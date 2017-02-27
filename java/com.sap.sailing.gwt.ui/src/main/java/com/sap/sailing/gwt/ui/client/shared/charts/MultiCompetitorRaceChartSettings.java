@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.common.settings.converter.DetailTypeStringToEnumConverter;
+import com.sap.sailing.gwt.settings.client.settingtypes.converter.DetailTypeStringToEnumConverter;
 import com.sap.sse.common.settings.generic.EnumSetting;
 
 public class MultiCompetitorRaceChartSettings extends ChartSettings {

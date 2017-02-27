@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.settings.converter;
+package com.sap.sailing.gwt.settings.client.settingtypes.converter;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;

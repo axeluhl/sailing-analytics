@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.settings.converter;
+package com.sap.sailing.gwt.settings.client.settingtypes.converter;
 
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sse.common.settings.generic.StringToEnumConverter;

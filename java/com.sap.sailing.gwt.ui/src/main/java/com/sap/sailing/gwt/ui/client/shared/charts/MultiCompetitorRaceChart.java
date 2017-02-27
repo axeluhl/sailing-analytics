@@ -33,10 +33,10 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private boolean hasOverallLeaderboard;
     
-    private final MultiCompetitorRaceChartLifecycle lifeycycle;
+    private final MultiCompetitorRaceChartLifecycle lifecycle;
     
     public MultiCompetitorRaceChart(Component<?> parent, ComponentContext<?> context,
-            MultiCompetitorRaceChartLifecycle lifeycycle,
+            MultiCompetitorRaceChartLifecycle lifecycle,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
@@ -47,7 +47,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
                 timeRangeWithZoomProvider, stringMessages, errorReporter,
                 /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);
-        this.lifeycycle = lifeycycle;
+        this.lifecycle = lifecycle;
         if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupName, false,
                     new AsyncCallback<LeaderboardGroupDTO>() {
@@ -102,7 +102,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
 
     @Override
     public String getLocalizedShortName() {
-        return lifeycycle.getLocalizedShortName();
+        return lifecycle.getLocalizedShortName();
     }
 
     @Override

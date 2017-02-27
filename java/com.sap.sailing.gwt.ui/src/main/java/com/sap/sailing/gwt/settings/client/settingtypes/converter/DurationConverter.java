@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.settings.converter;
+package com.sap.sailing.gwt.settings.client.settingtypes.converter;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;

@@ -58,7 +58,7 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
     
     @SuppressWarnings("unchecked")
     @Override
-    public <SS extends Settings> ComponentLifecycle<SS> getLiveCycleForId(String id) {
+    public <SS extends Settings> ComponentLifecycle<SS> getLifecycleForId(String id) {
         for (ComponentLifecycle<?> componentLifecycle : componentLifecycles) {
             if (id.equals(componentLifecycle.getComponentId())) {
                 return (ComponentLifecycle<SS>) componentLifecycle;
@@ -73,7 +73,7 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
         for (Entry<String, Settings> childSet : settings.getSettingsPerComponentId().entrySet()) {
             String childId = childSet.getKey();
             Settings childNewSettings = childSet.getValue();
-            ComponentLifecycle<Settings> childLiveCycle = getLiveCycleForId(childId);
+            ComponentLifecycle<Settings> childLiveCycle = getLifecycleForId(childId);
             Settings extracted = childLiveCycle.extractContextSettings(childNewSettings);
             settingsPerComponent.put(childId, extracted);
         }
@@ -89,7 +89,7 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
         for (Entry<String, Settings> childSet : settings.getSettingsPerComponentId().entrySet()) {
             String childId = childSet.getKey();
             Settings childNewSettings = childSet.getValue();
-            ComponentLifecycle<Settings> childLiveCycle = getLiveCycleForId(childId);
+            ComponentLifecycle<Settings> childLiveCycle = getLifecycleForId(childId);
             Settings extracted = childLiveCycle.extractGlobalSettings(childNewSettings);
             settingsPerComponent.put(childId, extracted);
         }

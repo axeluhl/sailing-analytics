@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentTreeNodeInfo;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**

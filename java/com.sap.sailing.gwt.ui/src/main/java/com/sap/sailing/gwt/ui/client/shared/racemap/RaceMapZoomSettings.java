@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import java.util.Collections;
 
 import com.google.gwt.maps.client.base.LatLngBounds;
-import com.sap.sailing.gwt.common.settings.converter.ZoomTypesStringToEnumConverter;
+import com.sap.sailing.gwt.settings.client.settingtypes.converter.ZoomTypesStringToEnumConverter;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;

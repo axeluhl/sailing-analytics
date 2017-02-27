@@ -1,6 +1,6 @@
-package com.sap.sailing.gwt.common.settings;
+package com.sap.sailing.gwt.settings.client.settingtypes;
 
-import com.sap.sailing.gwt.common.settings.converter.DurationConverter;
+import com.sap.sailing.gwt.settings.client.settingtypes.converter.DurationConverter;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.base.AbstractValueSetting;

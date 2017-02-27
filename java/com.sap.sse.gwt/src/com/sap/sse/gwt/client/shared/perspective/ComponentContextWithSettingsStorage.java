@@ -183,7 +183,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     private ComponentLifecycle<S> determineLifeCycle(ArrayList<String> path, ComponentLifecycle<S> current) {
         while (current instanceof PerspectiveLifecycle<?> && !path.isEmpty()) {
             String last = path.remove(path.size() - 1);
-            current = (ComponentLifecycle<S>) ((PerspectiveLifecycle) current).getLiveCycleForId(last);
+            current = (ComponentLifecycle<S>) ((PerspectiveLifecycle) current).getLifecycleForId(last);
         }
         if (!path.isEmpty()) {
             throw new IllegalStateException("Settings path is not finished, but no perspective at current level");

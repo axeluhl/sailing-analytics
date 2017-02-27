@@ -4,7 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.gwt.common.settings.converter.WindSourceTypeStringToEnumConverter;
+import com.sap.sailing.gwt.settings.client.settingtypes.converter.WindSourceTypeStringToEnumConverter;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;

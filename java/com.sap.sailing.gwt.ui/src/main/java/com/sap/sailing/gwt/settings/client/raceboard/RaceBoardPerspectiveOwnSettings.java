@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.settings.client.raceboard;
 
-import com.sap.sailing.gwt.common.settings.DurationSetting;
+import com.sap.sailing.gwt.settings.client.settingtypes.DurationSetting;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
