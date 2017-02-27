@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.settings.client.raceboard;
+package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,6 @@ import java.util.List;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.raceboard.AbstractRaceBoardMode;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
