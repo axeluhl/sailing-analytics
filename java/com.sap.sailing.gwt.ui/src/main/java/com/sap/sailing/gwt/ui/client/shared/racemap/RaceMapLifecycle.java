@@ -8,7 +8,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *
  */
 public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
-    public static final String ID = "rml";
+    public static final String ID = "rm";
 
     private final StringMessages stringMessages;
     

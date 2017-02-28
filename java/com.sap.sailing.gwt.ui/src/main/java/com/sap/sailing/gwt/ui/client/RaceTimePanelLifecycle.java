@@ -5,6 +5,8 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 public class RaceTimePanelLifecycle implements
         ComponentLifecycle<RaceTimePanelSettings> {
     private final StringMessages stringMessages;
+    
+    public static final String ID = "rt";
 
     public RaceTimePanelLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -27,7 +29,7 @@ public class RaceTimePanelLifecycle implements
 
     @Override
     public String getComponentId() {
-        return "rtpl";
+        return ID;
     }
 
     @Override

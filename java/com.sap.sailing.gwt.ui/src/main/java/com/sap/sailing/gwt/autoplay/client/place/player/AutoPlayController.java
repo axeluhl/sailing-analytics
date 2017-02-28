@@ -64,12 +64,12 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     private final PlayerView playerView;
     private final AutoPlayerContext autoPlayerConfiguration;
     private PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings;
-    private AutoplayPerspectiveLifecycle autoplayLiveCycle;
+    private AutoplayPerspectiveLifecycle autoplayLifecycle;
 
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, ErrorReporter errorReporter, AutoPlayerContext autoPlayerConfiguration,
             PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings,
-            UserAgentDetails userAgent, PlayerView playerView, AutoplayPerspectiveLifecycle autoplayLiveCycle) {
+            UserAgentDetails userAgent, PlayerView playerView, AutoplayPerspectiveLifecycle autoplayLifecycle) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.userService = userService;
@@ -78,7 +78,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
         this.userAgent = userAgent;
         this.playerView = playerView;
         this.settings = settings;
-        this.autoplayLiveCycle = autoplayLiveCycle;
+        this.autoplayLifecycle = autoplayLifecycle;
 
         asyncActionsExecutor = new AsyncActionsExecutor();
         currentLeaderboard = null;
@@ -103,10 +103,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
             boolean withFullscreenButton = settings.getPerspectiveOwnSettings().isFullscreen() && isInitialScreen;
 
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings = settings
-                    .findSettingsByComponentId(autoplayLiveCycle.getLeaderboardLifecycle().getComponentId());
+                    .findSettingsByComponentId(autoplayLifecycle.getLeaderboardLifecycle().getComponentId());
 
             LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(null,
-                    null, autoplayLiveCycle.getLeaderboardLifecycle(), leaderboardSettings, 
+                    null, autoplayLifecycle.getLeaderboardLifecycle(), leaderboardSettings, 
                     sailingService, userService, asyncActionsExecutor,
                     new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
                     autoPlayerConfiguration.getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
@@ -132,10 +132,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                     playerView.clearContent();
 
                     PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> raceboardSettings = settings
-                            .findSettingsByComponentId(autoplayLiveCycle.getRaceboardLifecycle().getComponentId());
+                            .findSettingsByComponentId(autoplayLifecycle.getRaceboardLifecycle().getComponentId());
 
                     RaceBoardPanel raceboardPerspective = new RaceBoardPanel(null, null,
-                            autoplayLiveCycle.getRaceboardLifecycle(),
+                            autoplayLifecycle.getRaceboardLifecycle(),
                             raceboardSettings,
                             sailingService, mediaService, userService, asyncActionsExecutor,
                             result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, autoPlayerConfiguration.getLeaderboardName(), 

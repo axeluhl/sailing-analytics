@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  */
 public class OverallLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
 
-    public static final String ID = "olpl";
+    public static final String ID = "olb";
 
     public OverallLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         super(leaderboard, stringMessages);

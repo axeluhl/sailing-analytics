@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * Leaderboard to coexist.
  */
 public class MultiLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
-    public static final String MID = "MultiLeaderboardPanel";
+    public static final String MID = "mlb";
 
     public MultiLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         super(leaderboard, stringMessages);

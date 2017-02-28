@@ -93,13 +93,13 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
     @SuppressWarnings("unchecked")
     public S extractGlobalSettings(Component<? extends Settings> component, Settings newDefaultSettings) {
-        ComponentLifecycle<S> targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<S> targetLifeCycle = determineLifecycle(component.getPath(), rootLifecycle);
         return extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
     }
 
     @SuppressWarnings("unchecked")
     public S extractContextSettings(Component<? extends Settings> component, Settings newDefaultSettings) {
-        ComponentLifecycle<S> targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<S> targetLifeCycle = determineLifecycle(component.getPath(), rootLifecycle);
         return extractContextSettings((S) newDefaultSettings, targetLifeCycle);
     }
 
@@ -114,7 +114,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     @SuppressWarnings("unchecked")
     @Override
     public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
-        ComponentLifecycle<S> targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<S> targetLifeCycle = determineLifecycle(component.getPath(), rootLifecycle);
         S globalSettings = extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
         S contextSettings = extractContextSettings((S) newDefaultSettings, targetLifeCycle);
         updateSettings(component.getPath(), globalSettings, contextSettings);
@@ -180,7 +180,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * Travels the Component tree, to find the correct LifeCycle for the Rootcomponent of the subtree to save
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private ComponentLifecycle<S> determineLifeCycle(ArrayList<String> path, ComponentLifecycle<S> current) {
+    private ComponentLifecycle<S> determineLifecycle(ArrayList<String> path, ComponentLifecycle<S> current) {
         while (current instanceof PerspectiveLifecycle<?> && !path.isEmpty()) {
             String last = path.remove(path.size() - 1);
             current = (ComponentLifecycle<S>) ((PerspectiveLifecycle) current).getLifecycleForId(last);

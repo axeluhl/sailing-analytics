@@ -733,7 +733,7 @@ public class RaceBoardPanel
 
     @Override
     public String getId() {
-        return "RaceBoardPanel";
+        return RaceBoardPerspectiveLifecycle.ID;
     }
 }
 

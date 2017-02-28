@@ -16,6 +16,8 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     private final SAPHeaderComponentLifecycle sapHeaderLifecycle;
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
     private final StringMessages stringMessages;
+    
+    public static final String ID = "lbwh";
 
     public LeaderboardWithHeaderPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -58,7 +60,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
 
     @Override
     public String getComponentId() {
-        return "lbwhpl";
+        return ID;
     }
 
     @Override

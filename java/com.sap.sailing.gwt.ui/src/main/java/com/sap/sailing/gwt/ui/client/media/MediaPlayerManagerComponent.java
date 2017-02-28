@@ -813,6 +813,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public String getId() {
-        return "MediaPlayerManagerComponent";
+        return mediaPlayerLifecycle.getComponentId();
     }
 }

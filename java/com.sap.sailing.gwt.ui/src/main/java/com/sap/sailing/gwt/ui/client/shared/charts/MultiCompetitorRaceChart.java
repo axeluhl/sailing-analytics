@@ -112,7 +112,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
 
     @Override
     public String getId() {
-        return "MultiCompetitorRaceChart";
+        return lifecycle.getComponentId();
     }
 
 }

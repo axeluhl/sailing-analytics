@@ -658,6 +658,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
 
     @Override
     public String getId() {
-        return "WindChart";
+        return windChartLifecycle.getComponentId();
     }
 }

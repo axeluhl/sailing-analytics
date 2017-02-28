@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 public class MultiCompetitorLeaderboardChartLifecycle implements
         ComponentLifecycle<MultiCompetitorLeaderboardChartSettings> {
     
-    public static final String ID = "mclcl";
+    public static final String ID = "mclbc";
     private final boolean isOverall;
 
     public MultiCompetitorLeaderboardChartLifecycle(boolean isOverall) {

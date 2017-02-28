@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
  * non life, and a RaceBoard for life races.
  */
 public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<AutoplayPerspectiveOwnSettings> {
-    public static final String ID = "appl";
+    public static final String ID = "ap";
     private LeaderboardWithHeaderPerspectiveLifecycle leaderboardLifecycle;
     private RaceBoardPerspectiveLifecycle raceboardLifecycle;
 

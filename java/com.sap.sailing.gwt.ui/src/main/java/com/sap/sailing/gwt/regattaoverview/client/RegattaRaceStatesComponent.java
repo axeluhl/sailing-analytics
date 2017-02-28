@@ -920,7 +920,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
 
     @Override
     public String getId() {
-        return "RegattaRaceStatesComponent";
+        return RegattaRaceStatesComponentLifecycle.ID;
     }
 
 }

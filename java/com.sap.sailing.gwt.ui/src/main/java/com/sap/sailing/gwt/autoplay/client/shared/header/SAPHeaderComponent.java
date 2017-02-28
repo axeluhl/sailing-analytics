@@ -78,6 +78,6 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
 
     @Override
     public String getId() {
-        return "SAPHeaderComponent";
+        return componentLifecycle.getComponentId();
     }
 }

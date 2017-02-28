@@ -225,7 +225,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
 
     @Override
     public String getId() {
-        return "LeaderboardWithHeaderPerspective";
+        return LeaderboardWithHeaderPerspectiveLifecycle.ID;
     }
 
 }

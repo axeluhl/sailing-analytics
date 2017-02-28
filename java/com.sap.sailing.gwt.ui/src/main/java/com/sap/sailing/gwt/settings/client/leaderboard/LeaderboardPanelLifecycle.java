@@ -9,7 +9,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class LeaderboardPanelLifecycle
         implements ComponentLifecycle<LeaderboardSettings> {
-    public static final String ID = "lpl";
+    public static final String ID = "lb";
 
     private final StringMessages stringMessages;
     private final List<String> namesOfRaceColumns;

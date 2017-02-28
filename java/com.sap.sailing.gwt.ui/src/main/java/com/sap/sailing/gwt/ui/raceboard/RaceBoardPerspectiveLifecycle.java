@@ -21,7 +21,9 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
     private final MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
-    private final RaceTimePanelLifecycle raceTimePanelLifecycle; 
+    private final RaceTimePanelLifecycle raceTimePanelLifecycle;
+    
+    public static final String ID = "rb";
 
     public RaceBoardPerspectiveLifecycle(StringMessages stringMessages) {
         this(null, stringMessages);
@@ -91,7 +93,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
 
     @Override
     public String getComponentId() {
-        return "rbpl";
+        return ID;
     }
 
     @Override

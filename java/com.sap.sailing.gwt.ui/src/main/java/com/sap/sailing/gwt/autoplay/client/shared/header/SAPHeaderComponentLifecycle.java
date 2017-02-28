@@ -7,6 +7,8 @@ public class SAPHeaderComponentLifecycle implements ComponentLifecycle<SAPHeader
     private final StringMessages stringMessages;
     private final String defaultTitle;
     
+    public static final String ID = "saph";
+    
     public SAPHeaderComponentLifecycle(String defaultTitle, StringMessages stringMessages) {
         this.defaultTitle = defaultTitle;
         this.stringMessages = stringMessages;
@@ -34,7 +36,7 @@ public class SAPHeaderComponentLifecycle implements ComponentLifecycle<SAPHeader
     
     @Override
     public String getComponentId() {
-        return "shcl";
+        return ID;
     }
 
     @Override

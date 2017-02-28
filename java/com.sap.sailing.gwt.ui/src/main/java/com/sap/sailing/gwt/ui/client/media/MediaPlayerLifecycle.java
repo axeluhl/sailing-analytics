@@ -7,6 +7,8 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerSetti
     
     private final StringMessages stringMessages;
     
+    public static final String ID = "mp";
+    
     public MediaPlayerLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
     }
@@ -28,7 +30,7 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerSetti
 
     @Override
     public String getComponentId() {
-        return "mpl";
+        return ID;
     }
 
     @Override

@@ -413,4 +413,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             listener.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         }
     }
+    
+    @Override
+    public String getId() {
+        return componentLifecycle.getComponentId();
+    }
 }

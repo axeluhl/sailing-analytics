@@ -6,6 +6,8 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<RegattaRaceStatesSettings> {
     
+    public static final String ID = "rrs";
+    
     @Override
     public RegattaRaceStatesSettingsDialogComponent getSettingsDialogComponent(RegattaRaceStatesSettings settings) {
         // TODO implement if needed
@@ -27,7 +29,7 @@ public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<R
 
     @Override
     public String getComponentId() {
-        return "rrs";
+        return ID;
     }
 
     @Override

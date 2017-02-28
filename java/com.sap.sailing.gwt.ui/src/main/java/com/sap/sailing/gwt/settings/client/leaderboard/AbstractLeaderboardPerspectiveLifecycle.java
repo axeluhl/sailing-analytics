@@ -41,11 +41,6 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
     }
 
     @Override
-    public String getComponentId() {
-        return null;
-    }
-
-    @Override
     public boolean hasSettings() {
         return false;
     }

@@ -5,6 +5,8 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings> {
     private final StringMessages stringMessages;
+    
+    public static final String ID = "wc";
 
     public WindChartLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -32,7 +34,7 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings>
 
     @Override
     public String getComponentId() {
-        return "wcl";
+        return ID;
     }
 
     @Override
