@@ -1,8 +1,6 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**

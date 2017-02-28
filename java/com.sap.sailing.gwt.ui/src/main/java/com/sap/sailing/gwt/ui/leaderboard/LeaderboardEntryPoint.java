@@ -13,19 +13,15 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
-import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
+import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
@@ -34,8 +30,6 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
@@ -229,33 +223,5 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                                // if an auto-refresh
         }
     }
-
-    /**
-     * Assembles a dialog that other parts of the application can use to let the user parameterize a leaderboard and
-     * obtain the according URL for it. This keeps the "secrets" of which URL parameters have which meaning encapsulated
-     * within this class.
-     * <p>
-     * 
-     * The implementation by and large uses the {@link LeaderboardSettingsDialogComponent}'s widget and adds to it a
-     * checkbox for driving the {@link #LeaderboardUrlSettings.PARAM_EMBEDDED} field.
-     * 
-     * @param stringmessages
-     * 
-     * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
-     */
-    public static void openUrlConfigurationDialog(final AbstractLeaderboardDTO leaderboard,
-            StringMessages stringmessages) {
-        final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
-        if (leaderboard.type.isMetaLeaderboard()) {
-            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringmessages, leaderboard);
-        } else {
-            lifeCycle = new LeaderboardPerspectiveLifecycle(stringmessages, leaderboard);
-        }
-        final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(leaderboard.name,
-                leaderboard.getDisplayName());
-        final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
-                EntryPointLinkFactory.LEADERBOARD_PATH, leaderboardContextSettings);
-        new SettingsDialogForLinkSharing<>(linkWithSettingsGenerator, lifeCycle, stringmessages)
-                .show();
-    }
+    
 }

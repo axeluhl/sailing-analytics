@@ -37,8 +37,12 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
+import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -59,6 +63,9 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
 TrackedRaceChangedListener, LeaderboardsDisplayer {
@@ -494,13 +501,31 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
 
     /**
-     * Allow the user to combine the various URL parameters that exist for the {@link LeaderboardEntryPoint} and obtain the
-     * resulting URL in a link. The link's reference target is updated dynamically as the user adjusts the settings. Therefore,
-     * the link can be clicked, bookmarked or copied to the clipboard at any time. The OK / Cancel actions for the dialog shown
-     * are no-ops.
+     * Assembles a dialog that other parts of the application can use to let the user parameterize a leaderboard and
+     * obtain the according URL for it. This keeps the "secrets" of which URL parameters have which meaning encapsulated
+     * within this class.
+     * <p>
+     * 
+     * The implementation by and large uses the {@link LeaderboardSettingsDialogComponent}'s widget and adds to it a
+     * checkbox for driving the {@link #LeaderboardUrlSettings.PARAM_EMBEDDED} field.
+     * 
+     * @param leaderboard
+     * 
+     * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
      */
     private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard) {
-        LeaderboardEntryPoint.openUrlConfigurationDialog(leaderboard, stringMessages);
+        final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
+        if (leaderboard.type.isMetaLeaderboard()) {
+            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringMessages, leaderboard);
+        } else {
+            lifeCycle = new LeaderboardPerspectiveLifecycle(stringMessages, leaderboard);
+        }
+        final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(leaderboard.name,
+                leaderboard.getDisplayName());
+        final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
+                EntryPointLinkFactory.LEADERBOARD_PATH, leaderboardContextSettings);
+        new SettingsDialogForLinkSharing<>(linkWithSettingsGenerator, lifeCycle, stringMessages)
+                .show();
     }
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
