@@ -8,17 +8,14 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 /**
- * Manages all default settings of perspectives and components. This abstract implementation has no support for settings
+ * Manages all default settings of perspectives and components. This simple implementation has no support for settings
  * storage. It is only capable of creating new default settings by means of {@link ComponentLifecycle} of the root
  * component managed by this {@link ComponentContext}. All in all, it is a dummy implementation for components which do
- * not have support for settings storage. If you need settings storage support, consider
+ * not have support for settings storage. If you need settings to be stored, consider
  * {@link ComponentContextWithSettingsStorage}.
  * 
  * @author Vladislav Chumak
  *
- * @param <L>
- *            The {@link ComponentLifecycle} type of the root component/perspective containing all the settings for
- *            itself and its subcomponents
  * @param <S>
  *            The {@link Settings} type of the settings of the root component/perspective containing all the settings
  *            for itself and its subcomponents
@@ -34,11 +31,14 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     private Queue<OnSettingsLoadedCallback<S>> settingsReceiverCallbacks = new LinkedList<>();
 
     /**
-     * Current initial/default settings for the whole settings tree which corresponds to the root component and its
+     * Current initial/default settings for the whole settings tree which correspond to the root component and its
      * subcomponents.
      */
     private S currentDefaultSettings = null;
     
+    /**
+     * Indicates whether this context instance is currently loading the initial settings.
+     */
     private boolean loadingDefaultSettings = false;
 
     /**
@@ -51,7 +51,7 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     }
 
     /**
-     * This operation is unsupported for this abstract implementation and will throw a
+     * This operation is unsupported for this simple implementation and will throw a
      * {@link UnsupportedOperationException} when it is called.
      */
     @Override
@@ -84,26 +84,16 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
         return false;
     }
     
-
     /**
-     * Initializes the instance with initial settings. This method may be called only once during the whole lifecycle of
-     * this instance. The call of this method is mandatory, otherwise it will not be possible to obtain initial
-     * settings.
-     * 
-     * @see #initInitialSettings(OnSettingsLoadedCallback)
+     * {@inheritDoc}
      */
+    @Override
     public void initInitialSettings() {
         loadDefaultSettingsIfNecessary();
     }
 
     /**
-     * Initializes the instance with initial settings. This method may be called only once during the whole lifecycle of
-     * this instance. The call of this method is mandatory, otherwise it will not be possible to obtain initial
-     * settings.
-     * 
-     * @param onInitialSettingsLoaded
-     *            Callback to be called when the settings initialization finishes
-     * @see #initInitialSettings()
+     * {@inheritDoc}
      */
     @Override
     public void initInitialSettings(final OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {

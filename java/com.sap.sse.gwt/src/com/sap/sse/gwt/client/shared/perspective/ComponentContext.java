@@ -10,21 +10,19 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  * 
  * @author Vladislav Chumak
  *
- * @param <L> The {@link ComponentLifecycle} type of the root component/perspective containing all settings for itself and its subcomponents
- * @param <S> The {@link Settings} type of the settings of the root component/perspective containing all settings for itself and its subcomponents
+ * @param <S> The {@link Settings} type of the settings of the root component/perspective containing all the settings for itself and its subcomponents
  */
 public interface ComponentContext<S extends Settings> {
 
     /**
-     * Stores the {@link Settings} of the passed {@link Component} in the default component settings tree. Make sure to
+     * Stores the {@link Settings} of the provided {@link Component} in the default component settings tree. Make sure to
      * call this method only when {@link #hasMakeCustomDefaultSettingsSupport(Component)} method returns {@code true}
      * for the passed {@link Component}.
      * 
      * @param component
-     *            The component which the passed {@link Settings} correspond to
+     *            The component which corresponds to the provided {@link Settings} 
      * @param newDefaultSettings
      *            The {@link Settings} to be stored
-     * @param settingsPath
      */
     void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings);
 
@@ -57,7 +55,25 @@ public interface ComponentContext<S extends Settings> {
      */
     boolean hasMakeCustomDefaultSettingsSupport(Component<?> component);
 
+    /**
+     * Initialises this instance with initial settings and passes these settings to the provided callback.
+     * The provided callback gets called when initial/default settings are available. That means,
+     * if the initialisation of this instance has been already finished, the provided callback is called
+     * immediately. If initialisation is not done yet, then the callback gets called when
+     * the initialisation gets finished. This method produces no side-effects if it gets called multiple times.
+     * 
+     * @param settingsReceiverCallback The callback which supplies the caller with initial settings
+     * 
+     * @see #initInitialSettings()
+     */
     void initInitialSettings(OnSettingsLoadedCallback<S> onInitialSettingsLoaded);
 
+    /**
+     * Initialises the instance with initial settings. The earlier this method gets called,
+     * the earlier the initial settings are going to be available.
+     * This method produces no side-effects if it gets called multiple times.
+     * 
+     * @see #initInitialSettings(OnSettingsLoadedCallback)
+     */
     void initInitialSettings();
 }

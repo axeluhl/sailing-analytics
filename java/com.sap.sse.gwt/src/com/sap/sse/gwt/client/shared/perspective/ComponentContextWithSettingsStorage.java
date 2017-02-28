@@ -15,15 +15,15 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 /**
- * Manages all default settings of a component/perspective and its subcomponents if there are any. It supplies
- * components with initial settings and determines whether the settings of components are storable or not. This abstract
+ * Manages all the default settings of a component/perspective and its subcomponents if there are any. It supplies
+ * components with initial settings and determines whether the settings of components are storable or not. This
  * implementation provides settings storage support if the storable settings either implement {@link SettingsMap} or
  * {@link GenericSerializableSettings}. There are two kinds of settings which are stored separately - <b>global
  * settings</b> and <b>context specific settings</b>.
  * <ul>
  * <li>Global settings are the settings which are applied globally to all components</li>
  * <li>Context specific settings have higher precedence than global settings and are applied to components only if the
- * current context (e.g. event or race) matches the context when the settings have been stored.</li>
+ * current context (e.g. event or race) matches the context of stored settings.</li>
  * </ul>
  * That means that context specific settings are stored per context (e.g. race or event) whereas global settings are
  * stored globally for all possible contexts (independent of event or race).
@@ -31,9 +31,6 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  * 
  * @author Vladislav Chumak
  *
- * @param <L>
- *            The {@link ComponentLifecycle} type of the root component/perspective containing all the settings for
- *            itself and its subcomponents
  * @param <S>
  *            The {@link Settings} type of the settings of the root component/perspective containing all the settings
  *            for itself and its subcomponents
@@ -47,10 +44,8 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
     /**
      * 
-     * @param rootLifecycle
-     *            The {@link ComponentLifecycle} of the root component/perspective
      * @param settingsStorageManager
-     *            The {@link SettingsStorageManager} to be used access stored settings and store new settings
+     *            The {@link SettingsStorageManager} to be used to access stored settings and to store new settings
      */
     public ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
             SettingsStorageManager<S> settingsStorageManager) {
@@ -74,7 +69,14 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     /**
-     * {@inheritDoc}
+     * Checks whether the {@link Settings} of the provided {@link Component} are
+     * storable and whether the underlying implementation supports
+     * {@link #makeSettingsDefault(Component, Settings)} calls for it.
+     * 
+     * @param component The component with potentially storable settings
+     * @return {@code true} if the settings of the component are storable
+     * <b>AND</b> the {@link ComponentContext} implementation has settings
+     * storage support
      */
     @Override
     public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
@@ -91,26 +93,68 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         return false;
     }
 
+    /**
+     * Extracts global settings from provided {@link Settings} of the specified component.
+     * 
+     * @param component The settings of the specified component
+     * @param componentSettings The settings of the specified component
+     * @return The global settings extracted, or {@code null} if there aren't any
+     * global settings to be stored
+     */
     @SuppressWarnings("unchecked")
-    public S extractGlobalSettings(Component<? extends Settings> component, Settings newDefaultSettings) {
-        ComponentLifecycle<S> targetLifeCycle = determineLifecycle(component.getPath(), rootLifecycle);
-        return extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
+    public S extractGlobalSettings(Component<? extends Settings> component, Settings componentSettings) {
+        ComponentLifecycle<S> targetLifecycle = determineLifecycle(component.getPath(), rootLifecycle);
+        return extractGlobalSettings((S) componentSettings, targetLifecycle);
     }
 
+    /**
+     * Extracts context specific settings from provided {@link Settings} of the specified component.
+     * 
+     * @param component The component which the provided settings correspond to
+     * @param componentSettings The settings of the specified component
+     * @return The context specific settings extracted, or {@code null} if there aren't any
+     * context specific settings to be stored
+     */
     @SuppressWarnings("unchecked")
-    public S extractContextSettings(Component<? extends Settings> component, Settings newDefaultSettings) {
+    public S extractContextSettings(Component<? extends Settings> component, Settings componentSettings) {
         ComponentLifecycle<S> targetLifeCycle = determineLifecycle(component.getPath(), rootLifecycle);
-        return extractContextSettings((S) newDefaultSettings, targetLifeCycle);
+        return extractContextSettings((S) componentSettings, targetLifeCycle);
     }
 
-    private S extractGlobalSettings(S newDefaultSettings, ComponentLifecycle<S> targetLifeCycle) {
-        return targetLifeCycle.extractGlobalSettings((S) newDefaultSettings);
+    /**
+     * Extracts global settings from provided {@link Settings} of the component corresponding to the specified lifecycle.
+     * 
+     * @param componentSettings The settings of the specified component
+     * @param targetLifecycle The lifecycle of the component which the provided settings correspond to
+     * @return The global settings extracted, or {@code null} if there aren't any
+     * global settings to be stored
+     */
+    private S extractGlobalSettings(S componentSettings, ComponentLifecycle<S> targetLifecycle) {
+        return targetLifecycle.extractGlobalSettings((S) componentSettings);
     }
 
-    private S extractContextSettings(S newDefaultSettings, ComponentLifecycle<S> targetLifeCycle) {
-        return targetLifeCycle.extractContextSettings((S) newDefaultSettings);
+    /**
+     * Extracts context specific settings from provided {@link Settings} of the component corresponding to the specified lifecycle.
+     * 
+     * @param componentSettings The settings of the specified component
+     * @param targetLifecycle The lifecycle of the component which the provided settings correspond to
+     * @return The context specific settings extracted, or {@code null} if there aren't any
+     * context specific settings to be stored
+     */
+    private S extractContextSettings(S componentSettings, ComponentLifecycle<S> targetLifecycle) {
+        return targetLifecycle.extractContextSettings((S) componentSettings);
     }
 
+    /**
+     * Stores the {@link Settings} of the provided {@link Component} in the default component settings tree. Make sure to
+     * call this method only when {@link #hasMakeCustomDefaultSettingsSupport(Component)} method returns {@code true}
+     * for the passed {@link Component}.
+     * 
+     * @param component
+     *            The component which corresponds to the provided {@link Settings} 
+     * @param newDefaultSettings
+     *            The {@link Settings} to be stored
+     */
     @SuppressWarnings("unchecked")
     @Override
     public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
@@ -120,6 +164,15 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         updateSettings(component.getPath(), globalSettings, contextSettings);
     }
 
+    /**
+     * Updates the settings tree with the new settings provided. The settings node with the specified path
+     * is going to be created/replaced with the new settings.
+     *  
+     * @param root The root node of the settings tree
+     * @param path The path of the node to create/update
+     * @param newSettings The new settings with that the target node in the settings tree is going to be updated
+     * @return
+     */
     private JSONObject patchJsonObject(JSONObject root, List<String> path, Settings newSettings) {
         if(path.isEmpty()) {
             return (JSONObject) settingsStorageManager.settingsToJSON(newSettings);

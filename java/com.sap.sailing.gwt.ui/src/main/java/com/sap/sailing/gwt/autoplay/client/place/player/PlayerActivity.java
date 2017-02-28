@@ -52,9 +52,9 @@ public class PlayerActivity extends AbstractActivity {
             @Override
             public void onSuccess(final EventDTO event) {
                 StrippedLeaderboardDTO leaderBoardDTO = getSelectedLeaderboard(event, context.getLeaderboardName());
-                AutoplayPerspectiveLifecycle autoplayLiveCycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO);
+                AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderBoardDTO);
                 PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplaySettings = stringSerializer
-                        .fromString(playerPlace.getContext(), autoplayLiveCycle.createDefaultSettings());
+                        .fromString(playerPlace.getContext(), autoplayLifecycle.createDefaultSettings());
 
                 clientFactory.getUserService().updateUser(true);
 
@@ -65,7 +65,7 @@ public class PlayerActivity extends AbstractActivity {
                 autoPlayController = new AutoPlayController(clientFactory.getSailingService(),
                         clientFactory.getMediaService(), clientFactory.getUserService(),
                         clientFactory.getErrorReporter(), context, autoplaySettings, userAgent, view,
-                        autoplayLiveCycle);
+                        autoplayLifecycle);
 
                 autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
             }
