@@ -38,20 +38,22 @@ public interface SettingsStorageManager<S extends Settings> {
      * will be stored.
      * 
      * @param globalSettings The global settings to store
+     * @param onSettingsStoredCallback The callback which is called when the settings storage process finishes
      * @see ComponentContextWithSettingsStorage
      * @see GenericSerializableSettings
      */
-    void storeGlobalSettings(JSONObject patchedGlobal);
+    void storeGlobalSettings(JSONObject globalSettings, OnSettingsStoredCallback onSettingsStoredCallback);
 
     /**
      * Stores provided context specific settings. Only the delta between default settings and provided settings
      * will be stored.
      * 
      * @param contextSpecificSettings The context specific settings to store
+     * @param onSettingsStoredCallback The callback which is called when the settings storage process finishes
      * @see ComponentContextWithSettingsStorage
      * @see GenericSerializableSettings
      */
-    void storeContextSpecificSettings(JSONObject contextSpecificSettings);
+    void storeContextSpecificSettings(JSONObject contextSpecificSettings, OnSettingsStoredCallback onSettingsStoredCallback);
 
     /**
      * Gets the last error occurred during settings initialisation.

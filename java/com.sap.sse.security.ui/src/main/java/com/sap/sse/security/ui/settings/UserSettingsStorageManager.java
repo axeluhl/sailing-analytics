@@ -10,6 +10,7 @@ import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.perspective.CallbacksJoinerHelper;
 import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -85,9 +86,22 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         }
     }
 
-    private void storeContextSpecificSettingsJsonOnServer(String serializedContextSpecificSettings) {
+    private void storeContextSpecificSettingsJsonOnServer(String serializedContextSpecificSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
         if (userService.getCurrentUser() != null) {
-            userService.setPreference(storageContextSpecificKey, serializedContextSpecificSettings);
+            userService.setPreference(storageContextSpecificKey, serializedContextSpecificSettings, new AsyncCallback<Void>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    onSettingsStoredCallback.onError(caught);
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    onSettingsStoredCallback.onSuccess();
+                }
+            });
+        } else {
+            onSettingsStoredCallback.onSuccess();
         }
     }
 
@@ -99,9 +113,22 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         }
     }
 
-    private void storeGlobalSettingsJsonOnServer(String serializedGlobalSettings) {
+    private void storeGlobalSettingsJsonOnServer(String serializedGlobalSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
         if (userService.getCurrentUser() != null) {
-            userService.setPreference(storageGlobalKey, serializedGlobalSettings);
+            userService.setPreference(storageGlobalKey, serializedGlobalSettings, new AsyncCallback<Void>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    onSettingsStoredCallback.onError(caught);
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    onSettingsStoredCallback.onSuccess();
+                }
+            });
+        } else {
+            onSettingsStoredCallback.onSuccess();
         }
     }
 
@@ -178,7 +205,18 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
                 // server has no global settings, local storage has => apply local storage settings and store them on
                 // server
                 defaultSettings = deserializeFromJson(defaultSettings, localStorageGlobalSettingsJson);
-                storeGlobalSettingsJsonOnServer(localStorageGlobalSettingsJson);
+                storeGlobalSettingsJsonOnServer(localStorageGlobalSettingsJson, new OnSettingsStoredCallback() {
+                    
+                    @Override
+                    public void onSuccess() {
+                        //nothing to do
+                    }
+                    
+                    @Override
+                    public void onError(Throwable caught) {
+                        //nothing to do
+                    }
+                });
             }
         }
 
@@ -194,7 +232,18 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
                 // server has no context specific settings, local storage has => apply local storage settings and store
                 // them on server
                 defaultSettings = deserializeFromJson(defaultSettings, localStorageContextSpecificSettingsJson);
-                storeContextSpecificSettingsJsonOnServer(localStorageContextSpecificSettingsJson);
+                storeContextSpecificSettingsJsonOnServer(localStorageContextSpecificSettingsJson, new OnSettingsStoredCallback() {
+                    
+                    @Override
+                    public void onSuccess() {
+                        //nothing to do
+                    }
+                    
+                    @Override
+                    public void onError(Throwable caught) {
+                        //nothing to do
+                    }
+                });
             }
         }
 
@@ -338,17 +387,17 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
     }
 
     @Override
-    public void storeGlobalSettings(JSONObject patchedGlobal) {
-        String tostore = jsonSerializer.jsonObjectToString(patchedGlobal);
-        storeGlobalSettingsJsonOnServer(tostore);
-        storeGlobalSettingsJsonOnLocalStorage(tostore);
+    public void storeGlobalSettings(JSONObject patchedGlobal, OnSettingsStoredCallback onSettingsStoredCallback) {
+        String jsonStringToStore = jsonSerializer.jsonObjectToString(patchedGlobal);
+        storeGlobalSettingsJsonOnLocalStorage(jsonStringToStore);
+        storeGlobalSettingsJsonOnServer(jsonStringToStore, onSettingsStoredCallback);
     }
 
     @Override
-    public void storeContextSpecificSettings(JSONObject contextSpecificSettings) {
-        String tostore = jsonSerializer.jsonObjectToString(contextSpecificSettings);
-        storeContextSpecificSettingsJsonOnServer(tostore);
-        storeContextSpecificSettingsJsonOnLocalStorage(tostore);
+    public void storeContextSpecificSettings(JSONObject contextSpecificSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
+        String jsonStringToStore = jsonSerializer.jsonObjectToString(contextSpecificSettings);
+        storeContextSpecificSettingsJsonOnLocalStorage(jsonStringToStore);
+        storeContextSpecificSettingsJsonOnServer(jsonStringToStore, onSettingsStoredCallback);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
+import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
 
 public class SettingsDialog<SettingsType extends Settings> extends AbstractSettingsDialog<SettingsType> {
 
@@ -86,10 +87,20 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
         getLeftButtonPannel().add(makeDefaultButton);
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                component.getComponentContext().makeSettingsDefault(component, getResult());
+                component.getComponentContext().makeSettingsDefault(component, getResult(), new OnSettingsStoredCallback() {
+                    
+                    @Override
+                    public void onSuccess() {
+                        Window.alert("Settings have been successfully saved");
+                    }
+                    
+                    @Override
+                    public void onError(Throwable caught) {
+                        Window.alert("Settings could not be saved");
+                    }
+                });
                 // TODO i18n + use nice styled dialog
                 // FIXME apply new result to new backend result and send to server for saving
-                Window.alert("Settings have been successfully saved");
             }
         });
     }

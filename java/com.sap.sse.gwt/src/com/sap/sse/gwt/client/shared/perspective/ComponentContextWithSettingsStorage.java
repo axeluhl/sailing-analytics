@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
@@ -154,14 +153,16 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      *            The component which corresponds to the provided {@link Settings} 
      * @param newDefaultSettings
      *            The {@link Settings} to be stored
+     * * @param onSettingsStoredCallback
+     *            The callback which is called when the settings storage process finishes
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
+    public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
         ComponentLifecycle<S> targetLifeCycle = determineLifecycle(component.getPath(), rootLifecycle);
         S globalSettings = extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
         S contextSettings = extractContextSettings((S) newDefaultSettings, targetLifeCycle);
-        updateSettings(component.getPath(), globalSettings, contextSettings);
+        updateSettings(component.getPath(), globalSettings, contextSettings, onSettingsStoredCallback);
     }
 
     /**
@@ -208,32 +209,43 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @param path The path of the settings' node to create/update
      * @param globalSettings The global settings of the component which corresponds to the provided path
      * @param contextSettings The context specific settings of the component which corresponds to the provided path
+     * @param onSettingsStoredCallback The callback which is called when the settings storage process finishes
      */
     private void updateSettings(final ArrayList<String> path, final Settings globalSettings,
-            final Settings contextSettings) {
+            final Settings contextSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
         settingsStorageManager.retrieveGlobalSettingsJson(new AsyncCallback<JSONObject>() {
             @Override
             public void onSuccess(final JSONObject globalServerside) {
                 settingsStorageManager.retrieveContextSpecificSettingsJson(new AsyncCallback<JSONObject>() {
                     @Override
                     public void onSuccess(JSONObject contextServerside) {
-                        JSONObject patchedContext = patchJsonObject(contextServerside, new ArrayList<>(path),
+                        final JSONObject patchedContext = patchJsonObject(contextServerside, new ArrayList<>(path),
                                 contextSettings);
-                        JSONObject patchedGlobal = patchJsonObject(globalServerside, new ArrayList<>(path),
+                        final JSONObject patchedGlobal = patchJsonObject(globalServerside, new ArrayList<>(path),
                                 globalSettings);
 
-                        settingsStorageManager.storeGlobalSettings(patchedGlobal);
-                        settingsStorageManager.storeContextSpecificSettings(patchedContext);
+                        settingsStorageManager.storeGlobalSettings(patchedGlobal, new OnSettingsStoredCallback() {
+                            
+                            @Override
+                            public void onSuccess() {
+                                settingsStorageManager.storeContextSpecificSettings(patchedContext, onSettingsStoredCallback);
+                            }
+                            
+                            @Override
+                            public void onError(Throwable caught) {
+                                onSettingsStoredCallback.onError(caught);
+                            }
+                        });
                     }
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert("Could not delta data, " + caught);
+                        onSettingsStoredCallback.onError(caught);
                     }
                 });
             }
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Could not delta data, " + caught);
+                onSettingsStoredCallback.onError(caught);
             }
         });
     }

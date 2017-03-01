@@ -23,8 +23,9 @@ public interface ComponentContext<S extends Settings> {
      *            The component which corresponds to the provided {@link Settings} 
      * @param newDefaultSettings
      *            The {@link Settings} to be stored
+     * @param onSettingsStoredCallback The callback which is called when the settings storage process finishes
      */
-    void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings);
+    void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings, OnSettingsStoredCallback onSettingsStoredCallback);
 
     /**
      * Gets the {@link ComponentLifecycle} of the root component managed by

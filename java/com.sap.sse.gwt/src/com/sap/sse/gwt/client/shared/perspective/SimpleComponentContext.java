@@ -55,7 +55,7 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
      * {@link UnsupportedOperationException} when it is called.
      */
     @Override
-    public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
+    public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
         throw new UnsupportedOperationException("Make Default action is unsupported for this type of ComponentContext "
                 + this.getClass().getName() + " " + component.getPath() + " " + newDefaultSettings);
     }

@@ -242,19 +242,9 @@ public class UserService {
      * @param serializedSettings
      *            Serialized settings as {@link String} containing the preferences
      */
-    public void setPreference(String key, String serializedSettings) {
+    public void setPreference(String key, String serializedSettings, final AsyncCallback<Void> callback) {
         String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
-        getUserManagementService().setPreference(username, key, serializedSettings, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO What to do in case of failure?
-            }
-            
-            @Override
-            public void onSuccess(Void result) {
-                // TODO Do anything in case of success?
-            }
-        });
+        getUserManagementService().setPreference(username, key, serializedSettings, callback);
     }
     
     /**
