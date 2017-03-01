@@ -165,7 +165,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     /**
-     * Updates the settings tree with the new settings provided. The settings node with the specified path
+     * Patches the settings tree with the new settings provided. The settings node with the specified path
      * is going to be created/replaced with the new settings.
      *  
      * @param root The root node of the settings tree
@@ -200,6 +200,15 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         return root;
     }
 
+    /**
+     * Updates the settings tree with the new settings provided. The settings node with the specified path
+     * is going to be created/replaced with the new settings. This method may produce a server round-trip
+     * if the user is logged in.
+     * 
+     * @param path The path of the settings' node to create/update
+     * @param globalSettings The global settings of the component which corresponds to the provided path
+     * @param contextSettings The context specific settings of the component which corresponds to the provided path
+     */
     private void updateSettings(final ArrayList<String> path, final Settings globalSettings,
             final Settings contextSettings) {
         settingsStorageManager.retrieveGlobalSettingsJson(new AsyncCallback<JSONObject>() {
@@ -230,7 +239,15 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     /**
-     * Travels the Component tree, to find the correct LifeCycle for the Rootcomponent of the subtree to save
+     * Travels the Component tree, to find the correct lifecycle for the root component of the subtree to save
+     */
+    /**
+     * Determines the lifecycle from the provided current lifecycle tree which corresponds to the provided path.
+     * 
+     * @param path The path of the component which lifecycle should be determined
+     * @param current The root lifecycle from that the desired lifecycle is reachable by the provided path
+     * @return The lifecycle which was determined for the provided path starting from the provided root lifecycle
+     * @throws IllegalStateException When the path cannot be resolved from the provided root lifecycle
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private ComponentLifecycle<S> determineLifecycle(ArrayList<String> path, ComponentLifecycle<S> current) {
