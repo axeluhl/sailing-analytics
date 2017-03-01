@@ -66,10 +66,10 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
      *            The key which is used to store the context specific settings. Each context with own context specific
      *            settings must have a unique key.
      */
-    public UserSettingsStorageManager(UserService userService, String globalDefinitionId, String contextDefinitionId) {
+    public UserSettingsStorageManager(UserService userService, StorageDefinitionId storageDefinitionId) {
         this.userService = userService;
-        this.storageGlobalKey = globalDefinitionId;
-        this.storageContextSpecificKey = this.storageGlobalKey + "#" + contextDefinitionId;
+        this.storageGlobalKey = storageDefinitionId.generateStorageGlobalKey();
+        this.storageContextSpecificKey = storageDefinitionId.generateStorageContextSpecificKey();
     }
     
     @Override
@@ -290,30 +290,6 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         return lastError;
     }
 
-    /**
-     * Utility method used to build a {@link UserSettingsStorageManager#storageContextSpecificKey context
-     * definition id} in order to construct an object of this class.
-     * 
-     * @param contextDefinitionParameters
-     *            The parameters which shape the context
-     * @return The generated context definition id from the provided parameters
-     */
-    public static String buildContextDefinitionId(String... contextDefinitionParameters) {
-        StringBuilder str = new StringBuilder("");
-        boolean first = true;
-        for (String contextDefinitionParameter : contextDefinitionParameters) {
-            if (first) {
-                first = false;
-            } else {
-                str.append(",");
-            }
-            if (contextDefinitionParameter != null) {
-                str.append(contextDefinitionParameter);
-            }
-        }
-        return str.toString();
-    }
-
     public void retrieveGlobalSettingsJsonFromServer(final AsyncCallback<JSONObject> asyncCallback) {
         retrieveGlobalSettingsJsonFromServerRaw(new AsyncCallback<String>() {
 
@@ -408,11 +384,11 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
      * ignoreLocalSettings is set to <code>true</code>, a SimpleSettingsStorageManager is created. A
      * UserSettingsStorageManager is created otherwise.
      */
-    public static <S extends Settings> SettingsStorageManager<S> createSettingsStorageManager(UserService userService, String globalDefinitionId, String contextDefinitionId) {
+    public static <S extends Settings> SettingsStorageManager<S> createSettingsStorageManager(UserService userService, StorageDefinitionId storageDefinitionId) {
         if (getIgnoreLocalSettings().isIgnoreLocalSettings()) {
             return new SimpleSettingsStorageManager<>();
         }
-        return new UserSettingsStorageManager<>(userService, globalDefinitionId, contextDefinitionId);
+        return new UserSettingsStorageManager<>(userService, storageDefinitionId);
     }
     
     public static IgnoreLocalSettings getIgnoreLocalSettings() {

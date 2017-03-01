@@ -5,6 +5,7 @@ import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
+import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -15,6 +16,7 @@ import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.PlaceBasedUserSettingsStorageManager;
+import com.sap.sse.security.ui.settings.StorageDefinitionId;
 
 /**
  * An abstract series tabView with some shared functions between the overall leaderboard tab and competitors chart tab
@@ -51,8 +53,9 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
     protected ComponentContext<LeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken) {
         final LeaderboardPanelLifecycle lifeCycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
+        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForSeriesOverallLeaderboard(leaderboardName);
         final SettingsStorageManager<LeaderboardSettings> settingsStorageManager = new PlaceBasedUserSettingsStorageManager<>(
-                userService, "SeriesOverallLeaderboard", leaderboardName, placeToken);
+                userService, storageDefinitionId, placeToken);
 
         final ComponentContext<LeaderboardSettings> componentContext = new ComponentContextWithSettingsStorage<>(
                 lifeCycle, settingsStorageManager);

@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwn
 import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
+import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -35,6 +36,7 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsSto
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.settings.StorageDefinitionId;
 import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
@@ -50,13 +52,13 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        final LeaderboardContextDefinition leaderboardContextSettings = new SettingsToUrlSerializer()
+        final LeaderboardContextDefinition leaderboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new LeaderboardContextDefinition());
 
-        final UUID eventId = leaderboardContextSettings.getEventId();
+        final UUID eventId = leaderboardContextDefinition.getEventId();
 
-        leaderboardName = leaderboardContextSettings.getLeaderboardName();
-        leaderboardGroupName = leaderboardContextSettings.getLeaderboardGroupName();
+        leaderboardName = leaderboardContextDefinition.getLeaderboardName();
+        leaderboardGroupName = leaderboardContextDefinition.getLeaderboardGroupName();
 
         if (leaderboardName != null) {
             final Runnable checkLeaderboardNameAndCreateUI = new Runnable() {
@@ -72,7 +74,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                                     && leaderboardName.equals(leaderboardNameAndType.getA())) {
                                                 Window.setTitle(leaderboardName);
                                                 leaderboardType = leaderboardNameAndType.getB();
-                                                loadSettingsAndCreateUI(leaderboardContextSettings, event);
+                                                loadSettingsAndCreateUI(leaderboardContextDefinition, event);
                                             } else {
                                                 RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                                             }
@@ -108,15 +110,15 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
     }
 
-    private void loadSettingsAndCreateUI(LeaderboardContextDefinition leaderboardContextSettings, EventDTO event) {
+    private void loadSettingsAndCreateUI(LeaderboardContextDefinition leaderboardContextDefinition, EventDTO event) {
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         
         // make a single live request as the default but don't continue to play by default
 
+        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForLeaderboard(leaderboardContextDefinition);
         final UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager = new UserSettingsStorageManager<>(
-                getUserService(), "LeaderboardEntryPoint",
-                UserSettingsStorageManager.buildContextDefinitionId(leaderboardName));
+                getUserService(), storageDefinitionId);
         if (leaderboardType.isMetaLeaderboard()) {
             // overall
 
@@ -136,7 +138,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                     timer, null, null, leaderboardGroupName, leaderboardName,
                                     LeaderboardEntryPoint.this, getStringMessages(),
                                     getActualChartDetailType(defaultSettings));
-                            createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextSettings);
+                            createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextDefinition);
                         }
 
                         @Override
@@ -163,7 +165,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                                     timer, null, leaderboardGroupName, leaderboardName,
                                     LeaderboardEntryPoint.this, getStringMessages(), getActualChartDetailType(defaultSettings));
-                            createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextSettings);
+                            createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextDefinition);
                         }
 
                         @Override

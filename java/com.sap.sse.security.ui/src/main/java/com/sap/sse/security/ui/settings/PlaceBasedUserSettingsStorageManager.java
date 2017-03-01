@@ -11,9 +11,8 @@ public class PlaceBasedUserSettingsStorageManager<S extends Settings> extends Us
     private final SettingsToStringSerializer settingsToStringSerializer = new SettingsToStringSerializer();
     private final String serializedSettings;
 
-    public PlaceBasedUserSettingsStorageManager(UserService userService, String globalDefinitionId,
-            String contextDefinitionId, String serializedSettings) {
-        super(userService, globalDefinitionId, contextDefinitionId);
+    public PlaceBasedUserSettingsStorageManager(UserService userService, StorageDefinitionId storageDefinitionId, String serializedSettings) {
+        super(userService, storageDefinitionId);
         this.serializedSettings = serializedSettings;
     }
 

@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -32,6 +33,7 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsSto
 import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.settings.StorageDefinitionId;
 import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
@@ -42,47 +44,39 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
      */
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
 
-    private RaceboardContextDefinition raceBoardContextSettings;
+    private RaceboardContextDefinition raceboardContextDefinition;
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
 
-        raceBoardContextSettings = new SettingsToUrlSerializer()
+        raceboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new RaceboardContextDefinition());
 
         final RaceBoardModes finalMode;
-        if (raceBoardContextSettings.getMode() != null) {
-            finalMode = RaceBoardModes.valueOf(raceBoardContextSettings.getMode());
+        if (raceboardContextDefinition.getMode() != null) {
+            finalMode = RaceBoardModes.valueOf(raceboardContextDefinition.getMode());
         } else {
             finalMode = null;
         }
 
-        if (raceBoardContextSettings.getRegattaName() == null || raceBoardContextSettings.getRegattaName().isEmpty()
-                || raceBoardContextSettings.getRaceName() == null || raceBoardContextSettings.getRaceName().isEmpty()
-                || raceBoardContextSettings.getLeaderboardName() == null
-                || raceBoardContextSettings.getLeaderboardName().isEmpty()) {
+        if (raceboardContextDefinition.getRegattaName() == null || raceboardContextDefinition.getRegattaName().isEmpty()
+                || raceboardContextDefinition.getRaceName() == null || raceboardContextDefinition.getRaceName().isEmpty()
+                || raceboardContextDefinition.getLeaderboardName() == null
+                || raceboardContextDefinition.getLeaderboardName().isEmpty()) {
             createErrorPage("This page requires a valid regatta name, race name and leaderboard name.");
             return;
         }
         
         final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
         
-        String componentContextGlobalDefinition = "RaceBoardEntryPoint";
-        if (raceBoardContextSettings.getMode() != null) {
-            componentContextGlobalDefinition += "." + raceBoardContextSettings.getMode().toString();
-        }
-        RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
+        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRaceBoard(raceboardContextDefinition);
+        final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
         ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
                 lifeCycle,
                 new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
-                        getUserService(), componentContextGlobalDefinition + "." + lifeCycle.getComponentId(),
-                        UserSettingsStorageManager.buildContextDefinitionId(raceBoardContextSettings.getRegattaName(),
-                                raceBoardContextSettings.getRaceName(), raceBoardContextSettings.getLeaderboardName(),
-                                raceBoardContextSettings.getLeaderboardGroupName(),
-                                raceBoardContextSettings.getEventId() == null ? null
-                                        : raceBoardContextSettings.getEventId().toString())));
+                        getUserService(), storageDefinitionId));
         
         context.initInitialSettings();
         AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
@@ -92,27 +86,27 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     createErrorPage(getStringMessages().noSuchLeaderboard());
                     return;
                 }
-                if (raceBoardContextSettings.getEventId() != null && !raceboardData.isValidEvent()) {
+                if (raceboardContextDefinition.getEventId() != null && !raceboardData.isValidEvent()) {
                     createErrorPage(getStringMessages().noSuchEvent());
                 }
-                if (raceBoardContextSettings.getLeaderboardGroupName() != null) {
+                if (raceboardContextDefinition.getLeaderboardGroupName() != null) {
                     if(!raceboardData.isValidLeaderboardGroup()) {
                         createErrorPage(getStringMessages().leaderboardNotContainedInLeaderboardGroup(
-                                raceBoardContextSettings.getLeaderboardName(),
-                                raceBoardContextSettings.getLeaderboardGroupName()));
+                                raceboardContextDefinition.getLeaderboardName(),
+                                raceboardContextDefinition.getLeaderboardGroupName()));
                         return;
                     }
-                    if (raceBoardContextSettings.getEventId() != null && raceboardData.isValidLeaderboardGroup()
+                    if (raceboardContextDefinition.getEventId() != null && raceboardData.isValidLeaderboardGroup()
                             && !raceboardData.isValidEvent()) {
                         createErrorPage(getStringMessages().leaderboardGroupNotContainedInEvent(
-                                raceBoardContextSettings.getLeaderboardGroupName(),
-                                raceBoardContextSettings.getEventId().toString()));
+                                raceboardContextDefinition.getLeaderboardGroupName(),
+                                raceboardContextDefinition.getEventId().toString()));
                         return;
                     }
                 }
                 if (raceboardData.getRace() == null) {
-                    createErrorPage("Could not obtain a race with name " + raceBoardContextSettings.getRaceName()
-                            + " for a regatta with name " + raceBoardContextSettings.getRegattaName());
+                    createErrorPage("Could not obtain a race with name " + raceboardContextDefinition.getRaceName()
+                            + " for a regatta with name " + raceboardContextDefinition.getRegattaName());
                     return;
                 }
                 
@@ -134,9 +128,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             }
         };
         
-        sailingService.getRaceboardData(raceBoardContextSettings.getRegattaName(),
-                raceBoardContextSettings.getRaceName(), raceBoardContextSettings.getLeaderboardName(),
-                raceBoardContextSettings.getLeaderboardGroupName(), raceBoardContextSettings.getEventId(),
+        sailingService.getRaceboardData(raceboardContextDefinition.getRegattaName(),
+                raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName(),
+                raceboardContextDefinition.getLeaderboardGroupName(), raceboardContextDefinition.getEventId(),
                 asyncCallback);
     }
     
@@ -165,8 +159,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 settings,
                 sailingService, mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
-                raceBoardContextSettings.getLeaderboardName(), raceBoardContextSettings.getLeaderboardGroupName(),
-                raceBoardContextSettings.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
+                raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
         return raceBoardPerspective;

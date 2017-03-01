@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiLeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
@@ -30,6 +31,7 @@ import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.PlaceBasedUserSettingsStorageManager;
+import com.sap.sse.security.ui.settings.StorageDefinitionId;
 
 public class EventSeriesLeaderboardsTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
         LeaderboardUpdateListener {
@@ -115,8 +117,9 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
     private ComponentContext<LeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken) {
         final MultiLeaderboardPanelLifecycle lifecycle = new MultiLeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
+        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForSeriesRegattaLeaderboards(leaderboardName);
         final SettingsStorageManager<LeaderboardSettings> settingsStorageManager = new PlaceBasedUserSettingsStorageManager<>(
-                userService, "SeriesRegattaLeaderboards", leaderboardName, placeToken);
+                userService, storageDefinitionId, placeToken);
 
         final ComponentContext<LeaderboardSettings> componentContext = new ComponentContextWithSettingsStorage<>(
                 lifecycle, settingsStorageManager);

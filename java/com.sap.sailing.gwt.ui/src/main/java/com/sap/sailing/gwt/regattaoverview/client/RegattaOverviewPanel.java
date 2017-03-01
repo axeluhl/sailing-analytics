@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.Ent
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
+import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -44,6 +45,7 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsSto
 import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.settings.StorageDefinitionId;
 import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class RegattaOverviewPanel extends SimplePanel {
@@ -149,10 +151,10 @@ public class RegattaOverviewPanel extends SimplePanel {
             
         });
         
+        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRegattaOverview(regattaOverviewContextDefinition);
         final RegattaRaceStatesComponentLifecycle lifecycle = new RegattaRaceStatesComponentLifecycle();
         final SettingsStorageManager<RegattaRaceStatesSettings> settingsStorageManager = UserSettingsStorageManager
-                .createSettingsStorageManager(userService, "RegattaOverview", UserSettingsStorageManager
-                        .buildContextDefinitionId(regattaOverviewContextDefinition.getEvent().toString()));
+                .createSettingsStorageManager(userService, storageDefinitionId);
         final ComponentContext<RegattaRaceStatesSettings> componentContext = new ComponentContextWithSettingsStorage<>(
                 lifecycle, settingsStorageManager);
         
