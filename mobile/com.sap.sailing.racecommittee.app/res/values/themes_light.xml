@@ -80,6 +80,7 @@
         <item name="button_prev">@drawable/button_prev_light</item>
         <item name="check_18dp">@drawable/ic_check_black_18dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_black_24dp</item>
+        <item name="clear_24dp">@drawable/ic_clear_black_24dp</item>
         <item name="create">@drawable/ic_create_light</item>
         <item name="compass_back">@drawable/compass_back_light</item>
         <item name="compass_needle">@drawable/compass_needle_light</item>

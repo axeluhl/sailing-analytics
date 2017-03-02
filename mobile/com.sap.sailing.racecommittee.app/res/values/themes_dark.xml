@@ -71,6 +71,7 @@
         <item name="button_prev">@drawable/button_prev_dark</item>
         <item name="check_18dp">@drawable/ic_check_white_18dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_white_24dp</item>
+        <item name="clear_24dp">@drawable/ic_clear_white_24dp</item>
         <item name="create">@drawable/ic_create_dark</item>
         <item name="compass_back">@drawable/compass_back_dark</item>
         <item name="compass_needle">@drawable/compass_needle_dark</item>
