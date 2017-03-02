@@ -2,7 +2,6 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -231,6 +231,7 @@ import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -2285,27 +2286,30 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) throws MalformedURLException, URISyntaxException {
+    public int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) {
         final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
-        int count = 0;
-        for (final DBObject o : collection.find()) {
-            count++;
-            final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
-            raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
-                final Map<String, Object> map = new HashMap<>();
-                for (final String key : o.keySet()) {
-                    if (!key.equals(TypeBasedServiceFinder.TYPE)) {
-                        map.put(key, o.get(key));
+        final DBCursor cursor = collection.find();
+        final int count = cursor.count();
+        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+        backgroundExecutor.execute(() -> {
+            for (final DBObject o : cursor) {
+                final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
+                raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
+                    final Map<String, Object> map = new HashMap<>();
+                    for (final String key : o.keySet()) {
+                        if (!key.equals(TypeBasedServiceFinder.TYPE)) {
+                            map.put(key, o.get(key));
+                        }
                     }
-                }
-                try {
-                    callback.accept(connectivityParamsPersistenceService.mapTo(map));
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Exception trying to load race restore connectivity parameters "
-                            + o + " with handler " + connectivityParamsPersistenceService, e);
-                }
-            });
-        }
+                    try {
+                        callback.accept(connectivityParamsPersistenceService.mapTo(map));
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Exception trying to load race restore connectivity parameters "
+                                + o + " with handler " + connectivityParamsPersistenceService, e);
+                    }
+                });
+            }
+        });
         return count;
     }
 }

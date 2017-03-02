@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.persistence;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
@@ -31,11 +29,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
-import com.sap.sailing.domain.tracking.RaceHandle;
-import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -148,11 +142,9 @@ public interface DomainObjectFactory {
     /**
      * Loads all {@link RaceTrackingConnectivityParameters} objects from the database telling how to re-load those races
      * that were {@link MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
-     * marked as to be restored} before the server got re-started. Callers that would like to use the result to
-     * re-connect to those races should take care not to flood servers with requests. Instead, ideally, callers would
-     * monitor the loading {@link TrackedRace#getStatus() status} or the resulting {@link TrackedRace}s (see
-     * {@link RaceTracker#getRaceHandle()}, {@link RaceHandle#getRace(long)}, {@link RaceHandle#getTrackedRegatta()} and
-     * {@link TrackedRegatta#getTrackedRace(RaceDefinition)}.
+     * marked as to be restored} before the server got re-started. Callers pass a {@code callback} that is invoked for
+     * each parameters object retrieved from the persistent store. The call returns immediately; loading the parameters
+     * happens in a background thread.
      * 
      * @param callback
      *            invoked for each connectivity params object successfully resolved; this pattern is preferred over a
@@ -171,6 +163,5 @@ public interface DomainObjectFactory {
      * @see MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      * @see MongoObjectFactory#removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      */
-    int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback)
-            throws MalformedURLException, URISyntaxException;
+    int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback);
 }
