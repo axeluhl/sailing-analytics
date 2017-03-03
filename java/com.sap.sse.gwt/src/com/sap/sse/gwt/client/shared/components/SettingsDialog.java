@@ -80,28 +80,44 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
         }
     }
 
-    private void initMakeDefaultButtons(final Component<SettingsType> component, StringMessages stringMessages) {
-        Button makeDefaultButton = new Button(stringMessages.save());
+    private void initMakeDefaultButtons(final Component<SettingsType> component, final StringMessages stringMessages) {
+        final Button makeDefaultButton = new Button(stringMessages.save());
         makeDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
         makeDefaultButton.ensureDebugId("SaveButton");
         getLeftButtonPannel().add(makeDefaultButton);
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
+                setButtonSavingState(true);
                 component.getComponentContext().makeSettingsDefault(component, getResult(), new OnSettingsStoredCallback() {
                     
                     @Override
                     public void onSuccess() {
+                        setButtonSavingState(false);
+                        // TODO i18n + use nice styled dialog
+                        // FIXME apply new result to new backend result and send to server for saving
                         Window.alert("Settings have been successfully saved");
                     }
                     
                     @Override
                     public void onError(Throwable caught) {
+                        setButtonSavingState(false);
                         Window.alert("Settings could not be saved");
                     }
+                    
+                    
                 });
-                // TODO i18n + use nice styled dialog
-                // FIXME apply new result to new backend result and send to server for saving
+            }
+            
+            private void setButtonSavingState(boolean savingState) {
+                if(savingState) {
+                    makeDefaultButton.setEnabled(false);
+                    makeDefaultButton.setText("Saving...");
+                } else {
+                    makeDefaultButton.setEnabled(true);
+                    makeDefaultButton.setText(stringMessages.save());
+                }
             }
         });
     }
+    
 }
