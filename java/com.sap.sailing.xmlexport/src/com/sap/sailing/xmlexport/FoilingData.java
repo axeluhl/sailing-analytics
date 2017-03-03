@@ -137,7 +137,7 @@ public class FoilingData {
                 				result.append(competitor.getName()).append(";");
                 				result.append(competitor.getBoat().getSailID()).append(";");
                 				result.append(competitor.getId()).append(";");
-                				result.append(speedOfCompetitor.getKnots()).append(";");
+                				result.append(speedOfCompetitor != null ? speedOfCompetitor.getKnots() : "0.0").append(";");
                 				result.append(rideHeight).append(";");
                 				result.append(rideHeightPort).append(";");
                 				result.append(rideHeightStarboard).append(";");
@@ -145,8 +145,8 @@ public class FoilingData {
                 				result.append(pitch).append(";");
                 				result.append(windFixSpeed.getObject().getKnots()).append(";");
                 				result.append(windFixBearing.reverse().getDegrees()).append(";");
-                				result.append(speedOfCompetitor.getBearing().getDegrees()).append(";");
-                				result.append(speedOfCompetitor.getBearing().getDifferenceTo(windFixBearing.reverse()).getDegrees()).append("\n");
+                				result.append(speedOfCompetitor != null ? speedOfCompetitor.getBearing().getDegrees() : "0.0").append(";");
+                				result.append(speedOfCompetitor != null ? speedOfCompetitor.getBearing().getDifferenceTo(windFixBearing.reverse()).getDegrees() : "0.0").append("\n");
                 			}
 							timePointToConsider = timePointToConsider.plus(samplingInterval);
 							attemptedNumberOfFixes++;
