@@ -113,11 +113,11 @@ public class FoilingData {
                 			BravoFix bravoFixAtTimepoint = sensorTrack.getFirstFixAtOrAfter(timePointToConsider);
                 			if (bravoFixAtTimepoint != null) {
                 				SpeedWithBearing speedOfCompetitor = trackedRace.getTrack(competitor).getEstimatedSpeed(timePointToConsider);
-                				double rideHeight = bravoFixAtTimepoint.get(BravoSensorDataMetadata.INSTANCE.RIDE_HEIGHT);
-                				double rideHeightPort = bravoFixAtTimepoint.get(BravoSensorDataMetadata.INSTANCE.RIDE_HEIGHT_PORT_HULL);
-                				double rideHeightStarboard = bravoFixAtTimepoint.get(BravoSensorDataMetadata.INSTANCE.RIDE_HEIGHT_STARBOARD_HULL);
-                				double heel = bravoFixAtTimepoint.get(BravoSensorDataMetadata.INSTANCE.HEEL);
-                				double pitch = bravoFixAtTimepoint.get(BravoSensorDataMetadata.INSTANCE.PITCH);
+                				double rideHeight = bravoFixAtTimepoint.get(BravoSensorDataMetadata.RIDE_HEIGHT);
+                				double rideHeightPort = bravoFixAtTimepoint.get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL);
+                				double rideHeightStarboard = bravoFixAtTimepoint.get(BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL);
+                				double heel = bravoFixAtTimepoint.get(BravoSensorDataMetadata.HEEL);
+                				double pitch = bravoFixAtTimepoint.get(BravoSensorDataMetadata.PITCH);
                 				WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> windFix = windTrack.getAveragedWindWithConfidence(null, timePointToConsider);
                 				SpeedWithConfidence<TimePoint> windFixSpeed = new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(windFix.getObject().getKnots()), windFix.getConfidence(), timePointToConsider);
                 				Bearing windFixBearing = windFix.getObject().getBearing();
