@@ -11,7 +11,7 @@ import com.sap.sailing.selenium.pages.PageArea;
 
 public class MapSettingsPO extends PageArea {
 
-    @FindBy(how = BySeleniumId.class, using = "raceMapSettingsWindChart")
+    @FindBy(how = BySeleniumId.class, using = "raceMapSettingsWindChart-input")
     private WebElement raceMapSettingsWindChart;
 
     @FindBy(how = BySeleniumId.class, using = "SaveButton")
