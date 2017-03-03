@@ -52,7 +52,6 @@ public class MapSettingsPO extends PageArea {
     }
 
     public boolean isWindChartSelected() {
-        String checked = raceMapSettingsWindChart.getAttribute("selenium_checkbox");
-        return String.valueOf(Boolean.TRUE).equals(checked);
+        return raceMapSettingsWindChart.isSelected();
     }
 }
