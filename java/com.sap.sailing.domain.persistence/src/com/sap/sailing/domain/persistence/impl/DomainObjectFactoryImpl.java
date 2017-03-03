@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -199,6 +201,8 @@ import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
@@ -227,6 +231,7 @@ import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -235,8 +240,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private final DB database;
    
     private final DomainFactory baseDomainFactory;
-    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinderFactory serviceFinderFactory;
+    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
+    private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
     
     /**
      * Uses <code>null</code> as the {@link TypeBasedServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
@@ -252,8 +258,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
             this.deviceIdentifierServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierMongoHandler());
+            this.raceTrackingConnectivityParamsServiceFinder = serviceFinderFactory.createServiceFinder(RaceTrackingConnectivityParametersHandler.class);
         } else {
             this.deviceIdentifierServiceFinder = null;
+            this.raceTrackingConnectivityParamsServiceFinder = null;
         }
         this.baseDomainFactory = baseDomainFactory;
         this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
@@ -1464,7 +1472,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogProtestStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         TimePoint protestStartTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_PROTEST_START_TIME);
-        return new RaceLogProtestStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, protestStartTime);
+        TimePoint protestEndTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_PROTEST_END_TIME);
+        if (protestEndTime == null) {
+            // fallback old data
+            protestEndTime = protestStartTime.plus(Duration.ONE_MINUTE.times(90));
+        }
+        TimeRange protestTime = new TimeRangeImpl(protestStartTime, protestEndTime);
+        return new RaceLogProtestStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, protestTime);
     }
 
     private RaceLogEvent loadRaceLogStartProcedureChangedEvent(TimePoint createdAt, AbstractLogEventAuthor author,
@@ -1748,9 +1762,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
         Serializable deviceMappingEventId = Helpers.tryUuidConversion((Serializable) dbObject.get(
                 FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name()));
-        TimePoint closingTimePoint = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
+        TimePoint closingTimePointInclusive = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
         return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(createdAt, author, logicalTimePoint, id,
-                deviceMappingEventId, closingTimePoint);
+                deviceMappingEventId, closingTimePointInclusive);
     }
 
     private RegattaLogDeviceMarkMappingEvent loadRegattaLogDeviceMarkMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
@@ -2269,5 +2283,33 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             modified = false;
         }
         return modified;
+    }
+
+    @Override
+    public int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) {
+        final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
+        final DBCursor cursor = collection.find();
+        final int count = cursor.count();
+        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+        backgroundExecutor.execute(() -> {
+            for (final DBObject o : cursor) {
+                final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
+                raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
+                    final Map<String, Object> map = new HashMap<>();
+                    for (final String key : o.keySet()) {
+                        if (!key.equals(TypeBasedServiceFinder.TYPE)) {
+                            map.put(key, o.get(key));
+                        }
+                    }
+                    try {
+                        callback.accept(connectivityParamsPersistenceService.mapTo(map));
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Exception trying to load race restore connectivity parameters "
+                                + o + " with handler " + connectivityParamsPersistenceService, e);
+                    }
+                });
+            }
+        });
+        return count;
     }
 }

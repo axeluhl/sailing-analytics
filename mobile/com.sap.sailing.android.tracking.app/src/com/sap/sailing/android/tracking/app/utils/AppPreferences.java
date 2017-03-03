@@ -143,10 +143,6 @@ public class AppPreferences extends BaseAppPreferences {
         return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), null);
     }
 
-    public static boolean getPrintDatabaseOperationDebugMessages() {
-        return false;
-    }
-
     public void setMessageResendIntervalInMillis(int intervalInMillis) {
         preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), intervalInMillis).commit();
     }

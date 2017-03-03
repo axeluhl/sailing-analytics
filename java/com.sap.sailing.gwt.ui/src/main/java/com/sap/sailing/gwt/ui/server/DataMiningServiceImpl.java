@@ -2,19 +2,25 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.shiro.SecurityUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.settings.SerializableSettings;
@@ -23,13 +29,18 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.data.ExtensibleQueryResult;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.data.QueryResultImpl;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.SerializationDummy;
+import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -68,17 +79,20 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public Date getComponentsChangedTimepoint() {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
         return getDataMiningServer().getComponentsChangedTimepoint();
     }
     
     @Override
     public HashSet<FunctionDTO> getAllStatistics(String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
         Iterable<Function<?>> statistics = getDataMiningServer().getAllStatistics();
         return functionsAsDTOs(statistics, localeInfoName);
     }
     
     @Override
     public HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, retrieverChainDefinition.getName()));
         Class<?> retrievedDataType = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(retrieverChainDefinition).getRetrievedDataType();
         Iterable<Function<?>> statistics = getDataMiningServer().getStatisticsFor(retrievedDataType);
         return functionsAsDTOs(statistics, localeInfoName);
@@ -86,6 +100,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, extractionFunction.getFunctionName()));
         Class<?> returnType = getReturnType(extractionFunction);
         @SuppressWarnings("unchecked")
         Iterable<AggregationProcessorDefinition<?, ?>> definitions = 
@@ -110,19 +125,16 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public HashSet<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
-        Class<?> baseDataType = getBaseDataType(statisticToCalculate);
-        Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(baseDataType);
+    public HashSet<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, dataRetrieverChainDefinitionDTO.getName()));
+        Class<?> retrievedType = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO).getRetrievedDataType();
+        Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(retrievedType);
         return functionsAsDTOs(dimensions, localeInfoName);
-    }
-
-    private Class<?> getBaseDataType(FunctionDTO statisticToCalculate) {
-        Function<?> function = getDataMiningServer().getFunctionForDTO(statisticToCalculate);
-        return function.getDeclaringType();
     }
     
     @Override
     public HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, dataRetrieverChainDefinitionDTO.getName()));
         DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensions = getDataMiningServer()
                 .getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
@@ -132,6 +144,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, dataRetrieverChainDefinitionDTO.getName()));
         DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = getDataMiningServer()
                 .getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
@@ -163,16 +176,23 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
         Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = getDataMiningServer().getDataRetrieverChainDefinitions();
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
     }
     
     @Override
     public ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, statisticToCalculate.getFunctionName()));
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
         @SuppressWarnings("unchecked")
         Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<?, ?>>)(Iterable<?>)  getDataMiningServer().getDataRetrieverChainDefinitionsByDataType(baseDataType);
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
+    }
+
+    private Class<?> getBaseDataType(FunctionDTO statisticToCalculate) {
+        Function<?> function = getDataMiningServer().getFunctionForDTO(statisticToCalculate);
+        return function.getDeclaringType();
     }
     
     private ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
@@ -192,15 +212,39 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public QueryResultDTO<HashSet<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
             DataRetrieverLevelDTO retrieverLevelDTO, HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsDTO,
             HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, dataRetrieverChainDefinitionDTO.getName()));
         DataMiningServer dataMiningServer = getDataMiningServer();
         DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = dataMiningServer.getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
         DataRetrieverLevel<?, ?> retrieverLevel = retrieverChainDefinition.getDataRetrieverLevel(retrieverLevelDTO.getLevel());
         Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
-        Map<DataRetrieverLevel<?, ?>, SerializableSettings> retrieverSettings = retrieverSettingsDTOAsRetrieverSettings(retrieverSettingsDTO, retrieverChainDefinition);
-        Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO, retrieverChainDefinition);
-        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
-        Query<HashSet<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, retrieverSettings, filterSelection, locale);
-        QueryResult<HashSet<Object>> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
+        // split up between boolean/enum dimensions and others; for the bool/enums we'll
+        // simply enumerate all values instead of retrieving all objects
+        List<Function<?>> nonBoolNonEnumResultDimensions = new ArrayList<>();
+        LinkedHashMap<Function<?>, List<?>> boolOrEnumResultDimensionsWithValues = new LinkedHashMap<>();
+        for (final Function<?> dimensionFunction : dimensions) {
+            if (dimensionFunction.getReturnType() == boolean.class || dimensionFunction.getReturnType() == Boolean.class) {
+                boolOrEnumResultDimensionsWithValues.put(dimensionFunction, Arrays.asList(true, false));
+            } else if (dimensionFunction.getReturnType().isEnum()) {
+                boolOrEnumResultDimensionsWithValues.put(dimensionFunction, Arrays.asList(dimensionFunction.getReturnType().getEnumConstants()));
+            } else {
+                nonBoolNonEnumResultDimensions.add(dimensionFunction);
+            }
+        }
+        final ExtensibleQueryResult<HashSet<Object>> result;
+        final Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        if (!nonBoolNonEnumResultDimensions.isEmpty()) {
+            Map<DataRetrieverLevel<?, ?>, SerializableSettings> retrieverSettings = retrieverSettingsDTOAsRetrieverSettings(retrieverSettingsDTO, retrieverChainDefinition);
+            Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO, retrieverChainDefinition);
+            Query<HashSet<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, nonBoolNonEnumResultDimensions, retrieverSettings, filterSelection, locale);
+            result = (ExtensibleQueryResult<HashSet<Object>>) dataMiningServer.runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
+        } else {
+            @SuppressWarnings("unchecked")
+            final Class<HashSet<Object>> clazz = (Class<HashSet<Object>>) new HashSet<Object>().getClass();
+            result = new QueryResultImpl<HashSet<Object>>(QueryResultState.NORMAL, clazz, new HashMap<GroupKey, HashSet<Object>>());
+        }
+        for (final Entry<Function<?>, List<?>> e : boolOrEnumResultDimensionsWithValues.entrySet()) {
+            result.addResult(new GenericGroupKey<>(dtoFactory.createFunctionDTO(e.getKey(), getDataMiningServer().getStringMessages(), locale)), new LinkedHashSet<>(e.getValue()));
+        }
         return dtoFactory.createResultDTO(result);
     }
 
@@ -251,6 +295,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public <ResultType> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinitionDTO) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, queryDefinitionDTO.getDataRetrieverChainDefinition().getName()));
         DataMiningServer dataMiningServer = getDataMiningServer();
         StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
         Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
@@ -260,6 +305,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers() {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
         HashSet<PredefinedQueryIdentifier> predefinedQueryNames = new HashSet<PredefinedQueryIdentifier>();
         for (PredefinedQueryIdentifier predefinedQueryName : getDataMiningServer().getPredefinedQueryIdentifiers()) {
             predefinedQueryNames.add(predefinedQueryName);
@@ -269,6 +315,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public <ResultType> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session, PredefinedQueryIdentifier identifier, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, identifier.getIdentifier()));
         DataMiningServer dataMiningServer = getDataMiningServer();
         ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = dataMiningServer.getPredefinedQueryDefinitionDTO(identifier);
         if (queryDefinitionDTO != null) {

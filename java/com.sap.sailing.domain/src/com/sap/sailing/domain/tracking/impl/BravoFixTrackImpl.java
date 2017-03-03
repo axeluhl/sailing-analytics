@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
@@ -27,7 +28,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      *            the name of the track by which it can be obtained from the {@link TrackedRace}.
      */
     public BravoFixTrackImpl(ItemType trackedItem, String trackName) {
-        super(trackedItem, trackName, BravoSensorDataMetadata.INSTANCE.getColumns(), 
+        super(trackedItem, trackName, BravoSensorDataMetadata.INSTANCE.getFileColumns(), 
                 BravoFixTrack.TRACK_NAME + " for " + trackedItem);
     }
 
@@ -52,6 +53,12 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
     
     @Override
+    public boolean isFoiling(TimePoint timePoint) {
+        final Distance rideHeight = getRideHeight(timePoint);
+        return rideHeight != null && rideHeight.compareTo(BravoFix.MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
+    }
+
+    @Override
     public Distance getAverageRideHeight(TimePoint from, TimePoint to) {
         final Distance result;
         lockForRead();
@@ -66,6 +73,31 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                 result = sum.scale(1./count);
             } else {
                 result = null;
+            }
+        } finally {
+            unlockAfterRead();
+        }
+        return result;
+    }
+    
+    private boolean isFoiling(BravoFix fix) {
+        return fix.isFoiling();
+    }
+
+    @Override
+    public Duration getTimeSpentFoiling(TimePoint from, TimePoint to) {
+        Duration result = Duration.NULL;
+        lockForRead();
+        try {
+            TimePoint last = from;
+            boolean isFoiling = false;
+            for (final BravoFix fix : getFixes(from, true, to, true)) {
+                final boolean fixFoils = isFoiling(fix);
+                if (isFoiling && fixFoils) {
+                    result = result.plus(last.until(fix.getTimePoint()));
+                }
+                last = fix.getTimePoint();
+                isFoiling = fixFoils;
             }
         } finally {
             unlockAfterRead();

@@ -14,23 +14,27 @@ public class BoatClassDTO extends NamedDTO implements Serializable, Comparable<B
     public static final String DEFAULT_NAME = "Default";
     
     private Distance hullLength;
+    private Distance hullBeam;
     private String displayName;
     
     BoatClassDTO() {}
 
-    public BoatClassDTO(String name, String displayName, Distance hullLength) {
+    public BoatClassDTO(String name, String displayName, Distance hullLength, Distance hullBeam) {
         super(name);
         this.hullLength = hullLength;
+        this.hullBeam = hullBeam;
     }
 
-    public BoatClassDTO(String name, Distance hullLength) {
-        super(name);
-        this.hullLength = hullLength;
-        this.displayName = null;
+    public BoatClassDTO(String name, Distance hullLength, Distance hullBeam) {
+        this(name, /* display name */ null, hullLength, hullBeam);
     }
 
     public Distance getHullLength() {
         return hullLength;
+    }
+    
+    public Distance getHullBeam() {
+        return hullBeam;
     }
 
     public String getDisplayName() {

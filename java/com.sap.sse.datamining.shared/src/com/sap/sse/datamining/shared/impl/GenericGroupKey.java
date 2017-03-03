@@ -31,6 +31,11 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
     public boolean hasSubKeys() {
         return false;
     }
+    
+    @Override
+    public int size() {
+        return 1;
+    }
 
     @Override
     public List<? extends GroupKey> getKeys() {

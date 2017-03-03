@@ -16,7 +16,7 @@
     <string name="preference_energy_saving_sending_interval_summary">Choose a value as high as possible to preserve battery life while still maintaining a reasonable live experience, depending on your use case.</string>
 
     <string name="preference_energy_saving_sending_interval_message">GPS updates will be sent to the server%1$s %2$s.</string>
-    <string name="preference_energy_saving_sending_interval_message_key">msgSndIntMessage</string>
+    <string name="preference_energy_saving_sending_interval_message_key" translatable="false">msgSndIntMessage</string>
     <string name="preference_energy_saving_sending_interval_message_every">every</string>
     <string-array name="preference_energy_saving_sending_interval_entries">
     	<item>immediately</item>

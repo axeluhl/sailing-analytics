@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -28,8 +29,10 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -135,4 +138,30 @@ public interface DomainObjectFactory {
     Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> loadAllDeviceConfigurations();
 
     Map<String, Set<URL>> loadResultUrls();
+    
+    /**
+     * Loads all {@link RaceTrackingConnectivityParameters} objects from the database telling how to re-load those races
+     * that were {@link MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
+     * marked as to be restored} before the server got re-started. Callers pass a {@code callback} that is invoked for
+     * each parameters object retrieved from the persistent store. The call returns immediately; loading the parameters
+     * happens in a background thread.
+     * 
+     * @param callback
+     *            invoked for each connectivity params object successfully resolved; this pattern is preferred over a
+     *            non-{@code void} return type because resolving the connectivity parameters objects itself happens
+     *            through a callback pattern that may be triggered asynchronously by the services for handling the
+     *            respective parameter types becoming available only later. For example, during the OSGi startup phase,
+     *            when the {@code RacingEventService} is launched, not all persistence bundles will have run their
+     *            activators; some may even depend on the {@code RacingEventService} and therefore won't start their
+     *            activators before the activator of {@code RacingEventService} has completed. This would either result
+     *            in a {@link NoCorrespondingServiceRegisteredException} or would have to be handled by not treating
+     *            those connectivity parameter objects which defeats the whole purpose of this method.
+     * @return the number of connectivity parameter objects found in the database; callers may use this to understand
+     *         the progress with the {@code callback} invocations of which eventually there should be this many, at
+     *         least if all handlers have ultimately become available.
+     * 
+     * @see MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
+     * @see MongoObjectFactory#removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
+     */
+    int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback);
 }

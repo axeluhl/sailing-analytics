@@ -44,7 +44,8 @@
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
-	<inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 
 	<!-- Turning CSS obfuscation off -->
 	<!-- <set-configuration-property name="CssResource.style" value="pretty"/> -->
@@ -66,7 +67,7 @@
     <inherits name='com.sap.sailing.gwt.settings.Settings'/>
     
     <set-configuration-property name="CssResource.enableGss" value="true" />
-    <set-configuration-property name="CssResource.legacy" value="true" />
+    <set-configuration-property name="CssResource.conversionMode" value="strict" />
 	
 	<source path='masterdataimport'/>
 	<source path='test'/>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-11-09T11:21:16Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="ru">
+	<file datatype="javapropertyresourcebundle" date="2017-02-01T15:41:36Z" original="/usr/sap/ljs/app/Converter_8942097082529348960/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="ru">
 		<header>
 			<skl>
-				<internal-file crc="f38aaa3e2ebfcee22c5187ca5b77bc00" form="base64">H4sIAAAAAAAAAIVWS28jKRC+8yu4jJQcRopn9qkVKznJ2vHKeci2Ntoj7i53o7TBApys59dvVdEP7Ew8F7rq4wOKetHLHUCpljQKHldgl1A4W4Zr2DgPaU6OroJcMyBuTYjaFrDy+hUaXN0BskPEg96CokHMoVoddqDwK0kQS22a2a2ij3zYb9fgxb+gvaKB2Aljfjv9oKNxVjcmHlQmi3HhnT1sVfsVC6h0jFq1X3Hj9j7A2INWSZQki2un402jQ1AkSRbFpAGIikex0AUoGnCH7Q6iic6rQeQNeK1Ygd4qGjLmEu9R1CtdZUtkAiWieEVdgl877UvygbHVrdtqYxcQvYFX8Dc1aiqjBbboHJnmAznv/I5VENOn5cT8d46GjM9Iwf3utX95Qucg89wCosmWl0xdQNg38UcGy0RLSx43mQd/dFPpNnKgk6EW9kg5b2Xi5P6ferff5Z6WjOSUfJYcTF7MHXN0eyLkF+EkRluLIXemu4DO7ZzcWz6Y92xsuYwebBXrmb0Gvceai4pg2eHSWNnNiOtNvFI3utmSNFJzU9VRauNJ/dKqaw/wDQj5qqZgYwMZ9JO6d3hFHXPwZzXxEOoM+UXh8c5WGfSrusPt5RvaRupvaqobnvi941YtMLpCxPlk40j9Y1yDZsjQY1/U3d57U6AbsI4brPJXWBbUfjpNsiovrrANhfiHHMk3jH28PKbP7BP4Avc+XYcu+3RKpWQ6t4CzlBeO18E1+wgLbV9Up0jSUsCoRb6LFvdNCtUm9j1zHJdRI6NvmdFJRiS2IhZSF36usQ2TSjmWdjomnLbptO3QqxPariBDx3Fi0F+Ur4p02o8RSZBIvfZx0yViUAmh/O2xnrXSxUvOYL2f/dtgiLJZ1vvZJ8D+HQ83xhfNEa2dkO0MWz3F2g2Pfu5CQC7bzZDEpprA4TlydNnUWE35oadToRNDXnyiY+dcU5eDfa40++3EWBPq3DqGZcKz62Cs80uQ+t7ya4hvALaPwNiW7QHfu5K8GLVhkZ//bE+8FLOAz2vxgu/tLMhW7K0Ymg737syg7BVKbX2ItH85JfOZXfdPQefXu1PSE07RVjSkVDz6T2jzru9njI43EXtcIrA8zN8aDwW96dimbQWq12UCqIBuocKeM5hEXhpMIk0868POGaziThDdy4WBVq3MUWfru+Qg+cPCYktP6yqZP5TVqjY+Ht6v4Lh+PVlAfeEN029I2XH5qm3UFbh9+MuWj5u5saA6nsyTN6dK5HLuGuqXVN10yp1uNlibNXCe0WuVCp0tiDXIGgm0jOQN136Dz9n3bfjwuJXZAvrDxlnnKEWQZIzC1aLiHkrd8M8US9xOxf+VN8i0cAoAAA==</internal-file>
+				<internal-file crc="11279ec7a00e268a726fb84cbe0bc2fa" form="base64">H4sIAAAAAAAAAIVWW28qNxB+96/wy5HgoWo4p1dVrkRCIWlzQQE1qtQXs8wuFouNbJMc+us7M96LQ07Ii3cun73jmfFnL/YAa7WgUfC4BLuAwtl1uITSeUg+OboIcsUGMTEhalvA0utnqHF2a5CtRdzrHSgaxC1Uy+MeFH4lCWKhTX0zUfSR94fdCrz4B7RXNBA62RjfuO91NM7q2sSjymQxLryzx51qvuIRKh2jVs1XXLmDDzD2oFUSJcni0ul4VesQFEmSRTGtAaLiUTzqAhQNuMJuD9FE51Uv8gI8VyxB7xQNGXKB+yg2S11lU2QySrTiFvUa/Mppv6YcGFtN3E4b+wjRG3gGf7VBTWWwwBGdA5M/UPLOr1gFMZsvpubrORgiJEJwvSdj1x+ACdKg77TfzjGVCD03g2CywaWNPUI41PGj7ckES1MeyizfH+VFulL2cArUwgEh56NMmLxaM+8O+7wuki05JPdSOSjneWJe7Z4A+Ua45THWou+02T5gctuStAXpst5tpY+XXIvowVZxc2MvQR/wyMY0o7VLY2XrEZdlvFBXut6RNFK3ptpEqY0n9XOjrjzAf0CWL2oGNtaQmX5Qdw73rGNu/FFNPYRNZvlJ4e+drTLTz+oal5cvGBupv6iZrtnxa4utGsPoAi3OpxhH6m/jagxDhs72WV0fvDcFpgFpoEaSeIZFQezVapJVObhAFgvxNzmSL9gMcfgafmPn4Atc+3QepuzTKZS669wEblueOF4FVx8iPGq7Va0iSUsFI4Z9Uy2mXSpVGTvKHcdF1IjoGDc6yRaJTMZCIvGnDbI4qdR0aaXXgFOWT8v2VJ+szQwKdBynBvNFDaxIp/XYIskkElU/lG0jBpUs1NCdrUMtdbHNEax33j8Nlijzst5554D0H49Xxhf1K1jjkI2Ho57hYQ4P/taFgFiOm00SOTkZ+9vM0WYTL5v1u5lOJ58QcvCJfnvLZ2rYx+fW5rCbGmvCJo+OzTLZs+1grfNNkPo28kuILwC2q8CYeIB/8K0tycGoKYv87vfmj0NxE/B2LrZ4Xd8E2YhdFD0LMZlnAWWXWOL5vtJ+ewrmf7bXQSo6X/6tkl4AVG1FQ2rFV8+Mpu86PmPruIzIcQnAcu+fGA8FPQmQt20FqtNlMtABmkCFnBO6U3g6pzuQZybLwdwFQ+d7KLBTsPxq6Zo2mOOZld/33THsNk/16DdPmnjSx70zyBetINpLk9ZsZF6Y89S2IcnvHmHOyekJTonqD/ByY3w8vp3BHfTlZAIx0AtupT8c4/WztlFX4A7hD7t+KG+NBdXiZH5McqhELJ8SQ8xMPEJ/udZ1iSywAe5ouigTpXAEcQNygwCaRnLJLFPjTfrtGN793dLsAPNh402bKEUmyTaqbWMVd7DWNb/6WGLiTsSMz0bcPLVw4mTWUxf3fn7s5n5++NK1NvUO34f+AJLdfX8Nlk+TIUO4YH9ZF0MGTFUcbGMYShHS7ZAwmUes8FFJ/N48bh31GD1JcIHBv4eyLNfLIYfJpz1FyKL4H/vwm9H1CwAA</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-11-04T21:01:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2017-01-26T16:57:13Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
@@ -83,8 +83,8 @@
 				<source>Team</source>
 				<target state="signed-off">Команда</target>
 			</trans-unit>
-			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CompetitorSearchTag" resname="CompetitorSearchTag">
-				<source>Competitor Search Tag</source>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SearchTag" resname="SearchTag">
+				<source>Search Tag</source>
 				<target state="signed-off">Тег поиска участника</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LeaderboardSailingDomainRetrieverChain" resname="LeaderboardSailingDomainRetrieverChain">
@@ -100,8 +100,12 @@
 				<target state="signed-off">Отрезки</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="GPSFixSailingDomainRetrieverChain" resname="GPSFixSailingDomainRetrieverChain">
-				<source>GPS-Fixes</source>
-				<target state="signed-off">Замеры GPS</target>
+				<source>GPS Fixes</source>
+				<target state="translated">Замеры GPS</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindFixSailingDomainRetrieverChain" resname="WindFixSailingDomainRetrieverChain">
+				<source>Wind Fixes</source>
+				<target>Замеры ветра</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="MarkPassingSailingDomainRetrieverChain" resname="MarkPassingSailingDomainRetrieverChain">
 				<source>Mark Passings</source>
@@ -140,8 +144,12 @@
 				<target state="signed-off">Отрезок участника</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="GpsFix" resname="GpsFix">
-				<source>GPS-Fix</source>
-				<target state="signed-off">Замер GPS</target>
+				<source>GPS Fix</source>
+				<target state="translated">Замер GPS</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindFix" resname="WindFix">
+				<source>Wind Fix</source>
+				<target>Замер ветра</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Maneuver" resname="Maneuver">
 				<source>Maneuver</source>
@@ -307,6 +315,14 @@
 				<source>Direction Change in Degrees</source>
 				<target state="signed-off">Изменение направления в градусах</target>
 			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AbsoluteDirectionChange" resname="AbsoluteDirectionChange">
+				<source>Absolute Direction Change in Degrees (Positive)</source>
+				<target>Абсолютное изменение направления в градусах (положительное)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ToSide" resname="ToSide">
+				<source>To Side (Port / Starboard)</source>
+				<target>Борт (левый/правый)</target>
+			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ManeuverLoss" resname="ManeuverLoss">
 				<source>Maneuver Loss</source>
 				<target state="signed-off">Потеря маневра</target>
@@ -350,6 +366,34 @@
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="MedalRace" resname="MedalRace">
 				<source>Medal Race</source>
 				<target state="signed-off">Гонка на медали</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindSourceType" resname="WindSourceType">
+				<source>Wind Source Type</source>
+				<target>Тип источника ветра</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindSourceName" resname="WindSourceName">
+				<source>Wind Source Name</source>
+				<target>Название источника ветра</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="windFrom" resname="windFrom">
+				<source>True Wind Direction (TWD)</source>
+				<target>Направление истинного ветра (НИВ)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="windSpeedKnots" resname="windSpeedKnots">
+				<source>True Wind Speed (kts) </source>
+				<target>Скорость истинного ветра (уз) </target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="speedInKnots" resname="speedInKnots">
+				<source>Speed (kts)</source>
+				<target>Скорость (уз)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="bearing" resname="bearing">
+				<source>Course over Ground (�T)</source>
+				<target>Курс относительно грунта (�T)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindTrack" resname="WindTrack">
+				<source>Wind Track</source>
+				<target>Отслеживание ветра</target>
 			</trans-unit>
 		</body>
 	</file>

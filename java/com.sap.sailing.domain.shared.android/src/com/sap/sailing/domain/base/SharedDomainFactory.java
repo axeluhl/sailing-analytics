@@ -110,4 +110,6 @@ public interface SharedDomainFactory extends CompetitorFactory {
     ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(String id, String name, Mark left, Mark right);
     
     RaceLogResolver getRaceLogResolver();
+
+    Mark getOrCreateMark(String name, MarkType markType);
 }

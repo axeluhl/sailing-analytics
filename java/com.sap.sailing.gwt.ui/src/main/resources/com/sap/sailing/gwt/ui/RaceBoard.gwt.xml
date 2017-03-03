@@ -25,8 +25,9 @@
 	<!-- Specify the app entry point class.                         -->
 	<entry-point class='com.sap.sailing.gwt.ui.raceboard.RaceBoardEntryPoint'/>
 
-        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
-  
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
+
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceClient' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceShared' />

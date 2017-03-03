@@ -89,13 +89,14 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
                 .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
                         0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
-                        EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
+                        EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
+                        /* preferReplayIfAvailable */ false);
     }
 
     private void startTracking() throws Exception, InterruptedException {
         startTrackingOnMaster();
         waitForTrackRaceReplicationTrigger();
-        raceIdentifier = racesHandle.getRaceTracker().getRaceIdentifiers().iterator().next();
+        raceIdentifier = racesHandle.getRaceTracker().getRaceIdentifier();
         masterTrackedRace = master.getTrackedRace(raceIdentifier);
     }
 

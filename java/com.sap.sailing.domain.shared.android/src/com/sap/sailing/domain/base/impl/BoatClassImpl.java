@@ -48,7 +48,9 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
 
     public BoatClassImpl(String name, boolean typicallyStartsUpwind) {
         this(name, typicallyStartsUpwind, /* displayName */ null,
-                /* hull length */ new MeterDistance(5), /* hullBeam */ null, /* hullType */ null);
+                // use the typical dinghy parameters as default
+                /* hull length */ new MeterDistance(5), /* hullBeam */ new MeterDistance(1.8),
+                /* hullType */ BoatHullType.MONOHULL);
     }
     
     public BoatClassImpl(String name, BoatClassMasterdata masterData) {
@@ -140,5 +142,4 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     public BoatHullType getHullType() {
         return hullType;
     }
-
 }

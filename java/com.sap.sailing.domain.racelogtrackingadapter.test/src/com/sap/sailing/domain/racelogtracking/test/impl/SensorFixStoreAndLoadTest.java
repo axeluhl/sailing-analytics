@@ -111,6 +111,8 @@ public class SensorFixStoreAndLoadTest {
             null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
     protected final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null,
             null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+    private final Competitor compNotPartOfRace = DomainFactory.INSTANCE.getOrCreateCompetitor("comp3", "comp3", null, null, null,
+            null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
     protected final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
@@ -511,8 +513,10 @@ public class SensorFixStoreAndLoadTest {
     }
 
     private DoubleVectorFix createBravoDoubleVectorFixWithRideHeight(long timestamp, double rideHeight) {
-        double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.columnCount];
-        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeight;
+        double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.trackColumnCount];
+        // fill the port/starboard columns as well because their minimum defines the true ride height
+        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn] = rideHeight;
+        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn] = rideHeight;
         return new DoubleVectorFixImpl(new MillisecondsTimePoint(timestamp), fixData);
     }
     
@@ -648,6 +652,24 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.waitForLoadingToFinish();
         assertNotNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
         assertNotNull(trackedRace.getSensorTrack(comp2, BravoFixTrack.TRACK_NAME));
+        fixLoaderAndTracker.stop(true);
+    }
+    
+    /** Regression test for bug 4052 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4052 */
+    @Test
+    public void testThatNoSensorFixesAreAddedToTrackOfCompetitorWhoIsntPartOfTheRace() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, compNotPartOfRace,
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
+
+        addBravoFixes();
+
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        trackedRace.waitForLoadingToFinish();
+
+        assertNull(trackedRace.getSensorTrack(compNotPartOfRace, BravoFixTrack.TRACK_NAME));
         fixLoaderAndTracker.stop(true);
     }
 }

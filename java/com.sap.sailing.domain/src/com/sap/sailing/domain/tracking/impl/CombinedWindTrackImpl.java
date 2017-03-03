@@ -28,12 +28,26 @@ public class CombinedWindTrackImpl extends VirtualWindTrackImpl {
     public CombinedWindTrackImpl(TrackedRace trackedRace, double baseConfidence) {
         super(trackedRace, /* millisecondsOverWhichToAverage not used, see overridden method */ -1, baseConfidence,
                 /* useSpeed */ WindSourceType.COMBINED.useSpeed());
-        virtualInternalRawFixes = new CombinedWindAsNavigableSet(this, trackedRace, /* resolutionInMilliseconds */ 10000l);
+        virtualInternalRawFixes = createVirtualInternalRawFixes(trackedRace);
+    }
+
+    protected CombinedWindAsNavigableSet createVirtualInternalRawFixes(TrackedRace trackedRace) {
+        return new CombinedWindAsNavigableSet(this, trackedRace, /* resolutionInMilliseconds */ 1000l);
     }
 
     @Override
     protected CombinedWindAsNavigableSet getInternalRawFixes() {
         return virtualInternalRawFixes;
+    }
+    
+    /**
+     * Delivers the position to use when a caller of {@link #getAveragedWind(Position, TimePoint)} or
+     * {@link #getAveragedWindWithConfidence(Position, TimePoint)} provides a {@code null} position. This position is
+     * also used for the fixes produced by the fix iterators for this track. This implementation returns the
+     * {@link TrackedRace#getCenterOfCourse(TimePoint) center of the course}.
+     */
+    protected Position getDefaultPosition(TimePoint at) {
+        return getTrackedRace().getCenterOfCourse(at);
     }
 
     /**
@@ -49,11 +63,11 @@ public class CombinedWindTrackImpl extends VirtualWindTrackImpl {
 
     @Override
     public Wind getAveragedWind(Position p, TimePoint at) {
-        return getTrackedRace().getWind(p, at);
+        return getTrackedRace().getWind(p==null?getDefaultPosition(at):p, at);
     }
 
     @Override
     public WindWithConfidence<Util.Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
-        return getTrackedRace().getWindWithConfidence(p, at);
+        return getTrackedRace().getWindWithConfidence(p==null?getDefaultPosition(at):p, at);
     }
 }

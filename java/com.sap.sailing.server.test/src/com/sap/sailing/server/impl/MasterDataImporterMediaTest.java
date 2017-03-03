@@ -62,7 +62,7 @@ public class MasterDataImporterMediaTest {
         when(mediaDb.loadAllMediaTracks()).thenReturn(Arrays.asList(existingDbMediaTracks));
 
         racingEventService = spy(new RacingEventServiceImpl(domainObjectFactory, mongoObjectFactory, mediaDb,
-                windStore, sensorFixStore));
+                windStore, sensorFixStore, /* restoreTrackedRaces */ false));
     }
 
     @Test

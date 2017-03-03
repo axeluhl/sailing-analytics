@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race;
 
-public interface RaceLogStartOfTrackingEvent extends RaceLogEvent {
+import com.sap.sailing.domain.abstractlog.Revokable;
+
+public interface RaceLogStartOfTrackingEvent extends RaceLogEvent, Revokable {
 
 }

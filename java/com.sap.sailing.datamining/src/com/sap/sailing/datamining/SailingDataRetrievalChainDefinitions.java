@@ -3,6 +3,9 @@ package com.sap.sailing.datamining;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.sap.sailing.datamining.data.HasBravoFixContext;
+import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
+import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasManeuverContext;
@@ -12,7 +15,12 @@ import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.data.HasWindFixContext;
+import com.sap.sailing.datamining.data.HasWindTrackContext;
+import com.sap.sailing.datamining.impl.components.BravoFixRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.BravoFixTrackRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.CompetitorOfRaceInLeaderboardRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.FoilingSegmentRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.GPSFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardGroupRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardRetrievalProcessor;
@@ -22,6 +30,8 @@ import com.sap.sailing.datamining.impl.components.RaceOfCompetitorRetrievalProce
 import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.WindFixRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.WindTrackRetrievalProcessor;
 import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -56,6 +66,18 @@ public class SailingDataRetrievalChainDefinitions {
         raceOfCompetitorRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class, RaceOfCompetitorRetrievalProcessor.class, HasRaceOfCompetitorContext.class, "Competitor");
         dataRetrieverChainDefinitions.add(raceOfCompetitorRetrieverChainDefinition);
 
+        final DataRetrieverChainDefinition<RacingEventService, HasBravoFixTrackContext> bravoFixTrackRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                raceOfCompetitorRetrieverChainDefinition, HasBravoFixTrackContext.class, "BravoFixTrackSailingDomainRetrieverChain");
+        bravoFixTrackRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class, BravoFixTrackRetrievalProcessor.class,
+                HasBravoFixTrackContext.class, "BravoFixTrack");
+        dataRetrieverChainDefinitions.add(bravoFixTrackRetrieverChainDefinition);
+
+        final DataRetrieverChainDefinition<RacingEventService, HasFoilingSegmentContext> foilingSegmentsRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                raceOfCompetitorRetrieverChainDefinition, HasFoilingSegmentContext.class, "FoilingSegmentsSailingDomainRetrieverChain");
+        foilingSegmentsRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class, FoilingSegmentRetrievalProcessor.class,
+                HasFoilingSegmentContext.class, "FoilingSegments");
+        dataRetrieverChainDefinitions.add(foilingSegmentsRetrieverChainDefinition);
+
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasTrackedLegOfCompetitorContext.class, "LegSailingDomainRetrieverChain");
         legOfCompetitorRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, TrackedLegRetrievalProcessor.class, HasTrackedLegContext.class, "Leg");
@@ -68,6 +90,19 @@ public class SailingDataRetrievalChainDefinitions {
         gpsFixRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, GPSFixRetrievalProcessor.class,
                 HasGPSFixContext.class, "GpsFix");
         dataRetrieverChainDefinitions.add(gpsFixRetrieverChainDefinition);
+
+        final DataRetrieverChainDefinition<RacingEventService, HasBravoFixContext> bravoFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                legOfCompetitorRetrieverChainDefinition, HasBravoFixContext.class, "BravoFixSailingDomainRetrieverChain");
+        bravoFixRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, BravoFixRetrievalProcessor.class,
+                HasBravoFixContext.class, "BravoFix");
+        dataRetrieverChainDefinitions.add(bravoFixRetrieverChainDefinition);
+
+        final DataRetrieverChainDefinition<RacingEventService, HasWindFixContext> windFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                trackedRaceRetrieverChainDefinition, HasWindFixContext.class, "WindFixSailingDomainRetrieverChain");
+        windFixRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, WindTrackRetrievalProcessor.class, HasWindTrackContext.class, "WindTrack");
+        windFixRetrieverChainDefinition.endWith(WindTrackRetrievalProcessor.class, WindFixRetrievalProcessor.class,
+                HasWindFixContext.class, "WindFix");
+        dataRetrieverChainDefinitions.add(windFixRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasManeuverContext> maneuverRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 legOfCompetitorRetrieverChainDefinition, HasManeuverContext.class, "ManeuverSailingDomainRetrieverChain");

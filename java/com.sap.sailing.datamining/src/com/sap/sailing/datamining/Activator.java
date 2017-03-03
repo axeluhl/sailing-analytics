@@ -7,6 +7,9 @@ import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.datamining.data.HasBravoFixContext;
+import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
+import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
@@ -17,12 +20,22 @@ import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.data.HasWindFixContext;
+import com.sap.sailing.datamining.data.HasWindTrackContext;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingAverageDegreesAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingMaxAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBoolSumAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceAverageAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMaxAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMedianAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceSumAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationAverageAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationMaxAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationMinAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationSumAggregationProcessor;
+import com.sap.sailing.datamining.provider.RacingEventServiceProvider;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -81,6 +94,11 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasTrackedLegContext.class);
         internalClasses.add(HasTrackedLegOfCompetitorContext.class);
         internalClasses.add(HasGPSFixContext.class);
+        internalClasses.add(HasWindTrackContext.class);
+        internalClasses.add(HasWindFixContext.class);
+        internalClasses.add(HasBravoFixContext.class);
+        internalClasses.add(HasBravoFixTrackContext.class);
+        internalClasses.add(HasFoilingSegmentContext.class);
         internalClasses.add(HasManeuverContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);
@@ -112,6 +130,13 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         aggregators.add(ParallelDistanceMaxAggregationProcessor.getDefinition());
         aggregators.add(ParallelDistanceMinAggregationProcessor.getDefinition());
         aggregators.add(ParallelDistanceMedianAggregationProcessor.getDefinition());
+        aggregators.add(ParallelDurationSumAggregationProcessor.getDefinition());
+        aggregators.add(ParallelDurationAverageAggregationProcessor.getDefinition());
+        aggregators.add(ParallelDurationMaxAggregationProcessor.getDefinition());
+        aggregators.add(ParallelDurationMinAggregationProcessor.getDefinition());
+        aggregators.add(ParallelBearingAverageDegreesAggregationProcessor.getDefinition());
+        aggregators.add(ParallelBearingMaxAggregationProcessor.getDefinition());
+        aggregators.add(ParallelBearingMinAggregationProcessor.getDefinition());
         return aggregators;
     }
     
@@ -133,7 +158,6 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         if (INSTANCE == null) {
             INSTANCE = new Activator(); // probably non-OSGi case, as in test execution
         }
-        
         return INSTANCE;
     }
 

@@ -1,5 +1,9 @@
 package com.sap.sailing.server.impl;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -8,6 +12,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmed
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -15,6 +20,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -90,9 +96,12 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
 
     @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
-        if (event instanceof RaceLogFinishPositioningConfirmedEvent) {
-            handleFinishPositioningList(raceColumn, raceLogIdentifier, (RaceLogFinishPositioningConfirmedEvent) event);
-        }
+        event.accept(new BaseRaceLogEventVisitor() {
+            @Override
+            public void visit(RaceLogFinishPositioningConfirmedEvent event) {
+                handleFinishPositioningList(raceColumn, raceLogIdentifier, event);
+            }
+        });
     }
 
     private void handleFinishPositioningList(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogFinishPositioningConfirmedEvent event) {
@@ -100,7 +109,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         if (leaderboard != null) {
             Fleet fleet = raceColumn.getFleetByName(raceLogIdentifier.getFleetName());
             RaceLog raceLog = raceColumn.getRaceLog(fleet);
-            checkNeedForScoreCorrectionByResultsOfRaceCommittee(leaderboard, raceColumn, fleet, raceLog, event.getCreatedAt());
+            checkNeedForScoreCorrectionByResultsOfRaceCommittee(leaderboard, raceColumn, fleet, raceLog, event.getCreatedAt(), event);
         }
     }
 
@@ -125,13 +134,19 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
      * 
      * @param timePoint
      *            the TimePoint at which the race committee confirmed their last rank list entered in the app.
+     * @param event
+     *            the event that has announced the latest results; used with a finder to determine the effective changes to
+     *            be applied to the leaderboard; if before {@code event} the race log had a result for a competitor that
+     *            is still in the {@code leaderboard}'s score corrections and after applying {@code event} there is no
+     *            result for that competitor anymore, remove those score corrections.
      */
-    private void checkNeedForScoreCorrectionByResultsOfRaceCommittee(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLog raceLog, TimePoint timePoint) {
+    private void checkNeedForScoreCorrectionByResultsOfRaceCommittee(Leaderboard leaderboard, RaceColumn raceColumn,
+            Fleet fleet, RaceLog raceLog, TimePoint timePoint, RaceLogFinishPositioningConfirmedEvent event) {
         int numberOfCompetitorsInLeaderboard = Util.size(leaderboard.getCompetitors());
         int numberOfCompetitorsInRace;
         CompetitorResults positioningList;
         numberOfCompetitorsInRace = getNumberOfCompetitorsInRace(raceColumn, fleet, numberOfCompetitorsInLeaderboard);
-        ConfirmedFinishPositioningListFinder confirmedPositioningListFinder = new ConfirmedFinishPositioningListFinder(raceLog);
+        final ConfirmedFinishPositioningListFinder confirmedPositioningListFinder = new ConfirmedFinishPositioningListFinder(raceLog);
         positioningList = confirmedPositioningListFinder.analyze();
         if (positioningList == null) {
             // we expect this case for old sailing events such as ESS Singapore, Quingdao, where the confirmation event did not contain the finish
@@ -141,25 +156,50 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
             // RaceLogFinishPositioningConfirmedEvent event was found in the race log
         }
         if (positioningList != null) {
+            final Map<Serializable, CompetitorResult> newResultsByCompetitorId = new HashMap<>();
             for (CompetitorResult positionedCompetitor : positioningList) {
-                Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
+                newResultsByCompetitorId.put(positionedCompetitor.getCompetitorId(), positionedCompetitor);
+                final Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
                 // The score is updated when explicitly provided or when no penalty was set;
                 // in turn, this means that when a penalty is set and no score is explicitly provided,
                 // it is up to the scoring scheme to infer a penalty score for the MaxPointsReason.
                 // See also bug 3955.
-                if (positionedCompetitor.getScore() != null
-                        || positionedCompetitor.getMaxPointsReason() == null
-                        || positionedCompetitor.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+                if (isNeedToCorrectScore(positionedCompetitor)) {
                     int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
                     correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, competitor,
                             rankByRaceCommittee, positionedCompetitor.getScore());
                 }
                 setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor.getMaxPointsReason(), competitor);
             }
+            final CompetitorResults oldResults = confirmedPositioningListFinder.analyzeIgnoring(event);
+            if (oldResults != null) {
+                // check if any of the old results need to be canceled from the leaderboard's score corrections, such
+                // as a cleared OCS; see also bug 4025
+                for (final CompetitorResult oldResult : oldResults) {
+                    if (!newResultsByCompetitorId.containsKey(oldResult.getCompetitorId())) {
+                        final Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(oldResult.getCompetitorId());
+                        // check what the leaderboard score correction looks like; if it matches the old result, remove the correction:
+                        if (Util.equalsWithNull(leaderboard.getScoreCorrection().getMaxPointsReason(competitor, raceColumn, TimePoint.EndOfTime), oldResult.getMaxPointsReason())) {
+                            service.apply(new UpdateLeaderboardMaxPointsReason(leaderboard.getName(), raceColumn.getName(), competitor.getId().toString(), /* reason */ null, timePoint));
+                        }
+                        if (isNeedToCorrectScore(oldResult) &&
+                                Util.equalsWithNull(leaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, raceColumn),
+                                    getScoreFromRaceCommittee(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, competitor, oldResult.getOneBasedRank(), oldResult.getScore()))) {
+                            service.apply(new UpdateLeaderboardScoreCorrection(leaderboard.getName(), raceColumn.getName(), competitor.getId().toString(), /* correctedScore */ null, timePoint));
+                        }
+                    }
+                }
+            }
             // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
             // be triggered, even though no score correction may have been performed
             applyMetadataUpdate(leaderboard, timePoint, COMMENT_TEXT_ON_SCORE_CORRECTION);
         }
+    }
+
+    private boolean isNeedToCorrectScore(CompetitorResult positionedCompetitor) {
+        return positionedCompetitor.getScore() != null
+                || positionedCompetitor.getMaxPointsReason() == null
+                || positionedCompetitor.getMaxPointsReason().equals(MaxPointsReason.NONE);
     }
 
     private boolean setMaxPointsReasonInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn,
@@ -177,6 +217,22 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     private void correctScoreInLeaderboard(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
             final int numberOfCompetitorsInRace, 
             Competitor competitor, int rankByRaceCommittee, Double optionalExplicitScore) {
+        final Double scoreByRaceCommittee = getScoreFromRaceCommittee(leaderboard, raceColumn, timePoint,
+                numberOfCompetitorsInRace, competitor, rankByRaceCommittee, optionalExplicitScore);
+        // Do ALWAYS apply score corrections from race committee
+        applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
+    }
+
+    /**
+     * If a non-{@code null} {@code optionalExplicitScore} is provided, it it returned. Otherwise, an implicit score is
+     * determined from the {@code rankByRaceCommittee} using the leaderboard scoring scheme's
+     * {@link ScoringScheme#getScoreForRank(Leaderboard, RaceColumn, Competitor, int, java.util.concurrent.Callable, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint)
+     * getScoreForRank(...)} method. Usually, scoring schemes will return {@code null} as score for {@code 0} as
+     * (one-based) rank.
+     */
+    private Double getScoreFromRaceCommittee(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
+            final int numberOfCompetitorsInRace, Competitor competitor, int rankByRaceCommittee,
+            Double optionalExplicitScore) {
         final Double scoreByRaceCommittee;
         if (optionalExplicitScore == null) {
             scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
@@ -184,8 +240,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         } else {
             scoreByRaceCommittee = optionalExplicitScore;
         }
-        // Do ALWAYS apply score corrections from race committee
-        applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
+        return scoreByRaceCommittee;
     }
 
     private void applyScoreCorrectionOperation(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, Double correctedScore, TimePoint timePoint) {

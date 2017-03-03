@@ -69,8 +69,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, Simulator simulator,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
-            RaceLogResolver raceLogResolver) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         this.tractracRace = tractracRace;
         this.raceLogResolver = raceLogResolver;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
