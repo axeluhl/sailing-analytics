@@ -252,6 +252,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     public class NumberOfCompetitorsFetcherImpl implements NumberOfCompetitorsInLeaderboardFetcher {
         private int numberOfCompetitors = -1;
+        private int numberOfCompetitorsWithoutMaxPointReason = -1;
         
         @Override
         public int getNumberOfCompetitorsInLeaderboard() {
@@ -259,6 +260,18 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 numberOfCompetitors = Util.size(getCompetitors());
             }
             return numberOfCompetitors;
+        }
+        
+        @Override
+        public int getNumberOfCompetitorsWithoutMaxPointReason(RaceColumn column, TimePoint timePoint) {
+        	if (numberOfCompetitorsWithoutMaxPointReason == -1) {
+        		numberOfCompetitorsWithoutMaxPointReason = 0;
+				for (Competitor competitor : getCompetitors()) {
+					MaxPointsReason maxPointReason = getScoreCorrection().getMaxPointsReason(competitor, column, timePoint);
+					numberOfCompetitorsWithoutMaxPointReason += maxPointReason == MaxPointsReason.NONE ? 1 : 0;
+				}
+        	}
+        	return numberOfCompetitorsWithoutMaxPointReason;
         }
     }
 
