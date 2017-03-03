@@ -81,7 +81,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
     }
 
     private void initMakeDefaultButtons(final Component<SettingsType> component, final StringMessages stringMessages) {
-        final Button makeDefaultButton = new Button(stringMessages.save());
+        final Button makeDefaultButton = new Button(stringMessages.makeDefault());
         makeDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
         makeDefaultButton.ensureDebugId("SaveButton");
         getLeftButtonPannel().add(makeDefaultButton);
@@ -93,15 +93,13 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
                     @Override
                     public void onSuccess() {
                         setButtonSavingState(false);
-                        // TODO i18n + use nice styled dialog
-                        // FIXME apply new result to new backend result and send to server for saving
-                        Window.alert("Settings have been successfully saved");
+                        Window.alert(stringMessages.settingsSavedMessage());
                     }
                     
                     @Override
                     public void onError(Throwable caught) {
                         setButtonSavingState(false);
-                        Window.alert("Settings could not be saved");
+                        Window.alert(stringMessages.settingsSaveErrorMessage());
                     }
                     
                     
@@ -111,10 +109,10 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
             private void setButtonSavingState(boolean savingState) {
                 if(savingState) {
                     makeDefaultButton.setEnabled(false);
-                    makeDefaultButton.setText("Saving...");
+                    makeDefaultButton.setText(stringMessages.makeDefaultInProgress());
                 } else {
                     makeDefaultButton.setEnabled(true);
-                    makeDefaultButton.setText(stringMessages.save());
+                    makeDefaultButton.setText(stringMessages.makeDefault());
                 }
             }
         });

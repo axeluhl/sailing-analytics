@@ -8,6 +8,10 @@ import com.google.gwt.i18n.client.Messages;
  *
  */
 public interface StringMessages extends Messages {
+    String makeDefault();
+    String makeDefaultInProgress();
+    String settingsSavedMessage();
+    String settingsSaveErrorMessage();
     String save();
     String remove();
     String ok();
