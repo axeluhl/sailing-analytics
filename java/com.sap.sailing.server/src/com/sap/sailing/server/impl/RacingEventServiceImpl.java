@@ -672,7 +672,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 int newNumberOfTrackedRacesRestored = numberOfTrackedRacesRestored.incrementAndGet();
                 logger.info("Added race to restore #"+newNumberOfTrackedRacesRestored+"/"+numberOfTrackedRacesToRestore);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Exception trying to restore race"+params, e);
+                logger.log(Level.SEVERE, "Exception trying to restore race "+params, e);
             }
         }).getNumberOfParametersToLoad();
     }
