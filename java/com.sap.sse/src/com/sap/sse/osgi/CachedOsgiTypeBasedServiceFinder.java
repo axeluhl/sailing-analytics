@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +35,7 @@ import com.sap.sse.common.Util;
 public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTrackerCustomizer<ServiceT, ServiceT>,
         TypeBasedServiceFinder<ServiceT> {
     private static final Logger logger = Logger.getLogger(CachedOsgiTypeBasedServiceFinder.class.getName());
-    private final Map<String, ServiceT> services = new HashMap<>();
+    private final ConcurrentHashMap<String, ServiceT> services = new ConcurrentHashMap<>();
     private final BundleContext context;
     private final Class<ServiceT> serviceType;
     private ServiceT fallback;
@@ -48,28 +49,24 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
 
     @Override
     public ServiceT findService(String type) {
-        synchronized (services) {
-            ServiceT service = services.get(type);
-            if (service == null) {
-                if (fallback != null) {
-                    return fallback;
-                } else {
-                    throw new NoCorrespondingServiceRegisteredException("Could not find service", type, serviceType.getSimpleName());       
-                }
+        ServiceT service = services.get(type);
+        if (service == null) {
+            if (fallback != null) {
+                return fallback;
+            } else {
+                throw new NoCorrespondingServiceRegisteredException("Could not find service", type, serviceType.getSimpleName());       
             }
-            return service;
         }
+        return service;
     }
 
     @Override
     public void applyServiceWhenAvailable(String type, Callback<ServiceT> callback) {
-        synchronized (services) {
-            ServiceT service = services.get(type);
-            if (service != null) {
-                callback.withService(service);
-            } else {
-                Util.addToValueSet(callbacks, type, callback);
-            }
+        ServiceT service = services.get(type);
+        if (service != null) {
+            callback.withService(service);
+        } else {
+            Util.addToValueSet(callbacks, type, callback);
         }
     }
 
@@ -78,10 +75,8 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
         String type = (String) reference.getProperty(TypeBasedServiceFinder.TYPE);
         ServiceT service = context.getService(reference);
         Set<Callback<ServiceT>> callbacksToNotify;
-        synchronized (services) {
-            services.put(type, service);
-            callbacksToNotify = callbacks.remove(type);
-        }
+        services.put(type, service);
+        callbacksToNotify = callbacks.remove(type);
         if (callbacksToNotify != null) {
             callbacksToNotify.forEach(c -> {
                 try {
@@ -103,9 +98,7 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
     @Override
     public void removedService(ServiceReference<ServiceT> reference, ServiceT service) {
         String type = (String) reference.getProperty(TypeBasedServiceFinder.TYPE);
-        synchronized (services) {
-            services.remove(type);
-        }
+        services.remove(type);
     }
 
     @Override
@@ -115,8 +108,6 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
 
     @Override
     public Set<ServiceT> findAllServices() {
-        synchronized (services) {
-            return new HashSet<ServiceT>(services.values());
-        }
+        return new HashSet<ServiceT>(services.values());
     }
 }
