@@ -2319,6 +2319,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     }
                 });
             }
+            logger.info("Done restoring races; restored "+i+" of "+count+" races");
         }, /* void result */ null);
         backgroundExecutor.execute(waiter);
         return new ConnectivityParametersLoadingResult() {
