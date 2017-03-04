@@ -673,7 +673,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception trying to restore race"+params, e);
             }
-        });
+        }).getNumberOfParametersToLoad();
     }
 
     @Override

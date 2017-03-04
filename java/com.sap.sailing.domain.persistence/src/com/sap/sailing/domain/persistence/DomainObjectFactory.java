@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 import com.mongodb.DBObject;
@@ -140,6 +141,32 @@ public interface DomainObjectFactory {
     Map<String, Set<URL>> loadResultUrls();
     
     /**
+     * Returned by {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer)}.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    static interface ConnectivityParametersLoadingResult {
+        /**
+         * @return the number of parameter sets that were loaded from the persistent store; each of these parameter sets
+         *         describes for one race how it is to be loaded / tracked.
+         */
+        int getNumberOfParametersToLoad();
+        
+        /**
+         * For each set of parameters obtained from the persistent store,
+         * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer)} invokes a callback. This
+         * method will return only after all these callbacks have been issued for all parameters loaded from the
+         * persistent store.
+         * <p>
+         * 
+         * Note that a callback implementation may itself trigger background actions. This method does not know about
+         * those background actions and hence may return before those background actions have completed.
+         */
+        void waitForCompletionOfCallbacksForAllParameters() throws InterruptedException, ExecutionException;
+    }
+    
+    /**
      * Loads all {@link RaceTrackingConnectivityParameters} objects from the database telling how to re-load those races
      * that were {@link MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      * marked as to be restored} before the server got re-started. Callers pass a {@code callback} that is invoked for
@@ -163,5 +190,6 @@ public interface DomainObjectFactory {
      * @see MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      * @see MongoObjectFactory#removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      */
-    int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback);
+    ConnectivityParametersLoadingResult loadConnectivityParametersForRacesToRestore(
+            Consumer<RaceTrackingConnectivityParameters> callback);
 }

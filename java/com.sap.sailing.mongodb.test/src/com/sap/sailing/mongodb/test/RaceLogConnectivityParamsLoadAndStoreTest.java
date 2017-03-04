@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
@@ -39,7 +40,7 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
     }
 
     @Test
-    public void testStoreAndLoadRaceLogTrackingParams() throws MalformedURLException, URISyntaxException, NotDenotableForRaceLogTrackingException {
+    public void testStoreAndLoadRaceLogTrackingParams() throws MalformedURLException, URISyntaxException, NotDenotableForRaceLogTrackingException, InterruptedException, ExecutionException {
         // set up
         final long delayToLiveInMillis = 3000;
         final boolean trackWind = true;
@@ -65,7 +66,8 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(rlParams);
         // load
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params -> connectivityParametersForRacesToRestore.add(params))
+                .waitForCompletionOfCallbacksForAllParameters();
         // compare
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
@@ -81,7 +83,8 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(rlParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params))
+            .waitForCompletionOfCallbacksForAllParameters();
         assertTrue(connectivityParametersForRacesToRestore2.isEmpty());
     }
 }

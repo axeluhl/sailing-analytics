@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -2286,12 +2288,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) {
+    public ConnectivityParametersLoadingResult loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) {
         final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
         final DBCursor cursor = collection.find();
         final int count = cursor.count();
         final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
-        backgroundExecutor.execute(() -> {
+        final FutureTask<Void> waiter = new FutureTask<>(() -> {
             for (final DBObject o : cursor) {
                 final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
                 raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
@@ -2309,7 +2311,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     }
                 });
             }
-        });
-        return count;
+        }, /* void result */ null);
+        backgroundExecutor.execute(waiter);
+        return new ConnectivityParametersLoadingResult() {
+            @Override
+            public int getNumberOfParametersToLoad() {
+                return count;
+            }
+
+            @Override
+            public void waitForCompletionOfCallbacksForAllParameters() throws InterruptedException, ExecutionException {
+                waiter.get();
+            }
+        };
     }
 }
