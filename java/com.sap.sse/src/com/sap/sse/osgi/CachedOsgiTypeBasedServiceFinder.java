@@ -62,21 +62,28 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
 
     @Override
     public void applyServiceWhenAvailable(String type, Callback<ServiceT> callback) {
-        ServiceT service = services.get(type);
+        final ServiceT service; 
+        synchronized (services) {
+            service = services.get(type);
+            if (service == null) {
+                Util.addToValueSet(callbacks, type, callback);
+            }
+        }
+        // no synchronization needed here anymore if the service was already found
         if (service != null) {
             callback.withService(service);
-        } else {
-            Util.addToValueSet(callbacks, type, callback);
         }
     }
 
     @Override
     public ServiceT addingService(ServiceReference<ServiceT> reference) {
-        String type = (String) reference.getProperty(TypeBasedServiceFinder.TYPE);
-        ServiceT service = context.getService(reference);
-        Set<Callback<ServiceT>> callbacksToNotify;
-        services.put(type, service);
-        callbacksToNotify = callbacks.remove(type);
+        final String type = (String) reference.getProperty(TypeBasedServiceFinder.TYPE);
+        final ServiceT service = context.getService(reference);
+        final Set<Callback<ServiceT>> callbacksToNotify;
+        synchronized (services) {
+            services.put(type, service);
+            callbacksToNotify = callbacks.remove(type);
+        }
         if (callbacksToNotify != null) {
             callbacksToNotify.forEach(c -> {
                 try {
