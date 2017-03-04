@@ -2152,8 +2152,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
         // update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
         if (connectivityParams != null) {
-            connectivityParams.setTrackWind(false);
-            getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
+            if (connectivityParams.isTrackWind()) {
+                connectivityParams.setTrackWind(false);
+                getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
+            }
         } else {
             logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
         }
