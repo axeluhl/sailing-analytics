@@ -1,6 +1,5 @@
 package com.sap.sse.security.ui.settings;
 
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
@@ -8,6 +7,7 @@ import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
@@ -47,12 +47,7 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
     }
 
     @Override
-    public void storeGlobalSettings(JSONObject globalSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
-        
-    }
-
-    @Override
-    public void storeContextSpecificSettings(JSONObject contextSpecificSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
+    public void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback) {
         
     }
 
@@ -67,17 +62,7 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
     }
 
     @Override
-    public String retrieveContextSpecificSettingsJsonFromLocalStorage() {
-        return null;
-    }
-
-    @Override
-    public void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
-        
-    }
-
-    @Override
-    public void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
+    public void retrieveSettingsJson(AsyncCallback<SettingsJsons> asyncCallback) {
         
     }
 }

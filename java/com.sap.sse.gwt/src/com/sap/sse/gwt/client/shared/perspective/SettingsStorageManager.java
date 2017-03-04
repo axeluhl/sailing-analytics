@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
@@ -34,26 +33,15 @@ public interface SettingsStorageManager<S extends Settings> {
             OnSettingsLoadedCallback<S> asyncCallback);
 
     /**
-     * Stores provided global settings. Only the delta between default settings and provided settings
+     * Stores provided settings. Only the delta between default settings and provided settings
      * will be stored.
      * 
-     * @param globalSettings The global settings to store
+     * @param settingsJsons The settings to store
      * @param onSettingsStoredCallback The callback which is called when the settings storage process finishes
      * @see ComponentContextWithSettingsStorage
      * @see GenericSerializableSettings
      */
-    void storeGlobalSettings(JSONObject globalSettings, OnSettingsStoredCallback onSettingsStoredCallback);
-
-    /**
-     * Stores provided context specific settings. Only the delta between default settings and provided settings
-     * will be stored.
-     * 
-     * @param contextSpecificSettings The context specific settings to store
-     * @param onSettingsStoredCallback The callback which is called when the settings storage process finishes
-     * @see ComponentContextWithSettingsStorage
-     * @see GenericSerializableSettings
-     */
-    void storeContextSpecificSettings(JSONObject contextSpecificSettings, OnSettingsStoredCallback onSettingsStoredCallback);
+    void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback);
 
     /**
      * Gets the last error occurred during settings initialisation.
@@ -64,10 +52,6 @@ public interface SettingsStorageManager<S extends Settings> {
 
     JSONValue settingsToJSON(Settings newSettings);
 
-    String retrieveContextSpecificSettingsJsonFromLocalStorage();
-
-    void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback);
-
-    void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback);
+    void retrieveSettingsJson(AsyncCallback<SettingsJsons> asyncCallback);
 
 }

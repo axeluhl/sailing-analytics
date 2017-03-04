@@ -213,36 +213,18 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      */
     private void updateSettings(final ArrayList<String> path, final Settings globalSettings,
             final Settings contextSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
-        settingsStorageManager.retrieveGlobalSettingsJson(new AsyncCallback<JSONObject>() {
+        settingsStorageManager.retrieveSettingsJson(new AsyncCallback<SettingsJsons>() {
+            
             @Override
-            public void onSuccess(final JSONObject globalServerside) {
-                settingsStorageManager.retrieveContextSpecificSettingsJson(new AsyncCallback<JSONObject>() {
-                    @Override
-                    public void onSuccess(JSONObject contextServerside) {
-                        final JSONObject patchedContext = patchJsonObject(contextServerside, new ArrayList<>(path),
-                                contextSettings);
-                        final JSONObject patchedGlobal = patchJsonObject(globalServerside, new ArrayList<>(path),
-                                globalSettings);
-
-                        settingsStorageManager.storeGlobalSettings(patchedGlobal, new OnSettingsStoredCallback() {
-                            
-                            @Override
-                            public void onSuccess() {
-                                settingsStorageManager.storeContextSpecificSettings(patchedContext, onSettingsStoredCallback);
-                            }
-                            
-                            @Override
-                            public void onError(Throwable caught) {
-                                onSettingsStoredCallback.onError(caught);
-                            }
-                        });
-                    }
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        onSettingsStoredCallback.onError(caught);
-                    }
-                });
+            public void onSuccess(SettingsJsons result) {
+                final JSONObject patchedContextSpecificSettings = patchJsonObject(result.getContextSpecificSettingsJson(), new ArrayList<>(path),
+                        contextSettings);
+                final JSONObject patchedGlobalSettings = patchJsonObject(result.getGlobalSettingsJson(), new ArrayList<>(path),
+                        globalSettings);
+                SettingsJsons settingsJsons = new SettingsJsons(patchedGlobalSettings, patchedContextSpecificSettings);
+                settingsStorageManager.storeSettingsJsons(settingsJsons, onSettingsStoredCallback);
             }
+            
             @Override
             public void onFailure(Throwable caught) {
                 onSettingsStoredCallback.onError(caught);

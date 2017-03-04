@@ -1,5 +1,10 @@
 package com.sap.sse.security.ui.settings;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.storage.client.Storage;
@@ -7,11 +12,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
-import com.sap.sse.gwt.client.shared.perspective.CallbacksJoinerHelper;
 import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
+import com.sap.sse.gwt.client.shared.perspective.SettingsStrings;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.client.UserService;
@@ -42,8 +48,6 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
      * must have a unique key.
      */
     private final String storageContextSpecificKey;
-
-    private Throwable lastError = null;
 
     private UserService userService;
 
@@ -78,187 +82,105 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         return true;
     }
 
-    private void storeContextSpecificSettingsJsonOnLocalStorage(String serializedContextSpecificSettings) {
+    private void storeSettingsStringsOnLocalStorage(SettingsStrings settingsStrings) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
             localStorage.removeItem(storageContextSpecificKey);
-            localStorage.setItem(storageContextSpecificKey, serializedContextSpecificSettings);
+            if(settingsStrings.getGlobalSettingsString() != null) {
+                localStorage.setItem(storageGlobalKey, settingsStrings.getGlobalSettingsString());
+            }
+            if(settingsStrings.getContextSpecificSettingsString() != null) {
+                localStorage.setItem(storageContextSpecificKey, settingsStrings.getContextSpecificSettingsString());
+            }
         }
     }
 
-    private void storeContextSpecificSettingsJsonOnServer(String serializedContextSpecificSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
-        if (userService.getCurrentUser() != null) {
-            userService.setPreference(storageContextSpecificKey, serializedContextSpecificSettings, new AsyncCallback<Void>() {
+    private void storeSettingsStringsOnServer(SettingsStrings settingsStrings, final OnSettingsStoredCallback onSettingsStoredCallback) {
+        Map<String, String> keyValuePairs = new HashMap<>();
+        keyValuePairs.put(storageGlobalKey, settingsStrings.getGlobalSettingsString());
+        keyValuePairs.put(storageContextSpecificKey, settingsStrings.getContextSpecificSettingsString());
+        userService.setPreferences(keyValuePairs, new AsyncCallback<Void>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    onSettingsStoredCallback.onError(caught);
-                }
+            @Override
+            public void onFailure(Throwable caught) {
+                onSettingsStoredCallback.onError(caught);
+            }
 
-                @Override
-                public void onSuccess(Void result) {
-                    onSettingsStoredCallback.onSuccess();
-                }
-            });
-        } else {
-            onSettingsStoredCallback.onSuccess();
-        }
-    }
-
-    private void storeGlobalSettingsJsonOnLocalStorage(String serializedGlobalSettings) {
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null) {
-            localStorage.removeItem(storageGlobalKey);
-            localStorage.setItem(storageGlobalKey, serializedGlobalSettings);
-        }
-    }
-
-    private void storeGlobalSettingsJsonOnServer(String serializedGlobalSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
-        if (userService.getCurrentUser() != null) {
-            userService.setPreference(storageGlobalKey, serializedGlobalSettings, new AsyncCallback<Void>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    onSettingsStoredCallback.onError(caught);
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    onSettingsStoredCallback.onSuccess();
-                }
-            });
-        } else {
-            onSettingsStoredCallback.onSuccess();
-        }
+            @Override
+            public void onSuccess(Void result) {
+                onSettingsStoredCallback.onSuccess();
+            }
+        });
     }
 
     /**
      * {@inheritDoc}
      */
-    public void retrieveDefaultSettings(S defaultSettings, final OnSettingsLoadedCallback<S> asyncCallback) {
-        final SettingsJsonRetrievement settingsJsonRetrievement = new SettingsJsonRetrievement(defaultSettings);
+    public void retrieveDefaultSettings(S defaultSettings, final OnSettingsLoadedCallback<S> callback) {
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
 
             @Override
             public void onUserStatusChange(UserDTO user) {
-                if (!initialUserSetting) {
-                    initialUserSetting = true;
-                    if (user != null) {
-                        AsyncCallback<String> globalSettingsAsyncCallback = new AsyncCallback<String>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                lastError = caught;
-                                settingsJsonRetrievement.receiveError(caught);
-                                onSuccess(null);
-                            }
+                //call this method always on user status change event in order to cause sync between local storage and server
+                retrieveSettingsJson(new AsyncCallback<SettingsJsons>() {
 
-                            @Override
-                            public void onSuccess(String globalSettingsJson) {
-                                settingsJsonRetrievement.receiveGlobalSettingsJson(globalSettingsJson);
-                                if (settingsJsonRetrievement.hasAllCallbacksReceived()) {
-                                    continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
-                                }
-                            }
-                        };
-                        retrieveGlobalSettingsJsonFromServerRaw(globalSettingsAsyncCallback);
-
-                        AsyncCallback<String> contextSpecificSettingsAsyncCallback = new AsyncCallback<String>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                lastError = caught;
-                                settingsJsonRetrievement.receiveError(caught);
-                                onSuccess(null);
-                            }
-
-                            @Override
-                            public void onSuccess(String contextSpecificSettingsJson) {
-                                settingsJsonRetrievement
-                                        .receiveContextSpecificSettingsJson(contextSpecificSettingsJson);
-                                if (settingsJsonRetrievement.hasAllCallbacksReceived()) {
-                                    continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
-                                }
-                            }
-                        };
-                        retrieveContextSpecificSettingsJsonFromServerRaw(contextSpecificSettingsAsyncCallback);
-                    } else {
-                        settingsJsonRetrievement.receiveContextSpecificSettingsJson(null);
-                        settingsJsonRetrievement.receiveGlobalSettingsJson(null);
-                        continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        if(!initialUserSetting) {
+                            initialUserSetting = true;
+                            SettingsStrings localStorageSettings = retrieveSettingsStringsFromLocalStorage();
+                            S newDefaultSettings = convertToSettings(defaultSettings, localStorageSettings);
+                            callback.onError(caught, newDefaultSettings);
+                        }
                     }
-                }
+
+                    @Override
+                    public void onSuccess(SettingsJsons settingsJsons) {
+                        if(!initialUserSetting) {
+                            initialUserSetting = true;
+                            callback.onSuccess(convertToSettings(defaultSettings, settingsJsons));
+                        }
+                    }
+                });
             }
+
         }, true);
     }
-
-    private void continueRetrieveDefaultSettings(
-            UserSettingsStorageManager<S>.SettingsJsonRetrievement settingsJsonRetrievement,
-            OnSettingsLoadedCallback<S> callback) {
-        S defaultSettings = settingsJsonRetrievement.getDefaultSettings();
-
-        // has been any global settings from server retrieved? yes => apply as default and override LocalStorage
-        if (settingsJsonRetrievement.getGlobalSettingsJson() != null) {
-            defaultSettings = deserializeFromJson(defaultSettings, settingsJsonRetrievement.getGlobalSettingsJson());
-            storeGlobalSettingsJsonOnLocalStorage(settingsJsonRetrievement.getGlobalSettingsJson());
-        } else {
-            String localStorageGlobalSettingsJson = retrieveGlobalSettingsJsonFromLocalStorage();
-            if (localStorageGlobalSettingsJson != null) {
-                // server has no global settings, local storage has => apply local storage settings and store them on
-                // server
-                defaultSettings = deserializeFromJson(defaultSettings, localStorageGlobalSettingsJson);
-                storeGlobalSettingsJsonOnServer(localStorageGlobalSettingsJson, new OnSettingsStoredCallback() {
-                    
-                    @Override
-                    public void onSuccess() {
-                        //nothing to do
-                    }
-                    
-                    @Override
-                    public void onError(Throwable caught) {
-                        //nothing to do
-                    }
-                });
-            }
+    
+    private SettingsStrings retrieveSettingsStringsFromLocalStorage() {
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        if (localStorage != null) {
+            return new SettingsStrings(localStorage.getItem(storageGlobalKey), localStorage.getItem(storageContextSpecificKey));
         }
-
-        // has been any context specific settings from server retrieved? yes => apply as default and override
-        // LocalStorage
-        if (settingsJsonRetrievement.getContextSpecificSettingsJson() != null) {
-            defaultSettings = deserializeFromJson(defaultSettings,
-                    settingsJsonRetrievement.getContextSpecificSettingsJson());
-            storeContextSpecificSettingsJsonOnLocalStorage(settingsJsonRetrievement.getContextSpecificSettingsJson());
-        } else {
-            String localStorageContextSpecificSettingsJson = retrieveContextSpecificSettingsJsonFromLocalStorage();
-            if (localStorageContextSpecificSettingsJson != null) {
-                // server has no context specific settings, local storage has => apply local storage settings and store
-                // them on server
-                defaultSettings = deserializeFromJson(defaultSettings, localStorageContextSpecificSettingsJson);
-                storeContextSpecificSettingsJsonOnServer(localStorageContextSpecificSettingsJson, new OnSettingsStoredCallback() {
-                    
-                    @Override
-                    public void onSuccess() {
-                        //nothing to do
-                    }
-                    
-                    @Override
-                    public void onError(Throwable caught) {
-                        //nothing to do
-                    }
-                });
-            }
-        }
-
-        // URL settings have highest precedence
-        defaultSettings = retrieveDefaultSettingsFromUrl(defaultSettings);
-
-        if (settingsJsonRetrievement.isErrorOccurred()) {
-            callback.onError(settingsJsonRetrievement.getCaught(), defaultSettings);
-        } else {
-            callback.onSuccess(defaultSettings);
-        }
+        return new SettingsStrings(null, null);
     }
-
+    
+    private SettingsJsons convertToSettingsJson(SettingsStrings settingsStrings) {
+        JSONObject globalSettingsJson = settingsStrings.getGlobalSettingsString() == null ? null : jsonSerializer.parseStringToJsonObject(settingsStrings.getGlobalSettingsString());
+        JSONObject contextSpecificSettingsJson = settingsStrings.getContextSpecificSettingsString() == null ? null : jsonSerializer.parseStringToJsonObject(settingsStrings.getContextSpecificSettingsString());
+        return new SettingsJsons(globalSettingsJson, contextSpecificSettingsJson);
+    }
+    
+    private SettingsStrings convertToSettingsStrings(SettingsJsons settingsJsons) {
+        String globalSettingsString = settingsJsons.getGlobalSettingsJson() == null ? null : jsonSerializer.jsonObjectToString(settingsJsons.getGlobalSettingsJson());
+        String contextSpecificSettingsString = settingsJsons.getContextSpecificSettingsJson() == null ? null : jsonSerializer.jsonObjectToString(settingsJsons.getContextSpecificSettingsJson());
+        return new SettingsStrings(globalSettingsString, contextSpecificSettingsString);
+    }
+    
+    private S convertToSettings(S defaultSettings, SettingsJsons settingsJsons) {
+        defaultSettings = deserializeFromJson(defaultSettings, settingsJsons.getGlobalSettingsJson());
+        defaultSettings = deserializeFromJson(defaultSettings, settingsJsons.getContextSpecificSettingsJson());
+        defaultSettings = retrieveDefaultSettingsFromUrl(defaultSettings);
+        return defaultSettings;
+    }
+    
+    private S convertToSettings(S defaultSettings, SettingsStrings settingsStrings) {
+        SettingsJsons settingsJsons = convertToSettingsJson(settingsStrings);
+        return convertToSettings(defaultSettings, settingsJsons);
+    }
+    
     @SuppressWarnings("unchecked")
-    private S deserializeFromJson(S defaultSettings, String jsonToDeserialize) {
+    private S deserializeFromJson(S defaultSettings, JSONObject jsonToDeserialize) {
         if (defaultSettings instanceof GenericSerializableSettings) {
             defaultSettings = (S) jsonSerializer.deserialize((GenericSerializableSettings) defaultSettings,
                     jsonToDeserialize);
@@ -268,109 +190,22 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         return defaultSettings;
     }
 
-    private String retrieveGlobalSettingsJsonFromLocalStorage() {
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null) {
-            return localStorage.getItem(storageGlobalKey);
-        }
-        return null;
-    }
-
-    public String retrieveContextSpecificSettingsJsonFromLocalStorage() {
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null) {
-            return localStorage.getItem(storageContextSpecificKey);
-        }
-        return null;
-    }
-
-    protected void retrieveGlobalSettingsJsonFromServerRaw(AsyncCallback<String> globalSettingsAsyncCallback) {
-        userService.getPreference(storageGlobalKey, globalSettingsAsyncCallback);
-    }
-
-    public void retrieveContextSpecificSettingsJsonFromServerRaw(AsyncCallback<String> asyncCallback) {
-        userService.getPreference(storageContextSpecificKey, asyncCallback);
-    }
-
     private S retrieveDefaultSettingsFromUrl(S defaultSettings) {
         return deserializeFromCurrentUrl(defaultSettings);
     }
 
-    /**
-     * Helper class to leverage two parallel server calls in order to retrieve global and context specific settings
-     * without additional unnecessary server-roundtrips and provide the results when both call results have been
-     * received.
-     * 
-     * @see CallbacksJoinerHelper
-     *
-     */
-    private class SettingsJsonRetrievement extends CallbacksJoinerHelper<String, String> {
-        private S defaultSettings;
-
-        public SettingsJsonRetrievement(S defaultSettings) {
-            this.defaultSettings = defaultSettings;
-        }
-
-        public String getGlobalSettingsJson() {
-            return getFirstCallbackResult();
-        }
-
-        public void receiveGlobalSettingsJson(String globalSettingsJson) {
-            receiveFirstCallbackResult(globalSettingsJson);
-        }
-
-        public String getContextSpecificSettingsJson() {
-            return getSecondCallbackResult();
-        }
-
-        public void receiveContextSpecificSettingsJson(String contextSpecificSettingsJson) {
-            receiveSecondCallbackResult(contextSpecificSettingsJson);
-        }
-
-        public S getDefaultSettings() {
-            return defaultSettings;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Throwable getLastError() {
-        return lastError;
-    }
-
-    public void retrieveGlobalSettingsJsonFromServer(final AsyncCallback<JSONObject> asyncCallback) {
-        retrieveGlobalSettingsJsonFromServerRaw(new AsyncCallback<String>() {
-
+    private void retrieveSettingsStringsFromServer(final AsyncCallback<SettingsStrings> asyncCallback) {
+        List<String> keys = new ArrayList<>(2);
+        keys.add(storageGlobalKey);
+        keys.add(storageContextSpecificKey);
+        userService.getPreferences(keys, new AsyncCallback<Map<String,String>>() {
+            
             @Override
-            public void onSuccess(String result) {
-                if (result == null) {
-                    asyncCallback.onSuccess(null);
-                } else {
-                    asyncCallback.onSuccess(jsonSerializer.parseStringToJsonObject(result));
-                }
-
+            public void onSuccess(Map<String, String> result) {
+                SettingsStrings settingsStrings = new SettingsStrings(result.get(storageGlobalKey), result.get(storageContextSpecificKey));
+                asyncCallback.onSuccess(settingsStrings);
             }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                asyncCallback.onFailure(caught);
-            }
-        });
-    }
-
-    public void retrieveContextSpecificSettingsJsonFromServer(final AsyncCallback<JSONObject> asyncCallback) {
-        retrieveContextSpecificSettingsJsonFromServerRaw(new AsyncCallback<String>() {
-
-            @Override
-            public void onSuccess(String result) {
-                if (result == null) {
-                    asyncCallback.onSuccess(null);
-                } else {
-                    asyncCallback.onSuccess(jsonSerializer.parseStringToJsonObject(result));
-                }
-            }
-
+            
             @Override
             public void onFailure(Throwable caught) {
                 asyncCallback.onFailure(caught);
@@ -387,45 +222,60 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
     }
 
     @Override
-    public void storeGlobalSettings(JSONObject patchedGlobal, OnSettingsStoredCallback onSettingsStoredCallback) {
-        String jsonStringToStore = jsonSerializer.jsonObjectToString(patchedGlobal);
-        storeGlobalSettingsJsonOnLocalStorage(jsonStringToStore);
-        storeGlobalSettingsJsonOnServer(jsonStringToStore, onSettingsStoredCallback);
-    }
-
-    @Override
-    public void storeContextSpecificSettings(JSONObject contextSpecificSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
-        String jsonStringToStore = jsonSerializer.jsonObjectToString(contextSpecificSettings);
-        storeContextSpecificSettingsJsonOnLocalStorage(jsonStringToStore);
-        storeContextSpecificSettingsJsonOnServer(jsonStringToStore, onSettingsStoredCallback);
-    }
-
-    @Override
-    public void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
-        if (userService.getCurrentUser() == null) {
-            String raw = retrieveContextSpecificSettingsJsonFromLocalStorage();
-            if (raw == null) {
-                asyncCallback.onSuccess(null);
-            } else {
-                asyncCallback.onSuccess(jsonSerializer.parseStringToJsonObject(raw));
-            }
+    public void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback) {
+        SettingsStrings settingsStrings = convertToSettingsStrings(settingsJsons);
+        storeSettingsStringsOnLocalStorage(settingsStrings);
+        if (userService.getCurrentUser() != null) {
+            storeSettingsStringsOnServer(settingsStrings, onSettingsStoredCallback);
         } else {
-            retrieveContextSpecificSettingsJsonFromServer(asyncCallback);
+            onSettingsStoredCallback.onSuccess();
         }
     }
 
     @Override
-    public void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
+    public void retrieveSettingsJson(AsyncCallback<SettingsJsons> asyncCallback) {
         if (userService.getCurrentUser() == null) {
-            String raw = retrieveGlobalSettingsJsonFromLocalStorage();
-            if (raw == null) {
-                asyncCallback.onSuccess(null);
-            } else {
-                asyncCallback.onSuccess(jsonSerializer.parseStringToJsonObject(raw));
-            }
+            SettingsStrings settingsStrings = retrieveSettingsStringsFromLocalStorage();
+            asyncCallback.onSuccess(convertToSettingsJson(settingsStrings));
         } else {
-            retrieveGlobalSettingsJsonFromServer(asyncCallback);
+            retrieveSettingsStringsFromServer(new AsyncCallback<SettingsStrings>() {
+                
+                @Override
+                public void onSuccess(SettingsStrings serverSettingsStrings) {
+                    serverSettingsStrings = syncLocalStorageAndServer(serverSettingsStrings);
+                    asyncCallback.onSuccess(convertToSettingsJson(serverSettingsStrings));
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    asyncCallback.onFailure(caught);
+                }
+            });
         }
+    }
+    
+    private SettingsStrings syncLocalStorageAndServer(SettingsStrings serverSettingsStrings) {
+        if(serverSettingsStrings.getGlobalSettingsString() == null && serverSettingsStrings.getContextSpecificSettingsString() == null) {
+            SettingsStrings localStorageSettingsStrings = retrieveSettingsStringsFromLocalStorage();
+            if(localStorageSettingsStrings.getGlobalSettingsString() != null || localStorageSettingsStrings.getContextSpecificSettingsString() != null) {
+                storeSettingsStringsOnServer(localStorageSettingsStrings, new OnSettingsStoredCallback() {
+                    
+                    @Override
+                    public void onSuccess() {
+                        //nothing to do
+                    }
+                    
+                    @Override
+                    public void onError(Throwable caught) {
+                        //nothing to do
+                    }
+                });
+            }
+            serverSettingsStrings = localStorageSettingsStrings;
+        } else {
+            storeSettingsStringsOnLocalStorage(serverSettingsStrings);
+        }
+        return serverSettingsStrings;
     }
 
     /**

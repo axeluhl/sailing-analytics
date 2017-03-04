@@ -1,6 +1,8 @@
 package com.sap.sse.security.ui.client;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -234,6 +236,12 @@ public class UserService {
         getUserManagementService().getPreference(username, key, callback);
     }
     
+    public void getPreferences(List<String> keys,
+            final AsyncCallback<Map<String, String>> callback) {
+        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        getUserManagementService().getPreferences(username, keys, callback);
+    }
+    
     /**
      * Sets the {@link #getCurrentUser() current user}'s preference with the given {@link String key} on server.
      * 
@@ -245,6 +253,12 @@ public class UserService {
     public void setPreference(String key, String serializedSettings, final AsyncCallback<Void> callback) {
         String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
         getUserManagementService().setPreference(username, key, serializedSettings, callback);
+    }
+    
+    public void setPreferences(Map<String, String> keyValuePairs,
+            final AsyncCallback<Void> callback) {
+        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        getUserManagementService().setPreferences(username, keyValuePairs, callback);
     }
     
     /**
