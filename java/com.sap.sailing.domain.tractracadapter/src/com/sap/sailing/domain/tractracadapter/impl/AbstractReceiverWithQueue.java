@@ -221,12 +221,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
             if (lastInQueue == null || getSimulator() != null) {
                 callback.loadingQueueDone(this);
             } else {
-                Set<LoadingQueueDoneCallBack> set = loadingQueueDoneCallBacks.get(lastInQueue);
-                if (set == null) {
-                    set = new HashSet<>();
-                    loadingQueueDoneCallBacks.put(lastInQueue, set);
-                }
-                set.add(callback);
+                Util.addToValueSet(loadingQueueDoneCallBacks, lastInQueue, callback);
             }
         }
     }
