@@ -195,7 +195,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final WindStore windStore;
-    private RaceDefinition race;
+    /**
+     * Needs to be {@code volatile} because one thread (e.g., the {@link RaceCourseReceiver}) writes it, another thread
+     * such as the callback set up by the {@link #stopped(Object)} method and executed by the last {@link Receiver}
+     * emptying its queue, leading to a call to
+     * {@link AbstractLoadingQueueDoneCallBack#executeWhenAllReceiversAreDoneLoading()} will read it. We need
+     * to ensure that the reading threads always read what other writers wrote.
+     */
+    private volatile RaceDefinition race;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
     private Map<Object, Util.Pair<Integer, Float>> lastProgressPerID;
@@ -676,12 +683,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 updateStatusOfTrackedRaces();
                 if (!stopped) {
                     try {
+                        // Note that due to the getRace() method returning a "volatile" (cross thread-synchronized) answer,
+                        // we can be sure here that getRace() will return a non-null result if previously a race definition has been
+                        // received.
                         if (getRace() != null) {
                             // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the
-                            // TracAPI then
-                            // all subscriptions have received all their data and it's therefore safe to stop all
-                            // subscriptions
-                            // at this point without missing any data.
+                            // TracAPI then all subscriptions have received all their data and it's therefore safe to stop all
+                            // subscriptions at this point without missing any data.
                             trackedRegattaRegistry.stopTracking(regatta, getRace());
                         }
                     } catch (InterruptedException | IOException e) {

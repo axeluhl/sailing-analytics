@@ -92,7 +92,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceLogResolver raceLogResolver;
 
-    private DynamicTrackedRace trackedRace;
+    private volatile DynamicTrackedRace trackedRace;
     private StartOfTrackingController startOfTrackingController;
     private EndOfTrackingController endOfTrackingController;
 
