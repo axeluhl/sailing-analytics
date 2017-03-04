@@ -2293,11 +2293,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final DBCursor cursor = collection.find();
         final int count = cursor.count();
         logger.info("Restoring "+count+" races");
+        final List<DBObject> restoreParameters = new ArrayList<>();
+        // consume all elements quickly to avoid cursor/DB timeouts while restoring many races;
+        // MongoDB cursors by default time out after ten minutes if no more batch (of by default 100 elements)
+        // has been requested during this time.
+        Util.addAll(cursor, restoreParameters);
+        logger.info("Obtained "+restoreParameters.size()+" race parameters to restore");
         final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         final FutureTask<Void> waiter = new FutureTask<>(() -> {
             logger.info("Starting to restore races");
             int i=0;
-            for (final DBObject o : cursor) {
+            for (final DBObject o : restoreParameters) {
                 final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
                 final int finalI = i++;
                 logger.info("Applying to restore race #"+ finalI +"/"+count+" of type "+type);
