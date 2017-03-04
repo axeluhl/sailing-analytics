@@ -669,7 +669,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
             try {
                 addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1);
-                numberOfTrackedRacesRestored.incrementAndGet();
+                int newNumberOfTrackedRacesRestored = numberOfTrackedRacesRestored.incrementAndGet();
+                logger.info("Added race to restore #"+newNumberOfTrackedRacesRestored+"/"+numberOfTrackedRacesToRestore);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception trying to restore race"+params, e);
             }
