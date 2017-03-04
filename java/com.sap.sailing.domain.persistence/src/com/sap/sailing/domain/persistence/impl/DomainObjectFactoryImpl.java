@@ -2292,11 +2292,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
         final DBCursor cursor = collection.find();
         final int count = cursor.count();
+        logger.info("Restoring "+count+" races");
         final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         final FutureTask<Void> waiter = new FutureTask<>(() -> {
+            logger.info("Starting to restore races");
+            int i=0;
             for (final DBObject o : cursor) {
                 final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
+                final int finalI = i++;
+                logger.info("Applying to restore race #"+ finalI +"/"+count+" of type "+type);
                 raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
+                    logger.info("Restoring race #"+ finalI +"/"+count+" of type "+type);
                     final Map<String, Object> map = new HashMap<>();
                     for (final String key : o.keySet()) {
                         if (!key.equals(TypeBasedServiceFinder.TYPE)) {
@@ -2305,8 +2311,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     }
                     try {
                         callback.accept(connectivityParamsPersistenceService.mapTo(map));
+                        logger.info("Done restoring race #"+ finalI +"/"+count+" of type "+type);
                     } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Exception trying to load race restore connectivity parameters "
+                        logger.log(Level.SEVERE, "Exception trying to load race #"+ finalI +"/"+count+" of type "+type+
+                                " from restore connectivity parameters "
                                 + o + " with handler " + connectivityParamsPersistenceService, e);
                     }
                 });
