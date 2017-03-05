@@ -2307,7 +2307,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (final DBObject o : restoreParameters) {
             final FutureTask<Void> waiter = new FutureTask<>(() -> {
                 final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
-                final int finalI = i.getAndIncrement();
+                final int finalI = i.incrementAndGet();
                 logger.info("Applying to restore race #"+ finalI +"/"+count+" of type "+type);
                 raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
                     logger.info("Restoring race #"+ finalI +"/"+count+" of type "+type);
