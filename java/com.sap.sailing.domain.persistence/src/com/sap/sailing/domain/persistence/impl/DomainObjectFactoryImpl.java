@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -2300,12 +2301,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Util.addAll(cursor, restoreParameters);
         logger.info("Obtained "+restoreParameters.size()+" race parameters to restore");
         final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
-        final FutureTask<Void> waiter = new FutureTask<>(() -> {
-            logger.info("Starting to restore races");
-            int i=0;
-            for (final DBObject o : restoreParameters) {
+        final Set<FutureTask<Void>> waiters = new HashSet<>();
+        logger.info("Starting to restore races");
+        final AtomicInteger i = new AtomicInteger();
+        for (final DBObject o : restoreParameters) {
+            final FutureTask<Void> waiter = new FutureTask<>(() -> {
                 final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
-                final int finalI = i++;
+                final int finalI = i.getAndIncrement();
                 logger.info("Applying to restore race #"+ finalI +"/"+count+" of type "+type);
                 raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
                     logger.info("Restoring race #"+ finalI +"/"+count+" of type "+type);
@@ -2324,10 +2326,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 + o + " with handler " + connectivityParamsPersistenceService, e);
                     }
                 });
-            }
-            logger.info("Done restoring races; restored "+i+" of "+count+" races");
-        }, /* void result */ null);
-        backgroundExecutor.execute(waiter);
+            }, /* void result */ null);
+            waiters.add(waiter);
+            backgroundExecutor.execute(waiter);
+        }
+        logger.info("Done restoring races; restored "+i+" of "+count+" races");
         return new ConnectivityParametersLoadingResult() {
             @Override
             public int getNumberOfParametersToLoad() {
@@ -2336,7 +2339,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
             @Override
             public void waitForCompletionOfCallbacksForAllParameters() throws InterruptedException, ExecutionException {
-                waiter.get();
+                for (final FutureTask<Void> waiter : waiters) {
+                    waiter.get();
+                }
             }
         };
     }
