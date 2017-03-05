@@ -637,6 +637,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void addRaceDefinition(final RaceDefinition race, final DynamicTrackedRace trackedRace) {
+        logger.info("Setting race for tracker "+this+" with ID "+getID()+" to "+race);
         this.race = race;
         updateStatusOfTrackedRace(trackedRace);
         notifyRaceCreationListeners();
@@ -649,7 +650,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
-        logger.info("Status change in tracker "+getID()+" for race(s) "+getRace()+": "+storedDataEvent);
+        logger.info("Status change in tracker "+this+" with ID "+getID()+" for race(s) "+getRace()+": "+storedDataEvent);
         switch (storedDataEvent.getType()) {
         case Begin:
             logger.info("Stored data begin in tracker "+getID()+" for race(s) "+getRace());
@@ -674,8 +675,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void stopped(Object o) {
-        logger.info("stopped TracTrac tracking in tracker " + getID() + " for " + getRace() + " while in status "
-                + lastStatus);
+        logger.info("stopped TracTrac tracking in tracker " + this + " with ID " + getID() + " for " + getRace()
+                + " while in status " + lastStatus);
         new AbstractLoadingQueueDoneCallBack(receivers) {
             @Override
             protected void executeWhenAllReceiversAreDoneLoading() {
