@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +36,13 @@ import com.sap.sse.common.Util;
 public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTrackerCustomizer<ServiceT, ServiceT>,
         TypeBasedServiceFinder<ServiceT> {
     private static final Logger logger = Logger.getLogger(CachedOsgiTypeBasedServiceFinder.class.getName());
+    
+    /**
+     * Keys are the service types, as obtained through {@code reference.getProperty(TypeBasedServiceFinder.TYPE)}.
+     * To allow for {@code null} types, {@link #getNullSafeType(String)} must be used to map type strings that
+     * may be {@code null} to key strings that are not {@code null} and where the {@code null} string value
+     * is represented by a dedicated "token."
+     */
     private final ConcurrentHashMap<String, ServiceT> services = new ConcurrentHashMap<>();
     private final BundleContext context;
     private final Class<ServiceT> serviceType;
@@ -49,7 +57,7 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
 
     @Override
     public ServiceT findService(String type) {
-        ServiceT service = services.get(type);
+        ServiceT service = services.get(getNullSafeType(type));
         if (service == null) {
             if (fallback != null) {
                 return fallback;
@@ -64,9 +72,9 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
     public void applyServiceWhenAvailable(String type, Callback<ServiceT> callback) {
         final ServiceT service; 
         synchronized (services) {
-            service = services.get(type);
+            service = services.get(getNullSafeType(type));
             if (service == null) {
-                Util.addToValueSet(callbacks, type, callback);
+                Util.addToValueSet(callbacks, getNullSafeType(type), callback);
             }
         }
         // no synchronization needed here anymore if the service was already found
@@ -81,7 +89,7 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
         final ServiceT service = context.getService(reference);
         final Set<Callback<ServiceT>> callbacksToNotify;
         synchronized (services) {
-            services.put(type, service);
+            services.put(getNullSafeType(type), service);
             callbacksToNotify = callbacks.remove(type);
         }
         if (callbacksToNotify != null) {
@@ -105,7 +113,16 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
     @Override
     public void removedService(ServiceReference<ServiceT> reference, ServiceT service) {
         String type = (String) reference.getProperty(TypeBasedServiceFinder.TYPE);
-        services.remove(type);
+        services.remove(getNullSafeType(type));
+    }
+
+    /**
+     * Used in {@link #getNullSafeType(String)} to ensure that no {@code null} keys are used in the {@link #services}
+     * map. This value is equivalent to a {@code null} key in {@link #services}.
+     */
+    private static final String NULL_STRING = UUID.randomUUID().toString();
+    private String getNullSafeType(String type) {
+        return type==null?NULL_STRING:type;
     }
 
     @Override
