@@ -694,6 +694,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                                 // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the
                                 // TracAPI then all subscriptions have received all their data and it's therefore safe to stop all
                                 // subscriptions at this point without missing any data.
+                                logger.info("Calling stopTracking for tracker "+this+" with ID "+getID());
                                 trackedRegattaRegistry.stopTracking(regatta, getRace());
                             } else {
                                 logger.warning("Didn't receive RaceDefinition for tracker "+this+" with ID "+getID()+
