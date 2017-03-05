@@ -638,7 +638,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     @Override
     public void addRaceDefinition(final RaceDefinition race, final DynamicTrackedRace trackedRace) {
         logger.info("Setting race for tracker "+this+" with ID "+getID()+" to "+race);
-        this.race = race;
+        synchronized (this) { // use synchronized to ensure the effects become visible to other threads reading later
+            this.race = race;
+        }
         updateStatusOfTrackedRace(trackedRace);
         notifyRaceCreationListeners();
     }
@@ -687,7 +689,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                         // Note that due to the getRace() method returning a "volatile" (cross thread-synchronized) answer,
                         // we can be sure here that getRace() will return a non-null result if previously a race definition has been
                         // received.
-                        if (getRace() != null) {
+                        final RaceDefinition r;
+                        synchronized (this) { // synchronize to ensure we read what addRaceDefinition has written;
+                            r = getRace();    // there may be issues with the "volatile" implementations on some Java VMs...
+                        }
+                        if (r != null) {
                             // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the
                             // TracAPI then all subscriptions have received all their data and it's therefore safe to stop all
                             // subscriptions at this point without missing any data.
