@@ -28,8 +28,7 @@ public class PositionAssert {
 
     public static void assertGPSFixEquals(GPSFixMoving f1, GPSFixMoving f2, double positionDegreeDelta, double bearingDegreeDelta, double knotDelta) {
         assertGPSFixEquals((GPSFix) f1, (GPSFix) f2, positionDegreeDelta);
-        assertBearingEquals(f1.getSpeed().getBearing(), f2.getSpeed().getBearing(), bearingDegreeDelta);
-        assertEquals(f1.getSpeed().getKnots(), f2.getSpeed().getKnots(), knotDelta);
+        assertSpeedEquals(f1.getSpeed(), f2.getSpeed(), bearingDegreeDelta, knotDelta);
     }
 
     public static void assertBearingEquals(Bearing b1, Bearing b2, double bearingDegreeDelta) {
