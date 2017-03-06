@@ -67,7 +67,7 @@ public class PositionTest {
         assertNotSame(p1, compactFix.getPosition());
         PositionAssert.assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
         assertNotSame(swb, compactFix.getSpeed());
-        assertEquals(swb, compactFix.getSpeed());
+        PositionAssert.assertSpeedEquals(swb, compactFix.getSpeed(), /* bearing deg delta */ 0.1, /* knot speed delta */ 0.1);
     }
     
     @Test

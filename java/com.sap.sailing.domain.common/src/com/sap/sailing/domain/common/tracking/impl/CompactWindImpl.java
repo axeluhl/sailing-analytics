@@ -23,9 +23,24 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
      */
     private final int lngDegScaled;
     
+    /**
+     * bit mask for {@link #flags}, telling the bit encoding whether the position is {@code null}.
+     */
     private static final byte POSITION_IS_NULL = 1<<0;
+
+    /**
+     * bit mask for {@link #flags}, telling the bit encoding whether the bearing is {@code null}.
+     */
     private static final byte BEARING_IS_NULL = 1<<1;
+
+    /**
+     * bit mask for {@link #flags}, telling the bit encoding whether the time point is {@code null}.
+     */
     private static final byte TIME_POINT_IS_NULL = 1<<2;
+    
+    /**
+     * See the bit mask values such as {@link #POSITION_IS_NULL}, {@link #BEARING_IS_NULL} and {@link #TIME_POINT_IS_NULL}.
+     */
     private final byte flags;
     
     /**

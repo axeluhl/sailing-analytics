@@ -320,7 +320,7 @@ public class TrackTest {
         cacheBarrier.await(20, TimeUnit.SECONDS);
         cacheDone.await(20, TimeUnit.SECONDS);
         testDone.await();
-        assertEquals(2., maxSpeed[0], 0.001);
+        assertEquals(2., maxSpeed[0], 0.1);
     }
 
     @Test
@@ -366,12 +366,12 @@ public class TrackTest {
                 1, new DegreeBearingImpl(123)));
         track.addGPSFix(fix3);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
-                getB().getKnots(), 0.001); // produces a cache entry that ends 
+                getB().getKnots(), 0.01); // produces a cache entry that ends 
         GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(10800000), new KnotSpeedWithBearingImpl(
                 1, new DegreeBearingImpl(123)));
         track.addGPSFix(fix4);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
-                getB().getKnots(), 0.001);
+                getB().getKnots(), 0.01);
     }
     
     @Test
@@ -383,7 +383,7 @@ public class TrackTest {
                 2, new DegreeBearingImpl(123)));
         track.addGPSFix(fast);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
-                getB().getKnots(), 0.001);
+                getB().getKnots(), 0.01);
         track.addGPSFix(slow);
         track.lockForRead();
         try {
@@ -405,7 +405,7 @@ public class TrackTest {
                 2, new DegreeBearingImpl(123)));
         track.addGPSFix(fix2);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
-                getB().getKnots(), 0.001); // produces a cache entry that ends 
+                getB().getKnots(), 0.01); // produces a cache entry that ends 
         GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(7200000), new KnotSpeedWithBearingImpl(
                 1, new DegreeBearingImpl(123)));
         track.addGPSFix(fix3);
@@ -413,7 +413,7 @@ public class TrackTest {
                 1, new DegreeBearingImpl(123)));
         track.addGPSFix(fix4);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
-                getB().getKnots(), 0.001);
+                getB().getKnots(), 0.01);
     }
     
     /**
@@ -560,7 +560,7 @@ public class TrackTest {
         Iterator<GPSFixMoving> subsetIter = subset.iterator();
         // start iteration
         GPSFixMoving firstOfSubset = subsetIter.next();
-        PositionAssert.assertGPSFixEquals(gpsFix2, firstOfSubset, /* pos deg delta */ 0.000001, /* bearing deg delta */ 0.01, /* knot delta */ 0.01);
+        PositionAssert.assertGPSFixEquals(gpsFix2, firstOfSubset, /* pos deg delta */ 0.00001, /* bearing deg delta */ 0.01, /* knot delta */ 0.01);
         // now add a fix:
         TimePoint now6 = addMillisToTimepoint(gpsFix5.getTimePoint(), 3);
         track.addGPSFix(new GPSFixMovingImpl(
@@ -675,7 +675,7 @@ public class TrackTest {
         TimePoint afterTimePoint = new MillisecondsTimePoint(millis + (millis-lastMillis));
         Position extrapolatedPosition = track.getEstimatedPosition(afterTimePoint, true);
         assertEquals(0.5, fix.getPosition().getDistance(extrapolatedPosition).getMeters()
-                / lastFix.getPosition().getDistance(extrapolatedPosition).getMeters(), 0.00001);
+                / lastFix.getPosition().getDistance(extrapolatedPosition).getMeters(), 0.01);
     }
     
     @Test
@@ -1054,8 +1054,7 @@ public class TrackTest {
         assertEquals(gpsFix2.getPosition().getLatDeg(), estimatedPosNew.getLatDeg(), 0.5);
         assertEquals(gpsFix2.getPosition().getLngDeg(), estimatedPosNew.getLngDeg(), 0.5);
         SpeedWithBearing estimatedSpeedNew = track.getEstimatedSpeed(normalFixesTime);
-        assertEquals(estimatedSpeed.getKnots(), estimatedSpeedNew.getKnots(), 0.001);
-        assertEquals(estimatedSpeed.getBearing().getDegrees(), estimatedSpeedNew.getBearing().getDegrees(), 0.001);
+        PositionAssert.assertSpeedEquals(estimatedSpeed, estimatedSpeedNew, /* bearing deg delta */ 0.1, /* knot speed delta */ 0.1);
     }
     
     @Test
@@ -1276,7 +1275,7 @@ public class TrackTest {
         fix.cacheEstimatedSpeed(estimatedSpeed);
         assertTrue(fix.isEstimatedSpeedCached());
         SpeedWithBearing cachedEstimatedSpeed = fix.getCachedEstimatedSpeed();
-        assertEquals(estimatedSpeed, cachedEstimatedSpeed);
+        PositionAssert.assertSpeedEquals(estimatedSpeed, cachedEstimatedSpeed, /* bearing deg delta */ 0.1, /* knot speed delta */ 0.1);
         fix.invalidateEstimatedSpeedCache();
         assertFalse(fix.isEstimatedSpeedCached());
     }
@@ -1287,7 +1286,7 @@ public class TrackTest {
         assertFalse(compactFix3.isEstimatedSpeedCached());
         SpeedWithBearing fix3EstimatedSpeed = track.getEstimatedSpeed(gpsFix3.getTimePoint());
         assertTrue(compactFix3.isEstimatedSpeedCached());
-        assertEquals(fix3EstimatedSpeed, compactFix3.getCachedEstimatedSpeed());
+        PositionAssert.assertSpeedEquals(fix3EstimatedSpeed, compactFix3.getCachedEstimatedSpeed(), /* bearing deg delta */ 0.1, /* knot speed delta */ 0.1);
         assertEquals(fix3EstimatedSpeed, track.getEstimatedSpeed(gpsFix3.getTimePoint())); // fetch again from the cache
         // assuming that all test fixes are within a few milliseconds and the averaging interval is much larger than that,
         // adding a single fix in the middle should invalidate the cache
