@@ -668,7 +668,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // server startup activities happening
         numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
             try {
-                addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1);
+                final RaceHandle handle = addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1);
+                final RaceDefinition race = handle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS); // try to not flood servers during restore by waiting for race to appear
+                if (race == null) {
+                    logger.warning("Race for tracker " + handle.getRaceTracker() + " with ID "
+                            + handle.getRaceTracker().getID() + " didn't appear within "
+                            + RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS
+                            + "ms. Maybe it will later...");
+                } else {
+                    logger.info("Race " + race + " showed up during restoring by tracker " + handle.getRaceTracker()
+                            + " with ID " + handle.getRaceTracker().getID());
+                }
                 int newNumberOfTrackedRacesRestored = numberOfTrackedRacesRestored.incrementAndGet();
                 logger.info("Added race to restore #"+newNumberOfTrackedRacesRestored+"/"+numberOfTrackedRacesToRestore);
             } catch (Exception e) {
