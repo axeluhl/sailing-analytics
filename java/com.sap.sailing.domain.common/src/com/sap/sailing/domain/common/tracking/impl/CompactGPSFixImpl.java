@@ -39,9 +39,16 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
      * <code>{@link #whatIsCached}&amp;{@link #IS_VALIDITY_CACHED} != 0</code>
      */
     private static final byte VALIDITY = 1<<2;
-    
-    private final double latDeg;
-    private final double lngDeg;
+
+    /**
+     * See {@link CompactPositionHelper}
+     */
+    private final int latDegScaled;
+
+    /**
+     * See {@link CompactPositionHelper}
+     */
+    private final int lngDegScaled;
     private final long timePointAsMillis;
     
     /**
@@ -69,12 +76,12 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
 
         @Override
         public double getLatDeg() {
-            return latDeg;
+            return CompactPositionHelper.getLatDeg(latDegScaled);
         }
 
         @Override
         public double getLngDeg() {
-            return lngDeg;
+            return CompactPositionHelper.getLngDeg(lngDegScaled);
         }
     }
     
@@ -111,11 +118,11 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     }
     
     public CompactGPSFixImpl(Position position, TimePoint timePoint) {
-        latDeg = position.getLatDeg();
-        lngDeg = position.getLngDeg();
+        latDegScaled = CompactPositionHelper.getLatDegScaled(position);
+        lngDegScaled = CompactPositionHelper.getLngDegScaled(position);
         timePointAsMillis = timePoint==null?-1:timePoint.asMillis();
     }
-    
+
     public CompactGPSFixImpl(GPSFix gpsFix) {
         this(gpsFix.getPosition(), gpsFix.getTimePoint());
     }
