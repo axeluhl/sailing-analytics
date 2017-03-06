@@ -25,8 +25,8 @@ import com.sap.sse.common.impl.AbstractTimePoint;
  *
  */
 public class CompactGPSFixImpl extends AbstractGPSFixImpl {
-    private static final long serialVersionUID = 8167588584536992501L;
-    
+    private static final long serialVersionUID = 3943572107870245437L;
+
     private static final Logger logger = Logger.getLogger(CompactGPSFixImpl.class.getName());
     
     /**
