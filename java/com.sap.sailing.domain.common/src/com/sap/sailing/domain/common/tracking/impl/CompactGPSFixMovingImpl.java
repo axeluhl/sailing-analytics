@@ -22,16 +22,24 @@ import com.sap.sse.common.TimePoint;
  *
  */
 public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFixMoving {
-    private static final long serialVersionUID = 761582024504236533L;
-    private final double knotSpeed;
-    private final double degBearing;
+    private static final long serialVersionUID = 3977983319207618335L;
+
+    /**
+     * See {@link CompactPositionHelper}
+     */
+    private final short speedInKnotsScaled;
+
+    /**
+     * See {@link CompactPositionHelper}
+     */
+    private final short degreeBearingScaled;
     
     private class CompactSpeedWithBearing extends AbstractSpeedImpl implements SpeedWithBearing {
         private static final long serialVersionUID = 1802065090733146728L;
 
         @Override
         public double getKnots() {
-            return knotSpeed;
+            return CompactPositionHelper.getKnotSpeed(speedInKnotsScaled);
         }
 
         @Override
@@ -82,23 +90,23 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
     }
     
     private class CompactBearing extends AbstractBearing {
-        private static final long serialVersionUID = -6474909210513108635L;
+        private static final long serialVersionUID = 8167886382067060570L;
 
         @Override
         public double getDegrees() {
-            return degBearing;
+            return CompactPositionHelper.getDegreeBearing(degreeBearingScaled);
         }
 
         @Override
         public double getRadians() {
-            return degBearing / 180. * Math.PI;
+            return getDegrees() / 180. * Math.PI;
         }
     }
     
     public CompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) {
         super(position, timePoint);
-        knotSpeed = speed.getKnots();
-        degBearing = speed.getBearing().getDegrees();
+        speedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(speed);
+        degreeBearingScaled = CompactPositionHelper.getDegreeBearingScaled(speed.getBearing());
     }
     
     public CompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) {

@@ -13,13 +13,31 @@ import com.sap.sse.common.impl.AbstractTimePoint;
 
 public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implements Wind {
     private static final long serialVersionUID = -5059956032663387929L;
-    private final double latDeg;
-    private final double lngDeg;
-    private final boolean positionIsNull;
-    private final boolean bearingIsNull;
-    private final boolean timePointIsNull;
-    private final double speedInKnots;
-    private final double degBearing;
+    /**
+     * See {@link CompactPositionHelper}
+     */
+    private final int latDegScaled;
+
+    /**
+     * See {@link CompactPositionHelper}
+     */
+    private final int lngDegScaled;
+    
+    private static final byte POSITION_IS_NULL = 1<<0;
+    private static final byte BEARING_IS_NULL = 1<<1;
+    private static final byte TIME_POINT_IS_NULL = 1<<2;
+    private final byte flags;
+    
+    /**
+     * See {@link CompactPositionHelper}
+     */
+    private final short speedInKnotsScaled;
+
+    /**
+     * See {@link CompactPositionHelper}
+     */
+    private final short degreeBearingScaled;
+    
     private final long timePointAsMillis;
 
     public class CompactPosition extends AbstractPosition {
@@ -27,17 +45,12 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
 
         @Override
         public double getLatDeg() {
-            return latDeg;
+            return CompactPositionHelper.getLatDeg(latDegScaled);
         }
 
         @Override
         public double getLngDeg() {
-            return lngDeg;
-        }
-        
-        @Override
-        public boolean equals(Object o) {
-            return this==o || o instanceof Position && getLatDeg() == ((Position) o).getLatDeg() && getLngDeg() == ((Position) o).getLngDeg();
+            return CompactPositionHelper.getLngDeg(lngDegScaled);
         }
     }
 
@@ -46,12 +59,12 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
 
         @Override
         public double getDegrees() {
-            return degBearing;
+            return CompactPositionHelper.getDegreeBearing(degreeBearingScaled);
         }
 
         @Override
         public double getRadians() {
-            return degBearing / 180. * Math.PI;
+            return getDegrees() / 180. * Math.PI;
         }
 
         @Override
@@ -70,23 +83,26 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
     }
     
     public CompactWindImpl(Wind wind) {
+        final boolean bearingIsNull;
+        final boolean positionIsNull;
+        final boolean timePointIsNull;
         if (wind.getBearing() == null) {
             bearingIsNull = true;
-            degBearing = 0;
+            degreeBearingScaled = 0;
         } else {
-            this.degBearing = wind.getBearing().getDegrees();
+            this.degreeBearingScaled = CompactPositionHelper.getDegreeBearingScaled(wind.getBearing());
             bearingIsNull = false;
         }
         if (wind.getPosition() == null) {
             positionIsNull = true;
-            this.latDeg = 0;
-            this.lngDeg = 0;
+            this.latDegScaled = 0;
+            this.lngDegScaled = 0;
         } else {
-            this.latDeg = wind.getPosition().getLatDeg();
-            this.lngDeg = wind.getPosition().getLngDeg();
+            this.latDegScaled = CompactPositionHelper.getLatDegScaled(wind.getPosition());
+            this.lngDegScaled = CompactPositionHelper.getLngDegScaled(wind.getPosition());
             positionIsNull = false;
         }
-        this.speedInKnots = wind.getKnots();
+        this.speedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(wind);
         if (wind.getTimePoint() == null) {
             timePointIsNull = true;
             this.timePointAsMillis = 0;
@@ -94,11 +110,12 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
             timePointIsNull = false;
             this.timePointAsMillis = wind.getTimePoint().asMillis();
         }
+        flags = (byte) ((byte) (bearingIsNull ? BEARING_IS_NULL : (byte) 0) | (positionIsNull ? POSITION_IS_NULL : (byte) 0) | (timePointIsNull ? TIME_POINT_IS_NULL : (byte) 0));
     }
 
     @Override
     public Position getPosition() {
-        if (positionIsNull) {
+        if ((flags & POSITION_IS_NULL) != 0) {
             return null;
         } else {
             return new CompactPosition();
@@ -107,7 +124,7 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
 
     @Override
     public TimePoint getTimePoint() {
-        if (timePointIsNull) {
+        if ((flags & TIME_POINT_IS_NULL) != 0) {
             return null;
         } else {
             return new CompactTimePoint();
@@ -116,7 +133,7 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
 
     @Override
     public Bearing getBearing() {
-        if (bearingIsNull) {
+        if ((flags & BEARING_IS_NULL) != 0) {
             return null;
         } else {
             return new CompactBearing();
@@ -125,7 +142,7 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
 
     @Override
     public double getKnots() {
-        return speedInKnots;
+        return CompactPositionHelper.getKnotSpeed(speedInKnotsScaled);
     }
 
     @Override
@@ -139,7 +156,7 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
 
     @Override
     public int hashCode() {
-        return WindImpl.hashCode(latDeg, lngDeg, timePointIsNull?0:timePointAsMillis);
+        return WindImpl.hashCode(getPosition().getLatDeg(), getPosition().getLngDeg(), (flags&TIME_POINT_IS_NULL) != 0?0:timePointAsMillis);
     }
 
     @Override

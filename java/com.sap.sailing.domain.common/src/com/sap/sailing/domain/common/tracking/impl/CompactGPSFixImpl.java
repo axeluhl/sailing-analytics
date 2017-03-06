@@ -61,15 +61,15 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     
     /**
      * When <code>{@link #whatIsCached}&amp;{@link #IS_ESTIMATED_SPEED_CACHED} != 0</code>, this field tells the estimated speed's
-     * true "bearing" (true course over ground) in degrees.
+     * true "bearing" (true course over ground) in degrees, scaled into a short value using {@link CompactPositionHelper}.
      */
-    private double cachedEstimatedSpeedBearingInDegrees;
+    private short cachedEstimatedSpeedBearingInDegreesScaled;
 
     /**
      * When <code>{@link #whatIsCached}&amp;{@link #IS_ESTIMATED_SPEED_CACHED} != 0</code>, this field tells the estimated speed
-     * in knots.
+     * in knots, scaled into a short value using {@link CompactPositionHelper}.
      */
-    private double cachedEstimatedSpeedInKnots;
+    private short cachedEstimatedSpeedInKnotsScaled;
     
     public class CompactPosition extends AbstractPosition {
         private static final long serialVersionUID = 5621506820766614178L;
@@ -99,7 +99,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
 
         @Override
         public double getDegrees() {
-            return cachedEstimatedSpeedBearingInDegrees;
+            return CompactPositionHelper.getDegreeBearing(cachedEstimatedSpeedBearingInDegreesScaled);
         }
     }
     
@@ -113,7 +113,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
 
         @Override
         public double getKnots() {
-            return cachedEstimatedSpeedInKnots;
+            return CompactPositionHelper.getKnotSpeed(cachedEstimatedSpeedInKnotsScaled);
         }
     }
     
@@ -186,10 +186,8 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
 
     @Override
     public void cacheEstimatedSpeed(SpeedWithBearing estimatedSpeed) {
-        cachedEstimatedSpeedBearingInDegrees = estimatedSpeed.getBearing().getDegrees();
-        cachedEstimatedSpeedInKnots = estimatedSpeed.getKnots();
+        cachedEstimatedSpeedBearingInDegreesScaled = CompactPositionHelper.getDegreeBearingScaled(estimatedSpeed.getBearing());
+        cachedEstimatedSpeedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(estimatedSpeed);
         whatIsCached |= IS_ESTIMATED_SPEED_CACHED;
     }
-    
-    
 }
