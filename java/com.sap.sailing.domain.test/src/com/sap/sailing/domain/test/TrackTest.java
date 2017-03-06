@@ -462,7 +462,7 @@ public class TrackTest {
         track.addGPSFix(f2);
         track.addGPSFix(f3);
         SpeedWithBearing average = track.getEstimatedSpeed(t2);
-        assertEquals(0, average.getBearing().getDegrees(), 0.01);
+        PositionAssert.assertBearingEquals(new DegreeBearingImpl(0), average.getBearing(), 0.1);
     }
     
     @Test
@@ -541,7 +541,7 @@ public class TrackTest {
         track.addGPSFix(f2);
         track.addGPSFix(f3);
         SpeedWithBearing average = track.getRawEstimatedSpeed(t2);
-        assertEquals(0, average.getBearing().getDegrees(), 0.01);
+        PositionAssert.assertBearingEquals(new DegreeBearingImpl(0), average.getBearing(), /* deg delta */ 0.1);
     }
     
     /**
@@ -792,7 +792,7 @@ public class TrackTest {
             bearing = new DegreeBearingImpl(bearing.getDegrees() + 1);
         }
         invalidationCalls.clear();
-        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.02);
         final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> fullIntervalCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start);
         assertNotNull(fullIntervalCacheEntry); // no more entry for "to"-value start in cache
         assertEquals(start, fullIntervalCacheEntry.getA());
@@ -808,7 +808,7 @@ public class TrackTest {
         invalidationCalls.clear();
         final TimePoint timePointOfLastOriginalFix = track.getLastRawFix().getTimePoint();
         assertEquals(speed.getMetersPerSecond() * (steps - 1),
-                track.getDistanceTraveled(now, timePointOfLastOriginalFix).getMeters(), 0.01);
+                track.getDistanceTraveled(now, timePointOfLastOriginalFix).getMeters(), 0.02);
         final com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> newFullIntervalCacheEntry = distanceCache
                 .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
         assertNotNull(newFullIntervalCacheEntry); // no more entry for "to"-value start in cache
@@ -861,7 +861,7 @@ public class TrackTest {
             track.unlockAfterRead();
         }
         GPSFix polishedLastFix2 = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
-        assertEquals(fix, polishedLastFix2);
+        PositionAssert.assertGPSFixEquals(fix, polishedLastFix2, /* pos deg delta */ 0.000001);
         assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
     }
     
@@ -1003,7 +1003,7 @@ public class TrackTest {
         final TimePoint stripTo = start.minus(2*timeBetweenFixesInMillis);
         assertEquals(speed.getMetersPerSecond()*(steps-3),
                 track.getDistanceTraveled(stripFrom, stripTo).getMeters(), 0.01);
-        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.02);
         assertTrue(invalidationCalls.isEmpty());
         // expect a cache entry exactly for the strip's boundaries
         com.sap.sse.common.Util.Pair<TimePoint, com.sap.sse.common.Util.Pair<TimePoint, Distance>> stripCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(stripFrom, stripTo);

@@ -19,7 +19,7 @@ public class PositionAssert {
         assertEquals(f1.getSpeed().getKnots(), f2.getSpeed().getKnots(), knotDelta);
     }
 
-    private static void assertBearingEquals(Bearing b1, Bearing b2, double bearingDegreeDelta) {
+    public static void assertBearingEquals(Bearing b1, Bearing b2, double bearingDegreeDelta) {
         assertEquals(b1.getDegrees(), b2.getDegrees(), bearingDegreeDelta);
     }
 
