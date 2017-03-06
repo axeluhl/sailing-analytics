@@ -178,23 +178,23 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         if(path.isEmpty()) {
             return (JSONObject) settingsStorageManager.settingsToJSON(newSettings);
         }
+        if (root == null) {
+            root = new JSONObject();
+        }
         String current = path.remove(path.size() - 1);
         // we need to go further
         if (!path.isEmpty()) {
             JSONValue child = root.get(current);
             boolean haskey = root.containsKey(current);
-            if (child == null) {
+            if (child == null || child.isObject() == null) {
                 if (haskey) {
                     GWT.log("Warning: replacing some subtree element that is wrong type!");
                 }
                 child = new JSONObject();
+                root.put(current, child);
             }
-            root.put(current, child);
-            return patchJsonObject(root, path, newSettings);
+            return patchJsonObject(child.isObject(), path, newSettings);
         } else {
-            if (root == null) {
-                root = new JSONObject();
-            }
             JSONValue json = settingsStorageManager.settingsToJSON(newSettings);
             root.put(current, json);
         }
