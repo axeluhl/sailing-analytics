@@ -46,10 +46,10 @@ public class CompactPositionHelper {
         return DEGREE_BEARING_SCALE * degreeBearingScaled;
     }
 
-    public static short getKnotSpeedScaled(Speed speed) {
+    public static short getKnotSpeedScaled(Speed speed) throws CompactionNotPossibleException {
         final double knotSpeedScaled = speed.getKnots() / KNOT_SPEED_SCALE;
         if (knotSpeedScaled > Short.MAX_VALUE || knotSpeedScaled < Short.MIN_VALUE) {
-            throw new IllegalArgumentException("Speed "+speed+" cannot be compacted; "+speed.getKnots()+" does not fit into a signed short value");
+            throw new CompactionNotPossibleException("Speed "+speed+" cannot be compacted; "+speed.getKnots()+" does not fit into a signed short value");
         }
         return (short) knotSpeedScaled;
     }

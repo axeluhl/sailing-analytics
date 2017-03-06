@@ -3,6 +3,8 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
@@ -23,10 +25,13 @@ import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.TimePoint;
 
 public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving> {
+    private static final Logger logger = Logger.getLogger(DynamicGPSFixMovingTrackImpl.class.getName());
+    
     private static final long serialVersionUID = 9111448573301259784L;
     private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
 
@@ -57,7 +62,14 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
 
     @Override
     public boolean add(GPSFixMoving fix, boolean replace) {
-        return super.add(new CompactGPSFixMovingImpl(fix), replace);
+        GPSFixMoving compactFix;
+        try {
+            compactFix = new CompactGPSFixMovingImpl(fix);
+        } catch (CompactionNotPossibleException e) {
+            logger.log(Level.FINE, "Couldn't compact fix "+fix+". Using original instead.", e);
+            compactFix = fix;
+        }
+        return super.add(compactFix, replace);
     }
 
     /**

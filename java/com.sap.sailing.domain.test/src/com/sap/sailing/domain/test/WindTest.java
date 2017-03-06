@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactWindImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -117,7 +118,7 @@ public class WindTest {
     }
     
     @Test
-    public void testWindEquality() {
+    public void testWindEquality() throws CompactionNotPossibleException {
         Position p1 = new DegreePosition(1, 2);
         Position p2 = new DegreePosition(4, 5);
         TimePoint t1 = MillisecondsTimePoint.now();

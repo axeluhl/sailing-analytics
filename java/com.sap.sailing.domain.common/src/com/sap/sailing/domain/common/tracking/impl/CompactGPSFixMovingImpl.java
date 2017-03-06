@@ -103,13 +103,13 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
         }
     }
     
-    public CompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) {
+    public CompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) throws CompactionNotPossibleException {
         super(position, timePoint);
         speedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(speed);
         degreeBearingScaled = CompactPositionHelper.getDegreeBearingScaled(speed.getBearing());
     }
     
-    public CompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) {
+    public CompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) throws CompactionNotPossibleException {
         this(gpsFixMoving.getPosition(), gpsFixMoving.getTimePoint(), gpsFixMoving.getSpeed());
     }
 

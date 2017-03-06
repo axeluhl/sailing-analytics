@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.tracking.impl.CompactWindImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.tracking.WindListener;
@@ -114,7 +115,14 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     @Override
     public boolean add(Wind wind, boolean replace) {
-        final CompactWindImpl compactWind = new CompactWindImpl(wind);
+        Wind compactWind;
+        try {
+            compactWind = new CompactWindImpl(wind);
+        } catch (CompactionNotPossibleException e) {
+            logger.log(Level.FINE, "Couldn't compact wind fix "+wind+". Using original instead.", e);
+            // then use the original fix instead:
+            compactWind = wind;
+        }
         final boolean result = super.add(compactWind, replace);
         notifyListenersAboutReceive(compactWind);
         return result;

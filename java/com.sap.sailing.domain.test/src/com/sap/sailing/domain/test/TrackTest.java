@@ -44,6 +44,7 @@ import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedWithDegreeBearingIm
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -1267,7 +1268,7 @@ public class TrackTest {
     }
     
     @Test
-    public void testEstimatedSpeedCaching() {
+    public void testEstimatedSpeedCaching() throws CompactionNotPossibleException {
         GPSFixMoving originalFix = new GPSFixMovingImpl(new DegreePosition(12, 34), MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(9, new DegreeBearingImpl(123)));
         GPSFixMoving fix = new CompactGPSFixMovingImpl(originalFix);

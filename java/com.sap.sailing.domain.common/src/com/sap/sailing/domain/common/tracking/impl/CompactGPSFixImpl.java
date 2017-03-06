@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.AbstractPosition;
 import com.sap.sailing.domain.common.Bearing;
@@ -23,6 +26,8 @@ import com.sap.sse.common.impl.AbstractTimePoint;
  */
 public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     private static final long serialVersionUID = 8167588584536992501L;
+    
+    private static final Logger logger = Logger.getLogger(CompactGPSFixImpl.class.getName());
     
     /**
      * Bit mask for {@link #whatIsCached}, telling whether validity is currently cached
@@ -184,10 +189,21 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
         whatIsCached &= ~IS_ESTIMATED_SPEED_CACHED;
     }
 
+    /**
+     * Under rare circumstances, caching the speed may fail for the compact representation of a GPS fix.
+     * This can happen if the speed estimated exceeds the range that can be represented in this compact
+     * form which is less than in the original form where the speed amount is represented as a {@code double}
+     * value. In this case, a warning message is logged with level {@link Level#FINER}, and the speed remains
+     * uncached.
+     */
     @Override
     public void cacheEstimatedSpeed(SpeedWithBearing estimatedSpeed) {
-        cachedEstimatedSpeedBearingInDegreesScaled = CompactPositionHelper.getDegreeBearingScaled(estimatedSpeed.getBearing());
-        cachedEstimatedSpeedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(estimatedSpeed);
-        whatIsCached |= IS_ESTIMATED_SPEED_CACHED;
+        try {
+            cachedEstimatedSpeedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(estimatedSpeed);
+            cachedEstimatedSpeedBearingInDegreesScaled = CompactPositionHelper.getDegreeBearingScaled(estimatedSpeed.getBearing());
+            whatIsCached |= IS_ESTIMATED_SPEED_CACHED;
+        } catch (CompactionNotPossibleException e) {
+            logger.log(Level.FINER, "Cannot cache estimated speed "+estimatedSpeed+" in compact fix:", e);
+        }
     }
 }

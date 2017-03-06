@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -60,7 +61,7 @@ public class PositionTest {
     }
     
     @Test
-    public void testEqualityBetweenCompactAndVerboseSpeedWithBearing() {
+    public void testEqualityBetweenCompactAndVerboseSpeedWithBearing() throws CompactionNotPossibleException {
         Position p1 = new DegreePosition(49.2, 008.3);
         SpeedWithBearing swb = new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123));
         CompactGPSFixMovingImpl compactFix = new CompactGPSFixMovingImpl(p1, MillisecondsTimePoint.now(), swb);
