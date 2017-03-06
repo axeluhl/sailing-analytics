@@ -10,10 +10,13 @@ public class MultiCompetitorLeaderboardChartSettings extends AbstractGenericSeri
 
     private EnumSetting<DetailType> detailType;
 
+    private MultiCompetitorLeaderboardChartSettings() {
+    }
+    
     public MultiCompetitorLeaderboardChartSettings(DetailType detailType) {
         this.detailType.setValue(detailType);
     }
-
+    
     @Override
     protected void addChildSettings() {
         detailType = new EnumSetting<>("detailType", this, new StringToEnumConverter<DetailType>() {
@@ -26,5 +29,21 @@ public class MultiCompetitorLeaderboardChartSettings extends AbstractGenericSeri
 
     public DetailType getDetailType() {
         return detailType.getValue();
+    }
+    
+    public static MultiCompetitorLeaderboardChartSettings createWithDefaultDetailType(boolean isOverall, DetailType detailType) {
+        MultiCompetitorLeaderboardChartSettings result = createWithDefaultDetailType(isOverall);
+        result.detailType.setValue(detailType);
+        return result;
+    }
+    
+    public static MultiCompetitorLeaderboardChartSettings createWithDefaultDetailType(boolean isOverall) {
+        MultiCompetitorLeaderboardChartSettings result = new MultiCompetitorLeaderboardChartSettings();
+        result.detailType.setDefaultValue(getDefaultDetailType(isOverall));
+        return result;
+    }
+    
+    public static DetailType getDefaultDetailType(boolean isOverall) {
+        return isOverall ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
     }
 }

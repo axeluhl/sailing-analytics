@@ -19,12 +19,14 @@ public class MultiCompetitorLeaderboardChartSettingsDialogComponent implements S
     private ListBox chartTypeSelectionListBox;
     private final DetailType initialDetailType;
     private final List<DetailType> availableDetailsTypes;
+    private final boolean isOverall;
 
     public MultiCompetitorLeaderboardChartSettingsDialogComponent(MultiCompetitorLeaderboardChartSettings settings, boolean isOverall) {
+        this.isOverall = isOverall;
         this.initialDetailType = settings.getDetailType();
 
         availableDetailsTypes = new ArrayList<DetailType>();
-        availableDetailsTypes.add(isOverall ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK);
+        availableDetailsTypes.add(MultiCompetitorLeaderboardChartSettings.getDefaultDetailType(isOverall));
         availableDetailsTypes.add(DetailType.REGATTA_NET_POINTS_SUM);
     }
 
@@ -72,7 +74,7 @@ public class MultiCompetitorLeaderboardChartSettingsDialogComponent implements S
                 break;
             }
         }
-        return new MultiCompetitorLeaderboardChartSettings(newDetailType);
+        return MultiCompetitorLeaderboardChartSettings.createWithDefaultDetailType(isOverall, newDetailType);
     }
 
     @Override

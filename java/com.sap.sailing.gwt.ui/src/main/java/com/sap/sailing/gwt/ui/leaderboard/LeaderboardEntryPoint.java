@@ -186,7 +186,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         if (chartDetailType == DetailType.REGATTA_NET_POINTS_SUM) {
             return chartDetailType;
         }
-        return leaderboardType.isMetaLeaderboard() ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
+        return MultiCompetitorLeaderboardChartSettings.getDefaultDetailType(leaderboardType.isMetaLeaderboard());
     }
     
     private void createUi(Widget leaderboardViewer, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer, LeaderboardContextDefinition leaderboardContextSettings) {
