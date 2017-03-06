@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
@@ -49,6 +51,16 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                         leaderboardName, //
                         true,
                         autoExpandLastRaceColumn);
+                leaderboardPanel.addAttachHandler(new Handler() {
+
+                    @Override
+                    public void onAttachOrDetach(AttachEvent event) {
+                        if(!event.isAttached()) {
+                            componentContext.dispose();
+                        }
+                    }
+                    
+                });
                 
                 if(ElementSizeMutationObserver.isSupported()) {
                     ElementSizeMutationObserver observer = new ElementSizeMutationObserver(new DomMutationCallback() {

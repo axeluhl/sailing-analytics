@@ -140,4 +140,8 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     protected void loadDefaultSettings(OnSettingsLoadedCallback<S> callback) {
         callback.onSuccess(getDefaultSettings());
     }
+
+    @Override
+    public void dispose() {
+    }
 }

@@ -65,4 +65,8 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
     public void retrieveSettingsJson(AsyncCallback<SettingsJsons> asyncCallback) {
         
     }
+
+    @Override
+    public void dispose() {
+    }
 }

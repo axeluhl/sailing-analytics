@@ -53,5 +53,7 @@ public interface SettingsStorageManager<S extends Settings> {
     JSONValue settingsToJSON(Settings newSettings);
 
     void retrieveSettingsJson(AsyncCallback<SettingsJsons> asyncCallback);
+    
+    void dispose();
 
 }

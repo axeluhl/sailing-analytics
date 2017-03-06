@@ -77,4 +77,7 @@ public interface ComponentContext<S extends Settings> {
      * @see #initInitialSettings(OnSettingsLoadedCallback)
      */
     void initInitialSettings();
+    
+    void dispose();
+    
 }

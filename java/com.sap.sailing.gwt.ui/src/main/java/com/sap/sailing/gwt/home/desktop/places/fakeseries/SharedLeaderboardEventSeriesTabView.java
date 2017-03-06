@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
@@ -44,6 +46,16 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
                         componentContext, leaderboardSettings, null, "leaderboardGroupName",
                         leaderboardName, true, // this information came from place, now hard coded. check with frank
                         autoExpandLastRaceColumn);
+                leaderboardPanel.addAttachHandler(new Handler() {
+
+                    @Override
+                    public void onAttachOrDetach(AttachEvent event) {
+                        if(!event.isAttached()) {
+                            componentContext.dispose();
+                        }
+                    }
+                    
+                });
                 leaderboardPanel.addLeaderboardUpdateListener(SharedLeaderboardEventSeriesTabView.this);
                 consumer.consume(leaderboardPanel);
             }

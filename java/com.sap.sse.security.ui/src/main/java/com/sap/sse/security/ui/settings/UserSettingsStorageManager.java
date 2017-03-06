@@ -58,6 +58,8 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
      * avoid "complicated problems"
      */
     private boolean initialUserSetting = false;
+    
+    private UserStatusEventHandler userStatusEventHandler = null;
 
     /**
      * 
@@ -113,11 +115,11 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void retrieveDefaultSettings(S defaultSettings, final OnSettingsLoadedCallback<S> callback) {
-        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+        if(userStatusEventHandler != null) {
+            throw new IllegalStateException("The contract between ComponentContext and SettingsStorageManager enforces this method to be called only once");
+        }
+        this.userStatusEventHandler = new UserStatusEventHandler() {
 
             @Override
             public void onUserStatusChange(UserDTO user) {
@@ -144,7 +146,16 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
                 });
             }
 
-        }, true);
+        };
+        userService.addUserStatusEventHandler(userStatusEventHandler, true);
+    }
+    
+    @Override
+    public void dispose() {
+        super.dispose();
+        if(userStatusEventHandler != null) {
+            userService.removeUserStatusEventHandler(userStatusEventHandler);
+        }
     }
     
     private SettingsStrings retrieveSettingsStringsFromLocalStorage() {
@@ -277,7 +288,7 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         }
         return serverSettingsStrings;
     }
-
+    
     /**
      * Creates a {@link SettingsStorageManager} instance based on the ignoreLocalSettings URL flag. if
      * ignoreLocalSettings is set to <code>true</code>, a SimpleSettingsStorageManager is created. A

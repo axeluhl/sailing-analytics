@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -86,6 +88,16 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                             leaderboardName,
                             true, // TODO @FM this information came from place, now hard coded. check with frank
                             autoExpandLastRaceColumn);
+                    leaderboardPanel.addAttachHandler(new Handler() {
+
+                        @Override
+                        public void onAttachOrDetach(AttachEvent event) {
+                            if(!event.isAttached()) {
+                                componentContext.dispose();
+                            }
+                        }
+                        
+                    });
                     
                     initWidget(ourUiBinder.createAndBindUi(EventSeriesLeaderboardsTabView.this));
                     

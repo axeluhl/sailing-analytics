@@ -254,4 +254,10 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         }
         return current;
     }
+    
+    @Override
+    public void dispose() {
+        super.dispose();
+        settingsStorageManager.dispose();
+    }
 }
