@@ -47,7 +47,11 @@ public class CompactPositionHelper {
     }
 
     public static short getKnotSpeedScaled(Speed speed) {
-        return (short) (speed.getKnots() / KNOT_SPEED_SCALE);
+        final double knotSpeedScaled = speed.getKnots() / KNOT_SPEED_SCALE;
+        if (knotSpeedScaled > Short.MAX_VALUE || knotSpeedScaled < Short.MIN_VALUE) {
+            throw new IllegalArgumentException("Speed "+speed+" cannot be compacted; "+speed.getKnots()+" does not fit into a signed short value");
+        }
+        return (short) knotSpeedScaled;
     }
 
     public static short getDegreeBearingScaled(Bearing bearing) {
