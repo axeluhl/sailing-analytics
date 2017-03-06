@@ -23,11 +23,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PositionTest {
-    private void assertPositionEquals(Position p1, Position p2, double degreeDelta) {
-        assertEquals(p1.getLatDeg(), p2.getLatDeg(), degreeDelta);
-        assertEquals(p1.getLngDeg(), p2.getLngDeg(), degreeDelta);
-    }
-    
     @Test
     public void testDistanceAcrossDateline() {
         Position p1 = new DegreePosition(0, 179);
@@ -41,7 +36,7 @@ public class PositionTest {
         Position p1 = new DegreePosition(49.2, 008.3);
         CompactGPSFixImpl compactFix = new CompactGPSFixImpl(p1, MillisecondsTimePoint.now());
         assertNotSame(p1, compactFix.getPosition());
-        assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
+        PositionAssert.assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
     }
     
     @Test
@@ -70,7 +65,7 @@ public class PositionTest {
         SpeedWithBearing swb = new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123));
         CompactGPSFixMovingImpl compactFix = new CompactGPSFixMovingImpl(p1, MillisecondsTimePoint.now(), swb);
         assertNotSame(p1, compactFix.getPosition());
-        assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
+        PositionAssert.assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
         assertNotSame(swb, compactFix.getSpeed());
         assertEquals(swb, compactFix.getSpeed());
     }

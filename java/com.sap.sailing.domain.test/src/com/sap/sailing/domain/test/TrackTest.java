@@ -221,7 +221,7 @@ public class TrackTest {
             now = nextNow;
         }
         assertEquals(speed.travel(start, now.minus(NUMBER_OF_FIXES_AT_SAME_POSITION * 1000)).getMeters(),
-                track.getDistanceTraveled(start, now).getMeters(), 0.00000001);
+                track.getDistanceTraveled(start, now).getMeters(), 0.01);
     }
 
     private void addFixesWithSamePositionButProgressingTime(DynamicGPSFixTrack<Object, GPSFixMoving> track,
@@ -462,7 +462,7 @@ public class TrackTest {
         track.addGPSFix(f2);
         track.addGPSFix(f3);
         SpeedWithBearing average = track.getEstimatedSpeed(t2);
-        assertEquals(0, average.getBearing().getDegrees(), 0.00001);
+        assertEquals(0, average.getBearing().getDegrees(), 0.01);
     }
     
     @Test
@@ -477,7 +477,7 @@ public class TrackTest {
         track.addGPSFix(f1);
         track.addGPSFix(f2);
         track.addGPSFix(f3);
-        assertEquals(f2, track.getFirstFixAtOrAfter(f2.getTimePoint())); // expect the fix to still be valid, but only its provided speed shall be ignored
+        PositionAssert.assertGPSFixEquals(f2, track.getFirstFixAtOrAfter(f2.getTimePoint()), /* pos deg delta */ 0.00001, /* bearing deg delta */ 0.01, /* knot delta */ 0.01); // expect the fix to still be valid, but only its provided speed shall be ignored
     }
     
     @Test
@@ -492,7 +492,7 @@ public class TrackTest {
         track.addGPSFix(f1);
         track.addGPSFix(f2);
         track.addGPSFix(f3);
-        assertEquals(f3, track.getFirstFixAtOrAfter(f2.getTimePoint())); // expect the f2 fix to be invalid
+        PositionAssert.assertGPSFixEquals(f3, track.getFirstFixAtOrAfter(f2.getTimePoint()), /* pos deg delta */ 0.00001, /* bearing deg delta */ 0.01, /* knot delta */ 0.01); // expect the fix to still be valid, but only its provided speed shall be ignored
     }
     
     @Test
@@ -508,7 +508,7 @@ public class TrackTest {
         track.addGPSFix(f2);
         track.addGPSFix(f3);
         // expect the f2 fix to be invalid because provided speed is too different
-        assertEquals(0, f3.getPosition().getDistance(track.getFirstFixAtOrAfter(f2.getTimePoint()).getPosition()).getMeters(), 0.001);
+        assertEquals(0, f3.getPosition().getDistance(track.getFirstFixAtOrAfter(f2.getTimePoint()).getPosition()).getMeters(), 0.01);
     }
     
     @Test
@@ -523,7 +523,7 @@ public class TrackTest {
         track.addGPSFix(f1);
         track.addGPSFix(f2);
         track.addGPSFix(f3);
-        assertEquals(f2, track.getFirstFixAtOrAfter(f2.getTimePoint())); // expect the fix to still be valid, but only its provided speed shall be ignored
+        PositionAssert.assertGPSFixEquals(f2, track.getFirstFixAtOrAfter(f2.getTimePoint()), /* pos deg delta */ 0.00001, /* bearing deg delta */ 0.01, /* knot delta */ 0.01); // expect the fix to still be valid, but only its provided speed shall be ignored
         SpeedWithBearing average = track.getEstimatedSpeed(t2);
         assertEquals(1, average.getKnots(), 0.001);
     }
@@ -541,7 +541,7 @@ public class TrackTest {
         track.addGPSFix(f2);
         track.addGPSFix(f3);
         SpeedWithBearing average = track.getRawEstimatedSpeed(t2);
-        assertEquals(0, average.getBearing().getDegrees(), 0.00001);
+        assertEquals(0, average.getBearing().getDegrees(), 0.01);
     }
     
     /**
@@ -560,14 +560,14 @@ public class TrackTest {
         Iterator<GPSFixMoving> subsetIter = subset.iterator();
         // start iteration
         GPSFixMoving firstOfSubset = subsetIter.next();
-        assertEquals(gpsFix2, firstOfSubset);
+        PositionAssert.assertGPSFixEquals(gpsFix2, firstOfSubset, /* pos deg delta */ 0.000001, /* bearing deg delta */ 0.01, /* knot delta */ 0.01);
         // now add a fix:
         TimePoint now6 = addMillisToTimepoint(gpsFix5.getTimePoint(), 3);
         track.addGPSFix(new GPSFixMovingImpl(
                 new DegreePosition(6, 5), now6, new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(0))));
         try {
             GPSFixMoving secondOfSubset = subsetIter.next();
-            assertEquals(gpsFix3, secondOfSubset);
+            PositionAssert.assertGPSFixEquals(gpsFix3, secondOfSubset, /* pos deg delta */ 0.000001, /* bearing deg delta */ 0.01, /* knot delta */ 0.01);
             fail("adding a fix interferes with iteration over subSet of track's fixes");
         } catch (ConcurrentModificationException e) {
             // this is what we expected
