@@ -48,14 +48,14 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     private final StringMessages stringMessages;
     
     public LeaderboardWithHeaderPerspective(Component<?> parent,
-            ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>> context,
+            ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>> componentContext,
             LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
             SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             boolean startInFullScreenMode) {
-        super(parent, context, lifecycle, settings);
+        super(parent, componentContext, lifecycle, settings);
         this.stringMessages = stringMessages;
         Window.addResizeHandler(new ResizeHandler() {
             @Override

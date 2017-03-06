@@ -9,15 +9,15 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public abstract class AbstractCompositeComponent<SettingsType extends Settings> extends Composite implements Component<SettingsType> {
     private Component<?> parentComponent;
-    private ComponentContext<?> context;
+    private ComponentContext<?> componentContext;
 
-    public AbstractCompositeComponent(Component<?> parent, ComponentContext<?> context) {
-        this.context = context;
+    public AbstractCompositeComponent(Component<?> parent, ComponentContext<?> componentContext) {
+        this.componentContext = componentContext;
         this.parentComponent = parent;
         if (parentComponent == null) {
             GWT.log("No parent for component, validate if correct " + this.getClass().getName());
         }
-        if (context == null) {
+        if (componentContext == null) {
             GWT.log("No context for component, validate if correct " + this.getClass().getName());
         }
     }
@@ -33,7 +33,7 @@ public abstract class AbstractCompositeComponent<SettingsType extends Settings> 
 
     @Override
     public ComponentContext<?> getComponentContext() {
-        return context;
+        return componentContext;
     }
 
 }

@@ -62,12 +62,12 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     private RegattaAndRaceIdentifier currentLiveRace;
     
     private final PlayerView playerView;
-    private final AutoPlayerContext autoPlayerConfiguration;
+    private final AutoPlayerContextDefinition autoPlayerConfiguration;
     private PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings;
     private AutoplayPerspectiveLifecycle autoplayLifecycle;
 
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            UserService userService, ErrorReporter errorReporter, AutoPlayerContext autoPlayerConfiguration,
+            UserService userService, ErrorReporter errorReporter, AutoPlayerContextDefinition autoPlayerConfiguration,
             PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings,
             UserAgentDetails userAgent, PlayerView playerView, AutoplayPerspectiveLifecycle autoplayLifecycle) {
         this.sailingService = sailingService;

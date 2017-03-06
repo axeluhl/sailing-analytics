@@ -177,7 +177,7 @@ public class RaceBoardPanel
      *            aligns its right border with that of the chart. Otherwise those components will be hidden.
      */
     public RaceBoardPanel(Component<?> parent,
-            ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
+            ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
             RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings,
             SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
@@ -186,7 +186,7 @@ public class RaceBoardPanel
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo) {
-        super(parent, context, lifecycle, settings);
+        super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -234,7 +234,7 @@ public class RaceBoardPanel
         } else {
             raceMapSettings = defaultRaceMapSettings;
         }
-        raceMap = new RaceMap(this, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor,
+        raceMap = new RaceMap(this, componentContext, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
                 /* showHeaderPanel */ true) {
@@ -332,7 +332,7 @@ public class RaceBoardPanel
                 }
             }
         }
-        racetimePanel = new RaceTimePanel(this, context, raceTimePanelLifecycle, userService, timer,
+        racetimePanel = new RaceTimePanel(this, componentContext, raceTimePanelLifecycle, userService, timer,
                 timeRangeWithZoomModel,
                 stringMessages, raceTimesInfoProvider, getPerspectiveSettings().isCanReplayDuringLiveRaces(),
                 showChartMarkEditMediaButtonsAndVideo, selectedRaceIdentifier,

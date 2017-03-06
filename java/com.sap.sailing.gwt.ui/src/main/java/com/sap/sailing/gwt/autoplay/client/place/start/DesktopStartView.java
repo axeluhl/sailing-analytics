@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerContext;
+import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerContextDefinition;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -203,7 +203,7 @@ public class DesktopStartView extends Composite implements StartView {
         if (selectedEvent != null && selectedLeaderboardName != null) {
             // TODO generate place settings url, and directly start other place
             String contextAndSettings = new SettingsToStringSerializer().fromSettings(
-                    new AutoPlayerContext(selectedEvent.id, selectedLeaderboardName), autoplayPerspectiveSettings);
+                    new AutoPlayerContextDefinition(selectedEvent.id, selectedLeaderboardName), autoplayPerspectiveSettings);
             navigator.goToPlayer(contextAndSettings);
         }
     }

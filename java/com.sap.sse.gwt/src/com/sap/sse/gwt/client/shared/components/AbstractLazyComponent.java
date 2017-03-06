@@ -9,11 +9,11 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public abstract class AbstractLazyComponent<SettingsType extends Settings> extends LazyPanel implements LazyComponent<SettingsType> {
     private Component<?> parent;
-    private ComponentContext<?> context;
+    private ComponentContext<?> componentContext;
 
-    public AbstractLazyComponent(Component<?> parent, ComponentContext<?> context) {
+    public AbstractLazyComponent(Component<?> parent, ComponentContext<?> componentContext) {
         this.parent = parent;
-        this.context = context;
+        this.componentContext = componentContext;
     }
 
     @Override
@@ -39,7 +39,7 @@ public abstract class AbstractLazyComponent<SettingsType extends Settings> exten
 
     @Override
     public ComponentContext<?> getComponentContext() {
-        return context;
+        return componentContext;
     }
 
 }

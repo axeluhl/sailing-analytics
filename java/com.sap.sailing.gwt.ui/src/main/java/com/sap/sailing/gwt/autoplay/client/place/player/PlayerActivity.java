@@ -44,7 +44,7 @@ public class PlayerActivity extends AbstractActivity {
 
         // get the event
         SettingsToStringSerializer stringSerializer = new SettingsToStringSerializer();
-        AutoPlayerContext context = new AutoPlayerContext();
+        AutoPlayerContextDefinition context = new AutoPlayerContextDefinition();
         stringSerializer.fromString(playerPlace.getContext(), context);
         final UUID eventUUID = context.getEventUidAsString();
 

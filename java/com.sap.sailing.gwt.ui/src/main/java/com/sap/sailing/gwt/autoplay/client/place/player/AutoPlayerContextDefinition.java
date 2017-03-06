@@ -6,18 +6,18 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
 
-public class AutoPlayerContext extends AbstractGenericSerializableSettings {
+public class AutoPlayerContextDefinition extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 2880854263616658272L;
 
     private transient UUIDSetting eventUUID;
     private transient StringSetting leaderboardName;
 
-    public AutoPlayerContext(UUID eventUUID, String leaderboardName) {
+    public AutoPlayerContextDefinition(UUID eventUUID, String leaderboardName) {
         this.eventUUID.setValue(eventUUID);
         this.leaderboardName.setValue(leaderboardName);
     }
 
-    public AutoPlayerContext() {
+    public AutoPlayerContextDefinition() {
     }
 
     @Override
