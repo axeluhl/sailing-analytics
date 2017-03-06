@@ -25,7 +25,7 @@ public class MultiCompetitorLeaderboardChartLifecycle implements
 
     @Override
     public MultiCompetitorLeaderboardChartSettings createDefaultSettings() {
-        return new MultiCompetitorLeaderboardChartSettings(null);
+        return MultiCompetitorLeaderboardChartSettings.createWithDefaultDetailType(isOverall);
     }
 
     @Override

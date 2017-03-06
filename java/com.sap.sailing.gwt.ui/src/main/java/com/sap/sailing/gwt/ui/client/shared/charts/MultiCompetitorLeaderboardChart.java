@@ -26,7 +26,7 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
         super(parent, context,sailingService, asyncActionsExecutor, leaderboardName, detailType, competitorSelectionProvider,
                 timer, stringMessages, errorReporter);
         this.isOverall = isOverall;
-        settings = new MultiCompetitorLeaderboardChartSettings(detailType);
+        settings = MultiCompetitorLeaderboardChartSettings.createWithDefaultDetailType(isOverall, detailType);
     }
 
     @Override
@@ -41,7 +41,8 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
     
     @Override
     public SettingsDialogComponent<MultiCompetitorLeaderboardChartSettings> getSettingsDialogComponent() {
-        MultiCompetitorLeaderboardChartSettings chartSettings = new MultiCompetitorLeaderboardChartSettings(settings.getDetailType());
+        MultiCompetitorLeaderboardChartSettings chartSettings = MultiCompetitorLeaderboardChartSettings
+                .createWithDefaultDetailType(isOverall, settings.getDetailType());
         return new MultiCompetitorLeaderboardChartSettingsDialogComponent(chartSettings, isOverall);
     }
 
