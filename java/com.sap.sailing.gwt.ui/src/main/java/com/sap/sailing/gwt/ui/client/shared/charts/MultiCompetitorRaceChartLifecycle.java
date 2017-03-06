@@ -7,7 +7,7 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     private final StringMessages stringMessages;
     private final boolean hasOverallLeaderboard;
     
-    public static final String ID = "mcrc";
+    public static final String ID = "cc";
     
     public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages, boolean hasOverallLeaderboard) {
         this.stringMessages = stringMessages;
