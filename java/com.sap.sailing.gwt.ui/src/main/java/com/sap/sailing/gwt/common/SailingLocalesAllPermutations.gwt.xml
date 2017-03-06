@@ -18,7 +18,7 @@
                   
     -->
     
-	<extend-property name="locale" values="en,de,zh,ru,ja" />
-	<set-property name="locale" value="en,de,zh,ru,ja" />
+	<extend-property name="locale" values="en,de,zh,ru,ja,es,fr,pt" />
+	<set-property name="locale" value="en,de,zh,ru,ja,es,fr,pt" />
 	<set-property-fallback name="locale" value="en" />
 </module>
