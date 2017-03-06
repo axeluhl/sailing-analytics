@@ -74,7 +74,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                 existingMapSettings.isShowSimulationOverlay(),
                 existingMapSettings.isShowMapControls(),
                 existingMapSettings.getManeuverTypesToShow(),
-                existingMapSettings.isShowDouglasPeuckerPoints());
+                existingMapSettings.isShowDouglasPeuckerPoints()).keepDefaults(existingMapSettings);
         // try to update the settings once; the problem is the "wind up" display; it changes pan/zoom
         // which is a major source of instability for the map. Going twice in the map idle event handler
         // to ensure the settings are really applied.

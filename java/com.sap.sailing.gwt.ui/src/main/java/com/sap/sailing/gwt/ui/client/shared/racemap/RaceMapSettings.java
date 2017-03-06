@@ -72,13 +72,13 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     
     @Override
     protected void addChildSettings() {
-        showMapControls = new BooleanSetting("showMapControls", this, true);
+        showMapControls = new BooleanSetting(PARAM_SHOW_MAPCONTROLS, this, true);
         helpLinesSettings = new RaceMapHelpLinesSettings("helpLinesSettings", this);
-        windUp = new BooleanSetting("windUp", this, false);
-        buoyZoneRadius = new DistanceSetting("buoyZoneRadius", this, DEFAULT_BUOY_ZONE_RADIUS);
-        showWindStreamletOverlay = new BooleanSetting("showWindStreamletOverlay", this, false);
-        showWindStreamletColors = new BooleanSetting("showWindStreamletColors", this, false);
-        showSimulationOverlay = new BooleanSetting("showSimulationOverlay", this, false);
+        windUp = new BooleanSetting(PARAM_MAP_ORIENTATION_WIND_UP, this, false);
+        buoyZoneRadius = new DistanceSetting(PARAM_BUOY_ZONE_RADIUS_IN_METERS, this, DEFAULT_BUOY_ZONE_RADIUS);
+        showWindStreamletOverlay = new BooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false);
+        showWindStreamletColors = new BooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false);
+        showSimulationOverlay = new BooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false);
         zoomSettings = new RaceMapZoomSettings("zoomSettings", this);
         transparentHoverlines = new BooleanSetting("transparentHoverlines", this, false);
         hoverlineStrokeWeight = new IntegerSetting("hoverlineStrokeWeight", this, 15);
@@ -165,6 +165,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      * copy constructor that produces a new settings object that equals the one passed as argument but takes the zoom settings from the second parameter
      */
     public RaceMapSettings(RaceMapSettings settings, RaceMapZoomSettings zoomSettings) {
+        this.buoyZoneRadius.setDefaultValue(settings.buoyZoneRadius.getDefaultValue());
         this.buoyZoneRadius.setValue(settings.buoyZoneRadius.getValue());
         this.helpLinesSettings.init(settings.getHelpLinesSettings());
         this.transparentHoverlines.setValue(settings.transparentHoverlines.getValue());
@@ -243,6 +244,53 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
 
     public Distance getBuoyZoneRadius() {
         return buoyZoneRadius.getValue();
+    }
+    
+    public boolean isBuoyZoneRadiusDefaultValue() {
+        return buoyZoneRadius.isDefaultValue();
+    }
+    
+    public RaceMapSettings getDefaultSettings() {
+        RaceMapSettings newRaceMapSettings = new RaceMapSettings();
+        newRaceMapSettings.buoyZoneRadius.setDefaultValue(this.buoyZoneRadius.getDefaultValue());
+        return newRaceMapSettings;
+    }
+    
+    public RaceMapSettings keepDefaults(RaceMapSettings previousSettings) {
+        RaceMapSettings newRaceMapSettings = previousSettings.getDefaultSettings();
+        newRaceMapSettings.buoyZoneRadius.setValue(getBuoyZoneRadius());
+        newRaceMapSettings.hoverlineStrokeWeight.setValue(getHoverlineStrokeWeight());
+        newRaceMapSettings.maneuverTypesToShow.setValues(getManeuverTypesToShow());
+        newRaceMapSettings.showDouglasPeuckerPoints.setValue(isShowDouglasPeuckerPoints());
+        newRaceMapSettings.showMapControls.setValue(isShowMapControls());
+        newRaceMapSettings.showOnlySelectedCompetitors.setValue(isShowOnlySelectedCompetitors());
+        newRaceMapSettings.showSelectedCompetitorsInfo.setValue(isShowSelectedCompetitorsInfo());
+        newRaceMapSettings.showSimulationOverlay.setValue(isShowSimulationOverlay());
+        newRaceMapSettings.showWindStreamletColors.setValue(isShowWindStreamletColors());
+        newRaceMapSettings.showWindStreamletOverlay.setValue(isShowWindStreamletOverlay());
+        newRaceMapSettings.tailLengthInMilliseconds.setValue(getTailLengthInMilliseconds());
+        newRaceMapSettings.transparentHoverlines.setValue(getTransparentHoverlines());
+        newRaceMapSettings.windUp.setValue(isWindUp());
+        newRaceMapSettings.helpLinesSettings.init(this.helpLinesSettings);
+        newRaceMapSettings.zoomSettings.init(this.zoomSettings);
+        return newRaceMapSettings;
+    }
+    
+    public static RaceMapSettings createSettingsWithNewDefaultBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
+        final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
+                settings.getZoomSettings(), settings.getHelpLinesSettings(),
+                settings.getTransparentHoverlines(),
+                settings.getHoverlineStrokeWeight(),
+                settings.getTailLengthInMilliseconds(), settings.isWindUp(),
+                settings.buoyZoneRadius.isDefaultValue() ? newDefaultBuoyZoneRadius : settings.getBuoyZoneRadius(), settings.isShowOnlySelectedCompetitors(),
+                settings.isShowSelectedCompetitorsInfo(),
+                settings.isShowWindStreamletColors(),
+                settings.isShowWindStreamletOverlay(),
+                settings.isShowSimulationOverlay(), settings.isShowMapControls(),
+                settings.getManeuverTypesToShow(),
+                settings.isShowDouglasPeuckerPoints());
+        newRaceMapSettings.buoyZoneRadius.setDefaultValue(newDefaultBuoyZoneRadius);
+        return newRaceMapSettings;
     }
 
     public boolean isWindUp() {
