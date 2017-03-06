@@ -186,6 +186,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      * Potentially, you can create 8 threads per TTCM (connecting only with one single race)."
      */
     static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 1000;
+
+    private static final long TIMEOUT_FOR_RACE_TO_APPEAR_FOR_STOPPING_TRACKING_IN_MILLIS = Duration.ONE_MINUTE.times(5).asMillis();
     
     private final IEvent tractracEvent;
     private final IRace tractracRace;
@@ -195,7 +197,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final WindStore windStore;
-    private RaceDefinition race;
+    /**
+     * Needs to be {@code volatile} because one thread (e.g., the {@link RaceCourseReceiver}) writes it, another thread
+     * such as the callback set up by the {@link #stopped(Object)} method and executed by the last {@link Receiver}
+     * emptying its queue, leading to a call to
+     * {@link AbstractLoadingQueueDoneCallBack#executeWhenAllReceiversAreDoneLoading()} will read it. We need
+     * to ensure that the reading threads always read what other writers wrote.
+     */
+    private volatile RaceDefinition race;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
     private Map<Object, Util.Pair<Integer, Float>> lastProgressPerID;
@@ -630,7 +639,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void addRaceDefinition(final RaceDefinition race, final DynamicTrackedRace trackedRace) {
-        this.race = race;
+        logger.info("Setting race for tracker "+this+" with ID "+getID()+" to "+race);
+        synchronized (this) { // use synchronized to ensure the effects become visible to other threads reading later
+            this.race = race;
+        }
         updateStatusOfTrackedRace(trackedRace);
         notifyRaceCreationListeners();
     }
@@ -642,7 +654,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
-        logger.info("Status change in tracker "+getID()+" for race(s) "+getRace()+": "+storedDataEvent);
+        logger.info("Status change in tracker "+this+" with ID "+getID()+" for race(s) "+getRace()+": "+storedDataEvent);
         switch (storedDataEvent.getType()) {
         case Begin:
             logger.info("Stored data begin in tracker "+getID()+" for race(s) "+getRace());
@@ -667,26 +679,34 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
 
     @Override
     public void stopped(Object o) {
-        logger.info("stopped TracTrac tracking in tracker " + getID() + " for " + getRace() + " while in status "
-                + lastStatus);
+        logger.info("stopped TracTrac tracking in tracker " + this + " with ID " + getID() + " for " + getRace()
+                + " while in status " + lastStatus);
         new AbstractLoadingQueueDoneCallBack(receivers) {
             @Override
             protected void executeWhenAllReceiversAreDoneLoading() {
                 lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
                 updateStatusOfTrackedRaces();
                 if (!stopped) {
-                    try {
-                        if (getRace() != null) {
-                            // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the
-                            // TracAPI then
-                            // all subscriptions have received all their data and it's therefore safe to stop all
-                            // subscriptions
-                            // at this point without missing any data.
-                            trackedRegattaRegistry.stopTracking(regatta, getRace());
+                    // launch background thread that may have to wait for the race to appear; wait with a generous timeout
+                    final Thread stopper = new Thread(()->{
+                        try {
+                            if (getRaceHandle().getRace(TIMEOUT_FOR_RACE_TO_APPEAR_FOR_STOPPING_TRACKING_IN_MILLIS) != null) {
+                                // See also bug 1517; with TracAPI we assume that when stopped(IEvent) is called by the
+                                // TracAPI then all subscriptions have received all their data and it's therefore safe to stop all
+                                // subscriptions at this point without missing any data.
+                                logger.info("Calling stopTracking for tracker "+this+" with ID "+getID());
+                                trackedRegattaRegistry.stopTracking(regatta, getRace());
+                            } else {
+                                logger.warning("Didn't receive RaceDefinition for tracker "+this+" with ID "+getID()+
+                                        " within "+TIMEOUT_FOR_RACE_TO_APPEAR_FOR_STOPPING_TRACKING_IN_MILLIS+
+                                        "ms; unable to call stopTracking(...)");
+                            }
+                        } catch (InterruptedException | IOException e) {
+                            logger.log(Level.INFO, "Interrupted while trying to stop tracker " + this, e);
                         }
-                    } catch (InterruptedException | IOException e) {
-                        logger.log(Level.INFO, "Interrupted while trying to stop tracker " + this, e);
-                    }
+                    }, "Stopper for tracker "+this+" with ID " + getID());
+                    stopper.setDaemon(true);
+                    stopper.start();
                 }
             }
         };

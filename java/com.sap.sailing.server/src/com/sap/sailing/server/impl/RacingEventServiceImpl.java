@@ -9,7 +9,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -665,23 +664,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private void restoreTrackedRaces() {
-        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         // restore the races by calling addRace one by one, but in a background thread, therefore concurrent to any remaining
         // server startup activities happening
-        backgroundExecutor.execute(()->{
+        numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
             try {
-                numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
-                    try {
-                        addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1);
-                        numberOfTrackedRacesRestored.incrementAndGet();
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Exception trying to restore race"+params, e);
-                    }
-                });
-            } catch (MalformedURLException | URISyntaxException e) {
-                logger.log(Level.SEVERE, "Exception trying to obtain connectivity parameters for restoring tracked races", e);
+                addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1);
+                int newNumberOfTrackedRacesRestored = numberOfTrackedRacesRestored.incrementAndGet();
+                logger.info("Added race to restore #"+newNumberOfTrackedRacesRestored+"/"+numberOfTrackedRacesToRestore);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception trying to restore race "+params, e);
             }
-        });
+        }).getNumberOfParametersToLoad();
     }
 
     @Override
@@ -1566,8 +1559,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // try a quick read first, protected by regattasByName being a concurrent hash set
         if (!regattasByName.containsKey(regatta.getName())) {
             // now we need to obtain exclusive write access; in between, some other thread may have added a regatta by
-            // that
-            // name, so we need to check again:
+            // that name, so we need to check again:
             LockUtil.lockForWrite(regattasByNameLock);
             try {
                 if (!regattasByName.containsKey(regatta.getName())) {
@@ -2161,8 +2153,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
         // update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
         if (connectivityParams != null) {
-            connectivityParams.setTrackWind(false);
-            getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
+            if (connectivityParams.isTrackWind()) {
+                connectivityParams.setTrackWind(false);
+                getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
+            }
         } else {
             logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
         }
@@ -2774,6 +2768,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regattasByName.putAll((Map<String, Regatta>) ois.readObject());
         logoutput.append("Received " + regattasByName.size() + " NEW regattas\n");
         for (Regatta regatta : regattasByName.values()) {
+            regatta.addRegattaListener(this);
             logoutput.append(String.format("%3s\n", regatta.toString()));
         }
 

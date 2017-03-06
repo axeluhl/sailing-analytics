@@ -52,7 +52,8 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(tracTracParams);
         // load
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params))
+            .waitForCompletionOfCallbacksForAllParameters();
         // compare
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
@@ -76,7 +77,8 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(tracTracParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params))
+            .waitForCompletionOfCallbacksForAllParameters();
         assertTrue(connectivityParametersForRacesToRestore2.isEmpty());
     }
 }

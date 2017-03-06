@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -168,9 +169,8 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                         callback.loadingQueueDone(this);
                     }
                 }
-
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.log(Level.INFO, "Interrupted while taking element from queue", e);
             }
         }
         unsubscribe();
@@ -221,12 +221,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
             if (lastInQueue == null || getSimulator() != null) {
                 callback.loadingQueueDone(this);
             } else {
-                Set<LoadingQueueDoneCallBack> set = loadingQueueDoneCallBacks.get(lastInQueue);
-                if (set == null) {
-                    set = new HashSet<>();
-                    loadingQueueDoneCallBacks.put(lastInQueue, set);
-                }
-                set.add(callback);
+                Util.addToValueSet(loadingQueueDoneCallBacks, lastInQueue, callback);
             }
         }
     }

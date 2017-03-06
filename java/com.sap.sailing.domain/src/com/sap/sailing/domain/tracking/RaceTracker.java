@@ -55,11 +55,12 @@ public interface RaceTracker {
     com.sap.sailing.domain.base.Regatta getRegatta();
 
     /**
-     * Returns the races being tracked by this tracker. Non-blocking call that returns <code>null</code>
-     * if the {@link RaceDefinition} hasn't been created yet, e.g., because the course definition
-     * hasn't been received yet or the listener for receiving course information hasn't been registered (yet). Also
-     * returns a race that may have been removed from containing structures which may lead this tracker to no longer update
-     * their {@link TrackedRace} with new data.
+     * Returns the races being tracked by this tracker, in a "volatile" way, meaning that if another thread belonging to
+     * this tracker has established the {@link RaceDefinition} for this tracker, other threads will immediately see this
+     * object. Non-blocking call that returns <code>null</code> if the {@link RaceDefinition} hasn't been created yet,
+     * e.g., because the course definition hasn't been received yet or the listener for receiving course information
+     * hasn't been registered (yet). Also returns a race that may have been removed from containing structures which may
+     * lead this tracker to no longer update their {@link TrackedRace} with new data.
      */
     RaceDefinition getRace();
     
