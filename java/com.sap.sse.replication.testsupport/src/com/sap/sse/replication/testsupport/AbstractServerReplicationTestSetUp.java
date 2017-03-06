@@ -290,7 +290,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                 final String uuid = UUID.randomUUID().toString();
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
                                 masterReplicationService.registerReplica(replicaDescriptor);
-                                pw.print(uuid.getBytes());
+                                pw.print(uuid);
                             } else if (request.contains("INITIAL_LOAD")) {
                                 Channel channel = masterReplicationService.createMasterChannel();
                                 RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,

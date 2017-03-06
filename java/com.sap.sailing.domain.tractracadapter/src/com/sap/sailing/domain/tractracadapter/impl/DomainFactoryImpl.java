@@ -318,21 +318,25 @@ public class DomainFactoryImpl implements DomainFactory {
         long start = System.currentTimeMillis();
         RaceDefinition result = raceCache.get(raceId);
         boolean interrupted = false;
-        while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
-            try {
-                synchronized (raceCache) {
-                    if (timeoutInMilliseconds == -1) {
-                        raceCache.wait();
-                    } else {
-                        long timeToWait = timeoutInMilliseconds-(System.currentTimeMillis()-start);
-                        if (timeToWait > 0) {
-                            raceCache.wait(timeToWait);
+        if (result == null) {
+            synchronized (raceCache) {
+                // try again while under raceCache's monitor; otherwise we may miss a notification
+                result = raceCache.get(raceId);
+                while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
+                    try {
+                        if (timeoutInMilliseconds == -1) {
+                            raceCache.wait();
+                        } else {
+                            long timeToWait = timeoutInMilliseconds-(System.currentTimeMillis()-start);
+                            if (timeToWait > 0) {
+                                raceCache.wait(timeToWait);
+                            }
                         }
+                        result = raceCache.get(raceId);
+                    } catch (InterruptedException e) {
+                        interrupted = true;
                     }
                 }
-                result = raceCache.get(raceId);
-            } catch (InterruptedException e) {
-                interrupted = true;
             }
         }
         return result;

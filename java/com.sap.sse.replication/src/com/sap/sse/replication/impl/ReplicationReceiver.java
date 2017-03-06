@@ -105,6 +105,8 @@ public class ReplicationReceiver implements Runnable {
      * class, enabling an inspection of the message queueing system's queue size of unprocessed messages.
      */
     private Field _queue;
+    
+    private int operationCounter;
 
     /**
      * Used for the parallel execution of operations that don't
@@ -308,12 +310,15 @@ public class ReplicationReceiver implements Runnable {
     }
 
     private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
+        final int operationCount = ++operationCounter;
+        logger.fine(()->""+operationCount+": Applying "+operation);
         Runnable runnable = () -> replicable.applyReceivedReplicated(operation);
         if (operation.requiresSynchronousExecution()) {
             runnable.run();
         } else {
             executor.execute(runnable);
         }
+        logger.fine(()->""+operationCount+": Done applying "+operation);
     }
     
     private void queue(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
