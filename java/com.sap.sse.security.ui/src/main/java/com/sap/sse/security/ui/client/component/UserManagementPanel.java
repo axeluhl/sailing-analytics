@@ -27,9 +27,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
-import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -132,9 +132,7 @@ public class UserManagementPanel extends DockPanel {
                 for (UserGroupDTO group : value.getPermissionMap().keySet()) {
                     sb.appendHtmlConstant("<td>");
                     String concated = group.getName() + ": ";
-                    for (String name : value.getPermissionMap().get(group)) {
-                        concated += name + ", ";
-                    }
+                    concated += String.join(", ", value.getPermissionMap().get(group));
                     sb.appendEscaped(concated);
                     sb.appendHtmlConstant("</td>");
                 }

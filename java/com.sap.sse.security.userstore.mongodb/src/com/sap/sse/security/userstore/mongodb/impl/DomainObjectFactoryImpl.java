@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bson.BSONObject;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -68,9 +70,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     public AccessControlList loadAccessControlList(DBObject aclDBObject, UserStore userStore, AccessControlListStore aclStore) {
         final String name = (String) aclDBObject.get(FieldNames.AccessControlList.NAME.name());
-        final String owner = (String) aclDBObject.get(FieldNames.AccessControlList.OWNER.name());
-        @SuppressWarnings("unchecked")
-        Map<String, Set<String>> permissionMap = (Map<String, Set<String>>) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name());
+        final String owner = (String) aclDBObject.get(FieldNames.AccessControlList.OWNER.name());        
+        Map<?, ?> permissionMapAsBSON = ((BSONObject) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name())).toMap();
+        Map<String, Set<String>> permissionMap = new HashMap<>();
+        for (Map.Entry<?, ?> entry : permissionMapAsBSON.entrySet()) {
+            String key = entry.getKey().toString();
+            Set<String> value = new HashSet<>();
+            for (Object o : (BasicDBList) entry.getValue()) {
+                value.add(o.toString());
+            }
+            permissionMap.put(key, value);
+        }
         AccessControlList result = new AccessControlListWithStore(name, owner, permissionMap, userStore);
         return result;
     }

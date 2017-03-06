@@ -163,7 +163,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             userGroups.add(userGroupDTO);
         }
         if (withTenants) {
-            userGroups.addAll(getTenantList());
+            for (TenantDTO t : getTenantList()) {
+                for (UserGroupDTO g : userGroups) {
+                    if (g.getName().equals(t.getName())) {
+                        userGroups.remove(g);
+                        break;
+                    }
+                }
+                userGroups.add(t);
+            }
         }
         return userGroups;
     }
