@@ -32,7 +32,7 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
         final boolean trackWind = true;
         final boolean correctWindDirectionByMagneticDeclination = true;
         final URL paramURL = new URL("http://event.tractrac.com/events/event_20160604_JuniorenSe/clientparams.php?event=event_20160604_JuniorenSe&race=4b9f0190-0b0d-0134-5b24-60a44ce903c3");
-        final URI storedURI = new URI("live://tractrac.com/storedURI");
+        final URI storedURI = new URI("http://event.tractrac.com/events/event_20160604_JuniorenSe/datafiles/4b9f0190-0b0d-0134-5b24-60a44ce903c3.mtb");
         final URI courseDesignUpdateURI = new URI("https://skitrac.dk/reverse/update");
         final TimePoint startOfTracking = MillisecondsTimePoint.now();
         final TimePoint endOfTracking = startOfTracking.plus(1000);
