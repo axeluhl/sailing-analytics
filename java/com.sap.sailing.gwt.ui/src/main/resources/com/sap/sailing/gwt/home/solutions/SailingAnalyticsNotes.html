@@ -10,6 +10,19 @@
                Find the language chooser in the lower right corner of the footer, or when signed in, go to your user
                profile and set your preferred language.
            </li>
+           <li>Several pages are now enabled to save user settings. In settings dialogs there is a "make default"
+               button in the lower-left corner if saving of settings is enabled. Settings saved this way are
+               stored locally in the browser's local storage and in the user profile if you are logged in. When the
+               user comes back to the page, all settings are restored unless there are specific parameters given by the URL.
+               Some settings are only valid in a specific context (e.g. the selected race columns to show are stored for a specific leaderboard only).
+               This change required changing several URL parameters, so that previously saved bookmarks may not work exactly as before.
+               <ul>
+                    <li><code>/gwt/RaceBoard.html</code></li>
+                    <li><code>/gwt/Leaderboard.html</code></li>
+                    <li><code>/gwt/RegattaOverview.html</code></li>
+                    <li>Leaderboards embedded in <code>/gwt/Home.html</code></li>
+               </ul> 
+           </li>
         </ul>
 
         <h5 class="articleSubheadline">February 2017</h5>
