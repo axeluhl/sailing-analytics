@@ -647,6 +647,16 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         notifyRaceCreationListeners();
     }
 
+    /**
+     * When this tracker is informed that the race cannot be loaded, e.g., because its boat class does
+     * not match the regatta's boat class, the tracker will {@link #stop} preemptively.
+     */
+    @Override
+    public void raceNotLoaded(String reason) throws MalformedURLException, IOException, InterruptedException {
+        logger.severe("Race for tracker "+this+" with ID "+getID()+" did not load: "+reason+". Stopping tracker.");
+        stop(/* preemptive */ true);
+    }
+
     @Override
     public void gotLiveDataEvent(ILiveDataEvent liveDataEvent) {
         logger.info("Status change in tracker "+getID()+" for race(s) "+getRace()+": "+liveDataEvent);

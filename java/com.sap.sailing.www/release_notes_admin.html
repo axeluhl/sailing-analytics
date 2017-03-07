@@ -33,6 +33,12 @@
                     	    resolution is at 4.6mm. Similarly, speeds are represented in their compact form in such a way
                     	    that speeds up to 500kts can be represented at a resolution of 0.015kts.
                     	</li>
+                    	<li>When a race cannot be loaded successfully through the TracTrac connector, e.g., because its boat
+                    	    class does not match the regatta's boat class, the tracker is now stopped, and a SEVERE log message
+                    	    is written, giving the reason for the failure to load the race. This gives administrators an opportunity
+                    	    to correct any errors in the underlying data and try again. Previously, tracking such a 
+                    	    was not possible without a server re-start because the tracker continued to exist.
+                    	</li>
                     </ul>
                     <h2 class="articleSubheadline">February 2017</h2>
                     <ul class="bulletList">
