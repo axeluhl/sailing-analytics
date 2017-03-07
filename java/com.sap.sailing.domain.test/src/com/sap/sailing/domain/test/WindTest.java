@@ -165,9 +165,9 @@ public class WindTest {
         track.add(wind7);
         
         // interval does bearely reach 20's burst because 0 has 0 length and 1000..30000 has 29000 length
-        PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1)), 0.01);
+        PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1)), 0.02);
         // interval uses the two fixes to the left (0, 1000)=1000 and three to the right (2000, 10000, 30000)=28000
-        PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1001)), 0.01);
+        PositionAssert.assertSpeedEquals(new KnotSpeedImpl(20), track.getAveragedWind(pos, new MillisecondsTimePoint(1001)), 0.02);
         // in the middle of the "hole", fetches (0, 1000, 2000, 10000)=10000 and (30000, 40000)=10000, so 20000ms worth of wind
         final double averageFor20000 = track.getAveragedWind(pos, new MillisecondsTimePoint(20000)).getKnots();
         // value is hard to predict exactly because time difference-based confidences rate fixes closer to 20000ms higher than those further away

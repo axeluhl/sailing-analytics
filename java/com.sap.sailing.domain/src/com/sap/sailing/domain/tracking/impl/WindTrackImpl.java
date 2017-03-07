@@ -158,9 +158,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         try {
             compactWind = losslessCompaction ? new PreciseCompactWindImpl(wind) : new VeryCompactWindImpl(wind);
         } catch (CompactionNotPossibleException e) {
-            logger.log(Level.FINE, "Couldn't compact wind fix "+wind+". Using original instead.", e);
-            // then use the original fix instead:
-            compactWind = wind;
+            logger.log(Level.FINE, "Couldn't compact wind fix "+wind+". Using lossless compactification instead.", e);
+            compactWind = new PreciseCompactWindImpl(wind);
         }
         return compactWind;
     }

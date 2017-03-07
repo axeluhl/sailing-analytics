@@ -43,7 +43,7 @@ public abstract class AbstractCompactWindImpl extends AbstractSpeedWithAbstractB
         }
     }
     
-    public AbstractCompactWindImpl(Wind wind) throws CompactionNotPossibleException {
+    public AbstractCompactWindImpl(Wind wind) {
         final boolean bearingIsNull;
         final boolean positionIsNull;
         final boolean timePointIsNull;

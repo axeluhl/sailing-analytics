@@ -394,7 +394,7 @@ public class TrackTest {
             track.unlockAfterRead();
         }
         assertEquals(1., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
-                getB().getKnots(), 0.001);
+                getB().getKnots(), 0.01);
     }
     
     @Test
@@ -527,7 +527,7 @@ public class TrackTest {
         track.addGPSFix(f3);
         PositionAssert.assertGPSFixEquals(f2, track.getFirstFixAtOrAfter(f2.getTimePoint()), /* pos deg delta */ 0.00001, /* bearing deg delta */ 0.01, /* knot delta */ 0.01); // expect the fix to still be valid, but only its provided speed shall be ignored
         SpeedWithBearing average = track.getEstimatedSpeed(t2);
-        assertEquals(1, average.getKnots(), 0.001);
+        assertEquals(1, average.getKnots(), 0.01);
     }
     
     @Test

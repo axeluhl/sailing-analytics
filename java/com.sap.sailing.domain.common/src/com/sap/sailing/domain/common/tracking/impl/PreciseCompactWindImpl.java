@@ -47,7 +47,7 @@ public class PreciseCompactWindImpl extends AbstractCompactWindImpl {
         }
     }
 
-    public PreciseCompactWindImpl(Wind wind) throws CompactionNotPossibleException {
+    public PreciseCompactWindImpl(Wind wind) {
         super(wind);
         if (wind.getBearing() == null) {
             degBearing = 0;
