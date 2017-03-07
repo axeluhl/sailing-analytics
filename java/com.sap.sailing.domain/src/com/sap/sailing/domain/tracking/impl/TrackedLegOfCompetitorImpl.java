@@ -676,6 +676,34 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
+    public Bearing getHeel(TimePoint at) {
+        final Bearing result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getHeel(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Bearing getPitch(TimePoint at) {
+        final Bearing result;
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint = hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            result = track == null ? null : track.getPitch(timePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
     public Distance getRideHeight(TimePoint at) {
         final Distance result;
         if (hasStartedLeg(at)) {
@@ -903,6 +931,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return beatAngle;
     }
     
+
     @Override
     public String toString() {
         return "TrackedLegOfCompetitor for "+getCompetitor()+" in leg "+getLeg();

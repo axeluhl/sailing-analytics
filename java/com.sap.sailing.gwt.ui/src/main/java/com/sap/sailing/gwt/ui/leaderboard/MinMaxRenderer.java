@@ -20,7 +20,25 @@ public class MinMaxRenderer {
     
     protected interface Templates extends SafeHtmlTemplates {
         @Template("<div title=\"{2}\" class=\"{1}\" style=\"background-size:{3}% 25px;\">{0}</div>")
-        SafeHtml render(String value, String cssClass, String title, int percentage);
+        SafeHtml render(String value, String cssClass, String title, double percentage);
+
+        @Template("<div title=\"{2}\" style='position:relative;'>"
+                + "<div class=\"{1}\" style=\"position:absolute;left:50%;width:1px;height:25px;background-repeat:repeat-x;\" ></div>"
+                + "<div style='position:relative;'>{0}</div>" //
+                + "</div>")
+        SafeHtml renderMiddle(String value, String cssClass, String title);
+
+        @Template("<div title=\"{2}\" style='position:relative;'>"
+                + "<div class=\"{1}\" style=\"position:absolute;left:50%;width:{3}%;background-repeat:repeat-x;\" >&nbsp;</div>"
+                + "<div style='position:relative;'>{0}</div>" //
+                + "</div>")
+        SafeHtml renderPositiveFromMiddle(String value, String cssClass, String title, double percentage);
+
+        @Template("<div title=\"{2}\" style='position:relative;'>"
+                + "<div class=\"{1}\" style=\"position:absolute;right:50%;width:{3}%;left:initial;background-repeat:repeat-x;\" >&nbsp;</div>"
+                + "<div style='position:relative;'>{0}</div>" //
+                + "</div>")
+        SafeHtml renderNegativeFromMiddle(String value, String cssClass, String title, double percentage);
     }
     
     protected static final String BACKGROUND_BAR_STYLE_BAD = "minMaxBackgroundBarBad";

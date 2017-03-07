@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
@@ -16,15 +18,15 @@ public class BravoFixImpl implements BravoFix {
     private final MeterDistance computedRideHeight;
     private final MeterDistance rideHeightPortHull;
     private final MeterDistance rideHeightStarboardHull;
-    private final double pitch;
-    private final double heel;
+    private final Bearing pitch;
+    private final Bearing heel;
     private final boolean computedIsFoiling;
 
     public BravoFixImpl(DoubleVectorFix fix) {
         this.fix = fix;
 
-        pitch = fix.get(BravoSensorDataMetadata.INSTANCE.pitchColumn);
-        heel = fix.get(BravoSensorDataMetadata.INSTANCE.heelColumn);
+        pitch = new DegreeBearingImpl(fix.get(BravoSensorDataMetadata.INSTANCE.pitchColumn));
+        heel = new DegreeBearingImpl(fix.get(BravoSensorDataMetadata.INSTANCE.heelColumn));
         double rideHeightPortHullasDouble = fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn);
         double rideHeightStarboardHullasDouble = fix
                 .get(BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn);
@@ -71,12 +73,12 @@ public class BravoFixImpl implements BravoFix {
     }
 
     @Override
-    public double getPitch() {
+    public Bearing getPitch() {
         return pitch;
     }
 
     @Override
-    public double getHeel() {
+    public Bearing getHeel() {
         return heel;
     }
 }

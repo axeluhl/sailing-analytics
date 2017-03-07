@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.tracking;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sse.datamining.annotations.Dimension;
@@ -31,9 +32,9 @@ public interface BravoFix extends SensorFix {
     boolean isFoiling();
 
     @Statistic(messageKey="pitch", resultDecimals=1)
-    double getPitch();
+    Bearing getPitch();
 
     @Statistic(messageKey = "heel", resultDecimals = 1)
-    double getHeel();
+    Bearing getHeel();
 
 }
