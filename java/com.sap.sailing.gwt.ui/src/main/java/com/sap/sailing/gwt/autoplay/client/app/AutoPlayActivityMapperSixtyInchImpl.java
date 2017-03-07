@@ -9,6 +9,8 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1P
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1PresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2PresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartActivitySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
 
 public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
     private final AutoPlayClientFactory clientFactory;
@@ -28,7 +30,7 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
         } else if (place instanceof Slide2Place) {
             return new Slide2PresenterImpl((Slide2Place) place, slideCtx);
         } else {
-            return null;
+            return new StartActivitySixtyInch((StartPlaceSixtyInch) place, clientFactory);
         }
     }
 }

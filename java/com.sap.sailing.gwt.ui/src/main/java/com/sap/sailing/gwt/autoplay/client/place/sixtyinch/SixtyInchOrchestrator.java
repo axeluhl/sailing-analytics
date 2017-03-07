@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Timer;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2Place;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
 
 public class SixtyInchOrchestrator {
     
@@ -31,6 +32,9 @@ public class SixtyInchOrchestrator {
     }
     
     private void triggerNextSlide() {
+        if (cf.getPlaceController().getWhere() instanceof StartPlaceSixtyInch) {
+            return;
+        }
         currentSlideNr++;
         if (currentSlideNr > simplePath.length - 1) {
             currentSlideNr = 0;
