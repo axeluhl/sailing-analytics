@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayActivityMapperSixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayHistoryMapperSixtyInch;
@@ -17,6 +18,8 @@ public class AutoPlaySixtyInchEntryPoint extends AbstractMvpEntryPoint<StringMes
 
         AutoPlayHistoryMapperSixtyInch applicationHistoryMapper = GWT.create(AutoPlayHistoryMapperSixtyInch.class);
         initMvp(clientFactory, applicationHistoryMapper, new AutoPlayActivityMapperSixtyInchImpl(clientFactory));
+
+        RootLayoutPanel.get().add(clientFactory.getRoot());
 
         SharedResources.INSTANCE.mediaCss().ensureInjected();
         SharedResources.INSTANCE.mainCss().ensureInjected();
