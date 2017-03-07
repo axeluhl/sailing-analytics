@@ -11,9 +11,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.sapheader.SAPHeader;
 
 public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
         implements ApplicationTopLevelView, AcceptsOneWidget {
@@ -22,7 +24,11 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
     @UiField
     protected LayoutPanel mainPanel;
 
+    protected SAPHeader sapHeader = new SAPHeader(SAPSailingHeaderWithAuthentication.SAP_SAILING_APP_NAME,
+            SAPSailingHeaderWithAuthentication.SAP_SAILING_URL);
+
     private Widget currentWidget;
+
     private static ErrorReporter errorReporter = new DefaultErrorReporter<StringMessages>(StringMessages.INSTANCE);
 
     interface SixtyInchViewImplUiBinder extends UiBinder<Widget, AutoPlayMainViewSixtyInchImpl> {
@@ -30,6 +36,9 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
 
     public AutoPlayMainViewSixtyInchImpl() {
         initWidget(uiBinder.createAndBindUi(this));
+        sapHeader.setHeaderTitle("ESS 2015 ACT 1 - SINGAPORE MAKE DYNAMIC");
+        mainPanel.add(sapHeader);
+        mainPanel.setWidgetTopHeight(sapHeader, 0, Unit.PX, 75, Unit.PX);
     }
 
     @Override
