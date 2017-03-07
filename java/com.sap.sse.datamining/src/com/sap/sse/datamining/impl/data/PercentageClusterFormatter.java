@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.data;
+package com.sap.sse.datamining.impl.data;
 
 public class PercentageClusterFormatter extends AbstractClusterFormatter<Double> {
 

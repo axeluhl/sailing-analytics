@@ -331,12 +331,17 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     protected static class DummyWind extends DummyTimed implements Wind {
         private static final long serialVersionUID = -311172509910032149L;
+        private final Position position;
         public DummyWind(TimePoint timePoint) {
+            this(timePoint, /* position */ null);
+        }
+        public DummyWind(TimePoint timePoint, Position position) {
             super(timePoint);
+            this.position = position;
         }
         @Override
         public Position getPosition() {
-            return null;
+            return position;
         }
         @Override
         public Bearing getBearing() {

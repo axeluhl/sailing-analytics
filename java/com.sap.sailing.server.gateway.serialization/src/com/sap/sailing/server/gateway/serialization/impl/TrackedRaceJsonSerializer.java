@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -12,7 +13,6 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sse.common.TimePoint;
 
 public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
     public static final String FIELD_ID = "id";
@@ -24,16 +24,12 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
 
     private final String windSourceToSerialize;
     private final String windSourceIdToSerialize;
-    private final TimePoint fromTime;
-    private final TimePoint toTime;
-    private final WindTrackJsonSerializer windTrackSerializer;
+    private final Function<WindSource, WindTrackJsonSerializer> windTrackSerializerProducer;
 
-    public TrackedRaceJsonSerializer(WindTrackJsonSerializer windTrackSerializer, String windSourceToSerialize, String windSourceIdToSerialize, TimePoint fromTime, TimePoint toTime) {
-        this.windTrackSerializer = windTrackSerializer;
+    public TrackedRaceJsonSerializer(Function<WindSource, WindTrackJsonSerializer> windTrackSerializer, String windSourceToSerialize, String windSourceIdToSerialize) {
+        this.windTrackSerializerProducer = windTrackSerializer;
         this.windSourceToSerialize = windSourceToSerialize;
         this.windSourceIdToSerialize = windSourceIdToSerialize;
-        this.fromTime = fromTime;
-        this.toTime = toTime;
         windSourceToSerialize = WindSourceType.COMBINED.name();
     }
 
@@ -43,7 +39,7 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
         jsonRace.put(FIELD_NAME, trackedRace.getRace().getName());
         jsonRace.put(FIELD_REGATTA, trackedRace.getRaceIdentifier().getRegattaName());
 
-        if(windTrackSerializer != null) {
+        if (windTrackSerializerProducer != null) {
             JSONArray windTracks = new JSONArray();
 
             List<WindSource> windSources = getAvailableWindSources(trackedRace);
@@ -60,18 +56,13 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
                     if (windSourceIdToSerialize != null && windSource.getId() != null && !windSource.getId().toString().equalsIgnoreCase(windSourceIdToSerialize)) {
                         continue;
                     }
-                    windTrackSerializer.setFromTime(fromTime);
-                    windTrackSerializer.setToTime(toTime);
-                    windTrackSerializer.setWindSource(windSource);
-                    
                     WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                    JSONObject jsonWindTrack = windTrackSerializer.serialize(windTrack);
+                    JSONObject jsonWindTrack = windTrackSerializerProducer.apply(windSource).serialize(windTrack);
                     windTracks.add(jsonWindTrack);
                 }
             }
             jsonRace.put(FIELD_WINDSOURCES, windTracks);
         }
-
         return jsonRace;
     }
 
@@ -84,6 +75,9 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
             windSources.remove(windSourceToExclude);
         }
         windSources.add(new WindSourceImpl(WindSourceType.COMBINED));
+        for (final WindSource trackedLegMiddleWindSource : trackedRace.getWindSources(WindSourceType.LEG_MIDDLE)) {
+            windSources.add(trackedLegMiddleWindSource);
+        }
         return windSources;
     }
 }

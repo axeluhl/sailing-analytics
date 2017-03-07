@@ -9,7 +9,6 @@ import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -67,20 +66,10 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
-    public BoatClass getBoatClass() {
-        return getLeaderboard().getBoatClass();
-    }
-
-    @Override
     public String getRegattaName() {
         Leaderboard leaderboard = getLeaderboard();;
         final String result = leaderboard.getName();
         return result;
-    }
-
-    @Override
-    public String getCompetitorSearchTag() {
-        return getCompetitor().getSearchTag();
     }
     
     @Override

@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.ui.datamining.presentation.dataproviders;
 import java.util.LinkedHashMap;
 import java.util.function.Function;
 
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class NumberDataProvider extends AbstractDataProvider<Number> {
+public class NumberDataProvider extends AbstractNumericDataProvider<Number> {
     private final static String FLOAT = "Float";
     private final static String INTEGER = "Integer";
 
@@ -40,6 +41,17 @@ public class NumberDataProvider extends AbstractDataProvider<Number> {
     @Override
     public String getDefaultDataKeyFor(QueryResultDTO<?> result) {
         return result.getValueDecimals() == 0 ? INTEGER : FLOAT;
+    }
+
+    @Override
+    public String getLocalizedNameForDataKey(StringMessages stringMessages, String dataKey) {
+        switch (dataKey) {
+        case FLOAT:
+            return stringMessages.floatNumber();
+        case INTEGER:
+            return stringMessages.integer();
+        }
+        throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
     }
 
 }

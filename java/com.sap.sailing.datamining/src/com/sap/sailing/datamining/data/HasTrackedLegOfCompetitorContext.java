@@ -14,9 +14,6 @@ public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     
     public TrackedLegOfCompetitor getTrackedLegOfCompetitor();
     
-    @Dimension(messageKey="CompetitorSearchTag", ordinal=11) // TODO Clean me: Move Dimension to Competitor when possible
-    public String getCompetitorSearchTag();
-    
     @Dimension(messageKey="RelativeScoreInRaceInPercent", ordinal=12)
     public ClusterDTO getPercentageClusterForRelativeScoreInRace();
 

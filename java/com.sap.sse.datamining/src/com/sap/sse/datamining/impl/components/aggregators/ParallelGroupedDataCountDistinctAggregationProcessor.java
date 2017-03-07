@@ -14,9 +14,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
-import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
 
@@ -45,20 +43,10 @@ public class ParallelGroupedDataCountDistinctAggregationProcessor
         super(executor, resultReceivers, "CountDistinct");
         countMap = new ConcurrentHashMap<>();
     }
-    
-    /**
-     * We don't need synchronization here because we're using a {@link ConcurrentHashSet} and a {@link ConcurrentHashMap} to
-     * aggregate the results.
-     */
+
     @Override
-    protected AbstractProcessorInstruction<Map<GroupKey, Number>> createInstruction(GroupedDataEntry<Object> element) {
-        return new AbstractProcessorInstruction<Map<GroupKey, Number>>(this, ProcessorInstructionPriority.Aggregation) {
-            @Override
-            public Map<GroupKey, Number> computeResult() {
-                handleElement(element);
-                return createInvalidResult();
-            }
-        };
+    protected boolean needsSynchronization() {
+        return false;
     }
 
     @Override

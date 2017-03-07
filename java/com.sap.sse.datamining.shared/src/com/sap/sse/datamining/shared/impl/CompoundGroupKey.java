@@ -53,6 +53,15 @@ public class CompoundGroupKey extends AbstractGroupKey {
     }
     
     @Override
+    public int size() {
+        int size = 0;
+        for (GroupKey key : keys) {
+            size += key.size();
+        }
+        return size;
+    }
+    
+    @Override
     public List<? extends GroupKey> getKeys() {
         if (hasSubKeys) {
             return Collections.unmodifiableList(keys);
