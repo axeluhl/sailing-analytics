@@ -25,9 +25,7 @@ public class StorageDefinitionIdFactory {
         }
 
         String contextDefinitionId = StorageDefinitionId.buildContextDefinitionId(raceboardContextDefinition.getRegattaName(),
-                raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName(),
-                raceboardContextDefinition.getLeaderboardGroupName(), raceboardContextDefinition.getEventId() == null
-                        ? null : raceboardContextDefinition.getEventId().toString());
+                raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName());
 
         return new StorageDefinitionId(globalDefinitionId, contextDefinitionId);
     }
