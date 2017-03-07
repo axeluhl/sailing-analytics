@@ -19,7 +19,7 @@ public class RaceTimePanelLifecycle implements
 
     @Override
     public RaceTimePanelSettings createDefaultSettings() {
-        return new RaceTimePanelSettings(1000);
+        return new RaceTimePanelSettings();
     }
 
     @Override
@@ -39,7 +39,7 @@ public class RaceTimePanelLifecycle implements
 
     @Override
     public RaceTimePanelSettings extractGlobalSettings(RaceTimePanelSettings settings) {
-        return createDefaultSettings();
+        return settings;
     }
 
     @Override
