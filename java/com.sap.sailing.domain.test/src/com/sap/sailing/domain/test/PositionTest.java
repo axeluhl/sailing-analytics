@@ -17,8 +17,8 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -35,7 +35,7 @@ public class PositionTest {
     @Test
     public void testEqualityBetweenCompactAndVerbosePosition() {
         Position p1 = new DegreePosition(49.2, 008.3);
-        CompactGPSFixImpl compactFix = new CompactGPSFixImpl(p1, MillisecondsTimePoint.now());
+        VeryCompactGPSFixImpl compactFix = new VeryCompactGPSFixImpl(p1, MillisecondsTimePoint.now());
         assertNotSame(p1, compactFix.getPosition());
         PositionAssert.assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
     }
@@ -55,7 +55,7 @@ public class PositionTest {
     }
 
     private void assertCompactFixHasEqualLatLng(final TimePoint now, final double latDeg, final double lngDeg) {
-        GPSFix fix = new CompactGPSFixImpl(new DegreePosition(latDeg, lngDeg), now);
+        GPSFix fix = new VeryCompactGPSFixImpl(new DegreePosition(latDeg, lngDeg), now);
         assertEquals(latDeg, fix.getPosition().getLatDeg(), 0.0000001);
         assertEquals(lngDeg, fix.getPosition().getLngDeg(), 0.0000001);
     }
@@ -64,7 +64,7 @@ public class PositionTest {
     public void testEqualityBetweenCompactAndVerboseSpeedWithBearing() throws CompactionNotPossibleException {
         Position p1 = new DegreePosition(49.2, 008.3);
         SpeedWithBearing swb = new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123));
-        CompactGPSFixMovingImpl compactFix = new CompactGPSFixMovingImpl(p1, MillisecondsTimePoint.now(), swb);
+        VeryCompactGPSFixMovingImpl compactFix = new VeryCompactGPSFixMovingImpl(p1, MillisecondsTimePoint.now(), swb);
         assertNotSame(p1, compactFix.getPosition());
         PositionAssert.assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
         assertNotSame(swb, compactFix.getSpeed());

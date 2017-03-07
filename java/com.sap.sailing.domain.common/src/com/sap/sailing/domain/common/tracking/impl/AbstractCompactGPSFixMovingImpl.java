@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
-import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.AbstractSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseChange;
@@ -21,31 +20,14 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (d043530)
  *
  */
-public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFixMoving {
+public abstract class AbstractCompactGPSFixMovingImpl extends AbstractCompactGPSFixImpl implements GPSFixMoving {
     private static final long serialVersionUID = 3977983319207618335L;
 
-    /**
-     * See {@link CompactPositionHelper}
-     */
-    private final short speedInKnotsScaled;
-
-    /**
-     * See {@link CompactPositionHelper}
-     */
-    private final short degreeBearingScaled;
-    
-    private class CompactSpeedWithBearing extends AbstractSpeedImpl implements SpeedWithBearing {
+    protected abstract class AbstractCompactSpeedWithBearing extends AbstractSpeedImpl implements SpeedWithBearing {
         private static final long serialVersionUID = 1802065090733146728L;
 
         @Override
-        public double getKnots() {
-            return CompactPositionHelper.getKnotSpeed(speedInKnotsScaled);
-        }
-
-        @Override
-        public Bearing getBearing() {
-            return new CompactBearing();
-        }
+        public abstract double getKnots();
 
         @Override
         public Position travelTo(Position pos, TimePoint from, TimePoint to) {
@@ -89,33 +71,12 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
         }
     }
     
-    private class CompactBearing extends AbstractBearing {
-        private static final long serialVersionUID = 8167886382067060570L;
-
-        @Override
-        public double getDegrees() {
-            return CompactPositionHelper.getDegreeBearing(degreeBearingScaled);
-        }
-
-        @Override
-        public double getRadians() {
-            return getDegrees() / 180. * Math.PI;
-        }
+    public AbstractCompactGPSFixMovingImpl(TimePoint timePoint) {
+        super(timePoint);
     }
     
-    public CompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) throws CompactionNotPossibleException {
-        super(position, timePoint);
-        speedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(speed);
-        degreeBearingScaled = CompactPositionHelper.getDegreeBearingScaled(speed.getBearing());
-    }
-    
-    public CompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) throws CompactionNotPossibleException {
-        this(gpsFixMoving.getPosition(), gpsFixMoving.getTimePoint(), gpsFixMoving.getSpeed());
-    }
-
-    @Override
-    public SpeedWithBearing getSpeed() {
-        return new CompactSpeedWithBearing();
+    public AbstractCompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) throws CompactionNotPossibleException {
+        this(gpsFixMoving.getTimePoint());
     }
 
     @Override

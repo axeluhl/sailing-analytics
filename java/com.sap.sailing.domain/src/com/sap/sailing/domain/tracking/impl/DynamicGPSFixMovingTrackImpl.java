@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
@@ -24,8 +25,10 @@ import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
 import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
+import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.TimePoint;
 
@@ -35,15 +38,49 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
     private static final long serialVersionUID = 9111448573301259784L;
     private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
 
+    /**
+     * Uses lossy compaction of fixes. See {@link CompactPositionHelper}. Use {@link #DynamicGPSFixMovingTrackImpl(Object, long, boolean)}
+     * to configure lossless compaction.
+     */
     public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
-        super(trackedItem, millisecondsOverWhichToAverage);
+        this(trackedItem, millisecondsOverWhichToAverage, /* losslessCompaction */ false);
     }
     
     /**
-     * @param maxSpeedForSmoothening pass <code>null</code> if you don't want speed-based smoothening
+     * Uses lossy compaction. Use {@link #DynamicGPSFixMovingTrackImpl(Object, long, Speed, boolean)} to configure
+     * lossless compaction.
+     * 
+     * @param maxSpeedForSmoothening
+     *            pass <code>null</code> if you don't want speed-based smoothening
      */
     public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
-        super(trackedItem, millisecondsOverWhichToAverage, maxSpeedForSmoothening);
+        this(trackedItem, millisecondsOverWhichToAverage, maxSpeedForSmoothening, /* losslessCompaction */ false);
+    }
+
+    /**
+     * @param maxSpeedForSmoothening
+     *            pass <code>null</code> if you don't want speed-based smoothening
+     * @param losslessCompaction
+     *            If {@code true}, {@link Wind} fixes will be compacted in a way that they remain precisely equal to
+     *            their original, without rounding or range limitations different from those of the original
+     *            {@link Wind} fix. Lossy compaction, in contrast, may use a more compact form that, however, has
+     *            stricter limits on ranges and precisions. See {@link CompactPositionHelper} for details on lossy
+     *            compaction.
+     */
+    public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening, boolean losslessCompaction) {
+        super(trackedItem, millisecondsOverWhichToAverage, maxSpeedForSmoothening, losslessCompaction);
+    }
+
+    /**
+     * @param losslessCompaction
+     *            If {@code true}, {@link Wind} fixes will be compacted in a way that they remain precisely equal to
+     *            their original, without rounding or range limitations different from those of the original
+     *            {@link Wind} fix. Lossy compaction, in contrast, may use a more compact form that, however, has
+     *            stricter limits on ranges and precisions. See {@link CompactPositionHelper} for details on lossy
+     *            compaction.
+     */
+    public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, boolean losslessCompaction) {
+        super(trackedItem, millisecondsOverWhichToAverage, losslessCompaction);
     }
 
     /**
@@ -64,7 +101,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
     public boolean add(GPSFixMoving fix, boolean replace) {
         GPSFixMoving compactFix;
         try {
-            compactFix = new CompactGPSFixMovingImpl(fix);
+            compactFix = isLosslessCompaction() ? new PreciseCompactGPSFixMovingImpl(fix) : new VeryCompactGPSFixMovingImpl(fix);
         } catch (CompactionNotPossibleException e) {
             logger.log(Level.FINE, "Couldn't compact fix "+fix+". Using original instead.", e);
             compactFix = fix;

@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 
 /**
- * A utility class that "compact" fix implementations such as {@link CompactGPSFixImpl} etc. can use
+ * A utility class that "compact" fix implementations such as {@link VeryCompactGPSFixImpl} etc. can use
  * to obtain representations of latitudes, longitudes, knot speeds and degree bearings marshalled in
  * types that sacrifice very little accuracy from a real-world perspective, yet use a data type for
  * encoding that requires fewer bytes than a {@code double} value.

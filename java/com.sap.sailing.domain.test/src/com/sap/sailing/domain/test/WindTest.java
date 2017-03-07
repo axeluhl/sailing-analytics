@@ -47,7 +47,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactWindImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactWindImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
@@ -126,7 +126,7 @@ public class WindTest {
         SpeedWithBearing s1 = new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(3));
         SpeedWithBearing s2 = new KnotSpeedWithBearingImpl(22, new DegreeBearingImpl(123));
         Wind w1 = new WindImpl(p1, t1, s1);
-        Wind w2 = new CompactWindImpl(w1);
+        Wind w2 = new VeryCompactWindImpl(w1);
         PositionAssert.assertWindEquals(w1, w2, /* pos deg delta */ 0.000001, /* bearing deg delta */ 0.1, /* knot speed delta */ 0.1);
         assertEquals(w1.hashCode(), w2.hashCode());
         Wind w3 = new WindImpl(p2, t2, s2);
