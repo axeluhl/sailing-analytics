@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.Comparator;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.tracking.BravoFix;
@@ -27,7 +26,6 @@ public class PitchBearingRender extends MinMaxRenderer {
             double absCurrentDoubleValue = Math.abs(currentDoubleValue);
             maxAbsDoubleValue = Math.max(absCurrentDoubleValue, maxAbsDoubleValue);
             double percent = (absCurrentDoubleValue / maxAbsDoubleValue * 100d / 2d);
-            GWT.log("heel: " + currentDoubleValue + " / " + maxAbsDoubleValue + " ==> " + percent + "%");
             if (percent < 0.02) {
                 sb.append(TEMPLATES.renderMiddle(nullSafeValue, BACKGROUND_BAR_STYLE_OK, nullSafeTitle));
             } else if (currentDoubleValue > 0) {
