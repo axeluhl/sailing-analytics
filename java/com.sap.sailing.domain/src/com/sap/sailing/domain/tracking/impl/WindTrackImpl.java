@@ -464,7 +464,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     public void remove(Wind wind) {
         lockForWrite();
         try {
-            getInternalRawFixes().remove(wind);
+            // map through "compactify" to account for possible rounding / accuracy differences and still achieve "equals"
+            getInternalRawFixes().remove(compactify(wind));
         } finally {
             unlockAfterWrite();
         }
