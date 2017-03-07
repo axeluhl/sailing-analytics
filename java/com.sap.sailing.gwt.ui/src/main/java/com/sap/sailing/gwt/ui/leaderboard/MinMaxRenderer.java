@@ -34,10 +34,11 @@ public class MinMaxRenderer {
 
     public static class Templates {
         interface MyTemplate extends SafeHtmlTemplates {
-            @Template("<div title=\"{2}\" class=\"{1}\" style='background-size:{3}'>{0}</div>")
+            @Template("<div title=\"{2}\" class=\"{1}\" style='{3}'>{0}</div>")
             SafeHtml render(String value, String cssClass, String title, SafeStyles style);
         }
-        protected static final MyTemplate T = GWT.create(Templates.class);
+
+        protected static final MyTemplate T = GWT.create(MyTemplate.class);
 
         SafeHtml render(String value, String cssClass, String title, int percentage) {
             SafeStylesBuilder sb = new SafeStylesBuilder();
