@@ -8,6 +8,7 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
@@ -28,7 +29,7 @@ public class StartActivitySixtyInch extends AbstractActivity {
             
             @Override
             public void onSuccess(List<EventDTO> result) {
-                final StartViewSixtyInch view = clientFactory.createStartView();
+                final StartView view = clientFactory.createStartView();
                 panel.setWidget(view.asWidget());
                 
                 view.asWidget().ensureDebugId("AutoPlayStartView");

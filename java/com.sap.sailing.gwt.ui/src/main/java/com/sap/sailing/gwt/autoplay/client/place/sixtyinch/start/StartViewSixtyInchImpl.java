@@ -17,8 +17,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfigurationSixtyInch;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.PlaceNavigatorSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -31,7 +32,7 @@ import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.security.ui.client.UserService;
 
-public class StartViewSixtyInchImpl extends Composite implements StartViewSixtyInch {
+public class StartViewSixtyInchImpl extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
 
     interface StartPageViewUiBinder extends UiBinder<Widget, StartViewSixtyInchImpl> {
@@ -45,11 +46,11 @@ public class StartViewSixtyInchImpl extends Composite implements StartViewSixtyI
     @UiField DivElement leaderboardSelectionUi;
     @UiField DivElement screenConfigurationUi;
     
-    private final PlaceNavigatorSixtyInch navigator;
+    private final PlaceNavigator navigator;
     private final EventBus eventBus;
     private final List<EventDTO> events;
     
-    public StartViewSixtyInchImpl(PlaceNavigatorSixtyInch navigator, EventBus eventBus, UserService userService) {
+    public StartViewSixtyInchImpl(PlaceNavigator navigator, EventBus eventBus, UserService userService) {
         super();
         this.navigator = navigator;
         this.eventBus = eventBus;
@@ -137,7 +138,7 @@ public class StartViewSixtyInchImpl extends Composite implements StartViewSixtyI
         String selectedLeaderboardName = getSelectedLeaderboardName();
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
-            navigator.goToPlayer(new ConfigurationSixtyInch(selectedEvent.id.toString(), selectedLeaderboardName));
+            navigator.goToPlayerSixtyInch(new ConfigurationSixtyInch(selectedEvent.id.toString(), selectedLeaderboardName));
         }
     }
 

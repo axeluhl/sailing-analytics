@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.place.player.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerView;
-import com.sap.sailing.gwt.autoplay.client.place.start.DesktopStartView;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartViewSixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
@@ -29,7 +31,7 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     
     @Override
     public StartView createStartView() {
-        return new DesktopStartView(getPlaceNavigator(), getEventBus(), getUserService());
+        return new StartViewSixtyInchImpl(getPlaceNavigator(), getEventBus(), getUserService());
     }
 
     @Override
@@ -40,6 +42,11 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     @Override
     public ErrorView createErrorView(String errorMessage, Throwable errorReason) {
         return null;
+    }
+
+    @Override
+    public Place getDefaultPlace() {
+        return new StartPlaceSixtyInch();
     }
 
 }
