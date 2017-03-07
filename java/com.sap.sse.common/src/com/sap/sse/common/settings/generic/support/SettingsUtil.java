@@ -4,20 +4,28 @@ import java.util.Map;
 
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.Setting;
+import com.sap.sse.common.settings.generic.SettingsListSetting;
 import com.sap.sse.common.settings.generic.ValueCollectionSetting;
 import com.sap.sse.common.settings.generic.ValueSetting;
 
 public final class SettingsUtil {
-    
+
     private SettingsUtil() {
     }
-    
+
     private interface DefaultValuesExtractor {
         <V> V getDefaultValue(ValueSetting<V> setting);
+
         <V> Iterable<V> getDefaultValue(ValueCollectionSetting<V> setting);
     }
 
-    public static <T extends GenericSerializableSettings> T copyDefaults(T settingsWithDefaults, T settingsToSetDefaults) {
+    /**
+     * Copies the defaults of the given settingsWithDefaults to the defaults of the given settingsToSetDefaults. Be
+     * aware that this works for nested {@link GenericSerializableSettings}, {@link ValueSetting} or
+     * {@link ValueCollectionSetting}, but not {@link SettingsListSetting}.
+     */
+    public static <T extends GenericSerializableSettings> T copyDefaults(T settingsWithDefaults,
+            T settingsToSetDefaults) {
         return copyDefaultsInternal(settingsWithDefaults, settingsToSetDefaults, new DefaultValuesExtractor() {
             @Override
             public <V> V getDefaultValue(ValueSetting<V> setting) {
@@ -30,24 +38,30 @@ public final class SettingsUtil {
             }
         });
     }
-    
-    public static <T extends GenericSerializableSettings> T copyDefaultsFromValues(T settingsToUseAsDefaults, T settingsToSetDefaults) {
+
+    /**
+     * Copies the values of the given settingsWithDefaults to the defaults of the given settingsToSetDefaults. Be aware
+     * that this works for nested {@link GenericSerializableSettings}, {@link ValueSetting} or
+     * {@link ValueCollectionSetting}, but not {@link SettingsListSetting}.
+     */
+    public static <T extends GenericSerializableSettings> T copyDefaultsFromValues(T settingsToUseAsDefaults,
+            T settingsToSetDefaults) {
         return copyDefaultsInternal(settingsToUseAsDefaults, settingsToSetDefaults, new DefaultValuesExtractor() {
             @Override
             public <V> V getDefaultValue(ValueSetting<V> setting) {
                 return setting.getValue();
             }
-            
+
             @Override
             public <V> Iterable<V> getDefaultValue(ValueCollectionSetting<V> setting) {
                 return setting.getValues();
             }
         });
     }
-    
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static <T extends GenericSerializableSettings> T copyDefaultsInternal(T settingsWithDefaults, T settingsToSetDefaults,
-            DefaultValuesExtractor defaultValuesExtractor) {
+    private static <T extends GenericSerializableSettings> T copyDefaultsInternal(T settingsWithDefaults,
+            T settingsToSetDefaults, DefaultValuesExtractor defaultValuesExtractor) {
         Map<String, Setting> childSettingsWithDefaults = settingsWithDefaults.getChildSettings();
         Map<String, Setting> childSettingsToSetDefaults = settingsToSetDefaults.getChildSettings();
         for (Map.Entry<String, Setting> entry : childSettingsToSetDefaults.entrySet()) {
