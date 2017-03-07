@@ -13,7 +13,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSett
 public class PlaceNavigatorImpl implements PlaceNavigator {
     private final PlaceController placeController;
     
-    protected PlaceNavigatorImpl(PlaceController placeController) {
+    public PlaceNavigatorImpl(PlaceController placeController) {
         super();
         this.placeController = placeController;
     }

@@ -10,21 +10,21 @@ import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 
-public class DesktopApplicationClientFactory extends AbstractApplicationClientFactory implements AutoPlayAppClientFactory {
-    public DesktopApplicationClientFactory() {
+public class AutoPlayClientFactoryDesktopImpl extends AutoPlayClientFactoryBase implements AutoPlayClientFactory {
+    public AutoPlayClientFactoryDesktopImpl() {
         this(new SimpleEventBus());
     }
     
-    private DesktopApplicationClientFactory(EventBus eventBus) {
+    private AutoPlayClientFactoryDesktopImpl(EventBus eventBus) {
         this(eventBus, new PlaceController(eventBus));
     }
 
-    private DesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
+    private AutoPlayClientFactoryDesktopImpl(EventBus eventBus, PlaceController placeController) {
         this(eventBus, placeController, new PlaceNavigatorImpl(placeController));
     }
 
-    private DesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, PlaceNavigator navigator) {
-        super(new DesktopApplicationView(navigator), eventBus, placeController, navigator);
+    private AutoPlayClientFactoryDesktopImpl(EventBus eventBus, PlaceController placeController, PlaceNavigator navigator) {
+        super(new AutoPlayMainViewDesktopImpl(), eventBus, placeController, navigator);
     }
     
     @Override

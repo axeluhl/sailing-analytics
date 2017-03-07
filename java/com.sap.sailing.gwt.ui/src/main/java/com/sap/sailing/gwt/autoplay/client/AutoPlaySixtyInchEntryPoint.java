@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
-public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages, AutoPlayClientFactory> {
+public class AutoPlaySixtyInchEntryPoint extends AbstractMvpEntryPoint<StringMessages, AutoPlayClientFactory> {
     @Override
     public void doOnModuleLoad() {
         AutoPlayClientFactory clientFactory = GWT.create(AutoPlayClientFactory.class);

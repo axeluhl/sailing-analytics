@@ -14,10 +14,10 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * This is the top-level view of the autoplay application. Every time another presenter wants to reveal itself,
- * {@link DesktopApplicationView} will add its content of the target inside the {@code mainContentPanel}.
+ * {@link AutoPlayMainViewDesktopImpl} will add its content of the target inside the {@code mainContentPanel}.
  */
-public class DesktopApplicationView extends Composite implements ApplicationTopLevelView {
-    interface DesktopApplicationViewUiBinder extends UiBinder<Widget, DesktopApplicationView> {
+public class AutoPlayMainViewDesktopImpl extends Composite implements ApplicationTopLevelView {
+    interface DesktopApplicationViewUiBinder extends UiBinder<Widget, AutoPlayMainViewDesktopImpl> {
     }
 
     private static DesktopApplicationViewUiBinder uiBinder = GWT.create(DesktopApplicationViewUiBinder.class);
@@ -27,7 +27,7 @@ public class DesktopApplicationView extends Composite implements ApplicationTopL
     @UiField
     SimpleLayoutPanel mainContentPanel;
 
-    public DesktopApplicationView(PlaceNavigator navigator) {
+    public AutoPlayMainViewDesktopImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         
         RootLayoutPanel.get().add(this.asWidget());

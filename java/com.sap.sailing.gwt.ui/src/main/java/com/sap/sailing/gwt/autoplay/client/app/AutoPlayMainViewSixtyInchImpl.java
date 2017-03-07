@@ -1,0 +1,78 @@
+package com.sap.sailing.gwt.autoplay.client.app;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.layout.client.Layout.AnimationCallback;
+import com.google.gwt.layout.client.Layout.Layer;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.ResizeComposite;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.DefaultErrorReporter;
+import com.sap.sse.gwt.client.ErrorReporter;
+
+public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
+        implements ApplicationTopLevelView, AcceptsOneWidget {
+    private static SixtyInchViewImplUiBinder uiBinder = GWT.create(SixtyInchViewImplUiBinder.class);
+
+    @UiField
+    protected LayoutPanel mainPanel;
+
+    private Widget currentWidget;
+    private static ErrorReporter errorReporter = new DefaultErrorReporter<StringMessages>(StringMessages.INSTANCE);
+
+    interface SixtyInchViewImplUiBinder extends UiBinder<Widget, AutoPlayMainViewSixtyInchImpl> {
+    }
+
+    public AutoPlayMainViewSixtyInchImpl() {
+        initWidget(uiBinder.createAndBindUi(this));
+    }
+
+    @Override
+    public void setWidget(IsWidget widgetToShow) {
+        if (widgetToShow == null) {
+            // we can't display a null widget
+            return;
+        }
+        if (currentWidget == null) {
+            // first widget, just show.
+            mainPanel.add(widgetToShow);
+            currentWidget = widgetToShow.asWidget();
+        } else {
+            final Widget widgetToDispose = currentWidget;
+            mainPanel.add(widgetToShow);
+            mainPanel.setWidgetLeftWidth(widgetToShow, 100, Unit.PCT, 100, Unit.PCT);
+            mainPanel.forceLayout();
+            mainPanel.setWidgetLeftWidth(widgetToShow, 0, Unit.PCT, 100, Unit.PCT);
+            mainPanel.animate(2000, new AnimationCallback() {
+                @Override
+                public void onAnimationComplete() {
+                    if (widgetToDispose != null) {
+                        mainPanel.remove(widgetToDispose);
+                    }
+                }
+                @Override
+                public void onLayout(Layer layer, double progress) {
+                }
+            });
+        }
+    }
+
+    @Override
+    public AcceptsOneWidget getContent() {
+        return this;
+    }
+
+    @Override
+    public void showLoading(boolean visible) {
+    }
+
+    @Override
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
+    }
+}

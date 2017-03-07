@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
+<module>
+	<inherits name='com.sap.sailing.gwt.autoplay.client.AutoPlayBase'/>
+
+	<!-- Default is Tablet/Desktop -->
+	<replace-with
+		class="com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactoryDesktopImpl">
+		<when-type-is class="com.sap.sailing.gwt.autoplay.client.app.AutoPlayAppClientFactory" />
+	</replace-with>
+
+	<!-- Specify the app entry point class. -->
+	<entry-point class='com.sap.sailing.gwt.autoplay.client.AutoPlayEntryPoint' />
+
+</module>

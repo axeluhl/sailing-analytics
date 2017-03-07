@@ -19,21 +19,12 @@
   	<!--  Bootstrap API -->
 	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
 	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-  	
-	<!-- Default is Tablet/Desktop -->
-	<replace-with
-		class="com.sap.sailing.gwt.autoplay.client.app.DesktopApplicationClientFactory">
-		<when-type-is class="com.sap.sailing.gwt.autoplay.client.app.AutoPlayAppClientFactory" />
-	</replace-with>
-
-	<!-- Specify the app entry point class. -->
-	<entry-point class='com.sap.sailing.gwt.autoplay.client.AutoPlayEntryPoint' />
 
 	<!-- Specify the paths for translatable code -->
     <!-- module containing locale configuration -->
     <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 	
-	<source path="autoplay"/>
+	<source path="client"/>
 	
 	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
