@@ -66,9 +66,12 @@ public interface ScoringScheme extends Serializable {
      *            otherwise, this parameter tells the number of competitors in the same race as <code>competitor</code>,
      *            not in the entire <code>raceColumn</code> (those may be more in case of split fleets). The scoring scheme
      *            may use this number, if available, to infer a penalty score.
+     * @param timePoint
+     * 			  an optional timePoint that may help the scheme to determine the penalty related to a certain point in time only.
      */
     Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher);
+            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
+            TimePoint timePoint);
 
     /**
      * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
