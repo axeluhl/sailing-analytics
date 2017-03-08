@@ -161,9 +161,14 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
         ComponentLifecycle<S> targetLifeCycle = determineLifecycle(component.getPath(), rootLifecycle);
         S globalSettings = extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
-        S contextSettings = extractContextSettings((S) newDefaultSettings, targetLifeCycle);
-        updateSettings(component.getPath(), globalSettings, contextSettings, onSettingsStoredCallback);
+        updateGlobalSettings(component.getPath(), globalSettings, onSettingsStoredCallback);
     }
+    
+    @Override
+    public void storeSettingsForContext(Component<? extends Settings> component, Settings newSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
+        updateContextSpecificSettings(component.getPath(), newSettings, onSettingsStoredCallback);
+    }
+
 
     /**
      * Patches the settings tree with the new settings provided. The settings node with the specified path
@@ -211,9 +216,10 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @param contextSettings The context specific settings of the component which corresponds to the provided path
      * @param onSettingsStoredCallback The callback which is called when the settings storage process finishes
      */
+    @SuppressWarnings("unused")
     private void updateSettings(final ArrayList<String> path, final Settings globalSettings,
             final Settings contextSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
-        settingsStorageManager.retrieveSettingsJson(new AsyncCallback<SettingsJsons>() {
+        settingsStorageManager.retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
             
             @Override
             public void onSuccess(SettingsJsons result) {
@@ -223,6 +229,42 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
                         globalSettings);
                 SettingsJsons settingsJsons = new SettingsJsons(patchedGlobalSettings, patchedContextSpecificSettings);
                 settingsStorageManager.storeSettingsJsons(settingsJsons, onSettingsStoredCallback);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                onSettingsStoredCallback.onError(caught);
+            }
+        });
+    }
+    
+    private void updateGlobalSettings(final ArrayList<String> path, final Settings globalSettings,
+            final OnSettingsStoredCallback onSettingsStoredCallback) {
+        settingsStorageManager.retrieveGlobalSettingsJson(new AsyncCallback<JSONObject>() {
+            
+            @Override
+            public void onSuccess(JSONObject result) {
+                final JSONObject patchedGlobalSettings = patchJsonObject(result, new ArrayList<>(path),
+                        globalSettings);
+                settingsStorageManager.storeGlobalSettingsJson(patchedGlobalSettings, onSettingsStoredCallback);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                onSettingsStoredCallback.onError(caught);
+            }
+        });
+    }
+
+    private void updateContextSpecificSettings(final ArrayList<String> path, final Settings contextSpecificSettings,
+            final OnSettingsStoredCallback onSettingsStoredCallback) {
+        settingsStorageManager.retrieveContextSpecificSettingsJson(new AsyncCallback<JSONObject>() {
+            
+            @Override
+            public void onSuccess(JSONObject result) {
+                final JSONObject patchedContextSpecificSettings = patchJsonObject(result, new ArrayList<>(path),
+                        contextSpecificSettings);
+                settingsStorageManager.storeContextSpecificSettingsJson(patchedContextSpecificSettings, onSettingsStoredCallback);
             }
             
             @Override

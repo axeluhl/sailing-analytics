@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
@@ -43,6 +44,10 @@ public interface SettingsStorageManager<S extends Settings> {
      */
     void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback);
 
+    void storeGlobalSettingsJson(JSONObject globalSettingsJson, OnSettingsStoredCallback onSettingsStoredCallback);
+
+    void storeContextSpecificSettingsJson(JSONObject contextSpecificSettingsJson,
+            OnSettingsStoredCallback onSettingsStoredCallback);
     /**
      * Gets the last error occurred during settings initialisation.
      * 
@@ -52,7 +57,11 @@ public interface SettingsStorageManager<S extends Settings> {
 
     JSONValue settingsToJSON(Settings newSettings);
 
-    void retrieveSettingsJson(AsyncCallback<SettingsJsons> asyncCallback);
+    void retrieveSettingsJsons(AsyncCallback<SettingsJsons> asyncCallback);
+    
+    void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback);
+    
+    void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback);
     
     void dispose();
 

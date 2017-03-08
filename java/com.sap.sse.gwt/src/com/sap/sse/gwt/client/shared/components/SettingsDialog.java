@@ -7,6 +7,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
+import com.sap.sse.gwt.client.shared.perspective.DummyOnSettingsStoredCallback;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
 
 public class SettingsDialog<SettingsType extends Settings> extends AbstractSettingsDialog<SettingsType> {
@@ -57,22 +58,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
             SettingsDialogComponent<SettingsType> dialogComponent, StringMessages stringMessages,
             boolean animationEnabled, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator, final DialogCallback<SettingsType> callback) {
         super(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled, linkWithSettingsGenerator,
-                new DialogCallback<SettingsType>() {
-                    @Override
-                    public void cancel() {
-                        if (callback != null) {
-                            callback.cancel();
-                        }
-                    }
-
-                    @Override
-                    public void ok(SettingsType newSettings) {
-                        component.updateSettings(newSettings);
-                        if (callback != null) {
-                            callback.ok(newSettings);
-                        }
-                    }
-                });
+                new SettingsDialogCallback<>(component, callback));
 
         if (component.getComponentContext() != null
                 && component.getComponentContext().hasMakeCustomDefaultSettingsSupport(component)) {
@@ -116,6 +102,35 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
                 }
             }
         });
+    }
+    
+    private static class SettingsDialogCallback<SettingsType extends Settings> implements DialogCallback<SettingsType> {
+        
+        private final DialogCallback<SettingsType> nestedCallback;
+        private final Component<SettingsType> component;
+        
+        public SettingsDialogCallback(Component<SettingsType> component, DialogCallback<SettingsType> nestedCallback) {
+            this.component = component;
+            this.nestedCallback = nestedCallback;
+        }
+        
+        @Override
+        public void ok(SettingsType editedSettings) {
+            if (component.getComponentContext() != null
+                    && component.getComponentContext().hasMakeCustomDefaultSettingsSupport(component)) {
+                component.getComponentContext().storeSettingsForContext(component, editedSettings, new DummyOnSettingsStoredCallback());
+            }
+            component.updateSettings(editedSettings);
+            if(nestedCallback != null) {
+                nestedCallback.ok(editedSettings);
+            }
+        }
+        @Override
+        public void cancel() {
+            if(nestedCallback != null) {
+                nestedCallback.cancel();
+            }
+        }
     }
     
 }

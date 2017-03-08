@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.settings;
 
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
@@ -48,7 +49,15 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
 
     @Override
     public void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback) {
-        
+    }
+    
+    @Override
+    public void storeGlobalSettingsJson(JSONObject globalSettingsJson, OnSettingsStoredCallback onSettingsStoredCallback) {
+    }
+    
+    @Override
+    public void storeContextSpecificSettingsJson(JSONObject contextSpecificSettingsJson,
+            OnSettingsStoredCallback onSettingsStoredCallback) {
     }
 
     @Override
@@ -62,8 +71,15 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
     }
 
     @Override
-    public void retrieveSettingsJson(AsyncCallback<SettingsJsons> asyncCallback) {
-        
+    public void retrieveSettingsJsons(AsyncCallback<SettingsJsons> asyncCallback) {
+    }
+    
+    @Override
+    public void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
+    }
+    
+    @Override
+    public void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
     }
 
     @Override

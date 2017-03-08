@@ -79,5 +79,7 @@ public interface ComponentContext<S extends Settings> {
     void initInitialSettings();
     
     void dispose();
+
+    void storeSettingsForContext(Component<? extends Settings> component, Settings newSettings, OnSettingsStoredCallback onSettingsStoredCallback);
     
 }

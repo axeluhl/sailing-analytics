@@ -144,4 +144,10 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     @Override
     public void dispose() {
     }
+
+    @Override
+    public void storeSettingsForContext(Component<? extends Settings> component, Settings newSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
+        throw new UnsupportedOperationException("Settings storage is unsupported for this type of ComponentContext "
+                + this.getClass().getName() + " " + component.getPath() + " " + newSettings);
+    }
 }
