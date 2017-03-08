@@ -31,8 +31,7 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
 
     @Override
     protected LeaderboardPerspectiveOwnSettings extractOwnContextSettings(LeaderboardPerspectiveOwnSettings settings) {
-        LeaderboardPerspectiveOwnSettings defaultSet = createPerspectiveOwnDefaultSettings();
-        return defaultSet;
+        return settings;
     }
 
     @Override

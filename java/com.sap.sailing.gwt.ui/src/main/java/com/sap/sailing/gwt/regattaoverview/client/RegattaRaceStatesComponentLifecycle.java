@@ -45,8 +45,6 @@ public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<R
 
     @Override
     public RegattaRaceStatesSettings extractContextSpecificSettings(RegattaRaceStatesSettings settings) {
-        final RegattaRaceStatesSettings defaultSettings = new RegattaRaceStatesSettings();
-        return settings.createInstanceWithSettings(settings.getVisibleCourseAreas(), settings.getVisibleRegattas(),
-                defaultSettings.isShowOnlyRacesOfSameDay(), defaultSettings.isShowOnlyCurrentlyRunningRaces());
+        return settings;
     }
 }

@@ -39,17 +39,11 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings>
 
     @Override
     public WindChartSettings extractGlobalSettings(WindChartSettings settings) {
-        WindChartSettings def = createDefaultSettings();
-        return new WindChartSettings(settings.isShowWindSpeedSeries(), def.getWindSpeedSourcesToDisplay(),
-                settings.isShowWindDirectionsSeries(), def.getWindDirectionSourcesToDisplay(),
-                settings.getResolutionInMilliseconds());
+        return settings;
     }
 
     @Override
     public WindChartSettings extractContextSpecificSettings(WindChartSettings settings) {
-        WindChartSettings def = createDefaultSettings();
-        return new WindChartSettings(def.isShowWindSpeedSeries(), settings.getWindSpeedSourcesToDisplay(),
-                def.isShowWindDirectionsSeries(), settings.getWindDirectionSourcesToDisplay(),
-                def.getResolutionInMilliseconds());
+        return settings;
     }
 }

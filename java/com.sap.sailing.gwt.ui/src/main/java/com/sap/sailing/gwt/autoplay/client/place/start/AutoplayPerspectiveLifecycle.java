@@ -64,7 +64,7 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
 
     @Override
     protected AutoplayPerspectiveOwnSettings extractOwnContextSettings(AutoplayPerspectiveOwnSettings settings) {
-        return createPerspectiveOwnDefaultSettings();
+        return settings;
     }
 
 }

@@ -44,6 +44,6 @@ public class RaceTimePanelLifecycle implements
 
     @Override
     public RaceTimePanelSettings extractContextSpecificSettings(RaceTimePanelSettings settings) {
-        return createDefaultSettings();
+        return settings;
     }
 }

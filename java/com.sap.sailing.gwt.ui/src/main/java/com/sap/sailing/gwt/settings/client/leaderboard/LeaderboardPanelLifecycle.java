@@ -70,24 +70,7 @@ public class LeaderboardPanelLifecycle
 
     @Override
     public LeaderboardSettings extractContextSpecificSettings(LeaderboardSettings leaderboardSettings) {
-        LeaderboardSettings defaultLeaderboardSettings = leaderboardSettings.getDefaultSettings();
-        LeaderboardSettings contextSpecificLeaderboardSettings = new LeaderboardSettings(
-                defaultLeaderboardSettings.getManeuverDetailsToShow(), defaultLeaderboardSettings.getLegDetailsToShow(),
-                defaultLeaderboardSettings.getRaceDetailsToShow(), defaultLeaderboardSettings.getOverallDetailsToShow(),
-                leaderboardSettings.getNamesOfRaceColumnsToShow(), leaderboardSettings.getNamesOfRacesToShow(),
-                defaultLeaderboardSettings.getNumberOfLastRacesToShow(),
-                defaultLeaderboardSettings.isAutoExpandPreSelectedRace(),
-                defaultLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                leaderboardSettings.getNameOfRaceToSort(), leaderboardSettings.isSortAscending(),
-                defaultLeaderboardSettings.isUpdateUponPlayStateChange(),
-                defaultLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
-                defaultLeaderboardSettings.isShowAddedScores(),
-                defaultLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                defaultLeaderboardSettings.isShowCompetitorSailIdColumn(),
-                defaultLeaderboardSettings.isShowCompetitorFullNameColumn());
-        contextSpecificLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(leaderboardSettings,
-                contextSpecificLeaderboardSettings);
-        return contextSpecificLeaderboardSettings;
+        return leaderboardSettings;
     }
 
 }

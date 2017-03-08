@@ -66,7 +66,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     @Override
     protected LeaderboardWithHeaderPerspectiveSettings extractOwnGlobalSettings(
             LeaderboardWithHeaderPerspectiveSettings settings) {
-        return createPerspectiveOwnDefaultSettings();
+        return settings;
     }
 
     @Override

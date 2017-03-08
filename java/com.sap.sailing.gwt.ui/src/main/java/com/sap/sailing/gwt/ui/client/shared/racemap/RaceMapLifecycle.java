@@ -46,7 +46,8 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
 
     @Override
     public RaceMapSettings extractGlobalSettings(RaceMapSettings settings) {
-        return createDefaultSettings();
+        RaceMapSettings defaultSettings = createDefaultSettings();
+        return RaceMapSettings.createSettingsWithNewDefaultBuoyZoneRadius(settings, defaultSettings.getBuoyZoneRadius());
     }
 
     @Override

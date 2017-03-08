@@ -52,6 +52,6 @@ public class MultiCompetitorLeaderboardChartLifecycle implements
     @Override
     public MultiCompetitorLeaderboardChartSettings extractContextSpecificSettings(
             MultiCompetitorLeaderboardChartSettings settings) {
-        return createDefaultSettings();
+        return settings;
     }
 }

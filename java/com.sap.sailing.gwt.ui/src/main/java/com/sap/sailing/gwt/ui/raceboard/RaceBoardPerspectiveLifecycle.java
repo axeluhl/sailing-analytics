@@ -98,11 +98,11 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
 
     @Override
     protected RaceBoardPerspectiveOwnSettings extractOwnGlobalSettings(RaceBoardPerspectiveOwnSettings settings) {
-        return createPerspectiveOwnDefaultSettings();
+        return settings;
     }
 
     @Override
     protected RaceBoardPerspectiveOwnSettings extractOwnContextSettings(RaceBoardPerspectiveOwnSettings settings) {
-        return createPerspectiveOwnDefaultSettings();
+        return settings;
     }
 }
