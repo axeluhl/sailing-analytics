@@ -198,8 +198,11 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
     }
     
     private S convertToSettings(S defaultSettings, SettingsJsons settingsJsons) {
-        defaultSettings = deserializeFromJson(defaultSettings, settingsJsons.getGlobalSettingsJson());
-        defaultSettings = deserializeFromJson(defaultSettings, settingsJsons.getContextSpecificSettingsJson());
+        if(settingsJsons.getContextSpecificSettingsJson() != null) {
+            defaultSettings = deserializeFromJson(defaultSettings, settingsJsons.getContextSpecificSettingsJson());
+        } else if(settingsJsons.getGlobalSettingsJson() != null) {
+            defaultSettings = deserializeFromJson(defaultSettings, settingsJsons.getGlobalSettingsJson());
+        }
         defaultSettings = retrieveDefaultSettingsFromUrl(defaultSettings);
         return defaultSettings;
     }
