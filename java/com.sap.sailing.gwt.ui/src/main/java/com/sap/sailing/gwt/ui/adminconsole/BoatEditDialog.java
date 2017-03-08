@@ -121,7 +121,7 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL);
+        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL, Distance.NULL);
         BoatDTO boat = new BoatDTO(boatToEdit.getIdAsString(), name.getText(), boatClass, sailId.getText(), color);
         return boat;
     }
