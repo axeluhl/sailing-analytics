@@ -183,17 +183,17 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition createRaceDefinition(Regatta regatta, String raceID, Map<Competitor, Boat> competitorsAndBoats,
-            List<ControlPoint> courseDefinition) {
+    public RaceDefinition createRaceDefinition(Regatta regatta, String swissTimingRaceID, Map<Competitor, Boat> competitorsAndBoats,
+            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition) {
         List<Waypoint> waypoints = new ArrayList<>();
         for (ControlPoint controlPoint : courseDefinition) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
             waypoints.add(waypoint);
         }
         com.sap.sailing.domain.base.Course domainCourse = new CourseImpl("Course", waypoints);
-        BoatClass boatClass = getRaceTypeFromRaceID(raceID).getBoatClass();
-        logger.info("Creating RaceDefinitionImpl for race "+raceID);
-        RaceDefinition result = new RaceDefinitionImpl(regatta.getId().toString()+"/"+raceID, domainCourse, boatClass, competitorsAndBoats);
+        BoatClass boatClass = getRaceTypeFromRaceID(swissTimingRaceID).getBoatClass();
+        logger.info("Creating RaceDefinitionImpl for race "+swissTimingRaceID);
+        RaceDefinition result = new RaceDefinitionImpl(raceName, domainCourse, boatClass, competitorsAndBoats, raceIdForRaceDefinition);
         regatta.addRace(result);
         return result;
     }
@@ -383,10 +383,10 @@ public class DomainFactoryImpl implements DomainFactory {
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port,
             String raceID, String raceName, String raceDescription, BoatClass boatClass, StartList startList,
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm) {
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm,
+            boolean trackWind, boolean correctWindDirectionByMagneticDeclination) {
         return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceName, raceDescription,
                 boatClass, startList, delayToLiveInMillis, swissTimingFactory, domainFactory, raceLogStore,
-                regattaLogStore, useInternalMarkPassingAlgorithm);
+                regattaLogStore, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination);
     }
-
 }

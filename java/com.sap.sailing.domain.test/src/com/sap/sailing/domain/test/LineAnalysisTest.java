@@ -71,7 +71,7 @@ public class LineAnalysisTest extends TrackBasedTest {
         final Distance distanceBehindLine = new MeterDistance(10);
         final Position behindMiddleOfLine = lineMiddle.translateGreatCircle(awayFromCourseSideOrthogonalToLine, distanceBehindLine);
         trackedRace.getTrack(competitorWithBoat.getCompetitor()).add(new GPSFixMovingImpl(behindMiddleOfLine, now, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45))));
-        assertEquals(distanceBehindLine.getMeters(), trackedRace.getDistanceToStartLine(competitorWithBoat.getCompetitor(), now).getMeters(), 0.000001);
+        assertEquals(distanceBehindLine.getMeters(), trackedRace.getDistanceToStartLine(competitorWithBoat.getCompetitor(), now).getMeters(), 0.01);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class LineAnalysisTest extends TrackBasedTest {
         final Position behindOutsideOfLine = outsideOfLine.translateGreatCircle(awayFromCourseSideOrthogonalToLine, distanceBehindLine);
         trackedRace.getTrack(competitorWithBoat.getCompetitor()).add(new GPSFixMovingImpl(behindOutsideOfLine, now, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45))));
         // the distance is that of the hypotenuse formed by the two cathesuses of 10m and 30m length, respectively:
-        assertEquals(Math.sqrt(10.*10.+30.*30.), trackedRace.getDistanceToStartLine(competitorWithBoat.getCompetitor(), now).getMeters(), 0.001);
+        assertEquals(Math.sqrt(10.*10.+30.*30.), trackedRace.getDistanceToStartLine(competitorWithBoat.getCompetitor(), now).getMeters(), 0.01);
     }
 
     private Mark getMark(String name) {

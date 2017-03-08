@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -60,7 +61,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class WindChart extends AbstractRaceChart<WindChartSettings> implements RequiresResize {
-    public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
+    public static final String LOAD_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
     
     private static final int LINE_WIDTH = 1;
 
@@ -435,15 +436,23 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
      */
     @Override
     public void updateSettings(WindChartSettings newSettings) {
+        boolean clearCacheAndReload = false;
+        final Set<String> oldWindSourceTypesToRequest = getNamesOfWindSourceTypesOfWhichToDisplaySpeedOrDirection();
         if (newSettings.getResolutionInMilliseconds() != settings.getResolutionInMilliseconds()) {
             settings.setResolutionInMilliseconds(newSettings.getResolutionInMilliseconds());
-            clearCacheAndReload();
+            clearCacheAndReload = true;
         }
         settings.setShowWindDirectionsSeries(newSettings.isShowWindDirectionsSeries());
         settings.setWindDirectionSourcesToDisplay(newSettings.getWindDirectionSourcesToDisplay());
 
         settings.setShowWindSpeedSeries(newSettings.isShowWindSpeedSeries());
         settings.setWindSpeedSourcesToDisplay(newSettings.getWindSpeedSourcesToDisplay());
+        if (!oldWindSourceTypesToRequest.equals(getNamesOfWindSourceTypesOfWhichToDisplaySpeedOrDirection())) {
+            clearCacheAndReload = true;
+        }
+        if (clearCacheAndReload) {
+            clearCacheAndReload();
+        }
         updateVisibleSeries();
     }
 
@@ -453,7 +462,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         windSourceDirectionPoints.clear();
         windSourceSpeedPoints.clear();
         firstPointOfFirstSeries = null;
-        
         loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
     }
 
@@ -473,9 +481,10 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     showLoading(stringMessages.windChartLoading());
                 }
                 GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
-                        from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
+                        from, to, settings.getResolutionInMilliseconds(), getNamesOfWindSourceTypesOfWhichToDisplaySpeedOrDirection(),
+                        /* onlyUpToNewestEvent==true because we don't want
                         to overshoot the evidence so far */ true);
-                asyncActionsExecutor.execute(getWindInfoAction, LODA_WIND_CHART_DATA_CATEGORY,
+                asyncActionsExecutor.execute(getWindInfoAction, LOAD_WIND_CHART_DATA_CATEGORY,
                         new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
                             public void onSuccess(WindInfoForRaceDTO result) {
@@ -501,6 +510,17 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         }
     }
     
+    private Set<String> getNamesOfWindSourceTypesOfWhichToDisplaySpeedOrDirection() {
+        final Set<String> result = new HashSet<>();
+        for (WindSourceType speedType : getSettings().getWindSpeedSourcesToDisplay()) {
+            result.add(speedType.name());
+        }
+        for (WindSourceType speedType : getSettings().getWindDirectionSourcesToDisplay()) {
+            result.add(speedType.name());
+        }
+        return result;
+    }
+
     private void clearChart() {
         chart.removeAllSeries();
     }

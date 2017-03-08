@@ -2,6 +2,8 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -101,8 +103,8 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
 
         mappings = new RegattaLogDeviceCompetitorMappingFinder(log).analyze();
         mappingForC = mappings.get(competitor).get(0);
-        assertThat("mapping now ends at checkout timepoint", mappingForC.getTimeRange().to().asMillis(),
-                equalTo(toMillis));
+        assertTrue("mapping now ends at checkout timepoint", mappingForC.getTimeRange().includes(new MillisecondsTimePoint(toMillis)));
+        assertFalse("mapping now ends at checkout timepoint", mappingForC.getTimeRange().includes(new MillisecondsTimePoint(toMillis+1)));
     }
 
 }

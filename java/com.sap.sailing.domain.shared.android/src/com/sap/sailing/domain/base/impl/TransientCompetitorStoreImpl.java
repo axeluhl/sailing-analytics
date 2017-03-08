@@ -262,7 +262,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                     CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
                     Boat b = c.getBoat();
                     BoatClassDTO boatClassDTO = new BoatClassDTO(b.getBoatClass().getName(), b.getBoatClass().getDisplayName(), 
-                            b.getBoatClass().getHullLength());
+                            b.getBoatClass().getHullLength(), b.getBoatClass().getHullBeam());
                     BoatDTO boatDTO = new BoatDTO(b.getId().toString(), b.getName(), boatClassDTO, b.getSailID(), b.getColor());  
                     competitorDTO = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(), countryCode == null ? ""
                             : countryCode.getTwoLetterISOCode(), countryCode == null ? ""
@@ -488,7 +488,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 boatDTO = weakBoatDTOCache.get(b);
                 if (boatDTO == null) {
                     BoatClassDTO boatClassDTO = new BoatClassDTO(b.getBoatClass().getName(), 
-                            b.getBoatClass().getDisplayName(), b.getBoatClass().getHullLength());
+                            b.getBoatClass().getDisplayName(), b.getBoatClass().getHullLength(), b.getBoatClass().getHullBeam());
                     boatDTO = new BoatDTO(b.getId().toString(), b.getName(), boatClassDTO, b.getSailID(), b.getColor());
                     weakBoatDTOCache.put(b, boatDTO);
                 }

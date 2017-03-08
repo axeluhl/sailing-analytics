@@ -82,11 +82,13 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
@@ -101,6 +103,7 @@ import com.sap.sailing.domain.common.impl.CourseChangeImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.TargetTimeInfoImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -2837,7 +2840,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            <code>competitor</code>, reduced to the interval requested, will be returned.
      */
     @Override
-    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
+    public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> allManeuvers = maneuverCache.get(competitor, waitForLatest);
         List<Maneuver> result;
         if (allManeuvers == null) {
@@ -3848,8 +3851,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Position getCenterOfCourse(TimePoint at) {
         int count = 0;
         ScalablePosition sum = null;
+        final MarkPositionAtTimePointCache cache = new MarkPositionAtTimePointCacheImpl(this, at);
         for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
-            final Position waypointPosition = getApproximatePosition(waypoint, at);
+            final Position waypointPosition = getApproximatePosition(waypoint, at, cache);
             if (waypointPosition != null) {
                 ScalablePosition p = new ScalablePosition(waypointPosition);
                 if (sum == null) {
@@ -3930,18 +3934,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
+    public TargetTimeInfo getEstimatedTimeToComplete(final TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
             NoWindException {
        if (polarDataService == null) {
             throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
         }
         Duration durationOfAllLegs = Duration.NULL;
-        final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, timepoint);
+        TimePoint current = timepoint;
+        final List<LegTargetTimeInfo> legTargetTimes = new ArrayList<>();
         for (TrackedLeg leg : trackedLegs.values()) {
-            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint, markPositionCache);
-            durationOfAllLegs = durationOfAllLegs.plus(durationOfLeg);
+            final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, current);
+            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeToComplete(polarDataService, current, markPositionCache);
+            legTargetTimes.add(legTargetTime);
+            durationOfAllLegs = durationOfAllLegs.plus(legTargetTime.getExpectedDuration());
+            current = current.plus(legTargetTime.getExpectedDuration()); // simulate the next leg with the wind as of the projected finishing time of the previous leg
         }
-        return durationOfAllLegs;
+        return new TargetTimeInfoImpl(legTargetTimes);
     }
     
     @Override
@@ -3997,7 +4005,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         LockUtil.lockForWrite(sensorTracksLock);
         try {
             TrackT result = getTrackInternal(key);
-            if (result == null) {
+            if (result == null && tracks.containsKey(competitor)) {
+                // A track is only added if the given Competitor is known to participate in this race
                 result = newTrackFactory.get();
                 addSensorTrackInternal(key, result);
             }

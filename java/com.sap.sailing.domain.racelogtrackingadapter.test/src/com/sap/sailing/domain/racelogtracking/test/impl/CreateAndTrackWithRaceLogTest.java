@@ -78,7 +78,7 @@ public class CreateAndTrackWithRaceLogTest {
 
     @Before
     public void setup() {
-        service = new RacingEventServiceImpl(true, new MockSmartphoneImeiServiceFinderFactory());
+        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
         sensorFixStore = service.getSensorFixStore();
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         author = service.getServerAuthor();
@@ -114,7 +114,7 @@ public class CreateAndTrackWithRaceLogTest {
             Exception {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
         exception.expect(NotDenotedForRaceLogTrackingException.class);
-        adapter.startTracking(service, leaderboard, column, fleet);
+        adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
     }
 
     private void testSize(Track<?> track, int expected) {
@@ -185,7 +185,7 @@ public class CreateAndTrackWithRaceLogTest {
         raceLog.add(new RaceLogRegisterCompetitorEventImpl(t(), author, 0, comp1));
         raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
         // start tracking
-        adapter.startTracking(service, leaderboard, column, fleet);
+        adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
         
 
         // now there is a tracked race
@@ -227,7 +227,7 @@ public class CreateAndTrackWithRaceLogTest {
         raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
 
         // start tracking
-        adapter.startTracking(service, leaderboard, column, fleet);
+        adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
 
         // now there is a trackedrace
         TrackedRace race = column.getTrackedRace(fleet);

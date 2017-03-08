@@ -305,6 +305,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String details();
     String noGroupSelected();
     String combinedWindSourceTypeName();
+    String legMiddleWindSourceTypeName();
     String courseBasedWindSourceTypeName();
     String trackBasedEstimationWindSourceTypeName();
     String windSensorWindSourceTypeName();
@@ -437,6 +438,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeHighPointEssOverall12Description();
     String scoringSchemeHighPointFirstGetsTwelveOrEight();
     String scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
+    String scoringSchemeHighPointFirstGetsTwelveOrEight2017();
+    String scoringSchemeHighPointFirstGetsTwelveOrEight2017Description();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -928,6 +931,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showWindSpeedSeriesTooltip();
     String showWindDirectionSeriesTooltip();
     String combinedWindSourceTypeTooltip();
+    String legMiddleWindSourceTypeTooltip();
     String courseBasedWindSourceTypeTooltip();
     String trackBasedEstimationWindSourceTypeTooltip();
     String windSensorWindSourceTypeTooltip();
@@ -1766,4 +1770,33 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String searchTagForImportedCompetitorPlaceholder();
     String version(String version);
     String replicables();
+    String eventRegattaRacesLegendWind();
+    String eventRegattaRacesLegendVideo();
+    String eventRegattaRacesLegendAudio();
+    String eventRegattaHeaderLegendGps();
+    String eventRegattaHeaderLegendGpsNo();
+    String eventRegattaHeaderLegendWind();
+    String eventRegattaHeaderLegendWindNo();
+    String eventRegattaHeaderLegendVideo();
+    String eventRegattaHeaderLegendVideoNo();
+    String eventRegattaHeaderLegendAudio();
+    String eventRegattaHeaderLegendAudioNo();
+    String set();
+    String gribWindImport_Title();
+    String angleInDegree();
+    String angleInRadian();
+    String centralAngleInRadian();
+    String centralAngleInDegree();
+    String kilometers();
+    String meters();
+    String nauticalMiles();
+    String seaMiles();
+    String geographicalMiles();
+    String days();
+    String hours();
+    String minutes();
+    String seconds();
+    String milliseconds();
+    String floatNumber();
+    String integer();
 }

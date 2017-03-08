@@ -191,7 +191,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL);
+        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL, Distance.NULL);
         // Use temporary competitorID as boat Id -> boat will be removed from competitor later on anyway
         BoatDTO boat = new BoatDTO(competitorToEdit.getIdAsString(), name.getText(), boatClass, sailId.getText());
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), shortName.getText(), color, email.getText(),

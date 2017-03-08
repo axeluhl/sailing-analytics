@@ -33,8 +33,9 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
     private final IControlPassingsListener listener;
     
     public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+            Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, long timeoutInMilliseconds) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         listener = new IControlPassingsListener() {
             @Override
             public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {

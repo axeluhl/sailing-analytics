@@ -31,7 +31,9 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
@@ -72,6 +74,11 @@ public class AbstractGPSFixStoreTest {
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
         return new GPSFixMovingImpl(new DegreePosition(lat, lng),
                 new MillisecondsTimePoint(millis), new KnotSpeedWithBearingImpl(knots, new DegreeBearingImpl(degrees)));
+    }
+    
+    protected GPSFix createFix(long millis, double lat, double lng) {
+        return new GPSFixImpl(new DegreePosition(lat, lng),
+                new MillisecondsTimePoint(millis));
     }
 
     @Before

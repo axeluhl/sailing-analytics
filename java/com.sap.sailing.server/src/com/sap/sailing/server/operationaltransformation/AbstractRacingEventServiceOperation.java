@@ -105,4 +105,10 @@ public abstract class AbstractRacingEventServiceOperation<ResultType> implements
     public static RacingEventServiceOperation<Void> getNoOp() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return super.toString()+" [requiresSynchronousExecution="+requiresSynchronousExecution()+"]";
+    }
+    
 }

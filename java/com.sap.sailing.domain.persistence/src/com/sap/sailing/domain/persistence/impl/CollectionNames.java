@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 
 /**
  * Defines literals providing the names for MongoDB collections. The literal documentation described the semantics
@@ -105,4 +106,10 @@ public enum CollectionNames {
      * URLs providing race results
      */
     RESULT_URLS,
+    
+    /**
+     * DB representations of {@link RaceTrackingConnectivityParameters} objects, serialized in a type-specific
+     * way by corresponding implementations of the RaceTrackingConnectivityParametersMongoHandler} interface.
+     */
+    CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED,
 }

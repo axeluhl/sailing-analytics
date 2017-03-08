@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.partials.eventstage.EventOverviewStage;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
+import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.standings.StandingsList;
 import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
@@ -28,6 +29,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -45,6 +47,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     @UiField(provided = true) EventOverviewStage stageUi;
     @UiField(provided = true) StandingsList standingsUi;
     @UiField(provided = true) StatisticsBox statisticsBoxUi;
+    @UiField RaceOfficeSection raceOfficeSectionUi;
 
     public RegattaOverviewTabView() {
     }
@@ -66,8 +69,8 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         statisticsBoxUi = new StatisticsBox(false);
         final HasRegattaMetadata regattaMetadata = currentPresenter.getRegattaMetadata();
         standingsUi = new StandingsList(regattaMetadata != null && regattaMetadata.getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(currentPresenter.getRegattaId()));
-
         initWidget(ourUiBinder.createAndBindUi(this));
+        raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
         RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
         if (currentPresenter.getRegattaMetadata() != null) {

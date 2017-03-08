@@ -19,11 +19,14 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.DoubleVectorFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
@@ -51,6 +54,8 @@ public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
     private static final String CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME = "persistentcompetitors.clear";
+    
+    private static final String RESTORE_TRACKED_RACES_PROPERTY_NAME = "restore.tracked.races";
 
     private static ExtenderBundleTracker extenderBundleTracker;
 
@@ -59,6 +64,8 @@ public class Activator implements BundleActivator {
     private RacingEventServiceImpl racingEventService;
 
     private final boolean clearPersistentCompetitors;
+    
+    private final boolean restoreTrackedRaces;
 
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
@@ -79,6 +86,8 @@ public class Activator implements BundleActivator {
     public Activator() {
         clearPersistentCompetitors = Boolean
                 .valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, "" + false));
+        restoreTrackedRaces = Boolean
+                .valueOf(System.getProperty(RESTORE_TRACKED_RACES_PROPERTY_NAME, "" + false));
         logger.log(Level.INFO,
                 "setting " + CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME + " to " + clearPersistentCompetitors);
         // there is exactly one instance of the racingEventService in the whole server
@@ -100,7 +109,7 @@ public class Activator implements BundleActivator {
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
-                trackedRegattaListener, notificationService);
+                trackedRegattaListener, notificationService, restoreTrackedRaces);
         notificationService.setRacingEventService(racingEventService);
 
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
@@ -114,11 +123,13 @@ public class Activator implements BundleActivator {
 
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
+        context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(), /* properties */ null);
+        context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(), /* properties */ null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
-        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
-                racingEventService.getId().toString());
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, racingEventService.getId().toString());
         context.registerService(Replicable.class.getName(), racingEventService, replicableServiceProperties);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
+        context.registerService(RaceLogResolver.class, racingEventService, null);
         context.registerService(ClearStateTestSupport.class.getName(), racingEventService, null);
         Dictionary<String, String> properties = new Hashtable<String, String>();
         final GPSFixMongoHandlerImpl gpsFixMongoHandler = new GPSFixMongoHandlerImpl(

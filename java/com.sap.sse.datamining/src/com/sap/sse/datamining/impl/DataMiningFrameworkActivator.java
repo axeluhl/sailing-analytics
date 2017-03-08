@@ -26,6 +26,7 @@ import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountDistinctAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataAverageAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMaxAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMedianAggregationProcessor;
@@ -80,6 +81,7 @@ public class DataMiningFrameworkActivator implements BundleActivator {
 
     private Iterable<AggregationProcessorDefinition<?, ?>> getDefaultAggregationProcessors() {
         Collection<AggregationProcessorDefinition<?, ?>> defaultAggregationProcessors = new HashSet<>();
+        defaultAggregationProcessors.add(ParallelGroupedDataCountDistinctAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedDataCountAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedNumberDataAverageAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedNumberDataMaxAggregationProcessor.getDefinition());

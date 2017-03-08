@@ -123,12 +123,6 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     }
 
     @Override
-    protected void onDataSelectionValueChange() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
         final Set<Series> seriesToHideAfterRendering = new HashSet<>();
         Map<GroupKey, ?> results = result.getResults();

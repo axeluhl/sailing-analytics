@@ -46,6 +46,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -136,7 +137,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         competitorTrack.lockForRead();
         try {
             assertEquals(1, Util.size(competitorTrack.getRawFixes()));
-            assertEquals(fix, competitorTrack.getRawFixes().iterator().next());
+            PositionAssert.assertGPSFixEquals(fix, competitorTrack.getRawFixes().iterator().next(), /* pos deg delta */ 0.0000001, /* bearing deg delta */ 0.01, /* knot speed delta */ 0.01);
             assertNotSame(fix, competitorTrack.getRawFixes().iterator().next());
         } finally {
             competitorTrack.unlockAfterRead();
@@ -157,7 +158,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         replicaMarkTrack.lockForRead();
         try {
             assertEquals(1, Util.size(replicaMarkTrack.getRawFixes()));
-            assertEquals(replicaMarkTrack.getRawFixes().iterator().next(), fix);
+            PositionAssert.assertGPSFixEquals(replicaMarkTrack.getRawFixes().iterator().next(), fix, /* pos deg delta */ 0.0000001);
             assertNotSame(fix, replicaMarkTrack.getRawFixes().iterator().next());
         } finally {
             replicaMarkTrack.unlockAfterRead();
@@ -180,7 +181,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         try {
             assertEquals(1, Util.size(replicaWindTrack.getRawFixes()));
             Wind replicaWind = replicaWindTrack.getRawFixes().iterator().next();
-            assertEquals(wind, replicaWind);
+            PositionAssert.assertWindEquals(wind, replicaWind, /* pos deg delta */ 0.0000001, /* bearing deg delta */ 0.02, /* knot speed delta */ 0.02);
             assertNotSame(wind, replicaWind);
         } finally {
             replicaWindTrack.unlockAfterRead();

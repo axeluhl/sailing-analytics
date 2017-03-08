@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -164,7 +165,7 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
         competitorTrack.lockForRead();
         try {
             assertEquals(1, Util.size(competitorTrack.getRawFixes()));
-            assertEquals(fix, competitorTrack.getRawFixes().iterator().next());
+            PositionAssert.assertGPSFixEquals(fix, competitorTrack.getRawFixes().iterator().next(), /* pos deg delta */ 0.0000001, /* bearing deg delta */ 0.01, /* knot speed delta */ 0.01);
             assertNotSame(fix, competitorTrack.getRawFixes().iterator().next());
         } finally {
             competitorTrack.unlockAfterRead();

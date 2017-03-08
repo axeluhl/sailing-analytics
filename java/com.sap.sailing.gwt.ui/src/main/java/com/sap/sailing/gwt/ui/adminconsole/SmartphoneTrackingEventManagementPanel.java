@@ -745,11 +745,9 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     private void showSetTrackingTimesDialog(RaceColumnDTO raceColumn, FleetDTO fleet) {
         new SetTrackingTimesDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumn.getName(),
                 fleet.getName(), stringMessages, new DataEntryDialog.DialogCallback<RaceLogSetTrackingTimesDTO>() {
-
                     @Override
                     public void ok(RaceLogSetTrackingTimesDTO editedObject) {
                         sailingService.setTrackingTimes(editedObject, new AsyncCallback<Void>(){
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error while setting tracking times: " + caught.getMessage());
@@ -760,9 +758,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             public void onSuccess(Void result) {
                                 refreshTrackingActionButtons();
                             }
-                            
                         });
-                        
                     }
 
                     @Override

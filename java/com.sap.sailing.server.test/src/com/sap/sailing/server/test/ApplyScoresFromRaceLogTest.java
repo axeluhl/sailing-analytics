@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -45,15 +46,20 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTestBase {
-    /**
-     * See also bug 3794: make sure that different variants of scores and max points reasons / penalties are applied to the
-     * leaderboard.
-     */
-    @Test
-    public void testApplicationOfScoresFromRaceLog() throws NoWindException {
-        final RacingEventService service = new RacingEventServiceImpl();
-        final List<Competitor> competitors = new ArrayList<>();
-        for (int i=0; i<20; i++) {
+    private RacingEventService service;
+    private Regatta regatta;
+    private RaceColumn f1Column;
+    private List<Competitor> competitors;
+    private Leaderboard leaderboard;
+    
+    @Before
+    public void setUp() {
+        service = new RacingEventServiceImpl();
+    }
+    
+    private void setUp(int numberOfCompetitors, TimePoint now, ScoringSchemeType scoringScheme) {
+        competitors = new ArrayList<>();
+        for (int i=0; i<numberOfCompetitors; i++) {
             final String competitorName = "C"+i;
             competitors.add(service.getBaseDomainFactory().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
                     competitorName, "c", /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
@@ -65,19 +71,27 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
                     competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null),
                     /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         }
-        final Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
+        regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
                 new String[] { "Default" },
                 /* medal */false, /* medal */ 0, "testOneStartedRaceWithDifferentScores",
-                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
-        TimePoint now = MillisecondsTimePoint.now();
-        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(scoringScheme));
         TrackedRace f1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors);
-        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
+        f1Column = series.get(1).getRaceColumnByName("F1");
         f1Column.setTrackedRace(f1Column.getFleets().iterator().next(), f1);
-        final Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        
+        leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         service.addLeaderboard(leaderboard); // should add a RaceLogScoringReplicator as listener to the leaderboard
         service.addRegattaWithoutReplication(regatta);
+    }
+    
+    /**
+     * See also bug 3794: make sure that different variants of scores and max points reasons / penalties are applied to the
+     * leaderboard.
+     */
+    @Test
+    public void testApplicationOfScoresFromRaceLog() throws NoWindException {
+        final TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        setUp(20, now, ScoringSchemeType.LOW_POINT);
         final Map<Competitor, Double> scores = new HashMap<>();
         final Map<Competitor, MaxPointsReason> mprs = new HashMap<>();
         int oneBasedRank = 1;
@@ -120,33 +134,9 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
      */
     @Test
     public void testScoresFromRaceLogOnlyAppliedIfExplicitOrNoMaxPointsReason() throws NoWindException {
-        final RacingEventService service = new RacingEventServiceImpl();
-        final List<Competitor> competitors = new ArrayList<>();
-        for (int i=0; i<8; i++) {
-            final String competitorName = "C"+i;
-            competitors.add(service.getBaseDomainFactory().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
-                    competitorName, competitorName, /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
-                    new TeamImpl("STG", Collections.singleton(
-                            new PersonImpl(competitorName, new NationalityImpl("GER"),
-                            /* dateOfBirth */ null, "This is famous "+competitorName)),
-                            new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName+ "Id", competitorName + "'s boat",
-                    new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null),
-                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
-        }
-        final Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
-                new String[] { "Default" },
-                /* medal */false, /* medal */ 0, "testOneStartedRaceWithDifferentScores",
-                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT));
-        TimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
-        TrackedRace f1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors);
-        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
-        f1Column.setTrackedRace(f1Column.getFleets().iterator().next(), f1);
-        final Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        
-        service.addLeaderboard(leaderboard); // should add a RaceLogScoringReplicator as listener to the leaderboard
-        service.addRegattaWithoutReplication(regatta);
+        setUp(8, now, ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT);
         int oneBasedRank = 1;
         final CompetitorResults results = new CompetitorResultsImpl();
         
@@ -177,6 +167,45 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         assertScoreCorrections(leaderboard, f1Column, competitors.get(6), MaxPointsReason.NONE,   4, /* score is corrected */  true, later); // score corrected based on rank because MaxPointsReason.NONE set
         assertScoreCorrections(leaderboard, f1Column, competitors.get(7), MaxPointsReason.NONE, 3.3, /* score is corrected */  true, later); // score corrected based on explicit score
     }
+    
+    /**
+     * See bug 4025: When a scoring race log event is received it may contain a partial competitor set. It shall depend on
+     * the previous state resulting from the race log, without the last event, what needs to be done with the leaderboard
+     * score corrections. If a competitor which which an earlier message did have a correction now no longer is part of
+     * the latest scoring race log event, and if the score corrections in the leaderboard match up with what the previous
+     * event had caused, remove that score correction again.
+     */
+    @Test
+    public void testApplyingOCSThenClearingOCS() {
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        final int numberOfCompetitors = 2;
+        setUp(numberOfCompetitors, now, ScoringSchemeType.LOW_POINT);
+        final CompetitorResults results = new CompetitorResultsImpl();
+        // set OCS
+        setResultForCompetitor(competitors.get(0), /* one-based rank */ 0, results, MaxPointsReason.OCS, /* explicit score */ null);
+        setResultForCompetitor(competitors.get(1), /* one-based rank */ 0, results, MaxPointsReason.OCS, /* explicit score */ null);
+        final RaceLog f1RaceLog = f1Column.getRaceLog(f1Column.getFleets().iterator().next());
+        final LogEventAuthorImpl author = new LogEventAuthorImpl("Axel", 0);
+        final RaceState f1RaceState = new RaceStateImpl(service, f1RaceLog, author,
+                new RacingProcedureFactoryImpl(author, new EmptyRegattaConfiguration()));
+        f1RaceState.setFinishPositioningListChanged(now, results);
+        final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
+        f1RaceState.setFinishPositioningConfirmed(now);
+        // validate that it arrived in leaderboard
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
+        
+        // now clear OCS for first competitor again and leave second competitor OCS:
+        final CompetitorResults resultsWithOCSCleared = new CompetitorResultsImpl();
+        setResultForCompetitor(competitors.get(1), /* one-based rank */ 0, resultsWithOCSCleared, MaxPointsReason.OCS, /* explicit score */ null);
+        f1RaceState.setFinishPositioningListChanged(later, resultsWithOCSCleared);
+        f1RaceState.setFinishPositioningConfirmed(later);
+        // validate that it got cleared in leaderboard
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.NONE, 1, /* score is corrected */ false, later); // ranking first, one point in low-point scheme
+    }
 
     private void assertScoreCorrections(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
             MaxPointsReason expectedMaxPointsReason, double expectedScore, boolean expectedIsScoreCorrected,
@@ -188,7 +217,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
 
     private void setResultForCompetitor(final Competitor competitor, int oneBasedRank,
             final CompetitorResults results, MaxPointsReason maxPointsReason, Double explicitScore) {
-        results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(), oneBasedRank++, maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null));
+        results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(), oneBasedRank, maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null));
     }
     
     

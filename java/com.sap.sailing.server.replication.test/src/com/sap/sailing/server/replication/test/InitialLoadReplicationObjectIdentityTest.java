@@ -1,7 +1,6 @@
 package com.sap.sailing.server.replication.test;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -61,6 +60,7 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -92,9 +92,9 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
     public void setUp() throws Exception {
         persistenceSetUp(/* dropDB */ true);
         this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE);
+                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false);
         this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE);
+                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false);
     }
     
     private void performReplicationSetup() throws Exception {
@@ -162,7 +162,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         WindTrack masterRCWindFixes = masterTrackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.RACECOMMITTEE));
         masterRCWindFixes.lockForRead();
         try {
-            assertEquals(masterWindFix, masterRCWindFixes.getRawFixes().iterator().next());
+            PositionAssert.assertWindEquals(masterWindFix, masterRCWindFixes.getRawFixes().iterator().next(), /* pos deg delta */ 0.0000001, /* bearing deg delta */ 0.01, /* knot speed delta */ 0.01);
         } finally {
             masterRCWindFixes.unlockAfterRead();
         }
@@ -237,7 +237,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         try {
             Iterator<Wind> replicaRCWindFixesIter = replicaRCWindFixes.getRawFixes().iterator();
             replicaRCWindFixesIter.next();
-            assertEquals(replicaWindFix, replicaRCWindFixesIter.next());
+            PositionAssert.assertWindEquals(replicaWindFix, replicaRCWindFixesIter.next(), /* pos deg delta */ 0.0000001, /* bearing deg delta */ 0.01, /* knot speed delta */ 0.02);
         } finally {
             replicaRCWindFixes.unlockAfterRead();
         }

@@ -11,6 +11,7 @@
   
   <inherits name="com.google.gwt.resources.Resources" />
   
+  <inherits name="com.sap.sse.security.ui.SecurityLocalesAllPermutations" />
   <inherits name="com.sap.sse.security.ui.LoginPanel"/>
   
   <!-- Specify the app entry point class.                         -->
@@ -25,6 +26,5 @@
   <set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
   <!-- Specify the paths for translatable code                    -->
-<extend-property name="locale" values="de"/>
   <source path='usermanagement'/>
 </module>
