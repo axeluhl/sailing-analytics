@@ -115,12 +115,13 @@
             <com.sap.sailing.racecommittee.app.ui.views.PanelButton
                 android:id="@+id/button_competitor"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 app:buttonCaption="@string/competitor_list"
                 app:buttonImage="?attr/competitor_list"
                 app:buttonType="typeImage"
                 app:captionPosition="bottom"
+                app:imageSize="64dp"
                 app:linePosition="left" />
         </LinearLayout>
     </com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout>

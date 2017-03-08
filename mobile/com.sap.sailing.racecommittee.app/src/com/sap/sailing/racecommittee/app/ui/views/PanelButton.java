@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -148,6 +149,12 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         setPanelText(a.getString(R.styleable.PanelButton_buttonValue));
 
         mImage = (ImageView) findViewById(R.id.panel_image);
+        int size = a.getDimensionPixelSize(R.styleable.PanelButton_imageSize, 0);
+        if (size > 0) {
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mImage.getLayoutParams();
+            params.height = size;
+            params.width = size;
+        }
         setPanelImage(a.getDrawable(R.styleable.PanelButton_buttonImage));
 
         mSwitch = (Switch) findViewById(R.id.panel_switch);

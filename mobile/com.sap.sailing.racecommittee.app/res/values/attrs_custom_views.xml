@@ -32,6 +32,8 @@
             <enum name="bottom" value="1" />
         </attr>
 
+        <attr name="imageSize" format="reference|dimension"/>
+
         <attr name="showLock" format="boolean" />
     </declare-styleable>
 
