@@ -15,6 +15,8 @@
         <item name="flags_course">@drawable/flags_course_96dp_dark</item>
         <item name="flags_postpone">@drawable/flags_postpone_96dp_dark</item>
         <item name="flags_recall">@drawable/flags_recall_96dp_dark</item>
+
+        <item name="list_24dp">?attr/list_both_24dp</item>
     </style>
 
 </resources>

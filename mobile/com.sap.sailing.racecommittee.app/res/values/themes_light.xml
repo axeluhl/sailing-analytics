@@ -91,6 +91,8 @@
         <item name="dns">@drawable/ic_dns_black</item>
         <item name="hearing">@drawable/ic_hearing_black</item>
         <item name="link_24dp">@drawable/ic_link_black_24dp</item>
+        <item name="list_both_24dp">@drawable/ic_list_both_black_24dp</item>
+        <item name="list_single_24dp">@drawable/ic_list_single_black_24dp</item>
         <item name="lock_outline">@drawable/ic_lock_outline_black</item>
         <item name="keyboard_control_36dp">@drawable/ic_keyboard_control_black_36dp</item>
         <item name="marker">@drawable/marker_light</item>
@@ -98,7 +100,9 @@
         <item name="mic_48dp">@drawable/ic_mic_black_48dp</item>
         <item name="photo_camera">@drawable/ic_photo_camera_black</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_black_36dp</item>
+        <item name="search_24dp">@drawable/ic_search_black_24dp</item>
         <item name="search_24dp_invert">@drawable/ic_search_white_24dp</item>
+        <item name="sortby_24dp">@drawable/ic_sortby_white_24dp</item>
         <item name="spinner_background">@drawable/spinner_background_light</item>
         <item name="swipe_idle">@drawable/swipe_idle_light</item>
         <item name="swipe_left">@drawable/swipe_left_light</item>
@@ -129,6 +133,8 @@
         <item name="flags_course">@drawable/flags_course_64dp_light</item>
         <item name="flags_postpone">@drawable/flags_postpone_64dp_light</item>
         <item name="flags_recall">@drawable/flags_recall_64dp_light</item>
+
+        <item name="list_24dp">?attr/list_single_24dp</item>
     </style>
 
     <style name="AppTheme.Light.PopupMenuStyle" parent="@style/Widget.AppCompat.Light.PopupMenu">

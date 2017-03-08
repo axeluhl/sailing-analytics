@@ -15,6 +15,8 @@
         <item name="flags_course">@drawable/flags_course_64dp_light</item>
         <item name="flags_postpone">@drawable/flags_postpone_64dp_light</item>
         <item name="flags_recall">@drawable/flags_recall_64dp_light</item>
+
+        <item name="list_24dp">?attr/list_both_24dp</item>
     </style>
 
     <style name="AppTheme.Light.Text.Header" parent="AppTheme.Light.Text.Normal"/>

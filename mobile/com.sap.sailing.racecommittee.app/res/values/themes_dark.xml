@@ -82,6 +82,8 @@
         <item name="dns">@drawable/ic_dns_white</item>
         <item name="hearing">@drawable/ic_hearing_white</item>
         <item name="link_24dp">@drawable/ic_link_white_24dp</item>
+        <item name="list_both_24dp">@drawable/ic_list_both_white_24dp</item>
+        <item name="list_single_24dp">@drawable/ic_list_single_white_24dp</item>
         <item name="lock_outline">@drawable/ic_lock_outline_white</item>
         <item name="keyboard_control_36dp">@drawable/ic_keyboard_control_white_36dp</item>
         <item name="marker">@drawable/marker_dark</item>
@@ -89,7 +91,9 @@
         <item name="mic_48dp">@drawable/ic_mic_white_48dp</item>
         <item name="photo_camera">@drawable/ic_photo_camera_white</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_white_36dp</item>
+        <item name="search_24dp">@drawable/ic_search_white_24dp</item>
         <item name="search_24dp_invert">@drawable/ic_search_black_24dp</item>
+        <item name="sortby_24dp">@drawable/ic_sortby_black_24dp</item>
         <item name="spinner_background">@drawable/spinner_background_dark</item>
         <item name="swipe_idle">@drawable/swipe_idle_dark</item>
         <item name="swipe_left">@drawable/swipe_left_dark</item>
@@ -120,6 +124,8 @@
         <item name="flags_course">@drawable/flags_course_64dp_dark</item>
         <item name="flags_postpone">@drawable/flags_postpone_64dp_dark</item>
         <item name="flags_recall">@drawable/flags_recall_64dp_dark</item>
+
+        <item name="list_24dp">?attr/list_single_24dp</item>
     </style>
 
     <style name="AppTheme.Dark.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">

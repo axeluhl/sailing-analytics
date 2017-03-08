@@ -72,6 +72,9 @@
     <attr name="dns" format="reference"/>
     <attr name="hearing" format="reference"/>
     <attr name="link_24dp" format="reference"/>
+    <attr name="list_24dp" format="reference"/>
+    <attr name="list_both_24dp" format="reference"/>
+    <attr name="list_single_24dp" format="reference"/>
     <attr name="lock_outline" format="reference"/>
     <attr name="keyboard_control_36dp" format="reference"/>
     <attr name="marker" format="reference"/>
@@ -79,7 +82,9 @@
     <attr name="mic_48dp" format="reference"/>
     <attr name="photo_camera" format="reference"/>
     <attr name="play_arrow_36dp" format="reference"/>
+    <attr name="search_24dp" format="reference" />
     <attr name="search_24dp_invert" format="reference"/>
+    <attr name="sortby_24dp" format="reference" />
     <attr name="spinner_background" format="reference"/>
     <attr name="swipe_idle" format="reference"/>
     <attr name="swipe_left" format="reference"/>
