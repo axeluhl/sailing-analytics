@@ -6,13 +6,17 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.place.player.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerView;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContext;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartViewSixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 
-public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBase implements AutoPlayClientFactory {
+public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBase<PlaceNavigatorSixtyInch>
+        implements AutoPlayClientFactorySixtyInch {
+    private SlideContext configurationSixtyInch;
+
     public AutoPlayClientFactorySixtyInchImpl() {
         this(new SimpleEventBus());
     }
@@ -25,8 +29,10 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
         this(eventBus, placeController, new PlaceNavigatorImpl(placeController));
     }
 
-    private AutoPlayClientFactorySixtyInchImpl(EventBus eventBus, PlaceController placeController, PlaceNavigator navigator) {
-        super(new AutoPlayMainViewSixtyInchImpl(), eventBus, placeController, navigator);
+    private AutoPlayClientFactorySixtyInchImpl(EventBus eventBus, PlaceController placeController,
+            PlaceNavigatorSixtyInch navigator) {
+        super(new AutoPlayMainViewSixtyInchImpl(eventBus), eventBus, placeController, navigator);
+        navigator.setAutoplayFactory(this);
     }
     
     @Override
@@ -48,5 +54,16 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     public Place getDefaultPlace() {
         return new StartPlaceSixtyInch();
     }
+
+    @Override
+    public void setSlideContext(SlideContext configurationSixtyInch) {
+        this.configurationSixtyInch = configurationSixtyInch;
+    }
+
+    @Override
+    public SlideContext getSlideCtx() {
+        return configurationSixtyInch;
+    }
+
 
 }

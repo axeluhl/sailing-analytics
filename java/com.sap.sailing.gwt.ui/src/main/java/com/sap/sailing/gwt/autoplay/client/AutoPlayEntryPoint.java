@@ -5,14 +5,15 @@ import com.google.gwt.dom.client.Document;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayAppActivityMapper;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayHistoryMapperDesktopImpl;
+import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
-public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages, AutoPlayClientFactory> {
+public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages, AutoPlayClientFactory<PlaceNavigator>> {
     @Override
     public void doOnModuleLoad() {
-        AutoPlayClientFactory clientFactory = GWT.create(AutoPlayClientFactory.class);
+        AutoPlayClientFactory<PlaceNavigator> clientFactory = GWT.create(AutoPlayClientFactory.class);
 
         AutoPlayHistoryMapperDesktopImpl applicationHistoryMapper = GWT.create(AutoPlayHistoryMapperDesktopImpl.class);
         initMvp(clientFactory, applicationHistoryMapper, new AutoPlayAppActivityMapper(clientFactory));

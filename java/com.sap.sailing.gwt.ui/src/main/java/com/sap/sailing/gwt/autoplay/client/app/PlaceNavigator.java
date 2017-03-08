@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfigurationSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
@@ -11,6 +10,4 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSett
 public interface PlaceNavigator {
     void goToPlayer(AutoPlayerConfiguration playerConfig, PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings,
             PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleWithAllSettings);
-
-    void goToPlayerSixtyInch(ConfigurationSixtyInch configurationSixtyInch);
 }

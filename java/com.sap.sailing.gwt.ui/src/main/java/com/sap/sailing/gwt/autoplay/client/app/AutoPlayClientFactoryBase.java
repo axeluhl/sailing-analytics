@@ -14,20 +14,24 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
-public abstract class AutoPlayClientFactoryBase extends SecureClientFactoryImpl<ApplicationTopLevelView> implements AutoPlayClientFactory {
+public abstract class AutoPlayClientFactoryBase<P extends PlaceNavigator>
+        extends SecureClientFactoryImpl<ApplicationTopLevelView> implements AutoPlayClientFactory<P> {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
-    private final PlaceNavigator navigator;
+    private final P navigator;
 
-    public AutoPlayClientFactoryBase(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController, PlaceNavigator navigator) {
+    public AutoPlayClientFactoryBase(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController,
+            P navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         sailingService = GWT.create(SailingService.class);
         mediaService = GWT.create(MediaService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService,
+                RemoteServiceMappingConstants.sailingServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
+                RemoteServiceMappingConstants.mediaServiceRemotePath);
     }
-    
+
     @Override
     public Place getDefaultPlace() {
         return new StartPlace();
@@ -44,7 +48,7 @@ public abstract class AutoPlayClientFactoryBase extends SecureClientFactoryImpl<
     }
 
     @Override
-    public PlaceNavigator getPlaceNavigator() {
+    public P getPlaceNavigator() {
         return navigator;
     }
 }

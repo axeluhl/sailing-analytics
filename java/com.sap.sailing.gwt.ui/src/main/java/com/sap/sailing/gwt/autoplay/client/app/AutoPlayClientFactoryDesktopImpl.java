@@ -12,7 +12,8 @@ import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 
-public class AutoPlayClientFactoryDesktopImpl extends AutoPlayClientFactoryBase implements AutoPlayClientFactory {
+public class AutoPlayClientFactoryDesktopImpl extends AutoPlayClientFactoryBase<PlaceNavigator>
+        implements AutoPlayClientFactory<PlaceNavigator> {
     public AutoPlayClientFactoryDesktopImpl() {
         this(new SimpleEventBus());
     }

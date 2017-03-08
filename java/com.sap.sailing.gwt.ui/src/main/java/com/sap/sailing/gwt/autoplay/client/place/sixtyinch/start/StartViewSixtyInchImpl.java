@@ -17,8 +17,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfigurationSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContextImpl;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
@@ -46,11 +46,11 @@ public class StartViewSixtyInchImpl extends Composite implements StartView {
     @UiField DivElement leaderboardSelectionUi;
     @UiField DivElement screenConfigurationUi;
     
-    private final PlaceNavigator navigator;
+    private final PlaceNavigatorSixtyInch navigator;
     private final EventBus eventBus;
     private final List<EventDTO> events;
     
-    public StartViewSixtyInchImpl(PlaceNavigator navigator, EventBus eventBus, UserService userService) {
+    public StartViewSixtyInchImpl(PlaceNavigatorSixtyInch navigator, EventBus eventBus, UserService userService) {
         super();
         this.navigator = navigator;
         this.eventBus = eventBus;
@@ -138,7 +138,7 @@ public class StartViewSixtyInchImpl extends Composite implements StartView {
         String selectedLeaderboardName = getSelectedLeaderboardName();
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
-            navigator.goToPlayerSixtyInch(new ConfigurationSixtyInch(selectedEvent.id.toString(), selectedLeaderboardName));
+            navigator.goToPlayerSixtyInch(new SlideContextImpl(selectedEvent.id.toString(), selectedLeaderboardName));
         }
     }
 

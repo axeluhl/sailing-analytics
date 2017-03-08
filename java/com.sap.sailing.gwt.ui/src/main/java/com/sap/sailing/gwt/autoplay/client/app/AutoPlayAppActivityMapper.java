@@ -9,9 +9,9 @@ import com.sap.sailing.gwt.autoplay.client.place.start.StartActivityProxy;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
 
 public class AutoPlayAppActivityMapper implements ActivityMapper {
-    private final AutoPlayClientFactory clientFactory;
+    private final AutoPlayClientFactory<PlaceNavigator> clientFactory;
 
-    public AutoPlayAppActivityMapper(AutoPlayClientFactory clientFactory) {
+    public AutoPlayAppActivityMapper(AutoPlayClientFactory<PlaceNavigator> clientFactory) {
         super();
         this.clientFactory = clientFactory;
     }

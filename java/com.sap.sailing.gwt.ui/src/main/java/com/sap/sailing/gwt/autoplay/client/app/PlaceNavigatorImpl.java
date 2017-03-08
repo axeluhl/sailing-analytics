@@ -3,19 +3,26 @@ package com.sap.sailing.gwt.autoplay.client.app;
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfigurationSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchOrchestrator;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContext;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 
-public class PlaceNavigatorImpl implements PlaceNavigator {
+public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyInch {
     private final PlaceController placeController;
+    private SixtyInchOrchestrator orchestrator;
+    private AutoPlayClientFactorySixtyInch autoplayFactory;
     
     public PlaceNavigatorImpl(PlaceController placeController) {
         super();
         this.placeController = placeController;
+    }
+
+    public void setAutoplayFactory(AutoPlayClientFactorySixtyInch autoplayFactory) {
+        this.autoplayFactory = autoplayFactory;
     }
 
     @Override
@@ -28,8 +35,15 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
 
     @Override
-    public void goToPlayerSixtyInch(ConfigurationSixtyInch configurationSixtyInch) {
-        throw new IllegalStateException("Todo start player view");
+    public void goToPlayerSixtyInch(SlideContext configurationSixtyInch) {
+        autoplayFactory.setSlideContext(configurationSixtyInch);
+        // create slidecontext here!
+        orchestrator.start();
+    }
+
+    @Override
+    public void setOrchestrator(SixtyInchOrchestrator orchestrator) {
+        this.orchestrator = orchestrator;
     }
 
 }
