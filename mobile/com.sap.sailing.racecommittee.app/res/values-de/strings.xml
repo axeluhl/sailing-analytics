@@ -517,5 +517,6 @@
     <string name="set_factor_error">Beim Setzen des Faktors ist ein Fehler aufgetreten: %s</string>
     <string name="sync_to_minute">Sync zur Minute</string>
     <string name="non_public_changed_title">Nicht öffentliche Events</string>
+    <string name="competitor_list">Teilnehmerliste</string>
 
 </resources>

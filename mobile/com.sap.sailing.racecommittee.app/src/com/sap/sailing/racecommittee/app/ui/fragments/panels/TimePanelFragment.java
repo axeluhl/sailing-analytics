@@ -29,6 +29,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
+import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -45,6 +46,8 @@ public class TimePanelFragment extends BasePanelFragment {
     private SimpleDateFormat dateFormat;
 
     private TimePanelHeaderLayout mRaceHeader;
+    private PanelButton mCompetitorList;
+
     private View mTimeLock;
     private TextView mCurrentTime;
     private TextView mHeaderTime;
@@ -76,6 +79,9 @@ public class TimePanelFragment extends BasePanelFragment {
                 new RaceHeaderClick().onClick(null);
             }
         });
+
+        mCompetitorList = ViewHelper.get(layout, R.id.button_competitor);
+        mCompetitorList.setListener(new CompetitorPanelClick());
 
         mTimeLock = ViewHelper.get(layout, R.id.time_start_lock);
         mCurrentTime = ViewHelper.get(layout, R.id.current_time);
@@ -172,9 +178,13 @@ public class TimePanelFragment extends BasePanelFragment {
 
     private void uncheckMarker(View view) {
         if (isAdded() && view != null) {
-            if (!view.equals(mRaceHeader)) {
+            if (!view.equals(mRaceHeader) && !isNormal(mRaceHeader, R.id.time_marker)) {
                 resetFragment(mTimeLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartTimeFragment.class);
                 setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
+            }
+            if (!view.equals(mCompetitorList)) {
+                resetFragment(mCompetitorList.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartTimeFragment.class);
+                mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
         }
     }
@@ -212,6 +222,30 @@ public class TimePanelFragment extends BasePanelFragment {
             default:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
                 break;
+        }
+    }
+
+    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
+
+        private View mView;
+
+        public RaceStateChangedListener() {
+            mView = new View(getActivity());
+        }
+
+        @Override
+        public void onStatusChanged(ReadonlyRaceState state) {
+            super.onStatusChanged(state);
+
+            checkStatus();
+            uncheckMarker(mView);
+        }
+
+        @Override
+        public void onStartTimeChanged(ReadonlyRaceState state) {
+            super.onStartTimeChanged(state);
+
+            mLinkedRace = null;
         }
     }
 
@@ -255,6 +289,35 @@ public class TimePanelFragment extends BasePanelFragment {
         }
     }
 
+    private class CompetitorPanelClick implements PanelButton.PanelButtonClick {
+
+        private final String TAG = CompetitorPanelClick.class.getName();
+
+        @Override
+        public void onClick(PanelButton view) {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
+            switch (view.toggleMarker()) {
+                case PanelButton.LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
+
+                case PanelButton.LEVEL_TOGGLED:
+                    replaceFragment(StartTimeFragment.newInstance(StartTimeFragment.MODE_TIME_PANEL));
+                    break;
+
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
+            }
+            view.disableToggle();
+        }
+
+        @Override
+        public void onChangedSwitch(PanelButton view, boolean isChecked) {
+            // no-op
+        }
+    }
+
     private class IntentReceiver extends BroadcastReceiver {
 
         @Override
@@ -270,6 +333,8 @@ public class TimePanelFragment extends BasePanelFragment {
                         String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
                         if (AppConstants.INTENT_ACTION_TOGGLE_TIME.equals(data)) {
                             uncheckMarker(mRaceHeader);
+                        } else if (AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR.equals(data)) {
+                            uncheckMarker(mCompetitorList);
                         } else {
                             uncheckMarker(view);
                         }
@@ -287,30 +352,6 @@ public class TimePanelFragment extends BasePanelFragment {
                     }
                 }
             }
-        }
-    }
-
-    private class RaceStateChangedListener extends BaseRaceStateChangedListener {
-
-        private View mView;
-
-        public RaceStateChangedListener() {
-            mView = new View(getActivity());
-        }
-
-        @Override
-        public void onStatusChanged(ReadonlyRaceState state) {
-            super.onStatusChanged(state);
-
-            checkStatus();
-            uncheckMarker(mView);
-        }
-
-        @Override
-        public void onStartTimeChanged(ReadonlyRaceState state) {
-            super.onStartTimeChanged(state);
-
-            mLinkedRace = null;
         }
     }
 }

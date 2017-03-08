@@ -64,6 +64,7 @@
     <attr name="create" format="reference"/>
     <attr name="compass_back" format="reference"/>
     <attr name="compass_needle" format="reference"/>
+    <attr name="competitor_list" format="reference"/>
     <attr name="course_triangle_48dp" format="reference"/>
     <attr name="course_triangle_64dp" format="reference"/>
     <attr name="course_updown_48dp" format="reference"/>

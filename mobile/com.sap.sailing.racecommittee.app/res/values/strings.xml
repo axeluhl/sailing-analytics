@@ -545,5 +545,6 @@
     <string name="set_factor_error">There was an error while setting the factor: %s</string>
     <string name="sync_to_minute">Sync to minute</string>
     <string name="non_public_changed_title">Non-Public Events</string>
+    <string name="competitor_list">Competitor List</string>
 
 </resources>
