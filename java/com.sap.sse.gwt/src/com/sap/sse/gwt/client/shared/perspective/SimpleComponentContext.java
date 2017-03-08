@@ -55,9 +55,15 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
      * {@link UnsupportedOperationException} when it is called.
      */
     @Override
-    public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
+    public<CS extends Settings> void makeSettingsDefault(Component<CS> component, CS newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
         throw new UnsupportedOperationException("Make Default action is unsupported for this type of ComponentContext "
                 + this.getClass().getName() + " " + component.getPath() + " " + newDefaultSettings);
+    }
+    
+    @Override
+    public<CS extends Settings> void storeSettingsForContext(Component<CS> component, CS newSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
+        throw new UnsupportedOperationException("Settings storage is unsupported for this type of ComponentContext "
+                + this.getClass().getName() + " " + component.getPath() + " " + newSettings);
     }
 
     /**
@@ -145,9 +151,4 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     public void dispose() {
     }
 
-    @Override
-    public void storeSettingsForContext(Component<? extends Settings> component, Settings newSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
-        throw new UnsupportedOperationException("Settings storage is unsupported for this type of ComponentContext "
-                + this.getClass().getName() + " " + component.getPath() + " " + newSettings);
-    }
 }

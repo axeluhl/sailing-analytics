@@ -44,7 +44,7 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerSetti
     }
 
     @Override
-    public MediaPlayerSettings extractContextSettings(MediaPlayerSettings settings) {
+    public MediaPlayerSettings extractContextSpecificSettings(MediaPlayerSettings settings) {
         return createDefaultSettings();
     }
 }

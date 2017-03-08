@@ -50,7 +50,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
     }
 
     @Override
-    public RaceMapSettings extractContextSettings(RaceMapSettings settings) {
+    public RaceMapSettings extractContextSpecificSettings(RaceMapSettings settings) {
         return settings;
     }
 }

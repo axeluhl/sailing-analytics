@@ -34,6 +34,6 @@ public interface ComponentLifecycle<S extends Settings> {
 
     S extractGlobalSettings(S settings);
 
-    S extractContextSettings(S settings);
+    S extractContextSpecificSettings(S settings);
 
 }

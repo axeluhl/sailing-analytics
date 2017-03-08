@@ -68,13 +68,13 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
     }
 
     @Override
-    public final PerspectiveCompositeSettings<PS> extractContextSettings(PerspectiveCompositeSettings<PS> settings) {
+    public final PerspectiveCompositeSettings<PS> extractContextSpecificSettings(PerspectiveCompositeSettings<PS> settings) {
         HashMap<String, Settings> settingsPerComponent = new HashMap<>();
         for (Entry<String, Settings> childSet : settings.getSettingsPerComponentId().entrySet()) {
             String childId = childSet.getKey();
             Settings childNewSettings = childSet.getValue();
             ComponentLifecycle<Settings> childLiveCycle = getLifecycleForId(childId);
-            Settings extracted = childLiveCycle.extractContextSettings(childNewSettings);
+            Settings extracted = childLiveCycle.extractContextSpecificSettings(childNewSettings);
             settingsPerComponent.put(childId, extracted);
         }
 

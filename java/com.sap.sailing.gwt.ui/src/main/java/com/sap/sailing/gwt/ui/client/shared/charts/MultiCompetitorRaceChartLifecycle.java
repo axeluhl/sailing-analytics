@@ -45,7 +45,7 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     }
 
     @Override
-    public MultiCompetitorRaceChartSettings extractContextSettings(MultiCompetitorRaceChartSettings settings) {
+    public MultiCompetitorRaceChartSettings extractContextSpecificSettings(MultiCompetitorRaceChartSettings settings) {
         return createDefaultSettings();
     }
 }

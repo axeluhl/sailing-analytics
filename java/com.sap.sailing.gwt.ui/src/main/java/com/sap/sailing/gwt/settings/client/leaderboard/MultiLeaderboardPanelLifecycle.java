@@ -20,7 +20,7 @@ public class MultiLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
     }
 
     @Override
-    public LeaderboardSettings extractContextSettings(LeaderboardSettings leaderboardSettings) {
+    public LeaderboardSettings extractContextSpecificSettings(LeaderboardSettings leaderboardSettings) {
         return createDefaultSettings();
     }
 

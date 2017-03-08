@@ -101,9 +101,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * global settings to be stored
      */
     @SuppressWarnings("unchecked")
-    public S extractGlobalSettings(Component<? extends Settings> component, Settings componentSettings) {
-        ComponentLifecycle<S> targetLifecycle = determineLifecycle(component.getPath(), rootLifecycle);
-        return extractGlobalSettings((S) componentSettings, targetLifecycle);
+    public<CS extends Settings> CS extractGlobalSettings(Component<CS> component, CS componentSettings) {
+        ComponentLifecycle<CS> targetLifecycle = (ComponentLifecycle<CS>) determineLifecycle(component.getPath(), rootLifecycle);
+        return targetLifecycle.extractGlobalSettings(componentSettings);
     }
 
     /**
@@ -115,33 +115,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * context specific settings to be stored
      */
     @SuppressWarnings("unchecked")
-    public S extractContextSettings(Component<? extends Settings> component, Settings componentSettings) {
-        ComponentLifecycle<S> targetLifeCycle = determineLifecycle(component.getPath(), rootLifecycle);
-        return extractContextSettings((S) componentSettings, targetLifeCycle);
-    }
-
-    /**
-     * Extracts global settings from provided {@link Settings} of the component corresponding to the specified lifecycle.
-     * 
-     * @param componentSettings The settings of the specified component
-     * @param targetLifecycle The lifecycle of the component which the provided settings correspond to
-     * @return The global settings extracted, or {@code null} if there aren't any
-     * global settings to be stored
-     */
-    private S extractGlobalSettings(S componentSettings, ComponentLifecycle<S> targetLifecycle) {
-        return targetLifecycle.extractGlobalSettings((S) componentSettings);
-    }
-
-    /**
-     * Extracts context specific settings from provided {@link Settings} of the component corresponding to the specified lifecycle.
-     * 
-     * @param componentSettings The settings of the specified component
-     * @param targetLifecycle The lifecycle of the component which the provided settings correspond to
-     * @return The context specific settings extracted, or {@code null} if there aren't any
-     * context specific settings to be stored
-     */
-    private S extractContextSettings(S componentSettings, ComponentLifecycle<S> targetLifecycle) {
-        return targetLifecycle.extractContextSettings((S) componentSettings);
+    public<CS extends Settings> CS extractContextSpecificSettings(Component<CS> component, CS componentSettings) {
+        ComponentLifecycle<CS> targetLifecycle = (ComponentLifecycle<CS>) determineLifecycle(component.getPath(), rootLifecycle);
+        return targetLifecycle.extractContextSpecificSettings(componentSettings);
     }
 
     /**
@@ -156,17 +132,20 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process finishes
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
-        ComponentLifecycle<S> targetLifeCycle = determineLifecycle(component.getPath(), rootLifecycle);
-        S globalSettings = extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
+    public<CS extends Settings> void makeSettingsDefault(Component<CS> component, CS newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
+        @SuppressWarnings("unchecked")
+        ComponentLifecycle<CS> targetLifecycle = (ComponentLifecycle<CS>) determineLifecycle(component.getPath(), rootLifecycle);
+        CS globalSettings = targetLifecycle.extractGlobalSettings(newDefaultSettings);
         updateGlobalSettings(component.getPath(), globalSettings, onSettingsStoredCallback);
     }
     
     @Override
-    public void storeSettingsForContext(Component<? extends Settings> component, Settings newSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
-        updateContextSpecificSettings(component.getPath(), newSettings, onSettingsStoredCallback);
+    public<CS extends Settings> void storeSettingsForContext(Component<CS> component, CS newSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
+        @SuppressWarnings("unchecked")
+        ComponentLifecycle<CS> targetLifecycle = (ComponentLifecycle<CS>) determineLifecycle(component.getPath(), rootLifecycle);
+        CS contextSpecificSettings = targetLifecycle.extractContextSpecificSettings(newSettings);
+        updateContextSpecificSettings(component.getPath(), contextSpecificSettings, onSettingsStoredCallback);
     }
 
 
@@ -285,11 +264,10 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @return The lifecycle which was determined for the provided path starting from the provided root lifecycle
      * @throws IllegalStateException When the path cannot be resolved from the provided root lifecycle
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private ComponentLifecycle<S> determineLifecycle(ArrayList<String> path, ComponentLifecycle<S> current) {
+    private ComponentLifecycle<? extends Settings> determineLifecycle(ArrayList<String> path, ComponentLifecycle<? extends Settings> current) {
         while (current instanceof PerspectiveLifecycle<?> && !path.isEmpty()) {
             String last = path.remove(path.size() - 1);
-            current = (ComponentLifecycle<S>) ((PerspectiveLifecycle) current).getLifecycleForId(last);
+            current = ((PerspectiveLifecycle<?>) current).getLifecycleForId(last);
         }
         if (!path.isEmpty()) {
             throw new IllegalStateException("Settings path is not finished, but no perspective at current level");

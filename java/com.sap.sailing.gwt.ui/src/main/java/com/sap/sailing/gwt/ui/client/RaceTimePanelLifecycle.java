@@ -43,7 +43,7 @@ public class RaceTimePanelLifecycle implements
     }
 
     @Override
-    public RaceTimePanelSettings extractContextSettings(RaceTimePanelSettings settings) {
+    public RaceTimePanelSettings extractContextSpecificSettings(RaceTimePanelSettings settings) {
         return createDefaultSettings();
     }
 }

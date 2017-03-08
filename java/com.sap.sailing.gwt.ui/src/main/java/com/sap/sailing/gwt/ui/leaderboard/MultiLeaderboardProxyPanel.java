@@ -167,7 +167,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
         if (ctx instanceof ComponentContextWithSettingsStorage) {
             @SuppressWarnings("unchecked")
             ComponentContextWithSettingsStorage<LeaderboardSettings> cctx = (ComponentContextWithSettingsStorage) ctx;
-            LeaderboardSettings contextSettings = cctx.extractContextSettings(this, newSettings);
+            LeaderboardSettings contextSettings = cctx.extractContextSpecificSettings(this, newSettings);
             contextStore.put(selectedLeaderboardPanel.getLeaderboardName(), contextSettings);
         }
         selectedLeaderboardPanel.updateSettings(newSettings);
