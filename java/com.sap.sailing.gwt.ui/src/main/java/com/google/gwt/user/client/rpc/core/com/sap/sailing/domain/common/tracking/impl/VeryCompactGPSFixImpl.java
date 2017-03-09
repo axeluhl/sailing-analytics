@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl.CompactPosition;
 
 public final class VeryCompactGPSFixImpl {
-    public static final class VeryCompactPosition_CustomFieldSerializer extends CustomFieldSerializer<CompactPosition> {
+    public static final class CompactPosition_CustomFieldSerializer extends CustomFieldSerializer<CompactPosition> {
         @Override
         public boolean hasCustomInstantiateInstance() {
             return true;
