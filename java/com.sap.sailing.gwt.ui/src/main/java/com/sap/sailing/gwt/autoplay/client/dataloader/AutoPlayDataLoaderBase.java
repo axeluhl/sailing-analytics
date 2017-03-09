@@ -5,16 +5,14 @@ import com.google.gwt.user.client.Timer;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.ResettableEventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
-import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailure;
 
-public abstract class AutoPlayDataLoaderBase
-        implements AutoPlayDataLoader<AutoPlayClientFactory<PlaceNavigatorSixtyInch>> {
+public abstract class AutoPlayDataLoaderBase<CF extends AutoPlayClientFactory<?>> implements AutoPlayDataLoader<CF> {
 
     private final Timer loadTrigger;
     private int loadingIntervallInMs = 5000;
     private ResettableEventBus eventBus;
-    private AutoPlayClientFactory<PlaceNavigatorSixtyInch> clientFactory;
+    private CF clientFactory;
 
     public AutoPlayDataLoaderBase() {
         loadTrigger = new Timer() {
@@ -30,7 +28,7 @@ public abstract class AutoPlayDataLoaderBase
     }
 
     @Override
-    public final void startLoading(EventBus eventBus, AutoPlayClientFactory<PlaceNavigatorSixtyInch> clientFactory) {
+    public final void startLoading(EventBus eventBus, CF clientFactory) {
         this.eventBus = new ResettableEventBus(eventBus);
         this.clientFactory = clientFactory;
         loadTrigger.scheduleRepeating(loadingIntervallInMs);
@@ -63,7 +61,7 @@ public abstract class AutoPlayDataLoaderBase
         this.loadingIntervallInMs = loadingIntervallInMs;
     }
 
-    protected AutoPlayClientFactory<PlaceNavigatorSixtyInch> getClientFactory() {
+    protected CF getClientFactory() {
         return clientFactory;
     }
 
