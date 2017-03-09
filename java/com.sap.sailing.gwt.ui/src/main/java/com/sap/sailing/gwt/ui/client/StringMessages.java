@@ -435,6 +435,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeHighPointEssOverall12Description();
     String scoringSchemeHighPointFirstGetsTwelveOrEight();
     String scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
+    String scoringSchemeHighPointFirstGetsTwelveOrEight2017();
+    String scoringSchemeHighPointFirstGetsTwelveOrEight2017Description();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();

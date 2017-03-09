@@ -59,7 +59,12 @@ public interface ReplicationMasterDescriptor {
 
     String getExchangeName();
 
-    void stopConnection();
+    /**
+     * @param deleteExchange
+     *            Only to be used by the master itself when no longer delivering messages to the exchange, or to tear
+     *            down after a test
+     */
+    void stopConnection(boolean deleteExchange);
 
     String getMessagingHostname();
 
