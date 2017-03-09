@@ -5,10 +5,10 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl.VeryCompactPosition;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl.VeryCompactPosition;
 
-public final class CompactGPSFixImpl {
-    public static final class CompactPosition_CustomFieldSerializer extends CustomFieldSerializer<VeryCompactPosition> {
+public final class VeryCompactGPSFixMovingImpl {
+    public static final class VeryCompactPosition_CustomFieldSerializer extends CustomFieldSerializer<VeryCompactPosition> {
         @Override
         public boolean hasCustomInstantiateInstance() {
             return true;

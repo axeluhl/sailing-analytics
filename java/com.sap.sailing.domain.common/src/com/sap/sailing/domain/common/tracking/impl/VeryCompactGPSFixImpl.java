@@ -50,7 +50,7 @@ public class VeryCompactGPSFixImpl extends AbstractCompactGPSFixImpl {
      */
     private short cachedEstimatedSpeedInKnotsScaled;
     
-    public class VeryCompactPosition extends AbstractPosition {
+    public class CompactPosition extends AbstractPosition {
         private static final long serialVersionUID = 5621506820766614178L;
 
         @Override
@@ -99,7 +99,7 @@ public class VeryCompactGPSFixImpl extends AbstractCompactGPSFixImpl {
 
     @Override
     public Position getPosition() {
-        return new VeryCompactPosition();
+        return new CompactPosition();
     }
 
     @Override
