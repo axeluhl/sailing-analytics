@@ -9,6 +9,7 @@ import com.google.gwt.user.client.Timer;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.dataloader.AutoPlayDataLoader;
 import com.sap.sailing.gwt.autoplay.client.dataloader.EventDTODataLoader;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.SlideConfig;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2Place;
 
@@ -20,10 +21,13 @@ public class SixtyInchOrchestrator {
 
     private int currentSlideNr = -1;
 
+    private boolean stopRequested = false;
+
     private List<AutoPlayDataLoader<AutoPlayClientFactorySixtyInch>> loaders = new ArrayList<>();
 
     public SixtyInchOrchestrator(AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
+
 
         loaders.add(new EventDTODataLoader());
     }
@@ -52,5 +56,9 @@ public class SixtyInchOrchestrator {
         cf.getPlaceController().goTo(newPlace);
 
         transitionTrigger.schedule(10000);
+    }
+
+    public void doStart(SlideConfig slideConfigBase) {
+        // TODO Auto-generated method stub
     }
 }
