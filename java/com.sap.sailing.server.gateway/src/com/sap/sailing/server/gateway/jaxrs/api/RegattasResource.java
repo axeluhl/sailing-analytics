@@ -881,7 +881,7 @@ public class RegattasResource extends AbstractSailingServerResource {
      */
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/maneuvers")
+    @Path("{regattaname}/races/{racename}/startorder")
     public Response getStartOrder(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
