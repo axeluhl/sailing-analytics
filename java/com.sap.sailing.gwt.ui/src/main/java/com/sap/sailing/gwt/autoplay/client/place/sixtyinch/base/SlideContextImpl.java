@@ -14,6 +14,9 @@ public class SlideContextImpl implements SlideContext {
     private EventBus eventBus;
 
     public SlideContextImpl(EventBus eventBus, SixtyInchSetting settings) {
+        if (settings == null) {
+            throw new IllegalStateException("No settings in ctx creation");
+        }
         this.eventBus = eventBus;
         this.settings = settings;
     }

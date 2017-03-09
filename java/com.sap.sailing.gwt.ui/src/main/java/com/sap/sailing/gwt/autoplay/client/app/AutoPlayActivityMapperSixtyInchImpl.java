@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1PresenterImpl;
@@ -9,6 +10,9 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1V
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2PresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2ViewImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitViewImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartActivitySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
 
@@ -26,8 +30,13 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
             return new Slide1PresenterImpl((Slide1Place) place, clientFactory, new Slide1ViewImpl());
         } else if (place instanceof Slide2Place) {
             return new Slide2PresenterImpl((Slide2Place) place, clientFactory, new Slide2ViewImpl());
-        } else {
+        } else if (place instanceof StartPlaceSixtyInch) {
             return new StartActivitySixtyInch((StartPlaceSixtyInch) place, clientFactory);
+        } else if (place instanceof SlideInitPlace) {
+            return new SlideInitPresenterImpl((SlideInitPlace) place, clientFactory, new SlideInitViewImpl());
+        } else {
+            GWT.log("unknown place!");
+            return new SlideInitPresenterImpl(new SlideInitPlace(), clientFactory, new SlideInitViewImpl());
         }
     }
 }

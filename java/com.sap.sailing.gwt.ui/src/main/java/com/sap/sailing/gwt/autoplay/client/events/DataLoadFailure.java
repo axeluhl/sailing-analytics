@@ -8,9 +8,11 @@ import com.sap.sailing.gwt.autoplay.client.dataloader.AutoPlayDataLoader;
  * Sample custom event class for copy & paste
  */
 public class DataLoadFailure extends GwtEvent<DataLoadFailure.Handler> {
-
-    private final AutoPlayDataLoader<?> source;
     public static final Type<Handler> TYPE = new Type<Handler>();
+
+    private final AutoPlayDataLoader source;
+    private Throwable caught;
+    private String message;
 
     /**
      * Event handler interface
@@ -19,11 +21,29 @@ public class DataLoadFailure extends GwtEvent<DataLoadFailure.Handler> {
         void onLoadFailure(DataLoadFailure e);
     }
 
-    public DataLoadFailure(AutoPlayDataLoader<?> source) {
-        this.source = source;
+    public DataLoadFailure(AutoPlayDataLoader source, Throwable caught) {
+        this(source, caught, null);
     }
 
-    public AutoPlayDataLoader<?> getSource() {
+    public DataLoadFailure(AutoPlayDataLoader source, String message) {
+        this(source, null, message);
+    }
+
+    public DataLoadFailure(AutoPlayDataLoader source, Throwable caught, String message) {
+        this.source = source;
+        this.caught = caught;
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Throwable getCaught() {
+        return caught;
+    }
+
+    public AutoPlayDataLoader getSource() {
         return source;
     }
 
