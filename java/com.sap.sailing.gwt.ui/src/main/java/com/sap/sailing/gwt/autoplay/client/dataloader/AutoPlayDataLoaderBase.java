@@ -27,6 +27,7 @@ public abstract class AutoPlayDataLoaderBase<CF extends AutoPlayClientFactory<?>
         };
     }
 
+
     @Override
     public final void startLoading(EventBus eventBus, CF clientFactory) {
         this.eventBus = new ResettableEventBus(eventBus);
@@ -44,9 +45,11 @@ public abstract class AutoPlayDataLoaderBase<CF extends AutoPlayClientFactory<?>
 
     protected abstract void onLoadData();
 
-    protected abstract void onStoppedLoading();
+    protected void onStoppedLoading() {
+    }
 
-    protected abstract void onStartedLoading();
+    protected void onStartedLoading() {
+    }
 
     /**
      * Helper method to fire event upon data changes.
@@ -59,6 +62,9 @@ public abstract class AutoPlayDataLoaderBase<CF extends AutoPlayClientFactory<?>
 
     protected void setLoadingIntervallInMs(int loadingIntervallInMs) {
         this.loadingIntervallInMs = loadingIntervallInMs;
+        if (loadTrigger.isRunning()) {
+            loadTrigger.scheduleRepeating(loadingIntervallInMs);
+        }
     }
 
     protected CF getClientFactory() {

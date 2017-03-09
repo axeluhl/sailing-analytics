@@ -10,12 +10,16 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContext;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartViewSixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 
 public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBase<PlaceNavigatorSixtyInch>
         implements AutoPlayClientFactorySixtyInch {
+
     private SlideContext configurationSixtyInch;
+    private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
 
     public AutoPlayClientFactorySixtyInchImpl() {
         this(new SimpleEventBus());
@@ -65,5 +69,9 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
         return configurationSixtyInch;
     }
 
+    @Override
+    public SailingDispatchSystem getDispatch() {
+        return dispatch;
+    }
 
 }
