@@ -62,6 +62,9 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
 
     @Override
     public SlideContext getSlideCtx() {
+        if (configurationSixtyInch == null) {
+            throw new IllegalStateException("No context set");
+        }
         return configurationSixtyInch;
     }
 
