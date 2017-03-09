@@ -16,11 +16,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorSixtyInch;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContextImpl;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
-import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,7 +27,6 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
-import com.sap.sse.security.ui.client.UserService;
 
 public class StartViewSixtyInchImpl extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -46,18 +42,14 @@ public class StartViewSixtyInchImpl extends Composite implements StartView {
     @UiField DivElement leaderboardSelectionUi;
     @UiField DivElement screenConfigurationUi;
     
-    private final PlaceNavigatorSixtyInch navigator;
-    private final EventBus eventBus;
     private final List<EventDTO> events;
+    private AutoPlayClientFactorySixtyInchImpl clientFactory;
     
-    public StartViewSixtyInchImpl(PlaceNavigatorSixtyInch navigator, EventBus eventBus, UserService userService) {
-        super();
-        this.navigator = navigator;
-        this.eventBus = eventBus;
+    public StartViewSixtyInchImpl(AutoPlayClientFactorySixtyInchImpl clientFactory) {
         this.events = new ArrayList<EventDTO>();
+        this.clientFactory = clientFactory;
 
         sapHeader = new SAPSailingHeaderWithAuthentication(StringMessages.INSTANCE.autoplayConfiguration());
-        new FixedSailingAuthentication(userService, sapHeader.getAuthenticationMenuView());
         
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
@@ -129,7 +121,7 @@ public class StartViewSixtyInchImpl extends Composite implements StartView {
     void onLocaleSelectionChange(ChangeEvent event) {
         String selectedLocale = getSelectedLocale();
         LocaleChangeEvent localeChangeEvent = new LocaleChangeEvent(selectedLocale);
-        eventBus.fireEvent(localeChangeEvent);
+        clientFactory.getEventBus().fireEvent(localeChangeEvent);
     }
     
     @UiHandler("startAutoPlayButton")
@@ -138,7 +130,9 @@ public class StartViewSixtyInchImpl extends Composite implements StartView {
         String selectedLeaderboardName = getSelectedLeaderboardName();
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
-            navigator.goToPlayerSixtyInch(new SlideContextImpl(selectedEvent.id.toString(), selectedLeaderboardName));
+            clientFactory.getPlaceNavigator().goToPlayerSixtyInch(
+                    new SixtyInchSetting(selectedEvent.id.toString(), selectedLeaderboardName),
+                    clientFactory);
         }
     }
 

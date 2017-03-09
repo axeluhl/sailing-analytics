@@ -1,21 +1,16 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base;
 
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.SixtyInchSetting;
+
 public class SlideContextImpl implements SlideContext {
-    private String eventUidAsString;
-    private String leaderboardName;
+    private SixtyInchSetting settings;
 
-    public SlideContextImpl(String eventUidAsString, String leaderboardName) {
-        this.eventUidAsString = eventUidAsString;
-        this.leaderboardName = leaderboardName;
+    public SlideContextImpl(SixtyInchSetting settings) {
+        this.settings = settings;
     }
 
     @Override
-    public String getEventUidAsString() {
-        return eventUidAsString;
-    }
-
-    @Override
-    public String getLeaderboardName() {
-        return leaderboardName;
+    public SixtyInchSetting getSettings() {
+        return settings;
     }
 }

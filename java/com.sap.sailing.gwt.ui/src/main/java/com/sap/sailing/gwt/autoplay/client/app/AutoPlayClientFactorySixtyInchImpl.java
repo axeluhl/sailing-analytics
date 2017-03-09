@@ -37,7 +37,7 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     
     @Override
     public StartView createStartView() {
-        return new StartViewSixtyInchImpl(getPlaceNavigator(), getEventBus(), getUserService());
+        return new StartViewSixtyInchImpl(this);
     }
 
     @Override
