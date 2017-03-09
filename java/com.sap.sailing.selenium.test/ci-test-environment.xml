@@ -44,12 +44,10 @@
         <name>webdriver.enable.native.events </name>
         <value>true</value>
      </system-property>
-  <!--
      <system-property>
         <name>webdriver.firefox.bin</name>
-        <value>[path to]\firefox.exe</value>
+        <value>c:\Program Files (x86)\Mozilla Firefox 24\firefox.exe</value>
      </system-property>
-  -->
   </system-properties>
   
   <!--

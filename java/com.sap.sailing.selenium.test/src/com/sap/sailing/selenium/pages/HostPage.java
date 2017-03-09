@@ -20,7 +20,7 @@ public abstract class HostPage extends PageObject {
     /**
      * </p>The default timeout of 60 seconds for the initialization of the page object.</p>
      */
-    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 60;
+    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 120;
     
     public static final String getGWTCodeServer() {
         String codeServer = System.getProperty(GWT_CODE_SERVER_PARAMETER_NAME);
