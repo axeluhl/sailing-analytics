@@ -23,9 +23,9 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
     @Override
     public Activity getActivity(Place place) {
         if (place instanceof Slide1Place) {
-            return new Slide1PresenterImpl((Slide1Place) place, clientFactory.getSlideCtx(), new Slide1ViewImpl());
+            return new Slide1PresenterImpl((Slide1Place) place, clientFactory, new Slide1ViewImpl());
         } else if (place instanceof Slide2Place) {
-            return new Slide2PresenterImpl((Slide2Place) place, clientFactory.getSlideCtx(), new Slide2ViewImpl());
+            return new Slide2PresenterImpl((Slide2Place) place, clientFactory, new Slide2ViewImpl());
         } else {
             return new StartActivitySixtyInch((StartPlaceSixtyInch) place, clientFactory);
         }

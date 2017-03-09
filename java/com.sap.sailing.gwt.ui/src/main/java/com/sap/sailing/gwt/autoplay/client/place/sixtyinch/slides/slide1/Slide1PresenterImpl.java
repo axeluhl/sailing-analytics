@@ -2,16 +2,17 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideBase;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContext;
 
 public class Slide1PresenterImpl extends SlideBase<Slide1Place> implements Slide1View.Slide1Presenter {
 
     private Slide1View view;
 
-    public Slide1PresenterImpl(Slide1Place place, SlideContext slideCtx, Slide1View slide1ViewImpl) {
-        super(place, slideCtx);
+    public Slide1PresenterImpl(Slide1Place place, AutoPlayClientFactorySixtyInch clientFactory,
+            Slide1View slide1ViewImpl) {
+        super(place, clientFactory);
         this.view = slide1ViewImpl;
     }
 
