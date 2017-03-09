@@ -19,7 +19,7 @@ public class Slide2PresenterImpl extends SlideBase<Slide2Place> implements Slide
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        eventBus.fireEvent(new SlideHeaderEvent("i18n Whats next?", getSlideCtx().getLeaderboardName()));
+        eventBus.fireEvent(new SlideHeaderEvent("i18n Whats next?", getSlideCtx().getSettings().getLeaderBoardName()));
         view.startingWith(this, panel);
     }
 }

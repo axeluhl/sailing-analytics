@@ -131,7 +131,7 @@ public class StartViewSixtyInchImpl extends Composite implements StartView {
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
             clientFactory.getPlaceNavigator().goToPlayerSixtyInch(
-                    new SixtyInchSetting(selectedEvent.id.toString(), selectedLeaderboardName),
+                    new SixtyInchSetting(selectedEvent.id, selectedLeaderboardName),
                     clientFactory);
         }
     }

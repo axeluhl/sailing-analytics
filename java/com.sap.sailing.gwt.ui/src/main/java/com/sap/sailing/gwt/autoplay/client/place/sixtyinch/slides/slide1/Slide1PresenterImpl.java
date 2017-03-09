@@ -18,8 +18,8 @@ public class Slide1PresenterImpl extends SlideBase<Slide1Place> implements Slide
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        eventBus.fireEvent(new SlideHeaderEvent("i18n 5 Races Rank", getSlideCtx().getLeaderboardName()));
-        view.setTestText(getSlideCtx().getLeaderboardName());
+        eventBus.fireEvent(new SlideHeaderEvent("i18n 5 Races Rank", getSlideCtx().getSettings().getLeaderBoardName()));
+        view.setTestText(getSlideCtx().getSettings().getLeaderBoardName());
         view.startingWith(this, panel);
     }
 }

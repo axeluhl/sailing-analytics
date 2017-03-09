@@ -18,7 +18,8 @@ public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        eventBus.fireEvent(new SlideHeaderEvent("Loading event data", getSlideCtx().getLeaderboardName()));
+        eventBus.fireEvent(
+                new SlideHeaderEvent("Loading event data", getSlideCtx().getSettings().getLeaderBoardName()));
         view.startingWith(this, panel);
     }
 }
