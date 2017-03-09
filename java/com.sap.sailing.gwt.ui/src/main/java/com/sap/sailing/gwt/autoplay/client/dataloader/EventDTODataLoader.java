@@ -6,11 +6,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailure;
-import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventDTODataLoader extends AutoPlayDataLoaderBase<AutoPlayClientFactorySixtyInch> {
-    protected EventDTO current;
 
     public EventDTODataLoader() {
         setLoadingIntervallInMs(10000);
@@ -23,9 +21,8 @@ public class EventDTODataLoader extends AutoPlayDataLoaderBase<AutoPlayClientFac
         getClientFactory().getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override
             public void onSuccess(final EventDTO event) {
-                // TODO change detection
-                getEventBus().fireEvent(new EventChanged(event));
-                current = event;
+                GWT.log("Event loaded " + event);
+                getClientFactory().getSlideCtx().updateEvent(event);
             }
 
             @Override
@@ -33,12 +30,11 @@ public class EventDTODataLoader extends AutoPlayDataLoaderBase<AutoPlayClientFac
                 getEventBus().fireEvent(new DataLoadFailure(EventDTODataLoader.this, caught,
                         "Error loading Event with id " + eventUUID));
             }
-        }); 
+        });
     }
 
     @Override
     protected void onStoppedLoading() {
-        current = null;
     }
 
     @Override

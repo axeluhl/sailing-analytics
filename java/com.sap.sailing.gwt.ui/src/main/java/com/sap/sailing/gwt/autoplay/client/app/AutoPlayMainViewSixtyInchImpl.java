@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitViewImpl;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
@@ -39,7 +40,7 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
 
     public AutoPlayMainViewSixtyInchImpl(EventBus eventBus) {
         initWidget(uiBinder.createAndBindUi(this));
-        sapHeader.setHeaderTitle("ESS 2015 ACT 1 - SINGAPORE MAKE DYNAMIC");
+        sapHeader.setHeaderTitle("Initializing");
         mainPanel.add(sapHeader);
         mainPanel.setWidgetTopHeight(sapHeader, 0, Unit.PX, 75, Unit.PX);
         eventBus.addHandler(SlideHeaderEvent.TYPE, new SlideHeaderEvent.Handler() {
@@ -69,7 +70,6 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
             mainPanel.setWidgetTopHeight(widgetToShow, 75, Unit.PX, 100, Unit.PCT);
             mainPanel.setWidgetLeftWidth(widgetToShow, 100, Unit.PCT, 100, Unit.PCT);
             mainPanel.forceLayout();
-            mainPanel.setWidgetLeftWidth(widgetToShow, 0, Unit.PCT, 100, Unit.PCT);
             if (widgetToDispose != null) {
                 new Timer() {
                     public void run() {
@@ -77,15 +77,20 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
                     };
                 }.schedule(2000);
             }
-            mainPanel.animate(2000, new AnimationCallback() {
-                @Override
-                public void onAnimationComplete() {
-                }
+            mainPanel.setWidgetLeftWidth(widgetToShow, 0, Unit.PCT, 100, Unit.PCT);
+            if (widgetToShow instanceof SlideInitViewImpl) {
+                mainPanel.forceLayout();
+            } else {
+                mainPanel.animate(2000, new AnimationCallback() {
+                    @Override
+                    public void onAnimationComplete() {
+                    }
 
-                @Override
-                public void onLayout(Layer layer, double progress) {
-                }
-            });
+                    @Override
+                    public void onLayout(Layer layer, double progress) {
+                    }
+                });
+            }
         }
     }
 

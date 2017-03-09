@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,6 +25,12 @@ public class SlideInitViewImpl extends ResizeComposite implements SlideInitView 
     @Override
     public void startingWith(SlideInitPresenter p, AcceptsOneWidget panel) {
         panel.setWidget(this);
+        content.setWidget(new Label("Some message"));
+    }
+
+    @Override
+    public void setImage(String string) {
+        content.getElement().getStyle().setBackgroundImage(string);
     }
 
 }

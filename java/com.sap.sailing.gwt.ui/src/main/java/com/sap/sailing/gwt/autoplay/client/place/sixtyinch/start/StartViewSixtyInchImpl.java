@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
-import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -34,7 +33,6 @@ public class StartViewSixtyInchImpl extends Composite implements StartView {
     interface StartPageViewUiBinder extends UiBinder<Widget, StartViewSixtyInchImpl> {
     }
 
-    @UiField(provided=true) SAPSailingHeaderWithAuthentication sapHeader;
     @UiField(provided=true) ListBox localeSelectionBox;
     @UiField(provided=true) ListBox eventSelectionBox;
     @UiField(provided=true) ListBox leaderboardSelectionBox;
@@ -48,8 +46,6 @@ public class StartViewSixtyInchImpl extends Composite implements StartView {
     public StartViewSixtyInchImpl(AutoPlayClientFactorySixtyInchImpl clientFactory) {
         this.events = new ArrayList<EventDTO>();
         this.clientFactory = clientFactory;
-
-        sapHeader = new SAPSailingHeaderWithAuthentication(StringMessages.INSTANCE.autoplayConfiguration());
         
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);

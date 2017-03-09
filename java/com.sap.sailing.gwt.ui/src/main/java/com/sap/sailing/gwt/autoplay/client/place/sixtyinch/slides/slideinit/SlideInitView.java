@@ -6,4 +6,6 @@ public interface SlideInitView {
     void startingWith(SlideInitPresenter p, AcceptsOneWidget panel);
     public interface SlideInitPresenter {
     }
+
+    void setImage(String string);
 }

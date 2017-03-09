@@ -18,8 +18,7 @@
 		}
     </ui:style>
     <g:HTMLPanel>
-        <s:SAPHeader ui:field="sapHeader" />
-        <div style="height:1em;" />
+        <div style="height:90px;" />
         <div class="{res.mediaCss.grid} {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 			    <span><ui:text from='{i18n.chooseALanguage}' />:</span>
