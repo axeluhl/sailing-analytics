@@ -6,12 +6,15 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchOrchestrator
 public abstract class SlideConfigBase implements SlideConfig {
 
     private Place placeToGo;
-    private SlideConfigBase nextSlide;
+    private SlideConfig nextSlide;
     private SixtyInchOrchestrator orchestrator;
 
-    protected SlideConfigBase(SixtyInchOrchestrator orchestrator, Place placeToGo, SlideConfigBase nextSlide) {
+    protected SlideConfigBase(SixtyInchOrchestrator orchestrator, Place placeToGo) {
         this.orchestrator = orchestrator;
         this.placeToGo = placeToGo;
+    }
+
+    public void setNextSlide(SlideConfig nextSlide) {
         this.nextSlide = nextSlide;
     }
 
@@ -24,7 +27,11 @@ public abstract class SlideConfigBase implements SlideConfig {
     public abstract void onStart();
 
     protected void fireTransition() {
-        nextSlide.start();
+        if (nextSlide != null) {
+            nextSlide.start();
+        } else {
+            orchestrator.doStart(null);
+        }
     }
 
     @Override

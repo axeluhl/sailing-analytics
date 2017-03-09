@@ -13,8 +13,8 @@ public class SlideEventTriggeredTransitionConfig extends SlideConfigBase {
     private boolean isSuspended;
 
     public SlideEventTriggeredTransitionConfig(SixtyInchOrchestrator orchestrator, Place thisSlidePlace,
-            SlideEventTriggeredTransitionConfig nextSlide, Type<?>[] transitionEvents) {
-        super(orchestrator, thisSlidePlace, nextSlide);
+            Type<?>[] transitionEvents) {
+        super(orchestrator, thisSlidePlace);
         remainingEventsBeforeTrigger.addAll(Arrays.asList(transitionEvents));
     }
 

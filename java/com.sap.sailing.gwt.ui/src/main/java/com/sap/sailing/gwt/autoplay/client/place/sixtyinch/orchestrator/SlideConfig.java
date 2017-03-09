@@ -13,4 +13,6 @@ public interface SlideConfig {
     void process(GwtEvent<?> event);
 
     Place getPlaceToGo();
+
+    void setNextSlide(SlideConfig nextSlide);
 }

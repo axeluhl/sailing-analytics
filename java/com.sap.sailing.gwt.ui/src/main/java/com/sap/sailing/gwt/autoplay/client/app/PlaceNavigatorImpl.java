@@ -5,7 +5,6 @@ import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchOrchestrator;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContextImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.SixtyInchSetting;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
@@ -47,7 +46,7 @@ public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyIn
         
         autoplayFactory.setSlideContext(new SlideContextImpl(autoplayFactory.getEventBus(), configurationSixtyInch));
         orchestrator.start();
-        placeController.goTo(new SlideInitPlace());
+
 
     }
 

@@ -11,9 +11,8 @@ public class SlideTimedTransitionConfig extends SlideConfigBase {
     private final Timer loadTimer;
 
     public SlideTimedTransitionConfig(SixtyInchOrchestrator orchestrator, Place thisSlidePlace,
-            SlideTimedTransitionConfig nextSlide,
             int displayDurationInMs) {
-        super(orchestrator, thisSlidePlace, nextSlide);
+        super(orchestrator, thisSlidePlace);
         this.displayDurationInMs = displayDurationInMs;
         this.loadTimer = new Timer() {
             @Override
