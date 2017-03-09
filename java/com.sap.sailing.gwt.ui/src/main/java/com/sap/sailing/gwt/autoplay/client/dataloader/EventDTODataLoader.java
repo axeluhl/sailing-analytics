@@ -4,11 +4,12 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailure;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class EventDTODataLoader extends AutoPlayDataLoaderBase {
+public class EventDTODataLoader extends AutoPlayDataLoaderBase<AutoPlayClientFactorySixtyInch> {
     protected EventDTO current;
 
     public EventDTODataLoader() {

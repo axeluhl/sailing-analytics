@@ -3,12 +3,10 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.events.MiniLeaderboardUpdatedEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.SixtyInchSetting;
-import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 
 public class SlideContextImpl implements SlideContext {
     private SixtyInchSetting settings;
-    private SailingDispatchSystem dispatch;
 
     private GetMiniLeaderboardDTO miniLeaderboardDTO;
     private EventBus eventBus;

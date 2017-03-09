@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.autoplay.client.dataloader.AutoPlayDataLoader;
 public class DataLoadFailure extends GwtEvent<DataLoadFailure.Handler> {
     public static final Type<Handler> TYPE = new Type<Handler>();
 
-    private final AutoPlayDataLoader source;
+    private final AutoPlayDataLoader<?> source;
     private Throwable caught;
     private String message;
 
@@ -21,15 +21,15 @@ public class DataLoadFailure extends GwtEvent<DataLoadFailure.Handler> {
         void onLoadFailure(DataLoadFailure e);
     }
 
-    public DataLoadFailure(AutoPlayDataLoader source, Throwable caught) {
+    public DataLoadFailure(AutoPlayDataLoader<?> source, Throwable caught) {
         this(source, caught, null);
     }
 
-    public DataLoadFailure(AutoPlayDataLoader source, String message) {
+    public DataLoadFailure(AutoPlayDataLoader<?> source, String message) {
         this(source, null, message);
     }
 
-    public DataLoadFailure(AutoPlayDataLoader source, Throwable caught, String message) {
+    public DataLoadFailure(AutoPlayDataLoader<?> source, Throwable caught, String message) {
         this.source = source;
         this.caught = caught;
         this.message = message;
@@ -43,7 +43,7 @@ public class DataLoadFailure extends GwtEvent<DataLoadFailure.Handler> {
         return caught;
     }
 
-    public AutoPlayDataLoader getSource() {
+    public AutoPlayDataLoader<?> getSource() {
         return source;
     }
 

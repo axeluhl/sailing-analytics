@@ -4,27 +4,15 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.Timer;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.ResettableEventBus;
-<<<<<<< HEAD
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailure;
 
 public abstract class AutoPlayDataLoaderBase<CF extends AutoPlayClientFactory<?>> implements AutoPlayDataLoader<CF> {
-=======
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailure;
-
-public abstract class AutoPlayDataLoaderBase
-        implements AutoPlayDataLoader {
->>>>>>> 8bd30717ae79719e3140a0152e35b51a9b46587c
 
     private final Timer loadTrigger;
     private int loadingIntervallInMs = 5000;
     private ResettableEventBus eventBus;
-<<<<<<< HEAD
     private CF clientFactory;
-=======
-    private AutoPlayClientFactorySixtyInch clientFactory;
->>>>>>> 8bd30717ae79719e3140a0152e35b51a9b46587c
 
     public AutoPlayDataLoaderBase() {
         loadTrigger = new Timer() {
@@ -39,13 +27,8 @@ public abstract class AutoPlayDataLoaderBase
         };
     }
 
-
     @Override
-<<<<<<< HEAD
     public final void startLoading(EventBus eventBus, CF clientFactory) {
-=======
-    public final void startLoading(EventBus eventBus, AutoPlayClientFactorySixtyInch clientFactory) {
->>>>>>> 8bd30717ae79719e3140a0152e35b51a9b46587c
         this.eventBus = new ResettableEventBus(eventBus);
         this.clientFactory = clientFactory;
         loadTrigger.scheduleRepeating(loadingIntervallInMs);
@@ -83,11 +66,7 @@ public abstract class AutoPlayDataLoaderBase
         }
     }
 
-<<<<<<< HEAD
     protected CF getClientFactory() {
-=======
-    protected AutoPlayClientFactorySixtyInch getClientFactory() {
->>>>>>> 8bd30717ae79719e3140a0152e35b51a9b46587c
         return clientFactory;
     }
 

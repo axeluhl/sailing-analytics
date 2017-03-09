@@ -20,7 +20,7 @@ public class SixtyInchOrchestrator {
 
     private int currentSlideNr = -1;
 
-    private List<AutoPlayDataLoader> loaders = new ArrayList<>();
+    private List<AutoPlayDataLoader<AutoPlayClientFactorySixtyInch>> loaders = new ArrayList<>();
 
     public SixtyInchOrchestrator(AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
@@ -37,7 +37,7 @@ public class SixtyInchOrchestrator {
 
     public void start() {
         transitionTrigger.schedule(0);
-        for (AutoPlayDataLoader loader : loaders) {
+        for (AutoPlayDataLoader<AutoPlayClientFactorySixtyInch> loader : loaders) {
             loader.startLoading(cf.getEventBus(), cf);
         }
     }

@@ -45,7 +45,7 @@ public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyIn
     public void goToPlayerSixtyInch(SixtyInchSetting configurationSixtyInch,
             AutoPlayClientFactorySixtyInch clientFactory) {
         
-        autoplayFactory.setSlideContext(new SlideContextImpl(configurationSixtyInch));
+        autoplayFactory.setSlideContext(new SlideContextImpl(autoplayFactory.getEventBus(), configurationSixtyInch));
         orchestrator.start();
         placeController.goTo(new SlideInitPlace());
 
