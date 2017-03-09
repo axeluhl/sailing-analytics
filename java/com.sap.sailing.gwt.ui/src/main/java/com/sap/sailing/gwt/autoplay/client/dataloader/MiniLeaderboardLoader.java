@@ -5,13 +5,23 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailure;
+import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 public class MiniLeaderboardLoader extends AutoPlayDataLoaderBase<AutoPlayClientFactorySixtyInch> {
     @Override
-    protected void onLoadData() {
+    protected void onStartedLoading() {
+        getEventBus().addHandler(EventChanged.TYPE, new EventChanged.Handler() {
+            @Override
+            public void onEventChanged(EventChanged e) {
+                doLoadData();
+            }
+        });
+    }
+    @Override
+    protected void doLoadData() {
         UUID eventId = getClientFactory().getSlideCtx().getSettings().getEventId();
         String leaderBoardName = getClientFactory().getSlideCtx().getSettings().getLeaderBoardName();
         if (eventId != null && leaderBoardName != null) {

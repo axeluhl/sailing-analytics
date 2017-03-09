@@ -13,7 +13,7 @@ public class MiniLeaderboardUpdatedEvent extends GwtEvent<MiniLeaderboardUpdated
     /**
      * Event handler interface
      */
-    interface Handler extends EventHandler {
+    public interface Handler extends EventHandler {
         void handleNoOpEvent(MiniLeaderboardUpdatedEvent e);
     }
 

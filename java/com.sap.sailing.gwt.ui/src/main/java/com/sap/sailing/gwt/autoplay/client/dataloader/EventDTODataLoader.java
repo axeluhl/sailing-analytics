@@ -17,7 +17,7 @@ public class EventDTODataLoader extends AutoPlayDataLoaderBase<AutoPlayClientFac
     }
 
     @Override
-    protected void onLoadData() {
+    protected void doLoadData() {
         GWT.log("Loading eventDTO new");
         UUID eventUUID = getClientFactory().getSlideCtx().getSettings().getEventId();
         getClientFactory().getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {

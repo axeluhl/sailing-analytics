@@ -13,7 +13,7 @@ public class NoOpEvent extends GwtEvent<NoOpEvent.Handler> {
     /**
      * Event handler interface
      */
-    interface Handler extends EventHandler {
+    public interface Handler extends EventHandler {
         void handleNoOpEvent(NoOpEvent e);
     }
 

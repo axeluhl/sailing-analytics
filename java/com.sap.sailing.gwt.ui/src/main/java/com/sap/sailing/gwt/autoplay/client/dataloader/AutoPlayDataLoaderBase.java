@@ -19,7 +19,7 @@ public abstract class AutoPlayDataLoaderBase<CF extends AutoPlayClientFactory<?>
             @Override
             public void run() {
                 try {
-                    onLoadData();
+                    doLoadData();
                 } catch (Exception e) {
                     fireEvent(new DataLoadFailure(AutoPlayDataLoaderBase.this, e));
                 }
@@ -42,7 +42,7 @@ public abstract class AutoPlayDataLoaderBase<CF extends AutoPlayClientFactory<?>
         eventBus.removeHandlers();
     }
 
-    protected abstract void onLoadData();
+    protected abstract void doLoadData();
 
     protected void onStoppedLoading() {
     }

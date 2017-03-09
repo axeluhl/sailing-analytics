@@ -15,7 +15,7 @@ public class EventChanged extends GwtEvent<EventChanged.Handler> {
     /**
      * Event handler interface
      */
-    interface Handler extends EventHandler {
+    public interface Handler extends EventHandler {
         void onEventChanged(EventChanged e);
     }
 
