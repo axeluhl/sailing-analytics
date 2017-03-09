@@ -6,6 +6,7 @@ public class SixtyInchSetting {
 
     private UUID eventId;
     private String leaderBoardName;
+    private boolean manualMode;
 
     public SixtyInchSetting(UUID eventUuid, String selectedLeaderboardName) {
         this.eventId = eventUuid;
@@ -18,6 +19,10 @@ public class SixtyInchSetting {
 
     public String getLeaderBoardName() {
         return leaderBoardName;
+    }
+
+    public boolean isManualMode() {
+        return manualMode;
     }
 }
 

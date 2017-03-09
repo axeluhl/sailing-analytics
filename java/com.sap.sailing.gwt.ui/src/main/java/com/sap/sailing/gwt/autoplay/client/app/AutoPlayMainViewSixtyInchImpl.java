@@ -6,6 +6,7 @@ import com.google.gwt.layout.client.Layout.AnimationCallback;
 import com.google.gwt.layout.client.Layout.Layer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
@@ -69,13 +70,18 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
             mainPanel.setWidgetLeftWidth(widgetToShow, 100, Unit.PCT, 100, Unit.PCT);
             mainPanel.forceLayout();
             mainPanel.setWidgetLeftWidth(widgetToShow, 0, Unit.PCT, 100, Unit.PCT);
+            if (widgetToDispose != null) {
+                new Timer() {
+                    public void run() {
+                        mainPanel.remove(widgetToDispose);
+                    };
+                }.schedule(2000);
+            }
             mainPanel.animate(2000, new AnimationCallback() {
                 @Override
                 public void onAnimationComplete() {
-                    if (widgetToDispose != null) {
-                        mainPanel.remove(widgetToDispose);
-                    }
                 }
+
                 @Override
                 public void onLayout(Layer layer, double progress) {
                 }
