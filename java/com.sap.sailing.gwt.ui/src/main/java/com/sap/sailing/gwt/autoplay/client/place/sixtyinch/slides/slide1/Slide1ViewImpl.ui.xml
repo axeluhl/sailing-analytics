@@ -6,8 +6,7 @@
     </ui:style>
     <g:SimpleLayoutPanel>
         <g:HTMLPanel>
-            <g:Label ui:field="ctxTest">SLIDE 1</g:Label>
-            <img src="./dummy.png" />
+            <g:SimplePanel ui:field="miniLeaderBoard"/>
         </g:HTMLPanel>
     </g:SimpleLayoutPanel>
 </ui:UiBinder> 
