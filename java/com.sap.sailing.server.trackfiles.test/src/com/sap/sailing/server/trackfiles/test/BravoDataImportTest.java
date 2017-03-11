@@ -64,7 +64,6 @@ public class BravoDataImportTest {
     }
     
     private void testImport(ImportData importData) throws FormatNotSupportedException, IOException {
-
         bravoDataImporter.importFixes(importData.getInputStream(), (fixes, device) -> {
             for (DoubleVectorFix fix : fixes) {
                 callbackCallCount++;
