@@ -16,13 +16,6 @@ import com.sap.sse.common.WithID;
 public interface SensorFixTrack<ItemType extends WithID & Serializable, FixT extends SensorFix>
         extends MappedTrack<ItemType, FixT> {
     
-    /**
-     * Value names to be used when reading values from {@link SensorFix}es by calling {@link SensorFix#get(String)}.
-     * 
-     * @return the value names that fixes contained in this track support
-     */
-    Iterable<String> getValueNames();
-    
     void addListener(SensorFixTrackListener<ItemType, FixT> listener);
     
     void removeListener(SensorFixTrackListener<ItemType, FixT> listener);

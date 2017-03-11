@@ -566,8 +566,7 @@ public class SensorFixStoreAndLoadTest {
         public static final String TRACK_NAME = "TestFixTrack";
         
         public TestFixTrackImpl(ItemType trackedItem, String trackName) {
-            super(trackedItem, trackName, TestFixImpl.COLUMNS, 
-                    TRACK_NAME + " for " + trackedItem);
+            super(trackedItem, trackName, TRACK_NAME + " for " + trackedItem);
         }
         
         public Double getTextValue(TimePoint timePoint) {
