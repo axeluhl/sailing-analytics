@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -31,6 +32,10 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
             @Override
             public Iterable<Boat> getBoats() {
                 return competitorsAndBoats.values();
+            }
+            @Override
+            public Map<Competitor, Boat> getCompetitorsAndTheirBoats() {
+                return competitorsAndBoats;
             }
             @Override
             public Competitor getCompetitorById(Serializable competitorID) {

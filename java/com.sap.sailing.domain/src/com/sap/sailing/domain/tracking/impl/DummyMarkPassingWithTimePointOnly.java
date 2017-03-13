@@ -62,7 +62,6 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             public Boat getBoat() {
                 return null;
             }
-
             @Override
             public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
                 return this;

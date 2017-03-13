@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import com.sap.sailing.domain.common.RaceCompetitorIdsAsStringWithMD5Hash;
 import com.sap.sse.common.NamedWithID;
@@ -28,6 +29,8 @@ public interface RaceDefinition extends NamedWithID {
 
     Competitor getCompetitorById(Serializable competitorID);
 
+    Map<Competitor, Boat> getCompetitorsAndTheirBoats();
+    
     /**
      * Gets the boat used by the competitor for this race.
      */

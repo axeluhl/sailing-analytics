@@ -68,6 +68,11 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
         }
 
         @Override
+        public Map<Competitor, Boat> getCompetitorsAndTheirBoats() {
+            return MockedTrackedRaceWithFixedRank.this.competitorsAndBoats;
+        }
+
+        @Override
         public BoatClass getBoatClass() {
             return boatClass;
         }

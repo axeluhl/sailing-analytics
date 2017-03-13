@@ -85,6 +85,11 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     }
 
     @Override
+    public Map<Competitor, Boat> getCompetitorsAndTheirBoats() {
+        return Collections.unmodifiableMap(competitorsAndTheirBoats);
+    }
+
+    @Override
     public byte[] getCompetitorMD5() {
         return raceCompetitorsMD5Hash.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID();
     }
