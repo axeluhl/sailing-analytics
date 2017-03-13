@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
@@ -9,8 +9,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class Slide2ViewImpl extends ResizeComposite implements Slide2View {
-    private static Slide3ViewImplUiBinder uiBinder = GWT.create(Slide3ViewImplUiBinder.class);
+public class Slide0ViewImpl extends ResizeComposite implements Slide0View {
+    private static Slide0ViewImplUiBinder uiBinder = GWT.create(Slide0ViewImplUiBinder.class);
 
     private static Dummy dummmyProvider = GWT.create(Dummy.class);
     @UiField
@@ -20,16 +20,16 @@ public class Slide2ViewImpl extends ResizeComposite implements Slide2View {
         ImageResource dummy();
     }
 
-    interface Slide3ViewImplUiBinder extends UiBinder<Widget, Slide2ViewImpl> {
+    interface Slide0ViewImplUiBinder extends UiBinder<Widget, Slide0ViewImpl> {
     }
 
-    public Slide2ViewImpl() {
+    public Slide0ViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         dummy.setUrl(dummmyProvider.dummy().getSafeUri());
     }
 
     @Override
-    public void startingWith(Slide2Presenter p, AcceptsOneWidget panel) {
+    public void startingWith(Slide0Presenter p, AcceptsOneWidget panel) {
         panel.setWidget(this);
     }
 
