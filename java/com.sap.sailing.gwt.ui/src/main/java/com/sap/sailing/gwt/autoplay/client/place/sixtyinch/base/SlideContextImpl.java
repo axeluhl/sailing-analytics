@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 
 public class SlideContextImpl implements SlideContext {
     private SixtyInchSetting settings;
@@ -33,6 +34,8 @@ public class SlideContextImpl implements SlideContext {
     private RegattaAndRaceIdentifier lifeRace;
 
     private RaceTimesInfoProvider raceTimesInfoProvider;
+
+    private RaceboardDataDTO raceboardResult;
 
     public SlideContextImpl(EventBus eventBus, SixtyInchSetting settings) {
         if (settings == null) {
@@ -85,13 +88,19 @@ public class SlideContextImpl implements SlideContext {
     @Override
     public void updateRaceTimeInfos(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived,
-            RegattaAndRaceIdentifier lifeRace) {
+            RegattaAndRaceIdentifier lifeRace, RaceboardDataDTO result) {
         this.raceTimesInfo = raceTimesInfo;
         this.clientTimeWhenRequestWasSent = clientTimeWhenRequestWasSent;
         this.serverTimeDuringRequest = serverTimeDuringRequest;
         this.clientTimeWhenResponseWasReceived = clientTimeWhenResponseWasReceived;
         this.lifeRace = lifeRace;
+        this.raceboardResult = result;
         eventBus.fireEvent(new RaceTimeInfoProviderUpdatedEvent());
+    }
+
+    @Override
+    public RaceboardDataDTO getRaceboardResult() {
+        return raceboardResult;
     }
 
     @Override

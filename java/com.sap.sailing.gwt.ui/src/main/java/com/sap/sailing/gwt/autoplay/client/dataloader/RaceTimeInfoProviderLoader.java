@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -19,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -75,20 +77,35 @@ public class RaceTimeInfoProviderLoader implements AutoPlayDataLoader<AutoPlayCl
         GetMiniLeaderboardDTO leaderBoardDTO = clientFactory.getSlideCtx().getMiniLeaderboardDTO();
         EventDTO eventDTO = clientFactory.getSlideCtx().getEvent();
         String leaderBoardName = clientFactory.getSlideCtx().getSettings().getLeaderBoardName();
-        
-        RegattaAndRaceIdentifier lifeRace = null;
+
         if (leaderBoardDTO != null && eventDTO != null) {
             StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard(eventDTO, leaderBoardName);
             updateRaceTimesInfoProvider(selectedLeaderboard);
             if (serverTimeDuringRequest != null) {
-                lifeRace = checkForLiveRace(selectedLeaderboard);
+                RegattaAndRaceIdentifier lifeRace = checkForLiveRace(selectedLeaderboard);
+                if (lifeRace == null) {
+                    clientFactory.getSlideCtx().updateRaceTimeInfos(raceTimesInfo, clientTimeWhenRequestWasSent,
+                            serverTimeDuringRequest, clientTimeWhenResponseWasReceived, lifeRace, null);
+                } else {
+                    clientFactory.getSailingService().getRaceboardData(lifeRace.getRegattaName(),
+                            lifeRace.getRaceName(), leaderBoardName, null, null, new AsyncCallback<RaceboardDataDTO>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    clientFactory.getSlideCtx().updateRaceTimeInfos(raceTimesInfo,
+                                            clientTimeWhenRequestWasSent, serverTimeDuringRequest,
+                                            clientTimeWhenResponseWasReceived, lifeRace, null);
+                                }
+
+                                @Override
+                                public void onSuccess(RaceboardDataDTO result) {
+                                    clientFactory.getSlideCtx().updateRaceTimeInfos(raceTimesInfo,
+                                            clientTimeWhenRequestWasSent, serverTimeDuringRequest,
+                                            clientTimeWhenResponseWasReceived, lifeRace, result);
+                                }
+                            });
+                }
             }
         }
-
-        
-        
-        clientFactory.getSlideCtx().updateRaceTimeInfos(raceTimesInfo, clientTimeWhenRequestWasSent,
-                serverTimeDuringRequest, clientTimeWhenResponseWasReceived, lifeRace);
     }
 
     private void updateRaceTimesInfoProvider(AbstractLeaderboardDTO currentLeaderboard) {

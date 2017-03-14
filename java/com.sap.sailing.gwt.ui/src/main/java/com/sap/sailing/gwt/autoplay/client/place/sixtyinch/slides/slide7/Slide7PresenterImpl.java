@@ -4,7 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
@@ -19,7 +18,6 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -33,7 +31,8 @@ public class Slide7PresenterImpl extends SlideBase<Slide7Place> implements Slide
 
     private Slide7View view;
     private Timer raceboardTimer;
-    private RegattaAndRaceIdentifier lastLiveRace;
+    private static RaceBoardPanel raceboardPerspective;
+    private static RegattaAndRaceIdentifier lastLiveRace;
 
     public Slide7PresenterImpl(Slide7Place place, AutoPlayClientFactorySixtyInch clientFactory,
             Slide7View slide7ViewImpl) {
@@ -44,8 +43,12 @@ public class Slide7PresenterImpl extends SlideBase<Slide7Place> implements Slide
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        String leaderBoardName = getSlideCtx().getSettings().getLeaderBoardName();
-        eventBus.fireEvent(new SlideHeaderEvent("i18n Whats next?", leaderBoardName));
+        if (getSlideCtx().getCurrentLiveRace() == null) {
+            eventBus.fireEvent(
+                    new SlideHeaderEvent("Currently Live", getSlideCtx().getCurrentLiveRace().getRaceName()));
+        } else {
+            eventBus.fireEvent(new SlideHeaderEvent("Currently Live", ""));
+        }
         view.startingWith(this, panel);
 
         raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
@@ -66,7 +69,12 @@ public class Slide7PresenterImpl extends SlideBase<Slide7Place> implements Slide
                 raceTimeInfosReceived();
             }
         });
-        view.showErrorNoLive();
+
+        if (raceboardPerspective != null) {
+            view.setRaceMap(raceboardPerspective);
+        } else {
+            view.showErrorNoLive();
+        }
     }
 
     protected void raceTimeInfosReceived() {
@@ -82,10 +90,13 @@ public class Slide7PresenterImpl extends SlideBase<Slide7Place> implements Slide
             view.showErrorNoLive();
         } else {
             // life race changed, switch to it!
-            if (lastLiveRace == null || !lastLiveRace.equals(currentLiveRace)) {
-                lastLiveRace = currentLiveRace;
-                createRaceMapIfNotExist(currentLiveRace);
+            if ((lastLiveRace == null && !(currentLiveRace == null))
+                    || (lastLiveRace != null && !lastLiveRace.equals(currentLiveRace))) {
+                if (getSlideCtx().getRaceboardResult() != null) {
+                    createRaceMapIfNotExist(currentLiveRace);
+                }
             }
+            lastLiveRace = currentLiveRace;
         }
 
     }
@@ -99,35 +110,24 @@ public class Slide7PresenterImpl extends SlideBase<Slide7Place> implements Slide
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
 
-        sailingService.getRaceboardData(currentLiveRace.getRegattaName(), currentLiveRace.getRaceName(),
-                leaderBoardName, null, null, new AsyncCallback<RaceboardDataDTO>() {
-                    @Override
-                    public void onSuccess(RaceboardDataDTO result) {
-                        EventDTO event = getClientFactory().getSlideCtx().getEvent();
-                        StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard(event, leaderBoardName);
+        EventDTO event = getClientFactory().getSlideCtx().getEvent();
+        StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard(event, leaderBoardName);
 
-                        RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(
-                                selectedLeaderboard, StringMessages.INSTANCE);
-                        PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(
-                                raceboardPerspectiveLifecycle, raceboardPerspectiveLifecycle.createDefaultSettings());
+        RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(
+                selectedLeaderboard, StringMessages.INSTANCE);
+        PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(
+                raceboardPerspectiveLifecycle, raceboardPerspectiveLifecycle.createDefaultSettings());
 
-                        RaceBoardPanel raceboardPerspective = new RaceBoardPanel(
-                                raceboardPerspectiveLifecyclesAndSettings,
-                                sailingService, mediaService, userService, asyncActionsExecutor,
-                                result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, leaderBoardName,
-                                /** leaderboardGroupName */
-                                null, /** eventId */
-                                null, errorReporter, StringMessages.INSTANCE, null,
-                                getSlideCtx().getRaceTimesInfoProvider(), true);
-                        raceboardTimer.setPlayMode(PlayModes.Live);
-                        view.setRaceMap(raceboardPerspective);
-                    }
+        raceboardPerspective = new RaceBoardPanel(raceboardPerspectiveLifecyclesAndSettings,
+                sailingService, mediaService, userService, asyncActionsExecutor,
+                getSlideCtx().getRaceboardResult().getCompetitorAndTheirBoats(),
+                raceboardTimer, currentLiveRace, leaderBoardName,
+                /** leaderboardGroupName */
+                null, /** eventId */
+                null, errorReporter, StringMessages.INSTANCE, null, getSlideCtx().getRaceTimesInfoProvider(), true);
+        raceboardTimer.setPlayMode(PlayModes.Live);
+        view.setRaceMap(raceboardPerspective);
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error while loading data for raceboard: " + caught.getMessage());
-                    }
-                });
     }
 
     private StrippedLeaderboardDTO getSelectedLeaderboard(EventDTO event, String leaderBoardName) {

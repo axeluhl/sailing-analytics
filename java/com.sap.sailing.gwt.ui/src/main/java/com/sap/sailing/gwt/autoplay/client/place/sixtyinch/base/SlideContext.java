@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 
 public interface SlideContext {
     SixtyInchSetting getSettings();
@@ -23,7 +24,7 @@ public interface SlideContext {
 
     void updateRaceTimeInfos(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived,
-            RegattaAndRaceIdentifier lifeRace);
+            RegattaAndRaceIdentifier lifeRace, RaceboardDataDTO result);
 
     long getClientTimeWhenRequestWasSent();
 
@@ -36,4 +37,6 @@ public interface SlideContext {
     RaceTimesInfoProvider getRaceTimesInfoProvider();
 
     void setRaceTimesInfoProvider(RaceTimesInfoProvider raceTimesInfoProvider);
+
+    RaceboardDataDTO getRaceboardResult();
 }
