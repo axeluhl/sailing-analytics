@@ -41,8 +41,6 @@ public interface ResourceBundleStringMessages {
             return new Control() {
                 @Override
                 public Locale getFallbackLocale(String baseName, Locale locale) {
-                    if (baseName == null)
-                        throw new NullPointerException();
                     return locale.equals(FALLBACK_LOCALE) ? null : FALLBACK_LOCALE;
                 }
 
@@ -58,6 +56,9 @@ public interface ResourceBundleStringMessages {
                     }
                     String classPathFilePath = baseName + localeExt + ".properties";
                     try (InputStream is = loader.getResourceAsStream(classPathFilePath);) {
+                        if (is == null) {
+                            return null;
+                        }
                         return new PropertyResourceBundle(new InputStreamReader(is, encoding));
                     }
                 }
