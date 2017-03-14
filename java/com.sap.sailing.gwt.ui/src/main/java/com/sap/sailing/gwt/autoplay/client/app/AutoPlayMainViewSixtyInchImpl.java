@@ -2,8 +2,6 @@ package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.layout.client.Layout.AnimationCallback;
-import com.google.gwt.layout.client.Layout.Layer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -82,15 +80,7 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
             if (widgetToShow instanceof SlideInitViewImpl) {
                 mainPanel.forceLayout();
             } else {
-                mainPanel.animate(2000, new AnimationCallback() {
-                    @Override
-                    public void onAnimationComplete() {
-                    }
-
-                    @Override
-                    public void onLayout(Layer layer, double progress) {
-                    }
-                });
+                mainPanel.animate(2000);
             }
         }
     }
