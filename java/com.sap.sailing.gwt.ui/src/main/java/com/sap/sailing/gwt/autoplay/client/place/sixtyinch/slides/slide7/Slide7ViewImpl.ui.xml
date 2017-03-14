@@ -5,7 +5,10 @@
 	.fullscreen {
 		width: 100%;
 		height: 100%;
+		background-color: #ffffff;
 	}
 	</ui:style>
-	<rf:ResizableFlowPanel ui:field="racemap" styleName="{style.fullscreen}" />
+    <ui:with field="res" type="com.sap.sailing.gwt.autoplay.client.resources.SixtyInchBundle" />
+    
+	<rf:ResizableFlowPanel ui:field="racemap" styleName="{style.fullscreen}"/>
 </ui:UiBinder> 

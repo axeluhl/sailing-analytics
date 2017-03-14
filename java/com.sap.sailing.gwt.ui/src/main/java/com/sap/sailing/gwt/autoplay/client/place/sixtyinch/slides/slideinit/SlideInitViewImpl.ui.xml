@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.autoplay.client.resources.SixtyInchBundle" />
     <ui:style>
         .fullscreen{
             width: 100%;
@@ -9,7 +10,7 @@
             background-size: contain;
         }
     </ui:style>
-    <g:SimpleLayoutPanel>
+    <g:SimpleLayoutPanel styleName="{res.style.slideBackground}">
         <g:HTMLPanel>
             <g:SimplePanel ui:field="content" styleName="{style.fullscreen}"/>
         </g:HTMLPanel>

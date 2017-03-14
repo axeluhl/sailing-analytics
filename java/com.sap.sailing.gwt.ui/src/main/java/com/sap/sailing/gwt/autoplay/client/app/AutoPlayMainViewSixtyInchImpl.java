@@ -77,6 +77,7 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
                     };
                 }.schedule(2000);
             }
+            mainPanel.setWidgetLeftWidth(widgetToDispose, -100, Unit.PCT, 100, Unit.PCT);
             mainPanel.setWidgetLeftWidth(widgetToShow, 0, Unit.PCT, 100, Unit.PCT);
             if (widgetToShow instanceof SlideInitViewImpl) {
                 mainPanel.forceLayout();
