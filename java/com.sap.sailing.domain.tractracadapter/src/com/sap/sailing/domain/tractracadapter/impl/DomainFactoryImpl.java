@@ -537,9 +537,16 @@ public class DomainFactoryImpl implements DomainFactory {
                     raceCache.put(raceId, raceDefinition);
                     raceCache.notifyAll();
                 } else {
-                    logger.warning("Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
+                    final String reasonForNotAddingRaceToRegatta = "Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
                             + " because boat class " + raceDefinition.getBoatClass()
-                            + " doesn't match regatta's boat class " + trackedRegatta.getRegatta().getBoatClass());
+                            + " doesn't match regatta's boat class " + trackedRegatta.getRegatta().getBoatClass();
+                    logger.warning(reasonForNotAddingRaceToRegatta);
+                    try {
+                        raceDefinitionSetToUpdate.raceNotLoaded(reasonForNotAddingRaceToRegatta);
+                    } catch (Exception e) {
+                        logger.log(Level.INFO, "Something else went wrong while trying to notify the RaceDefinition set that the race "+
+                                raceDefinition+" could not be added to the the regatta "+trackedRegatta.getRegatta(), e);
+                    }
                 }
             } else {
                 logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
@@ -688,11 +695,11 @@ public class DomainFactoryImpl implements DomainFactory {
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable) throws Exception {
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable, int timeoutInMillis) throws Exception {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, this, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination,
-                preferReplayIfAvailable);
+                preferReplayIfAvailable, timeoutInMillis);
     }
 
     @Override

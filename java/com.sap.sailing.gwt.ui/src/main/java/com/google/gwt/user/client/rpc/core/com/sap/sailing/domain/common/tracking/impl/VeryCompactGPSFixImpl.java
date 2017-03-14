@@ -5,9 +5,9 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl.CompactPosition;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl.CompactPosition;
 
-public final class CompactGPSFixImpl {
+public final class VeryCompactGPSFixImpl {
     public static final class CompactPosition_CustomFieldSerializer extends CustomFieldSerializer<CompactPosition> {
         @Override
         public boolean hasCustomInstantiateInstance() {
@@ -23,7 +23,7 @@ public final class CompactGPSFixImpl {
         public static CompactPosition instantiate(SerializationStreamReader streamReader) throws SerializationException {
             final double latDeg = streamReader.readDouble();
             final double lngDeg = streamReader.readDouble();
-            return (CompactPosition) new com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl(
+            return (CompactPosition) new com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl(
                     new DegreePosition(latDeg, lngDeg), /* timePoint */null).getPosition();
         }
 

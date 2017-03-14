@@ -256,12 +256,13 @@ public interface DomainFactory {
      *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
      *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
      *            races if since the last connection the race was migrated to a replay file format.
+     * @param timeoutInMillis TODO
      */
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
-            boolean preferReplayIfAvailable) throws Exception;
+            boolean preferReplayIfAvailable, int timeoutInMillis) throws Exception;
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding

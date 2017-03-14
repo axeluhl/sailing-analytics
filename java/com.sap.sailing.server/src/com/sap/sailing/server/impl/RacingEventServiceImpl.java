@@ -1707,7 +1707,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore,
+        public void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore,
                 Double newCorrectedScore) {
             notifyForCompetitorIfNotAlreadyNotifiedRecently(competitor, raceColumn);
         }
