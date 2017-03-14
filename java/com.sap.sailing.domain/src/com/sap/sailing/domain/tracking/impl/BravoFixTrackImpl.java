@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
@@ -28,8 +27,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      *            the name of the track by which it can be obtained from the {@link TrackedRace}.
      */
     public BravoFixTrackImpl(ItemType trackedItem, String trackName) {
-        super(trackedItem, trackName, BravoSensorDataMetadata.INSTANCE.getFileColumns(), 
-                BravoFixTrack.TRACK_NAME + " for " + trackedItem);
+        super(trackedItem, trackName, BravoFixTrack.TRACK_NAME + " for " + trackedItem);
     }
 
     @Override
