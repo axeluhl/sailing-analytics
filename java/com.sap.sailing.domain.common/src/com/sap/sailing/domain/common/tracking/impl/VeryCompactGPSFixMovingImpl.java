@@ -122,8 +122,13 @@ public class VeryCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingImpl
         super(timePoint);
         latDegScaled = CompactPositionHelper.getLatDegScaled(position);
         lngDegScaled = CompactPositionHelper.getLngDegScaled(position);
-        speedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(speed);
-        degreeBearingScaled = CompactPositionHelper.getDegreeBearingScaled(speed.getBearing());
+        if (speed == null) {
+            speedInKnotsScaled = 0;
+            degreeBearingScaled = 0;
+        } else {
+            speedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(speed);
+            degreeBearingScaled = CompactPositionHelper.getDegreeBearingScaled(speed.getBearing());
+        }
     }
     
     public VeryCompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) throws CompactionNotPossibleException {
