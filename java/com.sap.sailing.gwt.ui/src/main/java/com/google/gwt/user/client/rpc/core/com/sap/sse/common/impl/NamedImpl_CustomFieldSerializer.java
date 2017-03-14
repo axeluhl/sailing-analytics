@@ -7,8 +7,16 @@ import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class NamedImpl_CustomFieldSerializer extends CustomFieldSerializer<NamedImpl> {
-    public static void deserialize(SerializationStreamReader streamReader, com.sap.sse.common.impl.NamedImpl instance)
+
+    @Override
+    public void serializeInstance(SerializationStreamWriter streamWriter, NamedImpl instance)
             throws SerializationException {
+        serialize(streamWriter, instance);
+    }
+
+    public static void serialize(SerializationStreamWriter streamWriter, NamedImpl instance)
+            throws SerializationException {
+        streamWriter.writeString(instance.getName());
     }
 
     @Override
@@ -18,19 +26,21 @@ public class NamedImpl_CustomFieldSerializer extends CustomFieldSerializer<Named
 
     @Override
     public NamedImpl instantiateInstance(SerializationStreamReader streamReader) throws SerializationException {
+        return instantiate(streamReader);
+    }
+
+    public static NamedImpl instantiate(SerializationStreamReader streamReader) throws SerializationException {
         return new NamedImpl(streamReader.readString());
     }
 
     @Override
     public void deserializeInstance(SerializationStreamReader streamReader, NamedImpl instance)
             throws SerializationException {
-        // done by instantiateInstance
+        deserialize(streamReader, instance);
     }
 
-    @Override
-    public void serializeInstance(SerializationStreamWriter streamWriter, NamedImpl instance)
-            throws SerializationException {
-        streamWriter.writeString(instance.getName());
+    public static void deserialize(SerializationStreamReader streamReader, NamedImpl instance) {
+        // Done by instantiateInstance
     }
 
 }
