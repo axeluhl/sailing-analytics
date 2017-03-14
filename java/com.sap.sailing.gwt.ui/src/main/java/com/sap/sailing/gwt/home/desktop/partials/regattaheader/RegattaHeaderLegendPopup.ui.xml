@@ -2,8 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    
-    <ui:style>
+
+    <ui:style gss="true">
         .iconGPS, .iconWind, .iconVideo, .iconAudio{
             line-height: 1.5em;
             position: relative;
@@ -47,7 +47,6 @@
             height: 0;
             width: 0;
             position: absolute;
-           // pointer-events: none;
         }
 
         .legend:after {
