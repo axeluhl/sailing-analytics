@@ -4,6 +4,7 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.place.player.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerView;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContext;
@@ -18,7 +19,7 @@ import com.sap.sse.gwt.client.mvp.ErrorView;
 public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBase<PlaceNavigatorSixtyInch>
         implements AutoPlayClientFactorySixtyInch {
 
-    private SlideContext configurationSixtyInch;
+    private SlideContext currentContext;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
 
     public AutoPlayClientFactorySixtyInchImpl() {
@@ -61,15 +62,15 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
 
     @Override
     public void setSlideContext(SlideContext configurationSixtyInch) {
-        this.configurationSixtyInch = configurationSixtyInch;
+        this.currentContext = configurationSixtyInch;
     }
 
     @Override
     public SlideContext getSlideCtx() {
-        if (configurationSixtyInch == null) {
-            throw new IllegalStateException("No context set");
+        if (currentContext == null) {
+            getEventBus().fireEvent(new AutoplayFailureEvent("No autoplay context found"));
         }
-        return configurationSixtyInch;
+        return currentContext;
     }
 
     @Override

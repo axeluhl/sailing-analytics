@@ -1,10 +1,12 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator;
+package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes;
 
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.place.shared.Place;
 
-public interface SlideConfig {
+public interface AutoPlayNode {
     void start();
+
+    void stop();
 
     void doSuspend();
 
@@ -14,5 +16,5 @@ public interface SlideConfig {
 
     Place getPlaceToGo();
 
-    void setNextSlide(SlideConfig nextSlide);
+    void setNextSlide(AutoPlayNode nextSlide);
 }

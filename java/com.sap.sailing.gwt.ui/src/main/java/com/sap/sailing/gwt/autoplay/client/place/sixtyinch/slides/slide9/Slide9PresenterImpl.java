@@ -1,12 +1,11 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide9;
 
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideBase;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
 
-public class Slide9PresenterImpl extends SlideBase<Slide9Place> implements Slide9View.Slide9Presenter {
+public class Slide9PresenterImpl extends ConfiguredSlideBase<Slide9Place> implements Slide9View.Slide9Presenter {
 
     private Slide9View view;
 
@@ -18,8 +17,9 @@ public class Slide9PresenterImpl extends SlideBase<Slide9Place> implements Slide
     }
 
     @Override
-    public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        eventBus.fireEvent(new SlideHeaderEvent("i18n Whats next?", getSlideCtx().getSettings().getLeaderBoardName()));
+    public void startConfigured(AcceptsOneWidget panel) {
+        getEventBus()
+                .fireEvent(new SlideHeaderEvent("i18n Whats next?", getSlideCtx().getSettings().getLeaderBoardName()));
         view.startingWith(this, panel);
     }
 }

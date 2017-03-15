@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchOrchestrator;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContextImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.SixtyInchSetting;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
@@ -14,7 +14,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSett
 
 public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyInch {
     private final PlaceController placeController;
-    private SixtyInchOrchestrator orchestrator;
+    private Orchestrator orchestrator;
     private AutoPlayClientFactorySixtyInch autoplayFactory;
     
     public PlaceNavigatorImpl(PlaceController placeController) {
@@ -36,7 +36,7 @@ public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyIn
     }
 
     @Override
-    public void setOrchestrator(SixtyInchOrchestrator orchestrator) {
+    public void setOrchestrator(Orchestrator orchestrator) {
         this.orchestrator = orchestrator;
     }
 

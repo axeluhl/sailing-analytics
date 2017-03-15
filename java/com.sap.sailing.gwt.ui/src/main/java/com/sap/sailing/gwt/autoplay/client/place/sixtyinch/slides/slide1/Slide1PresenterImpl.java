@@ -1,14 +1,13 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1;
 
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.MiniLeaderboardUpdatedEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideBase;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 
-public class Slide1PresenterImpl extends SlideBase<Slide1Place> implements Slide1View.Slide1Presenter {
+public class Slide1PresenterImpl extends ConfiguredSlideBase<Slide1Place> implements Slide1View.Slide1Presenter {
 
     private Slide1View view;
 
@@ -19,11 +18,12 @@ public class Slide1PresenterImpl extends SlideBase<Slide1Place> implements Slide
     }
 
     @Override
-    public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        eventBus.fireEvent(new SlideHeaderEvent("i18n 5 Races Rank", getSlideCtx().getSettings().getLeaderBoardName()));
+    public void startConfigured(AcceptsOneWidget panel) {
+        getEventBus()
+                .fireEvent(new SlideHeaderEvent("i18n 5 Races Rank", getSlideCtx().getSettings().getLeaderBoardName()));
         view.startingWith(this, panel);
 
-        eventBus.addHandler(MiniLeaderboardUpdatedEvent.TYPE, new MiniLeaderboardUpdatedEvent.Handler() {
+        getEventBus().addHandler(MiniLeaderboardUpdatedEvent.TYPE, new MiniLeaderboardUpdatedEvent.Handler() {
 
             @Override
             public void handleNoOpEvent(MiniLeaderboardUpdatedEvent e) {

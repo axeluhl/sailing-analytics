@@ -3,13 +3,12 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.RaceTimeInfoProviderUpdatedEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideBase;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,7 +26,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.security.ui.client.UserService;
 
-public class Slide7PresenterImpl extends SlideBase<Slide7Place> implements Slide7View.Slide7Presenter {
+public class Slide7PresenterImpl extends ConfiguredSlideBase<Slide7Place> implements Slide7View.Slide7Presenter {
 
     private Slide7View view;
     private Timer raceboardTimer;
@@ -42,12 +41,12 @@ public class Slide7PresenterImpl extends SlideBase<Slide7Place> implements Slide
     }
 
     @Override
-    public void start(AcceptsOneWidget panel, EventBus eventBus) {
+    public void startConfigured(AcceptsOneWidget panel) {
         if (getSlideCtx().getCurrentLiveRace() == null) {
-            eventBus.fireEvent(
+            getEventBus().fireEvent(
                     new SlideHeaderEvent("Currently Live", getSlideCtx().getCurrentLiveRace().getRaceName()));
         } else {
-            eventBus.fireEvent(new SlideHeaderEvent("Currently Live", ""));
+            getEventBus().fireEvent(new SlideHeaderEvent("Currently Live", ""));
         }
         view.startingWith(this, panel);
 
@@ -63,7 +62,7 @@ public class Slide7PresenterImpl extends SlideBase<Slide7Place> implements Slide
             }
         });
 
-        eventBus.addHandler(RaceTimeInfoProviderUpdatedEvent.TYPE, new RaceTimeInfoProviderUpdatedEvent.Handler() {
+        getEventBus().addHandler(RaceTimeInfoProviderUpdatedEvent.TYPE, new RaceTimeInfoProviderUpdatedEvent.Handler() {
             @Override
             public void handleNoOpEvent(RaceTimeInfoProviderUpdatedEvent e) {
                 raceTimeInfosReceived();

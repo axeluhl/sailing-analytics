@@ -8,8 +8,9 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayHistoryMapperSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.AutoPlayActivityMapperSixtyInchImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchOrchestrator;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.SixtyInchOrchestrator;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.SixtyInchSetting;
 import com.sap.sailing.gwt.autoplay.client.resources.SixtyInchBundle;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -34,7 +35,7 @@ public class AutoPlaySixtyInchEntryPoint
 
         Document.get().getBody().addClassName(SharedResources.INSTANCE.mainCss().desktop());
         
-        SixtyInchOrchestrator orchestrator = new SixtyInchOrchestrator(clientFactory);
+        Orchestrator orchestrator = new SixtyInchOrchestrator(clientFactory);
         clientFactory.getPlaceNavigator().setOrchestrator(orchestrator);
         
         //loadPlace CTX if exists here!

@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailure;
+import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventDTODataLoader extends AutoPlayDataLoaderBase<AutoPlayClientFactorySixtyInch> {
@@ -27,7 +27,7 @@ public class EventDTODataLoader extends AutoPlayDataLoaderBase<AutoPlayClientFac
 
             @Override
             public void onFailure(Throwable caught) {
-                getEventBus().fireEvent(new DataLoadFailure(EventDTODataLoader.this, caught,
+                getEventBus().fireEvent(new DataLoadFailureEvent(EventDTODataLoader.this, caught,
                         "Error loading Event with id " + eventUUID));
             }
         });

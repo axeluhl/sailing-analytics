@@ -3,15 +3,16 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideBase;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
 public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements SlideInitView.SlideInitPresenter {
-
     private SlideInitView view;
 
     public SlideInitPresenterImpl(SlideInitPlace place, AutoPlayClientFactorySixtyInch clientFactory,
@@ -25,16 +26,28 @@ public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         eventBus.fireEvent(
                 new SlideHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(), "Loading event data"));
-
         eventBus.addHandler(EventChanged.TYPE, new EventChanged.Handler() {
             @Override
             public void onEventChanged(EventChanged e) {
                 updateEventImage();
-
             }
         });
-
         view.startingWith(this, panel);
+        if (getPlace().getFailureEvent() != null) {
+            view.showFailure(getPlace().getFailureEvent(), new Command() {
+                @Override
+                public void execute() {
+                    if (getPlace().getCurrentSlideConfig() != null) {
+                        getPlace().getCurrentSlideConfig().doContinue();
+                    }
+                }
+            }, new Command() {
+                @Override
+                public void execute() {
+                    getClientFactory().getPlaceController().goTo(new StartPlaceSixtyInch());
+                }
+            });
+        }
     }
 
     protected void updateEventImage() {

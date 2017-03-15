@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchOrchestrator;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.SixtyInchSetting;
 
 public interface PlaceNavigatorSixtyInch extends PlaceNavigator {
@@ -9,5 +9,5 @@ public interface PlaceNavigatorSixtyInch extends PlaceNavigator {
 
     void goToPlayerSixtyInch(SixtyInchSetting configurationSixtyInch, AutoPlayClientFactorySixtyInch clientFactory);
 
-    void setOrchestrator(SixtyInchOrchestrator orchestrator);
+    void setOrchestrator(Orchestrator orchestrator);
 }

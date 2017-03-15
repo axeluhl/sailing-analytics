@@ -5,6 +5,7 @@ import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 
 public abstract class SlideBase<P extends Place> extends AbstractActivity implements Slide<P> {
+
     private P place;
     private AutoPlayClientFactorySixtyInch clientFactory;
 
