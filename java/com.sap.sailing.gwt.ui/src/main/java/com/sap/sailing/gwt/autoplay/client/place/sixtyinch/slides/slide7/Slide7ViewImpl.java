@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class Slide7ViewImpl extends ResizeComposite implements Slide7View {
@@ -32,7 +31,7 @@ public class Slide7ViewImpl extends ResizeComposite implements Slide7View {
     }
 
     @Override
-    public void setRaceMap(RaceBoardPanel raceboardPerspective) {
+    public void setRaceMap(Widget raceboardPerspective) {
         panel.setWidget(raceboardPerspective);
     }
 
