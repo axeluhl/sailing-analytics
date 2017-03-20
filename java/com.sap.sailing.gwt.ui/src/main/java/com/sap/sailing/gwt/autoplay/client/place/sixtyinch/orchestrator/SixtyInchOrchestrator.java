@@ -50,7 +50,7 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // SlideConfig slide4 = new SlideTimedTransitionConfig(this, new Slide4Place(), 10000);
         // SlideConfig slide5 = new SlideTimedTransitionConfig(this, new Slide5Place(), 10000);
         // SlideConfig slide6 = new SlideTimedTransitionConfig(this, new Slide6Place(), 10000);
-        AutoPlayNode slide7 = new TimedTransitionSimpleNode(this, new Slide7Place(), 2000000);
+        AutoPlayNode slide7 = new TimedTransitionSimpleNode(this, new Slide7Place(), 100000);
         // SlideConfig slide8 = new SlideTimedTransitionConfig(this, new Slide8Place(), 10000);
         // SlideConfig slide9 = new SlideTimedTransitionConfig(this, new Slide9Place(), 10000);
         // slideInit.setNextSlide(slide0);

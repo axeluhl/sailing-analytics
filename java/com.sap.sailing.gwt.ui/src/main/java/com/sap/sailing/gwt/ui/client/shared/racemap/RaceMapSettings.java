@@ -227,7 +227,7 @@ public class RaceMapSettings extends AbstractSettings {
         return showMapControls;
     }
 
-    private static HashSet<ManeuverType> getDefaultManeuvers() {
+    public static HashSet<ManeuverType> getDefaultManeuvers() {
         HashSet<ManeuverType> types = new HashSet<ManeuverType>();
         types.add(ManeuverType.JIBE);
         types.add(ManeuverType.TACK);

@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class Slide7ViewImpl extends ResizeComposite implements Slide7View {
@@ -14,8 +15,6 @@ public class Slide7ViewImpl extends ResizeComposite implements Slide7View {
 
     @UiField
     ResizableFlowPanel racemap;
-
-    private AcceptsOneWidget panel;
 
     interface Slide7ViewImplUiBinder extends UiBinder<Widget, Slide7ViewImpl> {
     }
@@ -25,19 +24,14 @@ public class Slide7ViewImpl extends ResizeComposite implements Slide7View {
     }
 
     @Override
-    public void startingWith(Slide7Presenter p, AcceptsOneWidget panel) {
+    public void startingWith(Slide7Presenter p, AcceptsOneWidget panel, RaceMap raceMap) {
         panel.setWidget(this);
-        this.panel = panel;
+        racemap.add(raceMap);
     }
 
     @Override
-    public void setRaceMap(Widget raceboardPerspective) {
-        panel.setWidget(raceboardPerspective);
-    }
-
-    @Override
-    public void showErrorNoLive() {
-        panel.setWidget(new Label("No life race"));
+    public void showErrorNoLive(Slide7PresenterImpl slide7PresenterImpl, AcceptsOneWidget panel, Throwable error) {
+        panel.setWidget(new Label("Could not load RaceMap"));
     }
 
 }
