@@ -232,6 +232,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -739,7 +740,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Pair<PersonDTO, CountryCode> makePersonDTOSerializableAndDeserializableDummy(PersonDTO dummy, CountryCode ccDummy) { return null; }
+    public Pair<PersonDTO, CountryCode> serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition) { return null; }
 
     /**
      * If <code>date</code> is <code>null</code>, the {@link LiveLeaderboardUpdater} for the
