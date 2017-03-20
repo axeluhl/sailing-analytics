@@ -103,7 +103,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         try {
             compactFix = isLosslessCompaction() ? new PreciseCompactGPSFixMovingImpl(fix) : new VeryCompactGPSFixMovingImpl(fix);
         } catch (CompactionNotPossibleException e) {
-            logger.log(Level.FINE, "Couldn't compact fix "+fix+". Using losslessly-compacted fix instead.", e);
+            logger.log(Level.FINE, "Couldn't compact fix "+fix+" for track for "+getTrackedItem()+". Using losslessly-compacted fix instead.", e);
             compactFix = new PreciseCompactGPSFixMovingImpl(fix);
         }
         return super.add(compactFix, replace);
