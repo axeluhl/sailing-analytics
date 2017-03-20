@@ -87,39 +87,57 @@ public class Slide7PresenterImpl extends ConfiguredSlideBase<Slide7Place> implem
                 StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard(getSlideCtx().getEvent(),
                         leaderBoardName);
 
-                loadRaceTimes(selectedLeaderboard, new RaceTimesInfoProviderListener() {
+                sailingService.getCompetitorsOfLeaderboard(leaderBoardName,
+                        new AsyncCallback<Iterable<CompetitorDTO>>() {
+
+                            @Override
+                            public void onSuccess(Iterable<CompetitorDTO> competitors) {
+                                loadRaceTimes(selectedLeaderboard, new RaceTimesInfoProviderListener() {
+
+                                    @Override
+                                    public void raceTimesInfosReceived(
+                                            Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
+                                            long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
+                                            long clientTimeWhenResponseWasReceived) {
+
+                                        raceboardTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent,
+                                                serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
+                                        raceboardTimer.play();
+                                        RegattaAndRaceIdentifier lifeRace = checkForLiveRace(selectedLeaderboard,
+                                                serverTimeDuringRequest);
+                                        if (lifeRace != null) {
+                                            sailingService.getCompetitorBoats(lifeRace,
+                                                    new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
+                                                        @Override
+                                                        public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
+                                                            createRaceMapIfNotExist(lifeRace, selectedLeaderboard,
+                                                                    result, competitors);
+                                                            getEventBus().fireEvent(new SlideHeaderEvent(
+                                                                    "Currently Live", lifeRace.getRaceName()));
+                                                        }
+
+                                                        @Override
+                                                        public void onFailure(Throwable caught) {
+                                                            view.showErrorNoLive();
+                                                            getEventBus()
+                                                                    .fireEvent(new SlideHeaderEvent("Currently Live",
+                                                                            "Error getting Competitor Boats"));
+                                                        }
+                                                    });
+                                        } else {
+                                            view.showErrorNoLive();
+                                            getEventBus().fireEvent(
+                                                    new SlideHeaderEvent("Currently Live", "No Life Race Found"));
+                                        }
+                                    }
+                                });
+                            }
 
                     @Override
-                    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
-                            long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
-                            long clientTimeWhenResponseWasReceived) {
-
-                        raceboardTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
-                                clientTimeWhenResponseWasReceived);
-                        raceboardTimer.play();
-                        RegattaAndRaceIdentifier lifeRace = checkForLiveRace(selectedLeaderboard,
-                                serverTimeDuringRequest);
-                        if (lifeRace != null) {
-                            sailingService.getCompetitorBoats(lifeRace,
-                                    new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
-                                        @Override
-                                        public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
-                                            createRaceMapIfNotExist(lifeRace, selectedLeaderboard, result);
-                                            getEventBus().fireEvent(
-                                                    new SlideHeaderEvent("Currently Live", lifeRace.getRaceName()));
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            view.showErrorNoLive();
-                                            getEventBus().fireEvent(new SlideHeaderEvent("Currently Live",
-                                                    "Error getting Competitor Boats"));
-                                        }
-                                    });
-                        } else {
-                            view.showErrorNoLive();
-                            getEventBus().fireEvent(new SlideHeaderEvent("Currently Live", "No Life Race Found"));
-                        }
+                            public void onFailure(Throwable caught) {
+                                view.showErrorNoLive();
+                                getEventBus()
+                                        .fireEvent(new SlideHeaderEvent("Currently Live", "Error getting Competitors"));
                     }
                 });
             }
@@ -162,7 +180,8 @@ public class Slide7PresenterImpl extends ConfiguredSlideBase<Slide7Place> implem
     }
 
     private void createRaceMapIfNotExist(RegattaAndRaceIdentifier currentLiveRace,
-            AbstractLeaderboardDTO selectedLeaderboard, Map<CompetitorDTO, BoatDTO> result) {
+            StrippedLeaderboardDTO selectedLeaderboard, Map<CompetitorDTO, BoatDTO> result,
+            Iterable<CompetitorDTO> competitors) {
 
         RaceMapSettings settings = new RaceMapSettings();
         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE);
@@ -170,13 +189,16 @@ public class Slide7PresenterImpl extends ConfiguredSlideBase<Slide7Place> implem
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace,
                 result);
         CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(
-                /* hasMultiSelection */ false, colorProvider);
+                /* hasMultiSelection */ true, colorProvider);
+        competitorSelectionProvider.setCompetitors(competitors);
         RaceMap raceboardPerspective = new RaceMap(raceMapLifecycle, settings, sailingService, asyncActionsExecutor,
                 errorReporter, raceboardTimer,
                 competitorSelectionProvider, StringMessages.INSTANCE, currentLiveRace, raceMapResources, true);
-
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceboardPerspective);
         raceboardTimer.setPlayMode(PlayModes.Live);
         view.setRaceMap(raceboardPerspective);
+
+
     }
 
     private RegattaAndRaceIdentifier checkForLiveRace(AbstractLeaderboardDTO currentLeaderboard,
