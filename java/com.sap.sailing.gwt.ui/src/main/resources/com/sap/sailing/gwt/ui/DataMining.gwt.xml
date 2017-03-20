@@ -46,6 +46,5 @@
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
 	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint" />
 	
-	<extend-configuration-property name="rpc.blacklist" value="com.sap.sailing.domain.common.quadtree.QuadTree"/>
 	
 </module>
