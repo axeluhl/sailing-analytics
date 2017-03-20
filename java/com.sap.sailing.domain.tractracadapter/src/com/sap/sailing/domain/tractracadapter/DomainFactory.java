@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
@@ -169,28 +170,42 @@ public interface DomainFactory {
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds);
 
     /**
-     * Creates a {@link RaceDefinition} from a TracTrac {@link IRace} and a domain {@link Course} definition. The
-     * resulting {@link RaceDefinition} is added to the {@link com.sap.sailing.domain.base.Regatta} to which
-     * <code>trackedRegatta</code> belongs (see {@link TrackedRegatta#getRegatta()}). It is added to the internal race
-     * cache. The corresponding {@link TrackedRace} object is also created, and the notification of threads waiting on
-     * the race cache such as a blocking {@link #getAndWaitForRaceDefinition(UUID)} happens only <em>after</em> the
-     * tracked race has been created and the {@link RaceDefinition} was
-     * {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition) added} to the domain event. This ensures that
-     * waiters for the {@link RaceDefinition} are guaranteed to obtain a valid, non-<code>null</code> tracked race
-     * already immediately after the notification was sent, and that the {@link RaceDefinition} is already
-     * {@link com.sap.sailing.domain.base.Regatta#getAllRaces() known} by its containing
-     * {@link com.sap.sailing.domain.base.Regatta}.
-     * @param raceDefinitionSetToUpdate
-     *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is
-     *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that
-     *            object.
-     * @param raceLogResolver TODO
-     */
-    DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats,
-            Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver);
+	 * Creates a {@link RaceDefinition} from a TracTrac {@link IRace} and a
+	 * domain {@link Course} definition. The resulting {@link RaceDefinition} is
+	 * added to the {@link com.sap.sailing.domain.base.Regatta} to which
+	 * <code>trackedRegatta</code> belongs (see
+	 * {@link TrackedRegatta#getRegatta()}). It is added to the internal race
+	 * cache. The corresponding {@link TrackedRace} object is also created, and
+	 * the notification of threads waiting on the race cache such as a blocking
+	 * {@link #getAndWaitForRaceDefinition(UUID)} happens only <em>after</em>
+	 * the tracked race has been created and the {@link RaceDefinition} was
+	 * {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition) added}
+	 * to the domain event. This ensures that waiters for the
+	 * {@link RaceDefinition} are guaranteed to obtain a valid,
+	 * non-<code>null</code> tracked race already immediately after the
+	 * notification was sent, and that the {@link RaceDefinition} is already
+	 * {@link com.sap.sailing.domain.base.Regatta#getAllRaces() known} by its
+	 * containing {@link com.sap.sailing.domain.base.Regatta}.
+	 * 
+	 * @param raceDefinitionSetToUpdate
+	 *            if not <code>null</code>, after creating the
+	 *            {@link TrackedRace}, the {@link RaceDefinition} is
+	 *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace)
+	 *            added} to that object.
+	 * @param runBeforeExposingRace
+	 *            if not {@code null} then this consumer will be passed the
+	 *            {@link DynamicTrackedRace} if it was actually created by this
+	 *            call. This happens while still in the
+	 *            {@code synchronized(raceCache)} block, therefore before calls
+	 *            waiting for the race (e.g.,
+	 *            {@link #getAndWaitForRaceDefinition(UUID)}) return the race.
+	 */
+	DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
+			String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass,
+			Map<Competitor, Boat> competitorBoats, Course course, Iterable<Sideline> sidelines, WindStore windStore,
+			long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+			DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid,
+			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace);
 
     /**
      * The record may be for a single mark or a gate. If for a gate, the

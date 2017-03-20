@@ -971,8 +971,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             startTime = newStartTime;
             startTimeWithoutInferenceFromStartMarkPassings = newStartTimeWithoutInferenceFromStartMarkPassings;
-            }
         }
+    }
 
     /**
      * Calculates the end time of the race from the mark passings of the last course waypoint
