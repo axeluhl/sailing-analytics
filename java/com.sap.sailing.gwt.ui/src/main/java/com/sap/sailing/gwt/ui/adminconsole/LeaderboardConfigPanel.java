@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspe
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
@@ -524,8 +525,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 leaderboard.getDisplayName());
         final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
                 EntryPointLinkFactory.LEADERBOARD_PATH, leaderboardContextSettings);
-        new SettingsDialogForLinkSharing<>(linkWithSettingsGenerator, lifeCycle, stringMessages)
-                .show();
+        SettingsDialogForLinkSharing<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> dialog = new SettingsDialogForLinkSharing<>(
+                linkWithSettingsGenerator, lifeCycle, stringMessages);
+        dialog.ensureDebugId("LeaderboardPageUrlConfigurationDialog");
+        dialog.show();
     }
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
