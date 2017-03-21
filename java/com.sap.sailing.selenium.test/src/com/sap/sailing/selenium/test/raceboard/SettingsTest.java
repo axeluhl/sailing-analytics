@@ -7,6 +7,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -52,6 +53,8 @@ public class SettingsTest extends AbstractSeleniumTest {
         super.setUp();
     }
 
+    // TODO bug 2529: temporarily ignored because make default is deactivated
+    @Ignore
     @Test
     public void createRaceAsAdminSetWindSettingToTrue() throws InterruptedException, UnsupportedEncodingException {
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
