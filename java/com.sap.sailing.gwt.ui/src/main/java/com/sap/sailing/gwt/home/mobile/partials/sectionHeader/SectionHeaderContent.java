@@ -18,6 +18,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
+import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.Direction;
+import com.sap.sailing.gwt.home.shared.partials.bubble.BubbleContentBoatClass;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSelectionFilter;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
@@ -135,4 +138,11 @@ public class SectionHeaderContent extends Composite {
         selectionFilter.getElement().setAttribute("dir", "rtl");
     }
     
+    public void initBoatClassPopup(String boatClassName) {
+        BubbleContentBoatClass content = new BubbleContentBoatClass(boatClassName);
+        Bubble.DefaultPresenter presenter = new Bubble.DefaultPresenter(content, getElement(), imageUi,
+                Direction.RIGHT);
+        presenter.registerTarget(imageUi);
+    }
+
 }

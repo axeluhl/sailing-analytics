@@ -30,6 +30,7 @@ public class EventSteps extends Composite implements RefreshableWidget<RegattaWi
         sectionHeaderUi.setImageUrl(boatClassIcon.getSafeUri().asString());
         sectionHeaderUi.setSectionTitle(regatta.getDisplayName());
         regattaProgessUi.setEdgeToEdgeContent(true);
+        sectionHeaderUi.initBoatClassPopup(regatta.getBoatClass());
     }
     
     @Override
