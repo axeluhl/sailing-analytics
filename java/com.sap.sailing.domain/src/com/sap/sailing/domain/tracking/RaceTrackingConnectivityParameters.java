@@ -25,7 +25,13 @@ public interface RaceTrackingConnectivityParameters {
      * {@link Regatta} is provided, this will first look up a regatta for the race from
      * {@link TrackedRegattaRegistry#getRememberedRegattaForRace(java.io.Serializable)} and if not found will look up or
      * create a default regatta based on race data such as an event name and the boat class.
-     * @param timeoutInMilliseconds TODO
+     * 
+     * @param timeoutInMilliseconds
+     *            gives the tracker a possibility to abort tracking the race after so many milliseconds of
+     *            unsuccessfully waiting for the connection to be established. Support is optional for
+     *            implementations, and there is no exact specification what must have happened before
+     *            this timeout in order for tracking to continue. So, consider this as a "hint" to the
+     *            tracker.
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws Exception;

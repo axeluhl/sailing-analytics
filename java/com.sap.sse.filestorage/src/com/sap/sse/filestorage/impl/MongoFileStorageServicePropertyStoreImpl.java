@@ -23,8 +23,8 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
 
     public MongoFileStorageServicePropertyStoreImpl(MongoDBService dbService) {
         propertiesCollection = dbService.getDB().getCollection(PROPERTIES_COLLECTION_NAME);
-        DBObject index = new BasicDBObjectBuilder().add(FieldNames.SERVICE_NAME.name(), true)
-                .add(FieldNames.PROPERTY_NAME.name(), true).get();
+        DBObject index = new BasicDBObjectBuilder().add(FieldNames.SERVICE_NAME.name(), 1)
+                .add(FieldNames.PROPERTY_NAME.name(), 1).get();
         propertiesCollection.createIndex(index, "unique service name/property name combination", true);
 
         activeServiceCollection = dbService.getDB().getCollection(ACTIVE_SERVICE_COLLECTION_NAME);

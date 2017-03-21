@@ -69,7 +69,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         private static final long serialVersionUID = 915433462154943441L;
 
         @Override
-        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
+        public void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
             getScoreCorrection().notifyListeners(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
         }
 
