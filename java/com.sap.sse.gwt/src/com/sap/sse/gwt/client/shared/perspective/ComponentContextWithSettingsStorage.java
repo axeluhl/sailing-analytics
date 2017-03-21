@@ -79,16 +79,17 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      */
     @Override
     public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
-        if (!component.hasSettings()) {
-            return false;
-        }
-        if(!settingsStorageManager.supportsStore()) {
-            return false;
-        }
-        Settings settings = component.getSettings();
-        if (settings instanceof SettingsMap || settings instanceof GenericSerializableSettings) {
-            return true;
-        }
+        // TODO bug3529 temporarily deactivated
+//        if (!component.hasSettings()) {
+//            return false;
+//        }
+//        if(!settingsStorageManager.supportsStore()) {
+//            return false;
+//        }
+//        Settings settings = component.getSettings();
+//        if (settings instanceof SettingsMap || settings instanceof GenericSerializableSettings) {
+//            return true;
+//        }
         return false;
     }
 
