@@ -10,6 +10,10 @@
                Find the language chooser in the lower right corner of the footer, or when signed in, go to your user
                profile and set your preferred language.
            </li>
+           <li>The application's locale now switches based on the client's "Accept-Language" HTTP header field.
+               This means that the application in all its parts will show in the user's default language if
+               supported, defaulting to English otherwise.
+           </li>
            <li>Several pages are now enabled to save user settings. In settings dialogs there is a "make default"
                button in the lower-left corner if saving of settings is enabled. Settings saved this way are
                stored locally in the browser's local storage and in the user profile if you are logged in. When the

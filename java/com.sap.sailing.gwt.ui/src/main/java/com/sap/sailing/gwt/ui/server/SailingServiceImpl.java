@@ -232,6 +232,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -467,6 +468,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
@@ -739,7 +741,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Pair<PersonDTO, CountryCode> makePersonDTOSerializableAndDeserializableDummy(PersonDTO dummy, CountryCode ccDummy) { return null; }
+    public Pair<PersonDTO, CountryCode> serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition) { return null; }
 
     /**
      * If <code>date</code> is <code>null</code>, the {@link LiveLeaderboardUpdater} for the
@@ -5992,9 +5994,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public FileStorageServiceDTO[] getAvailableFileStorageServices(String localeInfoName) {
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
-        for (FileStorageService s : getService().getFileStorageManagementService().getAvailableFileStorageServices()) {
-            serviceDtos.add(FileStorageServiceDTOUtils.convert(s, getLocale(localeInfoName)));
-        }
+        final FileStorageManagementService fileStorageManagementService = getService().getFileStorageManagementService();
+        if (fileStorageManagementService != null) {
+			for (FileStorageService s : fileStorageManagementService.getAvailableFileStorageServices()) {
+				serviceDtos.add(FileStorageServiceDTOUtils.convert(s, getLocale(localeInfoName)));
+			}
+		}
         return serviceDtos.toArray(new FileStorageServiceDTO[0]);
     }
 

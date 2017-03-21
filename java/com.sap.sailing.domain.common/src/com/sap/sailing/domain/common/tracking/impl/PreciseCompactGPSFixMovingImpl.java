@@ -102,8 +102,8 @@ public class PreciseCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingI
         super(timePoint);
         latDeg = position.getLatDeg();
         lngDeg = position.getLngDeg();
-        knotSpeed = speed.getKnots();
-        degBearing = speed.getBearing().getDegrees();
+        knotSpeed = speed==null?0:speed.getKnots();
+        degBearing = speed==null?0:speed.getBearing().getDegrees();
     }
     
     public PreciseCompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) {

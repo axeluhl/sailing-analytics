@@ -971,8 +971,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             startTime = newStartTime;
             startTimeWithoutInferenceFromStartMarkPassings = newStartTimeWithoutInferenceFromStartMarkPassings;
-            }
         }
+    }
 
     /**
      * Calculates the end time of the race from the mark passings of the last course waypoint
@@ -2852,8 +2852,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private <T extends Timed> List<T> extractInterval(TimePoint from, TimePoint to, List<T> listOfTimed) {
-        List<T> result;
-        result = new LinkedList<T>();
+        List<T> result = new LinkedList<T>();
         for (T timed : listOfTimed) {
             if (timed.getTimePoint().compareTo(from) >= 0 && timed.getTimePoint().compareTo(to) <= 0) {
                 result.add(timed);
