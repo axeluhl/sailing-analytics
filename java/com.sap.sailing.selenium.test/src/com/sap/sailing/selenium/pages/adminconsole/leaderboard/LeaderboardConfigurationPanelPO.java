@@ -12,12 +12,16 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
+import com.sap.sailing.selenium.pages.common.SettingsDialogPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
 public class LeaderboardConfigurationPanelPO extends PageArea {
     public static class LeaderboardEntryPO extends DataEntryPO {
+
+        private static final String ACTION_NAME_CONFIGURE_URL = "ACTION_CONFIGURE_URL";
+
         public LeaderboardEntryPO(CellTablePO<?> table, WebElement element) {
             super(table, element);
         }
@@ -38,6 +42,11 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         public String getLeaderboardURL() {
             WebElement link = this.context.findElement(By.xpath(".//td/div/a"));
             return link.getAttribute("href");
+        }
+
+        public SettingsDialogPO getLeaderboardPageUrlConfigurationDialog() {
+            clickActionImage(ACTION_NAME_CONFIGURE_URL);
+            return getPO(SettingsDialogPO::new, "LeaderboardPageUrlConfigurationDialog");
         }
     }
     
