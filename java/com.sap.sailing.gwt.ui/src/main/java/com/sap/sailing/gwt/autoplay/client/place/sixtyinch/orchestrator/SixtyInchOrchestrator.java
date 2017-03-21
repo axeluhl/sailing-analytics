@@ -9,10 +9,9 @@ import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.Slide1Node;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.Slide7Node;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 
 public class SixtyInchOrchestrator implements Orchestrator {
@@ -33,7 +32,7 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // SlideConfig slide4 = new SlideTimedTransitionConfig(this, new Slide4Place(), 10000);
         // SlideConfig slide5 = new SlideTimedTransitionConfig(this, new Slide5Place(), 10000);
         // SlideConfig slide6 = new SlideTimedTransitionConfig(this, new Slide6Place(), 10000);
-        TimedTransitionSimpleNode node7 = new TimedTransitionSimpleNode("node7", new Slide7Place(), 15000);
+        Slide7Node node7 = new Slide7Node(cf);
         // SlideConfig slide8 = new SlideTimedTransitionConfig(this, new Slide8Place(), 10000);
         // SlideConfig slide9 = new SlideTimedTransitionConfig(this, new Slide9Place(), 10000);
         // slideInit.setNextSlide(slide0);
