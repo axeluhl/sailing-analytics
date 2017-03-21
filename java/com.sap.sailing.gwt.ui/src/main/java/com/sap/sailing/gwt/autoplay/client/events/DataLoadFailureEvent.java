@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import com.sap.sailing.gwt.autoplay.client.dataloader.AutoPlayDataLoader;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 
 /**
  * Sample custom event class for copy & paste
@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.autoplay.client.dataloader.AutoPlayDataLoader;
 public class DataLoadFailureEvent extends GwtEvent<DataLoadFailureEvent.Handler> implements FailureEvent {
     public static final Type<Handler> TYPE = new Type<Handler>();
 
-    private final AutoPlayDataLoader<?> source;
+    private final AutoPlayNode source;
     private Throwable caught;
     private String message;
 
@@ -21,15 +21,15 @@ public class DataLoadFailureEvent extends GwtEvent<DataLoadFailureEvent.Handler>
         void onLoadFailure(DataLoadFailureEvent e);
     }
 
-    public DataLoadFailureEvent(AutoPlayDataLoader<?> source, Throwable caught) {
+    public DataLoadFailureEvent(AutoPlayNode source, Throwable caught) {
         this(source, caught, null);
     }
 
-    public DataLoadFailureEvent(AutoPlayDataLoader<?> source, String message) {
+    public DataLoadFailureEvent(AutoPlayNode source, String message) {
         this(source, null, message);
     }
 
-    public DataLoadFailureEvent(AutoPlayDataLoader<?> source, Throwable caught, String message) {
+    public DataLoadFailureEvent(AutoPlayNode source, Throwable caught, String message) {
         this.source = source;
         this.caught = caught;
         this.message = message;
@@ -43,7 +43,7 @@ public class DataLoadFailureEvent extends GwtEvent<DataLoadFailureEvent.Handler>
         return caught;
     }
 
-    public AutoPlayDataLoader<?> getSource() {
+    public AutoPlayNode getSource() {
         return source;
     }
 

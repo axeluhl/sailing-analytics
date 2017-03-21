@@ -1,20 +1,11 @@
 package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes;
 
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.place.shared.Place;
+import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 
 public interface AutoPlayNode {
-    void start();
-
-    void stop();
-
+    void start(EventBus eventBus, Orchestrator orchestrator);
     void doSuspend();
-
     void doContinue();
-
-    void process(GwtEvent<?> event);
-
-    Place getPlaceToGo();
-
-    void setNextSlide(AutoPlayNode nextSlide);
+    void stop();
 }

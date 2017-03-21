@@ -1,44 +1,27 @@
 package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes;
 
-import com.google.gwt.core.shared.GWT;
-import com.google.gwt.place.shared.Place;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 
 public abstract class AutoPlayNodeBase implements AutoPlayNode {
-
-    private Place placeToGo;
-    private AutoPlayNode nextSlide;
     private Orchestrator orchestrator;
-
-    protected AutoPlayNodeBase(Orchestrator orchestrator, Place placeToGo) {
-        this.orchestrator = orchestrator;
-        this.placeToGo = placeToGo;
-    }
-
-    public void setNextSlide(AutoPlayNode nextSlide) {
-        this.nextSlide = nextSlide;
-    }
+    private EventBus bus;
 
     @Override
-    public final void start() {
-        orchestrator.didMoveToSlide(this);
+    public final void start(EventBus bus, Orchestrator orchestrator) {
+        this.bus = bus;
+        this.orchestrator = orchestrator;
         onStart();
     }
 
     public abstract void onStart();
 
-    protected void fireTransition() {
-        GWT.log("fired transition in " + toString());
-        if (nextSlide != null) {
-            nextSlide.start();
-        } else {
-            orchestrator.didMoveToSlide(null);
-        }
+    protected EventBus getBus() {
+        return bus;
     }
 
-    @Override
-    public Place getPlaceToGo() {
-        return placeToGo;
+    protected Orchestrator getOrchestrator() {
+        return orchestrator;
     }
 
 }

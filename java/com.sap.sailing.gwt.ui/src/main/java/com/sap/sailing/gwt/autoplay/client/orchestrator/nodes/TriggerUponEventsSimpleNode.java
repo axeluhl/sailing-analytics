@@ -3,23 +3,34 @@ package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
+import com.google.gwt.place.shared.PlaceChangeEvent;
 
-public class TriggerUponEventsSimpleNode extends AutoPlayNodeBase {
+public class TriggerUponEventsSimpleNode extends AutoPlaySingleNextSlideNodeBase {
+
     private ArrayList<Type<?>> remainingEventsBeforeTrigger = new ArrayList<>();
     private boolean isSuspended;
     private boolean isDone = false;
+    private final Place placeToGo;
 
-    public TriggerUponEventsSimpleNode(Orchestrator orchestrator, Place thisSlidePlace,
+
+    public TriggerUponEventsSimpleNode(Place placeToGo,
             Type<?>[] transitionEvents) {
-        super(orchestrator, thisSlidePlace);
+        this.placeToGo = placeToGo;
         remainingEventsBeforeTrigger.addAll(Arrays.asList(transitionEvents));
     }
 
     public void onStart() {
+        GWT.log("Starting node: " + toString());
+        getBus().fireEvent(new PlaceChangeEvent(placeToGo));
+    }
+
+    public <H extends EventHandler> void registerEventToWaitFor(GwtEvent.Type<H> type, H handler) {
+        getBus().addHandler(type, handler);
     }
 
     @Override
@@ -33,8 +44,8 @@ public class TriggerUponEventsSimpleNode extends AutoPlayNodeBase {
             fireTransition();
         }
     }
-    @Override
-    public void process(GwtEvent<?> event) {
+
+    public void consume(GwtEvent<?> event) {
         if (isDone) {
             return;
         }
@@ -56,6 +67,5 @@ public class TriggerUponEventsSimpleNode extends AutoPlayNodeBase {
     public void stop() {
         doSuspend();
     }
-
 
 }

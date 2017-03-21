@@ -38,12 +38,14 @@ public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements
                 @Override
                 public void execute() {
                     if (getPlace().getCurrentSlideConfig() != null) {
+                        GWT.log("sideinit presenter: doContinue");
                         getPlace().getCurrentSlideConfig().doContinue();
                     }
                 }
             }, new Command() {
                 @Override
                 public void execute() {
+                    GWT.log("sideinit presenter: doContinue");
                     getClientFactory().getPlaceController().goTo(new StartPlaceSixtyInch());
                 }
             });

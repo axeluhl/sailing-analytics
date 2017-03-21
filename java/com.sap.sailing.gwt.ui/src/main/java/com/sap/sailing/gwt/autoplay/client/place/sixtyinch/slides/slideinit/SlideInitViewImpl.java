@@ -59,6 +59,8 @@ public class SlideInitViewImpl extends ResizeComposite implements SlideInitView 
             errorContinueUi.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
+                    errorContinueUi.setEnabled(false);
+                    errorResetUi.setEnabled(false);
                     onContinue.execute();
                 }
             });
@@ -70,6 +72,8 @@ public class SlideInitViewImpl extends ResizeComposite implements SlideInitView 
             errorResetUi.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
+                    errorContinueUi.setEnabled(false);
+                    errorResetUi.setEnabled(false);
                     onReset.execute();
                 }
             });

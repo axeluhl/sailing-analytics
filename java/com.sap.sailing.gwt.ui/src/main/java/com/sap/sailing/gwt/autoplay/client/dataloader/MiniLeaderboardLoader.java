@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
@@ -30,7 +29,7 @@ public class MiniLeaderboardLoader extends AutoPlayDataLoaderBase<AutoPlayClient
                     new AsyncCallback<ResultWithTTL<GetMiniLeaderboardDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            fireEvent(new DataLoadFailureEvent(MiniLeaderboardLoader.this, caught));
+                            // fireEvent(new DataLoadFailureEvent(MiniLeaderboardLoader.this, caught));
                         }
 
                         @Override

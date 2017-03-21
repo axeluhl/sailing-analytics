@@ -5,7 +5,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.ResettableEventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
-import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 
 public abstract class AutoPlayDataLoaderBase<CF extends AutoPlayClientFactory<?>> implements AutoPlayDataLoader<CF> {
 
@@ -21,7 +20,7 @@ public abstract class AutoPlayDataLoaderBase<CF extends AutoPlayClientFactory<?>
                 try {
                     doLoadData();
                 } catch (Exception e) {
-                    fireEvent(new DataLoadFailureEvent(AutoPlayDataLoaderBase.this, e));
+                    // fireEvent(new DataLoadFailureEvent(e));
                 }
             }
         };
