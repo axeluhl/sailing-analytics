@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO.LeaderboardEntryPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
@@ -21,6 +22,7 @@ import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.S
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
+import com.sap.sailing.selenium.pages.common.SettingsDialogPO;
 import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
 import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -90,5 +92,20 @@ public class SettingsTest extends AbstractSeleniumTest {
         MapSettingsPO mapSettings2 = raceboard2.openMapSettings();
         boolean stillSelected = mapSettings2.isWindChartSelected();
         Assert.assertTrue(stillSelected);
+    }
+
+    @Test
+    @Ignore // FIXME: Complete test implementation! NOTE: This is a test stub and therefore ignored.
+    public void testLeaderboardPageSettingsForwarding() {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME);
+
+        LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        LeaderboardEntryPO leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
+        SettingsDialogPO urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
+        urlConfigurationDialog.pressShareAnchor();
     }
 }
