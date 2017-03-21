@@ -9,7 +9,7 @@ public class TimedTransitionSimpleNode extends AutoPlaySingleNextSlideNodeBase {
 
     private final int displayDurationInMs;
     private final Timer transitionTimer;
-    private final Place placeToGo;
+    private Place placeToGo;
     private String nodeName;
     private boolean isRunning = true;
 
@@ -28,9 +28,32 @@ public class TimedTransitionSimpleNode extends AutoPlaySingleNextSlideNodeBase {
         };
     }
 
+    protected TimedTransitionSimpleNode(String nodeName, int displayDurationInMs) {
+        this.nodeName = nodeName;
+        this.displayDurationInMs = displayDurationInMs;
+        this.transitionTimer = new Timer() {
+            @Override
+            public void run() {
+                GWT.log("Timed transition triggered by " + nodeName + " state: " + isRunning);
+                if (isRunning) {
+                    fireTransition();
+                }
+            }
+        };
+    }
+
     public void onStart() {
-        GWT.log("Starting node: " + nodeName);
-        getBus().fireEvent(new PlaceChangeEvent(placeToGo));
+        firePlaceChangeAndStartTimer();
+    }
+
+    public void setPlaceToGo(Place placeToGo) {
+        this.placeToGo = placeToGo;
+    }
+
+    protected void firePlaceChangeAndStartTimer() {
+        if (placeToGo != null) {
+            getBus().fireEvent(new PlaceChangeEvent(placeToGo));
+        }
         if (!transitionTimer.isRunning())
             transitionTimer.schedule(this.displayDurationInMs);
     }

@@ -49,4 +49,14 @@ public class AutoplayFailureEvent extends GwtEvent<AutoplayFailureEvent.Handler>
     protected void dispatch(Handler handler) {
         handler.onFailure(this);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("AutoplayFailureEvent");
+        sb.append(", message: ").append(message);
+        if (caught != null) {
+            sb.append(", ex: ").append(caught);
+        }
+        return sb.toString();
+    }
 }

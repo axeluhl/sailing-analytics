@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Command;
@@ -40,6 +41,7 @@ public abstract class ConfiguredSlideBase<P extends Place> extends SlideBase<P> 
                     }
                 });
             } else {
+                GWT.log("Not configured, go back to start place");
                 getClientFactory().getPlaceController().goTo(new StartPlaceSixtyInch());
             }
         } catch (Exception e) {

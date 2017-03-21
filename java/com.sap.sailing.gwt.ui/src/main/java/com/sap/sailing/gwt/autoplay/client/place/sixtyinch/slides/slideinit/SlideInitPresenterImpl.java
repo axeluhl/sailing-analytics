@@ -24,14 +24,23 @@ public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        eventBus.fireEvent(
-                new SlideHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(), "Loading event data"));
+
+        if (getClientFactory().getSlideCtx() == null || getClientFactory().getSlideCtx().getEvent() != null) {
+            getClientFactory().getPlaceController().goTo(new StartPlaceSixtyInch());
+            return;
+        }
         eventBus.addHandler(EventChanged.TYPE, new EventChanged.Handler() {
             @Override
             public void onEventChanged(EventChanged e) {
-                updateEventImage();
+                if (getClientFactory().getSlideCtx() != null) {
+                    updateEventImage();
+                }
             }
         });
+        if (getSlideCtx() != null && getSlideCtx().getSettings() != null) {
+            eventBus.fireEvent(
+                    new SlideHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(), "Loading event data"));
+        }
         view.startingWith(this, panel);
         if (getPlace().getFailureEvent() != null) {
             view.showFailure(getPlace().getFailureEvent(), new Command() {
@@ -53,6 +62,9 @@ public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements
     }
 
     protected void updateEventImage() {
+        if (getClientFactory().getSlideCtx() == null) {
+            return;
+        }
         GWT.log("Updating image");
         String thumbnailImageUrl = null;
         if (getSlideCtx().getEvent() != null) {

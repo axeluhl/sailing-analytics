@@ -6,10 +6,8 @@ import java.util.Map;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
-import com.sap.sailing.gwt.autoplay.client.events.MiniLeaderboardUpdatedEvent;
 import com.sap.sailing.gwt.autoplay.client.events.RaceTimeInfoProviderUpdatedEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.SixtyInchSetting;
-import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -18,7 +16,6 @@ import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 public class SlideContextImpl implements SlideContext {
     private SixtyInchSetting settings;
 
-    private GetMiniLeaderboardDTO miniLeaderboardDTO;
     private EventBus eventBus;
 
     private EventDTO event;
@@ -51,29 +48,6 @@ public class SlideContextImpl implements SlideContext {
     @Override
     public SixtyInchSetting getSettings() {
         return settings;
-    }
-
-    @Override
-    public void updateMiniLeaderboardDTO(GetMiniLeaderboardDTO miniLeaderboardDTO) {
-        this.miniLeaderboardDTO = miniLeaderboardDTO;
-        eventBus.fireEvent(new MiniLeaderboardUpdatedEvent());
-    }
-
-    @Override
-    public void updateEvent(EventDTO event) {
-        if (detectChange(this.event, event)) {
-            this.event = event;
-            eventBus.fireEvent(new EventChanged(event));
-        }
-    }
-
-    @Override
-    public GetMiniLeaderboardDTO getMiniLeaderboardDTO() {
-        return miniLeaderboardDTO;
-    }
-
-    private boolean detectChange(Object event2, EventDTO event3) {
-        return true;
     }
 
     @Override
@@ -131,5 +105,11 @@ public class SlideContextImpl implements SlideContext {
     @Override
     public void setRaceTimesInfoProvider(RaceTimesInfoProvider raceTimesInfoProvider) {
         this.raceTimesInfoProvider = raceTimesInfoProvider;
+    }
+
+    @Override
+    public void updateEvent(EventDTO event) {
+        this.event = event;
+        eventBus.fireEvent(new EventChanged(event));
     }
 }

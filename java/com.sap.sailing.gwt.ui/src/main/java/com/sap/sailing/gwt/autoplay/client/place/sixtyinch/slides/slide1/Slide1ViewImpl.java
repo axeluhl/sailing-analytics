@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
-import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
+import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 
 public class Slide1ViewImpl extends ResizeComposite implements Slide1View {
     private static Slide1ViewImplUiBinder uiBinder = GWT.create(Slide1ViewImplUiBinder.class);
@@ -18,6 +18,7 @@ public class Slide1ViewImpl extends ResizeComposite implements Slide1View {
 
     @UiField
     SimplePanel miniLeaderBoard;
+    protected LeaderboardFetcher leaderboardPanel;
 
     public Slide1ViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -30,9 +31,7 @@ public class Slide1ViewImpl extends ResizeComposite implements Slide1View {
 
     @Override
     public void setLeaderBoardDTO(GetMiniLeaderboardDTO leaderBoardDTO) {
-        MinileaderboardBox miniBox = new MinileaderboardBox(false);
-        miniBox.setData(leaderBoardDTO);
-        miniLeaderBoard.setWidget(miniBox);
+
     }
 
 

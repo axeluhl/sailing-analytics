@@ -1,24 +1,17 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gwt.core.shared.GWT;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.ResettableEventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.dataloader.AutoPlayDataLoader;
-import com.sap.sailing.gwt.autoplay.client.dataloader.EventDTODataLoader;
-import com.sap.sailing.gwt.autoplay.client.dataloader.MiniLeaderboardLoader;
-import com.sap.sailing.gwt.autoplay.client.dataloader.RaceTimeInfoProviderLoader;
 import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.Slide1Node;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 
@@ -26,20 +19,15 @@ public class SixtyInchOrchestrator implements Orchestrator {
 
     private AutoPlayClientFactorySixtyInch cf;
 
-    private List<AutoPlayDataLoader<AutoPlayClientFactorySixtyInch>> loaders = new ArrayList<>();
-
     private AutoPlayNodeReference currentNodeRef;
     private AutoPlayNode rootNodeForStartup;
 
     public SixtyInchOrchestrator(AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
-        loaders.add(new EventDTODataLoader());
-        loaders.add(new MiniLeaderboardLoader());
-        loaders.add(new RaceTimeInfoProviderLoader());
         
         StartupNode slideInit = new StartupNode(cf);
         // SlideConfig slide0 = new SlideTimedTransitionConfig(this, new Slide0Place(), 10000);
-        TimedTransitionSimpleNode node1 = new TimedTransitionSimpleNode("node1", new Slide1Place(), 10000);
+        Slide1Node node1 = new Slide1Node(cf);
         // SlideConfig slide2 = new SlideTimedTransitionConfig(this, new Slide2Place(), 10000);
         // SlideConfig slide3 = new SlideTimedTransitionConfig(this, new Slide3Place(), 10000);
         // SlideConfig slide4 = new SlideTimedTransitionConfig(this, new Slide4Place(), 10000);

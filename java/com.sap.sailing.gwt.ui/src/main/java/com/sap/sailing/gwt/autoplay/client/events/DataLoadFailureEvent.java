@@ -56,4 +56,14 @@ public class DataLoadFailureEvent extends GwtEvent<DataLoadFailureEvent.Handler>
     protected void dispatch(Handler handler) {
         handler.onLoadFailure(this);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("DataLoadFailureEvent");
+        sb.append(", message: ").append(message);
+        if (caught != null) {
+            sb.append(", ex: ").append(caught);
+        }
+        return sb.toString();
+    }
 }

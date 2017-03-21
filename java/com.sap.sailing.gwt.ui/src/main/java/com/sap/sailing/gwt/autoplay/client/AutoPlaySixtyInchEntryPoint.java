@@ -40,10 +40,6 @@ public class AutoPlaySixtyInchEntryPoint
         
         //loadPlace CTX if exists here!
         SixtyInchSetting fromPlace = null;
-        if(fromPlace != null){
-            //restore slideCTX here, then
-            clientFactory.getPlaceNavigator().goToPlayerSixtyInch(fromPlace, clientFactory);
-        }
     }
     
     @Override
