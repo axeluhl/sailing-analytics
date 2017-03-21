@@ -22,8 +22,13 @@ public class Slide7PresenterImpl extends ConfiguredSlideBase<Slide7Place> implem
     }
 
     @Override
+    public void onStop() {
+    }
+
+    @Override
     protected void init(AcceptsOneWidget panel, Command whenReady) {
-        RaceMapHelper.create(getClientFactory().getSailingService(), new AsyncActionsExecutor(),
+        RaceMapHelper.create(getClientFactory().getSailingService(),
+                new AsyncActionsExecutor(),
                 getClientFactory().getErrorReporter(),
                 getClientFactory().getSlideCtx().getSettings().getLeaderBoardName(),
                 getClientFactory().getSlideCtx().getSettings().getEventId(),
