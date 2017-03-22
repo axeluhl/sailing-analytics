@@ -5910,10 +5910,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 revoke = true;
                 create = false;
             } else {
-                boolean same = newZeroBasedIndexOfSuppressedMarkPassing == oldSuppressedMarkPassingEvent
-                        .getZeroBasedIndexOfFirstSuppressedWaypoint();
-                create = !same;
-                revoke = !same;
+                boolean equal = Util.equalsWithNull(newZeroBasedIndexOfSuppressedMarkPassing,
+                		oldSuppressedMarkPassingEvent.getZeroBasedIndexOfFirstSuppressedWaypoint());
+                create = !equal;
+                revoke = !equal;
             }
         }
         if (revoke) {
