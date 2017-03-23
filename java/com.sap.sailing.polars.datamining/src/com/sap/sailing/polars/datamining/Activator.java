@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.datamining;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +47,8 @@ public class Activator extends AbstractDataMiningActivator {
     
     public Activator() {
         dataRetrieverChainDefinitions = new PolarsDataRetrievalChainDefinitions();
-        sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClassLoader());
+        sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClassLoader(),
+                StandardCharsets.UTF_8.name());
     }
 
     @Override

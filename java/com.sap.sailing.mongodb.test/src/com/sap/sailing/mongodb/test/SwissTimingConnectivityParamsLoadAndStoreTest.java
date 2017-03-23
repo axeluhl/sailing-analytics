@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
@@ -31,7 +32,7 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
     }
 
     @Test
-    public void testStoreAndLoadSwissTimingLiveParamsWithCompetitorsWithIDAndCrew() throws MalformedURLException, URISyntaxException {
+    public void testStoreAndLoadSwissTimingLiveParamsWithCompetitorsWithIDAndCrew() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException {
         final boolean trackWind = true;
         final boolean correctWindDirectionByMagneticDeclination = true;
         final String hostname = "a.b.com";
@@ -57,7 +58,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params))
+            .waitForCompletionOfCallbacksForAllParameters();
         // compare
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
@@ -78,12 +80,13 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params))
+            .waitForCompletionOfCallbacksForAllParameters();
         assertTrue(connectivityParametersForRacesToRestore2.isEmpty());
     }
     
     @Test
-    public void testStoreAndLoadSwissTimingLiveParamsWithCompetitorsWithoutID() throws MalformedURLException, URISyntaxException {
+    public void testStoreAndLoadSwissTimingLiveParamsWithCompetitorsWithoutID() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException {
         final boolean trackWind = false;
         final boolean correctWindDirectionByMagneticDeclination = false;
         final String hostname = "a.b.com";
@@ -105,7 +108,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params))
+            .waitForCompletionOfCallbacksForAllParameters();
         // compare
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
@@ -126,7 +130,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
-        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params));
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params))
+            .waitForCompletionOfCallbacksForAllParameters();
         assertTrue(connectivityParametersForRacesToRestore2.isEmpty());
     }
 }

@@ -9,8 +9,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 /**
- * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one or more
- * {@link RaceDefinition races} that are {@link Regatta#getAllRaces() part of} a common {@link #getRegatta() Event}. Some
+ * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one
+ * {@link RaceDefinition race} that is {@link Regatta#getAllRaces() part of} a common {@link #getRegatta() Event}. Some
  * tracker architectures may not be able to deliver all data for the {@link RaceDefinition} when created or started.
  * Therefore, {@link #getRace()} may return <code>null</code> if the race information hasn't been received by the
  * tracker yet. Through the {@link RaceHandle} returned by {@link #getRaceHandle()} it is also possible to perform a
@@ -43,7 +43,7 @@ public interface RaceTracker {
     static long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
 
     /**
-     * Stops tracking the races.
+     * Stops tracking the race.
      * 
      * @param preemptive
      *            if <code>false</code>, the tracker will continue to process data already received but will stop
@@ -55,11 +55,12 @@ public interface RaceTracker {
     com.sap.sailing.domain.base.Regatta getRegatta();
 
     /**
-     * Returns the races being tracked by this tracker. Non-blocking call that returns <code>null</code>
-     * if the {@link RaceDefinition} hasn't been created yet, e.g., because the course definition
-     * hasn't been received yet or the listener for receiving course information hasn't been registered (yet). Also
-     * returns a race that may have been removed from containing structures which may lead this tracker to no longer update
-     * their {@link TrackedRace} with new data.
+     * Returns the race being tracked by this tracker, in a "volatile" way, meaning that if another thread belonging to
+     * this tracker has established the {@link RaceDefinition} for this tracker, other threads will immediately see this
+     * object. Non-blocking call that returns <code>null</code> if the {@link RaceDefinition} hasn't been created yet,
+     * e.g., because the course definition hasn't been received yet or the listener for receiving course information
+     * hasn't been registered (yet). Also returns a race that may have been removed from containing structures which may
+     * lead this tracker to no longer update their {@link TrackedRace} with new data.
      */
     RaceDefinition getRace();
     

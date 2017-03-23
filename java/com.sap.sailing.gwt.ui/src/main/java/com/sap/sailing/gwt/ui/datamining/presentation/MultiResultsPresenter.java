@@ -64,7 +64,12 @@ public class MultiResultsPresenter implements ResultsPresenter<Settings> {
         controlsPanel.removeFromParent();
         presenter.addControl(controlsPanel);
         
-        // TODO Synchronize the selected data (Meters, Kilometers, ...)
+        if (presenter instanceof AbstractNumericResultsPresenter &&
+            currentPresenter instanceof AbstractNumericResultsPresenter) {
+            String dataKey = ((AbstractNumericResultsPresenter<?>) currentPresenter).getSelectedDataKey();
+            ((AbstractNumericResultsPresenter<?>) presenter).setSelectedDataKey(dataKey);
+        }
+        
         currentPresenter = presenter;
         presenterPanel.setWidget(currentPresenter.getEntryWidget());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
