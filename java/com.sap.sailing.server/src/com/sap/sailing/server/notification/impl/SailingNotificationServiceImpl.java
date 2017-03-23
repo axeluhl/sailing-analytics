@@ -2,6 +2,7 @@ package com.sap.sailing.server.notification.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -74,7 +75,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
             CompetitorResultsNotificationSet competitorResults) throws MalformedURLException {
         this.mailQueue = mailQueue;
         this.messages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME,
-                this.getClass().getClassLoader());
+                this.getClass().getClassLoader(), StandardCharsets.UTF_8.name());
         this.defaultBaseURL = new URL("https://www.sapsailing.com");
         
         toStop.add(this.boatClassResults = boatClassResults);
