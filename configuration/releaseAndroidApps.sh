@@ -85,7 +85,9 @@ git checkout $ANDROID_RELEASE_BRANCH
 git merge -m "Merging $GIT_REMOTE/$ANDROID_RELEASE_BRANCH" $GIT_REMOTE/$ANDROID_RELEASE_BRANCH
 git fetch $GIT_REMOTE $RELEASE_BRANCH:$RELEASE_BRANCH
 git merge -m "Merging $RELEASE_BRANCH into $ANDROID_RELEASE_BRANCH, probably incorporating version setting to -SNAPSHOT" $GIT_REMOTE/$RELEASE_BRANCH
-git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$ANDROID_RELEASE_BRANCH
+if [ "$PERFORM_GIT_OPERATIONS" = "1" ]; then
+  git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$ANDROID_RELEASE_BRANCH
+fi
 
 # Patch the AndroidManifest.xml files to upgrade the android:versionCode sequential counter relevant for the PlayStore
 # and the android:versionName which is what the user sees and which we expect to follow a major.minor version scheme,
