@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -31,10 +32,10 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
-import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
-import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -132,11 +133,11 @@ public class ImportMasterDataOperation extends
             if (masterData.getDeviceConfigurations() != null) {
                 importDeviceConfigurations(toState);
             }
+            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), creationCount, override);
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
-            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), override);
             return creationCount;
         } catch (Exception e) {
-            logger.severe("Error during execution of ImportMasterDataOperation");
+            logger.log(Level.SEVERE, "Error during execution of ImportMasterDataOperation", e);
             throw new RuntimeException("Error during execution of ImportMasterDataOperation", e);
         } finally {
             LockUtil.unlockAfterWrite(dataImportLock);

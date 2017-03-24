@@ -773,7 +773,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaDefinesResultDiscardingRules();
     String startsWithZeroScore();
     String masterDataImportPanel();
-    String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas);
+    String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas, int mediaTracksImported);
     String importSuccessOverwriteInfo();
     String regattaOverviewConfiguration();
     String firstRaceIsNonDiscardableCarryForward();
