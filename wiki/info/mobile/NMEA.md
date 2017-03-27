@@ -4,10 +4,11 @@ This page gives a short summary on the first attempt to integrate data from a sa
 ## GOAL
 The reason for the integration of NMEA data into the SAP Sailing Analytics is the assumption that the GPS of a sailing vessel is better than the GPS of a smartphone. Therefore it desireable to retrieve the location from the vessel's GPS if available. Furthermore most sailing vessels have additional wind sensors. These sensors could be used as an additional wind source for the SAP Sailing Analytics. This would allow a more detailed analysis of the wind conditions during a race.
 
-## Documentaion
-All the code regarding the NMEA functionality is on the branch "nmea" in SAP Sailing Analytics git. The current state of the nmea topic is documented in the NmeaDocu.pptx in the doc folder of the branch. 
-The documentation includes:
-* short explanation of the different NMEA protocols 
-* set up guide for the test set up I used to simulate nmea data
-* short summary which projects are important
-* 
+## Documentation
+All the code regarding the NMEA functionality is on the branch "nmea" in SAP Sailing Analytics git. The current state of the nmea topic is documented in the NmeaDocu.pptx in the doc folder of the branch.
+ 
+####The documentation includes:
+ * short explanation of the different NMEA2000 protocols and NMEA0183 protocols
+ * set up guide for the test set up 
+ * short summary of projects 
+ * List of whats done what still to do 
