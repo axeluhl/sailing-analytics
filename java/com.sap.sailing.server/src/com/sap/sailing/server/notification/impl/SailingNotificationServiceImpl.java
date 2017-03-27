@@ -158,13 +158,11 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
         String eventName = event.getName();
         String leaderboardDisplayName = leaderboard.getDisplayName() != null ? leaderboard.getDisplayName()
                 : leaderboard.getName();
-
         if (Util.size(raceColumn.getFleets()) > 1) {
             return messages.get(locale, "raceInFleetInRegattaOfEvent", raceName, leaderboardDisplayName, eventName,
                     fleet.getName());
         } else {
             return messages.get(locale, "raceInRegattaOfEvent", raceName, leaderboardDisplayName, eventName);
-
         }
     }
 
@@ -172,7 +170,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
         String eventName = event.getName();
         String leaderboardDisplayName = leaderboard.getDisplayName() != null ? leaderboard.getDisplayName()
                 : leaderboard.getName();
-
         return messages.get(locale, "leaderboardOfEvent", leaderboardDisplayName, eventName);
     }
     
@@ -254,7 +251,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     public void notifyUserOnBoatClassWhenScoreCorrectionsAreAvailable(BoatClass boatClass, Leaderboard leaderboard) {
         // TODO don't send notifications when a notification for the same boatClass / leaderboard has already been sent shortly before
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassResults) {
                 @Override
                 protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
@@ -273,7 +269,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     public void notifyUserOnBoatClassUpcomingRace(BoatClass boatClass, Leaderboard leaderboard, RaceColumn raceColumn,
             Fleet fleet,  TimePoint when) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassUpcomingRace) {
                 @Override
                 protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
