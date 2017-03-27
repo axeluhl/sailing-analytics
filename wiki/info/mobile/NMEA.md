@@ -11,4 +11,4 @@ All the code regarding the NMEA functionality is on the branch "nmea" in SAP Sai
  * short explanation of the different NMEA2000 protocols and NMEA0183 protocols
  * set up guide for the test set up 
  * short summary of projects 
- * List of whats done what still to do 
+ * To Do list with open tasks
