@@ -25,6 +25,7 @@ public class TestI18N {
     private static final String TEST_MESSAGE_WITH_SINGLE_QUOTE = "MessageWithSingleQuote";
     private static final String TEST_MESSAGE_WITH_OPENING_CURLY_BRACE = "MessageWithOpeningCurlyBrace";
     private static final String TEST_MESSAGE_WITH_ESCAPED_PARAMETERS = "MessageWithEscapedParameters";
+    private static final String TEST_MESSAGE_WITH_PARAMETERS_AND_ESCAPED_SINGLE_QUOTES = "MessageWithEscapedSingleQuotesAndParameters";
     
     private ResourceBundleStringMessages testStringMessages;
     
@@ -33,6 +34,12 @@ public class TestI18N {
         testStringMessages = TestsUtil.getTestStringMessages();
     }
 
+    @Test
+    public void testEscapedSingleQuotesWithParameters() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_PARAMETERS_AND_ESCAPED_SINGLE_QUOTES, "First", "Second"), is("'First' ' 'Second'"));
+        assertThat(testStringMessages.get(Locale.ROOT, TEST_MESSAGE_WITH_PARAMETERS_AND_ESCAPED_SINGLE_QUOTES, "First", "Second"), is("'First' ' 'Second'"));
+    }
+    
     @Test
     public void testSingleQuoteInString() {
         assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_SINGLE_QUOTE), is("A Single ' Quote"));
