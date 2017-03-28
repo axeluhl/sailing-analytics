@@ -248,7 +248,11 @@ public class TracTracEventManagementPanelPO extends PageArea {
         table.selectEntries(e -> races.contains(new TrackableRaceDescriptor(e.getColumnContent("Event"),
                 e.getColumnContent("Race"), e.getColumnContent("Boat Class"))));
         startTrackingAndWaitForAjaxRequests();
-        }
+    }
+    
+    public void startTrackingForAllRaces() {
+        getTrackableRacesTable().selectAllEntries();
+        startTrackingAndWaitForAjaxRequests();
     }
     
     private void startTrackingAndWaitForAjaxRequests() {
