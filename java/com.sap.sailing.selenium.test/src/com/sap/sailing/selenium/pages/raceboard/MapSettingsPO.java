@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.pages.raceboard;
 
+import java.util.List;
+
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
@@ -16,9 +18,6 @@ public class MapSettingsPO extends PageArea {
 
     @FindBy(how = BySeleniumId.class, using = "SaveButton")
     private WebElement saveButton;
-    
-    @FindBy(how = BySeleniumId.class, using = "showSimulatorOverlay-input")
-    private WebElement showSimulatorOverlay;
 
     public MapSettingsPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -59,6 +58,7 @@ public class MapSettingsPO extends PageArea {
     }
     
     public boolean isSimulatorOverlayAvailable() {
-        return (showSimulatorOverlay != null);
+        List<WebElement> foundElements = findElementsBySeleniumId(context, "showSimulatorOverlay-input");
+        return !foundElements.isEmpty();
     }
 }
