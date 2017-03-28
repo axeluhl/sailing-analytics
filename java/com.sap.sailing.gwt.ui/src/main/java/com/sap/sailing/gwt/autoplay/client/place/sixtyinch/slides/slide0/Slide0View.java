@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
 
 public interface Slide0View {
@@ -9,4 +10,10 @@ public interface Slide0View {
     }
 
     void setLeaderBoard(SixtyInchLeaderBoard leaderboardPanel);
+
+    void onCompetitorSelect(CompetitorDTO marked);
+
+    void scrollLeaderBoardToTop();
+
+    void onStop();
 }
