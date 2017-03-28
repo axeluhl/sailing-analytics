@@ -125,4 +125,10 @@ public class SeriesEditDialogPO extends DataEntryDialogPO {
         
         return raceNamesGrid.findElements(By.tagName("tr"));
     }
+    
+    public void setMedalSeries(boolean medal) {
+        if(medalSeriesCheckbox.isSelected() != medal) {
+            medalSeriesCheckbox.click();
+        }
+    }
 }
