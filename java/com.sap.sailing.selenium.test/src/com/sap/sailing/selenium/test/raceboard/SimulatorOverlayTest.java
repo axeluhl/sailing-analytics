@@ -58,57 +58,78 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
     @Test
     public void testSimulatorOverlayIsAvailableFor49erAtKW2015() throws InterruptedException, UnsupportedEncodingException {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
-
-        final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        final EventConfigurationPanelPO events = adminConsole.goToEvents();
-        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(EVENT, EVENT_DESC,
-                VENUE, EVENT_START_TIME, EVENT_END_TIME, true, REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER,
-                EVENT_START_TIME, EVENT_END_TIME);
         
-        final RegattaStructureManagementPanelPO regattaStructurePanel = adminConsole.goToRegattaStructure();
-        final RegattaDetailsCompositePO regattaDetails = regattaStructurePanel.getRegattaDetails(regattaDescriptor);
-        regattaDetails.deleteSeries(SERIES_DEFAULT);
-        RegattaEditDialogPO editRegatta = regattaStructurePanel.getRegattaList().editRegatta(regattaDescriptor);
-        editRegatta.addSeries(SERIES_QUALIFICATION);
-        editRegatta.addSeries(SERIES_MEDALS);
-        editRegatta.pressOk();
-        
-        SeriesEditDialogPO editSeriesQualification = regattaDetails.editSeries(SERIES_QUALIFICATION);
-        editSeriesQualification.addRaces(1, 11, "Q");
-        editSeriesQualification.pressOk();
-        
-        SeriesEditDialogPO editSeriesMedals = regattaDetails.editSeries(SERIES_MEDALS);
-        editSeriesMedals.setMedalSeries(true);
-        editSeriesMedals.addSingleRace("M");
-        editSeriesMedals.pressOk();
-
-        final TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(JSON_URL);
-        tracTracEvents.setReggataForTracking(regattaDescriptor);
-        tracTracEvents.setTrackSettings(true, false, false);
-        tracTracEvents.setFilterForTrackableRaces("(49er)");
-        // races are filtered so that all shown entries belong to the correct regatta
-        tracTracEvents.startTrackingForAllRaces();
-        
-        TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        List<TrackedRaceDescriptor> racesToWaitLoadingFor = new ArrayList<>();
-        for(int i = 1; i<=11; i++) {
-            racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, String.format(RACE_N_49ER, i)));
+        {
+            final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+            final EventConfigurationPanelPO events = adminConsole.goToEvents();
+            events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(EVENT, EVENT_DESC,
+                    VENUE, EVENT_START_TIME, EVENT_END_TIME, true, REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER,
+                    EVENT_START_TIME, EVENT_END_TIME);
+            
+            final RegattaStructureManagementPanelPO regattaStructurePanel = adminConsole.goToRegattaStructure();
+            final RegattaDetailsCompositePO regattaDetails = regattaStructurePanel.getRegattaDetails(regattaDescriptor);
+            regattaDetails.deleteSeries(SERIES_DEFAULT);
+            RegattaEditDialogPO editRegatta = regattaStructurePanel.getRegattaList().editRegatta(regattaDescriptor);
+            editRegatta.addSeries(SERIES_QUALIFICATION);
+            editRegatta.addSeries(SERIES_MEDALS);
+            editRegatta.pressOk();
+            
+            final SeriesEditDialogPO editSeriesQualification = regattaDetails.editSeries(SERIES_QUALIFICATION);
+            editSeriesQualification.addRaces(1, 11, "Q");
+            editSeriesQualification.pressOk();
+            
+            final SeriesEditDialogPO editSeriesMedals = regattaDetails.editSeries(SERIES_MEDALS);
+            editSeriesMedals.setMedalSeries(true);
+            editSeriesMedals.addSingleRace("M");
+            editSeriesMedals.pressOk();
+    
+            final TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+            tracTracEvents.listTrackableRaces(JSON_URL);
+            tracTracEvents.setReggataForTracking(regattaDescriptor);
+            tracTracEvents.setTrackSettings(true, false, false);
+            tracTracEvents.setFilterForTrackableRaces("(49er)");
+            // races are filtered so that all shown entries belong to the correct regatta
+            tracTracEvents.startTrackingForAllRaces();
+            
+            final TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
+            final List<TrackedRaceDescriptor> racesToWaitLoadingFor = new ArrayList<>();
+            for(int i = 1; i<=11; i++) {
+                racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, String.format(RACE_N_49ER, i)));
+            }
+            racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
+            trackedRacesList.waitForTrackedRaces(racesToWaitLoadingFor, Status.FINISHED, 600);
+    
+            final LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
+            final LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(REGATTA_49ER_WITH_SUFFIX);
+            
+            for(int i = 1; i<=11; i++) {
+                details.linkRace(new RaceDescriptor("Q" + i, DEFAULT_FLEET, false, false, 0), new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, String.format(RACE_N_49ER, i)));
+            }
+            details.linkRace(new RaceDescriptor("M", DEFAULT_FLEET, true, false, 0), new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
         }
-        racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
-        trackedRacesList.waitForTrackedRaces(racesToWaitLoadingFor, Status.FINISHED, 600);
 
-        LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
-        LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(REGATTA_49ER_WITH_SUFFIX);
-        
-        for(int i = 1; i<=11; i++) {
-            details.linkRace(new RaceDescriptor("Q" + i, DEFAULT_FLEET, false, false, 0), new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, String.format(RACE_N_49ER, i)));
+        {
+            RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
+                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
+            MapSettingsPO mapSettings = raceboard.openMapSettings();
+            // Simulator overlay option must not be available without wind data
+            Assert.assertFalse(mapSettings.isSimulatorOverlayAvailable());
         }
-        details.linkRace(new RaceDescriptor("M", DEFAULT_FLEET, true, false, 0), new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
-
-        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
-                REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
-        MapSettingsPO mapSettings = raceboard.openMapSettings();
-        Assert.assertTrue(mapSettings.isSimulatorOverlayAvailable());
+        
+//        {
+//            final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+//            IgtimiAccountsManagementPanelPO igtimiAccountsManagementPanel = adminConsole.goToIgtimi();
+//            igtimiAccountsManagementPanel.addAccount("", "");
+//        }
+//        
+//        // TODO load wind
+//        
+//        {
+//            RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
+//                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
+//            MapSettingsPO mapSettings = raceboard.openMapSettings();
+//            // Simulator overlay option must be available with the wind data being available
+//            Assert.assertTrue(mapSettings.isSimulatorOverlayAvailable());
+//        }
     }
 }
