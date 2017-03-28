@@ -6,7 +6,6 @@ import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSim
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.RaceMapHelper;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7Place;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
 public class Slide7Node extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
@@ -18,7 +17,7 @@ public class Slide7Node extends TimedTransitionSimpleNode {
     }
 
     public void onStart() {
-        RaceMapHelper.create(cf.getSailingService(), new AsyncActionsExecutor(), cf.getErrorReporter(),
+        RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),
                 cf.getSlideCtx().getSettings().getLeaderBoardName(), cf.getSlideCtx().getSettings().getEventId(),
                 cf.getSlideCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), new AsyncCallback<RaceMap>() {
 

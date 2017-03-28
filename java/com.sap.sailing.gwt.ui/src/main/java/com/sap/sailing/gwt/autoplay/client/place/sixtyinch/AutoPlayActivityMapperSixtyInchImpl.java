@@ -8,15 +8,9 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.Slide0Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.Slide0PresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.Slide0ViewImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1PresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide1.Slide1ViewImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2PresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2ViewImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide3.Slide3Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide3.Slide3PresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide3.Slide3ViewImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4.Slide4Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4.Slide4PresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4.Slide4ViewImpl;
@@ -61,14 +55,8 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
         if (place instanceof Slide0Place) {
             return new Slide0PresenterImpl((Slide0Place) place, clientFactory, new Slide0ViewImpl());
         }
-        if (place instanceof Slide1Place) {
-            return new Slide1PresenterImpl((Slide1Place) place, clientFactory, new Slide1ViewImpl());
-        }
         if (place instanceof Slide2Place) {
             return new Slide2PresenterImpl((Slide2Place) place, clientFactory, new Slide2ViewImpl());
-        }
-        if (place instanceof Slide3Place) {
-            return new Slide3PresenterImpl((Slide3Place) place, clientFactory, new Slide3ViewImpl());
         }
         if (place instanceof Slide4Place) {
             return new Slide4PresenterImpl((Slide4Place) place, clientFactory, new Slide4ViewImpl());
