@@ -6,7 +6,7 @@
 <stringAttribute key="com.google.gwt.eclipse.core.CLASSIC_DEVMODE_CODE_SERVER_PORT" value="9876"/>
 <stringAttribute key="com.google.gwt.eclipse.core.CODE_SERVER_PORT" value="9876"/>
 <listAttribute key="com.google.gwt.eclipse.core.ENTRY_POINT_MODULES">
-<listEntry value="com.sap.sailing.gwt.autoplay.AutoPlaySixtyInch"/>
+<listEntry value="com.sap.sailing.gwt.AutoPlay"/>
 </listAttribute>
 <booleanAttribute key="com.google.gwt.eclipse.core.SUPERDEVMODE_ENABLED" value="true"/>
 <stringAttribute key="com.google.gwt.eclipse.core.URL" value="/gwt/Home.html"/>

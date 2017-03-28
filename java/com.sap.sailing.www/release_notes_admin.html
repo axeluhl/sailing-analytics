@@ -23,6 +23,27 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">March 2017</h2>
+                    <ul class="bulletList">
+                    	<li>A more compact internal storage format for GPS and Wind fixes is now being used. Instead of a full
+                    	    64-bit "double" value for all components such at latitude, longitude, speed over ground or course over
+                    	    ground, "smaller" data types such as "int" and "short" are now employed. The reduction of accuracy
+                    	    that this brings about is negligible given the accuracy of the tracking systems used. For example,
+                    	    the latitude values are encoded such that while covering the full range from -90° to +90°, the
+                    	    resolution is at 4.6mm. Similarly, speeds are represented in their compact form in such a way
+                    	    that speeds up to 500kts can be represented at a resolution of 0.015kts.
+                    	</li>
+                    	<li>When a race cannot be loaded successfully through the TracTrac connector, e.g., because its boat
+                    	    class does not match the regatta's boat class, the tracker is now stopped, and a SEVERE log message
+                    	    is written, giving the reason for the failure to load the race. This gives administrators an opportunity
+                    	    to correct any errors in the underlying data and try again. Previously, tracking such a 
+                    	    was not possible without a server re-start because the tracker continued to exist.
+                    	</li>
+                    	<li>The application's locale now switches based on the client's "Accept-Language" HTTP header field.
+                    	    This means that the application as well as all its parts, including the administration console,
+                    	    will show in the user's default language if supported, defaulting to English otherwise.
+                    	</li>
+                    </ul>
                     <h2 class="articleSubheadline">February 2017</h2>
                     <ul class="bulletList">
                     	<li>Wind data in GRIB format can now be imported in the "Wind" sub-tab of the "Tracked Races" tab
