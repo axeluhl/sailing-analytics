@@ -47,7 +47,7 @@ public class LeaderboardPage extends HostPage {
     
     public static LeaderboardPage goToPage(WebDriver driver, String root, String leaderboard, boolean raceDetails, Long autoRefreshIntervalInMillis) {
         driver.get(root + "gwt/Leaderboard.html?" + getLeaderboard(leaderboard) + //$NON-NLS-1$
-                "&" + getGWTCodeServer() + "&" + getShowRaceDeatails(raceDetails) +
+                "&" + getGWTCodeServerAndLocale() + "&" + getShowRaceDeatails(raceDetails) +
                 (autoRefreshIntervalInMillis==null ? "" : ("&" + getAutoRefreshIntervalMillis(autoRefreshIntervalInMillis)))); //$NON-NLS-1$
         
         return new LeaderboardPage(driver, leaderboard);
