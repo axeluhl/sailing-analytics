@@ -38,7 +38,7 @@ public class AutoPlaySixtyInchEntryPoint
         Orchestrator orchestrator = new SixtyInchOrchestrator(clientFactory);
         clientFactory.getPlaceNavigator().setOrchestrator(orchestrator);
         
-        //loadPlace CTX if exists here!
+        // loadPlace CTX if exists here! waiting for settings merge before
         SixtyInchSetting fromPlace = null;
     }
     

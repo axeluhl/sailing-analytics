@@ -16,7 +16,7 @@ public class Slide0Node extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
 
     public Slide0Node(AutoPlayClientFactorySixtyInch cf) {
-        super("slide1", 60000);
+        super("slide1", 30000);
         this.cf = cf;
 
     }

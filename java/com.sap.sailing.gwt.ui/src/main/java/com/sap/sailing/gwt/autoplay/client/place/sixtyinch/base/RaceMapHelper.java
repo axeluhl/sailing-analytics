@@ -44,9 +44,19 @@ public class RaceMapHelper {
     private static RaceTimesInfoProvider raceTimesInfoProvider;
     private static RaceMap raceboardPerspective;
 
+    public static class RVWrapper {
+        public RVWrapper(RaceMap raceboardPerspective2, CompetitorSelectionModel competitorSelectionProvider) {
+            this.raceboardPerspective = raceboardPerspective2;
+            this.csel = competitorSelectionProvider;
+        }
+
+        public RaceMap raceboardPerspective;
+        public CompetitorSelectionModel csel;
+    }
+
     public static void create(SailingServiceAsync sailingService, ErrorReporter errorReporter, String leaderBoardName,
             UUID eventId, EventDTO event, EventBus eventBus,
-            SailingDispatchSystem sailingDispatchSystem, AsyncCallback<RaceMap> callback) {
+            SailingDispatchSystem sailingDispatchSystem, AsyncCallback<RVWrapper> callback) {
 
         raceboardTimer.reset();
         raceboardTimer.setLivePlayDelayInMillis(1000);
@@ -147,7 +157,7 @@ public class RaceMapHelper {
             StrippedLeaderboardDTO selectedLeaderboard, Map<CompetitorDTO, BoatDTO> result,
             Iterable<CompetitorDTO> competitors, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
-            AsyncCallback<RaceMap> callback,
+            AsyncCallback<RVWrapper> callback,
             long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest, long clientTimeWhenRequestWasSent,
             Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
 
@@ -176,6 +186,6 @@ public class RaceMapHelper {
         raceboardTimer.setPlayMode(PlayModes.Live);
         // wait for one update
         raceboardPerspective.onResize();
-        callback.onSuccess(raceboardPerspective);
+        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider));
     }
 }
