@@ -77,7 +77,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         SafeHtml colorBox(SafeStyles htmlColor, String styleClass);
 
         @SafeHtmlTemplates.Template("<div class=\"{0}\">&nbsp;</div>")
-        SafeHtml nocolorBox(SafeHtml styleClass);
+        SafeHtml nocolorBox(String styleClass);
     }
     
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
