@@ -245,8 +245,8 @@ public class TracTracEventManagementPanelPO extends PageArea {
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
-        table.selectEntries(() -> table.getEntries().stream().filter(e -> races.contains(
-                new TrackableRaceDescriptor(e.getColumnContent("Event"), e.getColumnContent("Race"), e.getColumnContent("Boat Class")))));
+        table.selectEntries(e -> races.contains(new TrackableRaceDescriptor(e.getColumnContent("Event"),
+                e.getColumnContent("Race"), e.getColumnContent("Boat Class"))));
         startTrackingAndWaitForAjaxRequests();
         }
     }
