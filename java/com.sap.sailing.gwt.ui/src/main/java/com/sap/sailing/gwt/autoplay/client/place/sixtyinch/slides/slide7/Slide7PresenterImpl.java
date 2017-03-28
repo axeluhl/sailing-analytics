@@ -1,25 +1,135 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class Slide7PresenterImpl extends ConfiguredSlideBase<Slide7Place> implements Slide7View.Slide7Presenter {
+    protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private Slide7View view;
+    private Timer selectionTimer;
+    private SixtyInchLeaderBoard leaderboardPanel;
+    private int selected;
+    ArrayList<CompetitorDTO> compList = new ArrayList<>();
 
     public Slide7PresenterImpl(Slide7Place place, AutoPlayClientFactorySixtyInch clientFactory,
             Slide7View slide7ViewImpl) {
         super(place, clientFactory);
         this.view = slide7ViewImpl;
+        selectionTimer = new Timer() {
+            @Override
+            public void run() {
+                selectNext();
+            }
+        };
 
+    }
+
+    protected void selectNext() {
+        selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
+        if (compList.isEmpty()) {
+            Iterator<CompetitorDTO> iter = getPlace().getRaceMapSelectionProvider().getAllCompetitors().iterator();
+            while (iter.hasNext()) {
+                compList.add(iter.next());
+            }
+            return;
+        }
+        if (selected >= 0) {
+            CompetitorDTO lastSelected = compList.get(selected);
+            getPlace().getRaceMapSelectionProvider().setSelected(lastSelected, false);
+        }
+        selected++;
+
+        // overflow, restart
+        if (selected > compList.size() - 1) {
+            selected = 0;
+        }
+
+        GWT.log("Select " + selected);
+        CompetitorDTO marked = compList.get(selected);
+        getPlace().getRaceMapSelectionProvider().setSelected(marked, true);
+        onSelect(marked);
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                if (selected == 0) {
+                    view.scrollLeaderBoardToTop();
+                } else {
+                    leaderboardPanel.scrollRowIntoView(selected);
+                }
+            }
+        });
+    }
+
+    private void onSelect(CompetitorDTO marked) {
+        view.onCompetitorSelect(marked);
     }
 
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
         if (getPlace().getError() != null) {
             view.showErrorNoLive(this, panel, getPlace().getError());
-        } else {
-            view.startingWith(this, panel, getPlace().getRaceMap());
+            return;
         }
+
+        SailingServiceAsync sailingService = getClientFactory().getSailingService();
+        ErrorReporter errorReporter = getClientFactory().getErrorReporter();
+
+        RegattaAndRaceIdentifier lifeRace = getPlace().getLifeRace();
+        ArrayList<String> racesToShow = null;
+        if (lifeRace != null) {
+            racesToShow = new ArrayList<>();
+            racesToShow.add(lifeRace.getRaceName());
+        } else {
+            view.showErrorNoLive(this, panel, new IllegalStateException("Na race is life"));
+            return;
+        }
+
+        final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance()
+                .createNewDefaultSettings(null, racesToShow, null, /* autoExpandFirstRace */ false,
+                        /* showRegattaRank */ false, /* showCompetitorSailIdColumn */ false,
+                        /* showCompetitorFullNameColumn */ true);
+        List<StrippedLeaderboardDTO> leaderboards = getSlideCtx().getEvent().getLeaderboardGroups().get(0)
+                .getLeaderboards();
+        StrippedLeaderboardDTO leaderboard = leaderboards.get(0);
+
+        com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(
+                // perform the first request as "live" but don't by default auto-play
+                PlayModes.Live, PlayStates.Playing,
+                /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
+        leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
+                false, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null, leaderboard.name, errorReporter,
+                StringMessages.INSTANCE, null, true, null, false, null, false, true, false, false, false);
+        selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
+
+        view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
     }
+
+    @Override
+    public void onStop() {
+        view.onStop();
+    }
+
 }
