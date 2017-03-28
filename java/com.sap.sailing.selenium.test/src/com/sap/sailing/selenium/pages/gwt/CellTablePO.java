@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -241,6 +242,30 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
                 entry.appendToSelection();
             }
         });
+    }
+    
+    /**
+     * <p>Selects entries based on the given Predicate.</p>
+     * 
+     * <p>Note: If an entry is not contained in the table it will not be selected.</p>
+     */
+    public void selectEntries(Predicate<T> toSelectPredicate) {
+        for (T entry : getEntries()) {
+            if(toSelectPredicate.test(entry)) {
+                entry.appendToSelection();
+            } else {
+                entry.deselect();
+            }
+        }
+    }
+    
+    /**
+     * <p>Selects entries based on the given Predicate.</p>
+     * 
+     * <p>Note: If an entry is not contained in the table it will not be selected.</p>
+     */
+    public void selectAllEntries() {
+        selectEntries(e -> true);
     }
     
     /**
