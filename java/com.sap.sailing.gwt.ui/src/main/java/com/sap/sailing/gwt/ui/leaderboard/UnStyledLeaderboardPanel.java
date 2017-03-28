@@ -3199,6 +3199,10 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
                 isShowCompetitorSailId(), isShowCompetitorFullName());
     }
     
+    public void scrollRowIntoView(int selected) {
+        leaderboardTable.getRowElement(selected).scrollIntoView();
+    }
+
     @Override
     public String getLocalizedShortName() {
         return stringMessages.leaderboard();
