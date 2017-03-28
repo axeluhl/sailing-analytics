@@ -3,7 +3,7 @@
 <booleanAttribute key="com.google.gdt.eclipse.core.RUN_SERVER" value="false"/>
 <stringAttribute key="com.google.gdt.eclipse.suiteMainTypeProcessor.PREVIOUSLY_SET_MAIN_TYPE_NAME" value="com.google.gwt.dev.GWTShell"/>
 <booleanAttribute key="com.google.gdt.eclipse.suiteWarArgumentProcessor.IS_WAR_FROM_PROJECT_PROPERTIES" value="false"/>
-<booleanAttribute key="com.google.gwt.eclipse.core.CLASSIC_DEVMODE_CODE_SERVER_PORT_AUTO" value="true"/>
+<stringAttribute key="com.google.gwt.eclipse.core.CLASSIC_DEVMODE_CODE_SERVER_PORT" value="9874"/>
 <booleanAttribute key="com.google.gwt.eclipse.core.CODE_SERVER_PORT_AUTO" value="true"/>
 <listAttribute key="com.google.gwt.eclipse.core.ENTRY_POINT_MODULES">
 <listEntry value="com.sap.sailing.dashboards.gwt.RibDashboard"/>
@@ -38,7 +38,7 @@
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.DevMode"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-nosuperDevMode -incremental -war &quot;${project_loc:com.sap.sailing.dashboards.gwt}&quot; -startupUrl /dashboards/RibDashboard.html -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort auto com.sap.sailing.dashboards.gwt.RibDashboard"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-nosuperDevMode -incremental -war &quot;${project_loc:com.sap.sailing.dashboards.gwt}&quot; -startupUrl /dashboards/RibDashboard.html -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9874 com.sap.sailing.dashboards.gwt.RibDashboard"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.dashboards.gwt"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx2048m -Dgwt.watchFileChanges=false"/>
 </launchConfiguration>
