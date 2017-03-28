@@ -11,9 +11,9 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class AnimationPanel extends ComplexPanel {
 
-    private static final int delay = 2000;
+    public static final int DELAY = 2000;
 
-    private static final int animationDuration = 2000;
+    public static final int ANIMATION_DURATION = 2000;
 
     interface Resources extends ClientBundle {
         @Source("AnimationPanel.gss")
@@ -57,7 +57,7 @@ public class AnimationPanel extends ComplexPanel {
             nextWidgetHolder.removeClassName(style.next());
             nextWidgetHolder.addClassName(style.current());
 
-            removeOldTimer.schedule(animationDuration);
+            removeOldTimer.schedule(ANIMATION_DURATION);
         }
     };
 
@@ -106,7 +106,7 @@ public class AnimationPanel extends ComplexPanel {
             nextWidgetHolder = holder;
             holder.addClassName(style.next());
 
-            showNextTimer.schedule(delay);
+            showNextTimer.schedule(DELAY);
         }
         wrapper.appendChild(holder);
         add(child, holder);
