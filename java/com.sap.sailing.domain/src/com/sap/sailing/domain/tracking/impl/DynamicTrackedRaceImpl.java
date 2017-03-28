@@ -276,7 +276,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } else {
 			logger.finer(() -> "Dropped fix " + fix + " because it is outside the tracking interval "
 					+ getStartOfTracking() + ".." + getEndOfTracking());
-			logger.finer("break here"); // TODO remove again
         }
     }
 

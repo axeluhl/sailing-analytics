@@ -8,6 +8,7 @@
         <div>
             <div class="{res.mediaCss.grid}">
                 <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                    <a class="{local_res.css.regattaheader_logo}" ui:field="logoUi"></a>
                     <a class="{local_res.css.regattaheader} {local_res.css.regattaheaderpadding}" ui:field="headerBodyUi"></a>
                     <a class="{local_res.css.regattaheader_indicators}" ui:field="dataIndicatorsUi">
                         <div style="pointer-events: none;">

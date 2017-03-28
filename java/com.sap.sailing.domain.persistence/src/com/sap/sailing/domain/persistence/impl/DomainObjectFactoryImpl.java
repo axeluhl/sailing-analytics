@@ -1962,7 +1962,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (controlPointClass.equals(Mark.class.getSimpleName())) {
                 Mark mark = loadMark((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = mark;
-            } else if(controlPointClass.equals("Gate")) {
+            } else if (controlPointClass.equals("Gate")) {
                 ControlPointWithTwoMarks cpwtm = loadControlPointWithTwoMarks((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 dbObject.put(FieldNames.CONTROLPOINT_CLASS.name(), ControlPointWithTwoMarks.class.getSimpleName());
                 controlPoint = cpwtm;
@@ -2318,8 +2318,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         }
                     }
                     try {
-                        callback.accept(connectivityParamsPersistenceService.mapTo(map));
-                        logger.info("Done restoring race #"+ finalI +"/"+count+" of type "+type);
+                        final RaceTrackingConnectivityParameters params = connectivityParamsPersistenceService.mapTo(map);
+                        if (params != null) {
+                        	callback.accept(params);
+                        	logger.info("Done restoring race #"+ finalI +"/"+count+" of type "+type);
+                        } else {
+                        	logger.warning("Couldn't restore race #"+ finalI +"/"+count+" of type "+type+
+                        			" because the parameters loaded from the DB couldn't be mapped. Maybe the owning leaderboard was removed?");
+                        }
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Exception trying to load race #"+ finalI +"/"+count+" of type "+type+
                                 " from restore connectivity parameters "
