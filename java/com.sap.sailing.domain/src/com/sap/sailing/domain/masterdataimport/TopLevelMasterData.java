@@ -286,7 +286,6 @@ public class TopLevelMasterData implements Serializable {
             for (RegattaAndRaceIdentifier raceIdentifier : mediaTrack.assignedRaces) {
                 if (raceIdentitifiersForMediaExport.contains(raceIdentifier)) {
                     filteredMediaTracks.add(mediaTrack);
-                    continue;
                 }
             }
         }

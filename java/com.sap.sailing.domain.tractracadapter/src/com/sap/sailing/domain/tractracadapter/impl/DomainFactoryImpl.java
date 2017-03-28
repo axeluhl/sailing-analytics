@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -510,11 +511,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats, Course course,
-            Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver) {
+	public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
+			String raceName, Iterable<Competitor> competitors, BoatClass boatClass,
+			Map<Competitor, Boat> competitorBoats, Course course, Iterable<Sideline> sidelines, WindStore windStore,
+			long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+			DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI tracTracUpdateURI, UUID tracTracEventUuid,
+			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver,
+			Consumer<DynamicTrackedRace> runBeforeExposingRace) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
@@ -532,6 +535,10 @@ public class DomainFactoryImpl implements DomainFactory {
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
                             raceLogResolver);
                     logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
+                    if (runBeforeExposingRace != null) {
+                    	logger.fine("Running callback for tracked race creation for "+trackedRace.getRace());
+                    	runBeforeExposingRace.accept(trackedRace);
+                    }
                     addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
                             raceDefinition, trackedRace);
                     raceCache.put(raceId, raceDefinition);
