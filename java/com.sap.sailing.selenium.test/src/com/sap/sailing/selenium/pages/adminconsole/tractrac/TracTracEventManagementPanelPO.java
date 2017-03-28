@@ -240,17 +240,18 @@ public class TracTracEventManagementPanelPO extends PageArea {
             }
         }
         table.selectEntry(entryToSelect);
-        this.startTrackingButton.click();
-        ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
-        if (condition.apply(this.driver) == null) {
-            waitForAjaxRequests();
-        }
+        startTrackingAndWaitForAjaxRequests();
     }
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         table.selectEntries(() -> table.getEntries().stream().filter(e -> races.contains(
                 new TrackableRaceDescriptor(e.getColumnContent("Event"), e.getColumnContent("Race"), e.getColumnContent("Boat Class")))));
+        startTrackingAndWaitForAjaxRequests();
+        }
+    }
+    
+    private void startTrackingAndWaitForAjaxRequests() {
         this.startTrackingButton.click();
         ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
         if (condition.apply(this.driver) == null) {
