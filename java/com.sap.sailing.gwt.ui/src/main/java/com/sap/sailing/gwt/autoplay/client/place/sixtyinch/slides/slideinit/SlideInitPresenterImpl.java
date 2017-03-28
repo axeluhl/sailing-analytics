@@ -10,7 +10,8 @@ import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideBase;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements SlideInitView.SlideInitPresenter {
     private SlideInitView view;
@@ -62,22 +63,26 @@ public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements
     }
 
     protected void updateEventImage() {
-        if (getClientFactory().getSlideCtx() == null) {
+        if (getClientFactory().getSlideCtx() == null || getClientFactory().getSlideCtx().getEvent() == null) {
             return;
         }
-        GWT.log("Updating image");
-        String thumbnailImageUrl = null;
-        if (getSlideCtx().getEvent() != null) {
-            thumbnailImageUrl = getSlideCtx().getEvent().getImages().get(0).getSourceRef();
+
+        ImageDTO imageToUseDTO = null;
+        for (ImageDTO imageDTO : getSlideCtx().getEvent().getImages()) {
+            if (imageDTO.getTags().contains(MediaTagConstants.TEASER)) {
+                imageToUseDTO = imageDTO;
+                break;
+            } else if (imageDTO.getTags().contains(MediaTagConstants.HIGHLIGHT)) {
+                imageToUseDTO = imageDTO;
+            } else if (imageToUseDTO == null) {
+                imageToUseDTO = imageDTO;
+            }
         }
-        final StringBuilder thumbnailUrlBuilder = new StringBuilder("url('");
-        if (thumbnailImageUrl == null || thumbnailImageUrl.isEmpty()) {
-            thumbnailUrlBuilder
-                    .append(SharedHomeResources.INSTANCE.defaultStageEventTeaserImage().getSafeUri().asString());
-        } else {
-            thumbnailUrlBuilder.append(UriUtils.fromString(thumbnailImageUrl).asString());
+        if (imageToUseDTO != null) {
+            final StringBuilder thumbnailUrlBuilder = new StringBuilder("url('");
+            thumbnailUrlBuilder.append(UriUtils.fromString(imageToUseDTO.getSourceRef()).asString());
+            thumbnailUrlBuilder.append("')");
+            view.setImage(thumbnailUrlBuilder.toString());
         }
-        thumbnailUrlBuilder.append("')");
-        view.setImage(thumbnailUrlBuilder.toString());
     }
 }

@@ -5,6 +5,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 public interface Slide2View {
     void startingWith(Slide2Presenter p, AcceptsOneWidget panel);
 
+    void setBackgroudImage(String string);
+
     public interface Slide2Presenter {
     }
 }

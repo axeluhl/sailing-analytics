@@ -6,15 +6,16 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.ResizeComposite;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class Slide2ViewImpl extends ResizeComposite implements Slide2View {
+public class Slide2ViewImpl extends Composite implements Slide2View {
     private static Slide3ViewImplUiBinder uiBinder = GWT.create(Slide3ViewImplUiBinder.class);
 
-    private static Dummy dummmyProvider = GWT.create(Dummy.class);
+
     @UiField
-    com.google.gwt.user.client.ui.Image dummy;
+    SimpleLayoutPanel mainPanelUi;
 
     interface Dummy extends ClientBundle {
         ImageResource dummy();
@@ -25,7 +26,6 @@ public class Slide2ViewImpl extends ResizeComposite implements Slide2View {
 
     public Slide2ViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
-        dummy.setUrl(dummmyProvider.dummy().getSafeUri());
     }
 
     @Override
@@ -33,4 +33,8 @@ public class Slide2ViewImpl extends ResizeComposite implements Slide2View {
         panel.setWidget(this);
     }
 
+    @Override
+    public void setBackgroudImage(String string) {
+        mainPanelUi.getElement().getStyle().setBackgroundImage(string);
+    }
 }
