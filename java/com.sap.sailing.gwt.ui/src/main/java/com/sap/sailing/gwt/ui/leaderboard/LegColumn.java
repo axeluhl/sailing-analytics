@@ -175,7 +175,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         protected String getTitle(LeaderboardRowDTO row) {
             String resultString = null;
             LegEntryDTO entry = getLegEntry(row);
-            if (entry != null) {
+            if (entry != null && entry.numberOfManeuvers != null) {
                 StringBuilder result = new StringBuilder();
                 if (entry.numberOfManeuvers.get(ManeuverType.TACK) != null) {
                     result.append(entry.numberOfManeuvers.get(ManeuverType.TACK));
@@ -212,7 +212,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 result.append(getFormatter().format(fieldValue));
             }
             LegEntryDTO entry = getLegEntry(row);
-            if (entry != null && entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != null && (int) entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != 0) {
+            if (entry != null && entry.numberOfManeuvers != null &&
+                    entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != null && (int) entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != 0) {
                 result.append(" (");
                 result.append(entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE));
                 result.append("P)");
@@ -227,7 +228,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             if (entry != null) {
                 for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE,
                         ManeuverType.PENALTY_CIRCLE }) {
-                    if (entry.numberOfManeuvers.get(maneuverType) != null) {
+                    if (entry.numberOfManeuvers != null && entry.numberOfManeuvers.get(maneuverType) != null) {
                         if (result == null) {
                             result = (double) entry.numberOfManeuvers.get(maneuverType);
                         } else {

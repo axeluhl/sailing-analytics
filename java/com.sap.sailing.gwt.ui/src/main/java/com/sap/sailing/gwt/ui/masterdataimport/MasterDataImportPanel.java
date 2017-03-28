@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
+import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -53,6 +54,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private final EventsRefresher eventRefresher;
     private final LeaderboardsRefresher leaderboardsRefresher;
     private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
+    private final MediaTracksRefresher mediaTracksRefresher;
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
     private CheckBox exportDeviceConfigsSwitch;
@@ -60,13 +62,14 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, LeaderboardsRefresher leaderboardsRefresher,
-            LeaderboardGroupsRefresher leaderboardGroupsRefresher) {
+            LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
         this.eventRefresher = eventsRefresher;
         this.leaderboardsRefresher = leaderboardsRefresher;
         this.leaderboardGroupsRefresher = leaderboardGroupsRefresher;
+        this.mediaTracksRefresher = mediaTracksRefresher;
 
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
@@ -204,6 +207,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         int leaderboardGroupsCreated = creationCount.getLeaderboardGroupCount();
         int eventsCreated = creationCount.getEventCount();
         int regattasCreated = creationCount.getRegattaCount();
+        int mediaTracksImported = creationCount.getMediaTrackCount();
         if (regattasCreated > 0) {
             regattaRefresher.fillRegattas();
         }
@@ -216,9 +220,12 @@ public class MasterDataImportPanel extends VerticalPanel {
         if (leaderboardsCreated > 0) {
             leaderboardsRefresher.fillLeaderboards();
         }
+        if (mediaTracksImported > 0) {
+        	mediaTracksRefresher.loadMediaTracks();
+        }
         Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
-                overwrittenRegattas);
+                mediaTracksImported, overwrittenRegattas);
         changeButtonStateAccordingToApplicationState();
     }
 
@@ -251,10 +258,10 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
-            int regattasCreated, Set<String> overwrittenRegattas) {
+            int regattasCreated, int mediaTracksImported, Set<String> overwrittenRegattas) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
-                regattasCreated));
+                regattasCreated, mediaTracksImported));
         if (overwrittenRegattas.size() > 0) {
             buffer.append("\n\n" + stringMessages.importSuccessOverwriteInfo() + "\n");
             for (String regattaName : overwrittenRegattas) {

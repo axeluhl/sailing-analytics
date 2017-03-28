@@ -8,6 +8,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class Slide2ViewImpl extends Composite implements Slide2View {
@@ -15,7 +16,7 @@ public class Slide2ViewImpl extends Composite implements Slide2View {
 
 
     @UiField
-    SimpleLayoutPanel mainPanelUi;
+    SimplePanel mainPanelUi;
 
     interface Dummy extends ClientBundle {
         ImageResource dummy();

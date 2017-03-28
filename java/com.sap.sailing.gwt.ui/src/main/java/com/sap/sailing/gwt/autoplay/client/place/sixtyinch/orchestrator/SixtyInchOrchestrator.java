@@ -10,10 +10,9 @@ import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.Slide1Node;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.Slide7Node;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 
 public class SixtyInchOrchestrator implements Orchestrator {
@@ -28,13 +27,14 @@ public class SixtyInchOrchestrator implements Orchestrator {
         
         StartupNode slideInit = new StartupNode(cf);
         // SlideConfig slide0 = new SlideTimedTransitionConfig(this, new Slide0Place(), 10000);
-        Slide1Node node1 = new Slide1Node(cf);
         TimedTransitionSimpleNode node2 = new TimedTransitionSimpleNode("node2", new Slide2Place(), 200000);
+        
+        // SlideConfig slide2 = new SlideTimedTransitionConfig(this, new Slide2Place(), 10000);
         // SlideConfig slide3 = new SlideTimedTransitionConfig(this, new Slide3Place(), 10000);
         // SlideConfig slide4 = new SlideTimedTransitionConfig(this, new Slide4Place(), 10000);
         // SlideConfig slide5 = new SlideTimedTransitionConfig(this, new Slide5Place(), 10000);
         // SlideConfig slide6 = new SlideTimedTransitionConfig(this, new Slide6Place(), 10000);
-        TimedTransitionSimpleNode node7 = new TimedTransitionSimpleNode("node7", new Slide7Place(), 15000);
+        Slide7Node node7 = new Slide7Node(cf);
         // SlideConfig slide8 = new SlideTimedTransitionConfig(this, new Slide8Place(), 10000);
         // SlideConfig slide9 = new SlideTimedTransitionConfig(this, new Slide9Place(), 10000);
         // slideInit.setNextSlide(slide0);
@@ -50,9 +50,9 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // slide9.setNextSlide(slide0);
 
         slideInit.setNextNode(node2);
-        node1.setNextNode(node2);
+        
         node2.setNextNode(node7);
-        node7.setNextNode(node1);
+        node7.setNextNode(node2);
 
         rootNodeForStartup = slideInit;
     }

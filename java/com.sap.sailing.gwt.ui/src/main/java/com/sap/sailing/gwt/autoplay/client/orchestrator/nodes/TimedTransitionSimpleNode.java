@@ -51,6 +51,7 @@ public class TimedTransitionSimpleNode extends AutoPlaySingleNextSlideNodeBase {
     }
 
     protected void firePlaceChangeAndStartTimer() {
+        isRunning = true;
         if (placeToGo != null) {
             getBus().fireEvent(new PlaceChangeEvent(placeToGo));
         }

@@ -34,6 +34,7 @@
   margin: -1em 1em -1em 0;
   background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
 }
 .sectionheader_item_image_seperator {
   position: absolute;
