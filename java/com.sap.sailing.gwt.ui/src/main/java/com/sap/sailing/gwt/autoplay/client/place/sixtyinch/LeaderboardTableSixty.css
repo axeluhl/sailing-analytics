@@ -19,7 +19,7 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch ; public class Snipp
     padding-bottom: 5px;
     text-align: center;
     text-shadow: none !important;
-    font-size: 20px !important;
+    font-size: 30px !important;
     font-family: 'Open Sans', sans-serif !important;
     font-weight: bold !important;
 }
@@ -57,7 +57,7 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch ; public class Snipp
 .cellTableCell {
 	line-height: 1.5em !important;
 	vertical-align: middle;
-	font-size: 20px !important;
+	font-size: 30px !important;
 	font-family: 'Open Sans', sans-serif !important;
 	font-weight: bold !important;
 }
@@ -109,7 +109,7 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch ; public class Snipp
 
 .cellTableRaceColumnHeader {
 	background-color: #f2f2f2;
-	font-size: 20px !important;
+	font-size: 30px !important;
 	font-family: 'Open Sans', sans-serif !important;
 	font-weight: bold !important;
 }
