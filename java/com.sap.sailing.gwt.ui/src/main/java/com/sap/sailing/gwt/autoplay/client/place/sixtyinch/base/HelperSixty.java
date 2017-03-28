@@ -49,6 +49,10 @@ public class HelperSixty {
                 }
             }
         }
+        if (raceTimesInfoProvider.getRaceIdentifiers().isEmpty()) {
+            throw new IllegalStateException(
+                    "No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
+        }
         raceTimesInfoProvider.forceTimesInfosUpdate();
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
             private boolean alreadyfired;
