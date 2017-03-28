@@ -98,6 +98,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         
         if (isSimulationEnabled) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
+            showSimulationOverlayCheckbox.ensureDebugId("showSimulatorOverlay");
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
             vp.add(showSimulationOverlayCheckbox);
         }

@@ -16,6 +16,9 @@ public class MapSettingsPO extends PageArea {
 
     @FindBy(how = BySeleniumId.class, using = "SaveButton")
     private WebElement saveButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "showSimulatorOverlay-input")
+    private WebElement showSimulatorOverlay;
 
     public MapSettingsPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -53,5 +56,9 @@ public class MapSettingsPO extends PageArea {
 
     public boolean isWindChartSelected() {
         return raceMapSettingsWindChart.isSelected();
+    }
+    
+    public boolean isSimulatorOverlayAvailable() {
+        return (showSimulatorOverlay != null);
     }
 }
