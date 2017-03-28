@@ -19,6 +19,8 @@ import com.sap.sse.gwt.client.sapheader.SAPHeader;
 
 public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
         implements ApplicationTopLevelView, AcceptsOneWidget {
+    public static final int SAP_HEADER_IN_PX = 75;
+
     private static SixtyInchViewImplUiBinder uiBinder = GWT.create(SixtyInchViewImplUiBinder.class);
 
     @UiField
@@ -38,7 +40,7 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
         initWidget(uiBinder.createAndBindUi(this));
         sapHeader.setHeaderTitle("Initializing");
         mainPanel.add(sapHeader);
-        mainPanel.setWidgetTopHeight(sapHeader, 0, Unit.PX, 75, Unit.PX);
+        mainPanel.setWidgetTopHeight(sapHeader, 0, Unit.PX, SAP_HEADER_IN_PX, Unit.PX);
         eventBus.addHandler(SlideHeaderEvent.TYPE, new SlideHeaderEvent.Handler() {
 
             @Override
