@@ -62,7 +62,7 @@ public class EventCreateDialogPO extends DataEntryDialogPO {
     }
     
     WebElement goToTab(String tabName, String id) {
-        return goToTab(eventDialogTabPanel, tabName, id, /* isVertical */ false);
+        return goToTab(eventDialogTabPanel, tabName, id, TabPanelType.TAB_LAYOUT_PANEL);
     }
     
     WebElement goToLeaderboardGroupsTab() {

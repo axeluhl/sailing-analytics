@@ -70,6 +70,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         FlowPanel dialogPanel = new FlowPanel();
+        dialogPanel.ensureDebugId("LeaderboardSettingsPanel");
         dialogPanel.add(createSelectedRacesPanel(dialog));
         dialogPanel.add(createOverallDetailPanel(dialog));
         dialogPanel.add(createRaceDetailPanel(dialog));

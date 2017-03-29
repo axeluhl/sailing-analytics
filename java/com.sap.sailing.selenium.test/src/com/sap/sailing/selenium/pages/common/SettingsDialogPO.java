@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardPage;
 
 public class SettingsDialogPO extends DataEntryDialogPO {
 
@@ -15,7 +16,8 @@ public class SettingsDialogPO extends DataEntryDialogPO {
         super(driver, element);
     }
 
-    public void pressShareAnchor() {
-        this.shareAnchor.click();
+    public LeaderboardPage openLeaderboard() {
+        String href = this.shareAnchor.getAttribute("href");
+        return LeaderboardPage.goToPage(driver, href);
     }
 }

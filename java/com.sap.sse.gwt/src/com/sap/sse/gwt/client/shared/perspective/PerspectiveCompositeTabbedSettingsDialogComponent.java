@@ -173,6 +173,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     @Override
     public Widget getAdditionalWidget(final DataEntryDialog<?> dialog) {
         TabPanel result = new TabPanel();
+        result.ensureDebugId("TabbedSettingsDialogTabPanel");
         if(perspectiveIdsAndSettingsDialog != null) {
             SettingsDialogComponent<PS> additional = perspectiveIdsAndSettingsDialog.getSettingsDialogComponent();
             if (additional != null) {

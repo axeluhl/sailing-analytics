@@ -59,10 +59,13 @@ public class PageObject {
     
     public static final int DEFAULT_POLLING_INTERVAL = 5;
     
-    private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
+    private static final MessageFormat TAB_PANEL_EXPRESSION = new MessageFormat(
+            ".//div[contains(@class, \"gwt-TabBarItem\")]/div[text()=\"{0}\"]/../..");
+    
+    private static final MessageFormat TAB_LAYOUT_PANEL_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
     
-    private static final MessageFormat VERTICAL_TAB_EXPRESSION = new MessageFormat(
+    private static final MessageFormat VERTICAL_TAB_LAYOUT_PANEL_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-VerticalTabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
     
     /**
@@ -455,13 +458,22 @@ public class PageObject {
         T get(WebDriver driver, WebElement element);
     }
     
-    protected WebElement goToTab(WebElement tabPanel, String tabName, final String id, boolean isVertical) {
-        final String expression;
-        if (isVertical) {
-            expression = VERTICAL_TAB_EXPRESSION.format(new Object[] {tabName});
-        } else {
-            expression = TAB_EXPRESSION.format(new Object[] {tabName});
+    protected WebElement goToTab(WebElement tabPanel, String tabName, final String id, TabPanelType tabPanelType) {
+        final MessageFormat expressionFormat;
+        switch(tabPanelType) {
+        case TAB_PANEL:
+            expressionFormat = TAB_PANEL_EXPRESSION;
+            break;
+        case TAB_LAYOUT_PANEL:
+            expressionFormat = TAB_LAYOUT_PANEL_EXPRESSION;
+            break;
+        case VERTICAL_TAB_LAYOUT_PANEL:
+            expressionFormat = VERTICAL_TAB_LAYOUT_PANEL_EXPRESSION;
+            break;
+            default:
+                throw new IllegalArgumentException("TabPanelType \"" + tabPanelType + "\" is unsupported");
         }
+        final String expression = expressionFormat.format(new Object[] {tabName});
         WebElement tab = tabPanel.findElement(By.xpath(expression));
         WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
         waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
@@ -476,5 +488,9 @@ public class PageObject {
         } // wait for a bit to make sure the UI had a change to trigger any asynchronous background update/refresh
         waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
         return content;
+    }
+    
+    public enum TabPanelType {
+        TAB_PANEL, TAB_LAYOUT_PANEL, VERTICAL_TAB_LAYOUT_PANEL
     }
 }

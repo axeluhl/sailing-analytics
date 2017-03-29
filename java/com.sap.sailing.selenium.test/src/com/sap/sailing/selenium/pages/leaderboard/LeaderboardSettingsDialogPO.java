@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.pages.leaderboard;
 
 import java.util.List;
 
+import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -64,6 +65,19 @@ public class LeaderboardSettingsDialogPO extends DataEntryDialogPO {
         textField.sendKeys(Integer.toString(numberOfRaces));
     }
     
+    public void setCheckboxValuesForDetails(boolean selected, DetailCheckboxInfo...detailCheckboxInfos) {
+        for (DetailCheckboxInfo detailCheckboxInfo : detailCheckboxInfos) {
+            setCheckboxValue(detailCheckboxInfo.getId(), selected);
+        }
+    }
+    
+    public void assertCheckboxValuesForDetails(boolean selected, DetailCheckboxInfo...detailCheckboxInfos) {
+        for (DetailCheckboxInfo detailCheckboxInfo : detailCheckboxInfos) {
+            String checkboxId = detailCheckboxInfo.getId();
+            Assert.assertTrue("Checkbox with id \"" + checkboxId + "\" is set to a wrong value", selected == getCheckboxValue(checkboxId));
+        }
+    }
+    
     public void setOverallDetails() {
         
     }
@@ -107,4 +121,17 @@ public class LeaderboardSettingsDialogPO extends DataEntryDialogPO {
         List<WebElement> e = settingsPanel.findElements(By.xpath(".//span[" + CSSHelper.containsCSSClassPredicate("gwt-CheckBox") + "]"));
         return e;
     }
+    
+    public void setCheckboxValue(String checkboxId, boolean selected) {
+        WebElement element = findElementBySeleniumId(checkboxId);
+        CheckBoxPO checkbox = new CheckBoxPO(driver, element);
+        checkbox.setSelected(selected);
+    }
+    
+    public boolean getCheckboxValue(String checkboxId) {
+        WebElement element = findElementBySeleniumId(checkboxId);
+        CheckBoxPO checkbox = new CheckBoxPO(driver, element);
+        return checkbox.isSelected();
+    }
+    
 }

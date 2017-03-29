@@ -1,7 +1,9 @@
 package com.sap.sailing.selenium.test.raceboard;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.stream.Stream;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -16,13 +18,16 @@ import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfig
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO.LeaderboardEntryPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardUrlConfigurationDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.Status;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
-import com.sap.sailing.selenium.pages.common.SettingsDialogPO;
+import com.sap.sailing.selenium.pages.leaderboard.DetailCheckboxInfo;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardPage;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsDialogPO;
 import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
 import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -95,7 +100,7 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
 
     @Test
-    @Ignore // FIXME: Complete test implementation! NOTE: This is a test stub and therefore ignored.
+    @Ignore
     public void testLeaderboardPageSettingsForwarding() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
@@ -105,7 +110,40 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         LeaderboardEntryPO leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
-        SettingsDialogPO urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
-        urlConfigurationDialog.pressShareAnchor();
+        LeaderboardUrlConfigurationDialogPO urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
+        LeaderboardSettingsDialogPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
+        
+        leaderboardSettingsPanel.setCheckboxValue("R2CheckBox", false);
+        DetailCheckboxInfo[] detailsSelected = { DetailCheckboxInfo.REGATTA_RANK, DetailCheckboxInfo.TOTAL_DISTANCE, DetailCheckboxInfo.TOTAL_AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.TIME_ON_TIME_FACTOR, DetailCheckboxInfo.TIME_ON_DISTANCE_ALLOWANCE };
+        leaderboardSettingsPanel.setCheckboxValuesForDetails(true, detailsSelected);
+        
+        DetailCheckboxInfo[] detailsUnselected = { DetailCheckboxInfo.TOTAL_TIME, DetailCheckboxInfo.MAXIMUM_SPEED_OVER_GROUND };
+        leaderboardSettingsPanel.setCheckboxValuesForDetails(false, detailsUnselected);
+        
+        LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
+        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel.assertCheckboxValuesForDetails(true, detailsSelected);
+        leaderboardSettingsPanel.assertCheckboxValuesForDetails(false, detailsUnselected);
+        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R1CheckBox"));
+        Assert.assertTrue(!leaderboardSettingsPanel.getCheckboxValue("R2CheckBox"));
+        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R3CheckBox"));
+        
+        
+        adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
+        urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
+        leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
+        
+        detailsUnselected = Stream.concat(Arrays.stream(detailsSelected), Arrays.stream(detailsUnselected))
+                .toArray(DetailCheckboxInfo[]::new);
+        leaderboardSettingsPanel.setCheckboxValuesForDetails(false, detailsUnselected);
+        
+        leaderboardPage = urlConfigurationDialog.openLeaderboard();
+        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel.assertCheckboxValuesForDetails(false, detailsUnselected);
+        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R1CheckBox"));
+        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R2CheckBox"));
+        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R3CheckBox"));
     }
 }

@@ -12,7 +12,6 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
-import com.sap.sailing.selenium.pages.common.SettingsDialogPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
@@ -44,9 +43,9 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
             return link.getAttribute("href");
         }
 
-        public SettingsDialogPO getLeaderboardPageUrlConfigurationDialog() {
+        public LeaderboardUrlConfigurationDialogPO getLeaderboardPageUrlConfigurationDialog() {
             clickActionImage(ACTION_NAME_CONFIGURE_URL);
-            return getPO(SettingsDialogPO::new, "LeaderboardPageUrlConfigurationDialog");
+            return getPO(LeaderboardUrlConfigurationDialogPO::new, "LeaderboardPageUrlConfigurationDialog");
         }
     }
     

@@ -53,6 +53,11 @@ public class LeaderboardPage extends HostPage {
         return new LeaderboardPage(driver, leaderboard);
     }
     
+    public static LeaderboardPage goToPage(WebDriver driver, String href) {
+        driver.get(href);
+        return new LeaderboardPage(driver);
+    }
+    
     private static String getLeaderboard(String leaderboard) {
         return LEADERBOAR_PARAMTER_NAME + "=" + leaderboard; //$NON-NLS-1$
     }
@@ -83,8 +88,12 @@ public class LeaderboardPage extends HostPage {
     @FindBy(how = BySeleniumId.class, using = "LeaderboardCellTable")
     private WebElement leaderboardCellTable;
     
-    private LeaderboardPage(WebDriver driver, String leaderboard) {
+    private LeaderboardPage(WebDriver driver) {
         super(driver);
+    }
+    
+    private LeaderboardPage(WebDriver driver, String leaderboard) {
+        this(driver);
         
         if(!this.driver.getTitle().equals(leaderboard)) {
             throw new IllegalStateException("This is not the leaderboard"); //$NON-NLS-1$

@@ -126,6 +126,15 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
         return headers;
     }
     
+    public boolean containsColumnHeader(String headerToCheck) {
+        for (String header : getColumnHeaders()) {
+            if(header.contains(headerToCheck)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * <p></p>
      * 

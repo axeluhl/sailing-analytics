@@ -173,6 +173,6 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     }
     
     private WebElement goToTab(String label, final String id, boolean isVertical) {
-        return goToTab(administrationTabPanel, label, id, isVertical);
+        return goToTab(administrationTabPanel, label, id, isVertical ? TabPanelType.VERTICAL_TAB_LAYOUT_PANEL : TabPanelType.TAB_LAYOUT_PANEL);
     }
 }
