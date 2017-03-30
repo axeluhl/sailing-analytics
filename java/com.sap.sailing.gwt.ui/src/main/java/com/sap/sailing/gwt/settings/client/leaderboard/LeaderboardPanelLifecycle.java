@@ -11,8 +11,8 @@ public class LeaderboardPanelLifecycle
         implements ComponentLifecycle<LeaderboardSettings> {
     public static final String ID = "lb";
 
-    private final StringMessages stringMessages;
-    private final List<String> namesOfRaceColumns;
+    protected final StringMessages stringMessages;
+    protected final List<String> namesOfRaceColumns;
 
     public LeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;

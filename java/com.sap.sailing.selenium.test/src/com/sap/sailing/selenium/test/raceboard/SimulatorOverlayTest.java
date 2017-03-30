@@ -38,7 +38,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
     private static final String RACE_N_49ER = "R%d (49er)"; //$NON-NLS-1$
     private static final String MEDAL_RACE_49ER = "R12-M Medal (49er)"; //$NON-NLS-1$
     private static final String EVENT_DESC = "Kieler Woche 2015"; //$NON-NLS-1$
-    private static final String VENUE = "Kieler Förde"; //$NON-NLS-1$
+    private static final String VENUE = "Kieler Fï¿½rde"; //$NON-NLS-1$
     private static final Date EVENT_START_TIME = DatatypeConverter.parseDateTime("2015-06-20T08:00:00-00:00")
             .getTime();
     private static final Date EVENT_END_TIME = DatatypeConverter.parseDateTime("2015-06-28T20:00:00-00:00")
@@ -64,7 +64,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             final EventConfigurationPanelPO events = adminConsole.goToEvents();
             events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(EVENT, EVENT_DESC,
                     VENUE, EVENT_START_TIME, EVENT_END_TIME, true, REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER,
-                    EVENT_START_TIME, EVENT_END_TIME);
+                    EVENT_START_TIME, EVENT_END_TIME, false);
             
             final RegattaStructureManagementPanelPO regattaStructurePanel = adminConsole.goToRegattaStructure();
             final RegattaDetailsCompositePO regattaDetails = regattaStructurePanel.getRegattaDetails(regattaDescriptor);

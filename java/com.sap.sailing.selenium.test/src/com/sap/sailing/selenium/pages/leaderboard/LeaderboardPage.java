@@ -9,6 +9,8 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
 
+import junit.framework.Assert;
+
 /**
  * <p>The page object representing the leaderboard.</p>
  * 
@@ -76,10 +78,10 @@ public class LeaderboardPage extends HostPage {
     @FindBy(how = BySeleniumId.class, using = "LeaderboardSettingsButton")
     private WebElement leaderboardSettingsButton;
     
-    @FindBy(how = BySeleniumId.class, using = "CompetitorChartsDisplayCheckBox")
+    @FindBy(how = BySeleniumId.class, using = "ShowChartsDisplayCheckBox")
     private WebElement competitorChartsDisplayCheckBox;
     
-    @FindBy(how = BySeleniumId.class, using = "CompetitorChartsSettingsButton")
+    @FindBy(how = BySeleniumId.class, using = "ShowChartsSettingsButton")
     private WebElement competitorChartsSettingsButton;
     
     @FindBy(how = BySeleniumId.class, using = "PlayAndPauseAnchor")
@@ -132,6 +134,26 @@ public class LeaderboardPage extends HostPage {
                 findElementBySeleniumId(this.driver, "LeaderboardSettingsDialog"));
     }
     
+    public boolean isOverallLeaderboardVisible() {
+        boolean selected = false;
+        try {
+            WebElement element = findElementBySeleniumId("SeriesLeaderboardDisplayCheckBox");
+            CheckBoxPO checkbox = new CheckBoxPO(this.driver, element);
+            selected = checkbox.isSelected();
+        } catch(Exception e) {}
+        
+        int leaderboardsCount = findElementsBySeleniumId("LeaderboardCellTable").size();
+        Assert.assertEquals(selected ? 2 : 1, leaderboardsCount);
+        return selected;
+    }
+    
+    public LeaderboardSettingsDialogPO getOverallLeaderboardSettings() {
+        WebElement overallLeaderboardSettingsButton = findElementBySeleniumId("SeriesLeaderboardSettingsButton");
+        overallLeaderboardSettingsButton.click();
+        return new LeaderboardSettingsDialogPO(this.driver,
+                findElementBySeleniumId(this.driver, "SeriesLeaderboardSettingsDialog"));
+    }
+    
     public LeaderboardTablePO getLeaderboardTable() {
         return new LeaderboardTablePO(this.driver, this.leaderboardCellTable);
     }
@@ -154,6 +176,17 @@ public class LeaderboardPage extends HostPage {
 //    public LineChart getCompetitorChart() {
 //        return new LineChart(this.driver, findElementBySeleniumId("CompetitorChart"));
 //    }
+    
+    public boolean isCompetitorChartVisible() {
+        CheckBoxPO checkbox = new CheckBoxPO(this.driver, this.competitorChartsDisplayCheckBox);
+        boolean selected = checkbox.isSelected();
+        WebElement element = null;
+        try {
+            element = findElementBySeleniumId("CompetitorChart");
+        } catch(Exception e) {}
+        Assert.assertEquals(selected, element != null);
+        return selected;
+    }
     
     @Override
     protected void initElements() {

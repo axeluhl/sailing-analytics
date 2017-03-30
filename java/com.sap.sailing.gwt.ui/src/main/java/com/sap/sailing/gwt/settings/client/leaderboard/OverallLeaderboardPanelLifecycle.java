@@ -24,5 +24,10 @@ public class OverallLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle 
     public String getLocalizedShortName() {
         return StringMessages.INSTANCE.overallLeaderboard();
     }
+    
+    @Override
+    public LeaderboardSettingsDialogComponent getSettingsDialogComponent(LeaderboardSettings settings) {
+        return new OverallLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages);
+    }
 
 }

@@ -64,9 +64,11 @@ public class EventConfigurationPanelPO extends PageArea {
     
     public void createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(String eventName, String eventDesc,
             String venue, Date eventStartDate, Date eventEndDate, boolean isPublic, String regattaName, String boatClass,
-            Date regattaStartDate, Date regattaEndDate) {
+            Date regattaStartDate, Date regattaEndDate, boolean useOverallLeaderboard) {
         createEvent(eventName, eventDesc, venue, eventStartDate, eventEndDate, isPublic).pressYes();
-        getPO(LeaderboardGroupCreateDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_DIALOG).pressOk();
+        LeaderboardGroupCreateDialogPO leaderboardGroupCreateDialogPO = getPO(LeaderboardGroupCreateDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_DIALOG);
+        leaderboardGroupCreateDialogPO.setUseOverallLeaderboard(useOverallLeaderboard);
+        leaderboardGroupCreateDialogPO.pressOk();
         getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_CONFIRM_DIALOG).pressYes();
         createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate).pressOk();
         getPO(ConfirmDialogPO::new, ID_LINK_LEADERBORAD_TO_GROUP_DIALOG).pressOk();

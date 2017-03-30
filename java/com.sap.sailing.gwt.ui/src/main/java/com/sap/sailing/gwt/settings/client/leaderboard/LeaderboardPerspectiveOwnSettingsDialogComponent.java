@@ -33,38 +33,47 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
+        vp.ensureDebugId("LeaderboardPageSettingsPanel");
 
         StringMessages stringMessages = StringMessages.INSTANCE;
 
         showRaceDetails = dialog.createCheckbox(stringMessages.showRaceDetails());
+        showRaceDetails.ensureDebugId("AllowForRaceDetailsCheckBox");
         showRaceDetails.setValue(initialSettings.isShowRaceDetails());
         vp.add(showRaceDetails);
 
         hideToolbar = dialog.createCheckbox(stringMessages.hideToolbar());
+        hideToolbar.ensureDebugId("HideToolbarCheckBox");
         hideToolbar.setValue(initialSettings.isHideToolbar());
         vp.add(hideToolbar);
 
         autoExpandLastRaceColumn = dialog.createCheckbox(stringMessages.expandLastRace());
+        autoExpandLastRaceColumn.ensureDebugId("AlwaysExpandLastRaceShownCheckBox");
         autoExpandLastRaceColumn.setValue(initialSettings.isAutoExpandLastRaceColumn());
         vp.add(autoExpandLastRaceColumn);
 
         showCharts = dialog.createCheckbox(stringMessages.showCharts());
+        showCharts.ensureDebugId("ShowChartsCheckBox");
         showCharts.setValue(initialSettings.isShowCharts());
         vp.add(showCharts);
 
         showOverallLeaderboard = dialog.createCheckbox(stringMessages.showOverallLeaderboard());
+        showOverallLeaderboard.ensureDebugId("ShowOverallLeaderboardCheckBox");
         showOverallLeaderboard.setValue(initialSettings.isShowOverallLeaderboard());
         vp.add(showOverallLeaderboard);
 
         showSeriesLeaderboards = dialog.createCheckbox(stringMessages.showSeriesLeaderboards());
+        showSeriesLeaderboards.ensureDebugId("ShowSeriesLeaderboardsCheckBox");
         showSeriesLeaderboards.setValue(initialSettings.isShowSeriesLeaderboards());
         vp.add(showSeriesLeaderboards);
 
         embedded = dialog.createCheckbox(stringMessages.embedded());
+        embedded.ensureDebugId("EmbeddedLeaderboardCheckBox");
         embedded.setValue(initialSettings.isEmbedded());
         vp.add(embedded);
 
         livePlay = dialog.createCheckbox(stringMessages.live());
+        livePlay.ensureDebugId("LivePlayLeaderboardCheckBox");
         livePlay.setValue(initialSettings.isLifePlay());
         vp.add(livePlay);
 
@@ -72,6 +81,7 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
         vp.add(zoomDescription);
 
         zoomTo = dialog.createTextBox("1");
+        zoomTo.ensureDebugId("zoomToTextBox");
         zoomTo.setValue(initialSettings.getZoomTo());
         vp.add(zoomTo);
         return vp;

@@ -1,8 +1,9 @@
 package com.sap.sailing.selenium.pages.leaderboard;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -35,6 +36,11 @@ public class LeaderboardSettingsDialogPO extends DataEntryDialogPO {
     
     @FindBy(how = BySeleniumId.class, using = "ManeuverSettingsPanel")
     private WebElement maneuverSettingsPanel;
+
+    @FindBy(how = BySeleniumId.class, using = "TimingSettingsPanel")
+    private WebElement timingSettingsPanel;
+    
+    
     
     public LeaderboardSettingsDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -65,45 +71,56 @@ public class LeaderboardSettingsDialogPO extends DataEntryDialogPO {
         textField.sendKeys(Integer.toString(numberOfRaces));
     }
     
-    public void setCheckboxValuesForDetails(boolean selected, DetailCheckboxInfo...detailCheckboxInfos) {
-        for (DetailCheckboxInfo detailCheckboxInfo : detailCheckboxInfos) {
-            setCheckboxValue(detailCheckboxInfo.getId(), selected);
+    public boolean isNumberOfRacesToDisplaySelected() {
+        RadioButtonPO button = new RadioButtonPO(this.driver, this.mostCurrentRacesSelectionRadioButton);
+        return button.isSelected();
+    }
+    
+    public int getNumberOfRacesToDisplaySelected() {
+        WebElement textField = findElementBySeleniumId(this.raceSelectionSettingsPanel, "NumberOfMostCurrentRacesIntegerBox");
+        return Integer.valueOf(textField.getAttribute("value"));
+    }
+    
+    public void setRefreshInterval(int seconds) {
+        WebElement textField = findElementBySeleniumId(this.timingSettingsPanel, "RefreshIntervalLongBox");
+        textField.clear();
+        textField.sendKeys(Integer.toString(seconds));
+    }
+    
+    public int getRefreshInterval() {
+        WebElement textField = findElementBySeleniumId(this.timingSettingsPanel, "RefreshIntervalLongBox");
+        return Integer.valueOf(textField.getAttribute("value"));
+    }
+    
+    public void selectDetailsAndUnselectOthers(DetailCheckboxInfo...detailsToSelect) {
+        Arrays.sort(detailsToSelect);
+        for (DetailCheckboxInfo detail : DetailCheckboxInfo.values()) {
+            boolean selected = Arrays.binarySearch(detailsToSelect, detail) >= 0;
+            setCheckboxValue(detail.getId(), selected);
         }
     }
     
-    public void assertCheckboxValuesForDetails(boolean selected, DetailCheckboxInfo...detailCheckboxInfos) {
-        for (DetailCheckboxInfo detailCheckboxInfo : detailCheckboxInfos) {
-            String checkboxId = detailCheckboxInfo.getId();
-            Assert.assertTrue("Checkbox with id \"" + checkboxId + "\" is set to a wrong value", selected == getCheckboxValue(checkboxId));
+    public DetailCheckboxInfo[] getSelectedDetails() {
+        List<DetailCheckboxInfo> selectedDetails = new ArrayList<>();
+        for (DetailCheckboxInfo detail : DetailCheckboxInfo.values()) {
+            String checkboxId = detail.getId();
+            if(getCheckboxValue(checkboxId)) {
+                selectedDetails.add(detail);
+            }
         }
-    }
-    
-    public void setOverallDetails() {
-        
+        return selectedDetails.toArray(new DetailCheckboxInfo[selectedDetails.size()]);
     }
     
     public void showAllOverallDetails() {
         setSelectionForAllSettings(this.overallDetailsSettingsPanel, true);
     }
     
-    public void setRaceDetails() {
-        
-    }
-    
     public void showAllRaceDetails() {
         setSelectionForAllSettings(this.raceDetailsSettingsPanel, true);
     }
     
-    public void setLegDetails() {
-        
-    }
-    
     public void showAllLegDetails() {
         setSelectionForAllSettings(this.legDetailsSettingsPanel, true);
-    }
-    
-    public void setManeuverDetails() {
-        
     }
     
     public void showAllManeuverDetails() {
