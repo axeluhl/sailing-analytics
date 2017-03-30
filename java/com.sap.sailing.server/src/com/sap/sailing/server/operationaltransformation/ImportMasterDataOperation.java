@@ -389,7 +389,7 @@ public class ImportMasterDataOperation extends
                 for (Wind fix : windTrackToReadFrom.getRawFixes()) {
                     Wind existingFix = windTrackToWriteTo.getFirstRawFixAtOrAfter(fix.getTimePoint());
                     if (existingFix == null || !(existingFix.equals(fix) && fix.getTimePoint().equals(existingFix.getTimePoint())
-                            && fix.getPosition().equals(existingFix.getPosition()))) {
+                            && Util.equalsWithNull(fix.getPosition(), existingFix.getPosition()))) {
                         windTrackToWriteTo.add(fix);
                     } else {
                         logger.info("Didn't add wind fix in import, because equal fix was already there.");
