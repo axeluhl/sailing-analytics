@@ -2,8 +2,7 @@ package com.sap.sailing.domain.common.sensordata;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.gwt.thirdparty.guava.common.base.Objects;
+import java.util.Objects;
 
 /**
  * Metadata that defines the column structure of {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}es when
@@ -38,7 +37,7 @@ public enum BravoSensorDataMetadata {
     public static BravoSensorDataMetadata byColumnName(String valueName) {
         BravoSensorDataMetadata[] values = BravoSensorDataMetadata.values();
         for (BravoSensorDataMetadata item : values) {
-            if (Objects.equal(item.getColumnName(), valueName)) {
+            if (Objects.equals(item.getColumnName(), valueName)) {
                 return item;
             }
         }
