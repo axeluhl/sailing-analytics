@@ -776,7 +776,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaDefinesResultDiscardingRules();
     String startsWithZeroScore();
     String masterDataImportPanel();
-    String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas);
+    String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas, int mediaTracksImported);
     String importSuccessOverwriteInfo();
     String regattaOverviewConfiguration();
     String firstRaceIsNonDiscardableCarryForward();
@@ -1452,7 +1452,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String shownDecimals();
     String openFullscreenView();
     String closeFullscreenView();
-    String progress();
     String videosCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String photosCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsHaveTakenPlace(@PluralCount(DefaultRule_1_0n.class) int eventCount);

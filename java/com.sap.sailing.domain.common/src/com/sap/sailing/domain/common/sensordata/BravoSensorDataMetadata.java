@@ -14,7 +14,7 @@ public enum BravoSensorDataMetadata {
 
     INSTANCE;
 
-	public static final String RIDE_HEIGHT = "RideHeight";
+    public static final String RIDE_HEIGHT = "RideHeight";
     public static final String RIDE_HEIGHT_PORT_HULL = "RideHeightPortHull";
     public static final String RIDE_HEIGHT_STBD_HULL = "RideHeightStbdHull";
     public static final String HEEL = "Heel";

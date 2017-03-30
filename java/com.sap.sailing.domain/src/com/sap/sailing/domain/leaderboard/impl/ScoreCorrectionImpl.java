@@ -99,7 +99,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     protected void notifyListeners(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
         for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
-            listener.correctedScoreChanced(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
+            listener.correctedScoreChanged(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
         }
     }
 

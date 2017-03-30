@@ -1,14 +1,20 @@
 package com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.tracking.impl;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl.VeryCompactPosition;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl.VeryCompactPosition;
 
-public final class CompactGPSFixImpl {
-    public static final class CompactPosition_CustomFieldSerializer extends CustomFieldSerializer<VeryCompactPosition> {
+public final class VeryCompactGPSFixMovingImpl {
+    private static final Logger logger = Logger.getLogger(VeryCompactGPSFixMovingImpl.class.getName());
+    
+    public static final class VeryCompactPosition_CustomFieldSerializer extends CustomFieldSerializer<VeryCompactPosition> {
         @Override
         public boolean hasCustomInstantiateInstance() {
             return true;
@@ -23,8 +29,14 @@ public final class CompactGPSFixImpl {
         public static VeryCompactPosition instantiate(SerializationStreamReader streamReader) throws SerializationException {
             final double latDeg = streamReader.readDouble();
             final double lngDeg = streamReader.readDouble();
-            return (VeryCompactPosition) new com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl(
-                    new DegreePosition(latDeg, lngDeg), /* timePoint */null).getPosition();
+            try {
+                return (VeryCompactPosition) new com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl(
+                        new DegreePosition(latDeg, lngDeg), /* timePoint */null, /* speed with bearing */ null).getPosition();
+            } catch (CompactionNotPossibleException e) {
+                logger.log(Level.SEVERE, "Internal error: an object that was a very compact position and was serialized "+
+                        "couldn't be de-serialized again as such an object", e);
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
