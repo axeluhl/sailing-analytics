@@ -10,9 +10,8 @@ import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.Slide7Node;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.Slide2Place;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 
 public class SixtyInchOrchestrator implements Orchestrator {
@@ -24,18 +23,19 @@ public class SixtyInchOrchestrator implements Orchestrator {
 
     public SixtyInchOrchestrator(AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
-        
+
         StartupNode slideInit = new StartupNode(cf);
         // SlideConfig slide0 = new SlideTimedTransitionConfig(this, new Slide0Place(), 10000);
-        TimedTransitionSimpleNode node2 = new TimedTransitionSimpleNode("node2", new Slide2Place(), 200000);
-        
+        // TimedTransitionSimpleNode node2 = new TimedTransitionSimpleNode("node2", new Slide2Place(), 200000);
+
         // SlideConfig slide2 = new SlideTimedTransitionConfig(this, new Slide2Place(), 10000);
         // SlideConfig slide3 = new SlideTimedTransitionConfig(this, new Slide3Place(), 10000);
         // SlideConfig slide4 = new SlideTimedTransitionConfig(this, new Slide4Place(), 10000);
         // SlideConfig slide5 = new SlideTimedTransitionConfig(this, new Slide5Place(), 10000);
         // SlideConfig slide6 = new SlideTimedTransitionConfig(this, new Slide6Place(), 10000);
-        Slide7Node node7 = new Slide7Node(cf);
-        // SlideConfig slide8 = new SlideTimedTransitionConfig(this, new Slide8Place(), 10000);
+        // Slide7Node node7 = new Slide7Node(cf);
+        TimedTransitionSimpleNode slide8 = new TimedTransitionSimpleNode("afterRaceLeaderboard",
+                new RaceEndWithBoatsPlace(), 10000);
         // SlideConfig slide9 = new SlideTimedTransitionConfig(this, new Slide9Place(), 10000);
         // slideInit.setNextSlide(slide0);
         // slide0.setNextSlide(slide1);
@@ -49,16 +49,17 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // slide8.setNextSlide(slide9);
         // slide9.setNextSlide(slide0);
 
-        slideInit.setNextNode(node2);
-        
-        node2.setNextNode(node7);
-        node7.setNextNode(node2);
+        slideInit.setNextNode(slide8);
+
+        // node2.setNextNode(node7);
+        // node7.setNextNode(node2);
 
         rootNodeForStartup = slideInit;
     }
 
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.Orchestrator#start()
      */
     @Override
@@ -87,9 +88,12 @@ public class SixtyInchOrchestrator implements Orchestrator {
         cf.getPlaceController().goTo(new SlideInitPlace(event, currentNodeRef.node));
     }
 
-
-    /* (non-Javadoc)
-     * @see com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.Orchestrator#didMoveToSlide(com.sap.sailing.gwt.autoplay.client.orchestrator.AutoPlayNode)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.Orchestrator#didMoveToSlide(com.sap.sailing.gwt.
+     * autoplay.client.orchestrator.AutoPlayNode)
      */
     @Override
     public void transitionToNode(AutoPlayNode source, AutoPlayNode nextNode) {
@@ -97,6 +101,10 @@ public class SixtyInchOrchestrator implements Orchestrator {
             GWT.log("transition started by: unknown");
         } else {
             GWT.log("transition started by: " + source);
+        }
+        if(nextNode == null){
+            GWT.log("Found no successor Node, staying at current node, validate Orchestrator");
+            return;
         }
         if (currentNodeRef != null) {
             currentNodeRef.stop();

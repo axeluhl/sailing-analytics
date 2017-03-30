@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -107,10 +107,12 @@ public class Slide7PresenterImpl extends ConfiguredSlideBase<Slide7Place> implem
             return;
         }
 
-        final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance()
-                .createNewDefaultSettings(null, racesToShow, null, /* autoExpandFirstRace */ false,
-                        /* showRegattaRank */ false, /* showCompetitorSailIdColumn */ false,
-                        /* showCompetitorFullNameColumn */ true);
+        final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, null, null,
+        null, racesToShow, null, false, null, null,
+        /* ascending */ true, /* updateUponPlayStateChange */ true, RaceColumnSelectionStrategies.EXPLICIT,
+        /* showAddedScores */ false, /* showOverallRacesCompleted */ false, false,
+        true);
+
         List<StrippedLeaderboardDTO> leaderboards = getSlideCtx().getEvent().getLeaderboardGroups().get(0)
                 .getLeaderboards();
         StrippedLeaderboardDTO leaderboard = leaderboards.get(0);
@@ -121,7 +123,7 @@ public class Slide7PresenterImpl extends ConfiguredSlideBase<Slide7Place> implem
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 false, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null, leaderboard.name, errorReporter,
-                StringMessages.INSTANCE, null, true, null, false, null, false, true, false, false, false);
+                StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, false);
         selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
 
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);

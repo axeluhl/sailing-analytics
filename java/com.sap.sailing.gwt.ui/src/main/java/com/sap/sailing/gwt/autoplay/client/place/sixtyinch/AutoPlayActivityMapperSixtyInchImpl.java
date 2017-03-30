@@ -23,9 +23,9 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.Slide6V
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7PresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7ViewImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.Slide8Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.Slide8PresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.Slide8ViewImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsViewImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide9.Slide9Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide9.Slide9PresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide9.Slide9ViewImpl;
@@ -70,8 +70,9 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
         if (place instanceof Slide7Place) {
             return new Slide7PresenterImpl((Slide7Place) place, clientFactory, new Slide7ViewImpl());
         }
-        if (place instanceof Slide8Place) {
-            return new Slide8PresenterImpl((Slide8Place) place, clientFactory, new Slide8ViewImpl());
+        if (place instanceof RaceEndWithBoatsPlace) {
+            return new RaceEndWithBoatsPresenterImpl((RaceEndWithBoatsPlace) place, clientFactory,
+                    new RaceEndWithBoatsViewImpl());
         }
         if (place instanceof Slide9Place) {
             return new Slide9PresenterImpl((Slide9Place) place, clientFactory, new Slide9ViewImpl());

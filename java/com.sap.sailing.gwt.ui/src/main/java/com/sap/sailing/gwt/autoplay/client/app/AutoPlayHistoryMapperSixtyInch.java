@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4.Slide4P
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide5.Slide5Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.Slide6Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.Slide8Place;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide9.Slide9Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
@@ -16,6 +16,6 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixty
 @WithTokenizers({ SlideInitPlace.Tokenizer.class, StartPlaceSixtyInch.Tokenizer.class, Slide0Place.Tokenizer.class,
         Slide0Place.Tokenizer.class, Slide2Place.Tokenizer.class, Slide4Place.Tokenizer.class,
         Slide5Place.Tokenizer.class, Slide6Place.Tokenizer.class,
-        Slide7Place.Tokenizer.class, Slide8Place.Tokenizer.class, Slide9Place.Tokenizer.class })
+        Slide7Place.Tokenizer.class, RaceEndWithBoatsPlace.Tokenizer.class, Slide9Place.Tokenizer.class })
 public interface AutoPlayHistoryMapperSixtyInch extends PlaceHistoryMapper {
 }

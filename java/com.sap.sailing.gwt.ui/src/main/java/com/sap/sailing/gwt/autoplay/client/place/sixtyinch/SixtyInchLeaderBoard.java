@@ -24,16 +24,6 @@ public class SixtyInchLeaderBoard extends UnStyledLeaderboardPanel {
 
     public SixtyInchLeaderBoard(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
-            String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            UserAgentDetails userAgent, boolean showRaceDetails) {
-        super(sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace, competitorSelectionProvider,
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                resources, componentResources, tableResources);
-    }
-
-    public SixtyInchLeaderBoard(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
@@ -47,12 +37,4 @@ public class SixtyInchLeaderBoard extends UnStyledLeaderboardPanel {
                 componentResources, tableResources);
     }
 
-    public SixtyInchLeaderBoard(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
-            String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            UserAgentDetails userAgent, boolean showRaceDetails) {
-        super(sailingService, asyncActionsExecutor, settings, competitorSelectionProvider, leaderboardName,
-                errorReporter, stringMessages, userAgent, showRaceDetails, resources, componentResources,
-                tableResources);
-    }
 }
