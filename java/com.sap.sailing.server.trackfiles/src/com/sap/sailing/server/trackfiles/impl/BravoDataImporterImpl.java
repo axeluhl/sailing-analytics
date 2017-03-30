@@ -39,8 +39,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private final Logger LOG = Logger.getLogger(DoubleVectorFixImporter.class.getName());
-    private final BravoSensorDataMetadata metadata = BravoSensorDataMetadata.INSTANCE;
     private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
+    private int trackColumnCount = BravoSensorDataMetadata.getTrackColumnCount();
 
     public void importFixes(InputStream inputStream, Callback callback, final String filename, String sourceName)
             throws FormatNotSupportedException, IOException {
@@ -75,7 +75,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
                 LOG.fine("Validate and parse header columns");
                 final Map<String, Integer> colIndices = validateAndParseHeader(headerLine);
 
-                DoubleFixProcessor downsampler = createProcessor(metadata, callback, trackIdentifier);
+                DoubleFixProcessor downsampler = createProcessor(callback, trackIdentifier);
 
                 buffer.lines().forEach(line -> {
                     lineNr.incrementAndGet();
@@ -101,10 +101,12 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
      * @param trackIdentifier
      * @return
      */
-    protected DoubleFixProcessor createProcessor(BravoSensorDataMetadata metadata, Callback callback,
+    protected DoubleFixProcessor createProcessor(Callback callback,
             final TrackFileImportDeviceIdentifier trackIdentifier) {
         LearningBatchProcessor batchProcessor = new LearningBatchProcessor(5000, 5000, callback, trackIdentifier);
-        DoubleFixProcessor downsampler = new DownsamplerTo1HzProcessor(metadata.trackColumnCount, batchProcessor);
+        DoubleFixProcessor downsampler = new DownsamplerTo1HzProcessor(trackColumnCount,
+                batchProcessor);
+
         return downsampler;
     }
 
@@ -123,9 +125,9 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
                 // we don't have epoch, skip the line
                 return null;
             }
-            double[] trackFixData = new double[metadata.trackColumnCount];
-            for (int trackColumnIdx = 0; trackColumnIdx < metadata.trackColumnCount; trackColumnIdx++) {
-                String columnNameToSearchForInFile = metadata.getTrackColumns().get(trackColumnIdx);
+            double[] trackFixData = new double[trackColumnCount];
+            for (int trackColumnIdx = 0; trackColumnIdx < trackColumnCount; trackColumnIdx++) {
+                String columnNameToSearchForInFile = BravoSensorDataMetadata.values()[trackColumnIdx].getColumnName();
                 Integer columnsInFileIdx = columnsInFile.get(columnNameToSearchForInFile);
                 trackFixData[trackColumnIdx] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);
             }
@@ -140,11 +142,11 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private Map<String, Integer> validateAndParseHeader(String headerLine) {
         final String[] headerTokens = split(headerLine);
         Map<String, Integer> colIndicesInFile = new HashMap<>();
-        for (int j = metadata.getHeaderColumnOffset(); j < headerTokens.length; j++) {
+        for (int j = BravoSensorDataMetadata.HEADER_COLUMN_OFFSET; j < headerTokens.length; j++) {
             String header = headerTokens[j];
             colIndicesInFile.put(header, j);
         }
-        List<String> requiredColumnsInFix = metadata.getTrackColumns();
+        List<String> requiredColumnsInFix = BravoSensorDataMetadata.getTrackColumnNames();
         if (!colIndicesInFile.keySet().containsAll(requiredColumnsInFix)) {
             final Set<String> missingColumns = new HashSet<>(requiredColumnsInFix);
             missingColumns.removeAll(colIndicesInFile.keySet());
