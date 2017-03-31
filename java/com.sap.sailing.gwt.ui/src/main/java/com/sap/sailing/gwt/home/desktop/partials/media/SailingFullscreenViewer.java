@@ -70,6 +70,7 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
         showContent(player = new SailingGalleryPlayer(selected, images));
         if (eventNavigationHandler.isNavigationConfigured()) {
             player.addSelectionChangeHandler(eventNavigationHandler);
+            player.addClickHandler(eventNavigationHandler);
         }
         autoRefreshControl.setStyleName(IS_AUTOPLAYING_STYLE, player.isAutoplaying());
         SelectionChangeEvent.fire(player);
