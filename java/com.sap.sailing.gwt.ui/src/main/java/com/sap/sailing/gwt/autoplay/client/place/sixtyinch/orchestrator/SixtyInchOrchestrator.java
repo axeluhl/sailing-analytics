@@ -9,9 +9,8 @@ import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 
 public class SixtyInchOrchestrator implements Orchestrator {
@@ -34,8 +33,7 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // SlideConfig slide5 = new SlideTimedTransitionConfig(this, new Slide5Place(), 10000);
         // SlideConfig slide6 = new SlideTimedTransitionConfig(this, new Slide6Place(), 10000);
         // Slide7Node node7 = new Slide7Node(cf);
-        TimedTransitionSimpleNode slide8 = new TimedTransitionSimpleNode("afterRaceLeaderboard",
-                new RaceEndWithBoatsPlace(), 10000);
+        RaceEndWithBoatsNode endRaceSlideWithBoats = new RaceEndWithBoatsNode(cf);
         // SlideConfig slide9 = new SlideTimedTransitionConfig(this, new Slide9Place(), 10000);
         // slideInit.setNextSlide(slide0);
         // slide0.setNextSlide(slide1);
@@ -49,7 +47,7 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // slide8.setNextSlide(slide9);
         // slide9.setNextSlide(slide0);
 
-        slideInit.setNextNode(slide8);
+        slideInit.setNextNode(endRaceSlideWithBoats);
 
         // node2.setNextNode(node7);
         // node7.setNextNode(node2);
@@ -82,6 +80,9 @@ public class SixtyInchOrchestrator implements Orchestrator {
 
     private void processFailure(FailureEvent event) {
         GWT.log("Captured failure event: " + event);
+        if (event.getCaught() != null) {
+            event.getCaught().printStackTrace();
+        }
         if (currentNodeRef != null) {
             currentNodeRef.stop();
         }

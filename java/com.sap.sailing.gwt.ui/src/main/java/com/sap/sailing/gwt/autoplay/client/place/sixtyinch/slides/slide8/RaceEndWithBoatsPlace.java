@@ -33,4 +33,8 @@ public class RaceEndWithBoatsPlace extends Place {
             return new RaceEndWithBoatsPlace();
         }
     }
+
+    public void setLifeRace(RegattaAndRaceIdentifier lifeRace) {
+        this.lifeRace = lifeRace;
+    }
 }

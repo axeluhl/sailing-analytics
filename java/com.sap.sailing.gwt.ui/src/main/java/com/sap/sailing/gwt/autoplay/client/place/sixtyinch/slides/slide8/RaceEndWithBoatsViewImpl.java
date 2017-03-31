@@ -1,8 +1,12 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8;
 
+import javax.annotation.Resource;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Image;
@@ -20,6 +24,13 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
 
     interface RaceEndWithBoatsViewImplUiBinder extends UiBinder<Widget, RaceEndWithBoatsViewImpl> {
     }
+
+    public interface RaceEndRessources extends CellTable.Resources {
+        @Resource
+        public ImageResource noTeamImagePlaceholder();
+    }
+
+    private static final RaceEndRessources res = GWT.create(RaceEndRessources.class);
 
     @UiField
     ResizableFlowPanel leaderBoardHolder;
@@ -74,31 +85,31 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
 
     @Override
     public void setFirst(CompetitorDTO c) {
-        subline1.setText(c.getName());
+        subline1.setText("1. " + c.getName());
         if (c.getImageURL() != null) {
             image1.setUrl(c.getImageURL());
         } else {
-            image1.setUrl((String) null);
+            image1.setUrl(res.noTeamImagePlaceholder().getSafeUri());
         }
     }
 
     @Override
     public void setSecond(CompetitorDTO c) {
-        subline2.setText(c.getName());
+        subline2.setText("2. " + c.getName());
         if (c.getImageURL() != null) {
             image2.setUrl(c.getImageURL());
         } else {
-            image2.setUrl((String) null);
+            image2.setUrl(res.noTeamImagePlaceholder().getSafeUri());
         }
     }
 
     @Override
     public void setThird(CompetitorDTO c) {
-        subline3.setText(c.getName());
+        subline3.setText("3. " + c.getName());
         if (c.getImageURL() != null) {
             image3.setUrl(c.getImageURL());
         } else {
-            image3.setUrl((String) null);
+            image3.setUrl(res.noTeamImagePlaceholder().getSafeUri());
         }
     }
 
