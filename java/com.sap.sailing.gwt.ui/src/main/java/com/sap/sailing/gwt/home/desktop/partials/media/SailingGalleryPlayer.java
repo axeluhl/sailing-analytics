@@ -78,8 +78,8 @@ public class SailingGalleryPlayer extends ResizeComposite implements HasSelectio
     @Override
     protected void onLoad() {
         _onLoad(this);
-        mainSliderUi.getChild(0).<Element>cast().setTabIndex(0);
-        mainSliderUi.getChild(0).<Element>cast().focus();
+        mainSliderUi.getFirstChild().<Element> cast().setTabIndex(0);
+        this.focus();
     }
 
     @Override
@@ -157,6 +157,10 @@ public class SailingGalleryPlayer extends ResizeComposite implements HasSelectio
         } else {
             _slickPause();
         }
+    }
+
+    public void focus() {
+        mainSliderUi.getFirstChild().<Element> cast().focus();
     }
 
     @Override
