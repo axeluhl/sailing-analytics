@@ -517,23 +517,17 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
     @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         makeControlsReactToFillRegattas(regattas);
-        if (Util.isEmpty(regattas)) {
-            raceTable.setVisible(false);
-            noTrackedRacesLabel.setVisible(true);
-        } else {
-            raceTable.setVisible(true);
-            noTrackedRacesLabel.setVisible(false);
-        }
+        displayRaceTableUI(regattas);
+
         List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
-        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
         List<String> regattaNames = new ArrayList<>();
+
         for (RegattaDTO regatta : regattas) {
-            newAllRegattas.add(regatta);
             for (RaceDTO race : regatta.races) {
                 if (race != null) {
                     if (raceIsToBeAddedToList(race)) {
-                        //We need only those regatta names which are available 
-                        //at tracking table
+                        // We need only those regatta names which are available
+                        // at tracking table
                         if (!regattaNames.contains(regatta.getName())) {
                             regattaNames.add(regatta.getName());
                         }
@@ -543,11 +537,43 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
             }
         }
 
-        listBoxRegattas.clear();
-        listBoxRegattas.addItem(stringMessages.all(), "");
-        regattaNames.stream().sorted().forEach(regatta->listBoxRegattas.addItem(regatta, regatta));
+        refreshListBoxRegattas(regattaNames);
         allRaces = newAllRaces;
         filterablePanelRaces.updateAll(allRaces);
+    }
+
+    private void refreshListBoxRegattas(List<String> regattaNames) {
+        String lastSelectedRegatta = listBoxRegattas.getSelectedItemText();
+        listBoxRegattas.clear();
+        listBoxRegattas.addItem(stringMessages.all(), "");
+        regattaNames.stream().sorted().forEach(regatta -> listBoxRegattas.addItem(regatta, regatta));
+        restoreListBoxRegattasSelection(lastSelectedRegatta);
+    }
+
+    private void restoreListBoxRegattasSelection(String lastSelectedRegatta) {
+        for (int i = 0; i < listBoxRegattas.getItemCount(); i++) {
+            if (listBoxRegattas.getItemText(i).equals(lastSelectedRegatta)) {
+                listBoxRegattas.setSelectedIndex(i);
+            }
+        }
+    }
+
+    private void displayRaceTableUI(Iterable<RegattaDTO> regattas) {
+        if (Util.isEmpty(regattas)) {
+            hideRaceTable();
+        } else {
+            showRaceTable();
+        }
+    }
+
+    private void showRaceTable() {
+        raceTable.setVisible(true);
+        noTrackedRacesLabel.setVisible(false);
+    }
+
+    private void hideRaceTable() {
+        raceTable.setVisible(false);
+        noTrackedRacesLabel.setVisible(true);
     }
 
     /**
