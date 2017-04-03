@@ -420,7 +420,7 @@ public class TrackingListFragment extends BaseFragment
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState()
-            .getFinishingTime(), item, position, mFinishedAdapter.getItemCount());
+            .getFinishingTime(), item, position, mFinishedAdapter.getItemCount(), false);
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override

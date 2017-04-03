@@ -7,12 +7,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.internal.view.ContextThemeWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,10 +24,12 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -38,15 +43,15 @@ import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
+import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, ItemListener {
 
-    private View mSortByButton;
     private View mButtonBar;
-    private Button mPenaltyButton;
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
     private List<CompetitorResultEditableImpl> mCompetitorResults;
@@ -65,9 +70,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
         mCompetitorResults = new ArrayList<>();
 
-        mSortByButton = ViewHelper.get(layout, R.id.competitor_sort);
-        if (mSortByButton != null) {
-            mSortByButton.setOnClickListener(new View.OnClickListener() {
+        View sortByButton = ViewHelper.get(layout, R.id.competitor_sort);
+        if (sortByButton != null) {
+            sortByButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     PopupMenu popupMenu;
@@ -87,9 +92,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         mButtonBar = ViewHelper.get(layout, R.id.button_bar);
         mButtonBar.setVisibility(View.GONE);
 
-        mPenaltyButton = ViewHelper.get(layout, R.id.button_penalty);
-        if (mPenaltyButton != null) {
-            mPenaltyButton.setOnClickListener(new View.OnClickListener() {
+        Button penaltyButton = ViewHelper.get(layout, R.id.button_penalty);
+        if (penaltyButton != null) {
+            penaltyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AppTheme_AlertDialog));
@@ -259,16 +264,59 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     }
 
     @Override
-    public void onEditClicked(CompetitorResultEditableImpl competitor) {
-
+    public void onEditClicked(final CompetitorResultEditableImpl competitor) {
+        Context context = getActivity();
+        if (context instanceof AppCompatActivity) {
+            ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
+            if (actionBar != null) {
+                context = actionBar.getThemedContext();
+            }
+        }
+        CompetitorResultWithIdImpl item = new CompetitorResultWithIdImpl(0, competitor.getCompetitorId(), competitor
+            .getCompetitorDisplayName(), competitor.getOneBasedRank(), competitor.getMaxPointsReason(), competitor.getScore(), competitor
+            .getFinishingTime(), competitor.getComment());
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+        builder.setTitle(item.getCompetitorDisplayName());
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item);
+        builder.setView(layout);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                CompetitorResultWithIdImpl item = layout.getValue();
+                if (!competitor.getMaxPointsReason().equals(item.getMaxPointsReason())) {
+                    competitor.setMaxPointsReason(item.getMaxPointsReason());
+                    competitor.setDirty(true);
+                }
+                if (!competitor.getComment().equals(item.getComment())) {
+                    competitor.setComment(item.getComment());
+                    competitor.setDirty(true);
+                }
+                if (!competitor.getScore().equals(item.getScore())) {
+                    competitor.setScore(item.getScore());
+                    competitor.setDirty(true);
+                }
+                if (competitor.isDirty()) {
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        if (AppUtils.with(getActivity()).isTablet()) {
+            Window window = dialog.getWindow();
+            if (window != null) {
+                window.setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
+        }
     }
 
     private CompetitorResults getCompetitorResults() {
         CompetitorResults results = new CompetitorResultsImpl();
         for (CompetitorResultEditableImpl item : mCompetitorResults) {
             if (!MaxPointsReason.NONE.equals(item.getMaxPointsReason())) {
-                CompetitorResult result = new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(),
-                    item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment());
+                CompetitorResult result = new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item
+                    .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment());
                 results.add(result);
             }
         }

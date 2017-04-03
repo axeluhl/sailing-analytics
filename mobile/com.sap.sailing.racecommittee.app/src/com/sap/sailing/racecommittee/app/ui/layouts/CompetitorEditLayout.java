@@ -23,6 +23,7 @@ import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
@@ -47,12 +48,18 @@ public class CompetitorEditLayout extends ScrollView {
     private NumberPicker mSeconds;
     private EditText mComment;
 
-    public CompetitorEditLayout(Context context, TimePoint startTime, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
-        super(context);
-        init(startTime, competitor, currentPos, maxPos);
+    private boolean mRestricted;
+
+    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor) {
+        this(context, null, competitor, 0, 1, true);
     }
 
-    private void init(TimePoint startTime, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
+    public CompetitorEditLayout(Context context, TimePoint startTime, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos,
+        boolean restrictedView) {
+        super(context);
+
+        mRestricted = restrictedView;
+
         int layoutId;
         if (AppUtils.with(getContext()).isPhone() && AppUtils.with(getContext()).isHDPI()) {
             layoutId = R.layout.race_tracking_list_competitor_edit_small;
@@ -63,6 +70,20 @@ public class CompetitorEditLayout extends ScrollView {
 
         setFillViewport(true);
         setPadding(0, getResources().getDimensionPixelSize(R.dimen.dialog_top_padding), 0, 0);
+
+        View position = ViewHelper.get(layout, R.id.competitor_position_layout);
+        if (position != null) {
+            position.setVisibility(restrictedView ? GONE : VISIBLE);
+        }
+        View finishDate = ViewHelper.get(layout, R.id.competitor_finish_date_layout);
+        if (finishDate != null) {
+            finishDate.setVisibility(restrictedView ? GONE : VISIBLE);
+        }
+
+        View finishTime = ViewHelper.get(layout, R.id.competitor_finish_time_layout);
+        if (finishTime != null) {
+            finishTime.setVisibility(restrictedView ? GONE : VISIBLE);
+        }
 
         mCompetitor = competitor;
 
@@ -106,7 +127,7 @@ public class CompetitorEditLayout extends ScrollView {
         }
 
         mDate = ViewHelper.get(layout, R.id.competitor_finish_date);
-        if (mDate != null) {
+        if (mDate != null && startTime != null) {
             String[] dates = getDates(startTime);
             StringArraySpinnerAdapter dateAdapter = new StringArraySpinnerAdapter(dates);
             mDate.setAdapter(dateAdapter);
@@ -179,22 +200,25 @@ public class CompetitorEditLayout extends ScrollView {
         if (mScore != null && !TextUtils.isEmpty(mScore.getText())) {
             score = Double.valueOf(mScore.getText().toString());
         }
-        if (mDate != null) {
-            String[] date = ((String) mDate.getSelectedItem()).split("-");
-            mCalendar.set(Calendar.YEAR, Integer.parseInt(date[0]));
-            mCalendar.set(Calendar.MONTH, Integer.parseInt(date[1]) - 1);
-            mCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(date[2]));
+        TimePoint finishingTime = null;
+        if (!mRestricted) {
+            if (mDate != null) {
+                String[] date = ((String) mDate.getSelectedItem()).split("-");
+                mCalendar.set(Calendar.YEAR, Integer.parseInt(date[0]));
+                mCalendar.set(Calendar.MONTH, Integer.parseInt(date[1]) - 1);
+                mCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(date[2]));
+            }
+            if (mHours != null) {
+                mCalendar.set(Calendar.HOUR_OF_DAY, mHours.getValue());
+            }
+            if (mMinutes != null) {
+                mCalendar.set(Calendar.MINUTE, mMinutes.getValue());
+            }
+            if (mSeconds != null) {
+                mCalendar.set(Calendar.SECOND, mSeconds.getValue());
+            }
+            finishingTime = new MillisecondsTimePoint(mCalendar.getTime());
         }
-        if (mHours != null) {
-            mCalendar.set(Calendar.HOUR_OF_DAY, mHours.getValue());
-        }
-        if (mMinutes != null) {
-            mCalendar.set(Calendar.MINUTE, mMinutes.getValue());
-        }
-        if (mSeconds != null) {
-            mCalendar.set(Calendar.SECOND, mSeconds.getValue());
-        }
-        TimePoint finishingTime = new MillisecondsTimePoint(mCalendar.getTime());
         String comment = null;
         if (mComment != null) {
             comment = mComment.getText().toString();
