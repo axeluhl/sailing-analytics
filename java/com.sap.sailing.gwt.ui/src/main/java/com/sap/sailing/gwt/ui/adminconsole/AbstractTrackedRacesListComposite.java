@@ -518,10 +518,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         makeControlsReactToFillRegattas(regattas);
         displayRaceTableUI(regattas);
-
-        List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
-        List<String> regattaNames = new ArrayList<>();
-
+        final List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
+        final List<String> regattaNames = new ArrayList<>();
         for (RegattaDTO regatta : regattas) {
             for (RaceDTO race : regatta.races) {
                 if (race != null) {
@@ -536,24 +534,24 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
                 }
             }
         }
-
         refreshListBoxRegattas(regattaNames);
         allRaces = newAllRaces;
         filterablePanelRaces.updateAll(allRaces);
     }
 
     private void refreshListBoxRegattas(List<String> regattaNames) {
-        String lastSelectedRegatta = listBoxRegattas.getSelectedItemText();
+        final String lastSelectedRegattaName = listBoxRegattas.getSelectedValue();
         listBoxRegattas.clear();
         listBoxRegattas.addItem(stringMessages.all(), "");
         regattaNames.stream().sorted().forEach(regatta -> listBoxRegattas.addItem(regatta, regatta));
-        restoreListBoxRegattasSelection(lastSelectedRegatta);
+        restoreListBoxRegattasSelection(lastSelectedRegattaName);
     }
 
-    private void restoreListBoxRegattasSelection(String lastSelectedRegatta) {
+    private void restoreListBoxRegattasSelection(String lastSelectedRegattaName) {
         for (int i = 0; i < listBoxRegattas.getItemCount(); i++) {
-            if (listBoxRegattas.getItemText(i).equals(lastSelectedRegatta)) {
+            if (listBoxRegattas.getValue(i).equals(lastSelectedRegattaName)) {
                 listBoxRegattas.setSelectedIndex(i);
+                break;
             }
         }
     }
@@ -579,9 +577,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
     /**
      * Allows applying some sort of filter to the process of adding races. Defaults to true in standard implementation.
      * Override for custom behavior
-     * 
-     * @param race
-     * @return
      */
     protected boolean raceIsToBeAddedToList(RaceDTO race) {
         return true;
