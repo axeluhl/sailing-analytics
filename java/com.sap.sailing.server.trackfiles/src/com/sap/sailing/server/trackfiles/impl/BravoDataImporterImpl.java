@@ -6,8 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -142,10 +144,12 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
             String header = headerTokens[j];
             colIndicesInFile.put(header, j);
         }
-        List<String> columnsInFix = metadata.getFileColumns();
-        if (colIndicesInFile.size() != columnsInFix.size() || !colIndicesInFile.keySet().containsAll(columnsInFix)) {
-            LOG.log(Level.SEVERE, "Missing headers");
-            throw new RuntimeException("Missing headers in import files");
+        List<String> requiredColumnsInFix = metadata.getTrackColumns();
+        if (!colIndicesInFile.keySet().containsAll(requiredColumnsInFix)) {
+            final Set<String> missingColumns = new HashSet<>(requiredColumnsInFix);
+            missingColumns.removeAll(colIndicesInFile.keySet());
+            LOG.log(Level.SEVERE, "Missing headers: "+missingColumns);
+            throw new RuntimeException("Missing headers "+missingColumns+" in import files");
         }
         return colIndicesInFile;
     }

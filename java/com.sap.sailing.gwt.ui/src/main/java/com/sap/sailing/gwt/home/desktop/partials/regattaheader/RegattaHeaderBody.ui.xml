@@ -5,7 +5,6 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.regattaheader.RegattaHeaderResources" />
     <div>
-        <div class="{local_res.css.regattaheader_logo}" ui:field="logoUi"></div>
         <div class="{local_res.css.regattaheader_content}">
             <div class="{local_res.css.regattaheader_content_title}">
                 <span ui:field="nameUi"></span>

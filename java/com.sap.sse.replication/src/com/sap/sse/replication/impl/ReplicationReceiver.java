@@ -400,7 +400,7 @@ public class ReplicationReceiver implements Runnable {
         }
         logger.info("Signaled Replicator thread to stop asap.");
         stopped = true;
-        master.stopConnection();
+        master.stopConnection(/* deleteExchange */ false);
         notifyAll(); // notify those waiting for stopped
     }
     

@@ -9,7 +9,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -93,6 +92,7 @@ import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -665,23 +665,27 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private void restoreTrackedRaces() {
-        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         // restore the races by calling addRace one by one, but in a background thread, therefore concurrent to any remaining
         // server startup activities happening
-        backgroundExecutor.execute(()->{
+        numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
             try {
-                numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
-                    try {
-                        addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1);
-                        numberOfTrackedRacesRestored.incrementAndGet();
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Exception trying to restore race"+params, e);
-                    }
-                });
-            } catch (MalformedURLException | URISyntaxException e) {
-                logger.log(Level.SEVERE, "Exception trying to obtain connectivity parameters for restoring tracked races", e);
+                final RaceHandle handle = addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1);
+                final RaceDefinition race = handle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS); // try to not flood servers during restore by waiting for race to appear
+                if (race == null) {
+                    logger.warning("Race for tracker " + handle.getRaceTracker() + " with ID "
+                            + handle.getRaceTracker().getID() + " didn't appear within "
+                            + RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS
+                            + "ms. Maybe it will later...");
+                } else {
+                    logger.info("Race " + race + " showed up during restoring by tracker " + handle.getRaceTracker()
+                            + " with ID " + handle.getRaceTracker().getID());
+                }
+                int newNumberOfTrackedRacesRestored = numberOfTrackedRacesRestored.incrementAndGet();
+                logger.info("Added race to restore #"+newNumberOfTrackedRacesRestored+"/"+numberOfTrackedRacesToRestore);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception trying to restore race "+params, e);
             }
-        });
+        }).getNumberOfParametersToLoad();
     }
 
     @Override
@@ -1704,7 +1708,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore,
+        public void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore,
                 Double newCorrectedScore) {
             notifyForCompetitorIfNotAlreadyNotifiedRecently(competitor, raceColumn);
         }
@@ -2160,8 +2164,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
         // update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
         if (connectivityParams != null) {
-            connectivityParams.setTrackWind(false);
-            getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
+            if (connectivityParams.isTrackWind()) {
+                connectivityParams.setTrackWind(false);
+                getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
+            }
         } else {
             logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
         }
@@ -3158,36 +3164,47 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, boolean override) {
+    public void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCount creationCount, boolean override) throws Exception {
+    	Exception firstException = null;
         for (MediaTrack trackToImport : mediaTracksToImport) {
-            MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
-            if (existingTrack == null) {
-                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url,
-                        trackToImport.startTime, trackToImport.duration, trackToImport.mimeType,
-                        trackToImport.assignedRaces);
-                mediaTrackAdded(trackToImport);
-            } else if (override) {
-
-                // Using fine-grained update methods.
-                // Rationale: Changes on more than one track property are rare
-                // and don't justify the introduction of a new set
-                // of methods (including replication).
-                if (!Util.equalsWithNull(existingTrack.title, trackToImport.title)) {
-                    mediaTrackTitleChanged(trackToImport);
-                }
-                if (!Util.equalsWithNull(existingTrack.url, trackToImport.url)) {
-                    mediaTrackUrlChanged(trackToImport);
-                }
-                if (!Util.equalsWithNull(existingTrack.startTime, trackToImport.startTime)) {
-                    mediaTrackStartTimeChanged(trackToImport);
-                }
-                if (!Util.equalsWithNull(existingTrack.duration, trackToImport.duration)) {
-                    mediaTrackDurationChanged(trackToImport);
-                }
-                if (!Util.equalsWithNull(existingTrack.assignedRaces, trackToImport.assignedRaces)) {
-                    mediaTrackAssignedRacesChanged(trackToImport);
-                }
-            }
+        	try {
+	            MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
+	            if (existingTrack == null) {
+	                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url,
+	                        trackToImport.startTime, trackToImport.duration, trackToImport.mimeType,
+	                        trackToImport.assignedRaces);
+	                mediaTrackAdded(trackToImport);
+	            } else if (override) {
+	                // Using fine-grained update methods.
+	                // Rationale: Changes on more than one track property are rare
+	                // and don't justify the introduction of a new set
+	                // of methods (including replication).
+	                if (!Util.equalsWithNull(existingTrack.title, trackToImport.title)) {
+	                    mediaTrackTitleChanged(trackToImport);
+	                }
+	                if (!Util.equalsWithNull(existingTrack.url, trackToImport.url)) {
+	                    mediaTrackUrlChanged(trackToImport);
+	                }
+	                if (!Util.equalsWithNull(existingTrack.startTime, trackToImport.startTime)) {
+	                    mediaTrackStartTimeChanged(trackToImport);
+	                }
+	                if (!Util.equalsWithNull(existingTrack.duration, trackToImport.duration)) {
+	                    mediaTrackDurationChanged(trackToImport);
+	                }
+	                if (!Util.equalsWithNull(existingTrack.assignedRaces, trackToImport.assignedRaces)) {
+	                    mediaTrackAssignedRacesChanged(trackToImport);
+	                }
+	            }
+	            creationCount.addOneMediaTrack();
+        	} catch (Exception e) {
+        		logger.log(Level.SEVERE, "Problem importing media track "+trackToImport+"; continuing with other media tracks.", e);
+        		if (firstException == null) {
+        			firstException = e;
+        		}
+        	}
+        }
+        if (firstException != null) {
+        	throw firstException;
         }
     }
 
