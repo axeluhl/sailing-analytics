@@ -519,4 +519,6 @@
     <string name="non_public_changed_title">Nicht öffentliche Events</string>
     <string name="competitor_list">Teilnehmerliste</string>
 
+    <string name="publish_button_empty">Veröffentlichen</string>
+    <string name="publish_button_other">Veröffentlichen (%d)</string>
 </resources>

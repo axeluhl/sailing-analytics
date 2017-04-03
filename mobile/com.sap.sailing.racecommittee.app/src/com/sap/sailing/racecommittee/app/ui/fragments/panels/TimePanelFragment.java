@@ -27,6 +27,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PenaltyFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
@@ -183,7 +184,7 @@ public class TimePanelFragment extends BasePanelFragment {
                 setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             }
             if (!view.equals(mCompetitorList)) {
-                resetFragment(mCompetitorList.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartTimeFragment.class);
+                resetFragment(mCompetitorList.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), PenaltyFragment.class);
                 mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
         }
@@ -302,7 +303,7 @@ public class TimePanelFragment extends BasePanelFragment {
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(StartTimeFragment.newInstance(StartTimeFragment.MODE_TIME_PANEL));
+                    replaceFragment(PenaltyFragment.newInstance());
                     break;
 
                 default:

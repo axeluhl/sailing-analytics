@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/tools_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp">
+
+        <com.sap.sailing.racecommittee.app.ui.views.SearchView
+            android:id="@+id/competitor_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true" />
+
+        <FrameLayout
+            android:id="@+id/competitor_sort"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@id/competitor_search"
+            android:background="?attr/sap_gray">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="?attr/sortby_24dp" />
+        </FrameLayout>
+    </RelativeLayout>
+
+    <include
+        android:id="@+id/button_bar"
+        layout="@layout/race_penalty_button_bar" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/competitor_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/button_bar"
+        android:layout_below="@id/tools_layout"
+        android:padding="16dp"
+        tools:listitem="@layout/race_penalty_row_item" />
+</RelativeLayout>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/button_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="24dp"
+    android:layout_marginLeft="24dp"
+    android:layout_marginRight="24dp"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/button_penalty"
+        style="?attr/buttonSolidNormal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Penalty" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp" />
+
+    <Button
+        android:id="@+id/button_publish"
+        style="?attr/buttonSolidNormal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+</LinearLayout>

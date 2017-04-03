@@ -545,6 +545,14 @@
     <string name="set_factor_error">There was an error while setting the factor: %s</string>
     <string name="sync_to_minute">Sync to minute</string>
     <string name="non_public_changed_title">Non-Public Events</string>
+
     <string name="competitor_list">Competitor List</string>
+    <string name="sort_by_boat">nach Segelnummer</string>
+    <string name="sort_by_name">nach Namen</string>
+    <string name="sort_by_start">nach Abstand zur Startlinie</string>
+    <string name="sort_by_goal">nach getracktem Zieldurchgang</string>
+
+    <string name="publish_button_empty">Publish</string>
+    <string name="publish_button_other">Publish (%d)</string>
 
 </resources>
