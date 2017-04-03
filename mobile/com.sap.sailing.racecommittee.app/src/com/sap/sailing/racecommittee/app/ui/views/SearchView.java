@@ -15,7 +15,6 @@ import com.sap.sailing.racecommittee.app.R;
 
 public class SearchView extends FrameLayout {
 
-    private View mSearchButton;
     private ImageView mSearchIcon;
     private EditText mEditText;
     private SearchTextWatcher mWatcher;
@@ -57,9 +56,9 @@ public class SearchView extends FrameLayout {
             });
         }
         mSearchIcon = (ImageView) layout.findViewById(R.id.search_icon);
-        mSearchButton = layout.findViewById(R.id.search_button);
-        if (mSearchButton != null) {
-            mSearchButton.setOnClickListener(new OnClickListener() {
+        View searchButton = layout.findViewById(R.id.search_button);
+        if (searchButton != null) {
+            searchButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onClickButton();

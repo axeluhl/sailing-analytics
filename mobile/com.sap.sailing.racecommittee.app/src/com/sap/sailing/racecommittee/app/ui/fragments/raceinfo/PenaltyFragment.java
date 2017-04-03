@@ -124,6 +124,9 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             });
         }
         mPublishButton = ViewHelper.get(layout, R.id.button_publish);
+        if (mPublishButton != null) {
+            confirmData();
+        }
         setPublishButton();
 
         mAdapter = new PenaltyAdapter(this);
@@ -147,7 +150,16 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public void onStop() {
         super.onStop();
 
+        sendUnconfirmed();
+    }
+    
+    private void sendUnconfirmed() {
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
+    }
+
+    private void confirmData() {
+        sendUnconfirmed();
+        getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
     }
 
     private String[] getAllMaxPointsReasons() {
