@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.support.annotation.NonNull;
@@ -14,12 +16,20 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
 
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
 
-    private List<CompetitorResultWithIdImpl> mCompetitor;
+    private List<CompetitorResultEditableImpl> mCompetitor;
     private ItemListener mListener;
+    private OrderBy mOrderBy = OrderBy.SAILING_NUMBER;
+
+    public enum OrderBy {
+        SAILING_NUMBER,
+        COMPETITOR_NAME,
+        START_LINE,
+        FINISH_LINE
+    }
 
     public PenaltyAdapter(@NonNull ItemListener listener) {
         mListener = listener;
@@ -33,21 +43,23 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final CompetitorResultWithIdImpl competitor = mCompetitor.get(position);
+        final CompetitorResultEditableImpl result = mCompetitor.get(position);
 
-        holder.mItemText.setText(competitor.getCompetitorDisplayName());
+        holder.mItemText.setText(result.getCompetitorDisplayName());
 
-        final boolean hasReason = !MaxPointsReason.NONE.equals(competitor.getMaxPointsReason());
+        final boolean hasReason = !MaxPointsReason.NONE.equals(result.getMaxPointsReason());
         holder.mItemPenalty.setVisibility(hasReason ? View.VISIBLE : View.GONE);
         if (hasReason) {
-            holder.mItemPenalty.setText(competitor.getMaxPointsReason().name());
+            holder.mItemPenalty.setText(result.getMaxPointsReason().name());
         }
 
+        holder.mItemCheck.setChecked(result.isChecked());
         holder.mItemCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                result.setChecked(isChecked);
                 if (mListener != null) {
-                    mListener.onCheckedChanged(competitor, isChecked);
+                    mListener.onCheckedChanged(result, isChecked);
                 }
             }
         });
@@ -56,7 +68,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
-                    mListener.onEditClicked(competitor);
+                    mListener.onEditClicked(result);
                 }
             }
         });
@@ -67,16 +79,62 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         return (mCompetitor != null) ? mCompetitor.size() : 0;
     }
 
-    public void setCompetitor(List<CompetitorResultWithIdImpl> competitor) {
+    public void setCompetitor(List<CompetitorResultEditableImpl> competitor) {
         mCompetitor = competitor;
+        sortData();
+    }
+
+    public void setOrderedBy(OrderBy orderBy) {
+        mOrderBy = orderBy;
+        sortData();
+    }
+
+    private void sortData() {
+        Comparator<CompetitorResultEditableImpl> comparator = null;
+        switch (mOrderBy) {
+            case SAILING_NUMBER:
+                comparator = new DisplayNameComparator(0);
+                break;
+
+            case COMPETITOR_NAME:
+                comparator = new DisplayNameComparator(1);
+                break;
+
+            default:
+                break;
+        }
+
+        if (comparator != null) {
+            Collections.sort(mCompetitor, comparator);
+        }
         notifyDataSetChanged();
+    }
+
+    private static class DisplayNameComparator implements Comparator<CompetitorResultEditableImpl> {
+
+        private int mPos;
+
+        DisplayNameComparator(int position) {
+            mPos = position;
+        }
+
+        @Override
+        public int compare(CompetitorResultEditableImpl lhs, CompetitorResultEditableImpl rhs) {
+            String[] leftItem = splitDisplayName(lhs.getCompetitorDisplayName());
+            String[] rightItem = splitDisplayName(rhs.getCompetitorDisplayName());
+            return leftItem[mPos].compareTo(rightItem[mPos]);
+        }
+
+        private String[] splitDisplayName(String displayName) {
+            return displayName.split(" - ");
+        }
     }
 
     public interface ItemListener {
 
-        void onCheckedChanged(CompetitorResultWithIdImpl competitor, boolean isChecked);
+        void onCheckedChanged(CompetitorResultEditableImpl competitor, boolean isChecked);
 
-        void onEditClicked(CompetitorResultWithIdImpl competitor);
+        void onEditClicked(CompetitorResultEditableImpl competitor);
 
     }
 

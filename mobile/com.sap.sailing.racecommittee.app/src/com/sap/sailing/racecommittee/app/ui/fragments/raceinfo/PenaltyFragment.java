@@ -1,16 +1,21 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import static com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.ItemListener;
+import static com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.OrderBy;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.internal.view.ContextThemeWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -22,25 +27,29 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, PenaltyAdapter.ItemListener {
-
-    private static final String TAG = "PenaltyFragment";
+public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, ItemListener {
 
     private View mSortByButton;
+    private View mButtonBar;
     private Button mPenaltyButton;
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
-    private List<CompetitorResult> mCheckedCompetitors;
+    private List<CompetitorResultEditableImpl> mCompetitorResults;
 
     public static PenaltyFragment newInstance() {
         Bundle args = new Bundle();
@@ -51,10 +60,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_penalty_fragment, container, false);
 
-        mCheckedCompetitors = new ArrayList<>();
+        mCompetitorResults = new ArrayList<>();
 
         mSortByButton = ViewHelper.get(layout, R.id.competitor_sort);
         if (mSortByButton != null) {
@@ -75,7 +84,34 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             });
         }
 
+        mButtonBar = ViewHelper.get(layout, R.id.button_bar);
+        mButtonBar.setVisibility(View.GONE);
+
         mPenaltyButton = ViewHelper.get(layout, R.id.button_penalty);
+        if (mPenaltyButton != null) {
+            mPenaltyButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AppTheme_AlertDialog));
+                    final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
+                    builder.setTitle(R.string.select_penalty_reason);
+                    builder.setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int position) {
+                            for (CompetitorResultEditableImpl item : mCompetitorResults) {
+                                if (item.isChecked()) {
+                                    item.setMaxPointsReason(MaxPointsReason.valueOf(maxPointsReasons[position].toString()));
+                                    item.setChecked(false);
+                                    item.setDirty(true);
+                                }
+                            }
+                            mAdapter.notifyDataSetChanged();
+                            setPublishButton();
+                        }
+                    });
+                    builder.show();
+                }
+            });
+        }
         mPublishButton = ViewHelper.get(layout, R.id.button_publish);
         setPublishButton();
 
@@ -85,8 +121,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
             recyclerView.setAdapter(mAdapter);
         }
-
-        mCheckedCompetitors = new ArrayList<>();
 
         return layout;
     }
@@ -102,7 +136,15 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public void onStop() {
         super.onStop();
 
-        // TODO save data
+        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
+    }
+
+    private String[] getAllMaxPointsReasons() {
+        List<String> result = new ArrayList<>();
+        for (MaxPointsReason reason : MaxPointsReason.values()) {
+            result.add(reason.name());
+        }
+        return result.toArray(new String[result.size()]);
     }
 
     private void loadCompetitors() {
@@ -133,38 +175,103 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         competitorLoader.forceLoad();
     }
 
-    protected void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
-
+    private void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
+        mCompetitorResults.clear();
+        for (Competitor item : data) { // add loaded competitors
+            String name = "";
+            if (item.getBoat() != null) {
+                name += item.getBoat().getSailID();
+            }
+            name += " - " + item.getName();
+            CompetitorResult result = new CompetitorResultImpl(item.getId(), name, 0, MaxPointsReason.NONE,
+                    /* score */ null, /* finishingTime */ null, /* comment */ null);
+            mCompetitorResults.add(new CompetitorResultEditableImpl(result));
+        }
+        if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) { // mix with finish position list
+            for (CompetitorResult result : getRaceState().getFinishPositioningList()) {
+                int pos = 0;
+                for (int i = 0; i < mCompetitorResults.size(); i++) {
+                    if (mCompetitorResults.get(i).getCompetitorId().equals(result.getCompetitorId())) {
+                        mCompetitorResults.remove(i);
+                        break;
+                    }
+                    pos++;
+                }
+                mCompetitorResults.add(pos, new CompetitorResultEditableImpl(result));
+            }
+        }
+        mAdapter.setCompetitor(mCompetitorResults);
     }
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        Toast.makeText(getActivity(), "Clicked: " + item.getTitle(), Toast.LENGTH_LONG).show();
-        return false;
+        OrderBy orderBy;
+        switch (item.getItemId()) {
+            case R.id.by_boat:
+                orderBy = OrderBy.SAILING_NUMBER;
+                break;
+
+            case R.id.by_name:
+                orderBy = OrderBy.COMPETITOR_NAME;
+                break;
+
+            case R.id.by_start:
+                orderBy = OrderBy.START_LINE;
+                break;
+
+            case R.id.by_goal:
+                orderBy = OrderBy.FINISH_LINE;
+                break;
+
+            default:
+                orderBy = OrderBy.SAILING_NUMBER;
+
+        }
+        mAdapter.setOrderedBy(orderBy);
+        return true;
     }
 
     @Override
-    public void onCheckedChanged(CompetitorResultWithIdImpl competitor, boolean isChecked) {
-        if (isChecked) {
-            mCheckedCompetitors.add(competitor);
-        } else {
-            mCheckedCompetitors.remove(competitor);
+    public void onCheckedChanged(CompetitorResultEditableImpl competitor, boolean isChecked) {
+        for (CompetitorResultEditableImpl item : mCompetitorResults) {
+            if (item.equals(competitor)) {
+                item.setChecked(isChecked);
+                break;
+            }
         }
         setPublishButton();
     }
 
     private void setPublishButton() {
-        int count = mCheckedCompetitors.size();
+        int count = 0;
+        for (CompetitorResultEditableImpl item : mCompetitorResults) {
+            if (item.isChecked() || item.isDirty()) {
+                count++;
+            }
+        }
         String text = getString(R.string.publish_button_empty);
         if (count != 0) {
             text = getString(R.string.publish_button_other, count);
         }
         mPublishButton.setText(text);
         mPublishButton.setEnabled(count != 0);
+        mButtonBar.setVisibility(count != 0 ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void onEditClicked(CompetitorResultWithIdImpl competitor) {
+    public void onEditClicked(CompetitorResultEditableImpl competitor) {
 
+    }
+
+    private CompetitorResults getCompetitorResults() {
+        CompetitorResults results = new CompetitorResultsImpl();
+        for (CompetitorResultEditableImpl item : mCompetitorResults) {
+            if (!MaxPointsReason.NONE.equals(item.getMaxPointsReason())) {
+                CompetitorResult result = new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(),
+                    item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment());
+                results.add(result);
+            }
+        }
+        return results;
     }
 }

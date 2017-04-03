@@ -7,14 +7,14 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/listPreferredItemHeightSmall">
+        android:layout_height="70dp">
 
         <CheckBox
             android:id="@+id/item_check"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"/>
+            android:layout_marginLeft="16dp" />
 
         <LinearLayout
             android:id="@+id/item_right"
@@ -47,6 +47,7 @@
 
         <TextView
             android:id="@+id/item_text"
+            style="?attr/textSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
