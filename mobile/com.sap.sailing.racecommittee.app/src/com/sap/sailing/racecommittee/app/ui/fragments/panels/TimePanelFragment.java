@@ -303,7 +303,7 @@ public class TimePanelFragment extends BasePanelFragment {
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(PenaltyFragment.newInstance());
+                    replaceFragment(PenaltyFragment.newInstance(), R.id.race_content);
                     break;
 
                 default:
