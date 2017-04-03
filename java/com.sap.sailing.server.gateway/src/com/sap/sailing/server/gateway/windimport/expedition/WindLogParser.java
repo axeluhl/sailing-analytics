@@ -32,7 +32,6 @@ public class WindLogParser {
 	 *
 	 */
 	private static class WindBuffer {
-
 		/**
 		 * The 1900 Date System http://support.microsoft.com/kb/180162/en-us
 		 */
@@ -49,7 +48,6 @@ public class WindLogParser {
 
 		public void updateTime(String time_ExcelEpoch) {
             if (!time_ExcelEpoch.trim().isEmpty()) {
-                
                 BigDecimal timeStamp = new BigDecimal(time_ExcelEpoch);
                 long millisecondsSinceExcelEpochStart = timeStamp.multiply(MILLISECONDS_PER_DAY).longValue();
     			this.timePoint = new MillisecondsTimePoint(EXCEL_EPOCH_START.getTimeInMillis() + millisecondsSinceExcelEpochStart);
@@ -59,7 +57,6 @@ public class WindLogParser {
 
 		public void updateWindData(String trueWindSpeedData, String trueWindDirectionData) {
 			if (!trueWindSpeedData.trim().isEmpty() && !trueWindDirectionData.trim().isEmpty()) {
-
 				double trueWindSpeed = Double.parseDouble(trueWindSpeedData);
 				double trueWindDirection = Double.parseDouble(trueWindDirectionData);
 				Bearing trueWindBearing = new DegreeBearingImpl(trueWindDirection + 180);
@@ -91,15 +88,8 @@ public class WindLogParser {
 			position = null;
 			trueWindSpeedWithBearing = null;
 		}
-
 	}
 
-//	private static final int CSV_INDEX_TIME_STAMP = 0;
-//	private static final int CSV_INDEX_TRUE_WIND_SPEED = 5;
-//	private static final int CSV_INDEX_TRUE_WIND_DIRECTION = 6;
-//	private static final int CSV_INDEX_LAT = 37;
-//	private static final int CSV_INDEX_LONG = 38;
-	
     private static final String COL_NAME_TIME_STAMP = "GPS Time";
     private static final String COL_NAME_TRUE_WIND_SPEED = "Tws";
     private static final String COL_NAME_TRUE_WIND_DIRECTION = "Twd";
@@ -139,7 +129,6 @@ public class WindLogParser {
                     lon = i;
                     break;
                 }
-
             }
             if (gpsTime == null || trueWindSpeed == null || trueWindDirection == null || lat == null || lon == null) {
                 throw new RuntimeException("Unexpected csv header for Expedition wind import: " + headerLine);

@@ -114,7 +114,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     createErrorPage(getStringMessages().noSuchEvent());
                 }
                 if (leaderboardGroupName != null) {
-                    if(!raceboardData.isValidLeaderboardGroup()) {
+                    if (!raceboardData.isValidLeaderboardGroup()) {
                         createErrorPage(getStringMessages().leaderboardNotContainedInLeaderboardGroup(leaderboardName, leaderboardGroupName));
                         return;
                     }

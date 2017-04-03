@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -61,7 +62,8 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
     private boolean dataSourceProvidersHaveBeenInitialized;
     
     public Activator() {
-        sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClassLoader());
+        sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClassLoader(),
+                StandardCharsets.UTF_8.name());
         dataRetrieverChainDefinitions = new SailingDataRetrievalChainDefinitions();
         predefinedQueries = new SailingPredefinedQueries();
     }

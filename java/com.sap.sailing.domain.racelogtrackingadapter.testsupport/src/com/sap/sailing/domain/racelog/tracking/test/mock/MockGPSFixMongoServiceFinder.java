@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -26,9 +26,9 @@ public class MockGPSFixMongoServiceFinder extends AbstractTypeBasedServiceFinder
     @Override
     public FixMongoHandler<?> findService(String fixType) {
         if (fixType.equals(GPSFixMovingImpl.class.getName()) ||
-                fixType.equals(CompactGPSFixMovingImpl.class.getName())) return movingHandler;
+                fixType.equals(VeryCompactGPSFixMovingImpl.class.getName())) return movingHandler;
         if (fixType.equals(GPSFixImpl.class.getName()) ||
-                fixType.equals(CompactGPSFixImpl.class.getName()))  return handler;
+                fixType.equals(VeryCompactGPSFixImpl.class.getName()))  return handler;
         if (fixType.equals(DoubleVectorFixImpl.class.getName()))  return doubleVectorFixHandler;
         return null;
     }

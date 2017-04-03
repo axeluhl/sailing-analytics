@@ -49,6 +49,11 @@ public class BravoDataImportTest {
     }
     
     @Test
+    public void testFileImportNewFormat() throws FormatNotSupportedException, IOException {
+        testImport(ImportData.FILE_NEW_BRAVO_FORMAT);
+    }
+    
+    @Test
     public void testDefaultHeaderNoDataImport() throws FormatNotSupportedException, IOException {
         testImport(ImportData.DUMMY_DEFAULT_HEADER_NO_DATA);
     }
@@ -64,7 +69,6 @@ public class BravoDataImportTest {
     }
     
     private void testImport(ImportData importData) throws FormatNotSupportedException, IOException {
-
         bravoDataImporter.importFixes(importData.getInputStream(), (fixes, device) -> {
             for (DoubleVectorFix fix : fixes) {
                 callbackCallCount++;
@@ -83,6 +87,12 @@ public class BravoDataImportTest {
             @Override
             protected InputStream getInputStream() {
                 return getClass().getResourceAsStream("/Undefined Race - BRAVO.txt");
+            }
+        },
+        FILE_NEW_BRAVO_FORMAT(6, 1) {
+            @Override
+            protected InputStream getInputStream() {
+                return getClass().getResourceAsStream("/FMU_out_new.txt");
             }
         },
         DUMMY_DEFAULT_HEADER_NO_DATA(0, 0) {

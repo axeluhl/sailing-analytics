@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -64,7 +65,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  * @author D047974
  * 
  */
-public class MediaPanel extends FlowPanel {
+public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
     private final SailingServiceAsync sailingService;
     private final LabeledAbstractFilterablePanel<MediaTrack> filterableMediaTracks;
@@ -138,7 +139,8 @@ public class MediaPanel extends FlowPanel {
         buttonAndFilterPanel.add(filterableMediaTracks);
     }
 
-    protected void loadMediaTracks() {
+    @Override
+    public void loadMediaTracks() {
         mediaTrackListDataProvider.getList().clear();
         mediaService.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrack>>() {
             @Override
@@ -153,8 +155,6 @@ public class MediaPanel extends FlowPanel {
                 mediaTrackListDataProvider.refresh();
             }
         });
-        
-
     }
 
     private void createMediaTracksTable() {

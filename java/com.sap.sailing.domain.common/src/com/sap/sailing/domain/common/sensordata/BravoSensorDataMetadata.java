@@ -14,10 +14,11 @@ public enum BravoSensorDataMetadata {
 
     INSTANCE;
 
-    private static final String RIDE_HEIGHT_PORT_HULL = "RideHeightPortHull";
-    private static final String RIDE_HEIGHT_STBD_HULL = "RideHeightStbdHull";
-    private static final String HEEL = "Heel";
-    private static final String PITCH = "ImuSensor_Pitch";
+    public static final String RIDE_HEIGHT = "RideHeight";
+    public static final String RIDE_HEIGHT_PORT_HULL = "RideHeightPortHull";
+    public static final String RIDE_HEIGHT_STBD_HULL = "RideHeightStbdHull";
+    public static final String HEEL = "Heel";
+    public static final String PITCH = "ImuSensor_Pitch";
 
     private final int HEADER_COLUMN_OFFSET = 3;
 
