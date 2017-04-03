@@ -9,7 +9,12 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -20,7 +25,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.HasSelectionChangedHandle
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sse.common.Util;
 
-public class SailingGalleryPlayer extends ResizeComposite implements HasSelectionChangedHandlers {
+public class SailingGalleryPlayer extends ResizeComposite implements HasSelectionChangedHandlers, HasClickHandlers {
    
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
@@ -50,6 +55,12 @@ public class SailingGalleryPlayer extends ResizeComposite implements HasSelectio
         return addHandler(handler, SelectionChangeEvent.getType());
     }
     
+    @Override
+    public HandlerRegistration addClickHandler(final ClickHandler handler) {
+        mainSliderUi.getStyle().setCursor(Cursor.POINTER);
+        return addHandler(handler, ClickEvent.getType());
+    }
+
     public SailingImageDTO getSelectedImage() {
         return images.get(selectedIdx);
     }
@@ -74,12 +85,16 @@ public class SailingGalleryPlayer extends ResizeComposite implements HasSelectio
         this.selectedIdx = currentIndex;
         SelectionChangeEvent.fire(this);
     }
+    
+    private void onMainSlideClicked(NativeEvent nativeEvent) {
+        ClickEvent.fireNativeEvent(nativeEvent, this);
+    }
 
     @Override
     protected void onLoad() {
         _onLoad(this);
-        mainSliderUi.getChild(0).<Element>cast().setTabIndex(0);
-        mainSliderUi.getChild(0).<Element>cast().focus();
+        mainSliderUi.getFirstChild().<Element> cast().setTabIndex(0);
+        this.focus();
     }
 
     @Override
@@ -119,6 +134,10 @@ public class SailingGalleryPlayer extends ResizeComposite implements HasSelectio
             $entry(function(event, slick, currentSlide, nextSlide) {
                 player.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::updateCurrentSlide(I)(nextSlide);
             }));
+        $wnd.$('.mainSlider').on('click',
+            $entry(function(event) {
+                player.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::onMainSlideClicked(Lcom/google/gwt/dom/client/NativeEvent;)(event);
+            }));
 	$wnd
 		.$('.subSlider')
 		.slick(
@@ -157,6 +176,10 @@ public class SailingGalleryPlayer extends ResizeComposite implements HasSelectio
         } else {
             _slickPause();
         }
+    }
+
+    public void focus() {
+        mainSliderUi.getFirstChild().<Element> cast().focus();
     }
 
     @Override

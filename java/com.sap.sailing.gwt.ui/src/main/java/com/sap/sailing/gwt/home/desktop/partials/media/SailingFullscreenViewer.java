@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -53,6 +54,7 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
         if (eventNavigationHandler.isNavigationConfigured()) {
             eventLinkControl.addClickHandler(eventNavigationHandler);
             eventLinkControl.addStyleName(SharedResources.INSTANCE.mainCss().buttonarrowrightwhite());
+            eventLinkControl.setTabIndex(-1);
             addToolbarAction(eventLinkControl);
         }
         autoRefreshControl.addClickHandler(new ClickHandler() {
@@ -68,6 +70,7 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
         showContent(player = new SailingGalleryPlayer(selected, images));
         if (eventNavigationHandler.isNavigationConfigured()) {
             player.addSelectionChangeHandler(eventNavigationHandler);
+            player.addClickHandler(eventNavigationHandler);
         }
         autoRefreshControl.setStyleName(IS_AUTOPLAYING_STYLE, player.isAutoplaying());
         SelectionChangeEvent.fire(player);
@@ -99,8 +102,8 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
 
         @Override
         public void onClick(ClickEvent event) {
-            SailingFullscreenViewer.this.hide();
-            eventNavigation.goToPlace();
+            player.focus();
+            Window.open(eventNavigation.getTargetUrl(), "_blank", null);
         }
 
         private boolean isNavigationConfigured() {
