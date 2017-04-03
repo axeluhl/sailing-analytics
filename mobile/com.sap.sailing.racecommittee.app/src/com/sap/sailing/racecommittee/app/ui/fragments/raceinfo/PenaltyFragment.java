@@ -46,10 +46,11 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImp
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
+import com.sap.sailing.racecommittee.app.ui.views.SearchView;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, ItemListener {
+public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, ItemListener, SearchView.SearchTextWatcher {
 
     private View mButtonBar;
     private Button mPublishButton;
@@ -69,6 +70,11 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         View layout = inflater.inflate(R.layout.race_penalty_fragment, container, false);
 
         mCompetitorResults = new ArrayList<>();
+
+        SearchView searchView = ViewHelper.get(layout, R.id.competitor_search);
+        if (searchView != null) {
+            searchView.setSearchTextWatcher(this);
+        }
 
         View sortByButton = ViewHelper.get(layout, R.id.competitor_sort);
         if (sortByButton != null) {
@@ -321,5 +327,12 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
         }
         return results;
+    }
+
+    @Override
+    public void onTextChanged(String text) {
+        if (mAdapter != null) {
+            mAdapter.setFilter(text);
+        }
     }
 }

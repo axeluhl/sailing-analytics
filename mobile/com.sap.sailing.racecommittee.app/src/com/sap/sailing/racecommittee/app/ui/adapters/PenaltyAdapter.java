@@ -1,11 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +23,10 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImp
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
 
     private List<CompetitorResultEditableImpl> mCompetitor;
+    private List<CompetitorResultEditableImpl> mFiltered;
     private ItemListener mListener;
     private OrderBy mOrderBy = OrderBy.SAILING_NUMBER;
+    private String mFilter;
 
     public enum OrderBy {
         SAILING_NUMBER,
@@ -43,7 +47,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final CompetitorResultEditableImpl result = mCompetitor.get(position);
+        final CompetitorResultEditableImpl result = mFiltered.get(position);
 
         holder.mItemText.setText(result.getCompetitorDisplayName());
 
@@ -76,17 +80,62 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        return (mCompetitor != null) ? mCompetitor.size() : 0;
+        return (mFiltered != null) ? mFiltered.size() : 0;
     }
 
     public void setCompetitor(List<CompetitorResultEditableImpl> competitor) {
         mCompetitor = competitor;
+        mFiltered = filterData();
         sortData();
     }
 
     public void setOrderedBy(OrderBy orderBy) {
         mOrderBy = orderBy;
         sortData();
+    }
+
+    public void setFilter(String filter) {
+        mFilter = filter;
+        mFiltered = filterData();
+        notifyDataSetChanged();
+    }
+
+    private List<CompetitorResultEditableImpl> filterData() {
+        List<CompetitorResultEditableImpl> result = new ArrayList<>();
+        if (TextUtils.isEmpty(mFilter)) {
+            result.addAll(mCompetitor);
+        } else {
+            for (int i = 0; i < mCompetitor.size(); i++) {
+                if (containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(), mFilter)) {
+                    result.add(mCompetitor.get(i));
+                }
+            }
+        }
+        return result;
+    }
+
+    private boolean containsIgnoreCase(@NonNull String src, @NonNull String what) {
+        final int length = what.length();
+        if (length == 0) {
+            return true; // Empty string is contained
+        }
+
+        final char firstLo = Character.toLowerCase(what.charAt(0));
+        final char firstUp = Character.toUpperCase(what.charAt(0));
+
+        for (int i = src.length() - length; i >= 0; i--) {
+            // Quick check before calling the more expensive regionMatches() method:
+            final char ch = src.charAt(i);
+            if (ch != firstLo && ch != firstUp) {
+                continue;
+            }
+
+            if (src.regionMatches(true, i, what, 0, length)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void sortData() {
@@ -105,7 +154,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         }
 
         if (comparator != null) {
-            Collections.sort(mCompetitor, comparator);
+            Collections.sort(mFiltered, comparator);
         }
         notifyDataSetChanged();
     }
