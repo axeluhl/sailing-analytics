@@ -6,7 +6,7 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.SettingsDialogPO;
-import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsDialogPO;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsPanelPO;
 
 public class LeaderboardUrlConfigurationDialogPO extends SettingsDialogPO {
     
@@ -26,9 +26,9 @@ public class LeaderboardUrlConfigurationDialogPO extends SettingsDialogPO {
         super(driver, element);
     }
     
-    public LeaderboardSettingsDialogPO goToLeaderboardSettings() {
-        goToTab(tabbedSettingsDialogTabPanel, LEADERBOARD_SETTINGS_TAB_LABEL, LEADERBOARD_SETTINGS_TAB_IDENTIFIER, TabPanelType.TAB_PANEL);
-        return new LeaderboardSettingsDialogPO(this.driver, this.getWebElement());
+    public LeaderboardSettingsPanelPO goToLeaderboardSettings() {
+        WebElement element = goToTab(tabbedSettingsDialogTabPanel, LEADERBOARD_SETTINGS_TAB_LABEL, LEADERBOARD_SETTINGS_TAB_IDENTIFIER, TabPanelType.TAB_PANEL);
+        return new LeaderboardSettingsPanelPO(this.driver, element);
     }
     
     public LeaderboardPageConfigurationPanelPO goToLeaderboardPageSettings() {
@@ -36,10 +36,9 @@ public class LeaderboardUrlConfigurationDialogPO extends SettingsDialogPO {
         return new LeaderboardPageConfigurationPanelPO(this.driver, this.getWebElement());
     }
     
-    public LeaderboardSettingsDialogPO goToOverallLeaderboardSettings() {
-        goToTab(tabbedSettingsDialogTabPanel, OVERALL_LEADERBOARD_SETTINGS_TAB_LABEL, OVERALL_LEADERBOARD_SETTINGS_TAB_IDENTIFIER, TabPanelType.TAB_PANEL);
-        //FIXME this.getWebElement() gives the wrong html node to the po
-        return new LeaderboardSettingsDialogPO(this.driver, this.getWebElement());
+    public LeaderboardSettingsPanelPO goToOverallLeaderboardSettings() {
+        WebElement element = goToTab(tabbedSettingsDialogTabPanel, OVERALL_LEADERBOARD_SETTINGS_TAB_LABEL, OVERALL_LEADERBOARD_SETTINGS_TAB_IDENTIFIER, TabPanelType.TAB_PANEL);
+        return new LeaderboardSettingsPanelPO(this.driver, element);
     }
 
 }

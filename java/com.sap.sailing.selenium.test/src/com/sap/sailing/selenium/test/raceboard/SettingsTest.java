@@ -29,7 +29,7 @@ import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagem
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
 import com.sap.sailing.selenium.pages.leaderboard.DetailCheckboxInfo;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardPage;
-import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsDialogPO;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsPanelPO;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO;
 import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
 import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
@@ -57,9 +57,9 @@ public class SettingsTest extends AbstractSeleniumTest {
     @Override
     @Before
     public void setUp() {
-//        this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(RACE, 1), BMW_CUP_BOAT_CLASS);
-//        this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(RACE, 1));
-//        clearState(getContextRoot());
+        this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(RACE, 1), BMW_CUP_BOAT_CLASS);
+        this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(RACE, 1));
+        clearState(getContextRoot());
         super.setUp();
     }
 
@@ -121,7 +121,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         LeaderboardEntryPO leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
         LeaderboardUrlConfigurationDialogPO urlConfigurationDialog = leaderboardEntry
                 .getLeaderboardPageUrlConfigurationDialog();
-        LeaderboardSettingsDialogPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
+        LeaderboardSettingsPanelPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
 
         leaderboardSettingsPanel.setCheckboxValue("R2CheckBox", false);
         DetailCheckboxInfo[] detailsToSelect = {
@@ -170,7 +170,7 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
-        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();
 
         DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
 
@@ -194,7 +194,7 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         leaderboardPage = urlConfigurationDialog.openLeaderboard();
-        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();
         Assert.assertTrue(leaderboardSettingsPanel.isNumberOfRacesToDisplaySelected());
         Assert.assertEquals(2, leaderboardSettingsPanel.getNumberOfRacesToDisplaySelected());
         Assert.assertEquals(1, leaderboardSettingsPanel.getRefreshInterval());
@@ -227,7 +227,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardPageSettings.setAllowForRaceDetails(true);
         leaderboardPageSettings.setShowCharts(false);
         
-        LeaderboardSettingsDialogPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
+        LeaderboardSettingsPanelPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
 
         leaderboardSettingsPanel.setCheckboxValue("R2CheckBox", false);
         DetailCheckboxInfo[] detailsToSelect = new DetailCheckboxInfo[] {
@@ -300,7 +300,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         LeaderboardUrlConfigurationDialogPO urlConfigurationDialog = leaderboardEntry
                 .getLeaderboardPageUrlConfigurationDialog();
         
-        LeaderboardSettingsDialogPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
+        LeaderboardSettingsPanelPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
         
         DetailCheckboxInfo[] detailsToSelect = {
                 // Overall details
@@ -350,7 +350,7 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
-        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();
 
         DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
 
@@ -358,7 +358,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertEquals(2, leaderboardSettingsPanel.getRefreshInterval());
         
         // open settings dialog of configurated OVERALL leaderboard and match the set values with forwarded values
-        leaderboardSettingsPanel = leaderboardPage.getOverallLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardPage.getOverallLeaderboardSettings().getLeaderboardSettingsPanelPO();
 
         selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
 
