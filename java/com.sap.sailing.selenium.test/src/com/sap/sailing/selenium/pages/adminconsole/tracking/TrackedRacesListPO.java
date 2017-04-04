@@ -191,6 +191,16 @@ public class TrackedRacesListPO extends PageArea {
     public void remove(List<TrackedRaceDescriptor> races) {
         selectRaces(races);
         
+        removeSelectedTrackedRacesAndWaitForAjaxRequests();
+    }
+    
+    public void removeAll() {
+        getTrackedRacesTable().selectAllEntries();
+        
+        removeSelectedTrackedRacesAndWaitForAjaxRequests();
+    }
+
+    private void removeSelectedTrackedRacesAndWaitForAjaxRequests() {
         this.removeButton.click();
         
         waitForAjaxRequests();
