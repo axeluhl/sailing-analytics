@@ -24,14 +24,30 @@
 		display: inline-block;
 		height: auto;
 		width: 33.3%;
-		min-height: 80%;
 		max-height: 90%;
+		border-radius: 4px;
 	}
 	
+	.image img {
+        display: block;
+        height: auto;
+        width: 100%;
+        max-height: 90%;
+        border-radius: 4px;
+    }
+	
+	.image::before {
+	    box-shadow: inset 0 0px white, 0 0px white, 0 0 0px 0px white, 0 0 10px 5px white;
+	    position: absolute;
+	    top: 0;
+	    height: 100%;
+	    content: "";
+    }
+	
 	.subline1 {
-        font-size: 30px;
+		font-size: 30px;
 		position: absolute;
-		text-align: left;
+		text-align: center;
 		width: 30%;
 		height: 10%;
 		font-weight: bold;
@@ -40,25 +56,25 @@
 	}
 	
 	.subline2 {
-        font-size: 30px;
-        position: absolute;
-        text-align: left;
-        width: 30%;
-        height: 10%;
-        font-weight: bold;
-        bottom: 40px;
-        left: 0%;
+		font-size: 30px;
+		position: absolute;
+		text-align: center;
+		width: 30%;
+		height: 10%;
+		font-weight: bold;
+		bottom: 40px;
+		left: 0%;
 	}
 	
 	.subline3 {
-        font-size: 30px;
-        position: absolute;
-        text-align: left;
-        width: 30%;
-        height: 10%;
-        font-weight: bold;
-        bottom: 40px;
-        right: 0%;
+		font-size: 30px;
+		position: absolute;
+		text-align: center;
+		width: 30%;
+		height: 10%;
+		font-weight: bold;
+		bottom: 40px;
+		right: 0%;
 	}
 	
 	.bottom {
@@ -75,9 +91,15 @@
 			styleName="{style.left}" />
 		<rf:ResizableFlowPanel ui:field="infoHolder"
 			styleName="{style.right}">
-			<g:Image ui:field="image1" styleName="{style.image}" />
-			<g:Image ui:field="image2" styleName="{style.image}" />
-			<g:Image ui:field="image3" styleName="{style.image}" />
+			<rf:ResizableFlowPanel styleName="{style.image}">
+				<g:Image ui:field="image1" />
+			</rf:ResizableFlowPanel>
+			<rf:ResizableFlowPanel styleName="{style.image}">
+				<g:Image ui:field="image2" />
+			</rf:ResizableFlowPanel>
+			<rf:ResizableFlowPanel styleName="{style.image}">
+				<g:Image ui:field="image3" />
+			</rf:ResizableFlowPanel>
 			<g:Label ui:field="subline1" styleName="{style.subline1}" />
 			<g:Label ui:field="subline2" styleName="{style.subline2}" />
 			<g:Label ui:field="subline3" styleName="{style.subline3}" />
