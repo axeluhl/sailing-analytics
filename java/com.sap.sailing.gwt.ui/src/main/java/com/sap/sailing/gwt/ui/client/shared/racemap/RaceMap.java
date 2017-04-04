@@ -853,6 +853,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+    public WindInfoForRaceDTO getLastCombinedWindTrackInfoDTO() {
+        return lastCombinedWindTrackInfoDTO;
+    }
     /**
      * Requests updates for map data and, when received, updates the map structures accordingly.
      * <p>
@@ -2913,5 +2916,4 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public void removeCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
         raceCompetitorSet.removeCompetitorsForRaceDefinedListener(listener);
     }
-
 }

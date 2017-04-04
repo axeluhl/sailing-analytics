@@ -9,15 +9,15 @@ import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSim
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.RaceMapHelper;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.RaceMapHelper.RVWrapper;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7Place;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.LifeRaceWithRacemapPlace;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
-public class Slide7Node extends TimedTransitionSimpleNode {
+public class LifeRaceWithRacemapNode extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
 
-    public Slide7Node(AutoPlayClientFactorySixtyInch cf) {
+    public LifeRaceWithRacemapNode(AutoPlayClientFactorySixtyInch cf) {
         super("slide7", 120000);
         this.cf = cf;
 
@@ -30,7 +30,7 @@ public class Slide7Node extends TimedTransitionSimpleNode {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        Slide7Place place = new Slide7Place();
+                        LifeRaceWithRacemapPlace place = new LifeRaceWithRacemapPlace();
                         place.setError(caught);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
@@ -57,7 +57,7 @@ public class Slide7Node extends TimedTransitionSimpleNode {
                                                     @Override
                                                     public void onSuccess(RegattaAndRaceIdentifier lifeRace) {
                                                         GetMiniLeaderboardDTO dto = resultTTL.getDto();
-                                                        Slide7Place place = new Slide7Place();
+                                                        LifeRaceWithRacemapPlace place = new LifeRaceWithRacemapPlace();
                                                         place.setLeaderBoardDTO(dto);
                                                         place.setLifeRace(lifeRace);
                                                         place.setRaceMap(result.raceboardPerspective, result.csel);

@@ -26,18 +26,18 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class Slide7PresenterImpl extends ConfiguredSlideBase<Slide7Place> implements Slide7View.Slide7Presenter {
+public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRaceWithRacemapPlace> implements LifeRaceWithRacemapView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
-    private Slide7View view;
+    private LifeRaceWithRacemapView view;
     private Timer selectionTimer;
     private SixtyInchLeaderBoard leaderboardPanel;
     private int selected;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
 
-    public Slide7PresenterImpl(Slide7Place place, AutoPlayClientFactorySixtyInch clientFactory,
-            Slide7View slide7ViewImpl) {
+    public LifeRaceWithRacemapPresenterImpl(LifeRaceWithRacemapPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+            LifeRaceWithRacemapView LifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
-        this.view = slide7ViewImpl;
+        this.view = LifeRaceWithRacemapViewImpl;
         selectionTimer = new Timer() {
             @Override
             public void run() {

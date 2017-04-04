@@ -17,12 +17,12 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4.Slide4V
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide5.Slide5Place;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide5.Slide5PresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide5.Slide5ViewImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.Slide6Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.Slide6PresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.Slide6ViewImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7PresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.Slide7ViewImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.PreRaceRacemapPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.PreRaceRacemapPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.PreRaceRacemapViewImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.LifeRaceWithRacemapPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.LifeRaceWithRacemapPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.LifeRaceWithRacemapViewImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsViewImpl;
@@ -51,7 +51,6 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
         if (place instanceof SlideInitPlace) {
             return new SlideInitPresenterImpl((SlideInitPlace) place, clientFactory, new SlideInitViewImpl());
         }
-
         if (place instanceof Slide0Place) {
             return new Slide0PresenterImpl((Slide0Place) place, clientFactory, new Slide0ViewImpl());
         }
@@ -64,11 +63,12 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
         if (place instanceof Slide5Place) {
             return new Slide5PresenterImpl((Slide5Place) place, clientFactory, new Slide5ViewImpl());
         }
-        if (place instanceof Slide6Place) {
-            return new Slide6PresenterImpl((Slide6Place) place, clientFactory, new Slide6ViewImpl());
+        if (place instanceof PreRaceRacemapPlace) {
+            return new PreRaceRacemapPresenterImpl((PreRaceRacemapPlace) place, clientFactory,
+                    new PreRaceRacemapViewImpl());
         }
-        if (place instanceof Slide7Place) {
-            return new Slide7PresenterImpl((Slide7Place) place, clientFactory, new Slide7ViewImpl());
+        if (place instanceof LifeRaceWithRacemapPlace) {
+            return new LifeRaceWithRacemapPresenterImpl((LifeRaceWithRacemapPlace) place, clientFactory, new LifeRaceWithRacemapViewImpl());
         }
         if (place instanceof RaceEndWithBoatsPlace) {
             return new RaceEndWithBoatsPresenterImpl((RaceEndWithBoatsPlace) place, clientFactory,

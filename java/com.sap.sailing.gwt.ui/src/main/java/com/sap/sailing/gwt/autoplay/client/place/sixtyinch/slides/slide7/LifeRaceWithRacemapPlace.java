@@ -7,16 +7,16 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 
-public class Slide7Place extends Place {
-    public static class Tokenizer implements PlaceTokenizer<Slide7Place> {
+public class LifeRaceWithRacemapPlace extends Place {
+    public static class Tokenizer implements PlaceTokenizer<LifeRaceWithRacemapPlace> {
         @Override
-        public String getToken(Slide7Place place) {
+        public String getToken(LifeRaceWithRacemapPlace place) {
             return "";
         }
 
         @Override
-        public Slide7Place getPlace(String token) {
-            return new Slide7Place();
+        public LifeRaceWithRacemapPlace getPlace(String token) {
+            return new LifeRaceWithRacemapPlace();
         }
     }
 

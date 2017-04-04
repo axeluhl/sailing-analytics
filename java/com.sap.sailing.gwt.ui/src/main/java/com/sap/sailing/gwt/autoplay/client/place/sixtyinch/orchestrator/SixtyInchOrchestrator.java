@@ -9,6 +9,8 @@ import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.LifeRaceWithRacemapNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.PreRaceWithRacemapNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
@@ -31,8 +33,9 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // SlideConfig slide3 = new SlideTimedTransitionConfig(this, new Slide3Place(), 10000);
         // SlideConfig slide4 = new SlideTimedTransitionConfig(this, new Slide4Place(), 10000);
         // SlideConfig slide5 = new SlideTimedTransitionConfig(this, new Slide5Place(), 10000);
-        // SlideConfig slide6 = new SlideTimedTransitionConfig(this, new Slide6Place(), 10000);
-        // Slide7Node node7 = new Slide7Node(cf);
+        PreRaceWithRacemapNode preRaceRacemapNode = new PreRaceWithRacemapNode(cf);
+
+        LifeRaceWithRacemapNode lifeRaceWithRacemap = new LifeRaceWithRacemapNode(cf);
         RaceEndWithBoatsNode endRaceSlideWithBoats = new RaceEndWithBoatsNode(cf);
         // SlideConfig slide9 = new SlideTimedTransitionConfig(this, new Slide9Place(), 10000);
         // slideInit.setNextSlide(slide0);
@@ -42,12 +45,12 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // slide3.setNextSlide(slide4);
         // slide4.setNextSlide(slide5);
         // slide5.setNextSlide(slide6);
-        // slide6.setNextSlide(slide7);
+        // preRaceRacemapNode.setNextNode(node7);
         // slide7.setNextSlide(slide8);
         // slide8.setNextSlide(slide9);
         // slide9.setNextSlide(slide0);
 
-        slideInit.setNextNode(endRaceSlideWithBoats);
+        slideInit.setNextNode(preRaceRacemapNode);
 
         // node2.setNextNode(node7);
         // node7.setNextNode(node2);

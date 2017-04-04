@@ -45,18 +45,22 @@ public class RaceMapHelper {
     private static RaceMap raceboardPerspective;
 
     public static class RVWrapper {
-        public RVWrapper(RaceMap raceboardPerspective2, CompetitorSelectionModel competitorSelectionProvider) {
+
+        public RVWrapper(RaceMap raceboardPerspective2, CompetitorSelectionModel competitorSelectionProvider,
+                RegattaAndRaceIdentifier race) {
             this.raceboardPerspective = raceboardPerspective2;
             this.csel = competitorSelectionProvider;
+            this.race = race;
         }
 
+        public RegattaAndRaceIdentifier race;
         public RaceMap raceboardPerspective;
         public CompetitorSelectionModel csel;
     }
 
     public static void create(SailingServiceAsync sailingService, ErrorReporter errorReporter, String leaderBoardName,
-            UUID eventId, EventDTO event, EventBus eventBus,
-            SailingDispatchSystem sailingDispatchSystem, AsyncCallback<RVWrapper> callback) {
+            UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
+            AsyncCallback<RVWrapper> callback) {
 
         raceboardTimer.reset();
         raceboardTimer.setLivePlayDelayInMillis(1000);
@@ -64,8 +68,7 @@ public class RaceMapHelper {
 
         if (raceTimesInfoProvider == null) {
             raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, HelperSixty.asyncActionsExecutor,
-                    errorReporter,
-                    new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
+                    errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
         }
         raceTimesInfoProvider.reset();
 
@@ -95,8 +98,7 @@ public class RaceMapHelper {
                                         public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
                                             createRaceMapIfNotExist(lifeRace, selectedLeaderboard, result, competitors,
                                                     sailingService, HelperSixty.asyncActionsExecutor, errorReporter,
-                                                    raceboardTimer,
-                                                    callback, clientTimeWhenResponseWasReceived,
+                                                    raceboardTimer, callback, clientTimeWhenResponseWasReceived,
                                                     serverTimeDuringRequest, clientTimeWhenRequestWasSent,
                                                     raceTimesInfo);
                                             eventBus.fireEvent(
@@ -157,9 +159,8 @@ public class RaceMapHelper {
             StrippedLeaderboardDTO selectedLeaderboard, Map<CompetitorDTO, BoatDTO> result,
             Iterable<CompetitorDTO> competitors, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
-            AsyncCallback<RVWrapper> callback,
-            long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest, long clientTimeWhenRequestWasSent,
-            Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+            AsyncCallback<RVWrapper> callback, long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest,
+            long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
 
         ArrayList<ZoomTypes> typesToConsiderOnZoom = new ArrayList<>();
         // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
@@ -186,6 +187,6 @@ public class RaceMapHelper {
         raceboardTimer.setPlayMode(PlayModes.Live);
         // wait for one update
         raceboardPerspective.onResize();
-        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider));
+        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider, currentLiveRace));
     }
 }

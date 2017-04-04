@@ -15,8 +15,8 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.LeaderBoardScale
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
-public class Slide7ViewImpl extends ResizeComposite implements Slide7View {
-    private static Slide7ViewImplUiBinder uiBinder = GWT.create(Slide7ViewImplUiBinder.class);
+public class LifeRaceWithRacemapViewImpl extends ResizeComposite implements LifeRaceWithRacemapView {
+    private static LifeRaceWithRacemapViewImplUiBinder uiBinder = GWT.create(LifeRaceWithRacemapViewImplUiBinder.class);
 
     @UiField
     ResizableFlowPanel racemap;
@@ -28,16 +28,16 @@ public class Slide7ViewImpl extends ResizeComposite implements Slide7View {
 
     private RaceMap rawRaceMap;
 
-    interface Slide7ViewImplUiBinder extends UiBinder<Widget, Slide7ViewImpl> {
+    interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, LifeRaceWithRacemapViewImpl> {
     }
 
-    public Slide7ViewImpl() {
+    public LifeRaceWithRacemapViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
 
     @Override
-    public void showErrorNoLive(Slide7PresenterImpl slide7PresenterImpl, AcceptsOneWidget panel, Throwable error) {
+    public void showErrorNoLive(LifeRaceWithRacemapPresenterImpl slide7PresenterImpl, AcceptsOneWidget panel, Throwable error) {
         panel.setWidget(new Label("Could not load RaceMap: " + error.getMessage()));
     }
 
