@@ -119,10 +119,11 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
 //        {
 //            final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
 //            IgtimiAccountsManagementPanelPO igtimiAccountsManagementPanel = adminConsole.goToIgtimi();
-//            igtimiAccountsManagementPanel.addAccount("", "");
+//            igtimiAccountsManagementPanel.addAccount("TODO", "TODO");
+//            
+//            WindPanelPO windPanel = adminConsole.goToWind();
+//            windPanel.importWindFromIgtimi();
 //        }
-//        
-//        // TODO load wind
 //        
 //        {
 //            RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
