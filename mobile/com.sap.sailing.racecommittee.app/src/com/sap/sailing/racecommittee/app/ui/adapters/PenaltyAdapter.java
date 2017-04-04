@@ -47,23 +47,23 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final CompetitorResultEditableImpl result = mFiltered.get(position);
+        final CompetitorResultEditableImpl item = mFiltered.get(position);
 
-        holder.mItemText.setText(result.getCompetitorDisplayName());
+        holder.mItemText.setText(item.getCompetitorDisplayName());
 
-        final boolean hasReason = !MaxPointsReason.NONE.equals(result.getMaxPointsReason());
+        final boolean hasReason = !MaxPointsReason.NONE.equals(item.getMaxPointsReason());
         holder.mItemPenalty.setVisibility(hasReason ? View.VISIBLE : View.GONE);
         if (hasReason) {
-            holder.mItemPenalty.setText(result.getMaxPointsReason().name());
+            holder.mItemPenalty.setText(item.getMaxPointsReason().name());
         }
 
-        holder.mItemCheck.setChecked(result.isChecked());
+        holder.mItemCheck.setChecked(item.isChecked());
         holder.mItemCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                result.setChecked(isChecked);
+                item.setChecked(isChecked);
                 if (mListener != null) {
-                    mListener.onCheckedChanged(result, isChecked);
+                    mListener.onCheckedChanged(item, isChecked);
                 }
             }
         });
@@ -72,7 +72,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
-                    mListener.onEditClicked(result);
+                    mListener.onEditClicked(item);
                 }
             }
         });

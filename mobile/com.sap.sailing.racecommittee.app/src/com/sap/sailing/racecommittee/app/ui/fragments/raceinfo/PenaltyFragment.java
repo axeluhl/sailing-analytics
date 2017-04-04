@@ -125,7 +125,12 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
         mPublishButton = ViewHelper.get(layout, R.id.button_publish);
         if (mPublishButton != null) {
-            confirmData();
+            mPublishButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    confirmData();
+                }
+            });
         }
         setPublishButton();
 
@@ -152,7 +157,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
         sendUnconfirmed();
     }
-    
+
     private void sendUnconfirmed() {
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
