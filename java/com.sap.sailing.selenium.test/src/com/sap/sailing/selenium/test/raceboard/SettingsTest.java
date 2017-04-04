@@ -107,7 +107,6 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
 
     @Test
-    @Ignore
     public void testLeaderboardPageSettingsForwarding() {
 
         // create event
@@ -206,7 +205,6 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
     
     @Test
-    @Ignore
     public void testLeaderboardPageSettingsForwardingWithTrackedRace() {
         // create event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -286,7 +284,6 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
     
     @Test
-    @Ignore
     public void testLeaderboardPageSettingsForwardingWithOverallLeaderboard() {
         // create event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
