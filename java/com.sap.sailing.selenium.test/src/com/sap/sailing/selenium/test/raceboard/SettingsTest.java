@@ -29,6 +29,7 @@ import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagem
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
 import com.sap.sailing.selenium.pages.leaderboard.DetailCheckboxInfo;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardPage;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsDialogPO;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsPanelPO;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO;
 import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
@@ -320,7 +321,6 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         };
         leaderboardSettingsPanel.selectDetailsAndUnselectOthers(detailsToSelect);
-        leaderboardSettingsPanel.setRefreshInterval(2);
         
         LeaderboardPageConfigurationPanelPO leaderboardPageSettings = urlConfigurationDialog
                 .goToLeaderboardPageSettings();
@@ -346,16 +346,17 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         };
         leaderboardSettingsPanel.selectDetailsAndUnselectOthers(overallDetailsToSelect);
-        leaderboardSettingsPanel.setRefreshInterval(3);
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
-        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();
+        LeaderboardSettingsDialogPO leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
 
         DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
 
         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-        Assert.assertEquals(2, leaderboardSettingsPanel.getRefreshInterval());
+        
+        leaderboardSettingsDialog.pressCancel();
         
         // open settings dialog of configurated OVERALL leaderboard and match the set values with forwarded values
         leaderboardSettingsPanel = leaderboardPage.getOverallLeaderboardSettings().getLeaderboardSettingsPanelPO();
@@ -363,7 +364,6 @@ public class SettingsTest extends AbstractSeleniumTest {
         selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
 
         Assert.assertArrayEquals(overallDetailsToSelect, selectedDetails);
-        Assert.assertEquals(3, leaderboardSettingsPanel.getRefreshInterval());
         
     }
 }
