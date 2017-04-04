@@ -1,7 +1,9 @@
 package com.sap.sailing.selenium.test.raceboard;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiAccountsManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
@@ -25,6 +28,7 @@ import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.Status;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.wind.WindPanelPO;
 import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
 import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -102,27 +106,27 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             Assert.assertFalse(mapSettings.isSimulatorOverlayAvailable());
         }
         
-//        {
-//            final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-//            IgtimiAccountsManagementPanelPO igtimiAccountsManagementPanel = adminConsole.goToIgtimi();
-//            igtimiAccountsManagementPanel.addAccount("TODO", "TODO");
-//            
-//            WindPanelPO windPanel = adminConsole.goToWind();
-//            windPanel.importWindFromIgtimi();
-//            
-//            final TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-//            tracTracEvents.getTrackedRacesList().removeAll();
-//            
-//            trackRacesFor49er(regattaDescriptor, tracTracEvents);
-//        }
-//        
-//        {
-//            RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
-//                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
-//            MapSettingsPO mapSettings = raceboard.openMapSettings();
-//            // Simulator overlay option must be available with the wind data being available
-//            Assert.assertTrue(mapSettings.isSimulatorOverlayAvailable());
-//        }
+        {
+            final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+            IgtimiAccountsManagementPanelPO igtimiAccountsManagementPanel = adminConsole.goToIgtimi();
+            igtimiAccountsManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
+            
+            WindPanelPO windPanel = adminConsole.goToWind();
+            windPanel.importWindFromIgtimi();
+            
+            final TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+            tracTracEvents.getTrackedRacesList().removeAll();
+            
+            trackRacesFor49er(regattaDescriptor, tracTracEvents);
+        }
+        
+        {
+            RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
+                    REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
+            MapSettingsPO mapSettings = raceboard.openMapSettings();
+            // Simulator overlay option must be available with the wind data being available
+            Assert.assertTrue(mapSettings.isSimulatorOverlayAvailable());
+        }
     }
 
     private void trackRacesFor49er(final RegattaDescriptor regattaDescriptor, final TracTracEventManagementPanelPO tracTracEvents) {
@@ -140,5 +144,17 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         }
         racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
         trackedRacesList.waitForTrackedRaces(racesToWaitLoadingFor, Status.FINISHED, 600);
+    }
+    
+    private String getIgtimiAccountUser() {
+        return decodeBase64("YmF1ckBzdGctYWNhZGVteS5vcmc=");
+    }
+    
+    private String getIgtimiAccountPassword() {
+        return decodeBase64("MTIzNDU2");
+    }
+
+    private String decodeBase64(String base64EncodedString) {
+        return new String(Base64.getDecoder().decode(base64EncodedString.getBytes(StandardCharsets.US_ASCII)), StandardCharsets.UTF_8);
     }
 }
