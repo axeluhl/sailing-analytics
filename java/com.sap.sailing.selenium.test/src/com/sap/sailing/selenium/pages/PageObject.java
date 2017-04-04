@@ -19,6 +19,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.core.AjaxCallsComplete;
 import com.sap.sailing.selenium.core.AjaxCallsExecuted;
@@ -290,6 +291,27 @@ public class PageObject {
     }
     
     /**
+     * <p>Waits for an element with the specified selenium id to appear in the given search context. If multiple
+     *   elements exists, the element closest to the context is returned.</p>
+     * 
+     * @param context
+     *   The search context to use for the search.
+     * @param id
+     *   The selenium id of the element.
+     * @return
+     *   The first matching element in the given context.
+     */
+    protected WebElement waitForElementBySeleniumId(SearchContext context, String id, int timeout) {
+        FluentWait<SearchContext> wait = createFluentWait(context, timeout, DEFAULT_POLLING_INTERVAL);
+        return (WebElement) wait.until(new Function<SearchContext, Object>() {
+            @Override
+            public Object apply(SearchContext context) {
+                return context.findElement(new BySeleniumId(id));
+            }
+        });
+    }
+    
+    /**
      * <p>Finds and returns the first element with the specified selenium id in the given search context. If multiple
      *   elements exists, the element closest to the context is returned.</p>
      * 
@@ -438,6 +460,21 @@ public class PageObject {
      */
     protected <T extends PageArea> T getPO(PageAreaSupplier<T> supplier, String seleniumId) {
         return supplier.get(driver, findElementBySeleniumId(driver, seleniumId));
+    }
+    
+    /**
+     * Waits for the element with the given seleniumId and returns a {@link PageArea} instance representing the element. The 
+     * {@link WebDriver} is used as search context.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @param timeout the timeout in seconds to wait for the element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(SearchContext, String)
+     */
+    protected <T extends PageArea> T waitForPO(PageAreaSupplier<T> supplier, String seleniumId, int timeout) {
+        return supplier.get(driver, waitForElementBySeleniumId(driver, seleniumId, timeout));
     }
     
     /**

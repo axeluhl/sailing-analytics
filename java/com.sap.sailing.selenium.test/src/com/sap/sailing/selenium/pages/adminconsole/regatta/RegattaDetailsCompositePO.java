@@ -56,7 +56,7 @@ public class RegattaDetailsCompositePO extends PageArea {
         if (entry != null) {
             WebElement action = ActionsHelper.findEditAction(entry.getWebElement());
             action.click();
-            return getPO(SeriesEditDialogPO::new, "SeriesEditDialog");
+            return waitForPO(SeriesEditDialogPO::new, "SeriesEditDialog", 5);
         }
         return null;
     }
