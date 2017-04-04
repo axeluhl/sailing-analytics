@@ -244,9 +244,13 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
+        List<TrackableRaceDescriptor> racesToProcess = new ArrayList<>(races);
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
-        table.selectEntries(e -> races.contains(new TrackableRaceDescriptor(e.getColumnContent("Event"),
+        table.selectEntries(e -> racesToProcess.remove(new TrackableRaceDescriptor(e.getColumnContent("Event"),
                 e.getColumnContent("Race"), e.getColumnContent("Boat Class"))));
+        if(!racesToProcess.isEmpty()) {
+            throw new IllegalStateException("Not all given races where selected");
+        }
         startTrackingAndWaitForAjaxRequests();
     }
     
