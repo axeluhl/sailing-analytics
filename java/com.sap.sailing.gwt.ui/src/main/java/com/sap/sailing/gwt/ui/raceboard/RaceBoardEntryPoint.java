@@ -76,7 +76,13 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
                 lifeCycle,
                 new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
-                        getUserService(), storageDefinitionId));
+                        getUserService(), storageDefinitionId)) {
+            @Override
+            public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
+                // TODO bug3529 temporarily deactivated for raceboard due to finishing settings storage for race modes
+                return false;
+            };
+        };
         
         context.initInitialSettings();
         AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
