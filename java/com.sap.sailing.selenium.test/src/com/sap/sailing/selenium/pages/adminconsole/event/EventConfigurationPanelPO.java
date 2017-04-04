@@ -104,14 +104,14 @@ public class EventConfigurationPanelPO extends PageArea {
         EventCreateDialogPO createDialog = getPO(EventCreateDialogPO::new, ID_EVENT_CREATE_DIALOG);
         createDialog.setValues(name, desc, venue, start, end, isPublic);
         createDialog.pressOk();
-        return getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG);
+        return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG, 5);
     }
     
     private ConfirmDialogPO createRegatta(String name, String boatClass, Date start, Date end) {
         RegattaCreateDialogPO createDialog = getPO(RegattaCreateDialogPO::new, ID_REGATTA_CREATE_DIALOG);
         createDialog.setValues(name, boatClass, start, end);
         createDialog.pressOk();
-        return getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_LEADERBOARD_CONFIRM_DIALOG);
+        return waitForPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_LEADERBOARD_CONFIRM_DIALOG, 5);
     }
     
 }
