@@ -1,0 +1,86 @@
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6;
+
+import java.util.Date;
+
+import com.google.gwt.place.shared.Place;
+import com.google.gwt.place.shared.PlaceTokenizer;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+
+public class PreRaceRacemapPlace extends Place {
+    public static class Tokenizer implements PlaceTokenizer<PreRaceRacemapPlace> {
+        @Override
+        public String getToken(PreRaceRacemapPlace place) {
+            return "";
+        }
+
+        @Override
+        public PreRaceRacemapPlace getPlace(String token) {
+            return new PreRaceRacemapPlace();
+        }
+    }
+
+    private RaceMap raceMap;
+    private Throwable error;
+    private CompetitorSelectionModel raceMapSelectionProvider;
+    private RegattaAndRaceIdentifier race;
+    private Date loadTime;
+    private String url;
+    private GetMiniLeaderboardDTO leaderboard;
+
+    public void setRaceMap(RaceMap result, CompetitorSelectionModel csel) {
+        this.raceMap = result;
+        this.raceMapSelectionProvider = csel;
+    }
+
+    public Date getRaceMapInitTime() {
+        return loadTime;
+    }
+
+    public RegattaAndRaceIdentifier getRace() {
+        return race;
+    }
+
+    public RaceMap getRaceMap() {
+        return raceMap;
+    }
+
+    public Throwable getError() {
+        return error;
+    }
+
+    public void setError(Throwable caught) {
+        this.error = caught;
+    }
+
+    public CompetitorSelectionModel getRaceMapSelectionProvider() {
+        return raceMapSelectionProvider;
+    }
+
+    public void setURL(String officialWebsiteURL) {
+        this.url = officialWebsiteURL;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setLeaderBoardDTO(GetMiniLeaderboardDTO dto) {
+        this.leaderboard = dto;
+    }
+
+    public GetMiniLeaderboardDTO getLeaderboard() {
+        return leaderboard;
+    }
+
+    public void setRace(RegattaAndRaceIdentifier race) {
+        this.race = race;
+    }
+
+    public void setTime(Date currentServerTime) {
+        this.loadTime = currentServerTime;
+    }
+
+}
