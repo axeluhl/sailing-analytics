@@ -129,22 +129,12 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     public List<RaceDescriptor> getRaces() {
         List<RaceDescriptor> result = new ArrayList<>();
         LeaderboardRacesTablePO racesTable = getRacesTable();
+        RaceDescriptorFactory raceDescriptorFactory = new RaceDescriptorFactory(racesTable);
         for(DataEntryPO entry : racesTable.getEntries()) {
-            result.add(createRaceDescriptor(entry));
+            result.add(raceDescriptorFactory.createRaceDescriptor(entry));
         }
         return result;
     }
-
-    private RaceDescriptor createRaceDescriptor(DataEntryPO entry) {
-        String name = entry.getColumnContent("Race");
-        String fleet = entry.getColumnContent("Fleet");
-        String medalRace = entry.getColumnContent("Medal Race");
-        String linked = entry.getColumnContent("Is linked");
-        String factorColumnContent = entry.getColumnContent("Factor");
-        double factor = factorColumnContent.trim().isEmpty() ? 0.0 : Double.valueOf(factorColumnContent);
-        return new RaceDescriptor(name, fleet, Util.equalsWithNull("x", medalRace), Util.equalsWithNull("Yes", linked), factor);
-    }
-    
     
 //    public RaceEditDialog editRace(RaceDescriptor race) {
 //        
@@ -187,8 +177,9 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     
     private DataEntryPO findRace(RaceDescriptor race) {
         LeaderboardRacesTablePO racesTable = getRacesTable();
+        RaceDescriptorFactory raceDescriptorFactory = new RaceDescriptorFactory(racesTable);
         for(DataEntryPO entry : racesTable.getEntries()) {
-            RaceDescriptor descriptor = createRaceDescriptor(entry);
+            RaceDescriptor descriptor = raceDescriptorFactory.createRaceDescriptor(entry);
             if (descriptor.equals(race)) {
                 return entry;
             }
@@ -199,10 +190,13 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     private DataEntryPO findTracking(TrackedRaceDescriptor tracking) {
         CellTablePO<DataEntryPO> trackingTable = getTrackedRacesTable();
         
+        final int regattaColumnIndex = trackingTable.getColumnIndex("Regatta");
+        final int boatClassColumnIndex = trackingTable.getColumnIndex("Boat Class");
+        final int raceColumnIndex = trackingTable.getColumnIndex("Race");
         for(DataEntryPO entry : trackingTable.getEntries()) {
-            String regatta = entry.getColumnContent("Regatta");
-            String boatClass = entry.getColumnContent("Boat Class");
-            String raceName = entry.getColumnContent("Race");
+            String regatta = entry.getColumnContent(regattaColumnIndex);
+            String boatClass = entry.getColumnContent(boatClassColumnIndex);
+            String raceName = entry.getColumnContent(raceColumnIndex);
             
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, raceName);
             
@@ -225,5 +219,38 @@ public class LeaderboardDetailsPanelPO extends PageArea {
         WebElement table = findElementBySeleniumId(this.trackedRacesListComposite, "TrackedRacesCellTable");
         
         return new GenericCellTablePO<>(this.driver, table, DataEntryPO.class);
+    }
+    
+    /**
+     * Helps to reduce redundant getColumnIndex calls by reusing the indexes values for several rows. Should only be
+     * used in one operation that iterates the table's rows. Caching is not intended sue to possible column changes.
+     */
+    private class RaceDescriptorFactory {
+        
+        private final int raceColumnIndex;
+        private final int fleetColumnIndex;
+        private final int medalRaceColumnIndex;
+        private final int linkedColumnIndex;
+        private final int factorColumnIndex;
+
+
+        public RaceDescriptorFactory(LeaderboardRacesTablePO racesTable) {
+            raceColumnIndex = racesTable.getColumnIndex("Race");
+            fleetColumnIndex = racesTable.getColumnIndex("Fleet");
+            medalRaceColumnIndex = racesTable.getColumnIndex("Medal Race");
+            linkedColumnIndex = racesTable.getColumnIndex("Is linked");
+            factorColumnIndex = racesTable.getColumnIndex("Factor");
+        }
+        
+
+        private RaceDescriptor createRaceDescriptor(DataEntryPO entry) {
+            String name = entry.getColumnContent(raceColumnIndex);
+            String fleet = entry.getColumnContent(fleetColumnIndex);
+            String medalRace = entry.getColumnContent(medalRaceColumnIndex);
+            String linked = entry.getColumnContent(linkedColumnIndex);
+            String factorColumnContent = entry.getColumnContent(factorColumnIndex);
+            double factor = factorColumnContent.trim().isEmpty() ? 0.0 : Double.valueOf(factorColumnContent);
+            return new RaceDescriptor(name, fleet, Util.equalsWithNull("x", medalRace), Util.equalsWithNull("Yes", linked), factor);
+        }
     }
 }
