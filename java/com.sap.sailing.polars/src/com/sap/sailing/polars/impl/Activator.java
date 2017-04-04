@@ -15,6 +15,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.ReplicablePolarService;
 import com.sap.sailing.polars.jaxrs.client.PolarDataClient;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.util.ClearStateTestSupport;
 
 /**
  * Handles OSGi (de-)registration of the polar data service. 
@@ -39,6 +40,7 @@ public class Activator implements BundleActivator {
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, service.getId().toString());
         registrations.add(context.registerService(Replicable.class.getName(), service, replicableServiceProperties));
+        registrations.add(context.registerService(ClearStateTestSupport.class.getName(), service, null));
         final String polarDataSourceURL = System.getProperty(POLAR_DATA_SOURCE_URL_PROPERTY_NAME);
         if (polarDataSourceURL != null && !polarDataSourceURL.isEmpty()) {
             waitForRacingEventServiceToObtainDomainFactory(polarDataSourceURL, service, context, polarDataServiceRegistration);
