@@ -83,21 +83,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             editSeriesMedals.addSingleRace("M");
             editSeriesMedals.pressOk();
     
-            final TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-            tracTracEvents.listTrackableRaces(JSON_URL);
-            tracTracEvents.setReggataForTracking(regattaDescriptor);
-            tracTracEvents.setTrackSettings(true, false, false);
-            tracTracEvents.setFilterForTrackableRaces("(49er)");
-            // races are filtered so that all shown entries belong to the correct regatta
-            tracTracEvents.startTrackingForAllRaces();
-            
-            final TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-            final List<TrackedRaceDescriptor> racesToWaitLoadingFor = new ArrayList<>();
-            for(int i = 1; i<=11; i++) {
-                racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, String.format(RACE_N_49ER, i)));
-            }
-            racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
-            trackedRacesList.waitForTrackedRaces(racesToWaitLoadingFor, Status.FINISHED, 600);
+            trackRacesFor49er(regattaDescriptor, adminConsole.goToTracTracEvents());
     
             final LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
             final LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(REGATTA_49ER_WITH_SUFFIX);
@@ -123,6 +109,11 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
 //            
 //            WindPanelPO windPanel = adminConsole.goToWind();
 //            windPanel.importWindFromIgtimi();
+//            
+//            final TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+//            tracTracEvents.getTrackedRacesList().removeAll();
+//            
+//            trackRacesFor49er(regattaDescriptor, tracTracEvents);
 //        }
 //        
 //        {
@@ -132,5 +123,22 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
 //            // Simulator overlay option must be available with the wind data being available
 //            Assert.assertTrue(mapSettings.isSimulatorOverlayAvailable());
 //        }
+    }
+
+    private void trackRacesFor49er(final RegattaDescriptor regattaDescriptor, final TracTracEventManagementPanelPO tracTracEvents) {
+        tracTracEvents.listTrackableRaces(JSON_URL);
+        tracTracEvents.setReggataForTracking(regattaDescriptor);
+        tracTracEvents.setTrackSettings(true, false, false);
+        tracTracEvents.setFilterForTrackableRaces("(49er)");
+        // races are filtered so that all shown entries belong to the correct regatta
+        tracTracEvents.startTrackingForAllRaces();
+        
+        final TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
+        final List<TrackedRaceDescriptor> racesToWaitLoadingFor = new ArrayList<>();
+        for(int i = 1; i<=11; i++) {
+            racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, String.format(RACE_N_49ER, i)));
+        }
+        racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
+        trackedRacesList.waitForTrackedRaces(racesToWaitLoadingFor, Status.FINISHED, 600);
     }
 }
