@@ -563,8 +563,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         onResize();
     }
     
-    private void loadData(final Date from, final Date to) {
-        if (selectedRaceIdentifier != null && from != null && to != null && marks == null) {
+    private void loadData() {
+        if (selectedRaceIdentifier != null && marks == null) {
             setWidget(chart);
             showLoading(stringMessages.loadingMarkFixes());
             markPositionService.getMarksInTrackedRace(raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier), 
@@ -814,7 +814,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         if (isVisible()) {
-            loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime());
+            loadData();
             updateTimePlotLine(newTime);
         }
     }

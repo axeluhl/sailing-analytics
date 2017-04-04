@@ -92,6 +92,7 @@ import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -3163,36 +3164,47 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, boolean override) {
+    public void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCount creationCount, boolean override) throws Exception {
+    	Exception firstException = null;
         for (MediaTrack trackToImport : mediaTracksToImport) {
-            MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
-            if (existingTrack == null) {
-                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url,
-                        trackToImport.startTime, trackToImport.duration, trackToImport.mimeType,
-                        trackToImport.assignedRaces);
-                mediaTrackAdded(trackToImport);
-            } else if (override) {
-
-                // Using fine-grained update methods.
-                // Rationale: Changes on more than one track property are rare
-                // and don't justify the introduction of a new set
-                // of methods (including replication).
-                if (!Util.equalsWithNull(existingTrack.title, trackToImport.title)) {
-                    mediaTrackTitleChanged(trackToImport);
-                }
-                if (!Util.equalsWithNull(existingTrack.url, trackToImport.url)) {
-                    mediaTrackUrlChanged(trackToImport);
-                }
-                if (!Util.equalsWithNull(existingTrack.startTime, trackToImport.startTime)) {
-                    mediaTrackStartTimeChanged(trackToImport);
-                }
-                if (!Util.equalsWithNull(existingTrack.duration, trackToImport.duration)) {
-                    mediaTrackDurationChanged(trackToImport);
-                }
-                if (!Util.equalsWithNull(existingTrack.assignedRaces, trackToImport.assignedRaces)) {
-                    mediaTrackAssignedRacesChanged(trackToImport);
-                }
-            }
+        	try {
+	            MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
+	            if (existingTrack == null) {
+	                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url,
+	                        trackToImport.startTime, trackToImport.duration, trackToImport.mimeType,
+	                        trackToImport.assignedRaces);
+	                mediaTrackAdded(trackToImport);
+	            } else if (override) {
+	                // Using fine-grained update methods.
+	                // Rationale: Changes on more than one track property are rare
+	                // and don't justify the introduction of a new set
+	                // of methods (including replication).
+	                if (!Util.equalsWithNull(existingTrack.title, trackToImport.title)) {
+	                    mediaTrackTitleChanged(trackToImport);
+	                }
+	                if (!Util.equalsWithNull(existingTrack.url, trackToImport.url)) {
+	                    mediaTrackUrlChanged(trackToImport);
+	                }
+	                if (!Util.equalsWithNull(existingTrack.startTime, trackToImport.startTime)) {
+	                    mediaTrackStartTimeChanged(trackToImport);
+	                }
+	                if (!Util.equalsWithNull(existingTrack.duration, trackToImport.duration)) {
+	                    mediaTrackDurationChanged(trackToImport);
+	                }
+	                if (!Util.equalsWithNull(existingTrack.assignedRaces, trackToImport.assignedRaces)) {
+	                    mediaTrackAssignedRacesChanged(trackToImport);
+	                }
+	            }
+	            creationCount.addOneMediaTrack();
+        	} catch (Exception e) {
+        		logger.log(Level.SEVERE, "Problem importing media track "+trackToImport+"; continuing with other media tracks.", e);
+        		if (firstException == null) {
+        			firstException = e;
+        		}
+        	}
+        }
+        if (firstException != null) {
+        	throw firstException;
         }
     }
 

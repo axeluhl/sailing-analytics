@@ -5394,9 +5394,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        
         final List<RegattaLogEvent> regattaLogDefineMarkEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();
-        
         RegattaLogDefineMarkEvent eventToRevoke = null;
         for (RegattaLogEvent event : regattaLogDefineMarkEvents) {
             RegattaLogDefineMarkEvent defineMarkEvent = (RegattaLogDefineMarkEvent) event;
@@ -5405,7 +5403,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
         }
-        
         regattaLog.revokeDefineMarkEventAndRelatedDeviceMappings(eventToRevoke, getService().getServerAuthor(), logger);
     }
 

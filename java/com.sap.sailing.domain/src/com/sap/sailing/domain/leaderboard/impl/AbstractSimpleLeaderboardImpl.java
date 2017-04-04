@@ -1214,6 +1214,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     @Override
     public void setSuppressed(Competitor competitor, boolean suppressed) {
+    	if (competitor == null) {
+    		throw new IllegalArgumentException("Cannot change suppression for a null competitor");
+    	}
         LockUtil.lockForWrite(suppressedCompetitorsLock);
         try {
             if (suppressed) {
