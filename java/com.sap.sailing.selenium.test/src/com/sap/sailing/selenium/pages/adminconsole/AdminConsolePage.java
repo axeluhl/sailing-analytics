@@ -20,6 +20,7 @@ import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManag
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.wind.WindPanelPO;
 
 /**
  * <p>The page object representing the administration console. The console consists of multiple tabs with its content
@@ -52,6 +53,9 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private static final String TRACKED_RACES_TAB_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
+    
+    private static final String WIND_TAB_LABEL = "Wind"; //$NON-NLS-1$
+    private static final String WIND_TAB_IDENTIFIER = "WindPanel"; //$NON-NLS-1$
     
     private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL = "Leaderboards"; //$NON-NLS-1$
     private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER = "LeaderboardPanel"; //$NON-NLS-1$
@@ -125,6 +129,12 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
         return new TrackedRacesManagementPanelPO(this.driver, goToTab(TRACKED_RACES_TAB_LABEL,
                 TRACKED_RACES_TAB_IDENTIFIER, false));
+    }
+        
+    public WindPanelPO goToWind() {
+        goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
+        return new WindPanelPO(this.driver, goToTab(WIND_TAB_LABEL,
+                WIND_TAB_IDENTIFIER, false));
     }
     
     public LeaderboardConfigurationPanelPO goToLeaderboardConfiguration() {
