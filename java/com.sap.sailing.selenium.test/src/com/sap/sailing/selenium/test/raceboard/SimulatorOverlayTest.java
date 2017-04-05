@@ -112,7 +112,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             igtimiAccountsManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
             
             WindPanelPO windPanel = adminConsole.goToWind();
-            windPanel.importWindFromIgtimi();
+            windPanel.importWindFromIgtimi(/* waiting up to 15 min */ 15 * 60);
             
             // Retracking all races should not be necessary, but currently, polar data is only calculated when GPS fixes
             // are recorded for a tracked race and not for wind fixes.
