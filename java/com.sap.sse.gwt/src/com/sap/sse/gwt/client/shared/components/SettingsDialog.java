@@ -69,7 +69,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
     private void initMakeDefaultButtons(final Component<SettingsType> component, final StringMessages stringMessages) {
         final Button makeDefaultButton = new Button(stringMessages.makeDefault());
         makeDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
-        makeDefaultButton.ensureDebugId("SaveButton");
+        makeDefaultButton.ensureDebugId("MakeDefaultButton");
         getLeftButtonPannel().add(makeDefaultButton);
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {

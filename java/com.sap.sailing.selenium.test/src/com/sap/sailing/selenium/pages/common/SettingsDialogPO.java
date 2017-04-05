@@ -20,4 +20,8 @@ public class SettingsDialogPO extends DataEntryDialogPO {
         String href = this.shareAnchor.getAttribute("href");
         return LeaderboardPage.goToPage(driver, href);
     }
+    
+    public String getLeaderboardLink() {
+        return this.shareAnchor.getAttribute("href");
+    }
 }

@@ -71,4 +71,18 @@ public abstract class DataEntryDialogPO extends PageArea {
     public void pressCancel() {
         this.cancelButton.click();
     }
+    
+    public void pressMakeDefault() {
+        WebElement element = findElementBySeleniumId("MakeDefaultButton");
+        element.click();
+        ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
+        Alert alert = condition.apply(this.driver);
+        
+        if(alert != null) {
+            alert.accept();
+        } else {
+            waitForAjaxRequests();
+        }
+        
+    }
 }

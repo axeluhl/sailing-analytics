@@ -39,17 +39,28 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 public class SettingsTest extends AbstractSeleniumTest {
     private static final String BMW_CUP_JSON_URL = "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
     private static final String BMW_CUP_EVENT = "BMW Cup";
+    private static final String AUDI_CUP_EVENT = "Audi Business Cup";
     private static final String BMW_CUP_BOAT_CLASS = "J80";
+    private static final String AUDI_CUP_BOAT_CLASS = "J70";
     private static final String BMW_CUP_REGATTA = "BMW Cup (J80)"; //$NON-NLS-1$
-    private static final String RACE = "BMW Cup Race %d";
+    private static final String AUDI_CUP_REGATTA = "Audi Business Cup (J70)"; //$NON-NLS-1$
+    private static final String BMW_RACE = "BMW Cup Race %d";
+//    private static final String AUDI_RACE = "Audi Business Cup Race %d";
     private static final String BMW_CUP_EVENTS_DESC = "BMW Cup Description";
+    private static final String AUDI_CUP_EVENTS_DESC = "";
     private static final String BMW_VENUE = "Somewhere";
+    private static final String AUDI_VENUE = "Somewhere else";
     private static final Date BMW_START_EVENT_TIME = DatatypeConverter.parseDateTime("2012-04-08T10:09:00-05:00")
             .getTime();
-    private static final Date BMW_STOP_EVENT_TIME = DatatypeConverter.parseDateTime("2012-04-08T10:50:00-05:00")
+    private static final Date AUDI_START_EVENT_TIME = DatatypeConverter.parseDateTime("2017-04-05T10:09:00-05:00")
+            .getTime();
+    private static final Date BMW_STOP_EVENT_TIME = DatatypeConverter.parseDateTime("2017-04-08T10:50:00-05:00")
+            .getTime();
+    private static final Date AUDI_STOP_EVENT_TIME = DatatypeConverter.parseDateTime("2017-04-05T10:50:00-05:00")
             .getTime();
 
     private static final String BMW_CUP_RACE_NAME = "R1";
+//    private static final String AUDI_CUP_RACE_NAME = "R1";
 
     private TrackableRaceDescriptor trackableRace;
 
@@ -58,8 +69,8 @@ public class SettingsTest extends AbstractSeleniumTest {
     @Override
     @Before
     public void setUp() {
-        this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(RACE, 1), BMW_CUP_BOAT_CLASS);
-        this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(RACE, 1));
+        this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(BMW_RACE, 1), BMW_CUP_BOAT_CLASS);
+        this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(BMW_RACE, 1));
         clearState(getContextRoot());
         super.setUp();
     }
@@ -77,13 +88,13 @@ public class SettingsTest extends AbstractSeleniumTest {
         initTrackingForBmwCupRace(adminConsole);
 
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(RACE, 1));
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1));
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         mapSettings.setWindChart(true);
         mapSettings.makeDefault();
         // reload
         RaceBoardPage raceboard2 = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(RACE, 1));
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1));
         MapSettingsPO mapSettings2 = raceboard2.openMapSettings();
         boolean stillSelected = mapSettings2.isWindChartSelected();
         Assert.assertTrue(stillSelected);
@@ -199,11 +210,11 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertEquals(2, leaderboardSettingsPanel.getNumberOfRacesToDisplaySelected());
         Assert.assertEquals(1, leaderboardSettingsPanel.getRefreshInterval());
         selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
-        //TODO fix leaderboard default values
+        // TODO fix leaderboard default values
         // Assert.assertEquals(0, selectedDetails.length);
 
     }
-    
+
     @Test
     public void testLeaderboardPageSettingsForwardingWithTrackedRace() {
         // create event
@@ -212,7 +223,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
                 BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
                 BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
-        
+
         initTrackingForBmwCupRace(adminConsole);
 
         // set custom leaderboard settings
@@ -220,12 +231,12 @@ public class SettingsTest extends AbstractSeleniumTest {
         LeaderboardEntryPO leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
         LeaderboardUrlConfigurationDialogPO urlConfigurationDialog = leaderboardEntry
                 .getLeaderboardPageUrlConfigurationDialog();
-        
+
         LeaderboardPageConfigurationPanelPO leaderboardPageSettings = urlConfigurationDialog
                 .goToLeaderboardPageSettings();
         leaderboardPageSettings.setAllowForRaceDetails(true);
         leaderboardPageSettings.setShowCharts(false);
-        
+
         LeaderboardSettingsPanelPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
 
         leaderboardSettingsPanel.setCheckboxValue("R2CheckBox", false);
@@ -240,7 +251,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
                 DetailCheckboxInfo.DISTANCE_TO_START_AT_RACE_START,
 
-                //TODO how to get leaderboard to show leg details and maneuvers? Is it required?
+                // TODO how to get leaderboard to show leg details and maneuvers? Is it required?
                 // Leg Details
                 // DetailCheckboxInfo.AVERAGE_SIGNED_CROSS_TRACK_ERROR, DetailCheckboxInfo.RANK_GAIN,
 
@@ -266,23 +277,22 @@ public class SettingsTest extends AbstractSeleniumTest {
             Assert.assertTrue("Column header label \"" + headerToCheck + "\" not found",
                     leaderboardTable.containsColumnHeader(headerToCheck));
         }
-        
-        //test showRaceDetails and showChart configuration options
+
+        // test showRaceDetails and showChart configuration options
         adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
         urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
-        
+
         leaderboardPageSettings = urlConfigurationDialog.goToLeaderboardPageSettings();
         leaderboardPageSettings.setAllowForRaceDetails(false);
         leaderboardPageSettings.setShowCharts(true);
-        
-        
+
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         leaderboardPage = urlConfigurationDialog.openLeaderboard();
         Assert.assertTrue(leaderboardPage.isCompetitorChartVisible());
     }
-    
+
     @Test
     public void testLeaderboardPageSettingsForwardingWithOverallLeaderboard() {
         // create event
@@ -291,15 +301,15 @@ public class SettingsTest extends AbstractSeleniumTest {
         events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
                 BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
                 BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true);
-        
+
         // set custom leaderboard settings
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         LeaderboardEntryPO leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
         LeaderboardUrlConfigurationDialogPO urlConfigurationDialog = leaderboardEntry
                 .getLeaderboardPageUrlConfigurationDialog();
-        
+
         LeaderboardSettingsPanelPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
-        
+
         DetailCheckboxInfo[] detailsToSelect = {
                 // Overall details
                 DetailCheckboxInfo.TIME_ON_DISTANCE_ALLOWANCE,
@@ -318,13 +328,13 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         };
         leaderboardSettingsPanel.selectDetailsAndUnselectOthers(detailsToSelect);
-        
+
         LeaderboardPageConfigurationPanelPO leaderboardPageSettings = urlConfigurationDialog
                 .goToLeaderboardPageSettings();
         leaderboardPageSettings.setShowOverallLeaderboard(true);
-        
+
         leaderboardSettingsPanel = urlConfigurationDialog.goToOverallLeaderboardSettings();
-        
+
         DetailCheckboxInfo[] overallDetailsToSelect = {
                 // Overall details
                 DetailCheckboxInfo.TIME_ON_TIME_FACTOR,
@@ -352,15 +362,123 @@ public class SettingsTest extends AbstractSeleniumTest {
         DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
 
         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-        
+
         leaderboardSettingsDialog.pressCancel();
-        
+
         // open settings dialog of configurated OVERALL leaderboard and match the set values with forwarded values
         leaderboardSettingsPanel = leaderboardPage.getOverallLeaderboardSettings().getLeaderboardSettingsPanelPO();
 
         selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
 
         Assert.assertArrayEquals(overallDetailsToSelect, selectedDetails);
+
+    }
+
+    @Test
+    public void testLeaderboardPageSettingsStorage() {
+
+        // create event
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
+
+        // open leaderboard
+        LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        LeaderboardEntryPO leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
+        LeaderboardUrlConfigurationDialogPO urlConfigurationDialog = leaderboardEntry
+                .getLeaderboardPageUrlConfigurationDialog();
+        String bmwCupDefaultLeaderboardLink = urlConfigurationDialog.getLeaderboardLink();
+        LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
+
+        // open settings dialog of configurated leaderboard with default values
+        LeaderboardSettingsDialogPO leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
+        LeaderboardSettingsPanelPO leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings()
+                .getLeaderboardSettingsPanelPO();
+
+        // store default values for checks later
+        DetailCheckboxInfo[] defaultDetails = leaderboardSettingsPanel.getSelectedDetails();
+        int defaultRefreshInterval = leaderboardSettingsPanel.getRefreshInterval();
+
+        // modify leaderboard settings
+        DetailCheckboxInfo[] newDetails = new DetailCheckboxInfo[] {
+                // Overall details
+                DetailCheckboxInfo.TOTAL_TIME, DetailCheckboxInfo.MAXIMUM_SPEED_OVER_GROUND,
+
+                // Race details
+                DetailCheckboxInfo.RACE_GAP_TO_LEADER, DetailCheckboxInfo.RACE_DISTANCE,
+
+                // Race Start Analysis
+                DetailCheckboxInfo.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
+                DetailCheckboxInfo.DISTANCE_TO_START_AT_RACE_START,
+
+                // Leg Details
+                DetailCheckboxInfo.AVERAGE_SIGNED_CROSS_TRACK_ERROR, DetailCheckboxInfo.RANK_GAIN,
+
+                // Maneuvers
+                DetailCheckboxInfo.AVERAGE_MANEUVER_LOSS
+
+        };
+        leaderboardSettingsPanel.selectDetailsAndUnselectOthers(newDetails);
+        int newRefreshInterval = 2;
+        leaderboardSettingsPanel.setRefreshInterval(newRefreshInterval);
         
+        //save new settings with ok (context specific storage)
+        leaderboardSettingsDialog.pressOk();
+        
+        //reload leaderboard and ensure new settings were stored
+        leaderboardPage = LeaderboardPage.goToPage(getWebDriver(), bmwCupDefaultLeaderboardLink);
+        leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        
+        Assert.assertArrayEquals(newDetails, leaderboardSettingsPanel.getSelectedDetails());
+        Assert.assertEquals(newRefreshInterval, leaderboardSettingsPanel.getRefreshInterval());
+        
+        //ensure that url has priority
+        adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
+        urlConfigurationDialog = leaderboardEntry
+                .getLeaderboardPageUrlConfigurationDialog();
+        leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
+        leaderboardSettingsPanel.setRefreshInterval(3);
+        leaderboardPage = urlConfigurationDialog.openLeaderboard();
+        leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        Assert.assertEquals(3, leaderboardSettingsPanel.getRefreshInterval());
+        
+        //ensure that context specific settings are stored only for the context
+        adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(AUDI_CUP_EVENT, AUDI_CUP_EVENTS_DESC,
+                AUDI_VENUE, AUDI_START_EVENT_TIME, AUDI_STOP_EVENT_TIME, true, AUDI_CUP_REGATTA, AUDI_CUP_BOAT_CLASS,
+                AUDI_START_EVENT_TIME, AUDI_STOP_EVENT_TIME, false);
+        leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(AUDI_CUP_REGATTA);
+        urlConfigurationDialog = leaderboardEntry
+                .getLeaderboardPageUrlConfigurationDialog();
+        String audiCupDefaultLeaderboardLink = urlConfigurationDialog.getLeaderboardLink();
+        leaderboardPage = urlConfigurationDialog.openLeaderboard();
+        leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        Assert.assertArrayEquals(defaultDetails, leaderboardSettingsPanel.getSelectedDetails());
+        Assert.assertEquals(defaultRefreshInterval, leaderboardSettingsPanel.getRefreshInterval());
+        
+        //set old default values to default again and check that the context values of other leaderboard have priority
+        leaderboardSettingsDialog.pressMakeDefault();
+        leaderboardPage = LeaderboardPage.goToPage(getWebDriver(), bmwCupDefaultLeaderboardLink);
+        leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        Assert.assertArrayEquals(newDetails, leaderboardSettingsPanel.getSelectedDetails());
+        Assert.assertEquals(newRefreshInterval, leaderboardSettingsPanel.getRefreshInterval());
+        
+        //set new values to default and check that the other leaderboard which does not have context specific settings stored, applies that values
+        leaderboardSettingsDialog.pressMakeDefault();
+        leaderboardPage = LeaderboardPage.goToPage(getWebDriver(), audiCupDefaultLeaderboardLink);
+        leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
+        leaderboardSettingsPanel = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        Assert.assertArrayEquals(newDetails, leaderboardSettingsPanel.getSelectedDetails());
+        Assert.assertEquals(newRefreshInterval, leaderboardSettingsPanel.getRefreshInterval());
     }
 }
