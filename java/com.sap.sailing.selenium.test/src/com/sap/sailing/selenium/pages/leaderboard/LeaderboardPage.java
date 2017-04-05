@@ -19,8 +19,8 @@ import junit.framework.Assert;
  */
 public class LeaderboardPage extends HostPage {
     
-    private static final String LEADERBOAR_PARAMTER_NAME = "name"; //$NON-NLS-1$
-    private static final String SHOW_RACE_DETAILS_PARAMTER_NAME = "showRaceDetails"; //$NON-NLS-1$
+    private static final String LEADERBOAR_PARAMETER_NAME = "name"; //$NON-NLS-1$
+    private static final String SHOW_RACE_DETAILS_PARAMETER_NAME = "showRaceDetails"; //$NON-NLS-1$
     private static final String REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis"; //$NON-NLS-1$
     
     private static final String AUTO_REFRESH_ENABLED_STRING = "Pause automatic refresh"; //$NON-NLS-1$
@@ -61,11 +61,11 @@ public class LeaderboardPage extends HostPage {
     }
     
     private static String getLeaderboard(String leaderboard) {
-        return LEADERBOAR_PARAMTER_NAME + "=" + leaderboard; //$NON-NLS-1$
+        return LEADERBOAR_PARAMETER_NAME + "=" + leaderboard; //$NON-NLS-1$
     }
     
     private static String getShowRaceDeatails(boolean raceDetails) {
-        return SHOW_RACE_DETAILS_PARAMTER_NAME + "=" + raceDetails; //$NON-NLS-1$
+        return SHOW_RACE_DETAILS_PARAMETER_NAME + "=" + raceDetails; //$NON-NLS-1$
     }
     
     private static String getAutoRefreshIntervalMillis(long autoRefreshIntervalInMillis) {

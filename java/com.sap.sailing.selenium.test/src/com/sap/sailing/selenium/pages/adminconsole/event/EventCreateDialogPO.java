@@ -69,8 +69,8 @@ public class EventCreateDialogPO extends DataEntryDialogPO {
         return goToTab("Leaderboard groups", LEADERBOARD_GROUPS_TAB_ID);
     }
 
-    WebElement goToCourseAreasTab() {
-        return goToTab("Course areas", COURSE_AREAS_TAB_ID);
+    CourseAreasTabPO goToCourseAreasTab() {
+        return new CourseAreasTabPO(driver, goToTab("Course areas", COURSE_AREAS_TAB_ID));
     }
 
     WebElement goToImagesTab() {

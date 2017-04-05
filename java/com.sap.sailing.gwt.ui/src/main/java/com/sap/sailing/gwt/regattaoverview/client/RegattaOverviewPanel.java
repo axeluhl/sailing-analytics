@@ -119,6 +119,7 @@ public class RegattaOverviewPanel extends SimplePanel {
             
         });
         settingsButton = new Anchor("&nbsp;", true);
+        settingsButton.ensureDebugId("RegattaOverviewSettingsButton");
         settingsButton.setStyleName(style.settingsButton());
         settingsButton.addStyleName(RES.mainCss().button());
         settingsButton.addStyleName(style.button());

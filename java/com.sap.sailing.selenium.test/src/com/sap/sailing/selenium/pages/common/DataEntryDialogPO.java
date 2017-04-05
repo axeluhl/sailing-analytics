@@ -11,6 +11,9 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 
 public abstract class DataEntryDialogPO extends PageArea {
+    
+    private static final String ID_MAKE_DEFAULT_BUTTON = "MakeDefaultButton";
+    
     @FindBy(how = BySeleniumId.class, using = "StatusLabel")
     private WebElement statusLabel;
 
@@ -73,7 +76,7 @@ public abstract class DataEntryDialogPO extends PageArea {
     }
     
     public void pressMakeDefault() {
-        WebElement element = findElementBySeleniumId("MakeDefaultButton");
+        WebElement element = findElementBySeleniumId(ID_MAKE_DEFAULT_BUTTON);
         element.click();
         ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
         Alert alert = condition.apply(this.driver);
@@ -84,5 +87,9 @@ public abstract class DataEntryDialogPO extends PageArea {
             waitForAjaxRequests();
         }
         
+    }
+    
+    public boolean isMakeDefaultButtonVisible() {
+        return !driver.findElements(new BySeleniumId(ID_MAKE_DEFAULT_BUTTON)).isEmpty();
     }
 }

@@ -53,6 +53,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
 
     private FlowPanel fillCourseAreaWidget(DataEntryDialog<?> dialog) {
         FlowPanel flowPanel = new FlowPanel();
+        flowPanel.ensureDebugId("CourseAreaPanel");
         flowPanel.addStyleName(SETTINGS_DIALOG_COMPONENT);
         flowPanel.add(dialog.createHeadline(stringMessages.showFollowingCourseAreas(), true));
         FlowPanel courseAreaPanel = new FlowPanel();
@@ -112,6 +113,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     
     private FlowPanel fillRegattaNamesWidget(DataEntryDialog<?> dialog) {
         FlowPanel flowPanel = new FlowPanel();
+        flowPanel.ensureDebugId("RegattaNamesPanel");
         flowPanel.addStyleName(SETTINGS_DIALOG_COMPONENT);
         flowPanel.add(dialog.createHeadline(stringMessages.showFollowingRegattas(), true));
         FlowPanel regattaNamesPanel = new FlowPanel();
@@ -179,12 +181,14 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     
     private CheckBox getShowOnlyRacesOfSameDayWidget(DataEntryDialog<?> dialog) {
         showOnlyRacesOfSameDayCheckBox = dialog.createCheckbox(stringMessages.showOnlyRacesOfSameDay());
+        showOnlyRacesOfSameDayCheckBox.ensureDebugId("ShowOnlyRacesOfSameDayCheckBox");
         showOnlyRacesOfSameDayCheckBox.setValue(initialSettings.isShowOnlyRacesOfSameDay());
         return showOnlyRacesOfSameDayCheckBox;
     }
     
     private CheckBox getShowOnlyCurrentlyRunningRacesWidget(DataEntryDialog<?> dialog) {
         showOnlyCurrentlyRunningRacesCheckBox = dialog.createCheckbox(stringMessages.showOnlyCurrentlyRunningRaces());
+        showOnlyCurrentlyRunningRacesCheckBox.ensureDebugId("ShowOnlyCurrentlyRunningRacesCheckBox");
         showOnlyCurrentlyRunningRacesCheckBox.setValue(initialSettings.isShowOnlyCurrentlyRunningRaces());
         return showOnlyCurrentlyRunningRacesCheckBox;
     }
@@ -205,6 +209,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel verticalPanel = new VerticalPanel();
+        dialog.ensureDebugId("RegattaRacesStatesSettingsDialog");
         
         verticalPanel.add(fillCourseAreaWidget(dialog));
         verticalPanel.add(fillRegattaNamesWidget(dialog));

@@ -22,6 +22,7 @@ import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetail
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardPageConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardUrlConfigurationDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.Status;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
@@ -34,6 +35,8 @@ import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsPanelPO;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO;
 import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
 import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
+import com.sap.sailing.selenium.pages.regattaoverview.RegattaOverviewPage;
+import com.sap.sailing.selenium.pages.regattaoverview.RegattaOverviewSettingsDialogPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class SettingsTest extends AbstractSeleniumTest {
@@ -45,7 +48,6 @@ public class SettingsTest extends AbstractSeleniumTest {
     private static final String BMW_CUP_REGATTA = "BMW Cup (J80)"; //$NON-NLS-1$
     private static final String AUDI_CUP_REGATTA = "Audi Business Cup (J70)"; //$NON-NLS-1$
     private static final String BMW_RACE = "BMW Cup Race %d";
-//    private static final String AUDI_RACE = "Audi Business Cup Race %d";
     private static final String BMW_CUP_EVENTS_DESC = "BMW Cup Description";
     private static final String AUDI_CUP_EVENTS_DESC = "";
     private static final String BMW_VENUE = "Somewhere";
@@ -60,7 +62,10 @@ public class SettingsTest extends AbstractSeleniumTest {
             .getTime();
 
     private static final String BMW_CUP_RACE_NAME = "R1";
-//    private static final String AUDI_CUP_RACE_NAME = "R1";
+    
+    private static final String CUSTOM_COURSE_AREA = "Custom X";
+    
+    private static final String URL_PARAMETER_IGNORE_LOCAL_SETTINGS = "ignoreLocalSettings=true";
 
     private TrackableRaceDescriptor trackableRace;
 
@@ -175,7 +180,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.AVERAGE_JIBE_LOSS, DetailCheckboxInfo.PENALTY_CIRCLE
 
         };
-        leaderboardSettingsPanel.selectDetailsAndUnselectOthers(detailsToSelect);
+        leaderboardSettingsPanel.selectDetailsAndDeselectOther(detailsToSelect);
 
         leaderboardSettingsPanel.setRefreshInterval(2);
 
@@ -201,7 +206,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
 
         leaderboardSettingsPanel.setNumberOfRacesToDisplay(2);
-        leaderboardSettingsPanel.selectDetailsAndUnselectOthers();
+        leaderboardSettingsPanel.selectDetailsAndDeselectOther();
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         leaderboardPage = urlConfigurationDialog.openLeaderboard();
@@ -262,7 +267,7 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         leaderboardSettingsPanel.setCheckboxValue("R2CheckBox", false);
         leaderboardSettingsPanel.setCheckboxValue("R3CheckBox", false);
-        leaderboardSettingsPanel.selectDetailsAndUnselectOthers(detailsToSelect);
+        leaderboardSettingsPanel.selectDetailsAndDeselectOther(detailsToSelect);
 
         // check the displaying leaderboard table columns of a tracked race
         LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
@@ -327,7 +332,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.AVERAGE_JIBE_LOSS, DetailCheckboxInfo.PENALTY_CIRCLE
 
         };
-        leaderboardSettingsPanel.selectDetailsAndUnselectOthers(detailsToSelect);
+        leaderboardSettingsPanel.selectDetailsAndDeselectOther(detailsToSelect);
 
         LeaderboardPageConfigurationPanelPO leaderboardPageSettings = urlConfigurationDialog
                 .goToLeaderboardPageSettings();
@@ -352,7 +357,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.AVERAGE_MANEUVER_LOSS
 
         };
-        leaderboardSettingsPanel.selectDetailsAndUnselectOthers(overallDetailsToSelect);
+        leaderboardSettingsPanel.selectDetailsAndDeselectOther(overallDetailsToSelect);
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
@@ -420,7 +425,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.AVERAGE_MANEUVER_LOSS
 
         };
-        leaderboardSettingsPanel.selectDetailsAndUnselectOthers(newDetails);
+        leaderboardSettingsPanel.selectDetailsAndDeselectOther(newDetails);
         int newRefreshInterval = 2;
         leaderboardSettingsPanel.setRefreshInterval(newRefreshInterval);
         
@@ -481,4 +486,139 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertArrayEquals(newDetails, leaderboardSettingsPanel.getSelectedDetails());
         Assert.assertEquals(newRefreshInterval, leaderboardSettingsPanel.getRefreshInterval());
     }
+    
+    @Test
+    public void testRegattaOverviewSettingsHandling() {
+        // create event
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false, CUSTOM_COURSE_AREA);
+        
+        //add a second regatta to the event and link its leaderboard to the event leaderboard
+        RegattaStructureManagementPanelPO regattas = adminConsole.goToRegattaStructure();
+        regattas.createRegattaAndAddToEvent(new RegattaDescriptor(AUDI_CUP_REGATTA, AUDI_CUP_BOAT_CLASS), BMW_CUP_EVENT, CUSTOM_COURSE_AREA);
+        
+        //open regatta overview for the created event
+        events = adminConsole.goToEvents();
+        RegattaOverviewPage regattaOverviewPage = events.goToRegattaOverviewOfEvent(BMW_CUP_EVENT);
+        RegattaOverviewSettingsDialogPO regattaOverviewSettingsDialog = regattaOverviewPage.getRegattaOverviewSettingsDialog();
+        
+        //assert state
+        String regattaOverviewUrl = regattaOverviewPage.getCurrentUrl();
+        Assert.assertTrue(regattaOverviewUrl.contains(URL_PARAMETER_IGNORE_LOCAL_SETTINGS));
+        Assert.assertFalse(regattaOverviewSettingsDialog.isMakeDefaultButtonVisible());
+        //per default all course areas and regatta names are selected => selectedValues equals availableValues
+        List<String> initiallySelectedCourseAreas = regattaOverviewSettingsDialog.getSelectedCourseAreas();
+        List<String> initiallySelectedRegattaNames = regattaOverviewSettingsDialog.getSelectedRegattaNames();
+        Assert.assertEquals(2, initiallySelectedCourseAreas.size());
+        Assert.assertEquals(2, initiallySelectedRegattaNames.size());
+        
+        //save initial state
+        boolean initialShowOnlyCurrentlyRunningRaces = regattaOverviewSettingsDialog.isShowOnlyCurrentlyRunningRaces();
+        boolean initialShowOnlyRacesOfSameDay = regattaOverviewSettingsDialog.isShowOnlyRacesOfSameDay();
+        
+        //apply new state
+        List<String> newSelectedCourseAreas = initiallySelectedCourseAreas.subList(1, 2);
+        List<String> newSelectedRegattaNames = initiallySelectedRegattaNames.subList(0, 1);
+        regattaOverviewSettingsDialog.selectCourseAreasAndDeselectOther(newSelectedCourseAreas);
+        regattaOverviewSettingsDialog.selectRegattaNamesAndDeselectOther(newSelectedRegattaNames);
+        regattaOverviewSettingsDialog.setShowOnlyCurrentlyRunningRaces(!initialShowOnlyCurrentlyRunningRaces);
+        regattaOverviewSettingsDialog.setShowOnlyRacesOfSameDay(!initialShowOnlyRacesOfSameDay);
+        regattaOverviewSettingsDialog.pressOk();
+        
+        //ensure the regatta overview has still the initial state after reload due to ignoreLocalSettings flag
+        regattaOverviewPage = RegattaOverviewPage.goToPage(getWebDriver(), regattaOverviewUrl);
+        regattaOverviewSettingsDialog = regattaOverviewPage.getRegattaOverviewSettingsDialog();
+        Assert.assertEquals(initiallySelectedCourseAreas, regattaOverviewSettingsDialog.getSelectedCourseAreas());
+        Assert.assertEquals(initiallySelectedRegattaNames, regattaOverviewSettingsDialog.getSelectedRegattaNames());
+        Assert.assertEquals(initialShowOnlyCurrentlyRunningRaces, regattaOverviewSettingsDialog.isShowOnlyCurrentlyRunningRaces());
+        Assert.assertEquals(initialShowOnlyRacesOfSameDay, regattaOverviewSettingsDialog.isShowOnlyRacesOfSameDay());
+        
+        //verify settings storage support without ignoreLocalSettingsParameter
+        String regattaOverviewUrlWithoutIgnoreLocalSettings = regattaOverviewUrl.replace(URL_PARAMETER_IGNORE_LOCAL_SETTINGS, "");
+        regattaOverviewPage = RegattaOverviewPage.goToPage(getWebDriver(), regattaOverviewUrlWithoutIgnoreLocalSettings);
+        regattaOverviewSettingsDialog = regattaOverviewPage.getRegattaOverviewSettingsDialog();
+        Assert.assertTrue(regattaOverviewSettingsDialog.isMakeDefaultButtonVisible());
+        regattaOverviewSettingsDialog.selectCourseAreasAndDeselectOther(newSelectedCourseAreas);
+        regattaOverviewSettingsDialog.selectRegattaNamesAndDeselectOther(newSelectedRegattaNames);
+        regattaOverviewSettingsDialog.setShowOnlyCurrentlyRunningRaces(!initialShowOnlyCurrentlyRunningRaces);
+        regattaOverviewSettingsDialog.setShowOnlyRacesOfSameDay(!initialShowOnlyRacesOfSameDay);
+        regattaOverviewSettingsDialog.pressOk();
+        
+        //reload and verify the regatta overview has previous values set
+        regattaOverviewPage = RegattaOverviewPage.goToPage(getWebDriver(), regattaOverviewUrlWithoutIgnoreLocalSettings);
+        regattaOverviewSettingsDialog = regattaOverviewPage.getRegattaOverviewSettingsDialog();
+        Assert.assertEquals(newSelectedCourseAreas, regattaOverviewSettingsDialog.getSelectedCourseAreas());
+        Assert.assertEquals(newSelectedRegattaNames, regattaOverviewSettingsDialog.getSelectedRegattaNames());
+        Assert.assertEquals(!initialShowOnlyCurrentlyRunningRaces, regattaOverviewSettingsDialog.isShowOnlyCurrentlyRunningRaces());
+        Assert.assertEquals(!initialShowOnlyRacesOfSameDay, regattaOverviewSettingsDialog.isShowOnlyRacesOfSameDay());
+        
+        // create second event
+        adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(AUDI_CUP_EVENT, AUDI_CUP_EVENTS_DESC,
+                AUDI_VENUE, AUDI_START_EVENT_TIME, AUDI_STOP_EVENT_TIME, true, AUDI_CUP_REGATTA, AUDI_CUP_BOAT_CLASS,
+                AUDI_START_EVENT_TIME, AUDI_STOP_EVENT_TIME, false, CUSTOM_COURSE_AREA);
+        
+        //add a second regatta to the event and link its leaderboard to the event leaderboard
+        regattas = adminConsole.goToRegattaStructure();
+        regattas.createRegattaAndAddToEvent(new RegattaDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS), AUDI_CUP_EVENT, CUSTOM_COURSE_AREA);
+        
+        //open regatta overview without ignoreLocalSettings flag for the recently created event
+        events = adminConsole.goToEvents();
+        String audiCupRegattaOverviewUrl = events.getRegattaOverviewUrlOfEvent(AUDI_CUP_EVENT);
+        String audiCupRegattaOverviewUrlWithoutIgnoreLocalSettings = audiCupRegattaOverviewUrl.replace(URL_PARAMETER_IGNORE_LOCAL_SETTINGS, "");
+        regattaOverviewPage = RegattaOverviewPage.goToPage(getWebDriver(), audiCupRegattaOverviewUrlWithoutIgnoreLocalSettings);
+        regattaOverviewSettingsDialog = regattaOverviewPage.getRegattaOverviewSettingsDialog();
+        
+        //verify the initial values are untouched
+        List<String> initiallySelectedCourseAreasForAudi = regattaOverviewSettingsDialog.getSelectedCourseAreas();
+        List<String> initiallySelectedRegattaNamesForAudi = regattaOverviewSettingsDialog.getSelectedRegattaNames();
+        Assert.assertEquals(2, initiallySelectedCourseAreasForAudi.size());
+        Assert.assertEquals(2, initiallySelectedRegattaNamesForAudi.size());
+        Assert.assertEquals(initialShowOnlyCurrentlyRunningRaces, regattaOverviewSettingsDialog.isShowOnlyCurrentlyRunningRaces());
+        Assert.assertEquals(initialShowOnlyRacesOfSameDay, regattaOverviewSettingsDialog.isShowOnlyRacesOfSameDay());
+        
+        //apply new state
+        List<String> newSelectedCourseAreasForAudi = initiallySelectedCourseAreasForAudi.subList(0, 1);
+        List<String> newSelectedRegattaNamesForAudi = initiallySelectedRegattaNamesForAudi.subList(1, 2);
+        regattaOverviewSettingsDialog.selectCourseAreasAndDeselectOther(newSelectedCourseAreasForAudi);
+        regattaOverviewSettingsDialog.selectRegattaNamesAndDeselectOther(newSelectedRegattaNamesForAudi);
+        regattaOverviewSettingsDialog.setShowOnlyCurrentlyRunningRaces(!initialShowOnlyCurrentlyRunningRaces);
+        regattaOverviewSettingsDialog.setShowOnlyRacesOfSameDay(initialShowOnlyRacesOfSameDay);
+        regattaOverviewSettingsDialog.pressMakeDefault();
+        
+        //reload first event and verify the regatta overview has previous values set
+        regattaOverviewPage = RegattaOverviewPage.goToPage(getWebDriver(), regattaOverviewUrlWithoutIgnoreLocalSettings);
+        regattaOverviewSettingsDialog = regattaOverviewPage.getRegattaOverviewSettingsDialog();
+        Assert.assertEquals(newSelectedCourseAreas, regattaOverviewSettingsDialog.getSelectedCourseAreas());
+        Assert.assertEquals(newSelectedRegattaNames, regattaOverviewSettingsDialog.getSelectedRegattaNames());
+        Assert.assertEquals(!initialShowOnlyCurrentlyRunningRaces, regattaOverviewSettingsDialog.isShowOnlyCurrentlyRunningRaces());
+        Assert.assertEquals(!initialShowOnlyRacesOfSameDay, regattaOverviewSettingsDialog.isShowOnlyRacesOfSameDay());
+        
+        //verify global settings with make default button
+        regattaOverviewSettingsDialog.pressMakeDefault();
+        //open second event again and verify that the global settings of the first event have applied
+        regattaOverviewPage = RegattaOverviewPage.goToPage(getWebDriver(), audiCupRegattaOverviewUrlWithoutIgnoreLocalSettings);
+        regattaOverviewSettingsDialog = regattaOverviewPage.getRegattaOverviewSettingsDialog();
+        //context specific settings must stay initial
+        Assert.assertEquals(2, regattaOverviewSettingsDialog.getSelectedCourseAreas().size());
+        Assert.assertEquals(2, regattaOverviewSettingsDialog.getSelectedRegattaNames().size());
+        //global settings must match with the settings of the first event
+        Assert.assertEquals(!initialShowOnlyCurrentlyRunningRaces, regattaOverviewSettingsDialog.isShowOnlyCurrentlyRunningRaces());
+        Assert.assertEquals(!initialShowOnlyRacesOfSameDay, regattaOverviewSettingsDialog.isShowOnlyRacesOfSameDay());
+        
+        
+        //verify that the stored values are ignored with ignoreLocalSettings flag set
+        regattaOverviewPage = RegattaOverviewPage.goToPage(getWebDriver(), audiCupRegattaOverviewUrl);
+        regattaOverviewSettingsDialog = regattaOverviewPage.getRegattaOverviewSettingsDialog();
+        Assert.assertEquals(initiallySelectedCourseAreasForAudi, regattaOverviewSettingsDialog.getSelectedCourseAreas());
+        Assert.assertEquals(initiallySelectedRegattaNamesForAudi, regattaOverviewSettingsDialog.getSelectedRegattaNames());
+        Assert.assertEquals(initialShowOnlyCurrentlyRunningRaces, regattaOverviewSettingsDialog.isShowOnlyCurrentlyRunningRaces());
+        Assert.assertEquals(initialShowOnlyRacesOfSameDay, regattaOverviewSettingsDialog.isShowOnlyRacesOfSameDay());
+        
+    }
+    
 }

@@ -93,7 +93,7 @@ public class LeaderboardSettingsPanelPO extends PageArea {
         return Integer.valueOf(textField.getAttribute("value"));
     }
     
-    public void selectDetailsAndUnselectOthers(DetailCheckboxInfo...detailsToSelect) {
+    public void selectDetailsAndDeselectOther(DetailCheckboxInfo...detailsToSelect) {
         Arrays.sort(detailsToSelect);
         for (DetailCheckboxInfo detail : DetailCheckboxInfo.values()) {
             boolean selected = Arrays.binarySearch(detailsToSelect, detail) >= 0;

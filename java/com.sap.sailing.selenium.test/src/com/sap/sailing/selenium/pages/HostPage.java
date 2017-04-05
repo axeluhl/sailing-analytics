@@ -76,4 +76,8 @@ public abstract class HostPage extends PageObject {
     protected interface HostPageSupplier<T extends HostPage> {
         T get(WebDriver driver);
     }
+    
+    public String getCurrentUrl() {
+        return driver.getCurrentUrl();
+    }
 }
