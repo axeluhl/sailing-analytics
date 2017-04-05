@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -23,6 +24,8 @@ public class PreRaceRacemapViewImpl extends ResizeComposite implements PreRaceRa
     ResizableFlowPanel raceInfoHolder;
 
     PreRaceStatisticsBox statistics = new PreRaceStatisticsBox(false);
+
+    private NumberFormat compactFormat = NumberFormat.getFormat("#.00");;
 
     interface PreRaceRacemapViewImplUiBinder extends UiBinder<Widget, PreRaceRacemapViewImpl> {
     }
@@ -53,10 +56,10 @@ public class PreRaceRacemapViewImpl extends ResizeComposite implements PreRaceRa
         statistics.addItem("", StringMessages.INSTANCE.url(), url);
         statistics.addItem(PreRaceStatisticsBox.ICON_COMPATITORS_COUNT, StringMessages.INSTANCE.competitors(),
                 result.getCompetitors());
-        statistics.addItem(PreRaceStatisticsBox.ICON_SUM_MILES, "18 Approximate Distance",
-                result.getDuration().asSeconds());
-        statistics.addItem(PreRaceStatisticsBox.ICON_FASTEST_SAILOR, "18 Approximate Time",
-                result.getDuration().asSeconds());
+        statistics.addItem(PreRaceStatisticsBox.ICON_SUM_MILES, "18 Approximate Distance (m)",
+                compactFormat.format(result.getDistance().getSeaMiles()));
+        statistics.addItem(PreRaceStatisticsBox.ICON_FASTEST_SAILOR, "18 Approximate Time (s)",
+                compactFormat.format(result.getDuration().asMinutes()));
         
         statistics.addItem("", "18 Legs",
                 result.getLegs());

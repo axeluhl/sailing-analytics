@@ -19,16 +19,19 @@ public class TargetTimeInfoImpl implements TargetTimeInfo {
         private final Duration expectedDuration;
         private final TimePoint expectedStartTimePoint;
         private final LegType legType;
+        private Distance expectedDistance;
 
         public LegTargetTimeInfoImpl(Distance distance, Wind wind, Bearing legBearing, Duration expectedDuration,
-                TimePoint expectedStartTimePoint, LegType legType) {
+                TimePoint expectedStartTimePoint, LegType legType, Distance expectedDistance) {
             super();
             this.distance = distance;
             this.wind = wind;
             this.legBearing = legBearing;
+            this.expectedDistance = expectedDistance;
             this.expectedDuration = expectedDuration;
             this.expectedStartTimePoint = expectedStartTimePoint;
             this.legType = legType;
+            this.expectedDistance = expectedDistance;
         }
 
         @Override
@@ -72,6 +75,11 @@ public class TargetTimeInfoImpl implements TargetTimeInfo {
                     + ", expectedDuration=" + expectedDuration + ", expectedStartTimePoint=" + expectedStartTimePoint
                     + ", legType=" + legType + "]";
         }
+
+        @Override
+        public Distance getExpectedDistance() {
+            return expectedDistance;
+        }
     }
 
     public TargetTimeInfoImpl(Iterable<LegTargetTimeInfo> legInfos) {
@@ -112,5 +120,14 @@ public class TargetTimeInfoImpl implements TargetTimeInfo {
     @Override
     public String toString() {
         return "TargetTimeInfoImpl [legInfos=" + legInfos + "]";
+    }
+
+    @Override
+    public Distance getExpectedDistance() {
+        Distance result = Distance.NULL;
+        for (final LegTargetTimeInfo legInfo : legInfos) {
+            result = result.add(legInfo.getExpectedDistance());
+        }
+        return result;
     }
 }

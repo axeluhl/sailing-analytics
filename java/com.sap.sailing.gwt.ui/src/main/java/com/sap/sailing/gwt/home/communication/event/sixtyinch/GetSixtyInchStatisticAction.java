@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TargetTimeInfo;
@@ -54,16 +55,31 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
         legs = race.getCourse().getLegs().size();
         DynamicTrackedRace trace = context.getRacingEventService().getTrackedRace(identifier);
 
+
         Duration duration = null;
         try {
             TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(MillisecondsTimePoint.now());
             duration = timeToComplete.getExpectedDuration();
+
+            trace.getEstimatedDistanceToComplete(MillisecondsTimePoint.now());
         } catch (NotEnoughDataHasBeenAddedException e) {
             e.printStackTrace();
         } catch (NoWindException e) {
             e.printStackTrace();
         }
 
-        return new GetSixtyInchStatisticDTO(competitors, legs, duration);
+        Distance distance = null;
+        try {
+            TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(MillisecondsTimePoint.now());
+            distance = timeToComplete.getExpectedDistance();
+
+            trace.getEstimatedDistanceToComplete(MillisecondsTimePoint.now());
+        } catch (NotEnoughDataHasBeenAddedException e) {
+            e.printStackTrace();
+        } catch (NoWindException e) {
+            e.printStackTrace();
+        }
+
+        return new GetSixtyInchStatisticDTO(competitors, legs, duration, distance);
     }
 }

@@ -83,12 +83,12 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
+import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
@@ -3943,7 +3943,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final List<LegTargetTimeInfo> legTargetTimes = new ArrayList<>();
         for (TrackedLeg leg : trackedLegs.values()) {
             final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, current);
-            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeToComplete(polarDataService, current, markPositionCache);
+            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeAndDistanceToComplete(polarDataService, current, markPositionCache);
             legTargetTimes.add(legTargetTime);
             durationOfAllLegs = durationOfAllLegs.plus(legTargetTime.getExpectedDuration());
             current = current.plus(legTargetTime.getExpectedDuration()); // simulate the next leg with the wind as of the projected finishing time of the previous leg
@@ -3951,6 +3951,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return new TargetTimeInfoImpl(legTargetTimes);
     }
     
+    @Override
+    public Distance getEstimatedDistanceToComplete(final TimePoint timepoint)
+            throws NotEnoughDataHasBeenAddedException, NoWindException {
+        if (polarDataService == null) {
+            throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
+        }
+        Distance distanceOfAllLegs = Distance.NULL;
+        TimePoint current = timepoint;
+        final List<LegTargetTimeInfo> legTargetTimes = new ArrayList<>();
+        for (TrackedLeg leg : trackedLegs.values()) {
+            final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, current);
+            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeAndDistanceToComplete(polarDataService, current,
+                    markPositionCache);
+            legTargetTimes.add(legTargetTime);
+            distanceOfAllLegs = distanceOfAllLegs.add(legTargetTime.getExpectedDistance());
+            current = current.plus(legTargetTime.getExpectedDuration()); // simulate the next leg with the wind as of
+                                                                         // the projected finishing time of the previous
+                                                                         // leg
+        }
+        return distanceOfAllLegs;
+    }
+
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;

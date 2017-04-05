@@ -934,6 +934,22 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
+    /**
+     * Calculates the estimated distance it takes a competitor to sail the race, from start to finish.
+     * 
+     * @param timepoint
+     *            Used for positions of marks and wind information; note that sometimes the marks are not in place yet
+     *            when the race starts and that a windward mark may be collected already before the race finishes.
+     * 
+     * @return estimated time it takes to complete the race, plus more useful information about how this result came
+     *         about
+     * 
+     * @throws NotEnoughDataHasBeenAddedException
+     *             thrown if not enough polar data has been added or polar data service is not available
+     * @throws NoWindException
+     */
+    Distance getEstimatedDistanceToComplete(TimePoint now) throws NotEnoughDataHasBeenAddedException, NoWindException;
+
     void setPolarDataService(PolarDataService polarDataService);
 
     default RaceLogResolver getRaceLogResolver() {

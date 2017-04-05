@@ -1138,4 +1138,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
         return null;
     }
+
+    @Override
+    public Distance getEstimatedDistanceToComplete(TimePoint now) {
+        return null;
+    }
 }
