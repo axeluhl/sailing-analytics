@@ -519,23 +519,15 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         makeControlsReactToFillRegattas(regattas);
-        if (Util.isEmpty(regattas)) {
-            raceTable.setVisible(false);
-            noTrackedRacesLabel.setVisible(true);
-        } else {
-            raceTable.setVisible(true);
-            noTrackedRacesLabel.setVisible(false);
-        }
-        List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
-        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
-        List<String> regattaNames = new ArrayList<>();
+        displayRaceTableUI(regattas);
+        final List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
+        final List<String> regattaNames = new ArrayList<>();
         for (RegattaDTO regatta : regattas) {
-            newAllRegattas.add(regatta);
             for (RaceDTO race : regatta.races) {
                 if (race != null) {
                     if (raceIsToBeAddedToList(race)) {
-                        //We need only those regatta names which are available 
-                        //at tracking table
+                        // We need only those regatta names which are available
+                        // at tracking table
                         if (!regattaNames.contains(regatta.getName())) {
                             regattaNames.add(regatta.getName());
                         }
@@ -544,20 +536,49 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 }
             }
         }
-
-        listBoxRegattas.clear();
-        listBoxRegattas.addItem(stringMessages.all(), "");
-        regattaNames.stream().sorted().forEach(regatta->listBoxRegattas.addItem(regatta, regatta));
+        refreshListBoxRegattas(regattaNames);
         allRaces = newAllRaces;
         filterablePanelRaces.updateAll(allRaces);
+    }
+
+    private void refreshListBoxRegattas(List<String> regattaNames) {
+        final String lastSelectedRegattaName = listBoxRegattas.getSelectedValue();
+        listBoxRegattas.clear();
+        listBoxRegattas.addItem(stringMessages.all(), "");
+        regattaNames.stream().sorted().forEach(regatta -> listBoxRegattas.addItem(regatta, regatta));
+        restoreListBoxRegattasSelection(lastSelectedRegattaName);
+    }
+
+    private void restoreListBoxRegattasSelection(String lastSelectedRegattaName) {
+        for (int i = 0; i < listBoxRegattas.getItemCount(); i++) {
+            if (listBoxRegattas.getValue(i).equals(lastSelectedRegattaName)) {
+                listBoxRegattas.setSelectedIndex(i);
+                break;
+            }
+        }
+    }
+
+    private void displayRaceTableUI(Iterable<RegattaDTO> regattas) {
+        if (Util.isEmpty(regattas)) {
+            hideRaceTable();
+        } else {
+            showRaceTable();
+        }
+    }
+
+    private void showRaceTable() {
+        raceTable.setVisible(true);
+        noTrackedRacesLabel.setVisible(false);
+    }
+
+    private void hideRaceTable() {
+        raceTable.setVisible(false);
+        noTrackedRacesLabel.setVisible(true);
     }
 
     /**
      * Allows applying some sort of filter to the process of adding races. Defaults to true in standard implementation.
      * Override for custom behavior
-     * 
-     * @param race
-     * @return
      */
     protected boolean raceIsToBeAddedToList(RaceDTO race) {
         return true;
