@@ -45,7 +45,7 @@ public class NonCompetingCompetitorTest extends AbstractManeuverDetectionTestCas
     public void testNoNonCompetingCompetitors() throws ParseException, NoWindException {
     	for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
     		assertFalse(competitor.getName().startsWith("Ump"));
-    		assertSame(getDomainFactory().getOrCreateBoatClass("GC32"), competitor.getBoat());
+    		assertSame(getDomainFactory().getOrCreateBoatClass("GC32"), competitor.getBoat().getBoatClass());
     	}
     }
 }
