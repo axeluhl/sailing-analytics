@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2017-03-03T16:43:54Z" original="/usr/sap/ljs/app/Converter_7519916557605079548/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="fr">
+	<file datatype="javapropertyresourcebundle" date="2017-04-05T08:55:09Z" original="/usr/sap/ljs/app/Converter_7519916557605079548/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="fr">
 		<header>
 			<skl>
 				<internal-file crc="687dae536d957f976a561fc5861eb426" form="base64">H4sIAAAAAAAAAI1XS2/jNhC+81fwskB8KJrs9omCBZy4cdLmYcTGBgv0QssjmbAsGiSd1P31nRmKEu3ETi8UOfNxOJwnNd0ALNSURsHjDJopFLZZ+EsorYPIkxfnXs6ZIEbGB90UMHP6BWrcnQgyUcSDXoOiQdxBNdttQOFX0kRMtalvR4o+8mG7noMT30A7RQOhI43xLftBB2MbXZuwU9lcDAtnm91atV/xBJUOQav2K67s1nkYOtAqTiXNxaXV4arW3iuaSZ6K6xogKB7Fky5A0YAS1hsIJlin+ikL4L1iBnqtaBBT1L5YznSl4kziFG+jF+DmVrsFXdc01ciutWmeIDgDL+CulrhSGczz4afAxPdkp9MSKy/Gk+m1+ecUDBESISjvEh1nP0Az5gCPDi9WH29iGBrZMnAK1Rqa4E/tIyhGXYKKZ9MsPtCPIK1699qtJuhWOuzEDoLJFhct/wR+W4eP7C8jLG55LPvQ+NBx0payh5OiDWwRclrLiMnDaezsdpMHjmRKDsm5FC8UFLlh9m5PgPwinH6oa9FH/Xjj0bgpZroI6MNiPyh6evR+8mDnpu7u/QWJNQ0Omiosb5tL0FusNyHuSHRpGpk44rIM5+pK12uaXag7Uy2D1MbR8nO7nDuAf4EoX9QYY6mGjPSDurdoJB1y4o/q2oFfZpSfFB5vmyoj/axuULx8Rd1o+Ysa65oZvyZs1RIuzpFiXdTxQn01tkY1pO9on9XN1jlToBmwhtVY4V5gWlDpTSvJS3l2jiXYh9/khXzF6AmDffhtMwFXoOzDfWiyT4dQCsdTGzjOeeNw7m29DfCkm5VKC0mr6DBqD2+8xT2DXFWGrl8MwzRoRHTtIljJFIllmCexAz0vsQXRkqI0StoHHLaoKLbvU5Ha7iBFh+HaoL0o4hWtSR5TJJFE7DOPZQpEryKFMqCjdagZ1bIMweuO+6dBF2VcXnfcCWDvCrsr44p6D9YyZMthrceY/f7R3VnvEct6M0laJyOxb8WWLhs7jVkctXQsFYSQZ5/o2DvOqUGvn12Y7fraNMYvc+2YLCM9uw76Or8ELd9qfgnhFaDpPDCkOsAHvHcleXbRukV+93t74kDcei4i+Na49bKddlr0ZYurf6ZQz2kbQ+9ptzoE85mpf0Sn88slLeLzhbytaIihuPdGauOuq2dMHZYBa1wE8Lznj4yDgt4zWOibClS3lpFACTSCCmuO77LwcE+XkCc2y7OJ9YbyeyAwUtD9ambbMJhgzsrv++gYdJcnf/SXp5V41ruNNVgv0kSkLksy2zkLZjulMKT50RRmmxxmcDRUn8CzpXFh93YHR9CXgw1UgV7xKn1yDBcvugm6Arv1fzSLx/LONKASTuZpkkMlYjlLDFVmqiN0yo2uS6wCS+CIps4aSwprEJYglwigbTQvucrU2Hrf1+HocTOzBrRHE26ToRSRJNPIty1V3MNC1/xk5RkX7liY8c2Ll6cQjjWZ1zGKez6/1HM+v9qprV07i49btwXJ7D6+zmbPowFD2GF/NTb4DBi9eLYKfiCFj90hYjKOmOMzmep7JvbvbVmWi9mAtYuPCBYY3w8hGaR9RUZzeDZHGUlip1/VN/0qNiYUSzWhUSwBanWDg3AYlzdAjwL1RLEf5xmZciFnSU6Om22d7+0yZQ/ZV1eG3/qkJdardpqev6Ot458Y1a5lInSANhz78h1fw5hTK7BlOc1smkzbsqRPjXdFZHGnmwWlZ+6FlnYITYWEHElmHzZVjY2kFdzXmUCOJudLTQiKhuGAsjtE5DFB7bH/Q1AdkUeeg71KHBw+exfOW0iuzTEhSZ2TQnJNDs49OOJAYLaXa5J/bNKPMA2U5VgTciGY+8dBSdbBD9Sbv6QhVmqsJe96QLVMqY844H3HfeAvvjzfWXy9H6uvUNsC/82xx2FujK1diP8A9Xa4EWEQAAA=</internal-file>
@@ -109,7 +109,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="BravoFixTrackSailingDomainRetrieverChain" resname="BravoFixTrackSailingDomainRetrieverChain">
 				<source>Bravo Tracks</source>
-				<target state="signed-off">Suivis Bravo</target>
+				<target state="signed-off">Enregistrements Bravo</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="FoilingSegmentsSailingDomainRetrieverChain" resname="FoilingSegmentsSailingDomainRetrieverChain">
 				<source>Foiled Segments</source>
@@ -165,7 +165,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="BravoFixTrack" resname="BravoFixTrack">
 				<source>Bravo Fix Track</source>
-				<target state="signed-off">Suivi de positions Bravo</target>
+				<target state="signed-off">Enregistrement de position Bravo</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindFix" resname="WindFix">
 				<source>Wind Fix</source>
@@ -177,7 +177,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindStrengthInBeaufort" resname="WindStrengthInBeaufort">
 				<source>Wind Strength in Beaufort</source>
-				<target state="signed-off">Force du vent sur l’échelle de Beaufort</target>
+				<target state="translated">Force du vent sur l'échelle de Beaufort</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft0" resname="Bft0">
 				<source>Calm</source>
@@ -273,7 +273,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfTacks" resname="NumberOfTacks">
 				<source>Number of Tacks</source>
-				<target state="signed-off">Nombre de bords longs</target>
+				<target state="signed-off">Nombre de virements</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfJibes" resname="NumberOfJibes">
 				<source>Number of Jibes</source>
@@ -321,7 +321,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Tack" resname="Tack">
 				<source>Tack</source>
-				<target state="translated">Virement</target>
+				<target state="signed-off">Virement</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedBefore" resname="SpeedBefore">
 				<source>Speed Before Maneuver</source>
@@ -357,7 +357,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="TackAtStart" resname="TackAtStart">
 				<source>Tack at Start</source>
-				<target state="translated">Virement au départ</target>
+				<target state="signed-off">Virement au départ</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedTenSecondsAfterStart" resname="SpeedTenSecondsAfterStart">
 				<source>Speed 10s After Start</source>
@@ -369,11 +369,11 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindwardDistanceToAdvantageousEndOfLine" resname="WindwardDistanceToAdvantageousEndOfLine">
 				<source>Windward Distance to Advantageous End of Line</source>
-				<target state="signed-off">Distance au vent jusqu’au côté avantageux de la ligne</target>
+				<target state="translated">Distance au vent jusqu'au côté avantageux de la ligne</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankAfterHalfOfTheFirstLeg" resname="RankAfterHalfOfTheFirstLeg">
 				<source>Rank after the half of the first leg</source>
-				<target state="signed-off">Place après la première moitié de la première portion de parcours</target>
+				<target state="signed-off">Place après la moitié de la première portion de parcours</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AdvantageousEndOfLine" resname="AdvantageousEndOfLine">
 				<source>Advantageous End of Line</source>
@@ -401,11 +401,11 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="windSpeedKnots" resname="windSpeedKnots">
 				<source>True Wind Speed (kts) </source>
-				<target state="translated">Vitesse réelle du vent (en nds) </target>
+				<target state="signed-off">Vitesse réelle du vent (en nds) </target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="speedInKnots" resname="speedInKnots">
 				<source>Speed (kts)</source>
-				<target state="translated">Vitesse (nds)</target>
+				<target state="signed-off">Vitesse (nds)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="bearing" resname="bearing">
 				<source>Direction (�T)</source>
@@ -413,7 +413,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindTrack" resname="WindTrack">
 				<source>Wind Track</source>
-				<target state="signed-off">Suivi du vent</target>
+				<target state="signed-off">Enregistrement vent</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="timeSpentFoiling" resname="timeSpentFoiling">
 				<source>Time spent foiling</source>
@@ -465,11 +465,11 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AbsoluteTrueWindAngleAtTakeoff" resname="AbsoluteTrueWindAngleAtTakeoff">
 				<source>Absolute true wind angle (TWA) at takeoff</source>
-				<target state="signed-off">Angle du vent apparent réel au déjaugeage (TWA)</target>
+				<target state="signed-off">Angle du vent réel au déjaugeage (TWA)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AbsoluteTrueWindAngleAtLanding" resname="AbsoluteTrueWindAngleAtLanding">
 				<source>Absolute true wind angle (TWA) at landing</source>
-				<target state="signed-off">Angle du vent apparent réel à la fin du planing (TWA)</target>
+				<target state="signed-off">Angle du vent réel à la fin du planing (TWA)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindStrengthInBeaufortAtTakeoff" resname="WindStrengthInBeaufortAtTakeoff">
 				<source>Wind strength in beaufort at takeoff</source>
@@ -501,11 +501,11 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AverageAbsoluteTrueWindAngle" resname="AverageAbsoluteTrueWindAngle">
 				<source>Average absolute true wind angle</source>
-				<target state="signed-off">Angle du vent apparent réel moyen</target>
+				<target state="signed-off">Angle du vent réel moyen</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AbsoluteTrueWindAngle" resname="AbsoluteTrueWindAngle">
 				<source>Absolute true wind angle (TWA)</source>
-				<target state="signed-off">Angle du vent apparent réel (TWA)</target>
+				<target state="signed-off">Angle du vent réel (TWA)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Wind" resname="Wind">
 				<source>Wind</source>
