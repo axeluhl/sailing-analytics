@@ -2,8 +2,6 @@ package com.sap.sailing.selenium.pages.raceboard;
 
 import java.util.List;
 
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -32,25 +30,7 @@ public class MapSettingsPO extends PageArea {
 
     public void makeDefault() throws InterruptedException {
         saveButton.click();
-        waitForAlertAndDispose(driver);
-    }
-
-    void waitForAlertAndDispose(WebDriver driver) throws InterruptedException {
-        int i = 0;
-        while (i < DEFAULT_WAIT_TIMEOUT_SECONDS) {
-            i++;
-            try {
-                Alert alert = driver.switchTo().alert();
-                alert.dismiss();
-                break;
-            } catch (NoAlertPresentException e) {
-                Thread.sleep(1000);
-                continue;
-            }
-        }
-        if (i >= DEFAULT_WAIT_TIMEOUT_SECONDS) {
-            throw new NoAlertPresentException();
-        }
+        waitForAlertAndDismiss();
     }
 
     public boolean isWindChartSelected() {

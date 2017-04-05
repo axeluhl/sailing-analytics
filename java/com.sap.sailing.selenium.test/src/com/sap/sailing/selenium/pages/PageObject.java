@@ -10,7 +10,9 @@ import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -529,5 +531,55 @@ public class PageObject {
     
     public enum TabPanelType {
         TAB_PANEL, TAB_LAYOUT_PANEL, VERTICAL_TAB_LAYOUT_PANEL
+    }
+    
+    /**
+     * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
+     */
+    protected void waitForAlertAndAccept() throws InterruptedException {
+        waitForAlertAndAccept(DEFAULT_WAIT_TIMEOUT_SECONDS);
+    }
+
+    /**
+     * Waits for an alert box to appear and accepts the alert. If no alert shows up, an Exception is thrown.
+     */
+    protected void waitForAlertAndAccept(int timeoutInSeconds) throws InterruptedException {
+        int i = 0;
+        while (i < timeoutInSeconds) {
+            i++;
+            try {
+                Alert alert = driver.switchTo().alert();
+                alert.accept();
+                return;
+            } catch (NoAlertPresentException e) {
+                Thread.sleep(1000);
+            }
+        }
+        throw new NoAlertPresentException();
+    }
+    
+    /**
+     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     */
+    protected void waitForAlertAndDismiss() throws InterruptedException {
+        waitForAlertAndDismiss(DEFAULT_WAIT_TIMEOUT_SECONDS);
+    }
+    
+    /**
+     * Waits for an alert box to appear and dismisses the alert. If no alert shows up, an Exception is thrown.
+     */
+    protected void waitForAlertAndDismiss(int timeoutInSeconds) throws InterruptedException {
+        int i = 0;
+        while (i < timeoutInSeconds) {
+            i++;
+            try {
+                Alert alert = driver.switchTo().alert();
+                alert.accept();
+                return;
+            } catch (NoAlertPresentException e) {
+                Thread.sleep(1000);
+            }
+        }
+        throw new NoAlertPresentException();
     }
 }

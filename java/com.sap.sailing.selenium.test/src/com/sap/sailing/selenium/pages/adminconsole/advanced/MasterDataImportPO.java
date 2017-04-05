@@ -2,8 +2,6 @@ package com.sap.sailing.selenium.pages.adminconsole.advanced;
 
 import java.util.function.BooleanSupplier;
 
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -57,24 +55,6 @@ public class MasterDataImportPO extends PageArea {
         }
         new Select(leaderBoardGroupListBox).selectByValue(eventName);
         importBtn.click();
-        waitForAlertAndDispose(driver);
-    }
-
-    void waitForAlertAndDispose(WebDriver driver) throws InterruptedException {
-        int i = 0;
-        while (i < DEFAULT_WAIT_TIMEOUT_SECONDS) {
-            i++;
-            try {
-                Alert alert = driver.switchTo().alert();
-                alert.dismiss();
-                break;
-            } catch (NoAlertPresentException e) {
-                Thread.sleep(1000);
-                continue;
-            }
-        }
-        if (i >= DEFAULT_WAIT_TIMEOUT_SECONDS) {
-            throw new NoAlertPresentException();
-        }
+        waitForAlertAndDismiss();
     }
 }
