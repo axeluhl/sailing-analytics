@@ -147,7 +147,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
     }
     
     private String getIgtimiAccountUser() {
-        return decodeBase64("YmF1ckBzdGctYWNhZGVteS5vcmc=");
+        return decodeBase64("c2FpbGluZ19hbmFseXRpY3NAc2FwLmNvbQ==");
     }
     
     private String getIgtimiAccountPassword() {
