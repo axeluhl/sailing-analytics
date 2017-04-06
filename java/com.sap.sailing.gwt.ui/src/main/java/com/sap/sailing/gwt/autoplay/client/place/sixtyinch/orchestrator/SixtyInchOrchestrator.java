@@ -50,7 +50,7 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // slide8.setNextSlide(slide9);
         // slide9.setNextSlide(slide0);
 
-        slideInit.setNextNode(preRaceRacemapNode);
+        slideInit.setNextNode(lifeRaceWithRacemap);
 
         // node2.setNextNode(node7);
         // node7.setNextNode(node2);
