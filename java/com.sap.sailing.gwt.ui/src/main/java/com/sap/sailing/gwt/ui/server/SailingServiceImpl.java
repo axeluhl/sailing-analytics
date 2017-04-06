@@ -5201,6 +5201,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 numberOfWindFixesImportedPerRace.put(key, i+resultForAccount.getValue());
             }
         }
+        for (final TrackedRace trackedRace : trackedRaces) {
+        	// update polar sheets:
+        	getService().getPolarDataService().insertExistingFixes(trackedRace);
+        }
         return numberOfWindFixesImportedPerRace;
     }
 

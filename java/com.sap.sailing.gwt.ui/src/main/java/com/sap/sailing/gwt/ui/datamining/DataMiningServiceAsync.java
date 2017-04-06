@@ -45,10 +45,14 @@ public interface DataMiningServiceAsync {
             HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
             String localeInfoName, AsyncCallback<QueryResultDTO<HashSet<Object>>> callback);
 
-    <ResultType> void runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
+    <ResultType extends Serializable> void runQuery(DataMiningSession session,
+            StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
 
     void getPredefinedQueryIdentifiers(AsyncCallback<HashSet<PredefinedQueryIdentifier>> callback);
-    <ResultType> void runPredefinedQuery(DataMiningSession session, PredefinedQueryIdentifier identifier, String localeInfoName, AsyncCallback<QueryResultDTO<ResultType>> callback);
+
+    <ResultType extends Serializable> void runPredefinedQuery(DataMiningSession session,
+            PredefinedQueryIdentifier identifier, String localeInfoName,
+            AsyncCallback<QueryResultDTO<ResultType>> callback);
     
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining
