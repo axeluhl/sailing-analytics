@@ -334,10 +334,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         eventSubscriber.subscribeCompetitors(new ICompetitorsListener() {
             @Override
             public void updateCompetitor(ICompetitor competitor) {
-                final Competitor domainCompetitor = TracTracRaceTrackerImpl.this.domainFactory.getOrCreateCompetitor(competitor);
-                logger.info("Competitor "+competitor+" was updated on TracTrac side. Maybe consider updating in competitor store as well. "+
-                            "TracTrac competitor maps to "+domainCompetitor.getName()+" with sail ID "+domainCompetitor.getBoat().getSailID()+
-                            " and boat class "+domainCompetitor.getBoat().getBoatClass().getName());
+            	if (!competitor.isNonCompeting()) {
+	                final Competitor domainCompetitor = TracTracRaceTrackerImpl.this.domainFactory.getOrCreateCompetitor(competitor);
+	                logger.info("Competitor "+competitor+" was updated on TracTrac side. Maybe consider updating in competitor store as well. "+
+	                            "TracTrac competitor maps to "+domainCompetitor.getName()+" with sail ID "+domainCompetitor.getBoat().getSailID()+
+	                            " and boat class "+domainCompetitor.getBoat().getBoatClass().getName());
+            	}
             }
             
             @Override
