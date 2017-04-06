@@ -11,10 +11,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -90,6 +92,8 @@ import com.tractrac.model.lib.api.event.ICompetitorClass;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.route.IControlPoint;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -514,7 +518,7 @@ public class DomainFactoryImpl implements DomainFactory {
 			long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
 			DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI tracTracUpdateURI, UUID tracTracEventUuid,
 			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver,
-			Consumer<DynamicTrackedRace> runBeforeExposingRace) {
+			Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
@@ -537,7 +541,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     	runBeforeExposingRace.accept(trackedRace);
                     }
                     addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
-                            raceDefinition, trackedRace);
+                            raceDefinition, trackedRace, tractracRace);
                     raceCache.put(raceId, raceDefinition);
                     raceCache.notifyAll();
                 } else {
@@ -560,11 +564,47 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
+    public Iterable<IControlPoint> getControlPointsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName) {
+    	final Set<IControlPoint> result = new HashSet<>();
+    	for (final IControl control : getControlsForCourseArea(tracTracEvent, tracTracCourseAreaName)) {
+    		result.addAll(control.getControlPoints());
+    	}
+    	return result;
+    }
+    
+    @Override
+    public Iterable<IControl> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName) {
+    	final Set<IControl> result = new HashSet<>();
+    	for (final IControl control : tracTracEvent.getControls()) {
+    		if (Util.equalsWithNull(control.getCourseArea(), tracTracCourseAreaName)) {
+    			result.add(control);
+    		}
+    	}
+    	return result;
+    }
+    
+    @Override
+    public IControl getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second) {
+    	final Set<Mark> pairOfMarksToFind = new HashSet<>();
+    	pairOfMarksToFind.add(first);
+    	pairOfMarksToFind.add(second);
+    	for (final IControl control : candidates) {
+    		TracTracControlPoint cp = new ControlPointAdapter(control);
+    		Set<Mark> marksInExistingControlPoint = new HashSet<>();
+    		Util.addAll(getOrCreateControlPoint(cp).getMarks(), marksInExistingControlPoint);
+    		if (marksInExistingControlPoint.equals(pairOfMarksToFind)) {
+    			return control;
+    		}
+    	}
+    	return null;
+    }
+    
+    @Override
     public void addTracTracUpdateHandlers(URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername,
-            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace) {
+            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace, IRace tractracRace) {
         TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
-                raceDefinition.getId());
+                raceDefinition.getId(), tractracRace, this);
         trackedRace.addCourseDesignChangedListener(courseDesignHandler);
         TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,

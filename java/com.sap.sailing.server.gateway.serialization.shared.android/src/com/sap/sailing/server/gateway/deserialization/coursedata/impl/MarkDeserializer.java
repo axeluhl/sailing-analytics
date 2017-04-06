@@ -34,5 +34,4 @@ public class MarkDeserializer implements JsonDeserializer<Mark> {
         Mark mark = factory.getOrCreateMark(id, name, type, color, shape, pattern);
         return mark;
     }
-
 }

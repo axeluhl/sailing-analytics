@@ -52,7 +52,7 @@ public interface SharedDomainFactory extends CompetitorFactory {
     Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type, String color, String shape, String pattern);
 
     /**
-     * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
+     * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createControlPointWithTwoMarks(Serializable, Mark, Mark, String)} instead
      */
     ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name);
 

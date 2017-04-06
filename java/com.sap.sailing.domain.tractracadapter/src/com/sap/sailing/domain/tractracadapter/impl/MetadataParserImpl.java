@@ -154,9 +154,9 @@ public class MetadataParserImpl implements MetadataParser {
             if (name2 == null) {
                 name2 = controlPointName + " (2)";
             }
-            final Serializable id1 = mark1UUID == null ? name1 : UUID.fromString(mark1UUID);
+            final Serializable id1 = mark1UUID == null ? controlPoint.getId().toString()+" (1)" : UUID.fromString(mark1UUID);
             ControlPointMetaData mark1Metadata = new ControlPointMetaDataImpl(name1, type1, color1, shape1, pattern1, id1);
-            final Serializable id2 = mark2UUID == null ? name2 : UUID.fromString(mark2UUID);
+            final Serializable id2 = mark2UUID == null ? controlPoint.getId().toString()+" (2)" : UUID.fromString(mark2UUID);
             ControlPointMetaData mark2Metadata = new ControlPointMetaDataImpl(name2, type2, color2, shape2, pattern2, id2);
             result = Arrays.asList(new ControlPointMetaData[] { mark1Metadata, mark2Metadata });
         } else {
