@@ -144,6 +144,6 @@ public class DataEntryPO extends CellTableRowPO {
     }
 
     protected void clickActionImage(String actionName) {
-        this.context.findElement(By.xpath(".//td/div/div[@name=\"" + actionName + "\"]")).click();
+        this.context.findElement(By.xpath(".//td/div/div[@name=\"" + actionName + "\"]/img")).click();
     }
 }

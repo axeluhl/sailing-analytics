@@ -45,7 +45,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
 
         public LeaderboardUrlConfigurationDialogPO getLeaderboardPageUrlConfigurationDialog() {
             clickActionImage(ACTION_NAME_CONFIGURE_URL);
-            return waitForPO(LeaderboardUrlConfigurationDialogPO::new, "LeaderboardPageUrlConfigurationDialog", 10);
+            return waitForPO(LeaderboardUrlConfigurationDialogPO::new, "LeaderboardPageUrlConfigurationDialog", 60);
         }
     }
     
