@@ -15,6 +15,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -62,7 +64,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
-        SafeHtml cell(String url, String displayName);
+        SafeHtml cell(SafeUri url, String displayName);
     }
 
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
@@ -508,7 +510,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.getName()
                         + "&showRaceDetails=true&"+RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.cell(link, group.getName());
+                return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
             }
         };
         groupNameColumn.setSortable(true);

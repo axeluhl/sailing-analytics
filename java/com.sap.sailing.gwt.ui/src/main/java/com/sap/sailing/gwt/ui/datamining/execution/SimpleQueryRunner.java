@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.execution;
 
+import java.io.Serializable;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -93,14 +95,15 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator();
-            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Object>(counter) {
+            dataMiningService.runQuery(session, queryDefinition,
+                    new ManagedDataMiningQueryCallback<Serializable>(counter) {
                 @Override
                 protected void handleFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
                     resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
                 @Override
-                protected void handleSuccess(QueryResultDTO<Object> result) {
+                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
                     resultsPresenter.showResult(result);
                 }
             });
