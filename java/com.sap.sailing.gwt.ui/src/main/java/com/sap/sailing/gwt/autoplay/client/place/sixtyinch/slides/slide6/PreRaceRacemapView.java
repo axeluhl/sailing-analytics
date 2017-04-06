@@ -12,6 +12,6 @@ public interface PreRaceRacemapView {
 
     void showErrorNoLive(PreRaceRacemapPresenterImpl slide7PresenterImpl, AcceptsOneWidget panel, Throwable error);
 
-    void updateStatistic(GetSixtyInchStatisticDTO result, String url);
+    void updateStatistic(GetSixtyInchStatisticDTO result, String url, String windData, String windDegree);
 
 }

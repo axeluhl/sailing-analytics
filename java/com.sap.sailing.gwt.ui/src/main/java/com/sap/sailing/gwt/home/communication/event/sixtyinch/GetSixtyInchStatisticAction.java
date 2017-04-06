@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.communication.event.sixtyinch;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
@@ -33,8 +32,7 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
     private String racename;
     private String regattaname;
 
-    @SuppressWarnings("unused")
-    private GetSixtyInchStatisticAction() {
+    public GetSixtyInchStatisticAction() {
     }
 
     public GetSixtyInchStatisticAction(String racename, String regattaname) {
@@ -45,16 +43,12 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
     @Override
     @GwtIncompatible
     public GetSixtyInchStatisticDTO execute(SailingDispatchContext context) {
-        int competitors = 0;
         int legs = 0;
         RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaname, racename);
         RaceDefinition race = context.getRacingEventService().getRace(identifier);
-        for (Competitor c : race.getCompetitors()) {
-            competitors++;
-        }
+        int competitors = com.sap.sse.common.Util.size(race.getCompetitors());
         legs = race.getCourse().getLegs().size();
         DynamicTrackedRace trace = context.getRacingEventService().getTrackedRace(identifier);
-
 
         Duration duration = null;
         try {

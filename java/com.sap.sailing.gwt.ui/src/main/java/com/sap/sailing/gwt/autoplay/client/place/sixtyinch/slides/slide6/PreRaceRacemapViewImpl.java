@@ -50,19 +50,22 @@ public class PreRaceRacemapViewImpl extends ResizeComposite implements PreRaceRa
 
 
     @Override
-    public void updateStatistic(GetSixtyInchStatisticDTO result, String url) {
+    public void updateStatistic(GetSixtyInchStatisticDTO result, String url, String windSpeed, String windDegree) {
+        GWT.log("Update statistic!");
         statistics.clear();
-        // statistics.addItem(PreRaceStatisticsBox.ICON_WIND_FIX, StringMessages.INSTANCE.wind(), windData);
-        statistics.addItem("", StringMessages.INSTANCE.url(), url);
         statistics.addItem(PreRaceStatisticsBox.ICON_COMPATITORS_COUNT, StringMessages.INSTANCE.competitors(),
                 result.getCompetitors());
+        statistics.addItem(PreRaceStatisticsBox.ICON_WIND_FIX, StringMessages.INSTANCE.wind(), windSpeed);
+        statistics.addItem(PreRaceStatisticsBox.ICON_WIND_FIX, StringMessages.INSTANCE.averageDirection(), windDegree);
+
+        statistics.addItem("", "18 Legs", result.getLegs());
         statistics.addItem(PreRaceStatisticsBox.ICON_SUM_MILES, "18 Approximate Distance (m)",
                 compactFormat.format(result.getDistance().getSeaMiles()));
         statistics.addItem(PreRaceStatisticsBox.ICON_FASTEST_SAILOR, "18 Approximate Time (s)",
                 compactFormat.format(result.getDuration().asMinutes()));
         
-        statistics.addItem("", "18 Legs",
-                result.getLegs());
+        statistics.addItem("", StringMessages.INSTANCE.url(), url);
+
     }
 
 }

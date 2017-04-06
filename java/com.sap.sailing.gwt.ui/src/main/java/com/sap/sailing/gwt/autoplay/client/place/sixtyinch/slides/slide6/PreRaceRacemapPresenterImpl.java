@@ -1,12 +1,19 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticAction;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
 public class PreRaceRacemapPresenterImpl extends ConfiguredSlideBase<PreRaceRacemapPlace>
         implements PreRaceRacemapView.Slide7Presenter {
@@ -31,22 +38,54 @@ public class PreRaceRacemapPresenterImpl extends ConfiguredSlideBase<PreRaceRace
 
             @Override
             public void run() {
+                GWT.log("Trying to get new data");
+                
                 getClientFactory().getDispatch()
                         .execute(
                                 new GetSixtyInchStatisticAction(getPlace().getRace().getRaceName(),
                                         getPlace().getRace().getRegattaName()),
-                        new AsyncCallback<GetSixtyInchStatisticDTO>() {
+                                new AsyncCallback<GetSixtyInchStatisticDTO>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                caught.printStackTrace();
-                            }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        GWT.log("error getting data! " + caught.getMessage());
+                                        caught.printStackTrace();
+                                    }
 
-                            @Override
-                            public void onSuccess(GetSixtyInchStatisticDTO result) {
-                                view.updateStatistic(result, getSlideCtx().getEvent().getOfficialWebsiteURL());
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(GetSixtyInchStatisticDTO result) {
+                                        String windSpeed = "";
+                                        String windDegree = "";
+                                        for (WindSource windSource : getPlace().getRaceMap()
+                                                .getLastCombinedWindTrackInfoDTO().windTrackInfoByWindSource.keySet()) {
+                                            WindTrackInfoDTO windTrackInfoDTO = getPlace().getRaceMap()
+                                                    .getLastCombinedWindTrackInfoDTO().windTrackInfoByWindSource
+                                                            .get(windSource);
+                                            switch (windSource.getType()) {
+                                            case COMBINED:
+                                                if (!windTrackInfoDTO.windFixes.isEmpty()) {
+                                                    WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
+                                                    double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
+                                                    double windFromDeg = windDTO.dampenedTrueWindBearingDeg;
+                                                    NumberFormat numberFormat = NumberFormat.getFormat("0.0");
+                                                    String title = Math.round(windFromDeg) + " "
+                                                            + StringMessages.INSTANCE.degreesShort() + " ("
+                                                            + WindSourceTypeFormatter.format(windSource,
+                                                                    StringMessages.INSTANCE)
+                                                            + ")";
+                                                    windDegree = title;
+                                                    windSpeed = numberFormat.format(speedInKnots) + " "
+                                                            + StringMessages.INSTANCE.knotsUnit();
+                                                }
+                                                break;
+                                            default:
+                                            }
+                                        }
+
+                                        view.updateStatistic(result, getSlideCtx().getEvent().getOfficialWebsiteURL(),
+                                                windSpeed, windDegree);
+                                    }
+                                });
 
             }
         };
