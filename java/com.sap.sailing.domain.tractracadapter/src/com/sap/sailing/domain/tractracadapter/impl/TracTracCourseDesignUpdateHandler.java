@@ -44,7 +44,6 @@ public class TracTracCourseDesignUpdateHandler extends UpdateHandler implements 
             logger.info("Not sending course update to TracTrac because no URL has been provided.");
             return;
         }
-        
         JSONObject serializedCourseDesign = courseSerializer.serialize(newCourseDesign);
         String payload = serializedCourseDesign.toJSONString();
         URL currentCourseDesignURL = buildUpdateURL();
