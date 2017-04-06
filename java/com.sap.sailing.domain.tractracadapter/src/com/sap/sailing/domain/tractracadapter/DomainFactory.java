@@ -17,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -332,6 +333,6 @@ public interface DomainFactory {
 	 * Looks for an {@link IControl} in the {@code candidates} that contains two {@link IControlPoint}s
 	 * that map to the {@code first} and {@code second} mark.
 	 */
-	IControl getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second);
+	ControlPoint getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second);
 
 }

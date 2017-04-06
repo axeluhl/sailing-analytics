@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
@@ -90,12 +91,13 @@ public class TracTracCourseDesignUpdateHandler extends UpdateHandler implements 
     			final Iterator<Mark> markIter = waypoint.getMarks().iterator();
     			final Mark first = markIter.next();
     			final Mark second = markIter.next();
-    			final IControl existingControl = domainFactory.getExistingControlWithTwoMarks(candidates, first, second);
-    			if (existingControl == null) {
+    			final ControlPoint existingControlPoint = domainFactory.getExistingControlWithTwoMarks(candidates, first, second);
+    			if (existingControlPoint == null) {
     				result.addWaypoint(zeroBasedPosition++, waypoint);
     			} else {
-    				domainFactory.getBaseDomainFactory().createWaypoint(domainFactory.getOrCreateControlPoint(new ControlPointAdapter(existingControl)),
-    						waypoint.getPassingInstructions());
+    				result.addWaypoint(zeroBasedPosition++,
+    						domainFactory.getBaseDomainFactory().createWaypoint(existingControlPoint, waypoint.getPassingInstructions()));
+    				changed = true;
     			}
     		} else {
     			result.addWaypoint(zeroBasedPosition++, waypoint);

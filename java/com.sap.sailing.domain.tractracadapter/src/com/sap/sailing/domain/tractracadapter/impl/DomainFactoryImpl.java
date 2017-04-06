@@ -584,16 +584,17 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public IControl getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second) {
+    public ControlPoint getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second) {
     	final Set<Mark> pairOfMarksToFind = new HashSet<>();
     	pairOfMarksToFind.add(first);
     	pairOfMarksToFind.add(second);
     	for (final IControl control : candidates) {
     		TracTracControlPoint cp = new ControlPointAdapter(control);
     		Set<Mark> marksInExistingControlPoint = new HashSet<>();
-    		Util.addAll(getOrCreateControlPoint(cp).getMarks(), marksInExistingControlPoint);
+    		final ControlPoint controlPoint = getOrCreateControlPoint(cp);
+			Util.addAll(controlPoint.getMarks(), marksInExistingControlPoint);
     		if (marksInExistingControlPoint.equals(pairOfMarksToFind)) {
-    			return control;
+    			return controlPoint;
     		}
     	}
     	return null;
