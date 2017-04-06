@@ -11,7 +11,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
-import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventLinkDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
@@ -79,8 +79,8 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
                 result.addRecentEvent(HomeServiceUtil.convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer, context.getRacingEventService()));
             }
             EventBase event = holder.event;
-            EventLinkAndMetadataDTO eventLink = HomeServiceUtil.convertToEventLinkAndMetadataDTO(holder.event,
-                    holder.baseURL, holder.onRemoteServer, context.getRacingEventService());
+            EventLinkDTO eventLink = HomeServiceUtil.convertToEventLinkDTO(holder.event, holder.baseURL,
+                    holder.onRemoteServer, context.getRacingEventService());
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
             for (ImageDescriptor url : HomeServiceUtil.getSailingLovesPhotographyImages(event)) {
                 if (url.hasSize()) {

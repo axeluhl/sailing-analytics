@@ -2,24 +2,24 @@ package com.sap.sailing.gwt.home.communication.media;
 
 import java.util.Date;
 
-import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventLinkDTO;
 import com.sap.sse.gwt.client.media.AbstractMediaDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class SailingImageDTO extends ImageDTO {
     
-    private EventLinkAndMetadataDTO eventLink;
+    private EventLinkDTO eventLink;
 
     protected SailingImageDTO() {
         super();
     }
 
-    public SailingImageDTO(EventLinkAndMetadataDTO eventLink, String imageRef, Date createdAtDate) {
+    public SailingImageDTO(EventLinkDTO eventLink, String imageRef, Date createdAtDate) {
         super(imageRef, createdAtDate);
         this.eventLink = eventLink;
     }
 
-    public EventLinkAndMetadataDTO getEventLink() {
+    public EventLinkDTO getEventLink() {
         return eventLink;
     }
 
