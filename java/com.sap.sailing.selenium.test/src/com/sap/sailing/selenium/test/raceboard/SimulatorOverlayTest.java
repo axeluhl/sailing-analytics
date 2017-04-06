@@ -112,7 +112,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             igtimiAccountsManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
             
             WindPanelPO windPanel = adminConsole.goToWind();
-            windPanel.importWindFromIgtimi(/* waiting up to 15 min */ 15 * 60);
+            windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 10 * 60);
         }
         
         {
