@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.statistik.PreRaceStatisticsBox;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -23,9 +24,11 @@ public class PreRaceRacemapViewImpl extends ResizeComposite implements PreRaceRa
     @UiField
     ResizableFlowPanel raceInfoHolder;
 
+    @UiField
+    Label bottomInfoPanel;
     PreRaceStatisticsBox statistics = new PreRaceStatisticsBox(false);
 
-    private NumberFormat compactFormat = NumberFormat.getFormat("#.00");;
+    private NumberFormat compactFormat = NumberFormat.getFormat("#.0");
 
     interface PreRaceRacemapViewImplUiBinder extends UiBinder<Widget, PreRaceRacemapViewImpl> {
     }
@@ -51,21 +54,30 @@ public class PreRaceRacemapViewImpl extends ResizeComposite implements PreRaceRa
 
     @Override
     public void updateStatistic(GetSixtyInchStatisticDTO result, String url, String windSpeed, String windDegree) {
-        GWT.log("Update statistic!");
+        // google maps api workaround
+        racemap.onResize();
+
         statistics.clear();
-        statistics.addItem(PreRaceStatisticsBox.ICON_COMPATITORS_COUNT, StringMessages.INSTANCE.competitors(),
+        statistics.addItem(PreRaceStatisticsBox.ICON_COMPETITORS, StringMessages.INSTANCE.competitors(),
                 result.getCompetitors());
         statistics.addItem(PreRaceStatisticsBox.ICON_WIND_FIX, StringMessages.INSTANCE.wind(), windSpeed);
-        statistics.addItem(PreRaceStatisticsBox.ICON_WIND_FIX, StringMessages.INSTANCE.averageDirection(), windDegree);
+        statistics.addItem(PreRaceStatisticsBox.ICON_WIND, StringMessages.INSTANCE.averageDirection(), windDegree);
 
-        statistics.addItem("", "18 Legs", result.getLegs());
-        statistics.addItem(PreRaceStatisticsBox.ICON_SUM_MILES, "18 Approximate Distance (m)",
-                compactFormat.format(result.getDistance().getSeaMiles()));
-        statistics.addItem(PreRaceStatisticsBox.ICON_FASTEST_SAILOR, "18 Approximate Time (s)",
-                compactFormat.format(result.getDuration().asMinutes()));
+        statistics.addItem(PreRaceStatisticsBox.ICON_LEGS, StringMessages.INSTANCE.legs(), result.getLegs());
+        statistics.addItem(PreRaceStatisticsBox.ICON_SUM_MILES, StringMessages.INSTANCE.estimatedDistance(),
+                compactFormat.format(result.getDistance().getSeaMiles()) + " " + StringMessages.INSTANCE.seaMiles());
+        statistics.addItem(PreRaceStatisticsBox.ICON_TIME,
+                StringMessages.INSTANCE.estimatedTime(),
+                compactFormat.format(result.getDuration().asMinutes()) + " " + StringMessages.INSTANCE.minutes());
         
-        statistics.addItem("", StringMessages.INSTANCE.url(), url);
+        statistics.addItem(PreRaceStatisticsBox.ICON_RACEVIEWER, StringMessages.INSTANCE.url(), url);
 
+    }
+
+    @Override
+    public void nextRace(RegattaAndRaceIdentifier race) {
+        bottomInfoPanel
+                .setText(StringMessages.INSTANCE.next() + " " + race.getRegattaName() + " " + race.getRaceName());
     }
 
 }

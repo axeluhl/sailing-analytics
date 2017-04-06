@@ -9,6 +9,7 @@
 		display: inline-block;
 		width: 50%;
 		height: 100%;
+		bottom: 55px;
 		overflow-y: auto;
 	}
 	
@@ -35,6 +36,17 @@
 		text-align: center;
 	}
 	
+	.bottom {
+		width: 100%;
+		height: 60px;
+		font-size: 50px;
+		text-align: center;
+		position: absolute;
+		bottom: 0px;
+		background-color: #008fcc;
+		color: white;
+	}
+	
 	.subline2 {
 		font-size: 20px;
 		text-align: center;
@@ -50,5 +62,9 @@
 			styleName="{style.right}" />
 		<rf:ResizableFlowPanel ui:field="racemap"
 			styleName="{style.left}" />
+		<rf:ResizableFlowPanel ui:field="nextRace"
+			styleName="{style.bottom}">
+			<g:Label ui:field="bottomInfoPanel" />
+		</rf:ResizableFlowPanel>
 	</rf:ResizableFlowPanel>
 </ui:UiBinder> 
