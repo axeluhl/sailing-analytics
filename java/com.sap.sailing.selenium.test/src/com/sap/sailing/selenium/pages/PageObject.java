@@ -308,7 +308,11 @@ public class PageObject {
         return (WebElement) wait.until(new Function<SearchContext, Object>() {
             @Override
             public Object apply(SearchContext context) {
-                return context.findElement(new BySeleniumId(id));
+                try {
+                    return context.findElement(new BySeleniumId(id));
+                } catch (Exception e) {
+                    return null;
+                }
             }
         });
     }
