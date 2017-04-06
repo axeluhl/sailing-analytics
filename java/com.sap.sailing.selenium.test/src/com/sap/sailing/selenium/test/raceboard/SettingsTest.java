@@ -316,7 +316,6 @@ public class SettingsTest extends AbstractSeleniumTest {
      * the regatta leaderboard. The settings of both leaderboards get asserted separately.
      */
     @Test
-    @Ignore
     public void testLeaderboardPageSettingsForwardingWithOverallLeaderboard() {
         // create event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -403,7 +402,6 @@ public class SettingsTest extends AbstractSeleniumTest {
      * storage support when it is set to {@code true}.
      */
     @Test
-    @Ignore
     public void testLeaderboardPageSettingsStorage() {
 
         // create event
@@ -516,7 +514,6 @@ public class SettingsTest extends AbstractSeleniumTest {
      * storage support when it is set to {@code true}.
      */
     @Test
-    @Ignore
     public void testRegattaOverviewSettingsHandling() {
         // create event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());

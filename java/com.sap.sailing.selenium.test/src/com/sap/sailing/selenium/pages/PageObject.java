@@ -63,7 +63,7 @@ public class PageObject {
     public static final int DEFAULT_POLLING_INTERVAL = 5;
     
     private static final MessageFormat TAB_PANEL_EXPRESSION = new MessageFormat(
-            ".//div[contains(@class, \"gwt-TabBarItem\")]/div[text()=\"{0}\"]/../..");
+            ".//div[contains(@class, \"gwt-TabBarItem\")]/div[text()=\"{0}\"]/..");
     
     private static final MessageFormat TAB_LAYOUT_PANEL_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
