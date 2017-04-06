@@ -294,7 +294,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public <ResultType> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinitionDTO) {
+    public <ResultType extends Serializable> QueryResultDTO<ResultType> runQuery(DataMiningSession session,
+            StatisticQueryDefinitionDTO queryDefinitionDTO) {
         SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, queryDefinitionDTO.getDataRetrieverChainDefinition().getName()));
         DataMiningServer dataMiningServer = getDataMiningServer();
         StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
@@ -314,7 +315,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public <ResultType> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session, PredefinedQueryIdentifier identifier, String localeInfoName) {
+    public <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,
+            PredefinedQueryIdentifier identifier, String localeInfoName) {
         SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, identifier.getIdentifier()));
         DataMiningServer dataMiningServer = getDataMiningServer();
         ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = dataMiningServer.getPredefinedQueryDefinitionDTO(identifier);

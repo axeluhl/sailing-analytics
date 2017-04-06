@@ -790,7 +790,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             boolean startOfTrackingFound = false;
             boolean endOfTrackingFound = false;
             // check race log
-            if (trackingTimesFromRaceLog != null){
+            if (trackingTimesFromRaceLog != null) {
                 if (trackingTimesFromRaceLog.getA() != null) {
                     startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
                     startOfTrackingFound = true;

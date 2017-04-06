@@ -30,6 +30,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safecss.shared.SafeStyles;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -146,19 +148,43 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
     private static final String STYLE_LEADERBOARD_INFO = "leaderboardInfo";
     private static final String STYLE_LEADERBOARD_TOOLBAR = "leaderboardContent-toolbar";
     private static final String STYLE_LEADERBOARD_LIVE_RACE = "leaderboardContent-liverace";
+    private static RaceColumnTemplate raceColumnTemplate = new RaceColumnTemplate();
 
-    interface RaceColumnTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<div style=\"color:{0}; border-bottom: 3px solid {1}\">")
-        SafeHtml cellFrameWithTextColorAndFleetBorder(String textColor, String borderStyle);
+    static class RaceColumnTemplate {
+        private MyTemplate template = GWT.create(MyTemplate.class);
 
-        @SafeHtmlTemplates.Template("<div style=\"color:{0};\">")
-        SafeHtml cellFrameWithTextColor(String textColor);
+        interface MyTemplate extends SafeHtmlTemplates {
+            @SafeHtmlTemplates.Template("<div style='{0}'>")
+            SafeHtml styledDiv(SafeStyles style);
+        }
 
-        @SafeHtmlTemplates.Template("<div style=\"color:{0};\">")
-        SafeHtml cellWithImageResourceAndText(ImageResource image, String text);
+        /**
+         * Originally in the safehtml template: color:{0}; border-bottom: 3px solid {1};
+         * 
+         * @param textColor
+         * @param borderColor
+         * @return
+         */
+        public SafeHtml cellFrameWithTextColorAndFleetBorder(String textColor, String borderColor) {
+            SafeStylesBuilder sb = new SafeStylesBuilder();
+            sb.trustedColor(textColor);
+            sb.trustedNameAndValue("border-bottom", "3px solid " + borderColor);
+            return template.styledDiv(sb.toSafeStyles());
+        }
+
+        /**
+         *
+         * Originally in the safehtml template: color:{0};
+         * 
+         * @param textColor
+         * @return
+         */
+        public SafeHtml cellFrameWithTextColor(String textColor) {
+            SafeStylesBuilder sb = new SafeStylesBuilder();
+            sb.trustedColor(textColor);
+            return template.styledDiv(sb.toSafeStyles());
+        }
     }
-
-    private static RaceColumnTemplates raceColumnTemplate = GWT.create(RaceColumnTemplates.class);
 
     /**
      * The leaderboard name is used to
