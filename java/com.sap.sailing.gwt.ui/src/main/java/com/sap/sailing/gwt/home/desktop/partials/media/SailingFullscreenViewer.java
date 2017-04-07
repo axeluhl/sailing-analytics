@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventLinkDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -94,7 +94,7 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
 
         @Override
         public void onSelectionChange(SelectionChangeEvent event) {
-            EventLinkAndMetadataDTO eventLink = player.getSelectedImage().getEventLink();
+            EventLinkDTO eventLink = player.getSelectedImage().getEventLink();
             eventLinkControl.setText(eventLink.getDisplayName());
             String evnetId = String.valueOf(eventLink.getId()), baseURL = eventLink.getBaseURL();
             eventNavigation = navigator.getEventNavigation(evnetId, baseURL, eventLink.isOnRemoteServer());
