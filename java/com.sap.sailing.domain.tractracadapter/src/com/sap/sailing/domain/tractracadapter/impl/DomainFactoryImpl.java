@@ -575,11 +575,13 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Iterable<IControl> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName) {
     	final Set<IControl> result = new HashSet<>();
-    	for (final IControl control : tracTracEvent.getControls()) {
-    		if (Util.equalsWithNull(control.getCourseArea(), tracTracCourseAreaName)) {
-    			result.add(control);
-    		}
-    	}
+		if (tracTracCourseAreaName != null) {
+			for (final IControl control : tracTracEvent.getControls()) {
+				if (control.getCourseArea() != null && control.getCourseArea().equals(tracTracCourseAreaName)) {
+					result.add(control);
+				}
+			}
+		}
     	return result;
     }
     
