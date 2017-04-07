@@ -176,13 +176,14 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
      * method return those, helping clients asking for "available" marks.
      */
     private void addAllMarksFromCourseArea(DynamicTrackedRace trackedRace) {
-    	for (final IControl tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(), tractracRace.getCourseArea())) {
-    		final TracTracControlPoint ttcp = new ControlPointAdapter(tractracControlPoint);
-    		final ControlPoint cp = getDomainFactory().getOrCreateControlPoint(ttcp);
-    		for (final Mark mark : cp.getMarks()) {
-    			trackedRace.getOrCreateTrack(mark);
-    		}
-    	}
+        for (final IControl tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(),
+                tractracRace.getCourseArea())) {
+            final TracTracControlPoint ttcp = new ControlPointAdapter(tractracControlPoint);
+            final ControlPoint cp = getDomainFactory().getOrCreateControlPoint(ttcp);
+            for (final Mark mark : cp.getMarks()) {
+                trackedRace.getOrCreateTrack(mark);
+            }
+        }
     }
     
     private void updateRaceTimes(IRace tractracRace, DynamicTrackedRace trackedRace) {
