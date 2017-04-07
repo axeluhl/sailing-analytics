@@ -57,6 +57,6 @@ public class ControlPointAdapter extends AbstractWithID implements TracTracContr
 
     @Override
     public UUID getSecondMarkId() {
-        return controlPoint.getControlPoints().get(0).getId();
+        return controlPoint.getControlPoints().get(1).getId();
     }
 }
