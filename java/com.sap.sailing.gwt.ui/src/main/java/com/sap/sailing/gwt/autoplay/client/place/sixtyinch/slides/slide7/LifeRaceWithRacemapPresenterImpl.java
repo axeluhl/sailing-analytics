@@ -44,11 +44,11 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRa
                 selectNext();
             }
         };
+        selectionTimer.scheduleRepeating(SWITCH_COMPETITOR_DELAY);
 
     }
 
     protected void selectNext() {
-        selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
         if (compList.isEmpty()) {
             for (LeaderboardRowDTO item : leaderboardPanel.getLeaderboardTable().getVisibleItems()) {
                 compList.add(item.competitor);
@@ -130,6 +130,7 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRa
 
     @Override
     public void onStop() {
+        selectionTimer.cancel();
         view.onStop();
     }
 

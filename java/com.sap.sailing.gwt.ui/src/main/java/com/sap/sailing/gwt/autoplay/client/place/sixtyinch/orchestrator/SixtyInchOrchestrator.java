@@ -9,10 +9,13 @@ import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.IdleUpNextNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.LifeRaceWithRacemapNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.PreRaceWithRacemapNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.IdleUpNextPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 
 public class SixtyInchOrchestrator implements Orchestrator {
@@ -27,16 +30,18 @@ public class SixtyInchOrchestrator implements Orchestrator {
 
         StartupNode slideInit = new StartupNode(cf);
         // SlideConfig slide0 = new SlideTimedTransitionConfig(this, new Slide0Place(), 10000);
-        // TimedTransitionSimpleNode node2 = new TimedTransitionSimpleNode("node2", new Slide2Place(), 200000);
+        TimedTransitionSimpleNode node2 = new TimedTransitionSimpleNode("node2", new IdleUpNextPlace(), 200000);
 
-        // SlideConfig slide2 = new SlideTimedTransitionConfig(this, new Slide2Place(), 10000);
         // SlideConfig slide3 = new SlideTimedTransitionConfig(this, new Slide3Place(), 10000);
         // SlideConfig slide4 = new SlideTimedTransitionConfig(this, new Slide4Place(), 10000);
         // SlideConfig slide5 = new SlideTimedTransitionConfig(this, new Slide5Place(), 10000);
-        PreRaceWithRacemapNode preRaceRacemapNode = new PreRaceWithRacemapNode(cf);
 
+        IdleUpNextNode idleUpNext = new IdleUpNextNode(cf);
+
+        PreRaceWithRacemapNode preRaceRacemapNode = new PreRaceWithRacemapNode(cf);
         LifeRaceWithRacemapNode lifeRaceWithRacemap = new LifeRaceWithRacemapNode(cf);
         RaceEndWithBoatsNode endRaceSlideWithBoats = new RaceEndWithBoatsNode(cf);
+
         // SlideConfig slide9 = new SlideTimedTransitionConfig(this, new Slide9Place(), 10000);
         // slideInit.setNextSlide(slide0);
         // slide0.setNextSlide(slide1);
@@ -45,12 +50,15 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // slide3.setNextSlide(slide4);
         // slide4.setNextSlide(slide5);
         // slide5.setNextSlide(slide6);
-        // preRaceRacemapNode.setNextNode(node7);
         // slide7.setNextSlide(slide8);
         // slide8.setNextSlide(slide9);
         // slide9.setNextSlide(slide0);
 
-        slideInit.setNextNode(lifeRaceWithRacemap);
+        slideInit.setNextNode(idleUpNext);
+        // endRaceSlideWithBoats.setNextNode(preRaceRacemapNode);
+        // preRaceRacemapNode.setNextNode(lifeRaceWithRacemap);
+        // lifeRaceWithRacemap.setNextNode(endRaceSlideWithBoats);
+
 
         // node2.setNextNode(node7);
         // node7.setNextNode(node2);

@@ -17,7 +17,7 @@ public class PreRaceWithRacemapNode extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
 
     public PreRaceWithRacemapNode(AutoPlayClientFactorySixtyInch cf) {
-        super("PreRaceWithRacemapNode", 120000);
+        super("PreRaceWithRacemapNode", 30000);
         this.cf = cf;
 
     }
