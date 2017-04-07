@@ -214,6 +214,7 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         leaderboardSettingsPanel.setNumberOfRacesToDisplay(2);
         leaderboardSettingsPanel.selectDetailsAndDeselectOther();
+        leaderboardSettingsPanel.setRefreshInterval(1);
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         leaderboardPage = urlConfigurationDialog.openLeaderboard();
@@ -221,7 +222,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertTrue(leaderboardSettingsPanel.isNumberOfRacesToDisplaySelected());
         Assert.assertEquals(2, leaderboardSettingsPanel.getNumberOfRacesToDisplaySelected());
         Assert.assertEquals(1, leaderboardSettingsPanel.getRefreshInterval());
-        selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
+//        selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
         // TODO fix leaderboard default values
         // Assert.assertEquals(0, selectedDetails.length);
 
