@@ -67,15 +67,9 @@ public class SettingsTest extends AbstractSeleniumTest {
 
     private static final String URL_PARAMETER_IGNORE_LOCAL_SETTINGS = "ignoreLocalSettings=true";
 
-    private TrackableRaceDescriptor trackableRace;
-
-    private TrackedRaceDescriptor trackedRace;
-
     @Override
     @Before
     public void setUp() {
-        this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(BMW_RACE, 1), BMW_CUP_BOAT_CLASS);
-        this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(BMW_RACE, 1));
         clearState(getContextRoot());
         super.setUp();
     }
@@ -106,14 +100,18 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {
+        
+        TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(BMW_RACE, 1), BMW_CUP_BOAT_CLASS);
+        TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(BMW_RACE, 1));
+        
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
         tracTracEvents.setReggataForTracking(bmwCupDescriptor);
         tracTracEvents.setTrackSettings(true, false, false);
-        tracTracEvents.startTrackingForRace(this.trackableRace);
+        tracTracEvents.startTrackingForRace(trackableRace);
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED, 600); // with the TracAPI, REPLAY races
+        trackedRacesList.waitForTrackedRace(trackedRace, Status.FINISHED, 600); // with the TracAPI, REPLAY races
         // status FINISHED when done loading
 
         LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
