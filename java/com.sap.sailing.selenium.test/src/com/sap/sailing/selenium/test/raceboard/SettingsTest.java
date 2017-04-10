@@ -74,7 +74,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         super.setUp();
     }
 
-    // TODO bug 2529: temporarily ignored because make default is deactivated
+    // TODO bug 2529: temporarily ignored because make default is deactivated for RaceBoard
     @Ignore
     @Test
     public void createRaceAsAdminSetWindSettingToTrue() throws InterruptedException, UnsupportedEncodingException {
