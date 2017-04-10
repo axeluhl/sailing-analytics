@@ -7,6 +7,8 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
+import com.sap.sailing.gwt.autoplay.client.events.FallbackToIdleNodePathEvent;
+import com.sap.sailing.gwt.autoplay.client.events.LiferaceDetectedEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.LifeRaceWithRacemapNode;
@@ -20,10 +22,15 @@ public class SixtyInchOrchestrator implements Orchestrator {
     private AutoPlayClientFactorySixtyInch cf;
 
     private AutoPlayNodeReference currentNodeRef;
-    private AutoPlayNode rootNodeForStartup;
+
+    private AutoPlayNode liveRaceInitialNode;
+    private AutoPlayNode idleEventInitialNode;
+
+    private UpcomingRacesMonitor racesMonitor = new UpcomingRacesMonitor(cf);
 
     public SixtyInchOrchestrator(AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
+
 
         StartupNode slideInit = new StartupNode(cf);
         // SlideConfig slide0 = new SlideTimedTransitionConfig(this, new Slide0Place(), 10000);
@@ -55,7 +62,8 @@ public class SixtyInchOrchestrator implements Orchestrator {
         // node2.setNextNode(node7);
         // node7.setNextNode(node2);
 
-        rootNodeForStartup = slideInit;
+        idleEventInitialNode = slideInit;
+        liveRaceInitialNode = preRaceRacemapNode;
     }
 
     /*
@@ -78,7 +86,22 @@ public class SixtyInchOrchestrator implements Orchestrator {
                 processFailure(e);
             }
         });
-        transitionToNode(null, rootNodeForStartup);
+        cf.getEventBus().addHandler(LiferaceDetectedEvent.TYPE, new LiferaceDetectedEvent.Handler() {
+            @Override
+            public void onLiferaceDetected(LiferaceDetectedEvent e) {
+                racesMonitor.startMonitoring();
+                transitionToNode(liveRaceInitialNode);
+            }
+        });
+        cf.getEventBus().addHandler(FallbackToIdleNodePathEvent.TYPE, new FallbackToIdleNodePathEvent.Handler() {
+            @Override
+            public void onFallbackToIdle(FallbackToIdleNodePathEvent e) {
+                racesMonitor.startMonitoring();
+                transitionToNode(e.getSource(), idleEventInitialNode);
+            }
+        });
+        racesMonitor.startMonitoring();
+        transitionToNode(null, idleEventInitialNode);
     }
 
     private void processFailure(FailureEvent event) {
@@ -92,13 +115,11 @@ public class SixtyInchOrchestrator implements Orchestrator {
         cf.getPlaceController().goTo(new SlideInitPlace(event, currentNodeRef.node));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.Orchestrator#didMoveToSlide(com.sap.sailing.gwt.
-     * autoplay.client.orchestrator.AutoPlayNode)
-     */
+
+    public void transitionToNode(AutoPlayNode nextNode) {
+        transitionToNode(null, nextNode);
+    }
+
     @Override
     public void transitionToNode(AutoPlayNode source, AutoPlayNode nextNode) {
         if (source == null) {

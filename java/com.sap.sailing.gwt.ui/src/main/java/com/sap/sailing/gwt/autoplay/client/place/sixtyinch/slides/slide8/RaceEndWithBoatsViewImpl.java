@@ -27,7 +27,7 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
 
     public interface RaceEndRessources extends CellTable.Resources {
         @Resource
-        public ImageResource noTeamImagePlaceholder();
+        public ImageResource noTeamImagePlaceHolder();
     }
 
     private static final RaceEndRessources res = GWT.create(RaceEndRessources.class);
@@ -89,7 +89,7 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
         if (c.getImageURL() != null) {
             image1.setUrl(c.getImageURL());
         } else {
-            image1.setUrl(res.noTeamImagePlaceholder().getSafeUri());
+            image1.setUrl(res.noTeamImagePlaceHolder().getSafeUri());
         }
     }
 
@@ -99,7 +99,7 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
         if (c.getImageURL() != null) {
             image2.setUrl(c.getImageURL());
         } else {
-            image2.setUrl(res.noTeamImagePlaceholder().getSafeUri());
+            image2.setUrl(res.noTeamImagePlaceHolder().getSafeUri());
         }
     }
 
@@ -109,7 +109,7 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
         if (c.getImageURL() != null) {
             image3.setUrl(c.getImageURL());
         } else {
-            image3.setUrl(res.noTeamImagePlaceholder().getSafeUri());
+            image3.setUrl(res.noTeamImagePlaceHolder().getSafeUri());
         }
     }
 
