@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -11,6 +10,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
@@ -31,7 +31,7 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRa
     private LifeRaceWithRacemapView view;
     private Timer selectionTimer;
     private SixtyInchLeaderBoard leaderboardPanel;
-    private int selected;
+    private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
 
     public LifeRaceWithRacemapPresenterImpl(LifeRaceWithRacemapPlace place, AutoPlayClientFactorySixtyInch clientFactory,
@@ -44,15 +44,14 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRa
                 selectNext();
             }
         };
+        selectionTimer.scheduleRepeating(SWITCH_COMPETITOR_DELAY);
 
     }
 
     protected void selectNext() {
-        selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
         if (compList.isEmpty()) {
-            Iterator<CompetitorDTO> iter = getPlace().getRaceMapSelectionProvider().getAllCompetitors().iterator();
-            while (iter.hasNext()) {
-                compList.add(iter.next());
+            for (LeaderboardRowDTO item : leaderboardPanel.getLeaderboardTable().getVisibleItems()) {
+                compList.add(item.competitor);
             }
             return;
         }
@@ -131,6 +130,7 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRa
 
     @Override
     public void onStop() {
+        selectionTimer.cancel();
         view.onStop();
     }
 

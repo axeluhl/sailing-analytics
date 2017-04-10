@@ -18,7 +18,7 @@ public class LifeRaceWithRacemapNode extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
 
     public LifeRaceWithRacemapNode(AutoPlayClientFactorySixtyInch cf) {
-        super("slide7", 120000);
+        super("slide7", 30000);
         this.cf = cf;
 
     }
