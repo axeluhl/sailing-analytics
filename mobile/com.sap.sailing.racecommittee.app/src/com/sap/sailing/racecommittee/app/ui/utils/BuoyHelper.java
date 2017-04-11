@@ -53,7 +53,7 @@ public class BuoyHelper {
             result = 0;
         } else {
             Triple<Integer, Integer, Integer> rgb = color.getAsRGB();
-            result = (rgb.getA() << 8 + rgb.getB()) << 8 + rgb.getC();
+            result = (((rgb.getA() << 8) + rgb.getB()) << 8) + rgb.getC();
         }
         return result;
     }
