@@ -12,9 +12,7 @@ public class ESSMarkImageHelper extends MarkImageHelper {
 
     private ESSMarkImageHelper(Context context) {
         markImageDescriptors = new ArrayList<>();
-
         defaultCourseMarkDescriptor = createMarkImageDescriptor(context, 0, MarkType.BUOY, "undefined", null, null);
-
         createMarkImageDescriptor(context, 0, MarkType.BUOY, "red", null, null);
         createMarkImageDescriptor(context, 0, MarkType.BUOY, "green", null, null);
         createMarkImageDescriptor(context, 0, MarkType.BUOY, "yellow", null, null);

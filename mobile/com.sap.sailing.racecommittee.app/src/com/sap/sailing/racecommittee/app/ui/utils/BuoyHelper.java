@@ -14,13 +14,18 @@ import com.sap.sailing.racecommittee.app.R;
 
 public class BuoyHelper {
 
+    /**
+     * @param color
+     *            this color string, with {@code buoy_color_} and {@code buoy_outline_} prepended, is matched against
+     *            the color constants defined in {@code res/values/colors.xml}. If not matched, the default constants
+     *            {@code buoy_color} and {@code buoy_online} from {@code res/values/colors.xml} are used.
+     */
     public static LayerDrawable getBuoy(Context context, MarkType type, String color, String shape, String pattern) {
         LayerDrawable drawable = null;
         ArrayList<Drawable> layers = new ArrayList<>();
         Drawable shadowDrawable;
         Drawable outlineDrawable;
         Drawable colorDrawable;
-
         if (TextUtils.isEmpty(shape) && type == MarkType.BUOY) { // default buoy
             shadowDrawable = ContextCompat.getDrawable(context, R.drawable.buoy_shadow);
             int outlineColor = context.getResources().getIdentifier("buoy_outline_" + color, "color", context.getPackageName());

@@ -37,6 +37,12 @@ public abstract class MarkImageHelper {
         return drawable;
     }
 
+    /**
+     * @param color
+     *            this color string, with {@code buoy_color_} and {@code buoy_outline_} prepended, is matched against
+     *            the color constants defined in {@code res/values/colors.xml}. If not matched, the default constants
+     *            {@code buoy_color} and {@code buoy_online} from {@code res/values/colors.xml} are used.
+     */
     protected MarkImageDescriptor createMarkImageDescriptor(Context context, @DrawableRes int drawableId, MarkType type, String color, String shape,
         String pattern) {
         MarkImageDescriptor markIconDescriptor = new MarkImageDescriptor(context, drawableId, type, color, shape, pattern);
