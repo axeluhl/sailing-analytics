@@ -212,20 +212,15 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         leaderboardSettingsPanel.setNumberOfRacesToDisplay(2);
         leaderboardSettingsPanel.selectDetailsAndDeselectOther();
-        leaderboardSettingsPanel.setRefreshInterval(1);
+        leaderboardSettingsPanel.setRefreshInterval(3);
         // FIXME: Settings Dialog is in Error state here
-        
-        // FIXME: refreshInterval doesn't seem to be written in the URL. As far as I can see, this should be the param
-        // "delayBetweenAutoAdvancesInMilliseconds"
-        // This is useful to "debug" the URL:
-        // System.out.println(urlConfigurationDialog.getLeaderboardLink());
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         leaderboardPage = urlConfigurationDialog.openLeaderboard();
         leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();
         Assert.assertTrue(leaderboardSettingsPanel.isNumberOfRacesToDisplaySelected());
         Assert.assertEquals(2, leaderboardSettingsPanel.getNumberOfRacesToDisplaySelected());
-        Assert.assertEquals(1, leaderboardSettingsPanel.getRefreshInterval());
+        Assert.assertEquals(3, leaderboardSettingsPanel.getRefreshInterval());
 //        selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
         // TODO fix leaderboard default values
         // Assert.assertEquals(0, selectedDetails.length);

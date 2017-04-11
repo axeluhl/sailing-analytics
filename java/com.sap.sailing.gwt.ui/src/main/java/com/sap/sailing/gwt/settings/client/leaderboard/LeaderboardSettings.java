@@ -7,6 +7,8 @@ import java.util.List;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.settingtypes.converter.DetailTypeStringToEnumConverter;
 import com.sap.sailing.gwt.settings.client.settingtypes.converter.RaceColumnSelectionStrategiesStringToEnumConverter;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
@@ -28,42 +30,6 @@ import com.sap.sse.common.settings.generic.StringSetting;
 public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 2625004077963291333L;
     
-    public static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
-    public static final String PARAM_EMBEDDED = "embedded";
-    public static final String PARAM_HIDE_TOOLBAR = "hideToolbar";
-    public static final String PARAM_SHOW_RACE_DETAILS = "showRaceDetails";
-    public static final String PARAM_RACE_NAME = "raceName";
-    public static final String PARAM_RACE_DETAIL = "raceDetail";
-    public static final String PARAM_OVERALL_DETAIL = "overallDetail";
-    public static final String PARAM_LEG_DETAIL = "legDetail";
-    public static final String PARAM_MANEUVER_DETAIL = "maneuverDetail";
-    public static final String PARAM_AUTO_EXPAND_PRESELECTED_RACE = "autoExpandPreselectedRace";
-    public static final String PARAM_AUTO_EXPAND_LAST_RACE_COLUMN = "autoExpandLastRaceColumn";
-    public static final String PARAM_REGATTA_NAME = "regattaName";
-    public static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
-    public static final String PARAM_SHOW_CHARTS = "showCharts";
-    public static final String PARAM_CHART_DETAIL = "chartDetail";
-    public static final String PARAM_SHOW_OVERALL_LEADERBOARD = "showOverallLeaderboard";
-    public static final String PARAM_SHOW_SERIES_LEADERBOARDS = "showSeriesLeaderboards";
-    public static final String PARAM_SHOW_ADDED_SCORES = "showAddedScores";
-    public static final String PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED = "showNumberOfRacesCompleted";
-    
-    /**
-     * Parameter to support scaling the complete page by a given factor. This works by either using the
-     * CSS3 zoom property or by applying scale operation to the body element. This comes in handy
-     * when having to deal with screens that have high resolutions and that can't be controlled manually.
-     * It is also a very simple method of adapting the viewport to a tv resolution. This parameter works
-     * with value from 0.0 to 10.0 where 1.0 denotes the unchanged level (100%).
-     */
-    public static final String PARAM_ZOOM_TO = "zoomTo";
-    
-    /**
-     * Lets the client choose a different race column selection which displays only up to the last N races with N being the integer
-     * number specified by the parameter.
-     */
-    public static final String PARAM_NAME_LAST_N = "lastN";
-
-
     /**
      * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
      * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
@@ -138,7 +104,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.REGATTA_RANK);
         overallDetailsToShow = new EnumListSetting<>("overallDetailsToShow", this, overallDetails, new DetailTypeStringToEnumConverter());
-        delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, null);
+        delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, new RaceColumnSelectionStrategiesStringToEnumConverter());
         nameOfRaceToSort = new StringSetting("nameOfRaceToSort", this, null);
         updateUponPlayStateChange = new BooleanSetting("updateUponPlayStateChange", this, true);
