@@ -2,14 +2,15 @@ package com.sap.sailing.racecommittee.app.ui.utils;
 
 import java.util.List;
 
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.MarkType;
+import com.sap.sse.common.Color;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
-
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.MarkType;
 
 public abstract class MarkImageHelper {
     protected MarkImageDescriptor defaultCourseMarkDescriptor;
@@ -43,7 +44,7 @@ public abstract class MarkImageHelper {
      *            the color constants defined in {@code res/values/colors.xml}. If not matched, the default constants
      *            {@code buoy_color} and {@code buoy_online} from {@code res/values/colors.xml} are used.
      */
-    protected MarkImageDescriptor createMarkImageDescriptor(Context context, @DrawableRes int drawableId, MarkType type, String color, String shape,
+    protected MarkImageDescriptor createMarkImageDescriptor(Context context, @DrawableRes int drawableId, MarkType type, Color color, String shape,
         String pattern) {
         MarkImageDescriptor markIconDescriptor = new MarkImageDescriptor(context, drawableId, type, color, shape, pattern);
         markImageDescriptors.add(markIconDescriptor);
