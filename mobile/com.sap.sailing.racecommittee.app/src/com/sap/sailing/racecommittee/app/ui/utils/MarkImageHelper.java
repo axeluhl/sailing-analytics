@@ -19,7 +19,6 @@ public abstract class MarkImageHelper {
         LayerDrawable drawable;
         MarkImageDescriptor result = defaultCourseMarkDescriptor;
         int highestCompatibilityLevel = -1;
-
         for (MarkImageDescriptor imageDescriptor : markImageDescriptors) {
             int compatibilityLevel = imageDescriptor.getCompatibilityLevel(mark.getType(), mark.getColor(), mark.getShape(), mark.getPattern());
             if (compatibilityLevel > highestCompatibilityLevel) {
@@ -30,7 +29,6 @@ public abstract class MarkImageHelper {
                 }
             }
         }
-
         if (result.getDrawableId() != 0) {
             drawable = new LayerDrawable(new Drawable[] { ContextCompat.getDrawable(context, result.getDrawableId()) });
         } else {
@@ -43,7 +41,6 @@ public abstract class MarkImageHelper {
         String pattern) {
         MarkImageDescriptor markIconDescriptor = new MarkImageDescriptor(context, drawableId, type, color, shape, pattern);
         markImageDescriptors.add(markIconDescriptor);
-
         return markIconDescriptor;
     }
 

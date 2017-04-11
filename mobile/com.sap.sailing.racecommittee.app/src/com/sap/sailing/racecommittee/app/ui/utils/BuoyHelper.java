@@ -23,26 +23,21 @@ public class BuoyHelper {
 
         if (TextUtils.isEmpty(shape) && type == MarkType.BUOY) { // default buoy
             shadowDrawable = ContextCompat.getDrawable(context, R.drawable.buoy_shadow);
-
             int outlineColor = context.getResources().getIdentifier("buoy_outline_" + color, "color", context.getPackageName());
             if (outlineColor == 0) {
                 outlineColor = R.color.buoy_outline;
             }
             outlineDrawable = BitmapHelper.getTintedDrawable(context, R.drawable.buoy_outline, context.getResources().getColor(outlineColor));
-
             int colorColor = context.getResources().getIdentifier("buoy_color_" + color, "color", context.getPackageName());
             if (colorColor == 0) {
                 colorColor = R.color.buoy_color;
             }
             colorDrawable = BitmapHelper.getTintedDrawable(context, R.drawable.buoy_color, context.getResources().getColor(colorColor));
-
             layers.add(shadowDrawable);
             layers.add(outlineDrawable);
             layers.add(colorDrawable);
-
             drawable = new LayerDrawable(layers.toArray(new Drawable[layers.size()]));
         }
-
         return drawable;
     }
 }

@@ -99,7 +99,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
             if (element.getRightMark() != null) {
                 itemHolder.rightText.setText(element.getRightMark().getName());
                 itemHolder.rightText.setVisibility(View.VISIBLE);
-
                 itemHolder.rightImage.setImageDrawable(mImageHelper.resolveMarkImage(mContext, element.getRightMark()));
                 itemHolder.rightImage.setVisibility(View.VISIBLE);
             } else {

@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 
 public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
@@ -37,7 +38,7 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
         DBObject cpValue = new BasicDBObject();
         cpValue.put(FieldNames.GATE_NAME.name(), "Name");
         cpValue.put(FieldNames.GATE_ID.name(), (Serializable) 0);
-     Mark mark1 = new MarkImpl(0, "Left", MarkType.BUOY, "blue", "square", "checkers");
+     Mark mark1 = new MarkImpl(0, "Left", MarkType.BUOY, AbstractColor.getCssColor("blue"), "square", "checkers");
         DBObject dbMark1 = new BasicDBObject();
         dbMark1.put(FieldNames.MARK_ID.name(), mark1.getId());
         dbMark1.put(FieldNames.MARK_COLOR.name(), mark1.getColor());
@@ -45,7 +46,7 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
         dbMark1.put(FieldNames.MARK_PATTERN.name(), mark1.getPattern());
         dbMark1.put(FieldNames.MARK_SHAPE.name(), mark1.getShape());
         dbMark1.put(FieldNames.MARK_TYPE.name(), mark1.getType().name());
-        Mark mark2 = new MarkImpl(0, "Right", MarkType.BUOY, "blue", "square", "checkers");
+        Mark mark2 = new MarkImpl(0, "Right", MarkType.BUOY, AbstractColor.getCssColor("blue"), "square", "checkers");
         DBObject dbMark2 = new BasicDBObject();
         dbMark2.put(FieldNames.MARK_ID.name(), mark2.getId());
         dbMark2.put(FieldNames.MARK_COLOR.name(), mark2.getColor());
