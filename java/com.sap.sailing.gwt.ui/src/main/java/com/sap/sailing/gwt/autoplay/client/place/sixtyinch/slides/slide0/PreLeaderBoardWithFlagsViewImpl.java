@@ -15,10 +15,10 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.LeaderBoardScaleHelper;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
-public class Slide0ViewImpl extends ResizeComposite implements Slide0View {
-    private static Slide0ViewImplUiBinder uiBinder = GWT.create(Slide0ViewImplUiBinder.class);
+public class PreLeaderBoardWithFlagsViewImpl extends ResizeComposite implements PreLeaderboardWithFlagsView {
+    private static IdleLeaderBoardWithFlagsViewImplUiBinder uiBinder = GWT.create(IdleLeaderBoardWithFlagsViewImplUiBinder.class);
 
-    interface Slide0ViewImplUiBinder extends UiBinder<Widget, Slide0ViewImpl> {
+    interface IdleLeaderBoardWithFlagsViewImplUiBinder extends UiBinder<Widget, PreLeaderBoardWithFlagsViewImpl> {
     }
 
     @UiField
@@ -38,7 +38,7 @@ public class Slide0ViewImpl extends ResizeComposite implements Slide0View {
 
     private Timer resizer;
 
-    public Slide0ViewImpl() {
+    public PreLeaderBoardWithFlagsViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
@@ -65,6 +65,8 @@ public class Slide0ViewImpl extends ResizeComposite implements Slide0View {
     public void onCompetitorSelect(CompetitorDTO marked) {
         if (marked.getFlagImageURL() != null) {
             image.setUrl(marked.getFlagImageURL());
+        } else if (marked.getImageURL() != null) {
+            image.setUrl(marked.getImageURL());
         } else {
             image.setUrl("");
         }

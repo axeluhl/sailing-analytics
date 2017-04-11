@@ -5,7 +5,7 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 
-public class Slide0Place extends Place {
+public class PreRaceLeaderBoardWithFlagsPlace extends Place {
 
     private GetMiniLeaderboardDTO leaderBoardDTO;
     private RegattaAndRaceIdentifier lifeRace;
@@ -26,15 +26,15 @@ public class Slide0Place extends Place {
         return lifeRace;
     }
 
-    public static class Tokenizer implements PlaceTokenizer<Slide0Place> {
+    public static class Tokenizer implements PlaceTokenizer<PreRaceLeaderBoardWithFlagsPlace> {
         @Override
-        public String getToken(Slide0Place place) {
+        public String getToken(PreRaceLeaderBoardWithFlagsPlace place) {
             return "";
         }
 
         @Override
-        public Slide0Place getPlace(String token) {
-            return new Slide0Place();
+        public PreRaceLeaderBoardWithFlagsPlace getPlace(String token) {
+            return new PreRaceLeaderBoardWithFlagsPlace();
         }
     }
 }

@@ -7,16 +7,16 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.Slide0Place;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreRaceLeaderBoardWithFlagsPlace;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
-public class Slide0Node extends TimedTransitionSimpleNode {
+public class PreLeaderBoardWithFlagsNode extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
 
-    public Slide0Node(AutoPlayClientFactorySixtyInch cf) {
-        super("slide1", 30000);
+    public PreLeaderBoardWithFlagsNode(AutoPlayClientFactorySixtyInch cf) {
+        super("PreLeaderBoardWithFlagsNode", 30000);
         this.cf = cf;
 
     }
@@ -43,7 +43,7 @@ public class Slide0Node extends TimedTransitionSimpleNode {
                                     @Override
                                     public void onSuccess(RegattaAndRaceIdentifier lifeRace) {
                                         GetMiniLeaderboardDTO dto = resultTTL.getDto();
-                                        Slide0Place place = new Slide0Place();
+                                        PreRaceLeaderBoardWithFlagsPlace place = new PreRaceLeaderBoardWithFlagsPlace();
                                         place.setLeaderBoardDTO(dto);
                                         place.setLifeRace(lifeRace);
                                         setPlaceToGo(place);

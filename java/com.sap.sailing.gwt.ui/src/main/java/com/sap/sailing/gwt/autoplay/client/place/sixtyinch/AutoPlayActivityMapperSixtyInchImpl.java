@@ -5,9 +5,9 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.Slide0Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.Slide0PresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.Slide0ViewImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreRaceLeaderBoardWithFlagsPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreLeaderBoardWithFlagsPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreLeaderBoardWithFlagsViewImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.IdleUpNextPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.IdleUpNextPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.IdleNextUpViewImpl;
@@ -51,8 +51,8 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
         if (place instanceof SlideInitPlace) {
             return new SlideInitPresenterImpl((SlideInitPlace) place, clientFactory, new SlideInitViewImpl());
         }
-        if (place instanceof Slide0Place) {
-            return new Slide0PresenterImpl((Slide0Place) place, clientFactory, new Slide0ViewImpl());
+        if (place instanceof PreRaceLeaderBoardWithFlagsPlace) {
+            return new PreLeaderBoardWithFlagsPresenterImpl((PreRaceLeaderBoardWithFlagsPlace) place, clientFactory, new PreLeaderBoardWithFlagsViewImpl());
         }
         if (place instanceof IdleUpNextPlace) {
             return new IdleUpNextPresenterImpl((IdleUpNextPlace) place, clientFactory, new IdleNextUpViewImpl());

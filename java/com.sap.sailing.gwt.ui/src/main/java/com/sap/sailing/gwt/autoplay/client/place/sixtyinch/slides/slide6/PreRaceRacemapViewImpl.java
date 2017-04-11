@@ -61,7 +61,7 @@ public class PreRaceRacemapViewImpl extends ResizeComposite implements PreRaceRa
         statistics.addItem(PreRaceStatisticsBox.ICON_COMPETITORS, StringMessages.INSTANCE.competitors(),
                 result.getCompetitors());
         statistics.addItem(PreRaceStatisticsBox.ICON_WIND_FIX, StringMessages.INSTANCE.wind(), windSpeed);
-        statistics.addItem(PreRaceStatisticsBox.ICON_WIND, StringMessages.INSTANCE.averageDirection(), windDegree);
+        // statistics.addItem(PreRaceStatisticsBox.ICON_WIND, StringMessages.INSTANCE.averageDirection(), windDegree);
 
         statistics.addItem(PreRaceStatisticsBox.ICON_LEGS, StringMessages.INSTANCE.legs(), result.getLegs());
         statistics.addItem(PreRaceStatisticsBox.ICON_SUM_MILES, StringMessages.INSTANCE.estimatedDistance(),
