@@ -26,12 +26,11 @@ public class BuoyHelper {
             shadowDrawable = ContextCompat.getDrawable(context, R.drawable.buoy_shadow);
             final int outlineColor; // as 0xAARRGGBB
             final int colorColor; // as 0xAARRGGBB
+            outlineColor = context.getResources().getColor(R.color.buoy_outline);
             if (color == null) {
-                outlineColor = context.getResources().getColor(R.color.buoy_outline);
                 colorColor = context.getResources().getColor(R.color.buoy_color);
             } else {
-                outlineColor = getAndroidIntColor(color);
-                colorColor = outlineColor;
+                colorColor = getAndroidIntColor(color);
             }
             outlineDrawable = BitmapHelper.getTintedDrawable(context, R.drawable.buoy_outline, outlineColor);
             colorDrawable = BitmapHelper.getTintedDrawable(context, R.drawable.buoy_color, colorColor);
