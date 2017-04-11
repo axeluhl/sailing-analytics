@@ -25,6 +25,7 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
     private final ListBox pattern;
     private final ListBox type;
     private final TextBox color;
+    private final TextBox colorSample;
     private final StringMessages stringMessages;
     
     public MarkEditDialog(final StringMessages stringMessages, MarkDTO markToEdit, boolean isNewMark,
@@ -57,6 +58,9 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
         this.shape = createAndSelectListBox(Shape.values(), markToEdit.shape, true);
         this.type = createAndSelectListBox(MarkType.values(), markToEdit.type == null ? null : markToEdit.type.name(), false);
         color[0] = createTextBox(markToEdit.color==null?null:markToEdit.color.getAsHtml());
+        colorSample = new TextBox();
+        colorSample.setVisibleLength(3);
+        colorSample.setEnabled(false);
         this.color = color[0];
         this.pattern = createAndSelectListBox(Pattern.values(), markToEdit.pattern, true);
     }
@@ -94,9 +98,9 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
         result.type = MarkType.valueOf(type.getItemText(type.getSelectedIndex()));
         result.color = AbstractColor.getCssColor(color.getText());
         if (result.color == null) {
-            color.getElement().removeAttribute("style");
+            colorSample.getElement().removeAttribute("style");
         } else {
-            color.getElement().setAttribute("style", "color:"+result.color.getAsHtml()+";background-color:"+result.color.invert().getAsHtml());
+            colorSample.getElement().setAttribute("style", "background-color:"+result.color.getAsHtml());
         }
         result.pattern = pattern.getItemText(pattern.getSelectedIndex());
         return result;
@@ -104,7 +108,7 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(5, 2);
+        Grid result = new Grid(5, 4);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.shape()));
@@ -113,6 +117,8 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
         result.setWidget(2, 1, type);
         result.setWidget(3, 0, new Label(stringMessages.color()));
         result.setWidget(3, 1, color);
+        result.setWidget(3, 2, new Label(stringMessages.sampleColor()));
+        result.setWidget(3, 3, colorSample);
         result.setWidget(4, 0, new Label(stringMessages.pattern()));
         result.setWidget(4, 1, pattern);
         return result;
