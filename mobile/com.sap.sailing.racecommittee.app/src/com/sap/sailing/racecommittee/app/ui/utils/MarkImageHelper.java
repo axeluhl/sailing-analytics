@@ -33,7 +33,7 @@ public abstract class MarkImageHelper {
         if (result.getDrawableId() != 0) {
             drawable = new LayerDrawable(new Drawable[] { ContextCompat.getDrawable(context, result.getDrawableId()) });
         } else {
-            drawable = result.getDrawable();
+            drawable = result.getDrawable(mark.getColor());
         }
         return drawable;
     }

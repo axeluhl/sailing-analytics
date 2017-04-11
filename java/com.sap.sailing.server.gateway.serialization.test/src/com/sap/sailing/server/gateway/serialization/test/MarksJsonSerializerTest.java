@@ -38,7 +38,7 @@ public class MarksJsonSerializerTest {
         JSONObject result = serializer.serialize(mark);
 
         assertEquals("NAME", result.get(MarkJsonSerializer.FIELD_NAME));
-        assertEquals("RED", result.get(MarkJsonSerializer.FIELD_COLOR));
+        assertEquals(AbstractColor.getCssColor("RED").getAsHtml(), result.get(MarkJsonSerializer.FIELD_COLOR));
         assertEquals("IIIIDDDD", result.get(MarkJsonSerializer.FIELD_ID));
         assertEquals("SHINY", result.get(MarkJsonSerializer.FIELD_PATTERN));
         assertEquals("ROUND", result.get(MarkJsonSerializer.FIELD_SHAPE));

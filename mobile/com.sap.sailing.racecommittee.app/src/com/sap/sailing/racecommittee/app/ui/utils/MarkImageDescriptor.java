@@ -30,8 +30,13 @@ public class MarkImageDescriptor {
         return drawableId;
     }
 
-    public LayerDrawable getDrawable() {
-        return BuoyHelper.getBuoy(context, type, color, shape, pattern);
+    /**
+     * @param instanceColor when this descriptor has {@code null{} as its {@link #color} then
+     * {@code instanceColor} can be used to provide a specific color; if {@code instanceColor}
+     * is {@code null}, whatever the value of {@link #color} is will be used.
+     */
+    public LayerDrawable getDrawable(Color instanceColor) {
+        return BuoyHelper.getBuoy(context, type, instanceColor == null ? color : instanceColor, shape, pattern);
     }
 
     public String getShape() {

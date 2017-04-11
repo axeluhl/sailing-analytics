@@ -38,10 +38,10 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
         DBObject cpValue = new BasicDBObject();
         cpValue.put(FieldNames.GATE_NAME.name(), "Name");
         cpValue.put(FieldNames.GATE_ID.name(), (Serializable) 0);
-     Mark mark1 = new MarkImpl(0, "Left", MarkType.BUOY, AbstractColor.getCssColor("blue"), "square", "checkers");
+        Mark mark1 = new MarkImpl(0, "Left", MarkType.BUOY, AbstractColor.getCssColor("blue"), "square", "checkers");
         DBObject dbMark1 = new BasicDBObject();
         dbMark1.put(FieldNames.MARK_ID.name(), mark1.getId());
-        dbMark1.put(FieldNames.MARK_COLOR.name(), mark1.getColor());
+        dbMark1.put(FieldNames.MARK_COLOR.name(), mark1.getColor().getAsHtml());
         dbMark1.put(FieldNames.MARK_NAME.name(), mark1.getName());
         dbMark1.put(FieldNames.MARK_PATTERN.name(), mark1.getPattern());
         dbMark1.put(FieldNames.MARK_SHAPE.name(), mark1.getShape());
@@ -49,7 +49,7 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
         Mark mark2 = new MarkImpl(0, "Right", MarkType.BUOY, AbstractColor.getCssColor("blue"), "square", "checkers");
         DBObject dbMark2 = new BasicDBObject();
         dbMark2.put(FieldNames.MARK_ID.name(), mark2.getId());
-        dbMark2.put(FieldNames.MARK_COLOR.name(), mark2.getColor());
+        dbMark2.put(FieldNames.MARK_COLOR.name(), mark2.getColor().getAsHtml());
         dbMark2.put(FieldNames.MARK_NAME.name(), mark2.getName());
         dbMark2.put(FieldNames.MARK_PATTERN.name(), mark2.getPattern());
         dbMark2.put(FieldNames.MARK_SHAPE.name(), mark2.getShape());
