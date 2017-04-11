@@ -27,7 +27,7 @@ public class LeaderboardPanelLifecycle
     @Override
     public LeaderboardSettings createDefaultSettings() {
         return LeaderboardSettingsFactory.getInstance()
-                .createNewSettingsWithCustomDefaults(new LeaderboardSettings(namesOfRaceColumns, 1000L));
+                .createNewSettingsWithCustomDefaults(new LeaderboardSettings(namesOfRaceColumns));
     }
 
     @Override
