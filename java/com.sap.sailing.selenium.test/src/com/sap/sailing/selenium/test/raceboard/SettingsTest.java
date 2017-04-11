@@ -212,7 +212,6 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         leaderboardSettingsPanel.setNumberOfRacesToDisplay(2);
         leaderboardSettingsPanel.selectDetailsAndDeselectOther();
-        leaderboardSettingsPanel.setRefreshInterval(3);
         // FIXME: Settings Dialog is in Error state here
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
@@ -468,11 +467,11 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
         urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
         leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
-        leaderboardSettingsPanel.setRefreshInterval(3);
+        leaderboardSettingsPanel.setRefreshInterval(4);
         leaderboardPage = urlConfigurationDialog.openLeaderboard();
         leaderboardSettingsDialog = leaderboardPage.getLeaderboardSettings();
         leaderboardSettingsPanel = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
-        Assert.assertEquals(3, leaderboardSettingsPanel.getRefreshInterval());
+        Assert.assertEquals(4, leaderboardSettingsPanel.getRefreshInterval());
 
         // ensure that context specific settings are stored only for the context
         adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
