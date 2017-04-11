@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
+import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -59,8 +60,15 @@ public class IdleUpNextPresenterImpl extends ConfiguredSlideBase<IdleUpNextPlace
         if (data == null) {
             return;
         }
+        ArrayList<Pair<RegattaAndRaceIdentifier, Date>> filteredData = new ArrayList<>();
+        for (Pair<RegattaAndRaceIdentifier, Date> raw : data) {
+            if (DateUtil.isToday(raw.getB()) || DateUtil.daysFromNow(raw.getB()) < 2) {
+                filteredData.add(raw);
+            }
+        }
+
         // filter past events here
-        view.setData(data);
+        view.setData(filteredData);
     }
 
     @Override

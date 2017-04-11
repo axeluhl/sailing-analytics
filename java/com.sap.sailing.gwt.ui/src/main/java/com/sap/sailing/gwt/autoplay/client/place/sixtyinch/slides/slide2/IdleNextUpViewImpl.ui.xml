@@ -23,12 +23,13 @@
     	background-color: white;
     	border-radius: 10px;
     	padding: 20px;
+
+        font-size: 30px;
     }
     </ui:style>
     <g:SimplePanel styleName="{res.style.slideBackground}"
         addStyleNames="{style.fullscreenBackground}" ui:field="mainPanelUi">
         <g:HTMLPanel styleName="{style.newsBox}" ui:field="dataPanel">
-            upcoming
         </g:HTMLPanel>
     </g:SimplePanel>
 </ui:UiBinder> 
