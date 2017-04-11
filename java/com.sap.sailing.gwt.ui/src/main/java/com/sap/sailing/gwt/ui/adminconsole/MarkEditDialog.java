@@ -56,7 +56,7 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
         this.name = createTextBox(markToEdit.getName());
         this.shape = createAndSelectListBox(Shape.values(), markToEdit.shape, true);
         this.type = createAndSelectListBox(MarkType.values(), markToEdit.type == null ? null : markToEdit.type.name(), false);
-        color[0] = createTextBox(markToEdit.color.getAsHtml());
+        color[0] = createTextBox(markToEdit.color==null?null:markToEdit.color.getAsHtml());
         this.color = color[0];
         this.pattern = createAndSelectListBox(Pattern.values(), markToEdit.pattern, true);
     }
