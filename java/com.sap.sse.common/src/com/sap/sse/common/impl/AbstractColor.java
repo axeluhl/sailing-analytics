@@ -17,7 +17,7 @@ public abstract class AbstractColor implements Color {
     private static String toBrowserHexValue(int number) {
         StringBuilder builder = new StringBuilder(Integer.toHexString(number & 0xff));
         while (builder.length() < 2) {
-            builder.append("0");
+            builder.insert(0, '0');
         }
         return builder.toString().toUpperCase();
     }
