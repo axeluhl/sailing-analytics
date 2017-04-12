@@ -27,16 +27,16 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class PreLeaderBoardWithFlagsPresenterImpl extends ConfiguredSlideBase<PreRaceLeaderBoardWithFlagsPlace> implements PreLeaderboardWithFlagsView.Slide1Presenter {
+public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredSlideBase<AbstractPreRaceLeaderBoardWithImagePlace> implements PreLeaderboardWithImageView.Slide1Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private int selected = -1;
-    private PreLeaderboardWithFlagsView view;
+    private PreLeaderboardWithImageView view;
     private SixtyInchLeaderBoard leaderboardPanel;
     private Timer selectionTimer;
     private CompetitorSelectionModel competitorSelectionProvider;
 
-    public PreLeaderBoardWithFlagsPresenterImpl(PreRaceLeaderBoardWithFlagsPlace place, AutoPlayClientFactorySixtyInch clientFactory,
-            PreLeaderboardWithFlagsView slide1ViewImpl) {
+    public PreLeaderBoardWithImagePresenterImpl(AbstractPreRaceLeaderBoardWithImagePlace place, AutoPlayClientFactorySixtyInch clientFactory,
+            PreLeaderboardWithImageView slide1ViewImpl) {
         super(place, clientFactory);
         this.view = slide1ViewImpl;
         selectionTimer = new Timer() {

@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.IdleUpNextNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.LifeRaceWithRacemapNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.PreRaceWithRacemapNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsNode;
 import com.sap.sse.common.Util.Pair;
 
@@ -27,7 +27,7 @@ public class LifeRacesMonitor {
         }
     };
     private IdleUpNextNode idleLoopStartNode;
-    private PreRaceWithRacemapNode preRaceStartNode;
+    private RaceEndWithBoatsNode preRaceStartNode;
     private LifeRaceWithRacemapNode lifeRaceStartNode;
     private RaceEndWithBoatsNode afterRaceStartNode;
 
@@ -97,7 +97,7 @@ public class LifeRacesMonitor {
         this.idleLoopStartNode = idleLoopStartNode;
     }
 
-    public void setPreLifeRaceNodeRef(PreRaceWithRacemapNode preRaceStartNode) {
+    public void setPreLifeRaceNodeRef(RaceEndWithBoatsNode preRaceStartNode) {
         this.preRaceStartNode = preRaceStartNode;
     }
 

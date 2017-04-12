@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.TimedTransitionSimpleNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.IdleUpNextPlace;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -22,18 +22,22 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Pair;
 
-public class IdleUpNextNode extends TimedTransitionSimpleNode {
+public class IdleUpNextController extends TimedTransitionSimpleNode<LifeRaceWithRacemapNode> {
     private final AutoPlayClientFactorySixtyInch cf;
     private IdleUpNextPlace place;
     private static RaceTimesInfoProvider raceTimesInfoProvider;
     // private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds
     // */1000l);
 
-    public IdleUpNextNode(AutoPlayClientFactorySixtyInch cf) {
+    public IdleUpNextController(AutoPlayClientFactorySixtyInch cf) {
         super("slide1", 30000);
         this.cf = cf;
         place = new IdleUpNextPlace();
+    }
 
+    @Override
+    public Class<LifeRaceWithRacemapNode> getNodeRef() {
+        return LifeRaceWithRacemapNode.class;
     }
 
     public void onStart() {

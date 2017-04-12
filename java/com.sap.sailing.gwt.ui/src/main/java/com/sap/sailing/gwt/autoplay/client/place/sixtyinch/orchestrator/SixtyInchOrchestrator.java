@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.Id
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.LifeRaceWithRacemapController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.LifeRaceWithRacemapNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.PreRaceWithRacemapController;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.PreRaceWithRacemapNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupController;
@@ -42,7 +42,7 @@ public class SixtyInchOrchestrator implements Orchestrator {
 
         racesMonitor = new LifeRacesMonitor(cf);
         racesMonitor.setIdleStartNodeRef(new IdleUpNextNode());
-        racesMonitor.setPreLifeRaceNodeRef(new PreRaceWithRacemapNode());
+        racesMonitor.setPreLifeRaceNodeRef(new RaceEndWithBoatsNode());
         racesMonitor.setLifeRaceNodeRef(new LifeRaceWithRacemapNode());
         racesMonitor.setAfterRaceNodeRef(new RaceEndWithBoatsNode());
         racesMonitor.startMonitoring();

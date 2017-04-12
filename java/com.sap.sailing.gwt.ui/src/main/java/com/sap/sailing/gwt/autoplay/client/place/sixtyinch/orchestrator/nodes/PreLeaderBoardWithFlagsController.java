@@ -5,7 +5,6 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.TimedTransitionSimpleNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreRaceLeaderBoardWithFlagsPlace;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
@@ -27,7 +26,6 @@ public class PreLeaderBoardWithFlagsController extends TimedTransitionSimpleNode
 
         UUID eventId = cf.getSlideCtx().getSettings().getEventId();
         String leaderBoardName = cf.getSlideCtx().getSettings().getLeaderBoardName();
-
         cf.getDispatch().execute(new GetMiniLeaderbordAction(eventId, leaderBoardName),
                 new AsyncCallback<ResultWithTTL<GetMiniLeaderboardDTO>>() {
                     @Override
@@ -38,13 +36,12 @@ public class PreLeaderBoardWithFlagsController extends TimedTransitionSimpleNode
 
                     @Override
                     public void onSuccess(ResultWithTTL<GetMiniLeaderboardDTO> resultTTL) {
-                        GetMiniLeaderboardDTO dto = resultTTL.getDto();
-                        PreRaceLeaderBoardWithFlagsPlace place = new PreRaceLeaderBoardWithFlagsPlace();
-                        place.setLeaderBoardDTO(dto);
-                        setPlaceToGo(place);
-                        firePlaceChangeAndStartTimer();
+                        /*
+                         * GetMiniLeaderboardDTO dto = resultTTL.getDto(); AbstractPreRaceLeaderBoardWithImagePlace
+                         * place = new AbstractPreRaceLeaderBoardWithImagePlace(); place.setLeaderBoardDTO(dto);
+                         * setPlaceToGo(place); firePlaceChangeAndStartTimer();
+                         */
                     }
                 });
-
     };
 }

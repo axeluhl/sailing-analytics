@@ -26,7 +26,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class RaceEndWithBoatsPresenterImpl extends ConfiguredSlideBase<RaceEndWithBoatsPlace>
+public class RaceEndWithBoatsPresenterImpl extends ConfiguredSlideBase<AbstractRaceEndWithImagesTop3Place>
         implements RaceEndWithBoatsView.NextRaceWithBoatsPresenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private RaceEndWithBoatsView view;
@@ -34,7 +34,8 @@ public class RaceEndWithBoatsPresenterImpl extends ConfiguredSlideBase<RaceEndWi
     private CompetitorSelectionModel competitorSelectionProvider;
     private Timer updater;
 
-    public RaceEndWithBoatsPresenterImpl(RaceEndWithBoatsPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+    public RaceEndWithBoatsPresenterImpl(AbstractRaceEndWithImagesTop3Place place,
+            AutoPlayClientFactorySixtyInch clientFactory,
             RaceEndWithBoatsView slide1ViewImpl) {
         super(place, clientFactory);
         this.view = slide1ViewImpl;

@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
-public class PreRaceWithRacemapController extends TimedTransitionSimpleNode<PreRaceWithRacemapNode> {
+public class PreRaceWithRacemapController extends TimedTransitionSimpleNode<RaceEndWithBoatsNode> {
     private final AutoPlayClientFactorySixtyInch cf;
 
     public PreRaceWithRacemapController(AutoPlayClientFactorySixtyInch cf) {
@@ -21,9 +21,10 @@ public class PreRaceWithRacemapController extends TimedTransitionSimpleNode<PreR
     }
 
     @Override
-    public Class<PreRaceWithRacemapNode> getNodeRef() {
-        return PreRaceWithRacemapNode.class;
+    public Class<RaceEndWithBoatsNode> getNodeRef() {
+        return RaceEndWithBoatsNode.class;
     }
+
     public void onStart() {
         RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),
                 cf.getSlideCtx().getSettings().getLeaderBoardName(), cf.getSlideCtx().getSettings().getEventId(),
