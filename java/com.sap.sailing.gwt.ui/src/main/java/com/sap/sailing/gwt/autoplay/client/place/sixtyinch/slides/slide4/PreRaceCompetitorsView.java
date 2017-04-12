@@ -1,10 +1,17 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4;
 
+import java.util.List;
+
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public interface PreRaceCompetitorsView {
-    void startingWith(Slide4Presenter p, AcceptsOneWidget panel);
+    void startingWith(PreRaceCompetitorsPresenter p, AcceptsOneWidget panel);
 
-    public interface Slide4Presenter {
+    public interface PreRaceCompetitorsPresenter {
     }
+
+    void move();
+
+    void setCompetitors(List<CompetitorDTO> data);
 }

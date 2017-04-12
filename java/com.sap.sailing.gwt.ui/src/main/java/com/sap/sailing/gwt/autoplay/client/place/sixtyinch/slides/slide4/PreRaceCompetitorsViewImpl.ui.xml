@@ -3,9 +3,11 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui" >
     <ui:with field="res" type="com.sap.sailing.gwt.autoplay.client.resources.SixtyInchBundle" />
     <ui:style>
-    
+        .competitorSlider{
+	       height:100%;
+	       width:100%;
+           overflow:hidden;
+        }
     </ui:style>
-    <g:SimpleLayoutPanel styleName="{res.style.slideBackground}">
-        <g:Image ui:field="dummy" />
-    </g:SimpleLayoutPanel>
+    <g:LayoutPanel ui:field="competitorSlider" styleName="{style.competitorSlider}"/>
 </ui:UiBinder> 

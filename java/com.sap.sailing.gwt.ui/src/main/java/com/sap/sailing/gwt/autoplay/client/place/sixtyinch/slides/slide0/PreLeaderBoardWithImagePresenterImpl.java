@@ -70,9 +70,9 @@ public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredSlideBase<Ab
         }
 
         GWT.log("Select " + selected);
-        CompetitorDTO marked = compList.get(selected);
-        competitorSelectionProvider.setSelected(marked, true);
-        onSelect(marked);
+        CompetitorDTO newSelected = compList.get(selected);
+        competitorSelectionProvider.setSelected(newSelected, true);
+        view.onCompetitorSelect(newSelected);
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
@@ -86,9 +86,6 @@ public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredSlideBase<Ab
         });
     }
 
-    private void onSelect(CompetitorDTO marked) {
-        view.onCompetitorSelect(marked);
-    }
 
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
