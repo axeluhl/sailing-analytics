@@ -8,8 +8,8 @@
 		position: absolute;
 		display: inline-block;
 		width: 50%;
-		height: 100%;
-		bottom: 55px;
+		bottom: 60px;
+		top:0px;
 		overflow-y: auto;
 	}
 	
