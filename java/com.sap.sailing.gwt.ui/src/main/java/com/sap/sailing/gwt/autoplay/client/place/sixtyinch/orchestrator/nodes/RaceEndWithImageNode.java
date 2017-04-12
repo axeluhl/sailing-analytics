@@ -10,10 +10,10 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
-public class RaceEndWithBoatsNode extends TimedTransitionSimpleNode {
+public class RaceEndWithImageNode extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
 
-    public RaceEndWithBoatsNode(AutoPlayClientFactorySixtyInch cf) {
+    public RaceEndWithImageNode(AutoPlayClientFactorySixtyInch cf) {
         super("slide1", 30000);
         this.cf = cf;
     }
