@@ -1384,7 +1384,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     double bearingOfCombinedWindInDeg = windFix.trueWindBearingDeg;
                     double rotatedBearingDeg1 = 0.0;
                     double rotatedBearingDeg2 = 0.0;
-                    switch (legInfoDTO.legType) {
+                    switch (lastBoatFix.legType) {
                     case UPWIND:
                     case DOWNWIND: {
                         rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
