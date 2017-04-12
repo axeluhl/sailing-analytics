@@ -25,7 +25,7 @@ public class PreRaceWithRacemapNode extends TimedTransitionSimpleNode {
     public void onStart() {
         RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),
                 cf.getSlideCtx().getSettings().getLeaderBoardName(), cf.getSlideCtx().getSettings().getEventId(),
-                cf.getSlideCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), new AsyncCallback<RVWrapper>() {
+                cf.getSlideCtx().getEvent(), cf.getEventBus(), cf.getDispatch(),cf.getSlideCtx().getLifeRace(), new AsyncCallback<RVWrapper>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -60,11 +60,9 @@ public class PreRaceWithRacemapNode extends TimedTransitionSimpleNode {
                                                         PreRaceRacemapPlace place = new PreRaceRacemapPlace();
                                                         place.setLeaderBoardDTO(dto);
                                                         place.setRaceMap(result.raceboardPerspective, result.csel);
-                                                        place.setRace(result.race);
+                                                        // add later with settings here
                                                         place.setURL(
                                                                 cf.getSlideCtx().getEvent().getOfficialWebsiteURL());
-                                                        place.setTime(
-                                                                cf.getSlideCtx().getEvent().getCurrentServerTime());
                                                         setPlaceToGo(place);
                                                         firePlaceChangeAndStartTimer();
                                                     }

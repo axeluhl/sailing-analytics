@@ -3,10 +3,8 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.RaceMapHelper;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.RaceMapHelper.RVWrapper;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.LifeRaceWithRacemapPlace;
@@ -26,7 +24,8 @@ public class LifeRaceWithRacemapNode extends TimedTransitionSimpleNode {
     public void onStart() {
         RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),
                 cf.getSlideCtx().getSettings().getLeaderBoardName(), cf.getSlideCtx().getSettings().getEventId(),
-                cf.getSlideCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), new AsyncCallback<RVWrapper>() {
+                cf.getSlideCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getSlideCtx().getLifeRace(),
+                new AsyncCallback<RVWrapper>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -50,32 +49,14 @@ public class LifeRaceWithRacemapNode extends TimedTransitionSimpleNode {
 
                                     @Override
                                     public void onSuccess(ResultWithTTL<GetMiniLeaderboardDTO> resultTTL) {
-                                        HelperSixty.getLifeRace(cf.getSailingService(), cf.getErrorReporter(),
-                                                cf.getSlideCtx().getEvent(), leaderBoardName, cf.getDispatch(),
-                                                new AsyncCallback<RegattaAndRaceIdentifier>() {
-
-                                                    @Override
-                                                    public void onSuccess(RegattaAndRaceIdentifier lifeRace) {
-                                                        GetMiniLeaderboardDTO dto = resultTTL.getDto();
-                                                        LifeRaceWithRacemapPlace place = new LifeRaceWithRacemapPlace();
-                                                        place.setLeaderBoardDTO(dto);
-                                                        place.setLifeRace(lifeRace);
-                                                        place.setRaceMap(result.raceboardPerspective, result.csel);
-                                                        setPlaceToGo(place);
-                                                        firePlaceChangeAndStartTimer();
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(Throwable caught) {
-                                                        // fireEvent(new
-                                                        // DataLoadFailureEvent(MiniLeaderboardLoader.this, caught));
-                                                        firePlaceChangeAndStartTimer();
-                                                    }
-                                                });
-
+                                        GetMiniLeaderboardDTO dto = resultTTL.getDto();
+                                        LifeRaceWithRacemapPlace place = new LifeRaceWithRacemapPlace();
+                                        place.setLeaderBoardDTO(dto);
+                                        place.setRaceMap(result.raceboardPerspective, result.csel);
+                                        setPlaceToGo(place);
+                                        firePlaceChangeAndStartTimer();
                                     }
                                 });
-
                     }
                 });
     };

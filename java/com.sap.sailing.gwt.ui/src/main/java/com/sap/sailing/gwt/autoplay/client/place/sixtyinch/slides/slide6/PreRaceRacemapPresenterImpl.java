@@ -5,6 +5,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
@@ -18,7 +19,7 @@ public class PreRaceRacemapPresenterImpl extends ConfiguredSlideBase<PreRaceRace
         implements PreRaceRacemapView.Slide7Presenter {
     private PreRaceRacemapView view;
     private Timer updateStatistics;
-    private GetSixtyInchStatisticDTO lastResult;
+    private GetSixtyInchStatisticDTO lastStatisticResult;
     private Timer reloadStatistics;
 
     public PreRaceRacemapPresenterImpl(PreRaceRacemapPlace place, AutoPlayClientFactorySixtyInch clientFactory,
@@ -33,7 +34,7 @@ public class PreRaceRacemapPresenterImpl extends ConfiguredSlideBase<PreRaceRace
             view.showErrorNoLive(this, panel, getPlace().getError());
             return;
         }
-        view.nextRace(getPlace().getRace());
+        view.nextRace(getSlideCtx().getLifeRace());
         reloadStatistics();
         reloadStatistics = new Timer() {
             @Override
@@ -44,7 +45,7 @@ public class PreRaceRacemapPresenterImpl extends ConfiguredSlideBase<PreRaceRace
         updateStatistics = new Timer() {
             @Override
             public void run() {
-                if (lastResult != null) {
+                if (lastStatisticResult != null) {
                     String windSpeed = "";
                     String windDegree = "";
                     for (WindSource windSource : getPlace().getRaceMap()
@@ -66,7 +67,7 @@ public class PreRaceRacemapPresenterImpl extends ConfiguredSlideBase<PreRaceRace
                         default:
                         }
                     }
-                    view.updateStatistic(lastResult, getSlideCtx().getEvent().getOfficialWebsiteURL(), windSpeed,
+                    view.updateStatistic(lastStatisticResult, getSlideCtx().getEvent().getOfficialWebsiteURL(), windSpeed,
                             windDegree);
                 }
             }
@@ -86,8 +87,10 @@ public class PreRaceRacemapPresenterImpl extends ConfiguredSlideBase<PreRaceRace
     }
 
     private void reloadStatistics() {
-        getClientFactory().getDispatch().execute(new GetSixtyInchStatisticAction(getPlace().getRace().getRaceName(),
-                getPlace().getRace().getRegattaName()), new AsyncCallback<GetSixtyInchStatisticDTO>() {
+        RegattaAndRaceIdentifier upcomingRace = getSlideCtx().getLifeRace();
+        getClientFactory().getDispatch().execute(
+                new GetSixtyInchStatisticAction(upcomingRace.getRaceName(), upcomingRace.getRegattaName()),
+                new AsyncCallback<GetSixtyInchStatisticDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -97,7 +100,7 @@ public class PreRaceRacemapPresenterImpl extends ConfiguredSlideBase<PreRaceRace
 
                     @Override
                     public void onSuccess(GetSixtyInchStatisticDTO result) {
-                        lastResult = result;
+                        lastStatisticResult = result;
                     }
                 });
 

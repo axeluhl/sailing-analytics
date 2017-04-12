@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
@@ -21,7 +20,6 @@ public class LifeRaceWithRacemapPlace extends Place {
     }
 
     private GetMiniLeaderboardDTO leaderBoardDTO;
-    private RegattaAndRaceIdentifier lifeRace;
     private RaceMap raceMap;
     private Throwable error;
     private CompetitorSelectionModel raceMapSelectionProvider;
@@ -55,11 +53,4 @@ public class LifeRaceWithRacemapPlace extends Place {
         this.leaderBoardDTO = leaderBoardDTO;
     }
 
-    public void setLifeRace(RegattaAndRaceIdentifier lifeRace) {
-        this.lifeRace = lifeRace;
-    }
-
-    public RegattaAndRaceIdentifier getLifeRace() {
-        return lifeRace;
-    }
 }

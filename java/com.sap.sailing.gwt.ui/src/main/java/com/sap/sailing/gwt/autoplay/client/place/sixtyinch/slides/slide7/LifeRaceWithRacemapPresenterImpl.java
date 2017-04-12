@@ -95,7 +95,7 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRa
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
 
-        RegattaAndRaceIdentifier lifeRace = getPlace().getLifeRace();
+        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLifeRace();
         ArrayList<String> racesToShow = null;
         if (lifeRace != null) {
             racesToShow = new ArrayList<>();
