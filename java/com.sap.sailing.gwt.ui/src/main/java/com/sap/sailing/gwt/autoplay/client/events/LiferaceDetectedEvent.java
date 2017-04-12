@@ -7,12 +7,12 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 /**
  * Trigger "in between/ idle mode" path in autoplay
  */
-public class UpcomingLiferaceDetectedEvent extends GwtEvent<UpcomingLiferaceDetectedEvent.Handler> {
+public class LiferaceDetectedEvent extends GwtEvent<LiferaceDetectedEvent.Handler> {
     public static final Type<Handler> TYPE = new Type<Handler>();
 
     private RegattaAndRaceIdentifier lifeRace;
 
-    public UpcomingLiferaceDetectedEvent(RegattaAndRaceIdentifier lifeRace) {
+    public LiferaceDetectedEvent(RegattaAndRaceIdentifier lifeRace) {
         this.lifeRace = lifeRace;
     }
 
@@ -26,7 +26,7 @@ public class UpcomingLiferaceDetectedEvent extends GwtEvent<UpcomingLiferaceDete
      * Event handler interface
      */
     public interface Handler extends EventHandler {
-        void onLiferaceDetected(UpcomingLiferaceDetectedEvent e);
+        void onLiferaceDetected(LiferaceDetectedEvent e);
     }
 
     @Override
