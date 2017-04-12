@@ -70,16 +70,16 @@ public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements 
     }
 
     @Override
-    public void onCompetitorSelect(CompetitorDTO marked) {
-        image.setUrl(provider.getImageUrl(marked));
-        if (marked.getBoat() != null && marked.getBoat().getName() != null) {
-            subline1.setText(marked.getBoat().getName());
+    public void onCompetitorSelect(CompetitorDTO selected) {
+        image.setUrl(provider.getImageUrl(selected));
+        if (selected.getBoat() != null && selected.getBoat().getName() != null) {
+            subline1.setText(selected.getBoat().getName());
         } else {
             subline1.setText("");
         }
 
-        if (marked.getName() != null) {
-            subline2.setText(marked.getName());
+        if (selected.getName() != null) {
+            subline2.setText(selected.getName());
         } else {
             subline2.setText("");
         }
