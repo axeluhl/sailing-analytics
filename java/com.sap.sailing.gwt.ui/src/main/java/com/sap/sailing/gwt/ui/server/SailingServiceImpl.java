@@ -1113,36 +1113,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURI
                 + " and storedURI " + storedURI);
         for (TracTracRaceRecordDTO rr : rrs) {
-            // reload JSON and load clientparams.php
-            RaceRecord record = getTracTracAdapter().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
-            logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() +
-                    " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
-            // note that the live URI may be null for races that were put into replay mode
-            final String effectiveLiveURI;
-            if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
-                if (liveURI == null || liveURI.trim().length() == 0) {
-                    effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+            try {
+                // reload JSON and load clientparams.php
+                RaceRecord record = getTracTracAdapter().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
+                logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() +
+                        " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
+                // note that the live URI may be null for races that were put into replay mode
+                final String effectiveLiveURI;
+                if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+                    if (liveURI == null || liveURI.trim().length() == 0) {
+                        effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+                    } else {
+                        effectiveLiveURI = liveURI;
+                    }
                 } else {
-                    effectiveLiveURI = liveURI;
+                    effectiveLiveURI = null;
                 }
-            } else {
-                effectiveLiveURI = null;
+                final String effectiveStoredURI;
+                if (storedURI == null || storedURI.trim().length() == 0) {
+                    effectiveStoredURI = record.getStoredURI().toString();
+                } else {
+                    effectiveStoredURI = storedURI;
+                }
+                getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
+                        record.getParamURL(), effectiveLiveURI == null ? null : new URI(effectiveLiveURI),
+                        new URI(effectiveStoredURI), new URI(courseDesignUpdateURI),
+                        new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
+                        new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()), getRaceLogStore(),
+                        getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                        offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, tracTracUsername,
+                        tracTracPassword, record.getRaceStatus(), record.getRaceVisibility(), trackWind,
+                        correctWindByDeclination);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }
-            final String effectiveStoredURI;
-            if (storedURI == null || storedURI.trim().length() == 0) {
-                effectiveStoredURI = record.getStoredURI().toString();
-            } else {
-                effectiveStoredURI = storedURI;
-            }
-            getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
-                    record.getParamURL(), effectiveLiveURI == null ? null : new URI(effectiveLiveURI),
-                    new URI(effectiveStoredURI), new URI(courseDesignUpdateURI),
-                    new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
-                    new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()), getRaceLogStore(),
-                    getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                    offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, tracTracUsername,
-                    tracTracPassword, record.getRaceStatus(), record.getRaceVisibility(), trackWind,
-                    correctWindByDeclination);
         }
     }
 
