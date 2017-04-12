@@ -7,17 +7,19 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
-import com.sap.sailing.gwt.autoplay.client.events.FallbackToIdleLoopEvent;
-import com.sap.sailing.gwt.autoplay.client.events.LiferaceDetectedEvent;
-import com.sap.sailing.gwt.autoplay.client.events.UpcomingLiferaceDetectedEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.IdleUpNextController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.IdleUpNextNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.LifeRaceWithRacemapController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.LifeRaceWithRacemapNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.PreRaceWithRacemapController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.PreRaceWithRacemapNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 
 public class SixtyInchOrchestrator implements Orchestrator {
 
@@ -25,32 +27,25 @@ public class SixtyInchOrchestrator implements Orchestrator {
 
     private AutoPlayNodeReference currentNodeRef;
 
-    private final AutoPlayNode preLifeRaceLoopStart;
-    private final AutoPlayNode afterLifeRaceLoopStart;
-    private final AutoPlayNode lifeRaceLoopStart;
-    private final AutoPlayNode idleLoopStart;
-
     private final LifeRacesMonitor racesMonitor;
+
+    private ControllerRegistry controllerRegistry = new ControllerRegistry();
 
     public SixtyInchOrchestrator(AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
 
-        StartupNode slideInit = new StartupNode(cf);
+        controllerRegistry.addToRegisty(new StartupController(cf));
+        controllerRegistry.addToRegisty(new IdleUpNextController(cf));
+        controllerRegistry.addToRegisty(new PreRaceWithRacemapController(cf));
+        controllerRegistry.addToRegisty(new LifeRaceWithRacemapController(cf));
+        controllerRegistry.addToRegisty(new RaceEndWithBoatsController(cf));
 
-        IdleUpNextNode idleUpNext = new IdleUpNextNode(cf);
-
-        PreRaceWithRacemapNode preRaceRacemapNode = new PreRaceWithRacemapNode(cf);
-        LifeRaceWithRacemapNode lifeRaceWithRacemap = new LifeRaceWithRacemapNode(cf);
-        RaceEndWithBoatsNode endRaceSlideWithBoats = new RaceEndWithBoatsNode(cf);
-        endRaceSlideWithBoats.setNextNode(idleUpNext);
-
-        slideInit.setNextNode(idleUpNext);
-
-        idleLoopStart = slideInit;
-        preLifeRaceLoopStart = preRaceRacemapNode;
-        lifeRaceLoopStart = lifeRaceWithRacemap;
-        afterLifeRaceLoopStart = endRaceSlideWithBoats;
         racesMonitor = new LifeRacesMonitor(cf);
+        racesMonitor.setIdleStartNodeRef(new IdleUpNextNode());
+        racesMonitor.setPreLifeRaceNodeRef(new PreRaceWithRacemapNode());
+        racesMonitor.setLifeRaceNodeRef(new LifeRaceWithRacemapNode());
+        racesMonitor.setAfterRaceNodeRef(new RaceEndWithBoatsNode());
+        racesMonitor.startMonitoring();
     }
 
     /*
@@ -73,32 +68,7 @@ public class SixtyInchOrchestrator implements Orchestrator {
                 processFailure(e);
             }
         });
-        cf.getEventBus().addHandler(UpcomingLiferaceDetectedEvent.TYPE, new UpcomingLiferaceDetectedEvent.Handler() {
-            @Override
-            public void onLiferaceDetected(UpcomingLiferaceDetectedEvent e) {
-                cf.getSlideCtx().setCurrenLifeRace(e.getLifeRace());
-                transitionToNode(preLifeRaceLoopStart);
-            }
-        });
-        cf.getEventBus().addHandler(LiferaceDetectedEvent.TYPE, new LiferaceDetectedEvent.Handler() {
-            @Override
-            public void onLiferaceDetected(LiferaceDetectedEvent e) {
-                cf.getSlideCtx().setCurrenLifeRace(e.getLifeRace());
-                transitionToNode(lifeRaceLoopStart);
-            }
-        });
-        cf.getEventBus().addHandler(FallbackToIdleLoopEvent.TYPE, new FallbackToIdleLoopEvent.Handler() {
-            @Override
-            public void onFallbackToIdle(FallbackToIdleLoopEvent e) {
-                if (e.isComingFromLifeRace()) {
-                    transitionToNode(afterLifeRaceLoopStart);
-                } else {
-                    transitionToNode(idleLoopStart);
-                }
-            }
-        });
 
-        transitionToNode(idleLoopStart);
     }
 
     private void processFailure(FailureEvent event) {
@@ -109,43 +79,45 @@ public class SixtyInchOrchestrator implements Orchestrator {
         if (currentNodeRef != null) {
             currentNodeRef.stop();
         }
-        cf.getPlaceController().goTo(new SlideInitPlace(event, currentNodeRef.node));
+        transitionToNode(new StartupNode());
     }
 
+    private AutoPlayNodeController<?> getControllerForNode(AutoPlayNode node) {
+        return controllerRegistry.getController(node);
+    }
 
     @Override
-    public void transitionToNode(AutoPlayNode nextNode) {
-        if(nextNode == null){
+    public void transitionToNode(AutoPlayNode requestedNode) {
+        if (requestedNode == null) {
             GWT.log("Found no successor Node, staying at current node, validate Orchestrator");
             return;
         }
         if (currentNodeRef != null) {
             currentNodeRef.stop();
         }
-        currentNodeRef = new AutoPlayNodeReference(this, cf.getEventBus(), nextNode);
-        GWT.log("start orchestrator transition to " + nextNode.toString());
-        currentNodeRef.start();
+        AutoPlayNodeController<?> autoPlayController = getControllerForNode(requestedNode);
+        currentNodeRef = new AutoPlayNodeReference(this, cf.getEventBus(), autoPlayController);
+
+        currentNodeRef.start(requestedNode);
     }
 
     private static class AutoPlayNodeReference {
         private ResettableEventBus bus;
-        private AutoPlayNode node;
-        private Orchestrator orchestrator;
+        private AutoPlayNodeController controller;
 
-        public AutoPlayNodeReference(Orchestrator orchestrator, EventBus bus, AutoPlayNode node) {
-            this.orchestrator = orchestrator;
+        public AutoPlayNodeReference(Orchestrator orchestrator, EventBus bus, AutoPlayNodeController controller) {
             this.bus = new ResettableEventBus(bus);
-            this.node = node;
+            this.controller = controller;
         }
 
-        public void start() {
-            node.start(this.bus, orchestrator);
+        public void start(AutoPlayNode node) {
+            controller.start(node, this.bus);
         }
 
         public void stop() {
-            GWT.log("stop node " + node.toString());
+
             try {
-                node.stop();
+                controller.stop();
             } catch (Exception e) {
                 GWT.log("Failed to stop current node", e);
             }

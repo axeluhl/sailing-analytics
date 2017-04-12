@@ -2,29 +2,29 @@ package com.sap.sailing.gwt.autoplay.client.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 
 /**
  * Trigger "in between/ idle mode" path in autoplay
  */
-public class UpcomingLiferaceDetectedEvent extends GwtEvent<UpcomingLiferaceDetectedEvent.Handler> {
+public class AutoPlayNodeTransitionRequestEvent extends GwtEvent<AutoPlayNodeTransitionRequestEvent.Handler> {
     public static final Type<Handler> TYPE = new Type<Handler>();
 
-    private RegattaAndRaceIdentifier lifeRace;
+    private AutoPlayNode nodeToTransitionTo;
 
-    public UpcomingLiferaceDetectedEvent(RegattaAndRaceIdentifier lifeRace) {
-        this.lifeRace = lifeRace;
+    public AutoPlayNodeTransitionRequestEvent(AutoPlayNode nodeToTransitionTo) {
+        this.nodeToTransitionTo = nodeToTransitionTo;
     }
 
-    public RegattaAndRaceIdentifier getLifeRace() {
-        return lifeRace;
+    public AutoPlayNode getNodeToTransitionTo() {
+        return nodeToTransitionTo;
     }
 
     /**
      * Event handler interface
      */
     public interface Handler extends EventHandler {
-        void onLiferaceDetected(UpcomingLiferaceDetectedEvent e);
+        void onAutoPlayNodeTransition(AutoPlayNodeTransitionRequestEvent e);
     }
 
     @Override
@@ -34,6 +34,6 @@ public class UpcomingLiferaceDetectedEvent extends GwtEvent<UpcomingLiferaceDete
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onLiferaceDetected(this);
+        handler.onAutoPlayNodeTransition(this);
     }
 }

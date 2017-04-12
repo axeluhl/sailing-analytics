@@ -5,5 +5,5 @@ import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 public interface Orchestrator {
     void start();
 
-    void transitionToNode(AutoPlayNode slideConfig);
+    void transitionToNode(AutoPlayNode nodeToTransitionTo);
 }

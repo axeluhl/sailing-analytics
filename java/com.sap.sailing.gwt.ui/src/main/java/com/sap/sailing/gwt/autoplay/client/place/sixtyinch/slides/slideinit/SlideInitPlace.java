@@ -3,14 +3,14 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
 
 public class SlideInitPlace extends Place {
 
     private FailureEvent failureEvent;
-    private AutoPlayNode currentSlideConfig;
+    private AutoPlayNodeController currentSlideConfig;
 
-    public SlideInitPlace(FailureEvent failureEvent, AutoPlayNode currentSlideConfig) {
+    public SlideInitPlace(FailureEvent failureEvent, AutoPlayNodeController currentSlideConfig) {
         this.failureEvent = failureEvent;
         this.currentSlideConfig = currentSlideConfig;
     }
@@ -22,7 +22,7 @@ public class SlideInitPlace extends Place {
         return failureEvent;
     }
 
-    public AutoPlayNode getCurrentSlideConfig() {
+    public AutoPlayNodeController getCurrentSlideConfig() {
         return currentSlideConfig;
     }
 

@@ -1,0 +1,64 @@
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes;
+
+import java.util.UUID;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.place.shared.PlaceChangeEvent;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.AutoPlaySingleNextSlideNodeBase;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+
+public class StartupController extends AutoPlaySingleNextSlideNodeBase<StartupNode> {
+    private AutoPlayClientFactorySixtyInch cf;
+
+    public StartupController(final AutoPlayClientFactorySixtyInch cf) {
+        this.cf = cf;
+        setNextNode(new IdleUpNextNode());
+    }
+
+    public Class<StartupNode> getNodeRef() {
+        return StartupNode.class;
+    }
+
+    @Override
+    public void doSuspend() {
+    }
+
+    @Override
+    public void doContinue() {
+    }
+
+    @Override
+    public void stop() {
+    }
+
+    @Override
+    public void onStart() {
+        cf.getEventBus().fireEvent(new PlaceChangeEvent(new SlideInitPlace()));
+        final UUID eventUUID = cf.getSlideCtx().getSettings().getEventId();
+        cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
+            @Override
+            public void onSuccess(final EventDTO event) {
+                GWT.log("Event loaded " + event);
+                cf.getSlideCtx().updateEvent(event);
+                new Timer() {
+                    @Override
+                    public void run() {
+                        fireTransition();
+                    }
+                }.schedule(5000);
+                ;
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                getBus().fireEvent(
+                        new DataLoadFailureEvent(StartupController.this, caught, "Error loading Event with id " + eventUUID));
+            }
+        });
+    }
+}

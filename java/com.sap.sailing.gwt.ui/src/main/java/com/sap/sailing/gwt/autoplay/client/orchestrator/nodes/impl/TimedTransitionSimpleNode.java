@@ -1,11 +1,13 @@
-package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes;
+package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.user.client.Timer;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 
-public class TimedTransitionSimpleNode extends AutoPlaySingleNextSlideNodeBase {
+public abstract class TimedTransitionSimpleNode<NODE extends AutoPlayNode>
+        extends AutoPlaySingleNextSlideNodeBase<NODE> {
 
     private final int displayDurationInMs;
     private final Timer transitionTimer;
