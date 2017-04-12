@@ -48,12 +48,6 @@ public interface SettingsStorageManager<S extends Settings> {
 
     void storeContextSpecificSettingsJson(JSONObject contextSpecificSettingsJson,
             OnSettingsStoredCallback onSettingsStoredCallback);
-    /**
-     * Gets the last error occurred during settings initialisation.
-     * 
-     * @return The last error as {@link Throwable}, if an error occurred, otherwise {@code null}
-     */
-    Throwable getLastError();
 
     JSONValue settingsToJSON(Settings newSettings);
 

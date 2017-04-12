@@ -59,15 +59,6 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     /**
-     * Gets the last error occurred during settings initialisation.
-     * 
-     * @return The last error as {@link Throwable}, if an error occurred, otherwise {@code null}
-     */
-    public Throwable getLastError() {
-        return settingsStorageManager.getLastError();
-    }
-
-    /**
      * Checks whether the {@link Settings} of the provided {@link Component} are
      * storable and whether the underlying implementation supports
      * {@link #makeSettingsDefault(Component, Settings)} calls for it.

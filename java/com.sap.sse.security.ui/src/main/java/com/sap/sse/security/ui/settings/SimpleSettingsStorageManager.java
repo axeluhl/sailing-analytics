@@ -4,13 +4,10 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.settings.generic.GenericSerializableSettings;
-import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
 import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
-import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 /**
  * This {@link SettingsStorageManager} implementation only reads settings from the URL.
@@ -21,7 +18,16 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
  * @see SettingsStorageManager
  */
 public class SimpleSettingsStorageManager<S extends Settings> implements SettingsStorageManager<S> {
-    private final SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();
+    
+    protected final SettingsBuildingPipeline settingsBuildingPipeline;
+    
+    public SimpleSettingsStorageManager() {
+        this(new UrlSettingsBuildingPipeline());
+    }
+    
+    public SimpleSettingsStorageManager(SettingsBuildingPipeline settingsBuildingPipeline) {
+        this.settingsBuildingPipeline = settingsBuildingPipeline;
+    }
 
     @Override
     public boolean supportsStore() {
@@ -32,19 +38,7 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
      * {@inheritDoc}
      */
     public void retrieveDefaultSettings(S defaultSettings, final OnSettingsLoadedCallback<S> asyncCallback) {
-        asyncCallback.onSuccess(deserializeFromCurrentUrl(defaultSettings));
-    }
-
-    @SuppressWarnings("unchecked")
-    protected S deserializeFromCurrentUrl(S defaultSettings) {
-        if (defaultSettings instanceof GenericSerializableSettings) {
-            defaultSettings = (S) urlSerializer
-                    .deserializeFromCurrentLocation((GenericSerializableSettings) defaultSettings);
-        } else if (defaultSettings instanceof SettingsMap) {
-            defaultSettings = (S) urlSerializer
-                    .deserializeSettingsMapFromCurrentLocation((SettingsMap) defaultSettings);
-        }
-        return defaultSettings;
+        asyncCallback.onSuccess(settingsBuildingPipeline.getSettingsObject(defaultSettings));
     }
 
     @Override
@@ -58,11 +52,6 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
     @Override
     public void storeContextSpecificSettingsJson(JSONObject contextSpecificSettingsJson,
             OnSettingsStoredCallback onSettingsStoredCallback) {
-    }
-
-    @Override
-    public Throwable getLastError() {
-        return null;
     }
 
     @Override

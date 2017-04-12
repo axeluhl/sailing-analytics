@@ -20,10 +20,6 @@ public class StorageDefinitionIdFactory {
     public static final StorageDefinitionId createStorageDefinitionIdForRaceBoard(
             RaceboardContextDefinition raceboardContextDefinition) {
         String globalDefinitionId = RACEBOARD;
-        if (raceboardContextDefinition.getMode() != null) {
-            globalDefinitionId += "." + raceboardContextDefinition.getMode().toString();
-        }
-
         String contextDefinitionId = StorageDefinitionId.buildContextDefinitionId(raceboardContextDefinition.getRegattaName(),
                 raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName());
 
