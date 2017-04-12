@@ -9,18 +9,13 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
-public class RaceEndWithBoatsController extends TimedTransitionSimpleNode<RaceEndWithBoatsNode> {
+public class RaceEndWithBoatsController extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
 
     public RaceEndWithBoatsController(AutoPlayClientFactorySixtyInch cf) {
-        super("slide1", 30000);
         this.cf = cf;
-        setNextNode(new IdleUpNextNode());
     }
 
-    public Class<RaceEndWithBoatsNode> getNodeRef() {
-        return RaceEndWithBoatsNode.class;
-    }
 
     public void onStart() {
 

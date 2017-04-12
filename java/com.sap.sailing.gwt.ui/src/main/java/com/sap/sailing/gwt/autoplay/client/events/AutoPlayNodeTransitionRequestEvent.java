@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
 
 /**
  * Trigger "in between/ idle mode" path in autoplay
@@ -10,13 +10,13 @@ import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 public class AutoPlayNodeTransitionRequestEvent extends GwtEvent<AutoPlayNodeTransitionRequestEvent.Handler> {
     public static final Type<Handler> TYPE = new Type<Handler>();
 
-    private AutoPlayNode nodeToTransitionTo;
+    private AutoPlayNodeController nodeToTransitionTo;
 
-    public AutoPlayNodeTransitionRequestEvent(AutoPlayNode nodeToTransitionTo) {
+    public AutoPlayNodeTransitionRequestEvent(AutoPlayNodeController nodeToTransitionTo) {
         this.nodeToTransitionTo = nodeToTransitionTo;
     }
 
-    public AutoPlayNode getNodeToTransitionTo() {
+    public AutoPlayNodeController getNodeToTransitionTo() {
         return nodeToTransitionTo;
     }
 

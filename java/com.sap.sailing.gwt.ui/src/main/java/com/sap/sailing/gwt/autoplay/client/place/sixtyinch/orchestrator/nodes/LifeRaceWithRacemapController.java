@@ -12,19 +12,15 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
-public class LifeRaceWithRacemapController extends TimedTransitionSimpleNode<LifeRaceWithRacemapNode> {
+public class LifeRaceWithRacemapController extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
 
     public LifeRaceWithRacemapController(AutoPlayClientFactorySixtyInch cf) {
-        super("slide7", 30000);
+
         this.cf = cf;
 
     }
 
-    @Override
-    public Class<LifeRaceWithRacemapNode> getNodeRef() {
-        return LifeRaceWithRacemapNode.class;
-    }
 
     public void onStart() {
         RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),

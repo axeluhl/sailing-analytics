@@ -9,18 +9,13 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
-public class PreLeaderBoardWithFlagsController extends TimedTransitionSimpleNode<PreLeaderBoardWithFlagsNode> {
+public class PreLeaderBoardWithFlagsController extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
 
     public PreLeaderBoardWithFlagsController(AutoPlayClientFactorySixtyInch cf) {
-        super("PreLeaderBoardWithFlagsNode", 30000);
         this.cf = cf;
     }
 
-    @Override
-    public Class<PreLeaderBoardWithFlagsNode> getNodeRef() {
-        return PreLeaderBoardWithFlagsNode.class;
-    }
 
     public void onStart() {
 
@@ -31,7 +26,6 @@ public class PreLeaderBoardWithFlagsController extends TimedTransitionSimpleNode
                     @Override
                     public void onFailure(Throwable caught) {
                         // fireEvent(new DataLoadFailureEvent(MiniLeaderboardLoader.this, caught));
-                        firePlaceChangeAndStartTimer();
                     }
 
                     @Override

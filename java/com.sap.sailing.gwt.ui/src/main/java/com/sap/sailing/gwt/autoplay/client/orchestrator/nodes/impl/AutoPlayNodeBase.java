@@ -1,14 +1,13 @@
 package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl;
 
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
 
-public abstract class AutoPlayNodeBase<NODE extends AutoPlayNode> implements AutoPlayNodeController<NODE> {
+public abstract class AutoPlayNodeBase implements AutoPlayNodeController {
     private EventBus bus;
 
     @Override
-    public final void start(NODE node, EventBus bus) {
+    public final void start(EventBus bus) {
         this.bus = bus;
         onStart();
     }

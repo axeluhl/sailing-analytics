@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Pair;
 
-public class IdleUpNextController extends TimedTransitionSimpleNode<LifeRaceWithRacemapNode> {
+public class IdleUpNextController extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
     private IdleUpNextPlace place;
     private static RaceTimesInfoProvider raceTimesInfoProvider;
@@ -30,15 +30,12 @@ public class IdleUpNextController extends TimedTransitionSimpleNode<LifeRaceWith
     // */1000l);
 
     public IdleUpNextController(AutoPlayClientFactorySixtyInch cf) {
-        super("slide1", 30000);
+        
         this.cf = cf;
         place = new IdleUpNextPlace();
     }
 
-    @Override
-    public Class<LifeRaceWithRacemapNode> getNodeRef() {
-        return LifeRaceWithRacemapNode.class;
-    }
+
 
     public void onStart() {
         setPlaceToGo(place);

@@ -4,37 +4,23 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceChangeEvent;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayNodeTransitionRequestEvent;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.AutoPlaySingleNextSlideNodeBase;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.TimedTransitionSimpleNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class StartupController extends AutoPlaySingleNextSlideNodeBase<StartupNode> {
+public class StartupController extends TimedTransitionSimpleNode {
     private AutoPlayClientFactorySixtyInch cf;
+    private AutoPlayNodeController whenReadyNode;
 
     public StartupController(final AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
-        setNextNode(new IdleUpNextNode());
     }
 
-    public Class<StartupNode> getNodeRef() {
-        return StartupNode.class;
-    }
-
-    @Override
-    public void doSuspend() {
-    }
-
-    @Override
-    public void doContinue() {
-    }
-
-    @Override
-    public void stop() {
-    }
 
     @Override
     public void onStart() {
@@ -45,13 +31,7 @@ public class StartupController extends AutoPlaySingleNextSlideNodeBase<StartupNo
             public void onSuccess(final EventDTO event) {
                 GWT.log("Event loaded " + event);
                 cf.getSlideCtx().updateEvent(event);
-                new Timer() {
-                    @Override
-                    public void run() {
-                        fireTransition();
-                    }
-                }.schedule(5000);
-                ;
+                getBus().fireEvent(new AutoPlayNodeTransitionRequestEvent(whenReadyNode));
             }
 
             @Override
@@ -60,5 +40,9 @@ public class StartupController extends AutoPlaySingleNextSlideNodeBase<StartupNo
                         new DataLoadFailureEvent(StartupController.this, caught, "Error loading Event with id " + eventUUID));
             }
         });
+    }
+
+    public void setWhenReadyDestination(AutoPlayNodeController whenReadyNode) {
+        this.whenReadyNode = whenReadyNode;
     }
 }
