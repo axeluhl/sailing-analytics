@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide5;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
@@ -8,9 +8,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreLeaderBoardWithImageViewImpl.ImageProvider;
 
-public class Slide5ViewImpl extends ResizeComposite implements Slide5View {
-    private static Slide5ViewImplUiBinder uiBinder = GWT.create(Slide5ViewImplUiBinder.class);
+public class PreRaceCompetitorsViewImpl extends ResizeComposite implements PreRaceCompetitorsView {
+    private static PreRaceCompetitorsViewImplUiBinder uiBinder = GWT.create(PreRaceCompetitorsViewImplUiBinder.class);
 
     private static Dummy dummmyProvider = GWT.create(Dummy.class);
     @UiField
@@ -20,16 +21,16 @@ public class Slide5ViewImpl extends ResizeComposite implements Slide5View {
         ImageResource dummy();
     }
 
-    interface Slide5ViewImplUiBinder extends UiBinder<Widget, Slide5ViewImpl> {
+    interface PreRaceCompetitorsViewImplUiBinder extends UiBinder<Widget, PreRaceCompetitorsViewImpl> {
     }
 
-    public Slide5ViewImpl() {
+    public PreRaceCompetitorsViewImpl(ImageProvider provider) {
         initWidget(uiBinder.createAndBindUi(this));
         dummy.setUrl(dummmyProvider.dummy().getSafeUri());
     }
 
     @Override
-    public void startingWith(Slide5Presenter p, AcceptsOneWidget panel) {
+    public void startingWith(Slide4Presenter p, AcceptsOneWidget panel) {
         panel.setWidget(this);
     }
 

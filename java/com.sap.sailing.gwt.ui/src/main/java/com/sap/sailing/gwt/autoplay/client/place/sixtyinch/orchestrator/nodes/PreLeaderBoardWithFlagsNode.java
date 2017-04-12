@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreRaceLeaderBoardWithFlagsPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.AbstractPreRaceLeaderBoardWithImagePlace;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
@@ -35,7 +35,7 @@ public class PreLeaderBoardWithFlagsNode extends TimedTransitionSimpleNode {
                     @Override
                     public void onSuccess(ResultWithTTL<GetMiniLeaderboardDTO> resultTTL) {
                         GetMiniLeaderboardDTO dto = resultTTL.getDto();
-                        PreRaceLeaderBoardWithFlagsPlace place = new PreRaceLeaderBoardWithFlagsPlace();
+                        AbstractPreRaceLeaderBoardWithImagePlace place = new AbstractPreRaceLeaderBoardWithImagePlace();
                         place.setLeaderBoardDTO(dto);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
