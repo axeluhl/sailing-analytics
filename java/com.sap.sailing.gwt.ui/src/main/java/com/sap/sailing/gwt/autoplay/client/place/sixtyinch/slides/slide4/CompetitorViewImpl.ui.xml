@@ -49,10 +49,15 @@
         bottom: 10px;
         left: 34%;
     }
+    .holder{
+	
+	}
 	</ui:style>
-	<rf:ResizableFlowPanel styleName="{style.image}">
-		<g:Image ui:field="image1" />
+	<rf:ResizableFlowPanel styleName="{style.holder">
+		<rf:ResizableFlowPanel styleName="{style.image}">
+			<g:Image ui:field="image1" />
+		</rf:ResizableFlowPanel>
+		<g:Label ui:field="subline1" styleName="{style.subline1}" />
+		<g:Label ui:field="subline2" styleName="{style.subline2}" />
 	</rf:ResizableFlowPanel>
-	<g:Label ui:field="subline1" styleName="{style.subline1}" />
-	<g:Label ui:field="subline2" styleName="{style.subline2}" />
 </ui:UiBinder> 
