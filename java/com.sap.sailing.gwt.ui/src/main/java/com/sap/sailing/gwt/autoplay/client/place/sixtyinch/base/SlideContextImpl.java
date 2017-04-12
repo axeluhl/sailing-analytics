@@ -1,16 +1,17 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base;
 
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.SixtyInchSetting;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class SlideContextImpl implements SlideContext {
     private SixtyInchSetting settings;
-
     private EventBus eventBus;
-
     private EventDTO event;
+    private RegattaAndRaceIdentifier lifeRace;
+
 
     public SlideContextImpl(EventBus eventBus, SixtyInchSetting settings) {
         if (settings == null) {
@@ -26,6 +27,16 @@ public class SlideContextImpl implements SlideContext {
     @Override
     public SixtyInchSetting getSettings() {
         return settings;
+    }
+
+    @Override
+    public RegattaAndRaceIdentifier getLifeRace() {
+        return lifeRace;
+    }
+
+    @Override
+    public void setCurrenLifeRace(RegattaAndRaceIdentifier lifeRace) {
+        this.lifeRace = lifeRace;
     }
 
     @Override

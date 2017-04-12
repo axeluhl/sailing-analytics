@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FallbackToIdleNodePathEvent;
-import com.sap.sailing.gwt.autoplay.client.events.LiferaceDetectedEvent;
+import com.sap.sailing.gwt.autoplay.client.events.UpcomingLiferaceDetectedEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
@@ -29,12 +29,12 @@ public class SixtyInchOrchestrator implements Orchestrator {
     private AutoPlayNode liveRaceInitialNode;
     private AutoPlayNode idleEventInitialNode;
 
-    private UpcomingRacesMonitor racesMonitor = new UpcomingRacesMonitor(cf);
+    private UpcomingRacesMonitor racesMonitor;
 
     public SixtyInchOrchestrator(AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
 
-
+        racesMonitor = new UpcomingRacesMonitor(cf);
         StartupNode slideInit = new StartupNode(cf);
         // SlideConfig slide0 = new SlideTimedTransitionConfig(this, new Slide0Place(), 10000);
         TimedTransitionSimpleNode node2 = new TimedTransitionSimpleNode("node2", new IdleUpNextPlace(), 200000);
@@ -94,10 +94,11 @@ public class SixtyInchOrchestrator implements Orchestrator {
                 processFailure(e);
             }
         });
-        cf.getEventBus().addHandler(LiferaceDetectedEvent.TYPE, new LiferaceDetectedEvent.Handler() {
+        cf.getEventBus().addHandler(UpcomingLiferaceDetectedEvent.TYPE, new UpcomingLiferaceDetectedEvent.Handler() {
             @Override
-            public void onLiferaceDetected(LiferaceDetectedEvent e) {
+            public void onLiferaceDetected(UpcomingLiferaceDetectedEvent e) {
                 racesMonitor.startMonitoring();
+                cf.getSlideCtx().setCurrenLifeRace(e.getLifeRace());
                 transitionToNode(liveRaceInitialNode);
             }
         });
