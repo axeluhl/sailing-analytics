@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.events.FallbackToIdleNodePathEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsPlace;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
@@ -17,11 +16,6 @@ public class RaceEndWithBoatsNode extends TimedTransitionSimpleNode {
     public RaceEndWithBoatsNode(AutoPlayClientFactorySixtyInch cf) {
         super("slide1", 30000);
         this.cf = cf;
-    }
-
-    @Override
-    protected void fireTransition() {
-        getBus().fireEvent(new FallbackToIdleNodePathEvent(this));
     }
 
     public void onStart() {

@@ -13,7 +13,7 @@ public abstract class AutoPlaySingleNextSlideNodeBase extends AutoPlayNodeBase {
     }
 
     protected void fireTransition() {
-        getOrchestrator().transitionToNode(this, nextSlide);
+        getOrchestrator().transitionToNode(nextSlide);
     }
 
 }
