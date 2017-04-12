@@ -9,7 +9,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
@@ -97,7 +96,7 @@ public class PreLeaderBoardWithFlagsPresenterImpl extends ConfiguredSlideBase<Pr
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
         view.startingWith(this, panel);
 
-        RegattaAndRaceIdentifier lifeRace = getPlace().getLifeRace();
+        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLifeRace();
         ArrayList<String> racesToShow = null;
         if (lifeRace != null) {
             racesToShow = new ArrayList<>();

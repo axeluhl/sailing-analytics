@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -29,7 +30,7 @@ public class HelperSixty {
 
     public static void getLifeRace(SailingServiceAsync sailingService,
             ErrorReporter errorReporter, EventDTO event, String leaderBoardName, SailingDispatchSystem dispatch,
-            AsyncCallback<RegattaAndRaceIdentifier> callback) {
+            AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
         raceboardTimer.reset();
         raceboardTimer.setLivePlayDelayInMillis(1000);
         raceboardTimer.setRefreshInterval(1000);
@@ -68,9 +69,10 @@ public class HelperSixty {
                 raceTimesInfoProvider.removeRaceTimesInfoProviderListener(this);
                 raceboardTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                         clientTimeWhenResponseWasReceived);
-                RegattaAndRaceIdentifier lifeRace = checkForLiveRace(selectedLeaderboard, serverTimeDuringRequest,
+                Pair<Long, RegattaAndRaceIdentifier> timeToStartAndRaceIdentifier = checkForLiveRace(
+                        selectedLeaderboard, serverTimeDuringRequest,
                         raceTimesInfoProvider);
-                callback.onSuccess(lifeRace);
+                callback.onSuccess(timeToStartAndRaceIdentifier);
             }
         });
 
@@ -93,7 +95,7 @@ public class HelperSixty {
     /**
      * Side effect free method to get a LifeRace from a timesProvider and a leaderboard
      */
-    public static RegattaAndRaceIdentifier checkForLiveRace(AbstractLeaderboardDTO currentLeaderboard,
+    public static Pair<Long, RegattaAndRaceIdentifier> checkForLiveRace(AbstractLeaderboardDTO currentLeaderboard,
             Date serverTimeDuringRequest, RaceTimesInfoProvider raceTimesInfoProvider) {
         Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceColumnDTO race : currentLeaderboard.getRaceList()) {
@@ -104,14 +106,9 @@ public class HelperSixty {
                     if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.getStartOfRace() != null
                             && raceTimes.endOfRace == null) {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
-                        long timeToSwitchBeforeRaceStartInMs = 180 * 1000;
                         long delayToLiveInMs = raceTimes.delayToLiveInMs;
-                        // the switch to the live race should happen at a defined timepoint before the race start
-                        // (default is 3 min)
-                        if (serverTimeDuringRequest.getTime() - delayToLiveInMs > startTimeInMs
-                                - timeToSwitchBeforeRaceStartInMs) {
-                            return raceIdentifier;
-                        }
+                        return new Pair<Long, RegattaAndRaceIdentifier>(
+                                startTimeInMs - serverTimeDuringRequest.getTime() - delayToLiveInMs, raceIdentifier);
                     }
                 }
             }

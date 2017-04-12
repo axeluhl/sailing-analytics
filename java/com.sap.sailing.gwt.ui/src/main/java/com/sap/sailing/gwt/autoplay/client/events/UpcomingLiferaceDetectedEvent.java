@@ -20,8 +20,6 @@ public class UpcomingLiferaceDetectedEvent extends GwtEvent<UpcomingLiferaceDete
         return lifeRace;
     }
 
-
-
     /**
      * Event handler interface
      */

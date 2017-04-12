@@ -14,7 +14,6 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
@@ -46,21 +45,18 @@ public class RaceMapHelper {
 
     public static class RVWrapper {
 
-        public RVWrapper(RaceMap raceboardPerspective2, CompetitorSelectionModel competitorSelectionProvider,
-                RegattaAndRaceIdentifier race) {
+        public RVWrapper(RaceMap raceboardPerspective2, CompetitorSelectionModel competitorSelectionProvider) {
             this.raceboardPerspective = raceboardPerspective2;
             this.csel = competitorSelectionProvider;
-            this.race = race;
         }
 
-        public RegattaAndRaceIdentifier race;
         public RaceMap raceboardPerspective;
         public CompetitorSelectionModel csel;
     }
 
     public static void create(SailingServiceAsync sailingService, ErrorReporter errorReporter, String leaderBoardName,
             UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
-            AsyncCallback<RVWrapper> callback) {
+            RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
 
         raceboardTimer.reset();
         raceboardTimer.setLivePlayDelayInMillis(1000);
@@ -88,21 +84,18 @@ public class RaceMapHelper {
                         raceboardTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                                 clientTimeWhenResponseWasReceived);
                         raceboardTimer.play();
-                        RegattaAndRaceIdentifier lifeRace = HelperSixty.checkForLiveRace(selectedLeaderboard,
-                                serverTimeDuringRequest, raceTimesInfoProvider);
 
-                        if (lifeRace != null) {
-                            sailingService.getCompetitorBoats(lifeRace,
+                        if (regattaAndRaceIdentifier != null) {
+                            sailingService.getCompetitorBoats(regattaAndRaceIdentifier,
                                     new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                                         @Override
                                         public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
-                                            createRaceMapIfNotExist(lifeRace, selectedLeaderboard, result, competitors,
+                                            createRaceMapIfNotExist(regattaAndRaceIdentifier, selectedLeaderboard,
+                                                    result, competitors,
                                                     sailingService, HelperSixty.asyncActionsExecutor, errorReporter,
                                                     raceboardTimer, callback, clientTimeWhenResponseWasReceived,
                                                     serverTimeDuringRequest, clientTimeWhenRequestWasSent,
                                                     raceTimesInfo);
-                                            eventBus.fireEvent(
-                                                    new SlideHeaderEvent("Currently Live", lifeRace.getRaceName()));
                                         }
 
                                         @Override
@@ -187,6 +180,6 @@ public class RaceMapHelper {
         raceboardTimer.setPlayMode(PlayModes.Live);
         // wait for one update
         raceboardPerspective.onResize();
-        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider, currentLiveRace));
+        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider));
     }
 }

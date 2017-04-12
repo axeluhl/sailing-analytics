@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
-import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
@@ -96,7 +95,7 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRa
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
 
-        RegattaAndRaceIdentifier lifeRace = getPlace().getLifeRace();
+        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLifeRace();
         ArrayList<String> racesToShow = null;
         if (lifeRace != null) {
             racesToShow = new ArrayList<>();
@@ -123,7 +122,6 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRa
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 false, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null, leaderboard.name, errorReporter,
                 StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, false);
-        selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
 
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
     }

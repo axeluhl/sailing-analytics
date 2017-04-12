@@ -3,11 +3,9 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.FallbackToIdleNodePathEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithBoatsPlace;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
@@ -41,26 +39,12 @@ public class RaceEndWithBoatsNode extends TimedTransitionSimpleNode {
 
                     @Override
                     public void onSuccess(ResultWithTTL<GetMiniLeaderboardDTO> resultTTL) {
-                        HelperSixty.getLifeRace(cf.getSailingService(), cf.getErrorReporter(),
-                                cf.getSlideCtx().getEvent(), leaderBoardName, cf.getDispatch(),
-                                new AsyncCallback<RegattaAndRaceIdentifier>() {
-
-                                    @Override
-                                    public void onSuccess(RegattaAndRaceIdentifier lifeRace) {
-                                        GetMiniLeaderboardDTO dto = resultTTL.getDto();
-                                        RaceEndWithBoatsPlace place = new RaceEndWithBoatsPlace();
-                                        place.setLeaderBoardDTO(dto);
-                                        place.setLifeRace(lifeRace);
-                                        setPlaceToGo(place);
-                                        firePlaceChangeAndStartTimer();
-                                    }
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-
-                                    }
-                                });
-
+                        GetMiniLeaderboardDTO dto = resultTTL.getDto();
+                        RaceEndWithBoatsPlace place = new RaceEndWithBoatsPlace();
+                        place.setLeaderBoardDTO(dto);
+                        place.setLifeRace(cf.getSlideCtx().getLifeRace());
+                        setPlaceToGo(place);
+                        firePlaceChangeAndStartTimer();
                     }
                 });
     };

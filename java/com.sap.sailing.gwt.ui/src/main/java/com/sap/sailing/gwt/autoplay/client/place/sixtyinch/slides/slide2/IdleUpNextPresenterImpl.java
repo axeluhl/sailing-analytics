@@ -19,6 +19,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class IdleUpNextPresenterImpl extends ConfiguredSlideBase<IdleUpNextPlace>
         implements IdleUpNextView.IdleUpNextPresenter {
+    private static final int SHOW_RACES_STARTED = 1000 * 60 * 30;
     private IdleUpNextView view;
     private Timer updateImage;
     private Timer updateData;
@@ -63,7 +64,11 @@ public class IdleUpNextPresenterImpl extends ConfiguredSlideBase<IdleUpNextPlace
         ArrayList<Pair<RegattaAndRaceIdentifier, Date>> filteredData = new ArrayList<>();
         for (Pair<RegattaAndRaceIdentifier, Date> raw : data) {
             if (DateUtil.isToday(raw.getB()) || DateUtil.daysFromNow(raw.getB()) < 2) {
-                filteredData.add(raw);
+                Date now = new Date();
+                long diffInMillis = raw.getB().getTime() - now.getTime();
+                if (diffInMillis > 0 || diffInMillis < SHOW_RACES_STARTED) {
+                    filteredData.add(raw);
+                }
             }
         }
 
