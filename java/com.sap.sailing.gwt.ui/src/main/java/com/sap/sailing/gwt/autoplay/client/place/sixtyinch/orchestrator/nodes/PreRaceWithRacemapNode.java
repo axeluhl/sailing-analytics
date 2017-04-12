@@ -1,10 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.TimedTransitionSimpleNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.RaceMapHelper;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.RaceMapHelper.RVWrapper;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.PreRaceRacemapPlace;
@@ -49,31 +47,14 @@ public class PreRaceWithRacemapNode extends TimedTransitionSimpleNode {
 
                                     @Override
                                     public void onSuccess(ResultWithTTL<GetMiniLeaderboardDTO> resultTTL) {
-                                        HelperSixty.getLifeRace(cf.getSailingService(), cf.getErrorReporter(),
-                                                cf.getSlideCtx().getEvent(),
-                                                cf.getSlideCtx().getSettings().getLeaderBoardName(), cf.getDispatch(),
-                                                new AsyncCallback<RegattaAndRaceIdentifier>() {
-
-                                                    @Override
-                                                    public void onSuccess(RegattaAndRaceIdentifier lifeRace) {
-                                                        GetMiniLeaderboardDTO dto = resultTTL.getDto();
-                                                        PreRaceRacemapPlace place = new PreRaceRacemapPlace();
-                                                        place.setLeaderBoardDTO(dto);
-                                                        place.setRaceMap(result.raceboardPerspective, result.csel);
-                                                        // add later with settings here
-                                                        place.setURL(
-                                                                cf.getSlideCtx().getEvent().getOfficialWebsiteURL());
-                                                        setPlaceToGo(place);
-                                                        firePlaceChangeAndStartTimer();
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(Throwable caught) {
-                                                        // fireEvent(new
-                                                        // DataLoadFailureEvent(MiniLeaderboardLoader.this, caught));
-                                                        firePlaceChangeAndStartTimer();
-                                                    }
-                                                });
+                                        GetMiniLeaderboardDTO dto = resultTTL.getDto();
+                                        PreRaceRacemapPlace place = new PreRaceRacemapPlace();
+                                        place.setLeaderBoardDTO(dto);
+                                        place.setRaceMap(result.raceboardPerspective, result.csel);
+                                        // add later with settings here
+                                        place.setURL(cf.getSlideCtx().getEvent().getOfficialWebsiteURL());
+                                        setPlaceToGo(place);
+                                        firePlaceChangeAndStartTimer();
 
                                     }
                                 });

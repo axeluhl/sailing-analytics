@@ -5,13 +5,17 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
+import com.sap.sailing.gwt.autoplay.client.events.LiferaceDetectedEvent;
 import com.sap.sailing.gwt.autoplay.client.events.UpcomingLiferaceDetectedEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
+import com.sap.sse.common.Util.Pair;
 
 public class UpcomingRacesMonitor {
     private final AutoPlayClientFactorySixtyInch cf;
     private String leaderBoardName;
     private int errorCount = 0;;
+    private RegattaAndRaceIdentifier currentPreLifeRace;
+    private RegattaAndRaceIdentifier currentLifeRace;
     private Timer checkTimer = new Timer() {
         @Override
         public void run() {
@@ -36,18 +40,28 @@ public class UpcomingRacesMonitor {
             checkTimer.schedule(5000);
             return;
         }
-
         this.leaderBoardName = cf.getSlideCtx().getSettings().getLeaderBoardName();
         HelperSixty.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getSlideCtx().getEvent(),
-                leaderBoardName, cf.getDispatch(), new AsyncCallback<RegattaAndRaceIdentifier>() {
+                leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
                     @Override
-                    public void onSuccess(RegattaAndRaceIdentifier lifeRace) {
+                    public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
-                        if (lifeRace == null) {
-                            checkTimer.schedule(5000);
-                        } else {
-                            cf.getEventBus().fireEvent(new UpcomingLiferaceDetectedEvent(lifeRace));
+                        final Long timeToRaceStartInMs = result.getA();
+                        final RegattaAndRaceIdentifier loadedLifeRace = result.getB();
+                        if (/* is pre liferace */ timeToRaceStartInMs > 10000) {
+                            if (/* is new pre life race */!loadedLifeRace.equals(currentPreLifeRace)) {
+                                currentPreLifeRace = loadedLifeRace;
+                                currentLifeRace = null;
+                                cf.getEventBus().fireEvent(new UpcomingLiferaceDetectedEvent(loadedLifeRace));
+                            }
+                        } else /* is life race */ {
+                            currentPreLifeRace = null;
+                            if (/* is new life race */!loadedLifeRace.equals(currentLifeRace)) {
+                                currentLifeRace = loadedLifeRace;
+                                cf.getEventBus().fireEvent(new LiferaceDetectedEvent(loadedLifeRace));
+                            }
                         }
+                        checkTimer.schedule(5000);
                     }
 
                     @Override
