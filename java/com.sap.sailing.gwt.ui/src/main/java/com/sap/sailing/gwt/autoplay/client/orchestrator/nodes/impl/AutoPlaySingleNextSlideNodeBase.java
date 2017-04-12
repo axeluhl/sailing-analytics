@@ -1,19 +1,22 @@
-package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes;
+package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl;
 
-public abstract class AutoPlaySingleNextSlideNodeBase extends AutoPlayNodeBase {
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayNodeTransitionRequestEvent;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 
-    private AutoPlayNode nextSlide;
+public abstract class AutoPlaySingleNextSlideNodeBase<NODE extends AutoPlayNode> extends AutoPlayNodeBase<NODE> {
 
-    public void setNextNode(AutoPlayNode nextSlide) {
-        this.nextSlide = nextSlide;
+    private AutoPlayNode nodeTroTransitionTo;
+
+    public void setNextNode(AutoPlayNode nodeTroTransitionTo) {
+        this.nodeTroTransitionTo = nodeTroTransitionTo;
     }
 
-    protected AutoPlayNode getNextSlide() {
-        return nextSlide;
+    protected AutoPlayNode getNodeTroTransitionTo() {
+        return nodeTroTransitionTo;
     }
 
     protected void fireTransition() {
-        getOrchestrator().transitionToNode(nextSlide);
+        getBus().fireEvent(new AutoPlayNodeTransitionRequestEvent(nodeTroTransitionTo));
     }
 
 }
