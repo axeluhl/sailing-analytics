@@ -2,10 +2,10 @@ package com.sap.sailing.racecommittee.app.ui.views;
 
 import android.content.Context;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -36,6 +36,7 @@ public class SearchView extends FrameLayout {
 
         mEditText = (EditText) layout.findViewById(R.id.search_input);
         if (mEditText != null) {
+            mEditText.setVisibility(getResources().getBoolean(R.bool.penalty_search_open) ? VISIBLE : GONE);
             mEditText.addTextChangedListener(new android.text.TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -56,12 +57,15 @@ public class SearchView extends FrameLayout {
             });
         }
         mSearchIcon = (ImageView) layout.findViewById(R.id.search_icon);
+        if (mSearchIcon != null && getResources().getBoolean(R.bool.penalty_search_open)) {
+            mSearchIcon.setImageDrawable(BitmapHelper.getAttrDrawable(getContext(), R.attr.clear_24dp));
+        }
         View searchButton = layout.findViewById(R.id.search_button);
         if (searchButton != null) {
             searchButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onClickButton();
+                    onClickButton(getResources().getBoolean(R.bool.penalty_search_open));
                 }
             });
         }
@@ -73,16 +77,25 @@ public class SearchView extends FrameLayout {
         mWatcher = watcher;
     }
 
-    private void onClickButton() {
-        if (mCollapsed) {
-            mSearchIcon.setImageDrawable(BitmapHelper.getAttrDrawable(getContext(), R.attr.clear_24dp));
-            mEditText.setVisibility(VISIBLE);
-        } else {
-            mSearchIcon.setImageDrawable(BitmapHelper.getAttrDrawable(getContext(), R.attr.search_24dp));
+    private void onClickButton(boolean startOpen) {
+        if (startOpen) {
             mEditText.setText(null);
-            mEditText.setVisibility(GONE);
+        } else {
+            if (mCollapsed) {
+                mSearchIcon.setImageDrawable(BitmapHelper.getAttrDrawable(getContext(), R.attr.clear_24dp));
+                mEditText.setVisibility(VISIBLE);
+                mEditText.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+            } else {
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.RESULT_HIDDEN, 0);
+                mSearchIcon.setImageDrawable(BitmapHelper.getAttrDrawable(getContext(), R.attr.search_24dp));
+                mEditText.setText(null);
+                mEditText.setVisibility(GONE);
+            }
+            mCollapsed = !mCollapsed;
         }
-        mCollapsed = !mCollapsed;
     }
 
     public interface SearchTextWatcher {
