@@ -19,6 +19,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
+import com.sap.sse.common.util.NaturalComparator;
 
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
 
@@ -27,13 +28,6 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     private ItemListener mListener;
     private OrderBy mOrderBy = OrderBy.SAILING_NUMBER;
     private String mFilter;
-
-    public enum OrderBy {
-        SAILING_NUMBER,
-        COMPETITOR_NAME,
-        START_LINE,
-        FINISH_LINE
-    }
 
     public PenaltyAdapter(@NonNull ItemListener listener) {
         mListener = listener;
@@ -97,6 +91,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     public void setFilter(String filter) {
         mFilter = filter;
         mFiltered = filterData();
+        sortData();
         notifyDataSetChanged();
     }
 
@@ -159,24 +154,8 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         notifyDataSetChanged();
     }
 
-    private static class DisplayNameComparator implements Comparator<CompetitorResultEditableImpl> {
-
-        private int mPos;
-
-        DisplayNameComparator(int position) {
-            mPos = position;
-        }
-
-        @Override
-        public int compare(CompetitorResultEditableImpl lhs, CompetitorResultEditableImpl rhs) {
-            String[] leftItem = splitDisplayName(lhs.getCompetitorDisplayName());
-            String[] rightItem = splitDisplayName(rhs.getCompetitorDisplayName());
-            return leftItem[mPos].compareTo(rightItem[mPos]);
-        }
-
-        private String[] splitDisplayName(String displayName) {
-            return displayName.split(" - ");
-        }
+    public enum OrderBy {
+        SAILING_NUMBER, COMPETITOR_NAME, START_LINE, FINISH_LINE
     }
 
     public interface ItemListener {
@@ -185,6 +164,29 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
         void onEditClicked(CompetitorResultEditableImpl competitor);
 
+    }
+
+    private static class DisplayNameComparator implements Comparator<CompetitorResultEditableImpl> {
+
+        private NaturalComparator mNaturalComparator;
+        private int mPos;
+
+        DisplayNameComparator(int position) {
+            mNaturalComparator = new NaturalComparator();
+
+            mPos = position;
+        }
+
+        @Override
+        public int compare(CompetitorResultEditableImpl lhs, CompetitorResultEditableImpl rhs) {
+            String[] leftItem = splitDisplayName(lhs.getCompetitorDisplayName());
+            String[] rightItem = splitDisplayName(rhs.getCompetitorDisplayName());
+            return mNaturalComparator.compare(leftItem[mPos], rightItem[mPos]);
+        }
+
+        private String[] splitDisplayName(String displayName) {
+            return displayName.split(" - ");
+        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
