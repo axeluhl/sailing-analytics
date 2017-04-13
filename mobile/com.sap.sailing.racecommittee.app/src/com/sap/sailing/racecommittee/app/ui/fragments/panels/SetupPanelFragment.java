@@ -379,7 +379,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             state.getRacingProcedure().addChangedListener(mProcedureListener);
 
             refreshPanel();
-            uncheckMarker(null);
         }
 
         @Override
@@ -387,7 +386,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             super.onCourseDesignChanged(state);
 
             refreshPanel();
-            uncheckMarker(null);
         }
 
         @Override
@@ -395,7 +393,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             super.onWindFixChanged(state);
 
             refreshPanel();
-            uncheckMarker(null);
         }
 
         @Override
@@ -403,24 +400,16 @@ public class SetupPanelFragment extends BasePanelFragment {
             super.onStatusChanged(state);
 
             checkStatus();
-            uncheckMarker(null);
         }
     }
 
     private class RaceProcedureChangedListener extends BaseRacingProcedureChangedListener {
-
-        private PanelButton mView;
-
-        public RaceProcedureChangedListener() {
-            mView = new PanelButton(getActivity());
-        }
 
         @Override
         public void onActiveFlagsChanged(ReadonlyRacingProcedure racingProcedure) {
             super.onActiveFlagsChanged(racingProcedure);
 
             refreshPanel();
-            uncheckMarker(mView);
         }
     }
 
