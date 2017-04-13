@@ -1,8 +1,6 @@
-package com.sap.sse.security.ui.settings;
+package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStrings;
 
 public abstract class AbstractSettingsBuildingPipeline implements SettingsBuildingPipeline {
     
@@ -15,8 +13,6 @@ public abstract class AbstractSettingsBuildingPipeline implements SettingsBuildi
     public AbstractSettingsBuildingPipeline(SettingsStringConverter settingsStringConverter) {
         this.settingsStringConverter = settingsStringConverter;
     }
-
-
 
     @Override
     public <S extends Settings> S getSettingsObject(S defaultSettings) {

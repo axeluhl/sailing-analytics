@@ -78,7 +78,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
                         getUserService(), storageDefinitionId));
         
-        context.initInitialSettings();
         AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO raceboardData) {
@@ -110,7 +109,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     return;
                 }
                 
-                context.initInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
+                context.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override
                     public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
                         final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, context, initialSettings,

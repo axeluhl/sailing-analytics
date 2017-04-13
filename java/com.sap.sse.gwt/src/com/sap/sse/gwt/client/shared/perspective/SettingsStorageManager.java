@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+import java.util.List;
+
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -49,13 +51,9 @@ public interface SettingsStorageManager<S extends Settings> {
     void storeContextSpecificSettingsJson(JSONObject contextSpecificSettingsJson,
             OnSettingsStoredCallback onSettingsStoredCallback);
 
-    JSONValue settingsToJSON(Settings newSettings);
+    JSONValue settingsToJSON(Settings newSettings, PipelineLevel pipelineLevel, List<String> path);
 
     void retrieveSettingsJsons(AsyncCallback<SettingsJsons> asyncCallback);
-    
-    void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback);
-    
-    void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback);
     
     void dispose();
 

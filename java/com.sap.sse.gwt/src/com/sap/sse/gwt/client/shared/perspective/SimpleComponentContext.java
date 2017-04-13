@@ -1,7 +1,6 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -23,23 +22,6 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 public class SimpleComponentContext<S extends Settings> implements ComponentContext<S> {
 
     protected final ComponentLifecycle<S> rootLifecycle;
-
-    /**
-     * Contains {@link SettingsReceiverCallback}s which are waiting to receive the initial settings of the root
-     * component.
-     */
-    private Queue<OnSettingsLoadedCallback<S>> settingsReceiverCallbacks = new LinkedList<>();
-
-    /**
-     * Current initial/default settings for the whole settings tree which correspond to the root component and its
-     * subcomponents.
-     */
-    private S currentDefaultSettings = null;
-    
-    /**
-     * Indicates whether this context instance is currently loading the initial settings.
-     */
-    private boolean loadingDefaultSettings = false;
 
     /**
      * 
@@ -75,9 +57,12 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the current default {@link Settings} of the root component managed
+     * by this {@link ComponentContext}. The returned {@link Settings} should
+     * contain all settings for the root component and its subcomponents.
+     * 
+     * @return The {@link Settings} of the root component
      */
-    @Override
     public S getDefaultSettings() {
         return rootLifecycle.createDefaultSettings();
     }
@@ -94,61 +79,18 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
      * {@inheritDoc}
      */
     @Override
-    public void initInitialSettings() {
-        loadDefaultSettingsIfNecessary();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initInitialSettings(final OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
-        settingsReceiverCallbacks.add(onInitialSettingsLoaded);
-        loadDefaultSettingsIfNecessary();
+    public void getInitialSettings(final OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
+        onInitialSettingsLoaded.onSuccess(getDefaultSettings());
     }
     
-    private void loadDefaultSettingsIfNecessary() {
-        if (loadingDefaultSettings) {
-            return;
-        }
-        if (currentDefaultSettings == null) {
-            loadingDefaultSettings = true;
-            loadDefaultSettings(new OnSettingsLoadedCallback<S>() {
-                @Override
-                public void onError(Throwable caught, S fallbackDefaultSettings) {
-                    loadingDefaultSettings = false;
-                    S fallbackSettings = getDefaultSettings();
-                    OnSettingsLoadedCallback<S> callback;
-                    while ((callback = settingsReceiverCallbacks.poll()) != null) {
-                        callback.onError(caught, fallbackSettings);
-                    }
-                }
-
-                @Override
-                public void onSuccess(S result) {
-                    loadingDefaultSettings = false;
-                    currentDefaultSettings = result;
-                    OnSettingsLoadedCallback<S> callback;
-                    while ((callback = settingsReceiverCallbacks.poll()) != null) {
-                        callback.onSuccess(result);
-                    }
-                }
-
-            });
-        } else {
-            OnSettingsLoadedCallback<S> callback;
-            while ((callback = settingsReceiverCallbacks.poll()) != null) {
-                callback.onSuccess(currentDefaultSettings);
-            }
-        }
-    }
-    
-    protected void loadDefaultSettings(OnSettingsLoadedCallback<S> callback) {
-        callback.onSuccess(getDefaultSettings());
-    }
-
     @Override
     public void dispose() {
+    }
+    
+    @Override
+    public <CS extends Settings> void getInitialSettingsForComponent(final Component<CS> component, final OnSettingsLoadedCallback<CS> callback) {
+        ComponentLifecycle<CS> componentLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()), rootLifecycle);
+        callback.onSuccess(componentLifecycle.createDefaultSettings());
     }
 
 }

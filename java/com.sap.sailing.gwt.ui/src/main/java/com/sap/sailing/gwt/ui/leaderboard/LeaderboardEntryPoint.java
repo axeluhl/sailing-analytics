@@ -126,7 +126,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                     stringmessages);
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
                     rootComponentLifeCycle, settingsManager);
-            context.initInitialSettings(
+            context.getInitialSettings(
                     new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                         @Override
                         public void onSuccess(
@@ -154,7 +154,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                     StringMessages.INSTANCE);
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
                     rootComponentLifeCycle, settingsManager);
-            context.initInitialSettings(
+            context.getInitialSettings(
                     new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                         @Override
                         public void onSuccess(

@@ -41,7 +41,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
         
         final ComponentContext<LeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, userService,
                 placeToken);
-        componentContext.initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+        componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
             @Override
             public void onSuccess(LeaderboardSettings leaderboardSettings) {
                 final LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel(null, componentContext, //

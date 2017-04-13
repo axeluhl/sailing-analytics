@@ -2,8 +2,10 @@ package com.sap.sse.security.ui.settings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
@@ -13,6 +15,8 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.perspective.PipelineLevel;
+import com.sap.sse.gwt.client.shared.perspective.SettingsBuildingPipeline;
 import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStrings;
@@ -55,6 +59,8 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
     private boolean initialUserSetting = false;
     
     private UserStatusEventHandler userStatusEventHandler = null;
+    
+    private Queue<AsyncCallback<SettingsJsons>> retrieveSettingsCallbacksQueue = new LinkedList<>();
     
     /**
      * 
@@ -136,39 +142,22 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         });
     }
 
+    @Override
     public void retrieveDefaultSettings(S defaultSettings, final OnSettingsLoadedCallback<S> callback) {
-        if(userStatusEventHandler != null) {
-            throw new IllegalStateException("The contract between ComponentContext and SettingsStorageManager enforces this method to be called only once");
-        }
-        this.userStatusEventHandler = new UserStatusEventHandler() {
+        retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
 
             @Override
-            public void onUserStatusChange(UserDTO user) {
-                //call this method always on user status change event in order to cause sync between local storage and server
-                retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        if(!initialUserSetting) {
-                            initialUserSetting = true;
-                            SettingsStrings localStorageSettings = retrieveSettingsStringsFromLocalStorage(true, true);
-                            S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(defaultSettings, localStorageSettings);
-                            callback.onError(caught, newDefaultSettings);
-                        }
-                    }
-
-                    @Override
-                    public void onSuccess(SettingsJsons settingsJsons) {
-                        if(!initialUserSetting) {
-                            initialUserSetting = true;
-                            callback.onSuccess(settingsBuildingPipeline.getSettingsObject(defaultSettings, settingsJsons));
-                        }
-                    }
-                });
+            public void onFailure(Throwable caught) {
+                SettingsStrings localStorageSettings = retrieveSettingsStringsFromLocalStorage();
+                S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(defaultSettings, localStorageSettings);
+                callback.onError(caught, newDefaultSettings);
             }
 
-        };
-        userService.addUserStatusEventHandler(userStatusEventHandler, true);
+            @Override
+            public void onSuccess(SettingsJsons settingsJsons) {
+                callback.onSuccess(settingsBuildingPipeline.getSettingsObject(defaultSettings, settingsJsons));
+            }
+        });
     }
     
     @Override
@@ -179,11 +168,11 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         }
     }
     
-    private SettingsStrings retrieveSettingsStringsFromLocalStorage(boolean retrieveGlobalSettings, boolean retrieveContextSpecificSettings) {
+    private SettingsStrings retrieveSettingsStringsFromLocalStorage() {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
-            String globalSettings = retrieveGlobalSettings ? localStorage.getItem(storageGlobalKey) : null;
-            String contextSpecificSettings = retrieveContextSpecificSettings ? localStorage.getItem(storageContextSpecificKey) : null;
+            String globalSettings = localStorage.getItem(storageGlobalKey);
+            String contextSpecificSettings = localStorage.getItem(storageContextSpecificKey);
             return new SettingsStrings(globalSettings, contextSpecificSettings);
         }
         return new SettingsStrings(null, null);
@@ -209,8 +198,8 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
     }
     
     @Override
-    public JSONValue settingsToJSON(Settings newSettings) {
-        return settingsBuildingPipeline.getJsonObject(newSettings);
+    public JSONValue settingsToJSON(Settings newSettings, PipelineLevel pipelineLevel, List<String> path) {
+        return settingsBuildingPipeline.getJsonObject(newSettings, pipelineLevel, path);
     }
     
     @Override
@@ -244,67 +233,57 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
     
     @Override
     public void retrieveSettingsJsons(AsyncCallback<SettingsJsons> asyncCallback) {
-        retrieveSettingsJsons(asyncCallback, true, true);
-    }
+        retrieveSettingsCallbacksQueue.add(asyncCallback);
+        if(userStatusEventHandler == null) {
+            this.userStatusEventHandler = new UserStatusEventHandler() {
     
-    private void retrieveSettingsJsons(AsyncCallback<SettingsJsons> asyncCallback, boolean retrieveGlobalSettings, boolean retrieveContextSpecificSettings) {
+                @Override
+                public void onUserStatusChange(UserDTO user) {
+                    //call this method always on user status change event in order to cause sync between local storage and server
+                    if(!initialUserSetting) {
+                        initialUserSetting = true;
+                        requestSettingsJsons();
+                    }
+                }
+            };
+        } else if(initialUserSetting) {
+            requestSettingsJsons();
+        }
+    }
+
+    private void requestSettingsJsons() {
         if (userService.getCurrentUser() == null) {
-            SettingsStrings settingsStrings = retrieveSettingsStringsFromLocalStorage(retrieveGlobalSettings, retrieveContextSpecificSettings);
-            asyncCallback.onSuccess(settingsBuildingPipeline.getSettingsStringConverter().convertToSettingsJson(settingsStrings));
+            SettingsStrings settingsStrings = retrieveSettingsStringsFromLocalStorage();
+            AsyncCallback<SettingsJsons> asyncCallback;
+            while((asyncCallback = retrieveSettingsCallbacksQueue.poll()) != null) {
+                asyncCallback.onSuccess(settingsBuildingPipeline.getSettingsStringConverter().convertToSettingsJson(settingsStrings));
+            }
         } else {
             retrieveSettingsStringsFromServer(new AsyncCallback<SettingsStrings>() {
                 
                 @Override
                 public void onSuccess(SettingsStrings serverSettingsStrings) {
                     serverSettingsStrings = syncLocalStorageAndServer(serverSettingsStrings);
-                    asyncCallback.onSuccess(settingsBuildingPipeline.getSettingsStringConverter().convertToSettingsJson(serverSettingsStrings));
+                    AsyncCallback<SettingsJsons> asyncCallback;
+                    while((asyncCallback = retrieveSettingsCallbacksQueue.poll()) != null) {
+                        asyncCallback.onSuccess(settingsBuildingPipeline.getSettingsStringConverter().convertToSettingsJson(serverSettingsStrings));
+                    }
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    asyncCallback.onFailure(caught);
+                    AsyncCallback<SettingsJsons> asyncCallback;
+                    while((asyncCallback = retrieveSettingsCallbacksQueue.poll()) != null) {
+                        asyncCallback.onFailure(caught);
+                    }
                 }
             });
         }
     }
     
-    @Override
-    public void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
-        retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                asyncCallback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(SettingsJsons result) {
-                asyncCallback.onSuccess(result.getGlobalSettingsJson());
-            }
-            
-        }, true, false);
-    }
-    
-    @Override
-    public void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
-        retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                asyncCallback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(SettingsJsons result) {
-                asyncCallback.onSuccess(result.getContextSpecificSettingsJson());
-            }
-            
-        }, false, true);
-    }
-    
     private SettingsStrings syncLocalStorageAndServer(SettingsStrings serverSettingsStrings) {
         if(serverSettingsStrings.getGlobalSettingsString() == null && serverSettingsStrings.getContextSpecificSettingsString() == null) {
-            SettingsStrings localStorageSettingsStrings = retrieveSettingsStringsFromLocalStorage(true, true);
+            SettingsStrings localStorageSettingsStrings = retrieveSettingsStringsFromLocalStorage();
             if(localStorageSettingsStrings.getGlobalSettingsString() != null || localStorageSettingsStrings.getContextSpecificSettingsString() != null) {
                 storeSettingsStringsOnServer(localStorageSettingsStrings, new OnSettingsStoredCallback() {
                     

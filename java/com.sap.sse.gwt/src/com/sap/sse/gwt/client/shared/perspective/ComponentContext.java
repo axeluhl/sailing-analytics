@@ -38,15 +38,6 @@ public interface ComponentContext<S extends Settings> {
     ComponentLifecycle<S> getRootLifecycle();
 
     /**
-     * Gets the current default {@link Settings} of the root component managed
-     * by this {@link ComponentContext}. The returned {@link Settings} should
-     * contain all settings for the root component and its subcomponents.
-     * 
-     * @return The {@link Settings} of the root component
-     */
-    S getDefaultSettings();
-
-    /**
      * Checks whether the {@link Settings} of the passed {@link Component} are
      * storable and whether the underlying implementation supports
      * {@link #makeSettingsDefault(Component, Settings)} calls for it.
@@ -57,9 +48,11 @@ public interface ComponentContext<S extends Settings> {
      * storage support
      */
     boolean hasMakeCustomDefaultSettingsSupport(Component<?> component);
+    
+    <CS extends Settings> void getInitialSettingsForComponent(final Component<CS> component, final OnSettingsLoadedCallback<CS> callback);
 
     /**
-     * Initialises this instance with initial settings and passes these settings to the provided callback.
+     * Gets initial settings and passes these settings to the provided callback.
      * The provided callback gets called when initial/default settings are available. That means,
      * if the initialisation of this instance has been already finished, the provided callback is called
      * immediately. If initialisation is not done yet, then the callback gets called when
@@ -69,17 +62,8 @@ public interface ComponentContext<S extends Settings> {
      * 
      * @see #initInitialSettings()
      */
-    void initInitialSettings(OnSettingsLoadedCallback<S> onInitialSettingsLoaded);
+    void getInitialSettings(OnSettingsLoadedCallback<S> onInitialSettingsLoaded);
 
-    /**
-     * Initialises the instance with initial settings. The earlier this method gets called,
-     * the earlier the initial settings are going to be available.
-     * This method produces no side-effects if it gets called multiple times.
-     * 
-     * @see #initInitialSettings(OnSettingsLoadedCallback)
-     */
-    void initInitialSettings();
-    
     void dispose();
 
 }

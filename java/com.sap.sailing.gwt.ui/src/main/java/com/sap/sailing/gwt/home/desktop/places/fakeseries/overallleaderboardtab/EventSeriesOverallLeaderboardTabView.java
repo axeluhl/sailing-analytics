@@ -77,7 +77,7 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
             if(leaderboardPanel == null) {
                 createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), /*FIXME placeToken */ null, leaderboardConsumer);
             } else if( /*FIXME placeToken not empty */ false) {
-                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null).initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null).getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
                     @Override
                     public void onSuccess(LeaderboardSettings settings) {
                         leaderboardPanel.updateSettings(settings);

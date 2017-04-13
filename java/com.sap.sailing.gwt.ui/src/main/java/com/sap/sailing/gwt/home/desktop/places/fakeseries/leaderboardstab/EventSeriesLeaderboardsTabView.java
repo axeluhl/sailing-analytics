@@ -77,7 +77,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             final boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
 
             final ComponentContext<LeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null);
-            componentContext.initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+            componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
                 @Override
                 public void onSuccess(LeaderboardSettings settings) {
                     MultiLeaderboardProxyPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(null, componentContext,

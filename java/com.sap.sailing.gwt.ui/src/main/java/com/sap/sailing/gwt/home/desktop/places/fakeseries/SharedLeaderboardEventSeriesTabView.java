@@ -39,7 +39,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
 
         final ComponentContext<LeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, userService,
                 placeToken);
-        componentContext.initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+        componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
             @Override
             public void onSuccess(LeaderboardSettings leaderboardSettings) {
                 LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(null,

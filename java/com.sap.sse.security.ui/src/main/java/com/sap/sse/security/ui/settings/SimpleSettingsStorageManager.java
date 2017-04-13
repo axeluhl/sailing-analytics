@@ -1,11 +1,15 @@
 package com.sap.sse.security.ui.settings;
 
+import java.util.List;
+
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.perspective.PipelineLevel;
+import com.sap.sse.gwt.client.shared.perspective.SettingsBuildingPipeline;
 import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 
@@ -55,7 +59,7 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
     }
 
     @Override
-    public JSONValue settingsToJSON(Settings newSettings) {
+    public JSONValue settingsToJSON(Settings newSettings, PipelineLevel pipelineLevel, List<String> path) {
         return null;
     }
 
@@ -63,14 +67,6 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
     public void retrieveSettingsJsons(AsyncCallback<SettingsJsons> asyncCallback) {
     }
     
-    @Override
-    public void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
-    }
-    
-    @Override
-    public void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
-    }
-
     @Override
     public void dispose() {
     }

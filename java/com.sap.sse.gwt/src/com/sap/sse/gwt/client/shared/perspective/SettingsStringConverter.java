@@ -1,12 +1,10 @@
-package com.sap.sse.security.ui.settings;
+package com.sap.sse.gwt.client.shared.perspective;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
-import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStrings;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 

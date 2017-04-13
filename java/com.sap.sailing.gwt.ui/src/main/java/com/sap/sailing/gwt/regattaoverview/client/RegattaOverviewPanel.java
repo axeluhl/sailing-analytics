@@ -224,7 +224,7 @@ public class RegattaOverviewPanel extends SimplePanel {
             leaderboardsTabPanel = null;
         }
         
-        componentContext.initInitialSettings(new DefaultOnSettingsLoadedCallback<RegattaRaceStatesSettings>() {
+        componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<RegattaRaceStatesSettings>() {
             @Override
             public void onSuccess(RegattaRaceStatesSettings defaultSettings) {
                 regattaRaceStatesComponent.updateSettings(defaultSettings);

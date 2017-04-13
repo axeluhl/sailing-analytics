@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -39,7 +40,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     /**
      * Manages the persistence layer of settings.
      */
-    private final SettingsStorageManager<S> settingsStorageManager;
+    protected final SettingsStorageManager<S> settingsStorageManager;
 
     /**
      * 
@@ -53,9 +54,27 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
     
     @Override
-    protected void loadDefaultSettings(OnSettingsLoadedCallback<S> callback) {
+    public void getInitialSettings(OnSettingsLoadedCallback<S> callback) {
         S systemDefaultSettings = rootLifecycle.createDefaultSettings();
         settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, callback);
+    }
+    
+    @Override
+    public <CS extends Settings> void getInitialSettingsForComponent(final Component<CS> component, final OnSettingsLoadedCallback<CS> callback) {
+        getInitialSettings(new OnSettingsLoadedCallback<S>() {
+
+            @Override
+            public void onError(Throwable caught, S fallbackDefaultSettings) {
+                CS componentFallbackSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(component.getPath()), fallbackDefaultSettings);
+                callback.onError(caught, componentFallbackSettings);
+            }
+
+            @Override
+            public void onSuccess(S settings) {
+                CS componentSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(component.getPath()), settings);
+                callback.onSuccess(componentSettings);
+            }
+        });
     }
 
     /**
@@ -91,9 +110,8 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @return The global settings extracted, or {@code null} if there aren't any
      * global settings to be stored
      */
-    @SuppressWarnings("unchecked")
     public<CS extends Settings> CS extractGlobalSettings(Component<CS> component, CS componentSettings) {
-        ComponentLifecycle<CS> targetLifecycle = (ComponentLifecycle<CS>) determineLifecycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()), rootLifecycle);
         return targetLifecycle.extractGlobalSettings(componentSettings);
     }
 
@@ -105,9 +123,8 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @return The context specific settings extracted, or {@code null} if there aren't any
      * context specific settings to be stored
      */
-    @SuppressWarnings("unchecked")
     public<CS extends Settings> CS extractContextSpecificSettings(Component<CS> component, CS componentSettings) {
-        ComponentLifecycle<CS> targetLifecycle = (ComponentLifecycle<CS>) determineLifecycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()), rootLifecycle);
         return targetLifecycle.extractContextSpecificSettings(componentSettings);
     }
 
@@ -125,16 +142,14 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      */
     @Override
     public<CS extends Settings> void makeSettingsDefault(Component<CS> component, CS newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
-        @SuppressWarnings("unchecked")
-        ComponentLifecycle<CS> targetLifecycle = (ComponentLifecycle<CS>) determineLifecycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()), rootLifecycle);
         CS globalSettings = targetLifecycle.extractGlobalSettings(newDefaultSettings);
         updateGlobalSettings(component.getPath(), globalSettings, onSettingsStoredCallback);
     }
     
     @Override
     public<CS extends Settings> void storeSettingsForContext(Component<CS> component, CS newSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
-        @SuppressWarnings("unchecked")
-        ComponentLifecycle<CS> targetLifecycle = (ComponentLifecycle<CS>) determineLifecycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()), rootLifecycle);
         CS contextSpecificSettings = targetLifecycle.extractContextSpecificSettings(newSettings);
         updateContextSpecificSettings(component.getPath(), contextSpecificSettings, onSettingsStoredCallback);
     }
@@ -149,9 +164,22 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @param newSettings The new settings with that the target node in the settings tree is going to be updated
      * @return
      */
-    private JSONObject patchJsonObject(JSONObject root, List<String> path, Settings newSettings) {
+    /**
+     * Patches the settings tree with the new settings provided. The settings node with the specified path
+     * is going to be created/replaced with the new settings.
+     *  
+     * @param root The root node of the settings tree
+     * @param path The path of the node to create/update
+     * @param newSettings The new settings with that the target node in the settings tree is going to be updated
+     * @return
+     */
+    private JSONObject patchJsonObject(JSONObject root, List<String> path, Settings newSettings, PipelineLevel pipelineLevel) {
+        return patchJsonObject(root, path, Collections.unmodifiableList(path), newSettings, pipelineLevel);
+    }
+    
+    private JSONObject patchJsonObject(JSONObject root, List<String> path, List<String> originalPath, Settings newSettings, PipelineLevel pipelineLevel) {
         if(path.isEmpty()) {
-            return (JSONObject) settingsStorageManager.settingsToJSON(newSettings);
+            return (JSONObject) settingsStorageManager.settingsToJSON(newSettings, pipelineLevel, originalPath);
         }
         if (root == null) {
             root = new JSONObject();
@@ -168,9 +196,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
                 child = new JSONObject();
                 root.put(current, child);
             }
-            return patchJsonObject(child.isObject(), path, newSettings);
+            return patchJsonObject(child.isObject(), path, originalPath, newSettings, pipelineLevel);
         } else {
-            JSONValue json = settingsStorageManager.settingsToJSON(newSettings);
+            JSONValue json = settingsStorageManager.settingsToJSON(newSettings, pipelineLevel, originalPath);
             root.put(current, json);
         }
         return root;
@@ -194,9 +222,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             @Override
             public void onSuccess(SettingsJsons result) {
                 final JSONObject patchedContextSpecificSettings = patchJsonObject(result.getContextSpecificSettingsJson(), new ArrayList<>(path),
-                        contextSettings);
+                        contextSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
                 final JSONObject patchedGlobalSettings = patchJsonObject(result.getGlobalSettingsJson(), new ArrayList<>(path),
-                        globalSettings);
+                        globalSettings, PipelineLevel.GLOBAL_DEFAULTS);
                 SettingsJsons settingsJsons = new SettingsJsons(patchedGlobalSettings, patchedContextSpecificSettings);
                 settingsStorageManager.storeSettingsJsons(settingsJsons, onSettingsStoredCallback);
             }
@@ -210,12 +238,12 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     
     private void updateGlobalSettings(final ArrayList<String> path, final Settings globalSettings,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
-        settingsStorageManager.retrieveGlobalSettingsJson(new AsyncCallback<JSONObject>() {
+        settingsStorageManager.retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
             
             @Override
-            public void onSuccess(JSONObject result) {
-                final JSONObject patchedGlobalSettings = patchJsonObject(result, new ArrayList<>(path),
-                        globalSettings);
+            public void onSuccess(SettingsJsons result) {
+                final JSONObject patchedGlobalSettings = patchJsonObject(result.getGlobalSettingsJson(), new ArrayList<>(path),
+                        globalSettings, PipelineLevel.GLOBAL_DEFAULTS);
                 settingsStorageManager.storeGlobalSettingsJson(patchedGlobalSettings, onSettingsStoredCallback);
             }
             
@@ -228,12 +256,12 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
     private void updateContextSpecificSettings(final ArrayList<String> path, final Settings contextSpecificSettings,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
-        settingsStorageManager.retrieveContextSpecificSettingsJson(new AsyncCallback<JSONObject>() {
+        settingsStorageManager.retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
             
             @Override
-            public void onSuccess(JSONObject result) {
-                final JSONObject patchedContextSpecificSettings = patchJsonObject(result, new ArrayList<>(path),
-                        contextSpecificSettings);
+            public void onSuccess(SettingsJsons result) {
+                final JSONObject patchedContextSpecificSettings = patchJsonObject(result.getContextSpecificSettingsJson(), new ArrayList<>(path),
+                        contextSpecificSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
                 settingsStorageManager.storeContextSpecificSettingsJson(patchedContextSpecificSettings, onSettingsStoredCallback);
             }
             
@@ -244,28 +272,6 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         });
     }
 
-    /**
-     * Travels the Component tree, to find the correct lifecycle for the root component of the subtree to save
-     */
-    /**
-     * Determines the lifecycle from the provided current lifecycle tree which corresponds to the provided path.
-     * 
-     * @param path The path of the component which lifecycle should be determined
-     * @param current The root lifecycle from that the desired lifecycle is reachable by the provided path
-     * @return The lifecycle which was determined for the provided path starting from the provided root lifecycle
-     * @throws IllegalStateException When the path cannot be resolved from the provided root lifecycle
-     */
-    private ComponentLifecycle<? extends Settings> determineLifecycle(ArrayList<String> path, ComponentLifecycle<? extends Settings> current) {
-        while (current instanceof PerspectiveLifecycle<?> && !path.isEmpty()) {
-            String last = path.remove(path.size() - 1);
-            current = ((PerspectiveLifecycle<?>) current).getLifecycleForId(last);
-        }
-        if (!path.isEmpty()) {
-            throw new IllegalStateException("Settings path is not finished, but no perspective at current level");
-        }
-        return current;
-    }
-    
     @Override
     public void dispose() {
         super.dispose();
