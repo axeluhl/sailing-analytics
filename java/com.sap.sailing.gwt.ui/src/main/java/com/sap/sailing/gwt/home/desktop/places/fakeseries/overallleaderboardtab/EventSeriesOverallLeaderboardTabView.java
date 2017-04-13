@@ -34,6 +34,7 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
 
     public EventSeriesOverallLeaderboardTabView() {
         leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
+        leaderboard.getShowLiveRacesControl().removeFromParent();
     }
 
     @Override
