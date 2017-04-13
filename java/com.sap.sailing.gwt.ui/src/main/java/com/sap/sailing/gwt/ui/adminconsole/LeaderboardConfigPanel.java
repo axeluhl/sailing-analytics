@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -78,7 +79,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
-        SafeHtml cell(String url, String displayName);
+        SafeHtml cell(SafeUri url, String displayName);
     }
 
     public LeaderboardConfigPanel(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
@@ -146,7 +147,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     leaderboardUrlParams.put("displayName", object.displayName);
                 }
                 String link = EntryPointLinkFactory.createLeaderboardLink(leaderboardUrlParams);
-                return ANCHORTEMPLATE.cell(link, object.name);
+                return ANCHORTEMPLATE.cell(UriUtils.fromString(link), object.name);
             }
 
         };

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.developer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -136,14 +137,15 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     protected void runSelectedPredefinedQuery() {
         PredefinedQueryIdentifier predefinedQueryIdentifier = selectionListBox.getValue();
         resultsPresenter.showBusyIndicator();
-        dataMiningService.runPredefinedQuery(session, predefinedQueryIdentifier, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<Object>>() {
+        dataMiningService.runPredefinedQuery(session, predefinedQueryIdentifier,
+                LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<Serializable>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running the query: " + caught.getMessage());
                 resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
             }
             @Override
-            public void onSuccess(QueryResultDTO<Object> result) {
+                    public void onSuccess(QueryResultDTO<Serializable> result) {
                 resultsPresenter.showResult(result);
             }
         });
