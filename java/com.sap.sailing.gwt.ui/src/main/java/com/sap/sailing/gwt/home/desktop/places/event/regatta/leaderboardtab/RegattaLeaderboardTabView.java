@@ -1,16 +1,22 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
+import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
+import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
@@ -18,30 +24,33 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Pr
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sse.gwt.dispatch.shared.commands.CollectionResult;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
 public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<RegattaLeaderboardPlace> {
-    interface MyBinder extends UiBinder<HTMLPanel, RegattaLeaderboardTabView> {
+    interface MyBinder extends UiBinder<FlowPanel, RegattaLeaderboardTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     private Presenter currentPresenter;
 
-    @UiField(provided = true)
-    protected OldLeaderboard leaderboard;
+    @UiField FlowPanel buttonContainer;
+    @UiField FlowPanel liveRacesContainer;
+    @UiField(provided = true) LiveRacesList liveRaces;
+    @UiField(provided = true) protected OldLeaderboard leaderboard;
 
     private LeaderboardUpdateProvider leaderboardUpdateProvider = null;
+    private OldLeaderboardAndLiveRacesPresenter leaderboardAndLiveRacesPresenter;
     
-    public RegattaLeaderboardTabView() {
-        leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
-    }
-
     @Override
     public Class<RegattaLeaderboardPlace> getPlaceClassForActivation() {
         return RegattaLeaderboardPlace.class;
@@ -75,7 +84,15 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             }
             leaderboardUpdateProvider = leaderboardPanel;
             leaderboardUpdateProvider.addLeaderboardUpdateListener(this);
+            leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
+            liveRaces = new LiveRacesList(currentPresenter, false);
             initWidget(ourUiBinder.createAndBindUi(this));
+            leaderboardAndLiveRacesPresenter = new OldLeaderboardAndLiveRacesPresenter(leaderboard,
+                    liveRaces, buttonContainer, liveRacesContainer);
+            RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea,
+                    currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
+            refreshManager.add(leaderboardAndLiveRacesPresenter.getLiveRacesRefreshableWrapper(),
+                    new GetLiveRacesForRegattaAction(currentPresenter.getEventDTO().getId(), regattaId));
             leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
             if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
                 // TODO: start autorefresh?
@@ -120,5 +137,60 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         if (leaderboardUpdateProvider != null) {
             leaderboardUpdateProvider.removeLeaderboardUpdateListener(this);
         }
+    }
+
+    @UiHandler("collapseLiveRacesButton")
+    void onCollapseLiveRacesButtonClicked(ClickEvent event) {
+        leaderboardAndLiveRacesPresenter.setShowLiveRaces(false);
+    }
+
+    @UiHandler("fullscreenButton")
+    void onFullscreenButtonClicked(ClickEvent event) {
+        leaderboard.getFullscreenControl().fireEvent(event);
+    }
+
+    private class OldLeaderboardAndLiveRacesPresenter {
+        private final OldLeaderboard leaderboard;
+        private final LiveRacesList liveRaces;
+        private final FlowPanel buttonContainer, liveRacesContainer;
+        boolean enabled = false;
+
+        private OldLeaderboardAndLiveRacesPresenter(OldLeaderboard leaderboard, LiveRacesList liveRaces,
+                FlowPanel buttonContainer, FlowPanel liveRacesContainer) {
+            this.leaderboard = leaderboard;
+            this.liveRaces = liveRaces;
+            this.buttonContainer = buttonContainer;
+            this.liveRacesContainer = liveRacesContainer;
+            this.leaderboard.getShowLiveRacesControl().addClickHandler(getShowLivesRacesClickHandler());
+            this.setShowLiveRaces(false);
+        }
+
+        private ClickHandler getShowLivesRacesClickHandler() {
+            return new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    OldLeaderboardAndLiveRacesPresenter.this.setShowLiveRaces(true);
+                }
+            };
+        }
+
+        private RefreshableWidget<CollectionResult<LiveRaceDTO>> getLiveRacesRefreshableWrapper() {
+            return new RefreshableWidget<CollectionResult<LiveRaceDTO>>() {
+                @Override
+                public void setData(CollectionResult<LiveRaceDTO> data) {
+                    enabled = data != null && !data.getValues().isEmpty();
+                    OldLeaderboardAndLiveRacesPresenter.this.setShowLiveRaces(liveRacesContainer.isVisible());
+                    liveRaces.getRefreshable().setData(data);
+                }
+            };
+        }
+
+        private void setShowLiveRaces(boolean show) {
+            leaderboard.getShowLiveRacesControl().setVisible(enabled && !show);
+            leaderboard.getFullscreenControl().setVisible(!enabled || !show);
+            buttonContainer.setVisible(enabled && show);
+            liveRacesContainer.setVisible(enabled && show);
+        }
+
     }
 }
