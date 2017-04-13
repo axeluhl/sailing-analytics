@@ -816,6 +816,12 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
+    /**
+     * @return if for a waypoint the mark positions are known, the resulting map will contain a non-empty list that for
+     *         each way of passing the waypoint (e.g., for a gate the competitor can round the left or the right mark) the
+     *         cross track error of the {@code fix} to the virtual line that must be crossed is contained; if the mark
+     *         positions are not known, that waypoint's value will be an empty list.
+     */
     private Map<Waypoint, List<Distance>> getXTE(Competitor c, GPSFix fix) {
         Map<Waypoint, List<Distance>> result = xteCache.get(c).get(fix);
         if (result == null) {

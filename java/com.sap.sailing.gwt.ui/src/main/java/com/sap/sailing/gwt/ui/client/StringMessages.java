@@ -1794,5 +1794,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String milliseconds();
     String floatNumber();
     String integer();
+    String sampleColor();
     String leaderboardPage();
 }

@@ -11,8 +11,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.impl.AbstractColor;
-import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
@@ -61,18 +59,7 @@ public class MarkTableWrapper<S extends RefreshableSelectionModel<MarkDTO>> exte
         Column<MarkDTO, SafeHtml> markColorColumn = new ColorColumn<>(new ColorRetriever<MarkDTO>() {
             @Override
             public Color getColor(MarkDTO t) {
-                Color result;
-                try {
-                    result = t.color != null && !t.color.isEmpty() ? AbstractColor
-                            .getColorByLowercaseNameStatic(t.color.toLowerCase()) == null ? new RGBColor(t.color)
-                            : AbstractColor.getColorByLowercaseNameStatic(t.color.toLowerCase()) : null;
-                } catch (IllegalArgumentException e) {
-                    // if the color name isn't recognized, neither as a named color nor as a HTML color code, an exception will
-                    // result because of the attempt to interpret something unknown as an HTML color. Catch this and return null as
-                    // the color
-                    result = null;
-                }
-                return result;
+                return t.color;
             }
         });
         table.addColumn(markColorColumn, stringMessages.color());
