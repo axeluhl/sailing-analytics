@@ -3010,7 +3010,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 result.addAll(detectManeuvers(competitor, markPassingTimePoint.plus(1), timePointAfterManeuver, /* ignoreMarkPassings */ true));
             } else {
                 // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe.
-                // For the first tack/jibe combination (they must alternate because course changes to in the same direction and
+                // For the first tack/jibe combination (they must alternate because the course changes in the same direction and
                 // the wind is considered sufficiently stable to not allow for two successive tacks or two successive jibes)
                 // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has completed.
                 if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
@@ -3092,7 +3092,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * contains at least a tack and a jibe, finds the earliest approximated fix's time point at which a tack and a jibe have been
      * completed.
      */
-    private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
+    private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(
+            Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
         double totalCourseChangeInDegrees = 0;
         TimePoint timePoint = null;
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
@@ -3106,6 +3107,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 timePoint = fixAndCourseChange.getA().getTimePoint();
                 break;
             }
+            // TODO consider continuing up to the point where the course over ground best approximates the course into the maneuver
         }
         return new TimePointAndTotalCourseChangeInDegrees(timePoint, totalCourseChangeInDegrees);
     }

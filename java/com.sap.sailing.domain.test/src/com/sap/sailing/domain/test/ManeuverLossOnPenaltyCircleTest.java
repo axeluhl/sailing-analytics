@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -12,6 +13,7 @@ import java.text.ParseException;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
+import org.hamcrest.number.IsGreaterThan;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -55,6 +57,6 @@ public class ManeuverLossOnPenaltyCircleTest extends OnlineTracTracBasedTest {
         Competitor canottieri = getCompetitorByName("Club Canottieri Roggero di Lauria");
         final Iterable<Maneuver> maneuversCanottieri = getTrackedRace().getManeuvers(canottieri, getTrackedRace().getStartOfRace(), getTrackedRace().getEndOfRace(), /* waitForLatest */ true);
         final Optional<Maneuver> penaltyCircleCanottieri = StreamSupport.stream(maneuversCanottieri.spliterator(), /* parallel */ false).filter(m->m.getType()==ManeuverType.PENALTY_CIRCLE).findAny();
-        assertTrue(penaltyCircleCanottieri.get().getManeuverLoss().compareTo(new MeterDistance(10)) > 0); // expect at least a 10m maneuver loss
+        assertThat(penaltyCircleCanottieri.get().getManeuverLoss(), new IsGreaterThan<>(new MeterDistance(10)));
     }
 }

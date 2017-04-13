@@ -751,19 +751,24 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     /**
-     * Fetches the set of fixes that encompass the maneuver. Usually, during a maneuver a boat loses speed over ground
-     * before it has reached the new tack and starts accelerating again, until the speed levels off. We assume that the
-     * <code>timePointBeforeManeuver</code> minus some excess time based on the approximate maneuver duration is the
-     * earliest time point to analyze. Starting there, we look for speed over ground minima between then and
-     * <code>timePointAfterManeuver</code> plus three times the approximate maneuver time as excess time. There may be
-     * multiple minima. We choose the one that has the best "fit" in terms of being close to the
+     * Fetches the set of fixes that encompass the maneuver. Usually, during a tack or gybe a boat loses speed over
+     * ground before it has reached the new tack and starts accelerating again, until the speed levels off. For penalty
+     * circles, however, the speed may even grow during the manuever, particularly if the boat is generally on an upwind
+     * course and has to bear away to complete a gybe as part of the circle.
+     * <p>
+     * 
+     * We assume that the <code>timePointBeforeManeuver</code> minus some excess time based on the approximate maneuver
+     * duration is the earliest time point to analyze. Starting there, we look for speed over ground minima between then
+     * and <code>timePointAfterManeuver</code> plus three times the approximate maneuver time as excess time. There may
+     * be multiple minima. We choose the one that has the best "fit" in terms of being close to the
      * <code>maneuverTimePoint</code> and being low in terms of speed over ground. From that time point, the nearest
      * maximum speeds over ground before and after are determined, and the fixes between them are returned.
      */
+    // TODO refactor to return Pair<TimePoint, TimePoint> as the start/end of the maneuver loss calculation interval
     private List<GPSFixMoving> getFixesToConsiderForManeuverLossAnalysis(TimePoint timePointBeforeManeuver,
             TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) {
-        final long EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
-        final long EXCESS_TIME_AFTER_MANEUVER_END_TO_SCAN_IN_MILLIS = 3*EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS;
+        final long EXCESS_TIME_BEFORE_MANEUVER_START_TO_SCAN_IN_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
+        final long EXCESS_TIME_AFTER_MANEUVER_END_TO_SCAN_IN_MILLIS = 3*EXCESS_TIME_BEFORE_MANEUVER_START_TO_SCAN_IN_MILLIS;
         List<GPSFixMoving> fixes = new ArrayList<>();
         NavigableSet<GPSFixMoving> maxima = new ArrayListNavigableSet<GPSFixMoving>(new TimedComparator());
         NavigableSet<GPSFixMoving> minima = new ArrayListNavigableSet<GPSFixMoving>(new TimedComparator());
@@ -775,7 +780,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         track.lockForRead();
         try {
             Iterator<GPSFixMoving> fixIter = track.getFixesIterator(
-                    timePointBeforeManeuver.minus(EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS), /* inclusive */true);
+                    timePointBeforeManeuver.minus(EXCESS_TIME_BEFORE_MANEUVER_START_TO_SCAN_IN_MILLIS), /* inclusive */true);
             GPSFixMoving fix;
             // The timePointAfterManeuver is determined based on the geometric shape of the boat's trajectory, not on
             // the speed development. To understand the full maneuver loss, we need to follow the boat speed until it levels off,
@@ -812,6 +817,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         // now remove all fixes before the last maximum before the fix with the lowest speed over ground during the maneuver if
         // there was such a maximum; otherwise, leave all fixes from the maneuver start on in place.
         final long MAX_SMOOTHENING_INTERVAL_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
+        // TODO now find the max speed closest to the start of the maneuver, but not after the minimum speed and
+        // not more before the start of the maneuver than EXCESS_TIME_BEFORE_MANEUVER_START_TO_SCAN_IN_MILLIS:
+        // TODO
         GPSFixMoving lastMaxSpeedFixBeforeLowSpeed = maxima.lower(fixWithLowestSpeedOverGround);
         // now check if there's a greater one that's only a little bit earlier
         if (lastMaxSpeedFixBeforeLowSpeed != null) {
@@ -828,6 +836,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 i.remove();
             }
         }
+        // TODO find the "best" maximum around the end of the maneuver
         // now remove all fixes after the first maximum after the global minimum:
         GPSFixMoving firstMaxSpeedFixAfterLowSpeed = maxima.higher(fixWithLowestSpeedOverGround);
         if (firstMaxSpeedFixAfterLowSpeed != null) {
