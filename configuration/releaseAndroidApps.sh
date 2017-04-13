@@ -19,7 +19,7 @@ increment_version_code_and_set_version_name() {
   OLD_MINOR_VERSION=`grep 'android:versionName="[0-9]*\.[0-9]*"' $MANIFEST | sed -e 's/^.*android:versionName="\([0-9]*\)\.\([0-9]*\)".*$/\2/'`
   NEW_MINOR_VERSION=$((OLD_MINOR_VERSION + 1))
   echo $MANIFEST: OLD_MINOR_VERSION is $OLD_MINOR_VERSION, NEW_MINOR_VERSION is $NEW_MINOR_VERSION
-  sed --in-place -e "s/android:versionCode=\"$OLD_VERSION_CODE\"/android:versionCode=\"$NEW_VERSION_CODE\"/" -e "s/android:versionName=\"\([^"]*\)\"/android:versionName=\"$NEW_VERSION_NAME\"/" "$MANIFEST"
+  sed --in-place -e "s/android:versionCode=\"$OLD_VERSION_CODE\"/android:versionCode=\"$NEW_VERSION_CODE\"/" -e "s/android:versionName=\"\([^\"]*\)\"/android:versionName=\"$NEW_VERSION_NAME\"/" "$MANIFEST"
 }
 
 upgrade_pom_and_manifest_versions() {
