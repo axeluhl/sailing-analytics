@@ -17,7 +17,9 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.NamedImpl;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
 
@@ -40,12 +42,12 @@ public class MetadataParserImpl implements MetadataParser {
     private class ControlPointMetaDataImpl extends NamedImpl implements ControlPointMetaData {
         private static final long serialVersionUID = 1L;
         private final MarkType type;
-        private final String color;
+        private final Color color;
         private final String shape;
         private final String pattern;
         private final Serializable id;
 
-        public ControlPointMetaDataImpl(String name, MarkType type, String color, String shape, String pattern, Serializable id) {
+        public ControlPointMetaDataImpl(String name, MarkType type, Color color, String shape, String pattern, Serializable id) {
             super(name);
             this.type = type;
             this.color = color;
@@ -60,7 +62,7 @@ public class MetadataParserImpl implements MetadataParser {
         }
 
         @Override
-        public String getColor() {
+        public Color getColor() {
             return color;
         }
 
@@ -138,8 +140,10 @@ public class MetadataParserImpl implements MetadataParser {
             // it's a gate
             MarkType type1 = resolveMarkTypeFromMetadata(controlPointMetadata, "P1.Type");
             MarkType type2 = resolveMarkTypeFromMetadata(controlPointMetadata, "P2.Type");
-            String color1 = controlPointMetadata.get("P1.Color");
-            String color2 = controlPointMetadata.get("P2.Color");
+            String color1AsString = controlPointMetadata.get("P1.Color");
+            Color color1 = AbstractColor.getCssColor(color1AsString);
+            String color2AsString = controlPointMetadata.get("P2.Color");
+            Color color2 = AbstractColor.getCssColor(color2AsString);
             String shape1 = controlPointMetadata.get("P1.Shape");
             String shape2 = controlPointMetadata.get("P2.Shape");
             String pattern1 = controlPointMetadata.get("P1.Pattern");
@@ -161,7 +165,8 @@ public class MetadataParserImpl implements MetadataParser {
             result = Arrays.asList(new ControlPointMetaData[] { mark1Metadata, mark2Metadata });
         } else {
             MarkType type = resolveMarkTypeFromMetadata(controlPointMetadata, "Type");
-            String color = controlPointMetadata.get("Color");
+            String colorAsString = controlPointMetadata.get("Color");
+            Color color = AbstractColor.getCssColor(colorAsString);
             String shape = controlPointMetadata.get("Shape");
             String pattern = controlPointMetadata.get("Pattern");
             ControlPointMetaData markMetadata = new ControlPointMetaDataImpl(controlPointName, type, color, shape, pattern, controlPoint.getId());
