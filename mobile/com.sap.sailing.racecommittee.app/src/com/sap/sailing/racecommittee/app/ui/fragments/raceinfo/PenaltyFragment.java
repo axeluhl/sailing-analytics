@@ -47,8 +47,8 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.views.SearchView;
-import com.sap.sailing.racecommittee.app.utils.GeneralHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, ItemListener, SearchView.SearchTextWatcher {
@@ -307,15 +307,15 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 CompetitorResultWithIdImpl item = layout.getValue();
-                if (!GeneralHelper.equals(competitor.getMaxPointsReason(), item.getMaxPointsReason())) {
+                if (!Util.equalsWithNull(competitor.getMaxPointsReason(), item.getMaxPointsReason())) {
                     competitor.setMaxPointsReason(item.getMaxPointsReason());
                     competitor.setDirty(true);
                 }
-                if (!GeneralHelper.equals(competitor.getComment(), item.getComment())) {
+                if (!Util.equalsWithNull(competitor.getComment(), item.getComment())) {
                     competitor.setComment(item.getComment());
                     competitor.setDirty(true);
                 }
-                if (!GeneralHelper.equals(competitor.getScore(), item.getScore())) {
+                if (!Util.equalsWithNull(competitor.getScore(), item.getScore())) {
                     competitor.setScore(item.getScore());
                     competitor.setDirty(true);
                 }
