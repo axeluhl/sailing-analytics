@@ -10,7 +10,7 @@
         style="?attr/editText"
         android:layout_width="200dp"
         android:layout_height="50dp"
-        android:inputType="text"
+        android:inputType="textNoSuggestions|"
         android:textAppearance="?attr/textNormal"
         android:visibility="gone" />
 
