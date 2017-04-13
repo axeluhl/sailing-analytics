@@ -93,7 +93,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
-
         mReset = (Button) layout.findViewById(R.id.resetCourse);
         if (mReset != null) {
             mReset.setOnClickListener(new View.OnClickListener() {
@@ -131,7 +130,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                 }
             });
         }
-
         mHistoryCourse = (RecyclerView) layout.findViewById(R.id.previous_course);
         if (mHistoryCourse != null) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -140,7 +138,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory, ESSMarkImageHelper.getInstance(getActivity()), false);
             mHistoryCourse.setAdapter(mHistoryAdapter);
         }
-
         mCurrentCourse = ViewHelper.get(layout, R.id.new_course);
         if (mCurrentCourse != null) {
             mGuardManager = new RecyclerViewTouchActionGuardManager();
@@ -344,10 +341,8 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
     protected List<CourseListDataElementWithIdImpl> convertCourseDesignToCourseElements(CourseBase courseData) {
         List<CourseListDataElementWithIdImpl> elementList = new ArrayList<>();
-
         for (Waypoint waypoint : courseData.getWaypoints()) {
             ControlPoint controlPoint = waypoint.getControlPoint();
-
             if (controlPoint instanceof Mark) {
                 CourseListDataElementWithIdImpl element = new CourseListDataElementWithIdImpl();
                 element.setId(mId);
@@ -365,7 +360,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             }
             mId++;
         }
-
         return elementList;
     }
 

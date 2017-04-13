@@ -42,7 +42,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.HOBIE_TIGER, BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO,
                 BoatClassMasterdata.FLYING_PHANTOM);
         BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.J70,
-                BoatClassMasterdata.B_ONE, BoatClassMasterdata.J80, BoatClassMasterdata.LASER_SB3,
+                BoatClassMasterdata.B_ONE, BoatClassMasterdata.J80, BoatClassMasterdata.LASER_SB3, BoatClassMasterdata.LONGTZE,
                 BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS100);
         BoatClassVectorGraphics dinghyWithSpinnaker = new DinghyWithSpinnakerVectorGraphics(BoatClassMasterdata._420,
                 BoatClassMasterdata._470, BoatClassMasterdata._5O5, BoatClassMasterdata.FLYING_DUTCHMAN,

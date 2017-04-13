@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.IsManagedByCache;
 
 
@@ -12,7 +13,7 @@ import com.sap.sse.common.IsManagedByCache;
  * 
  */
 public interface Mark extends ControlPoint, IsManagedByCache<SharedDomainFactory> {
-    public String getColor();
+    public Color getColor();
     public String getShape();
     public String getPattern();
     public MarkType getType();

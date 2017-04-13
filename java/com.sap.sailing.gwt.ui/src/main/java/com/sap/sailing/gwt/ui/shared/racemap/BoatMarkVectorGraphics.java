@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.common.Color;
 
 public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
 
@@ -24,7 +25,7 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
     private final static double BOAT_MARK_SELECTION_TRANSLATE_Y = -130;
     private final String markIdAsString;
 
-    public BoatMarkVectorGraphics(MarkType type, String color, String shape, String pattern, String markIdAsString) {
+    public BoatMarkVectorGraphics(MarkType type, Color color, String shape, String pattern, String markIdAsString) {
         super(type, color, shape, pattern);
         this.anchorPointX = BOAT_MARK_HEIGHT_IN_METERS.getMeters() / 2;
         this.anchorPointY = BOAT_MARK_WIDTH_IN_METERS.getMeters() / 2;
