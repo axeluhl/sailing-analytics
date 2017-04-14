@@ -246,6 +246,7 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
                     }
                 }
             };
+            userService.addUserStatusEventHandler(userStatusEventHandler, true);
         } else if(initialUserSetting) {
             requestSettingsJsons();
         }
