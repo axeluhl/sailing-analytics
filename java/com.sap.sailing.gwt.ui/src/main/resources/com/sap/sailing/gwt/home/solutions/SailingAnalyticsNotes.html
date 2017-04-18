@@ -6,6 +6,15 @@
     <div class="innerContent">
         <h5 class="articleSubheadline">April 2017</h5>
         <ul class="bulletList">
+           <li>The maneuver loss calculation for penalty circles has been improved. Previously, the end of the
+               penalty circle maneuver was considered to be at the last of the two adjacent tack/gybe maneuvers.
+               This, usually, is earlier than when approaching the course over ground at the beginning of the
+               penalty circle again. With this, the extrapolation of the speed/course at the beginning of
+               the maneuver did not last long enough. Furthermore, penalties with strong accelerations during
+               the gybing phase could have led to an incorrect inference of the speed and course at the
+               beginning of the maneuver. Both of these issues have now been fixed, leading to good results
+               also in very specific and unusual speed developments during a penalty circle maneuver.
+           </li>
            <li>The advantage line display has been fixed for legs changing their type (upwind/downwind/reach)
                while the race is going on. It now uses the leg type at the same current time point that the
                leaderboard uses for calculating the competitor ranking.
