@@ -3107,7 +3107,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 timePoint = fixAndCourseChange.getA().getTimePoint();
                 break;
             }
-            // TODO consider continuing up to the point where the course over ground best approximates the course into the maneuver
+            // TODO bug3285 consider continuing up to the point where the course over ground best approximates the course into the maneuver
         }
         return new TimePointAndTotalCourseChangeInDegrees(timePoint, totalCourseChangeInDegrees);
     }

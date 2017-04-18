@@ -38,6 +38,7 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
@@ -718,12 +719,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         assert timePointAfterManeuver != null;
         Distance result;
         final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        List<GPSFixMoving> fixes = getFixesToConsiderForManeuverLossAnalysis(timePointBeforeManeuver,
+        Pair<TimePoint, TimePoint> startAndEndOfManeuver = getStartAndEndOfManeuverToConsiderForManeuverLossAnalysis(timePointBeforeManeuver,
                 maneuverTimePoint, timePointAfterManeuver);
-        TimePoint timePointWhenSpeedStartedToDrop = fixes.get(0).getTimePoint();
+        TimePoint timePointWhenSpeedStartedToDrop = startAndEndOfManeuver.getA();
         SpeedWithBearing speedWhenSpeedStartedToDrop = track.getEstimatedSpeed(timePointWhenSpeedStartedToDrop);
         if (speedWhenSpeedStartedToDrop != null) {
-            TimePoint timePointWhenSpeedLevelledOffAfterManeuver = fixes.get(fixes.size()-1).getTimePoint();
+            TimePoint timePointWhenSpeedLevelledOffAfterManeuver = startAndEndOfManeuver.getB();
             SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(timePointWhenSpeedLevelledOffAfterManeuver);
             if (speedAfterManeuver != null) {
                 // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual and
@@ -764,8 +765,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * <code>maneuverTimePoint</code> and being low in terms of speed over ground. From that time point, the nearest
      * maximum speeds over ground before and after are determined, and the fixes between them are returned.
      */
-    // TODO refactor to return Pair<TimePoint, TimePoint> as the start/end of the maneuver loss calculation interval
-    private List<GPSFixMoving> getFixesToConsiderForManeuverLossAnalysis(TimePoint timePointBeforeManeuver,
+    private Pair<TimePoint, TimePoint> getStartAndEndOfManeuverToConsiderForManeuverLossAnalysis(TimePoint timePointBeforeManeuver,
             TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) {
         final long EXCESS_TIME_BEFORE_MANEUVER_START_TO_SCAN_IN_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
         final long EXCESS_TIME_AFTER_MANEUVER_END_TO_SCAN_IN_MILLIS = 3*EXCESS_TIME_BEFORE_MANEUVER_START_TO_SCAN_IN_MILLIS;
@@ -853,7 +853,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 i.remove();
             }
         }
-        return fixes;
+        return new Pair<>(fixes.get(0).getTimePoint(), fixes.get(fixes.size()-1).getTimePoint());
     }
 
     private GPSFixMoving getBestFittingSpeedMinimumInManeuver(NavigableSet<GPSFixMoving> minima,
