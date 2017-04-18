@@ -17,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -53,6 +54,8 @@ import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.route.IControlPoint;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -186,26 +189,26 @@ public interface DomainFactory {
 	 * notification was sent, and that the {@link RaceDefinition} is already
 	 * {@link com.sap.sailing.domain.base.Regatta#getAllRaces() known} by its
 	 * containing {@link com.sap.sailing.domain.base.Regatta}.
-	 * 
-	 * @param raceDefinitionSetToUpdate
+     * @param raceDefinitionSetToUpdate
 	 *            if not <code>null</code>, after creating the
 	 *            {@link TrackedRace}, the {@link RaceDefinition} is
 	 *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace)
 	 *            added} to that object.
-	 * @param runBeforeExposingRace
+     * @param runBeforeExposingRace
 	 *            if not {@code null} then this consumer will be passed the
 	 *            {@link DynamicTrackedRace} if it was actually created by this
 	 *            call. This happens while still in the
 	 *            {@code synchronized(raceCache)} block, therefore before calls
 	 *            waiting for the race (e.g.,
 	 *            {@link #getAndWaitForRaceDefinition(UUID)}) return the race.
+     * @param tractracRace TODO
 	 */
 	DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
 			String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass,
 			Map<Competitor, Boat> competitorBoats, Course course, Iterable<Sideline> sidelines, WindStore windStore,
 			long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
 			DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid,
-			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace);
+			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver, Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace);
 
     /**
      * The record may be for a single mark or a gate. If for a gate, the
@@ -294,7 +297,8 @@ public interface DomainFactory {
      */
     Serializable getRaceID(IRace tractracRace);
 
-    JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
+    JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams)
+            throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
     MetadataParser getMetadataParser();
 
@@ -308,6 +312,28 @@ public interface DomainFactory {
      * the start time and whether a race was aborted.
      */
     void addTracTracUpdateHandlers(URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername,
-            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace);
+            String tracTracPassword, RaceDefinition raceDefinition, DynamicTrackedRace trackedRace, IRace tractracRace);
+
+    /**
+     * Since TracAPI 3.6.1 the TracAPI provides a course area name for {@link IRace} objects. Furthermore, the
+     * {@link IControl} control points can now tell their {@link IControl#getCourseArea() course area}. This allows
+     * us to fetch the {@link IControl}s for a specific course area, thereby, e.g., restricting the marks of an
+     * event that we offer to the Race Manager app's course designer to those available on the course area.
+     */
+    Iterable<IControl> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName);
+
+    /**
+     * Since TracAPI 3.6.1 the TracAPI provides a course area name for {@link IRace} objects. Furthermore, the
+     * {@link IControl} control points can now tell their {@link IControl#getCourseArea() course area}. This allows us
+     * to fetch the {@link IControlPoint}s for a specific course area, thereby, e.g., restricting the marks of an event
+     * that we offer to the Race Manager app's course designer to those available on the course area.
+     */
+    Iterable<IControlPoint> getControlPointsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName);
+
+    /**
+     * Looks for an {@link IControl} in the {@code candidates} that contains two {@link IControlPoint}s that map to the
+     * {@code first} and {@code second} mark.
+     */
+    ControlPoint getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second);
 
 }

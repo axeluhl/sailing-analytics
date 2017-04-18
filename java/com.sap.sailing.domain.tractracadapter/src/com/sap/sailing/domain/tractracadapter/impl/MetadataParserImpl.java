@@ -148,8 +148,8 @@ public class MetadataParserImpl implements MetadataParser {
             String shape2 = controlPointMetadata.get("P2.Shape");
             String pattern1 = controlPointMetadata.get("P1.Pattern");
             String pattern2 = controlPointMetadata.get("P2.Pattern");
-            String mark1UUID = controlPointMetadata.get("P1.UUID");
-            String mark2UUID = controlPointMetadata.get("P2.UUID");
+            UUID mark1UUID = controlPoint.getFirstMarkId();
+            UUID mark2UUID = controlPoint.getSecondMarkId();
             String name1 = controlPointMetadata.get("P1.Name");
             if (name1 == null) {
                 name1 = controlPointName + " (1)";
@@ -158,9 +158,9 @@ public class MetadataParserImpl implements MetadataParser {
             if (name2 == null) {
                 name2 = controlPointName + " (2)";
             }
-            final Serializable id1 = mark1UUID == null ? name1 : UUID.fromString(mark1UUID);
+            final Serializable id1 = mark1UUID == null ? controlPoint.getId().toString()+" (1)" : mark1UUID;
             ControlPointMetaData mark1Metadata = new ControlPointMetaDataImpl(name1, type1, color1, shape1, pattern1, id1);
-            final Serializable id2 = mark2UUID == null ? name2 : UUID.fromString(mark2UUID);
+            final Serializable id2 = mark2UUID == null ? controlPoint.getId().toString()+" (2)" : mark2UUID;
             ControlPointMetaData mark2Metadata = new ControlPointMetaDataImpl(name2, type2, color2, shape2, pattern2, id2);
             result = Arrays.asList(new ControlPointMetaData[] { mark1Metadata, mark2Metadata });
         } else {
