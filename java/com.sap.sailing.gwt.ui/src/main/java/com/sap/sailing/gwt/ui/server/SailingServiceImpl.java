@@ -5756,6 +5756,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
+    public void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
+            final boolean trackWind, final boolean correctWindByDeclination)
+            throws NotDenotedForRaceLogTrackingException, Exception {
+        for (final Triple<String, String, String> leaderboardRaceColumnFleetName : leaderboardRaceColumnFleetNames) {
+            startRaceLogTracking(leaderboardRaceColumnFleetName.getA(), leaderboardRaceColumnFleetName.getB(),
+                    leaderboardRaceColumnFleetName.getC(), trackWind, correctWindByDeclination);
+        }
+    }
+    
+    @Override
     public Collection<String> getGPSFixImporterTypes() {
         return getRegisteredImporterTypes(GPSFixImporter.class);
     }
@@ -6494,9 +6504,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> getTrackingTimes(
-            Collection<Triple<String, String, String>> raceColumnsAndFleets) {
+            Collection<Triple<String, String, String>> leaderboardRaceColumnFleetNames) {
         Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> trackingTimes = new HashMap<>(); 
-        for (Triple<String, String, String> leaderboardRaceColumnFleetName : raceColumnsAndFleets) {
+        for (Triple<String, String, String> leaderboardRaceColumnFleetName : leaderboardRaceColumnFleetNames) {
             try {
                 trackingTimes.put(leaderboardRaceColumnFleetName, getTrackingTimes(leaderboardRaceColumnFleetName.getA(), 
                         leaderboardRaceColumnFleetName.getB(), leaderboardRaceColumnFleetName.getC()));
