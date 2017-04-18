@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
@@ -146,6 +147,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), ttControlPoints);
                 if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
                     trackedRace = createTrackedRace(existingRaceDefinitionForRace, sidelines, tr->updateRaceTimes(tractracRace, tr));
+                    addAllMarksFromCourseArea(trackedRace);
                 }
             } catch (PatchFailedException e) {
                 logger.log(Level.SEVERE, "Internal error updating race course "+course+": "+e.getMessage());
@@ -160,13 +162,30 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                     getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(), competitorsAndDominantBoatClass.getA(),
                     competitorsAndDominantBoatClass.getB(), competitorBoats, course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
-                    getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver, tr->updateRaceTimes(tractracRace, tr));
+                    getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver, tr->updateRaceTimes(tractracRace, tr), tractracRace);
+            addAllMarksFromCourseArea(trackedRace);
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
             }
         }
     }
 
+    /**
+     * For all marks associated with the course area of the {@link #tractracRace}'s {@link IRace#getCourseArea() course area} (if any; this
+     * was introduced with the TracAPI version 3.6.1) a mark track is created in the {@link TrackedRace}. This will let the {@link TrackedRace#getMarks}
+     * method return those, helping clients asking for "available" marks.
+     */
+    private void addAllMarksFromCourseArea(DynamicTrackedRace trackedRace) {
+        for (final IControl tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(),
+                tractracRace.getCourseArea())) {
+            final TracTracControlPoint ttcp = new ControlPointAdapter(tractracControlPoint);
+            final ControlPoint cp = getDomainFactory().getOrCreateControlPoint(ttcp);
+            for (final Mark mark : cp.getMarks()) {
+                trackedRace.getOrCreateTrack(mark);
+            }
+        }
+    }
+    
     private void updateRaceTimes(IRace tractracRace, DynamicTrackedRace trackedRace) {
         final int liveDelayInSeconds = tractracRace.getLiveDelay();
         long delayInMillis = liveDelayInSeconds * 1000;
@@ -225,7 +244,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         if (runAfterCreatingTrackedRace != null) {
         	runAfterCreatingTrackedRace.accept(trackedRace);
         }
-        getDomainFactory().addTracTracUpdateHandlers(tracTracUpdateURI, getTracTracEvent().getId(), tracTracUsername, tracTracPassword, race, trackedRace);
+        getDomainFactory().addTracTracUpdateHandlers(tracTracUpdateURI, getTracTracEvent().getId(), tracTracUsername, tracTracPassword, race, trackedRace,
+        		tractracRace);
         return trackedRace;
     }
 

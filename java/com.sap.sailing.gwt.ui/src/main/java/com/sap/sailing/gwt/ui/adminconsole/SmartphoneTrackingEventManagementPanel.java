@@ -423,7 +423,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 racesToStopTracking.add(race.getRaceIdentifier());
             }   
         }
-        
         sailingService.stopTrackingRaces(racesToStopTracking, new MarkedAsyncCallback<Void>(
                 new AsyncCallback<Void>() {
                     @Override
@@ -675,7 +674,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
         //prompt user if competitor registrations are missing for same races
         String namesOfRacesMissingRegistrations = "";
-        
         if (!regattaHasCompetitors) {
             for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
                 if (!doCompetitorResgistrationsExist(race)) {
@@ -690,25 +688,25 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 return;
             }
         }
+        final List<Triple<String, String, String>> leaderboardRaceColumnFleetNames = new ArrayList<>();
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
             final RaceColumnDTO raceColumn = race.getA();
             final FleetDTO fleet = race.getB();
-            sailingService.startRaceLogTracking(leaderboard.name, raceColumn.getName(), fleet.getName(),
-                    trackWind, correctWindByDeclination,
-                    new AsyncCallback<Void>() {
-                @Override
-                public void onSuccess(Void result) {
-                    loadAndRefreshLeaderboard(leaderboard.name);
-                    trackedRacesListComposite.regattaRefresher.fillRegattas();
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Failed to start tracking " + raceColumn.getName() + " - "
-                            + fleet.getName() + ": " + caught.getMessage());
-                }
-            });
+            leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumn.getName(), fleet.getName()));
         }
+        sailingService.startRaceLogTracking(leaderboardRaceColumnFleetNames, trackWind, correctWindByDeclination,
+                new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                loadAndRefreshLeaderboard(leaderboard.name);
+                trackedRacesListComposite.regattaRefresher.fillRegattas();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Failed to start tracking " + leaderboardRaceColumnFleetNames + ": " + caught.getMessage());
+            }
+        });
     }
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
