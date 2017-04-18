@@ -1,5 +1,6 @@
 package com.sap.sse.common.settings.util;
 
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sse.common.Util;
@@ -30,11 +31,24 @@ public class SettingsMergeUtils {
 
     @SuppressWarnings("unchecked")
     private static<T> void mergeSettings(ValueCollectionSetting<?> setting, ValueCollectionSetting<T> settingToPatch) {
-        for (Object value : setting.getValues()) {
-            if(!Util.contains(settingToPatch.getValues(), value)) {
-                settingToPatch.addValue((T) value);
+        
+        List<T> newValues = Util.createList(settingToPatch.getValues());
+        
+        //remove values which are not contained in setting, but are contained in the default values of setting
+        for (Object value : setting.getDefaultValues()) {
+            if(!Util.contains(setting.getValues(), value)) {
+                newValues.remove((T) value);
             }
         }
+        
+        for (Object value : setting.getValues()) {
+            if(!Util.contains(settingToPatch.getValues(), value)) {
+                newValues.add((T) value);
+            }
+        }
+        
+        settingToPatch.setValues(newValues);
+        
     }
 
     @SuppressWarnings("unchecked")

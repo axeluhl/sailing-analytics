@@ -7,7 +7,37 @@ import com.sap.sse.common.settings.generic.Setting;
 import com.sap.sse.common.settings.generic.ValueCollectionSetting;
 import com.sap.sse.common.settings.generic.ValueSetting;
 
-public class DefaultValuesUtils {
+public class SettingsDefaultValuesUtils {
+    
+    public static void keepDefaults(GenericSerializableSettings previousSettings, GenericSerializableSettings newSettings) {
+        for (Map.Entry<String, Setting> entry : previousSettings.getChildSettings().entrySet()) {
+            Setting newSetting = entry.getValue();
+            Setting previousSetting = newSettings.getChildSettings().get(entry.getKey());
+            if (newSetting instanceof ValueSetting) {
+                keepDefaults((ValueSetting<?>) previousSetting, (ValueSetting<?>) newSetting);
+            } else if (newSetting instanceof ValueCollectionSetting) {
+                keepDefaults((ValueCollectionSetting<?>) previousSetting, (ValueCollectionSetting<?>) newSetting);
+            } else if (newSetting instanceof GenericSerializableSettings) {
+                keepDefaults((GenericSerializableSettings) previousSetting, (GenericSerializableSettings) newSetting);
+            } else {
+                throw new IllegalStateException("Unknown Setting type");
+            }
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static<T> void keepDefaults(ValueCollectionSetting<?> previousSettings, ValueCollectionSetting<T> newSettings) {
+        Iterable<T> originalValues = newSettings.getValues();
+        newSettings.setDefaultValues((Iterable<T>) previousSettings.getDefaultValues());
+        newSettings.setValues(originalValues);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static<T> void keepDefaults(ValueSetting<?> previousSettings, ValueSetting<T> newSettings) {
+        T originalValue = newSettings.getValue();
+        newSettings.setDefaultValue((T) previousSettings.getDefaultValue());
+        newSettings.setValue(originalValue);
+    }
 
     public static void setDefaults(GenericSerializableSettings defaultSettings, GenericSerializableSettings settingsToPatch) {
         for (Map.Entry<String, Setting> entry : defaultSettings.getChildSettings().entrySet()) {
@@ -38,5 +68,5 @@ public class DefaultValuesUtils {
         settingToPatch.setDefaultValue((T) defaultSetting.getValue());
         settingToPatch.setValue(originalValue);
     }
-
+    
 }

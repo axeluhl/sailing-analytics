@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class LeaderboardPanelLifecycle
@@ -63,8 +64,7 @@ public class LeaderboardPanelLifecycle
                 currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn());
-        globalLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(currentLeaderboardSettings,
-                globalLeaderboardSettings);
+        SettingsDefaultValuesUtils.keepDefaults(currentLeaderboardSettings, globalLeaderboardSettings);
         return globalLeaderboardSettings;
     }
 

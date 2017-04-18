@@ -109,6 +109,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -3280,7 +3281,8 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                 /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 isShowCompetitorSailId(), isShowCompetitorFullName());
-        return LeaderboardSettingsFactory.getInstance().keepDefaults(currentSettings, leaderboardSettings);
+        SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
+        return leaderboardSettings;
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
-import com.sap.sse.common.settings.util.DefaultValuesUtils;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.common.settings.util.SettingsMergeUtils;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
@@ -68,7 +68,7 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
 
         @Override
         public CS patchSettings(CS settingsToPatch) {
-            DefaultValuesUtils.setDefaults(contextSpecificDefaults, settingsToPatch);
+            SettingsDefaultValuesUtils.setDefaults(contextSpecificDefaults, settingsToPatch);
             return settingsToPatch;
         }
         
