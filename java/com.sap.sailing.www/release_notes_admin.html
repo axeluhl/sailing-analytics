@@ -35,8 +35,17 @@
                     	    ignored. This may include camera boats, jury boats and other moving objects that do
                     	    not represent competitor boats.
                     	</li>
+                    	<li>Upgraded to TracAPI 3.6.3 which offers improvements regarding the identification of
+                    	    marks and waypoints.
+                    	</li>
                     	<li>A bug regarding the regatta filter setting for the tracked races list has been fixed.
                     	    The filter setting now survives a refresh cycle of the tracked races list.
+                    	</li>
+                    	<li>When using the TracTrac connector, identification of marks has slightly changed for
+                    	    gates and lines. Before, the mark IDs were constructed based on the control point's
+                    	    name. Now, the control point's ID plus a numeric suffic (1/2) is used instead,
+                    	    providing uniqueness at the same scope that TracTrac provides uniqueness regarding
+                    	    their control point IDs. 
                     	</li>
                     </ul>
                     <h2 class="articleSubheadline">March 2017</h2>
