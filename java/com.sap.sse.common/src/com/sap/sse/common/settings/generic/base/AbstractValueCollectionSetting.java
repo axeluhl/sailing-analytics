@@ -68,6 +68,7 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
         ensureValue().setValues(values, getValueConverter());
     }
     
+    @Override
     public void addValue(T value) {
         ensureValue().addValue(value, getValueConverter());
     }

@@ -35,8 +35,8 @@ class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildingPipel
             defaultSettings = settingsStringConverter.deserializeFromJson(defaultSettings, settingsJsons.getContextSpecificSettingsJson());
             defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
         } else if (settingsJsons.getGlobalSettingsJson() != null) {
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
             defaultSettings = settingsStringConverter.deserializeFromJson(defaultSettings, settingsJsons.getGlobalSettingsJson());
+            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
             defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
         }
         defaultSettings = settingsStringConverter.deserializeFromCurrentUrl(defaultSettings);
