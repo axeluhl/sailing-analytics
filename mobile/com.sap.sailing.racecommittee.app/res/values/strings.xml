@@ -115,7 +115,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="tracking_list_01">Competitor List</string>
-    <string name="tracking_list_02">Tracking List</string>
+    <string name="tracking_list_02">Result List</string>
     <string name="availableFinishingCompetitors">Competitors</string>
     <string name="choose_blue_flag_finishing">Finish race</string>
     <string name="drag_handle_description">Drag handle</string>
@@ -394,7 +394,7 @@
     <string name="finished_replay">Replay Voice</string>
     <string name="finished_list">Finish List</string>
     <string name="finished_photos">Take Photos</string>
-    <string name="finished_tracking">Tracking</string>
+    <string name="finished_tracking">Competitor</string>
     <string name="finished_edit">Edit List</string>
     <string name="finished_publishing">Publishing</string>
     <string name="finished_submit">Submit</string>
