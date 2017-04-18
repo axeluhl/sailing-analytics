@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2017-03-03T16:45:41Z" original="/usr/sap/ljs/app/Converter_7335190261158680380/java/com.sap.sailing.domain.racelogtrackingadapter/resources/stringmessages/TrackingStringMessages.properties" source-language="en" target-language="fr">
+	<file datatype="javapropertyresourcebundle" date="2017-04-12T15:30:41Z" original="/usr/sap/ljs/app/Converter_429408536936316109/java/com.sap.sailing.domain.racelogtrackingadapter/resources/stringmessages/TrackingStringMessages.properties" source-language="en" target-language="fr">
 		<header>
 			<skl>
-				<internal-file crc="064477f4b22ea4cc8cbdaab36795b9a4" form="base64">H4sIAAAAAAAAAF1RQU7DQAy85xW+cakQ50o5FCSkSEBLk8J5m7iN1c16tXZbIsTf2U1SWnHzzjjjmYkGUx/I7Qt3IjVK7J455NWEwhWGHYdMauPe10/c4DJ8kJBugq14jXsSxbCQ/NUcEOQYEHo+QmtOCNoifD/8wMJ7ICdqrMXmHqoWHSS9YWHH1vI5XRzlgQPUlurDwFpyBzhKoqNsAOlMUN+yi+oMYToPRrIz2po7rDj/HKe4kNGy3AgGyUuN30F8JjOZcU1gam6pxQiNtI2aLmY/oe2HsFVL8hKt5MVuiGdizICmSb40ctAZssBjogZPVCOcSdvhneIbm9b7aw0zEOq87aesW4wlpEiS3Myz7ZH7Cl2DIU8j6DBnxvtSOWAxylT4pRdLDbs7vfaejvaoM/AWjeDl8DxJFCz5pHCtxPupgj/qtpJkYhXTxl/t/ZvpMC8XKyhj6lTBY7I40plErHAl7Vv9vwoTnv0Cs+RzW3sCAAA=</internal-file>
+				<internal-file crc="55a81e913c44ad945c6ad9615879c2ce" form="base64">H4sIAAAAAAAAAF1RQU7DQAy85xW+cakQ50o5FCSkSEBLk8J5m7iN1c16tXZbIsTf2U1SWnHzzjjjmYkGUx/I7Qt3IjVK7J455NWEwhWGHYdMauPe10/c4DJ8kJBugq14jXsSxbCQ/NUcEOQYEHo+QmtOCNoifD/8wMJ7ICdqrMXmHqoWHSS9YWHH1vI5XRzlgQPUlurDwFpyBzhKoqNsAOlMUN+yi+oMYToPRrIz2po7rDj/HKe4kNGy3AgGyUuN30F8JjOZcU1gam6pxQiNtI2aLmY/oe2HsFVL8hKt5MVuiGdizICmSb40ctAZssBjogZPVCOcSdvhneIbm9b7aw0zEOq87aesW4wlpEiS3Myz7ZH7Cl2DIU8j6DBnxvtSOWAxylT4pRdLDbu7O70Wn672qDPwFo3g5fI8aRQs+SRx7cT7qYM/6raT5GIV48Z/7f2b6TAvFysoY+zUwWPyONKZRKxwJe1b/b8KE579Ah7aV3t8AgAA</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-12-16T08:45:26Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2017-04-06T12:41:23Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
-			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
+			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Java properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
 		<body>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="trackingInvitationFor" resname="trackingInvitationFor">
@@ -17,7 +17,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="scanQRCodeOrVisitUrlToRegisterAs" resname="scanQRCodeOrVisitUrlToRegisterAs">
 				<source>Make sure you have the <ph id="1">{0}</ph> App installed. Then scan the following QRCode or click the link using your smartphone to register as</source>
-				<target state="signed-off">Si vous avez bien installé l’application <ph id="1">{0}</ph>, scannez le code QR suivant ou cliquez sur le lien sur votre smartphone pour vous enregistrer comme</target>
+				<target state="signed-off">Si vous avez bien installé l'application <ph id="1">{0}</ph>, scannez le code QR suivant ou cliquez sur le lien sur votre smartphone pour vous enregistrer comme</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="welcomeTo" resname="welcomeTo">
 				<source>Welcome to</source>
@@ -25,7 +25,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="iOSUsers" resname="iOSUsers">
 				<source>Start iOS App</source>
-				<target state="signed-off">Lancer l’application iOS</target>
+				<target state="signed-off">Lancer l'application iOS</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="androidUsers" resname="androidUsers">
 				<source>Start Android App</source>
@@ -33,15 +33,15 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="alternativelyVisitThisLink" resname="alternativelyVisitThisLink">
 				<source>If you are reading this mail on the device with the App already installed, simply click below to start:</source>
-				<target state="signed-off">Si vous consultez ce mail sur l’appareil sur lequel l’application est déjà installée, cliquez simplement sur le bouton ci-dessous pour commencer :</target>
+				<target state="signed-off">Si vous consultez ce mail sur l'appareil sur lequel l'application est déjà installée, cliquez simplement sur le bouton ci-dessous pour commencer :</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="buoyTender" resname="buoyTender">
 				<source>buoy tender</source>
 				<target state="signed-off">Navire baliseur</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appStoreInstallText" resname="appStoreInstallText">
-				<source>If you don't have the App yet, please install:</source>
-				<target state="signed-off">Si vous n'avez pas encore l’application, voici les liens pour l’installer :</target>
+				<source>If you don''t have the App yet, please install:</source>
+				<target state="translated">Si vous n'avez pas encore l'application, installez-la :</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appIos" resname="appIos">
 				<source>Install iOS App</source>
