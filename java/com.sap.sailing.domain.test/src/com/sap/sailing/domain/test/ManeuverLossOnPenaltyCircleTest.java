@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
