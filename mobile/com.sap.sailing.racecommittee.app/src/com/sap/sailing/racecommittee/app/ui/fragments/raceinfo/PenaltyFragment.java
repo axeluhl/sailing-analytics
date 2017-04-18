@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.internal.view.ContextThemeWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -27,6 +28,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -56,6 +58,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private View mButtonBar;
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
+    private TextView mEntryCount;
     private List<CompetitorResultEditableImpl> mCompetitorResults;
 
     public static PenaltyFragment newInstance() {
@@ -134,6 +137,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             });
         }
         setPublishButton();
+
+        mEntryCount = ViewHelper.get(layout, R.id.competitor_entry_count);
 
         mAdapter = new PenaltyAdapter(this);
         RecyclerView recyclerView = ViewHelper.get(layout, R.id.competitor_list);
@@ -230,6 +235,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
         }
         mAdapter.setCompetitor(mCompetitorResults);
+        setPublishButton();
     }
 
     @Override
@@ -273,8 +279,12 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
     private void setPublishButton() {
         int count = 0;
+        boolean isChecked = false;
         for (CompetitorResultEditableImpl item : mCompetitorResults) {
-            if (item.isChecked() || item.isDirty()) {
+            if (item.isChecked()) {
+                isChecked = true;
+            }
+            if (!MaxPointsReason.NONE.equals(item.getMaxPointsReason())) {
                 count++;
             }
         }
@@ -284,7 +294,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
         mPublishButton.setText(text);
         mPublishButton.setEnabled(count != 0);
-        mButtonBar.setVisibility(count != 0 ? View.VISIBLE : View.GONE);
+        mButtonBar.setVisibility((count != 0 || isChecked) ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -322,6 +332,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 if (competitor.isDirty()) {
                     mAdapter.notifyDataSetChanged();
                 }
+                setPublishButton();
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
@@ -351,6 +362,15 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public void onTextChanged(String text) {
         if (mAdapter != null) {
             mAdapter.setFilter(text);
+            int count = mAdapter.getItemCount();
+            if (mEntryCount != null) {
+                if (!TextUtils.isEmpty(text)) {
+                    mEntryCount.setText(getString(R.string.competitor_count, count));
+                    mEntryCount.setVisibility(View.VISIBLE);
+                } else {
+                    mEntryCount.setVisibility(View.GONE);
+                }
+            }
         }
     }
 }

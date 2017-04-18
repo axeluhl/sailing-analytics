@@ -97,12 +97,14 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
     private List<CompetitorResultEditableImpl> filterData() {
         List<CompetitorResultEditableImpl> result = new ArrayList<>();
-        if (TextUtils.isEmpty(mFilter)) {
-            result.addAll(mCompetitor);
-        } else {
-            for (int i = 0; i < mCompetitor.size(); i++) {
-                if (containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(), mFilter)) {
-                    result.add(mCompetitor.get(i));
+        if (mCompetitor != null) {
+            if (TextUtils.isEmpty(mFilter)) {
+                result.addAll(mCompetitor);
+            } else {
+                for (int i = 0; i < mCompetitor.size(); i++) {
+                    if (containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(), mFilter)) {
+                        result.add(mCompetitor.get(i));
+                    }
                 }
             }
         }

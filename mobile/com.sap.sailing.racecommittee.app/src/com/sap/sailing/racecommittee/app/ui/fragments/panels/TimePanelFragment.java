@@ -23,12 +23,15 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PenaltyFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
@@ -56,6 +59,8 @@ public class TimePanelFragment extends BasePanelFragment {
     private ImageView mLinkIcon;
     private Boolean mLinkedRace = null;
 
+    private CompetitorPanelClick mClickListener;
+
     public TimePanelFragment() {
         mReceiver = new IntentReceiver();
     }
@@ -82,7 +87,6 @@ public class TimePanelFragment extends BasePanelFragment {
         });
 
         mCompetitorList = ViewHelper.get(layout, R.id.button_competitor);
-        mCompetitorList.setListener(new CompetitorPanelClick());
 
         mTimeLock = ViewHelper.get(layout, R.id.time_start_lock);
         mCurrentTime = ViewHelper.get(layout, R.id.current_time);
@@ -95,6 +99,17 @@ public class TimePanelFragment extends BasePanelFragment {
         }
 
         return layout;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (preferences.getRacingProcedureIsResultEntryEnabled(getRace().getState().getRacingProcedure().getType())) {
+            mClickListener = new CompetitorPanelClick();
+            mCompetitorList.setListener(mClickListener);
+            mCompetitorList.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -167,7 +182,8 @@ public class TimePanelFragment extends BasePanelFragment {
                 if (mLinkedRace && mHeaderTime != null && result.getResolutionFailed() == NO_START_TIME_SET) {
                     SimpleRaceLogIdentifier identifier = Util.get(result.getDependingOnRaces(), 0);
                     ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
-                    mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getShortReverseRaceName(race, " / ", getRace())));
+                    mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper
+                        .getShortReverseRaceName(race, " / ", getRace())));
                 }
             }
         }
@@ -226,6 +242,12 @@ public class TimePanelFragment extends BasePanelFragment {
         }
     }
 
+    private void toggleCompetitorList() {
+        if (RaceLogRaceStatus.FINISHING.equals(getRaceState().getStatus())) {
+            mCompetitorList.toggleMarker();
+        }
+    }
+
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {
 
         @Override
@@ -234,6 +256,8 @@ public class TimePanelFragment extends BasePanelFragment {
 
             checkStatus();
             uncheckMarker(null);
+
+            toggleCompetitorList();
         }
 
         @Override
@@ -297,7 +321,15 @@ public class TimePanelFragment extends BasePanelFragment {
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(PenaltyFragment.newInstance(), R.id.race_content);
+                    Bundle args = new Bundle();
+                    RaceFragment content;
+                    args.putSerializable(AppConstants.INTENT_EXTRA_RACE_ID, getRace().getId());
+                    if (getRace().getStatus() != RaceLogRaceStatus.FINISHING) {
+                        content = PenaltyFragment.newInstance();
+                    } else {
+                        content = TrackingListFragment.newInstance(args, 1);
+                    }
+                    replaceFragment(content, R.id.race_content);
                     break;
 
                 default:
@@ -331,6 +363,17 @@ public class TimePanelFragment extends BasePanelFragment {
                             uncheckMarker(mCompetitorList);
                         } else {
                             uncheckMarker(null);
+                        }
+                    }
+                }
+
+                if (AppConstants.INTENT_ACTION_CLICK.equals(action)) {
+                    if (intent.getExtras() != null) {
+                        String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                        if (AppConstants.INTENT_ACTION_CLICK_COMPETITOR.equals(data)) {
+                            if (mCompetitorList != null && mClickListener != null) {
+                                mClickListener.onClick(mCompetitorList);
+                            }
                         }
                     }
                 }

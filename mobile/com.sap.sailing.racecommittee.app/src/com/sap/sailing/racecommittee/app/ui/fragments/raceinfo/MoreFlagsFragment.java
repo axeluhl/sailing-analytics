@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -164,7 +166,8 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 case 1: // Race-State: Finishing -> End Finishing
                     ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
                     if (flag != null) {
-                        flag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size)));
+                        flag.setImageDrawable(FlagsResources
+                            .getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size)));
                     }
 
                     TextView headline = ViewHelper.get(getView(), R.id.header_headline);

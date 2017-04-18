@@ -579,12 +579,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                                     content = RaceFlagViewerFragment.newInstance();
                                 } else {
-                                    if (preferences.getRacingProcedureIsResultEntryEnabled(mSelectedRace.getState().
-                                        getRacingProcedure().getType())) {
-                                        content = TrackingListFragment.newInstance(args, 1);
-                                    } else {
-                                        content = RaceFinishingFragment.newInstance();
-                                    }
+                                    content = RaceFinishingFragment.newInstance();
                                 }
                                 content.setArguments(args);
                                 transaction.replace(R.id.race_content, content);

@@ -8,7 +8,9 @@
         android:id="@+id/tools_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp">
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp">
 
         <com.sap.sailing.racecommittee.app.ui.views.SearchView
             android:id="@+id/competitor_search"
@@ -30,6 +32,16 @@
                 android:layout_gravity="center"
                 android:src="?attr/sortby_24dp" />
         </FrameLayout>
+
+        <TextView
+            android:id="@+id/competitor_entry_count"
+            style="?attr/textSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="12dp"
+            android:layout_toLeftOf="@id/competitor_sort"
+            tools:text="@string/competitor_count" />
     </RelativeLayout>
 
     <include
