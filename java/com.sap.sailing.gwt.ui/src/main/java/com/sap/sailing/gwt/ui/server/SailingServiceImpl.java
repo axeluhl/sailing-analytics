@@ -5242,12 +5242,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void denoteForRaceLogTracking(String leaderboardName,
+    public Boolean denoteForRaceLogTracking(String leaderboardName,
     		String raceColumnName, String fleetName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
     	RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
     	Fleet fleet = getFleetByName(raceColumn, fleetName);
-    	getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
+    	return getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
     }
     
     @Override

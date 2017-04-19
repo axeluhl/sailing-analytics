@@ -634,8 +634,12 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
+    /**
+     * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
+     *         so
+     */
     void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Void> callback);
+            AsyncCallback<Boolean> callback);
 
     void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
 
