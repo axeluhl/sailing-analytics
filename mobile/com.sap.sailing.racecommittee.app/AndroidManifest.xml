@@ -67,7 +67,9 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activities.RacingActivity" />
+        <activity
+            android:name=".ui.activities.RacingActivity"
+            android:windowSoftInputMode="adjustNothing" />
         <activity android:name=".ui.activities.PasswordActivity" />
         <activity
             android:name=".ui.activities.PreferenceActivity"
