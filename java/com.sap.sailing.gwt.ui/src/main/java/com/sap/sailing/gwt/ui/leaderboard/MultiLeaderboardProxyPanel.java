@@ -79,9 +79,6 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
         super(parent, context);
 
         loadedSettings = settings;
-        if (loadedSettings == null) {
-            loadedSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomDefaults(null);
-        }
 
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;

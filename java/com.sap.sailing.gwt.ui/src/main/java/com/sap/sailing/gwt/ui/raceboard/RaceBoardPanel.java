@@ -41,7 +41,6 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
@@ -75,7 +74,6 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
-import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -284,7 +282,7 @@ public class RaceBoardPanel
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
         leaderboardPanel = createLeaderboardPanel(lifecycle, settings, leaderboardName, leaderboardGroupName,
-                competitorSearchTextBox, isScreenLargeEnoughToInitiallyDisplayLeaderboard);
+                competitorSearchTextBox);
         addChildComponent(leaderboardPanel);
 
         leaderboardPanel.setTitle(stringMessages.leaderboard());
@@ -446,20 +444,10 @@ public class RaceBoardPanel
     private LeaderboardPanel createLeaderboardPanel(RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
             String leaderboardGroupName,
-            CompetitorFilterPanel competitorSearchTextBox, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard) {
+            CompetitorFilterPanel competitorSearchTextBox) {
         LeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
         LeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
-        ExplicitRaceColumnSelectionWithPreselectedRace raceColumn = new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier);
-        LeaderboardSettings defaultLeaderboardSettingsForCurrentPlayMode = LeaderboardSettingsFactory.getInstance()
-                .createNewSettingsForPlayMode(timer.getPlayMode(),
-                        /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
-                        /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
-                        /* showRegattaRank */ false,
-                        /*showCompetitorSailIdColumn*/true,
-                        /* don't showCompetitorFullNameColumn in case screen is so small that we don't
-                         * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard,raceColumn.getNumberOfLastRaceColumnsToShow(),raceColumn.getType());
-        leaderboardSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesWithNewDefaults(leaderboardSettings, defaultLeaderboardSettingsForCurrentPlayMode);
         return new LeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 leaderboardSettings,
                 selectedRaceIdentifier != null, selectedRaceIdentifier,

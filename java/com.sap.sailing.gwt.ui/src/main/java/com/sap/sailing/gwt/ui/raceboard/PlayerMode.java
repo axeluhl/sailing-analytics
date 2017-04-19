@@ -22,7 +22,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
  *
  */
 public class PlayerMode extends AbstractRaceBoardMode {
-    private final Duration DURATION_BEFORE_START_TO_SET_TIMER_TO_FOR_REPLAY_RACES = Duration.ONE_SECOND.times(10);
+    private static final Duration DURATION_BEFORE_START_TO_SET_TIMER_TO_FOR_REPLAY_RACES = Duration.ONE_SECOND.times(10);
     
     private boolean adjustedLeaderboardSettings;
 
@@ -51,19 +51,19 @@ public class PlayerMode extends AbstractRaceBoardMode {
         if (getTimer().getPlayMode() == PlayModes.Live) {
             stopReceivingRaceTimesInfos(); // this trigger wouldn't be stopped otherwise
         }
-        if (!adjustedLeaderboardSettings && getLeaderboard() != null) {
-            adjustedLeaderboardSettings = true;
-            // it's important to first unregister the listener before updateSettings is called because
-            // updateSettings will trigger another leaderboard load, leading to an endless recursion otherwise
-            stopReceivingLeaderboard();
-            adjustLeaderboardSettings();
-        }
         if (!timerAdjusted && getTimer().getPlayMode() != PlayModes.Live && getRaceTimesInfoForRace() != null && getRaceTimesInfoForRace().startOfRace != null) {
             timerAdjusted = true;
             getTimer().setTime(new MillisecondsTimePoint(getRaceTimesInfoForRace().startOfRace).minus(DURATION_BEFORE_START_TO_SET_TIMER_TO_FOR_REPLAY_RACES).asMillis());
             getTimer().play();
             // we've done our adjustments; remove listener and let go
             stopReceivingRaceTimesInfos();
+        }
+        if (!adjustedLeaderboardSettings && getLeaderboard() != null) {
+            adjustedLeaderboardSettings = true;
+            // it's important to first unregister the listener before updateSettings is called because
+            // updateSettings will trigger another leaderboard load, leading to an endless recursion otherwise
+            stopReceivingLeaderboard();
+            adjustLeaderboardSettings();
         }
     }
 }

@@ -29,13 +29,6 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
      */
     @Override
     protected void trigger() {
-        if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
-            leaderboardSettingsAdjusted = true;
-            // it's important to first unregister the listener before updateSettings is called because
-            // updateSettings will trigger another leaderboard load, leading to an endless recursion otherwise
-            stopReceivingLeaderboard();
-            adjustLeaderboardSettings();
-        }
         if (!timerAdjusted && getRaceTimesInfoForRace() != null && getRaceTimesInfoForRace().endOfRace != null) {
             timerAdjusted = true;
             stopReceivingRaceTimesInfos();
@@ -43,6 +36,13 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
                 getTimer().setPlayMode(PlayModes.Replay);
             }
             getTimer().setTime(getRaceTimesInfoForRace().endOfRace.getTime());
+        }
+        if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
+            leaderboardSettingsAdjusted = true;
+            // it's important to first unregister the listener before updateSettings is called because
+            // updateSettings will trigger another leaderboard load, leading to an endless recursion otherwise
+            stopReceivingLeaderboard();
+            adjustLeaderboardSettings();
         }
     }
 

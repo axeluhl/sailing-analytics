@@ -17,7 +17,9 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 public class LeaderboardSettingsFactory {
     private static LeaderboardSettingsFactory instance;
     
-    public synchronized static LeaderboardSettingsFactory getInstance() {
+    private static final long DEFAULT_REFRESH_INTERVAL = 1000L;
+    
+    public static LeaderboardSettingsFactory getInstance() {
         if (instance == null) {
             instance = new LeaderboardSettingsFactory();
         }
@@ -49,7 +51,7 @@ public class LeaderboardSettingsFactory {
      * @param raceColumnSelectionType
      * @param raceColumnSelection
      */
-    public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
+    public LeaderboardSettings createNewDefaultSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
             String nameOfRaceToShow, boolean showRegattaRank, boolean showCompetitorSailIdColumn,
             boolean showCompetitorNameColumn, Integer raceColumnSelectionNumber,
             RaceColumnSelectionStrategies raceColumnSelectionType) {
@@ -59,6 +61,7 @@ public class LeaderboardSettingsFactory {
         LeaderboardSettings settings = null;
         List<String> namesOfRaceColumnsToShow = nameOfRaceColumnToShow == null ? null : Collections.singletonList(nameOfRaceColumnToShow);
         List<String> namesOfRacesToShow = nameOfRaceToShow == null ? null : Collections.singletonList(nameOfRaceToShow);
+        final List<DetailType> overallDetails = new ArrayList<>();
         switch (playMode) {
             case Live:  
                 List<DetailType> maneuverDetails = new ArrayList<DetailType>();
@@ -76,79 +79,29 @@ public class LeaderboardSettingsFactory {
                 raceDetails.add(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS);
                 raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
                 raceDetails.add(DetailType.DISPLAY_LEGS);
-                final List<DetailType> overallDetails = createOverallDetailsForShowRegattaRank(showRegattaRank);
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                         namesOfRaceColumnsToShow,
                     namesOfRacesToShow, raceColumnSelectionNumber,
                         /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
-                        /* refresh interval */ null, /* name of race to sort */ nameOfRaceToSort,
+                        /* refresh interval */ DEFAULT_REFRESH_INTERVAL, /* name of race to sort */ nameOfRaceToSort,
                     /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelectionType,
                         /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false,
                         showCompetitorSailIdColumn, showCompetitorNameColumn);
                 break;
             case Replay:
-            settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
-                    nameOfRaceColumnToShow != null, showRegattaRank, showCompetitorSailIdColumn, showCompetitorNameColumn);
+                LeaderboardSettings defaultSettings = new LeaderboardSettings();
+                settings = new LeaderboardSettings(defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(), defaultSettings.getRaceDetailsToShow(), overallDetails, namesOfRaceColumnsToShow, namesOfRacesToShow,
+                        defaultSettings.getNumberOfLastRacesToShow(), nameOfRaceColumnToShow != null, DEFAULT_REFRESH_INTERVAL, nameOfRaceToSort, defaultSettings.isSortAscending(), defaultSettings.isUpdateUponPlayStateChange(), defaultSettings.getActiveRaceColumnSelectionStrategy(), defaultSettings.isShowAddedScores(), defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
+                        showCompetitorSailIdColumn, showCompetitorNameColumn);
             break;
         }
+        SettingsDefaultValuesUtils.setDefaults(settings, settings);
         return settings;
     }
     
-    /**
-     * @param showRegattaRank
-     *            Puts overall details
-     *            collection to the settings and adds {@link DetailType#REGATTA_RANK} to the
-     *            overall details if and only if this parameter is <code>true</code>
-     */
-    private List<DetailType> createOverallDetailsForShowRegattaRank(boolean showRegattaRank) {
-        final List<DetailType> overallDetails = new ArrayList<>();
-        if (showRegattaRank) {
-            overallDetails.add(DetailType.REGATTA_RANK);
-        }
-        return overallDetails;
-    }
-
-    /**
-     * @param namesOfRaceColumnsToShow
-     *            if <code>null</code>, create settings which leave the list of races to show unchanged when applied
-     *            using {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}; otherwise, the list of names of
-     *            the race columns (not their races!) that will be shown, so that, e.g., an empty list causes no race
-     *            columns to be shown
-     * @param namesOfRacesToShow
-     *            alternatively, races to show can also be specified by their race names; if not <code>null</code>,
-     *            <code>namesOfRaceColumnsToShow</code> must be <code>null</code>
-     * @param showRegattaRank
-     *            if <code>null</code>, the overall detail settings that are responsible for deciding whether or not to
-     *            show the regatta rank are left unchanged; otherwise, a non-<code>null</code> overall details
-     *            collection will be put to the settings and the {@link DetailType#REGATTA_RANK} will be added to the
-     *            overall details if and only if this parameter is <code>true</code>
-     */
-    private LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace, Boolean showRegattaRank,
-            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn) {
-        final List<DetailType> overallDetails = createOverallDetailsForShowRegattaRank(showRegattaRank);
-        return new LeaderboardSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, overallDetails,
-                nameOfRaceToSort, autoExpandPreSelectedRace,
-                showCompetitorSailIdColumn, showCompetitorFullNameColumn);
-    }
-    
-    public LeaderboardSettings createNewSettingsWithCustomDefaults(LeaderboardSettings customDefaultSettings, LeaderboardSettings settingsWithCustomValues) {
-        LeaderboardSettings leaderboardSettings = new LeaderboardSettings();
-        leaderboardSettings.overrideDefaultValues(customDefaultSettings);
-        leaderboardSettings.setValues(settingsWithCustomValues);
-        return leaderboardSettings;
-    }
-    
-    public LeaderboardSettings createNewSettingsWithCustomDefaults(LeaderboardSettings customDefaultSettings) {
-        LeaderboardSettings leaderboardSettings = new LeaderboardSettings();
-        leaderboardSettings.overrideDefaultValues(customDefaultSettings);
-        return leaderboardSettings;
-    }
-    
-    public LeaderboardSettings overrideDefaultValuesWithNewDefaults(LeaderboardSettings settingsWithCustomValues, LeaderboardSettings customDefaultSettings) {
-        LeaderboardSettings leaderboardSettings = new LeaderboardSettings();
-        leaderboardSettings.setValues(settingsWithCustomValues);
-        leaderboardSettings.overrideDefaultValues(customDefaultSettings);
+    public LeaderboardSettings createNewDefaultSettingsWithRaceColumns(List<String> namesOfRaceColumns) {
+        LeaderboardSettings leaderboardSettings = new LeaderboardSettings(namesOfRaceColumns);
+        SettingsDefaultValuesUtils.setDefaults(leaderboardSettings, leaderboardSettings);
         return leaderboardSettings;
     }
     
@@ -173,7 +126,7 @@ public class LeaderboardSettingsFactory {
     
     public LeaderboardSettings mergeLeaderboardSettings(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
         LeaderboardSettings newSettings = mergeLeaderboardSettingsHelper(settingsWithRaceSelection, settingsWithDetails);
-        LeaderboardSettings newDefaultSettings = mergeLeaderboardSettingsHelper(settingsWithRaceSelection.getDefaultSettings(), settingsWithDetails.getDefaultSettings());
+        LeaderboardSettings newDefaultSettings = mergeLeaderboardSettingsHelper(SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), settingsWithRaceSelection), SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), settingsWithDetails));
         SettingsDefaultValuesUtils.keepDefaults(newDefaultSettings, newSettings);
         return newSettings;
     }

@@ -99,11 +99,6 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
 
     @Override
     protected void trigger() {
-        if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
-            leaderboardSettingsAdjusted = true;
-            stopReceivingLeaderboard();
-            adjustLeaderboardSettings();
-        }
         if (!timerAdjusted && getRaceTimesInfoForRace() != null && getRaceTimesInfoForRace().startOfRace != null) {
             timerAdjusted = true;
             // we've done our adjustments; remove listener and let go
@@ -145,6 +140,11 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                     }
                 }, /* delay in milliseconds */ 500);
             }
+        }
+        if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
+            leaderboardSettingsAdjusted = true;
+            stopReceivingLeaderboard();
+            adjustLeaderboardSettings();
         }
         if (getLeaderboardForSpecificTimePoint() == null &&
                 getRaceColumn() != null && getLeaderboard() != null

@@ -28,7 +28,7 @@ public class LeaderboardPanelLifecycle
     @Override
     public LeaderboardSettings createDefaultSettings() {
         return LeaderboardSettingsFactory.getInstance()
-                .createNewSettingsWithCustomDefaults(new LeaderboardSettings(namesOfRaceColumns));
+                .createNewDefaultSettingsWithRaceColumns(namesOfRaceColumns);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class LeaderboardPanelLifecycle
 
     @Override
     public LeaderboardSettings extractGlobalSettings(LeaderboardSettings currentLeaderboardSettings) {
-        LeaderboardSettings defaultLeaderboardSettings = currentLeaderboardSettings.getDefaultSettings();
+        LeaderboardSettings defaultLeaderboardSettings = SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), currentLeaderboardSettings);
         LeaderboardSettings globalLeaderboardSettings = new LeaderboardSettings(
                 currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),

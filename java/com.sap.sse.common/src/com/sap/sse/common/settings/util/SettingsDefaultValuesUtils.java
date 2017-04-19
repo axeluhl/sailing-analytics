@@ -9,6 +9,12 @@ import com.sap.sse.common.settings.generic.ValueSetting;
 
 public class SettingsDefaultValuesUtils {
     
+    public static<T extends GenericSerializableSettings> T getDefaultSettings(T newInstance, T settingsWithContainedDefaults) {
+        keepDefaults(settingsWithContainedDefaults, newInstance);
+        newInstance.resetToDefault();
+        return newInstance;
+    }
+    
     public static void keepDefaults(GenericSerializableSettings previousSettings, GenericSerializableSettings newSettings) {
         for (Map.Entry<String, Setting> entry : previousSettings.getChildSettings().entrySet()) {
             Setting newSetting = entry.getValue();

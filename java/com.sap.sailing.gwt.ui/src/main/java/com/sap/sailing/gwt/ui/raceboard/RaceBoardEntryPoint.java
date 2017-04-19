@@ -69,15 +69,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             return;
         }
         
-        final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
-        
-        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRaceBoard(raceboardContextDefinition);
-        final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
-        ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
-                lifeCycle,
-                new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
-                        getUserService(), storageDefinitionId));
-        
         AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO raceboardData) {
@@ -109,11 +100,20 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     return;
                 }
                 
+                final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
+                final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRaceBoard(raceboardContextDefinition);
+                final Timer timer = new Timer(PlayModes.Replay, 1000l);
+                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(timer, raceboardData.getRace().getRaceIdentifier(), StringMessages.INSTANCE);
+                ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
+                        lifeCycle,
+                        new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
+                                getUserService(), storageDefinitionId));
+                
                 context.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override
                     public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
                         final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, context, initialSettings,
-                                        raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle);
+                                        raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle, timer);
                                 if (finalMode != null) {
                                     finalMode.getMode().applyTo(raceBoardPanel);
                         }
@@ -145,10 +145,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceBoardPanel createPerspectivePage(Component<?> parent,
             ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, RaceboardDataDTO raceboardData,
-            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle) {
+            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle, Timer timer) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
-        Timer timer = new Timer(PlayModes.Replay, 1000l);
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);

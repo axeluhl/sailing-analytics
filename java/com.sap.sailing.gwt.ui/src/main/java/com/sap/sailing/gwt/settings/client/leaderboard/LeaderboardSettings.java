@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
@@ -280,80 +279,4 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         return showCompetitorFullNameColumn.getValue();
     }
     
-    void overrideDefaultValues(LeaderboardSettings newDefaults) {
-        autoExpandPreSelectedRace = newDefaults.autoExpandPreSelectedRace;
-        boolean namesOfRaceColumnsToShowWasDefault = Util.equals(namesOfRaceColumnsToShow.getValues(), namesOfRaceColumnsToShow.getDefaultValues());
-        namesOfRaceColumnsToShow.setDefaultValues(newDefaults.namesOfRaceColumnsToShow.getValues());
-        namesOfRacesToShow.setDefaultValues(newDefaults.namesOfRacesToShow.getValues());
-        if(getNamesOfRaceColumnsToShow() != null && getNamesOfRacesToShow() != null) {
-            if(namesOfRaceColumnsToShowWasDefault) {
-                namesOfRaceColumnsToShow.setValues(null);
-            } else {
-                namesOfRacesToShow.setValues(null);
-            }
-        }
-        numberOfLastRacesToShow.setDefaultValue(newDefaults.numberOfLastRacesToShow.getValue());
-        maneuverDetailsToShow.setDefaultValues(newDefaults.maneuverDetailsToShow.getValues());
-        legDetailsToShow.setDefaultValues(newDefaults.legDetailsToShow.getValues());
-        raceDetailsToShow.setDefaultValues(newDefaults.raceDetailsToShow.getValues());
-        overallDetailsToShow.setDefaultValues(newDefaults.overallDetailsToShow.getValues());
-        delayBetweenAutoAdvancesInMilliseconds.setDefaultValue(newDefaults.delayBetweenAutoAdvancesInMilliseconds.getValue());
-        activeRaceColumnSelectionStrategy.setDefaultValue(newDefaults.activeRaceColumnSelectionStrategy.getValue());
-        nameOfRaceToSort.setDefaultValue(newDefaults.nameOfRaceToSort.getValue());
-        updateUponPlayStateChange.setDefaultValue(newDefaults.updateUponPlayStateChange.getValue());
-        sortAscending.setDefaultValue(newDefaults.sortAscending.getValue());
-        showAddedScores.setDefaultValue(newDefaults.showAddedScores.getValue());
-        showCompetitorSailIdColumn.setDefaultValue(newDefaults.showCompetitorSailIdColumn.getValue());
-        showCompetitorFullNameColumn.setDefaultValue(newDefaults.showCompetitorFullNameColumn.getValue());
-        showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setDefaultValue(newDefaults.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.getValue());
-    }
-    
-    void setValues(LeaderboardSettings settingsWithCustomValues) {
-        this.legDetailsToShow.setValues(settingsWithCustomValues.getLegDetailsToShow());
-        this.raceDetailsToShow.setValues(settingsWithCustomValues.getRaceDetailsToShow());
-        this.overallDetailsToShow.setValues(settingsWithCustomValues.getOverallDetailsToShow());
-        this.namesOfRacesToShow.setValues(settingsWithCustomValues.getNamesOfRacesToShow());
-        this.namesOfRaceColumnsToShow.setValues(settingsWithCustomValues.getNamesOfRaceColumnsToShow());
-        this.numberOfLastRacesToShow.setValue(settingsWithCustomValues.getNumberOfLastRacesToShow());
-        this.activeRaceColumnSelectionStrategy.setValue(settingsWithCustomValues.getActiveRaceColumnSelectionStrategy());
-        this.autoExpandPreSelectedRace = settingsWithCustomValues.isAutoExpandPreSelectedRace();
-        this.delayBetweenAutoAdvancesInMilliseconds.setValue(settingsWithCustomValues.getDelayBetweenAutoAdvancesInMilliseconds());
-        this.maneuverDetailsToShow.setValues(settingsWithCustomValues.getManeuverDetailsToShow());
-        this.nameOfRaceToSort.setValue(settingsWithCustomValues.getNameOfRaceToSort());
-        this.sortAscending.setValue(settingsWithCustomValues.isSortAscending());
-        this.updateUponPlayStateChange.setValue(settingsWithCustomValues.isUpdateUponPlayStateChange());
-        this.showAddedScores.setValue(settingsWithCustomValues.isShowAddedScores());
-        this.showCompetitorSailIdColumn.setValue(settingsWithCustomValues.isShowCompetitorSailIdColumn());
-        this.showCompetitorFullNameColumn.setValue(settingsWithCustomValues.isShowCompetitorFullNameColumn());
-        this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(settingsWithCustomValues.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
-    }
-    
-    public LeaderboardSettings getDefaultSettings() {
-        LeaderboardSettings leaderboardSettings = new LeaderboardSettings();
-        leaderboardSettings.legDetailsToShow.setDefaultValues(legDetailsToShow.getDefaultValues());
-        leaderboardSettings.raceDetailsToShow.setDefaultValues(raceDetailsToShow.getDefaultValues());
-        leaderboardSettings.overallDetailsToShow.setDefaultValues(overallDetailsToShow.getDefaultValues());
-        leaderboardSettings.namesOfRacesToShow.setDefaultValues(namesOfRacesToShow.getDefaultValues());
-        leaderboardSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumnsToShow.getDefaultValues());
-        leaderboardSettings.numberOfLastRacesToShow.setDefaultValue(numberOfLastRacesToShow.getDefaultValue());
-        leaderboardSettings.activeRaceColumnSelectionStrategy.setDefaultValue(activeRaceColumnSelectionStrategy.getDefaultValue());
-        leaderboardSettings.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
-        leaderboardSettings.delayBetweenAutoAdvancesInMilliseconds.setDefaultValue(delayBetweenAutoAdvancesInMilliseconds.getDefaultValue());
-        leaderboardSettings.maneuverDetailsToShow.setDefaultValues(maneuverDetailsToShow.getDefaultValues());
-        leaderboardSettings.nameOfRaceToSort.setDefaultValue(nameOfRaceToSort.getDefaultValue());
-        leaderboardSettings.sortAscending.setDefaultValue(sortAscending.getDefaultValue());
-        leaderboardSettings.updateUponPlayStateChange.setDefaultValue(updateUponPlayStateChange.getDefaultValue());
-        leaderboardSettings.showAddedScores.setDefaultValue(showAddedScores.getDefaultValue());
-        leaderboardSettings.showCompetitorSailIdColumn.setDefaultValue(showCompetitorSailIdColumn.getDefaultValue());
-        leaderboardSettings.showCompetitorFullNameColumn.setDefaultValue(showCompetitorFullNameColumn.getDefaultValue());
-        leaderboardSettings.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setDefaultValue(showOverallColumnWithNumberOfRacesCompletedPerCompetitor.getDefaultValue());
-        return leaderboardSettings;
-    }
-    
-    public static LeaderboardSettings createDefaultSettings(Collection<String> defaultNamesOfRaceColumnsToShow) {
-        LeaderboardSettings leaderboardSettings = new LeaderboardSettings();
-        leaderboardSettings.namesOfRaceColumnsToShow.setDefaultValues(defaultNamesOfRaceColumnsToShow);
-        
-        return leaderboardSettings;
-    }
 }
