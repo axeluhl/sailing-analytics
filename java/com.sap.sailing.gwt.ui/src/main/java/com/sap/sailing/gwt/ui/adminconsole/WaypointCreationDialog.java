@@ -36,7 +36,6 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
                         }
                         return null;
                     }
-
                 }, /* animationEnabled */ false, callback);
         this.stringMessages = stringMessages;
         controlPointsWrapper = new ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>>(
@@ -57,10 +56,8 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
     
     private void updatePassingInstructions() {
         passingInstructions.clear();
-        
         int numMarks = controlPointsWrapper.getSelectionModel().getSelectedObject() != null ?
                 Util.size(controlPointsWrapper.getSelectionModel().getSelectedObject().getMarks()) : 0;
-                
         int i = 0;
         passingInstructions.insertItem(PassingInstruction.None.name(), i++);
         for (PassingInstruction pi : PassingInstruction.relevantValues()) {
@@ -77,7 +74,6 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
         PassingInstruction pi = passingInstructions.getSelectedIndex() > 0 ?
                 PassingInstruction.valueOf(passingInstructions.getItemText(passingInstructions.getSelectedIndex()))
                 : PassingInstruction.None;
-        
         ControlPointDTO controlPoint = controlPointsWrapper.getSelectionModel().getSelectedObject();
         String name = null;
         if (controlPoint != null) {
@@ -89,14 +85,11 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
     @Override
     protected Widget getAdditionalWidget() {
         Grid grid = new Grid(2,1);
-        
         grid.setWidget(0, 0, controlPointsWrapper);
-        
         HorizontalPanel passingInstructionsRow = new HorizontalPanel();
         grid.setWidget(1, 0, passingInstructionsRow);
         passingInstructionsRow.add(new Label(stringMessages.passingInstructions() + ":"));
         passingInstructionsRow.add(passingInstructions);
-        
         return grid;
     }
 }
