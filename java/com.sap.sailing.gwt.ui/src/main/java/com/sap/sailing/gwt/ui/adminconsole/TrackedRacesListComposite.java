@@ -21,7 +21,9 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with
@@ -36,9 +38,11 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private ExportPopup exportPopup;
     private boolean actionButtonsEnabled;
 
-    public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+    public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
+            final SailingServiceAsync sailingService,
+            final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
+        super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();
@@ -195,6 +199,11 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     public TrackedRacesSettings getSettings() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "TrackedRacesListComposite";
     }
 
     

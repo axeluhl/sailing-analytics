@@ -3010,7 +3010,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 result.addAll(detectManeuvers(competitor, markPassingTimePoint.plus(1), timePointAfterManeuver, /* ignoreMarkPassings */ true));
             } else {
                 // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe.
-                // For the first tack/jibe combination (they must alternate because course changes to in the same direction and
+                // For the first tack/jibe combination (they must alternate because the course changes in the same direction and
                 // the wind is considered sufficiently stable to not allow for two successive tacks or two successive jibes)
                 // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has completed.
                 if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
@@ -3089,11 +3089,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     /**
      * Starting at <code>timePointBeforeManeuver</code>, and assuming that the group of <code>approximatedFixesAndCourseChanges</code>
-     * contains at least a tack and a jibe, finds the earliest approximated fix's time point at which a tack and a jibe have been
-     * completed.
+     * contains at least a tack and a jibe, finds the approximated fix's time point at which one tack and one jibe have been
+     * completed and for which the total course change is as close as possible to 360°.
      */
-    private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
+    private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(
+            Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
         double totalCourseChangeInDegrees = 0;
+        double bestTotalCourseChangeInDegrees = 0; // this should be as close as possible to 360° after one tack and one gybe
         TimePoint timePoint = null;
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
         Bearing newCourse = courseBeforeManeuver;
@@ -3103,11 +3105,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getBearing());
             int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getFrom());
             if (numberOfJibes > 0 && numberOfTacks > 0) {
-                timePoint = fixAndCourseChange.getA().getTimePoint();
-                break;
+                if (numberOfJibes > 1 || numberOfTacks > 1) {
+                    break; // don't continue into a subsequent tack/gybe sailed in conjunction with the penalty or starting the next circle
+                }
+                if (Math.abs(360-Math.abs(totalCourseChangeInDegrees)) < (Math.abs(360-Math.abs(bestTotalCourseChangeInDegrees)))) {
+                    bestTotalCourseChangeInDegrees = totalCourseChangeInDegrees;
+                    timePoint = fixAndCourseChange.getA().getTimePoint();
+                } else {
+                    break; // not getting closer but further away from 360°
+                }
             }
         }
-        return new TimePointAndTotalCourseChangeInDegrees(timePoint, totalCourseChangeInDegrees);
+        return new TimePointAndTotalCourseChangeInDegrees(timePoint, bestTotalCourseChangeInDegrees);
     }
 
     /**

@@ -5242,12 +5242,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void denoteForRaceLogTracking(String leaderboardName,
+    public Boolean denoteForRaceLogTracking(String leaderboardName,
     		String raceColumnName, String fleetName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
     	RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
     	Fleet fleet = getFleetByName(raceColumn, fleetName);
-    	getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
+    	return getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
     }
     
     @Override
@@ -5753,6 +5753,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination);
+    }
+    
+    @Override
+    public void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
+            final boolean trackWind, final boolean correctWindByDeclination)
+            throws NotDenotedForRaceLogTrackingException, Exception {
+        for (final Triple<String, String, String> leaderboardRaceColumnFleetName : leaderboardRaceColumnFleetNames) {
+            startRaceLogTracking(leaderboardRaceColumnFleetName.getA(), leaderboardRaceColumnFleetName.getB(),
+                    leaderboardRaceColumnFleetName.getC(), trackWind, correctWindByDeclination);
+        }
     }
     
     @Override
@@ -6494,9 +6504,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> getTrackingTimes(
-            Collection<Triple<String, String, String>> raceColumnsAndFleets) {
+            Collection<Triple<String, String, String>> leaderboardRaceColumnFleetNames) {
         Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> trackingTimes = new HashMap<>(); 
-        for (Triple<String, String, String> leaderboardRaceColumnFleetName : raceColumnsAndFleets) {
+        for (Triple<String, String, String> leaderboardRaceColumnFleetName : leaderboardRaceColumnFleetNames) {
             try {
                 trackingTimes.put(leaderboardRaceColumnFleetName, getTrackingTimes(leaderboardRaceColumnFleetName.getA(), 
                         leaderboardRaceColumnFleetName.getB(), leaderboardRaceColumnFleetName.getC()));

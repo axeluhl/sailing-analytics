@@ -177,7 +177,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
                             move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
-                            validate();
+                            validateAndUpdate();
                         }
 
                         @Override
@@ -192,7 +192,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
                             move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
-                            validate();
+                            validateAndUpdate();
                         }
 
                         @Override

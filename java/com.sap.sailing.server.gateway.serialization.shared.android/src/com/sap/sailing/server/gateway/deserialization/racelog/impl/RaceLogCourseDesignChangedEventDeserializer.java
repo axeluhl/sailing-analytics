@@ -29,12 +29,10 @@ public class RaceLogCourseDesignChangedEventDeserializer extends BaseRaceLogEven
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-
         JSONObject jsonCourseDesign = (JSONObject) object.get(RaceLogCourseDesignChangedEventSerializer.FIELD_COURSE_DESIGN);
         CourseBase courseData = courseDataDeserializer.deserialize(jsonCourseDesign);
         final String courseDesignerModeName = (String) object.get(RaceLogCourseDesignChangedEventSerializer.FIELD_COURSE_DESIGNER_MODE);
         return new RaceLogCourseDesignChangedEventImpl(createdAt, timePoint, author, id, passId, courseData,
                 courseDesignerModeName == null ? null : CourseDesignerMode.valueOf(courseDesignerModeName));
     }
-
 }

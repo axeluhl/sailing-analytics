@@ -38,7 +38,9 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     
@@ -129,8 +131,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private final Map<GroupKey, Double> averagePerMainKey;
     private final Map<GroupKey, Double> medianPerMainKey;
 
-    public ResultsChart(StringMessages stringMessages) {
-        super(stringMessages);
+    public ResultsChart(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
@@ -406,5 +408,10 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     @Override
     public Settings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "rc";
     }
 }

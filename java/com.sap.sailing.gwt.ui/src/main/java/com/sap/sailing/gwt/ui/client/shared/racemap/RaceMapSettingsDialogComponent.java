@@ -31,6 +31,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
+/**
+ * The view responsible for manipulating an instance of RaceMapSettings, is handled by the RaceMapLifecycle
+ */
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
     private static final Distance MAX_BUOY_ZONE_RADIUS = new MeterDistance(100);
     private static final int MAX_STROKE_WEIGHT = 33;
@@ -67,12 +70,13 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-
         Label generalLabel = dialog.createHeadlineLabel(stringMessages.general());
         vp.add(generalLabel);
        
         windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
         windUpCheckbox.setValue(initialSettings.isWindUp());
+        windUpCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isWindUp()));
+        windUpCheckbox.ensureDebugId("raceMapSettingsWindChart");
         vp.add(windUpCheckbox);
 
         showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
@@ -94,6 +98,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         
         if (isSimulationEnabled) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
+            showSimulationOverlayCheckbox.ensureDebugId("showSimulatorOverlay");
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
             vp.add(showSimulationOverlayCheckbox);
         }
@@ -283,7 +288,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 transparentHoverlines.getValue(), hoverlineStrokeWeight.getValue(), tailLengthInMilliseconds, windUpCheckbox.getValue(),
                 buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
-                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue());
+                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue()).keepDefaults(initialSettings);
     }
     
     private RaceMapZoomSettings getZoomSettings() {

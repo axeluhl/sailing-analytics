@@ -11,6 +11,7 @@ public class GateJsonSerializer extends BaseControlPointJsonSerializer implement
 
     public static final String FIELD_LEFT = "left";
     public static final String FIELD_RIGHT = "right";
+    public static final String FIELD_ID = "id";
 
     private final JsonSerializer<ControlPoint> markSerializer;
 
@@ -28,6 +29,7 @@ public class GateJsonSerializer extends BaseControlPointJsonSerializer implement
         ControlPointWithTwoMarks gate = (ControlPointWithTwoMarks) object;
         JSONObject result =  super.serialize(gate);
         
+        result.put(FIELD_ID, object.getId().toString());
         result.put(FIELD_LEFT, markSerializer.serialize(gate.getLeft()));
         result.put(FIELD_RIGHT, markSerializer.serialize(gate.getRight()));
 

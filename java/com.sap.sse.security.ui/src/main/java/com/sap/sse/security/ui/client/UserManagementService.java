@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -61,6 +62,8 @@ public interface UserManagementService extends RemoteService {
      * @param value must not be <code>null</code>
      */
     void setPreference(String username, String key, String value);
+    
+    void setPreferences(String username, Map<String, String> keyValuePairs);
 
     /**
      * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
@@ -72,6 +75,8 @@ public interface UserManagementService extends RemoteService {
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
     String getPreference(String username, String key);
+    
+    Map<String, String> getPreferences(String username, List<String> keys);
 
     String getAccessToken(String username);
 
