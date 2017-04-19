@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -19,17 +20,20 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.util.NaturalComparator;
 
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
 
+    private Context mContext;
     private List<CompetitorResultEditableImpl> mCompetitor;
     private List<CompetitorResultEditableImpl> mFiltered;
     private ItemListener mListener;
     private OrderBy mOrderBy = OrderBy.SAILING_NUMBER;
     private String mFilter;
 
-    public PenaltyAdapter(@NonNull ItemListener listener) {
+    public PenaltyAdapter(Context context, @NonNull ItemListener listener) {
+        mContext = context;
         mListener = listener;
     }
 
@@ -43,6 +47,11 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         final CompetitorResultEditableImpl item = mFiltered.get(position);
 
+        int bgId = R.attr.sap_gray_black_30;
+        if (!item.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+            bgId = R.attr.sap_gray_black_20;
+        }
+        holder.itemView.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
         holder.mItemText.setText(item.getCompetitorDisplayName());
 
         final boolean hasReason = !MaxPointsReason.NONE.equals(item.getMaxPointsReason());
