@@ -372,7 +372,8 @@ public class TimePanelFragment extends BasePanelFragment {
                         String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
                         if (AppConstants.INTENT_ACTION_CLICK_COMPETITOR.equals(data)) {
                             if (mCompetitorList != null && mClickListener != null) {
-                                mClickListener.onClick(mCompetitorList);
+                                // TODO find a way for show finishing list
+                                // mClickListener.onClick(mCompetitorList);
                             }
                         }
                     }
