@@ -371,7 +371,8 @@ public class TrackingListFragment extends BaseFragment
             name += competitor.getBoat().getSailID();
         }
         name += " - " + competitor.getName();
-        mFinishedData.add(new CompetitorResultWithIdImpl(mId, competitor.getId(), name, mFinishedData.size() + 1, MaxPointsReason.NONE,
+        int pos = mAdapter.getFirstPenalty();
+        mFinishedData.add(pos, new CompetitorResultWithIdImpl(mId, competitor.getId(), name, mFinishedData.size() + 1, MaxPointsReason.NONE,
                     /* score */ null, /* finishingTime */ null, /* comment */ null));
         mId++;
         mFinishedAdapter.notifyDataSetChanged();
