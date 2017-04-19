@@ -128,7 +128,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         notifyItemMoved(fromPosition, toPosition);
     }
 
-    private int getFirstPenalty() {
+    public int getFirstPenalty() {
         int result = getItemCount();
         for (int i = 0; i < getItemCount(); i++) {
             if (!mCompetitor.get(i).getMaxPointsReason().equals(MaxPointsReason.NONE)) {

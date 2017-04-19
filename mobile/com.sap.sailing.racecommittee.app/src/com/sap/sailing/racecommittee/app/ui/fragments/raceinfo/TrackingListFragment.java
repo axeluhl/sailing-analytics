@@ -68,6 +68,7 @@ public class TrackingListFragment extends BaseFragment
     private RecyclerView mFinishView;
     private Button mConfirm;
 
+    private FinishListAdapter mAdapter;
     private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
     private CompetitorAdapter mCompetitorAdapter;
     private List<CompetitorResultWithIdImpl> mFinishedData;
@@ -195,11 +196,11 @@ public class TrackingListFragment extends BaseFragment
                 mSwipeManager = new RecyclerViewSwipeManager();
 
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                FinishListAdapter adapter = new FinishListAdapter(getActivity(), mFinishedData);
-                adapter.setListener(this);
+                mAdapter = new FinishListAdapter(getActivity(), mFinishedData);
+                mAdapter.setListener(this);
 
                 @SuppressWarnings("unchecked") RecyclerView.Adapter<FinishListAdapter.ViewHolder> dragManager = mDragDropManager
-                    .createWrappedAdapter(adapter);
+                    .createWrappedAdapter(mAdapter);
                 mFinishedAdapter = dragManager;
 
                 @SuppressWarnings("unchecked") RecyclerView.Adapter<FinishListAdapter.ViewHolder> swipeManager = mSwipeManager
@@ -443,6 +444,10 @@ public class TrackingListFragment extends BaseFragment
                     int newPos = newItem.getOneBasedRank();
                     if (newPos > 0) {
                         newPos -= 1;
+                    }
+                    int firstPenalty = mAdapter.getFirstPenalty();
+                    if (newPos >= firstPenalty) {
+                        newPos = firstPenalty;
                     }
                     mFinishedData.remove(item);
                     mFinishedData.add(newPos, newItem);
