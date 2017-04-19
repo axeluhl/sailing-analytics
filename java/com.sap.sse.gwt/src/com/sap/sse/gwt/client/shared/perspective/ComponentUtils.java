@@ -77,7 +77,7 @@ public class ComponentUtils {
         }
         
         while(!perspectiveSettingsPath.isEmpty()) {
-            PerspectiveCompositeSettings<?> parent = perspectiveSettingsPath.remove(path.size() - 1);
+            PerspectiveCompositeSettings<?> parent = perspectiveSettingsPath.remove(perspectiveSettingsPath.size() - 1);
             Map<String, Settings> originalSettingsPerComponent = parent.getSettingsPerComponentId();
             Map<String, Settings> newSettingsPerComponent = new HashMap<>();
             for (Entry<String, Settings> entry : originalSettingsPerComponent.entrySet()) {

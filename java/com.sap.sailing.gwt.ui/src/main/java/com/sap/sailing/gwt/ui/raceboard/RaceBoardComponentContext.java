@@ -23,7 +23,7 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
     
     public<CS extends GenericSerializableSettings> void addModesPatching(Component<CS> component, CS additiveSettings, OnSettingsPatchedCallback<CS> patchCallback) {
         addPatchForLoadingSettings(component, PipelineLevel.GLOBAL_DEFAULTS, new ModeLoadingSettingsPatch<>(additiveSettings));
-        addPatchForLoadingSettings(component, PipelineLevel.GLOBAL_DEFAULTS, new ModeStoringSettingsPatch<>(additiveSettings));
+        addPatchForStoringSettings(component, PipelineLevel.GLOBAL_DEFAULTS, new ModeStoringSettingsPatch<>(additiveSettings));
         getInitialSettingsForComponent(component, new OnSettingsLoadedCallback<CS>() {
 
             @Override

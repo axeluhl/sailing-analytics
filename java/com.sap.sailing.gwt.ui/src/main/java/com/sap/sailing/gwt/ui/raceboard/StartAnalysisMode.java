@@ -82,7 +82,6 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.getManeuverTypesToShow(),
                 defaultSettings.isShowDouglasPeuckerPoints());
         
-        SettingsDefaultValuesUtils.keepDefaults(raceMap.getSettings(), additiveSettings);
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsPatchedCallback<RaceMapSettings>() {
 
             @Override
@@ -141,11 +140,11 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                                 final MultiCompetitorRaceChartSettings additiveSettings = new MultiCompetitorRaceChartSettings(
                                         new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                                         /* no second series */ null);
-                                SettingsDefaultValuesUtils.keepDefaults(competitorChart.getSettings(), additiveSettings);
                                 ((RaceBoardComponentContext) competitorChart.getComponentContext()).addModesPatching(competitorChart, additiveSettings, new OnSettingsPatchedCallback<MultiCompetitorRaceChartSettings>() {
 
                                     @Override
                                     public void settingsPatched(MultiCompetitorRaceChartSettings patchedSettings) {
+                                        SettingsDefaultValuesUtils.keepDefaults(competitorChart.getSettings(), patchedSettings);
                                         competitorChart.updateSettings(patchedSettings);
                                     }
                                     
@@ -191,7 +190,6 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.START_TACK);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
         final LeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
-        SettingsDefaultValuesUtils.keepDefaults(leaderboardPanel.getSettings(), additiveSettings);
         ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsPatchedCallback<LeaderboardSettings>() {
 
             @Override

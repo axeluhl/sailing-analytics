@@ -104,6 +104,11 @@ public class LeaderboardSettingsFactory {
         SettingsDefaultValuesUtils.setDefaults(leaderboardSettings, leaderboardSettings);
         return leaderboardSettings;
     }
+ 
+    public LeaderboardSettings createSettingsWithNewDefaultRaceColumns(List<String> namesOfRaceColumns, LeaderboardSettings otherSettings) {
+        LeaderboardSettings leaderboardSettings = new LeaderboardSettings(namesOfRaceColumns, otherSettings);
+        return leaderboardSettings;
+    }
     
     public LeaderboardSettings createNewSettingsWithCustomRaceDetails(List<DetailType> raceDetailsToShow) {
         LeaderboardSettings defaultSettings = new LeaderboardSettings();

@@ -61,7 +61,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     
     @Override
     public <CS extends Settings> void getInitialSettingsForComponent(final Component<CS> component, final OnSettingsLoadedCallback<CS> callback) {
-        getInitialSettings(new OnSettingsLoadedCallback<S>() {
+        OnSettingsLoadedCallback<S> internalCallback = new OnSettingsLoadedCallback<S>() {
 
             @Override
             public void onError(Throwable caught, S fallbackDefaultSettings) {
@@ -74,7 +74,8 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
                 CS componentSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(component.getPath()), settings);
                 callback.onSuccess(componentSettings);
             }
-        });
+        };
+        getInitialSettings(internalCallback);
     }
 
     /**

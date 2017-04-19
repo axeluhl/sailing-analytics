@@ -34,7 +34,7 @@ import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.settings.StorageDefinitionId;
-import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
+import com.sap.sse.security.ui.settings.UserSettingsStorageManagerWithPatching;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceWithCompetitorsDTO selectedRace;
@@ -104,10 +104,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRaceBoard(raceboardContextDefinition);
                 final Timer timer = new Timer(PlayModes.Replay, 1000l);
                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(timer, raceboardData.getRace().getRaceIdentifier(), StringMessages.INSTANCE);
-                ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
-                        lifeCycle,
-                        new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
-                                getUserService(), storageDefinitionId));
+                RaceBoardComponentContext context = new RaceBoardComponentContext(lifeCycle, new UserSettingsStorageManagerWithPatching<>(getUserService(), storageDefinitionId));
                 
                 context.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override

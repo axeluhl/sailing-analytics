@@ -143,7 +143,7 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
     }
 
     @Override
-    public void retrieveDefaultSettings(S defaultSettings, final OnSettingsLoadedCallback<S> callback) {
+    public void retrieveDefaultSettings(final S defaultSettings, final OnSettingsLoadedCallback<S> callback) {
         retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
 
             @Override
@@ -155,7 +155,8 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
 
             @Override
             public void onSuccess(SettingsJsons settingsJsons) {
-                callback.onSuccess(settingsBuildingPipeline.getSettingsObject(defaultSettings, settingsJsons));
+                S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(defaultSettings, settingsJsons);
+                callback.onSuccess(newDefaultSettings);
             }
         });
     }

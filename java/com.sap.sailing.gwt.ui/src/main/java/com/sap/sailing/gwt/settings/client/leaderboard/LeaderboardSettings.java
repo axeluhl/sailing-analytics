@@ -17,6 +17,7 @@ import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.common.settings.generic.StringListSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 
 /**
  * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
@@ -121,6 +122,28 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
     }
     
+    public LeaderboardSettings(List<String> namesOfRaceColumns, LeaderboardSettings otherSettings) {
+        this.legDetailsToShow.setValues(otherSettings.getLegDetailsToShow());
+        this.raceDetailsToShow.setValues(otherSettings.getRaceDetailsToShow());
+        this.overallDetailsToShow.setValues(otherSettings.getOverallDetailsToShow());
+        this.numberOfLastRacesToShow.setValue(otherSettings.getNumberOfLastRacesToShow());
+        this.activeRaceColumnSelectionStrategy.setValue(otherSettings.getActiveRaceColumnSelectionStrategy());
+        this.autoExpandPreSelectedRace = otherSettings.isAutoExpandPreSelectedRace();
+        this.delayBetweenAutoAdvancesInMilliseconds.setValue(otherSettings.getDelayBetweenAutoAdvancesInMilliseconds());
+        this.maneuverDetailsToShow.setValues(otherSettings.getManeuverDetailsToShow());
+        this.nameOfRaceToSort.setValue(otherSettings.getNameOfRaceToSort());
+        this.sortAscending.setValue(otherSettings.isSortAscending());
+        this.updateUponPlayStateChange.setValue(otherSettings.isUpdateUponPlayStateChange());
+        this.showAddedScores.setValue(otherSettings.isShowAddedScores());
+        this.showCompetitorSailIdColumn.setValue(otherSettings.isShowCompetitorSailIdColumn());
+        this.showCompetitorFullNameColumn.setValue(otherSettings.isShowCompetitorFullNameColumn());
+        this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(otherSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
+        
+        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumns);
+        SettingsDefaultValuesUtils.keepDefaults(otherSettings, this);
+        this.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumns);
+    }
+    
     public LeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow, Long delayBetweenAutoAdvancesInMilliseconds) {
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
         this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
@@ -177,6 +200,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(showOverallColumnWithNumberOfRacesCompletedPerCompetitor);
     }
   
+
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
