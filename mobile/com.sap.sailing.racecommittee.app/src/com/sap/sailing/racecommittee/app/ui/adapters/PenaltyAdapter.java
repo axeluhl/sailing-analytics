@@ -20,6 +20,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.util.NaturalComparator;
 
@@ -111,37 +112,13 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
                 result.addAll(mCompetitor);
             } else {
                 for (int i = 0; i < mCompetitor.size(); i++) {
-                    if (containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(), mFilter)) {
+                    if (StringHelper.on(mContext).containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(), mFilter)) {
                         result.add(mCompetitor.get(i));
                     }
                 }
             }
         }
         return result;
-    }
-
-    private boolean containsIgnoreCase(@NonNull String src, @NonNull String what) {
-        final int length = what.length();
-        if (length == 0) {
-            return true; // Empty string is contained
-        }
-
-        final char firstLo = Character.toLowerCase(what.charAt(0));
-        final char firstUp = Character.toUpperCase(what.charAt(0));
-
-        for (int i = src.length() - length; i >= 0; i--) {
-            // Quick check before calling the more expensive regionMatches() method:
-            final char ch = src.charAt(i);
-            if (ch != firstLo && ch != firstUp) {
-                continue;
-            }
-
-            if (src.regionMatches(true, i, what, 0, length)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private void sortData() {

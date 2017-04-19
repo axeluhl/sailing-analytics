@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Loader;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -54,6 +55,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.RaceColumnsParser;
 import com.sap.sailing.racecommittee.app.domain.CoursePosition;
+import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
@@ -265,6 +267,32 @@ public class OnlineDataManager extends DataManager {
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/competitors", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);
+            }
+        }, getContext());
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createStartOrderLoader(
+        final ManagedRace managedRace, LoadClient<Collection<Competitor>> callback) {
+        return new DataLoaderCallbacks<>(callback, new LoaderCreator<Collection<Competitor>>() {
+            @Override
+            public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
+                ExLog.i(context, TAG, "Creating StartOrder-Competitor-OnlineDataLoader " + id);
+                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(), new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))), new BoatJsonDeserializer(new BoatClassJsonDeserializer(domainFactory)));
+                DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
+                DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
+
+                // https://dev.sapsailing.com/sailingserver/api/v1/regattas/ESS%202016%20Cardiff/races/Race%2016/startorder
+                Uri.Builder uri = Uri.parse(preferences.getServerBaseURL()).buildUpon();
+                uri.appendPath("sailingserver");
+                uri.appendPath("api");
+                uri.appendPath("v1");
+                uri.appendPath("regattas");
+                uri.appendPath(managedRace.getIdentifier().getRaceGroup().getName());
+                uri.appendPath("races");
+                uri.appendPath(managedRace.getName());
+                uri.appendPath("startorder");
+                return new OnlineDataLoader<>(context, new URL(uri.build().toString()), parser, handler);
             }
         }, getContext());
     }

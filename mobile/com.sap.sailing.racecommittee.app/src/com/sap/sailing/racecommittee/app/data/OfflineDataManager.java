@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 
@@ -231,6 +232,18 @@ public class OfflineDataManager extends DataManager {
                         return managedRace.getCompetitors();
                     }
                 });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createStartOrderLoader(final ManagedRace managedRace,
+        LoadClient<Collection<Competitor>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<Competitor>>(context, callback,
+            new Callable<Collection<Competitor>>() {
+                @Override
+                public Collection<Competitor> call() throws Exception {
+                    return managedRace.getCompetitors();
+                }
+            });
     }
 
     @Override

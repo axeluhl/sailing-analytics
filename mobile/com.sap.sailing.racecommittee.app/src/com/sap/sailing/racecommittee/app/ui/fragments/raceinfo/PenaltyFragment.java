@@ -31,6 +31,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
@@ -55,6 +56,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, ItemListener, SearchView.SearchTextWatcher {
 
+    private static final int COMPETITOR_LOADER = 0;
+    private static final int START_ORDER_LOADER = 1;
     private View mButtonBar;
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
@@ -140,7 +143,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
         mEntryCount = ViewHelper.get(layout, R.id.competitor_entry_count);
 
-        mAdapter = new PenaltyAdapter(this);
+        mAdapter = new PenaltyAdapter(getActivity(), this);
         RecyclerView recyclerView = ViewHelper.get(layout, R.id.competitor_list);
         if (recyclerView != null) {
             recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -190,7 +193,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
 
         final Loader<?> competitorLoader = getLoaderManager()
-            .initLoader(0, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
+            .initLoader(COMPETITOR_LOADER, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
 
                 @Override
                 public void onLoadFailed(Exception reason) {
@@ -207,6 +210,25 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
         // Force load to get non-cached remote competitors...
         competitorLoader.forceLoad();
+    }
+
+    private void loadStartOrder() {
+        ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+
+        final Loader<?> startOrderLoader = getLoaderManager()
+            .initLoader(START_ORDER_LOADER, null, dataManager.createStartOrderLoader(getRace(), new LoadClient<Collection<Competitor>>() {
+                @Override
+                public void onLoadFailed(Exception reason) {
+
+                }
+
+                @Override
+                public void onLoadSucceeded(Collection<Competitor> data, boolean isCached) {
+                    ExLog.i(getActivity(), "asd", data.toString());
+                }
+            }));
+
+        startOrderLoader.forceLoad();
     }
 
     private void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
@@ -363,7 +385,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         if (mAdapter != null) {
             mAdapter.setFilter(text);
             int count = mAdapter.getItemCount();
-            if (mEntryCount != null) {
+            if (mEntryCount != null && AppUtils.with(getActivity()).isTablet()) {
                 if (!TextUtils.isEmpty(text)) {
                     mEntryCount.setText(getString(R.string.competitor_count, count));
                     mEntryCount.setVisibility(View.VISIBLE);

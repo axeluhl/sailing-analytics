@@ -80,8 +80,6 @@ public class SetupPanelFragment extends BasePanelFragment {
                 layout = inflater.inflate(R.layout.race_panel_setup, container, false);
         }
 
-        mFactorFormat = new DecimalFormat(container.getContext().getString(R.string.race_factor_format));
-
         mStateListener = new RaceStateChangedListener();
         mProcedureListener = new RaceProcedureChangedListener();
 
@@ -145,6 +143,13 @@ public class SetupPanelFragment extends BasePanelFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mFactorFormat = new DecimalFormat(getActivity().getString(R.string.race_factor_format));
     }
 
     @Override

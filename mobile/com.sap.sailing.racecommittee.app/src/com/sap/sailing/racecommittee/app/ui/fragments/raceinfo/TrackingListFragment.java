@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -17,13 +18,16 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Spinner;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,38 +55,43 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+import com.sap.sailing.racecommittee.app.ui.views.SearchView;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackingListFragment extends BaseFragment
-    implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents, View.OnClickListener, AdapterView.OnItemSelectedListener {
+    implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents, View.OnClickListener, AdapterView.OnItemSelectedListener,
+    PopupMenu.OnMenuItemClickListener, SearchView.SearchTextWatcher {
 
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
     private RecyclerViewTouchActionGuardManager mGuardManager;
     private RecyclerView mFinishView;
     private Button mConfirm;
+    private TextView mEntryCount;
 
     private FinishListAdapter mAdapter;
     private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
     private CompetitorAdapter mCompetitorAdapter;
     private List<CompetitorResultWithIdImpl> mFinishedData;
     private List<Competitor> mCompetitorData;
+    private List<Competitor> mFilteredCompetitorData;
     private int mId = 0;
     private HeaderLayout mHeader;
-    private TextView mPageTitle;
-    private Spinner mSortSpinner;
 
     private Comparator<Competitor> mComparator;
     private List<Comparator<Competitor>> mComparators;
+    private String mFilter;
 
     public TrackingListFragment() {
         mCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
+        mFilteredCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
     }
 
     public static TrackingListFragment newInstance(Bundle args, int startMode) {
@@ -132,22 +141,35 @@ public class TrackingListFragment extends BaseFragment
         }
 
         if (getArguments().getInt(START_MODE, 0) != 0) {
-            mPageTitle = ViewHelper.get(layout, R.id.page_title);
-            if (mPageTitle != null) {
-                mPageTitle.setVisibility(View.VISIBLE);
-            }
-
             if (mHeader != null) {
                 mHeader.setVisibility(View.GONE);
             }
         }
 
-        mSortSpinner = ViewHelper.get(layout, R.id.sort_spinner);
-        if (mSortSpinner != null) {
-            StringArraySpinnerAdapter adapter = new StringArraySpinnerAdapter(getResources().getStringArray(R.array.sort_by_values));
-            mSortSpinner.setAdapter(adapter);
-            mSortSpinner.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(adapter, this));
-            mSortSpinner.setSelection(0);
+        mEntryCount = ViewHelper.get(layout, R.id.competitor_entry_count);
+
+        SearchView searchView = ViewHelper.get(layout, R.id.competitor_search);
+        if (searchView != null) {
+            searchView.setSearchTextWatcher(this);
+        }
+
+        View sortByButton = ViewHelper.get(layout, R.id.competitor_sort);
+        if (sortByButton != null) {
+            sortByButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PopupMenu popupMenu;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        popupMenu = new PopupMenu(getActivity(), v, Gravity.RIGHT);
+                    } else {
+                        popupMenu = new PopupMenu(getActivity(), v);
+                    }
+                    popupMenu.inflate(R.menu.sort_menu);
+                    popupMenu.setOnMenuItemClickListener(TrackingListFragment.this);
+                    popupMenu.show();
+                    ThemeHelper.positioningPopupMenu(getActivity(), popupMenu, v);
+                }
+            });
         }
 
         return layout;
@@ -169,7 +191,7 @@ public class TrackingListFragment extends BaseFragment
             RecyclerView competitorView = (RecyclerView) getView().findViewById(R.id.list_positioning_all);
             if (competitorView != null) {
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                mCompetitorAdapter = new CompetitorAdapter(getActivity(), mCompetitorData);
+                mCompetitorAdapter = new CompetitorAdapter(getActivity(), mFilteredCompetitorData);
                 mCompetitorAdapter.setListener(this);
 
                 competitorView.setLayoutManager(layoutManager);
@@ -233,6 +255,8 @@ public class TrackingListFragment extends BaseFragment
         }
 
         Util.addAll(getRace().getCompetitors(), mCompetitorData);
+        mFilteredCompetitorData.clear();
+        mFilteredCompetitorData.addAll(mCompetitorData);
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
     }
@@ -281,6 +305,32 @@ public class TrackingListFragment extends BaseFragment
         super.onDestroy();
     }
 
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.by_boat:
+                mComparator = mComparators.get(0);
+                break;
+
+            case R.id.by_name:
+                mComparator = mComparators.get(1);
+                break;
+
+            case R.id.by_start:
+                break;
+
+            case R.id.by_goal:
+                break;
+
+            default:
+                mComparator = mComparators.get(0);
+
+        }
+        sortCompetitors();
+        mCompetitorAdapter.notifyDataSetChanged();
+        return true;
+    }
+
     private void sendUnconfirmed() {
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
@@ -316,6 +366,8 @@ public class TrackingListFragment extends BaseFragment
     protected void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
         mCompetitorData.clear();
         mCompetitorData.addAll(data);
+        mFilteredCompetitorData.clear();
+        mFilteredCompetitorData.addAll(data);
         sortCompetitors();
         deleteCompetitorsFromFinishedList(data);
         deleteCompetitorsFromCompetitorList();
@@ -336,6 +388,7 @@ public class TrackingListFragment extends BaseFragment
         for (CompetitorResultWithIdImpl item : mFinishedData) {
             Competitor competitor = getCompetitorStore().getExistingCompetitorById(item.getCompetitorId());
             mCompetitorData.remove(competitor);
+            mFilteredCompetitorData.remove(competitor);
         }
     }
 
@@ -372,12 +425,13 @@ public class TrackingListFragment extends BaseFragment
         mId++;
         mFinishedAdapter.notifyDataSetChanged();
         if (mDots.size() > 0) {
-            Toast.makeText(getActivity(), getString(R.string.added_to_result_list, name, mFinishedData.size()), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), getString(R.string.added_to_result_list, name, pos + 1), Toast.LENGTH_SHORT).show();
         }
     }
 
     private void removeCompetitorFromList(Competitor competitor) {
         mCompetitorData.remove(competitor);
+        mFilteredCompetitorData.remove(competitor);
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
     }
@@ -397,6 +451,7 @@ public class TrackingListFragment extends BaseFragment
 
     private void addNewCompetitorToCompetitorList(Competitor competitor) {
         mCompetitorData.add(competitor);
+        mFilteredCompetitorData.add(competitor);
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
     }
@@ -520,37 +575,18 @@ public class TrackingListFragment extends BaseFragment
         if (mHeader != null) {
             switch (mActivePage) {
                 case 0:
-                    if (mSortSpinner != null) {
-                        mSortSpinner.setVisibility(View.VISIBLE);
-                    }
                     mHeader.setHeaderText(R.string.tracking_list_01);
                     break;
 
                 default:
-                    if (mSortSpinner != null) {
-                        mSortSpinner.setVisibility(View.GONE);
-                    }
                     mHeader.setHeaderText(R.string.tracking_list_02);
             }
-            if (mPageTitle != null) {
-                mPageTitle.setText(mHeader.getHeaderText());
-            } else if (getView() != null) {
-                View header = getView().findViewById(R.id.spinner_header);
-                if (header != null) {
-                    if (mSortSpinner.getVisibility() != View.VISIBLE) {
-                        header.setVisibility(View.GONE);
-                    } else {
-                        header.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-
         }
         mConfirm.setEnabled(mActivePage != 0 || mDots.size() == 0);
     }
 
     private void sortCompetitors() {
-        Collections.sort(mCompetitorData, mComparator);
+        Collections.sort(mFilteredCompetitorData, mComparator);
     }
 
     @Override
@@ -565,5 +601,43 @@ public class TrackingListFragment extends BaseFragment
         mComparator = mComparators.get(0);
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onTextChanged(String text) {
+        if (mCompetitorAdapter != null) {
+            mFilter = text;
+            filterData();
+            mCompetitorAdapter.notifyDataSetChanged();
+            int count = mCompetitorAdapter.getItemCount();
+            if (mEntryCount != null && AppUtils.with(getActivity()).isTablet()) {
+                if (!TextUtils.isEmpty(text)) {
+                    mEntryCount.setText(getString(R.string.competitor_count, count));
+                    mEntryCount.setVisibility(View.VISIBLE);
+                } else {
+                    mEntryCount.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    private void filterData() {
+        mFilteredCompetitorData.clear();
+        if (mCompetitorData != null) {
+            if (TextUtils.isEmpty(mFilter)) {
+                mFilteredCompetitorData.addAll(mCompetitorData);
+            } else {
+                for (Competitor competitor : mCompetitorData) {
+                    String name = "";
+                    if (competitor.getBoat() != null) {
+                        name += competitor.getBoat().getSailID();
+                    }
+                    name += " - " + competitor.getName();
+                    if (StringHelper.on(getActivity()).containsIgnoreCase(name, mFilter)) {
+                        mFilteredCompetitorData.add(competitor);
+                    }
+                }
+            }
+        }
     }
 }

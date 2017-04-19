@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/by_boat"
@@ -10,8 +9,10 @@
         android:title="@string/sort_by_name" />
     <item
         android:id="@+id/by_start"
-        android:title="@string/sort_by_start" />
+        android:title="@string/sort_by_start"
+        android:visible="false" />
     <item
         android:id="@+id/by_goal"
-        android:title="@string/sort_by_goal" />
+        android:title="@string/sort_by_goal"
+        android:visible="false" />
 </menu>

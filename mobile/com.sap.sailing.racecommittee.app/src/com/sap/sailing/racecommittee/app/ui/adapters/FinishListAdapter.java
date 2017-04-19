@@ -203,10 +203,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         }
     }
 
-    private void setDragRange() {
-
-    }
-
     public interface FinishEvents {
         void afterMoved();
 
