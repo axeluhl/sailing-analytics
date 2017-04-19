@@ -251,7 +251,7 @@ public class TrackingListFragment extends BaseFragment
     public void onStop() {
         super.onStop();
 
-
+        sendUnconfirmed();
     }
 
     @Override
