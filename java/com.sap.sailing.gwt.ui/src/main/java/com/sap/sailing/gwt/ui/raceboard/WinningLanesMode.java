@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardComponentContext.OnSettingsPatchedCallback;
@@ -60,23 +61,33 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
     }
 
     private void adjustMapSettings() {
-        final RaceMapSettings existingMapSettings = getRaceBoardPanel().getMap().getSettings();
-        final RaceMapSettings newMapSettings = new RaceMapSettings(existingMapSettings.getZoomSettings(),
-                existingMapSettings.getHelpLinesSettings(),
-                existingMapSettings.getTransparentHoverlines(),
-                existingMapSettings.getHoverlineStrokeWeight(),
+        RaceMap raceMap = getRaceBoardPanel().getMap();
+        final RaceMapSettings defaultSettings = raceMap.getLifecycle().createDefaultSettings();
+        final RaceMapSettings additiveSettings = new RaceMapSettings(defaultSettings.getZoomSettings(),
+                defaultSettings.getHelpLinesSettings(),
+                defaultSettings.getTransparentHoverlines(),
+                defaultSettings.getHoverlineStrokeWeight(),
                 tailLength.asMillis(),
                 /* existingMapSettings.isWindUp() */ true,
-                existingMapSettings.getBuoyZoneRadius(),
+                defaultSettings.getBuoyZoneRadius(),
                 /* existingMapSettings.isShowOnlySelectedCompetitors() */ true, // show the top n competitors and their tails quickly
-                existingMapSettings.isShowSelectedCompetitorsInfo(),
-                existingMapSettings.isShowWindStreamletColors(),
-                existingMapSettings.isShowWindStreamletOverlay(),
-                existingMapSettings.isShowSimulationOverlay(),
-                existingMapSettings.isShowMapControls(),
-                existingMapSettings.getManeuverTypesToShow(),
-                existingMapSettings.isShowDouglasPeuckerPoints()).keepDefaults(existingMapSettings);
-        getRaceBoardPanel().getMap().updateSettings(newMapSettings);
+                defaultSettings.isShowSelectedCompetitorsInfo(),
+                defaultSettings.isShowWindStreamletColors(),
+                defaultSettings.isShowWindStreamletOverlay(),
+                defaultSettings.isShowSimulationOverlay(),
+                defaultSettings.isShowMapControls(),
+                defaultSettings.getManeuverTypesToShow(),
+                defaultSettings.isShowDouglasPeuckerPoints());
+        
+        SettingsDefaultValuesUtils.keepDefaults(raceMap.getSettings(), additiveSettings);
+        ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsPatchedCallback<RaceMapSettings>() {
+
+            @Override
+            public void settingsPatched(RaceMapSettings patchedSettings) {
+                raceMap.updateSettings(patchedSettings);
+            }
+            
+        });
     }
 
     /**

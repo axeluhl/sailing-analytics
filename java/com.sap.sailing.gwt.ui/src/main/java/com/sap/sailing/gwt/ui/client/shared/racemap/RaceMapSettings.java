@@ -250,32 +250,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         return buoyZoneRadius.isDefaultValue();
     }
     
-    public RaceMapSettings getDefaultSettings() {
-        RaceMapSettings newRaceMapSettings = new RaceMapSettings();
-        newRaceMapSettings.buoyZoneRadius.setDefaultValue(this.buoyZoneRadius.getDefaultValue());
-        return newRaceMapSettings;
-    }
-    
-    public RaceMapSettings keepDefaults(RaceMapSettings previousSettings) {
-        RaceMapSettings newRaceMapSettings = previousSettings.getDefaultSettings();
-        newRaceMapSettings.buoyZoneRadius.setValue(getBuoyZoneRadius());
-        newRaceMapSettings.hoverlineStrokeWeight.setValue(getHoverlineStrokeWeight());
-        newRaceMapSettings.maneuverTypesToShow.setValues(getManeuverTypesToShow());
-        newRaceMapSettings.showDouglasPeuckerPoints.setValue(isShowDouglasPeuckerPoints());
-        newRaceMapSettings.showMapControls.setValue(isShowMapControls());
-        newRaceMapSettings.showOnlySelectedCompetitors.setValue(isShowOnlySelectedCompetitors());
-        newRaceMapSettings.showSelectedCompetitorsInfo.setValue(isShowSelectedCompetitorsInfo());
-        newRaceMapSettings.showSimulationOverlay.setValue(isShowSimulationOverlay());
-        newRaceMapSettings.showWindStreamletColors.setValue(isShowWindStreamletColors());
-        newRaceMapSettings.showWindStreamletOverlay.setValue(isShowWindStreamletOverlay());
-        newRaceMapSettings.tailLengthInMilliseconds.setValue(getTailLengthInMilliseconds());
-        newRaceMapSettings.transparentHoverlines.setValue(getTransparentHoverlines());
-        newRaceMapSettings.windUp.setValue(isWindUp());
-        newRaceMapSettings.helpLinesSettings.init(this.helpLinesSettings);
-        newRaceMapSettings.zoomSettings.init(this.zoomSettings);
-        return newRaceMapSettings;
-    }
-    
     public static RaceMapSettings createSettingsWithNewDefaultBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
         final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
                 settings.getZoomSettings(), settings.getHelpLinesSettings(),

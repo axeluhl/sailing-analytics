@@ -2924,5 +2924,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public String getId() {
         return raceMapLifecycle.getComponentId();
     }
+    
+    public RaceMapLifecycle getLifecycle() {
+        return raceMapLifecycle;
+    }
 
 }
