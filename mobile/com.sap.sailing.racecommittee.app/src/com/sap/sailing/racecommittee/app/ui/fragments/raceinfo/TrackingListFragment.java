@@ -140,11 +140,6 @@ public class TrackingListFragment extends BaseFragment
             if (mHeader != null) {
                 mHeader.setVisibility(View.GONE);
             }
-
-            View buttonBar = ViewHelper.get(layout, R.id.bottom_bar);
-            if (buttonBar != null) {
-                buttonBar.setVisibility(View.GONE);
-            }
         }
 
         mSortSpinner = ViewHelper.get(layout, R.id.sort_spinner);
