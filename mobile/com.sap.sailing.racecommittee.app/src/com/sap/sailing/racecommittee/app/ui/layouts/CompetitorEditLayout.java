@@ -188,12 +188,15 @@ public class CompetitorEditLayout extends ScrollView {
 
     public CompetitorResultWithIdImpl getValue() {
         int oneBaseRank = 0;
-        if (mPosition != null) {
-            oneBaseRank = mPosition.getSelectedItemPosition();
-        }
         MaxPointsReason maxPointsReason = MaxPointsReason.NONE;
         if (mPenalty != null) {
             maxPointsReason = MaxPointsReason.valueOf((String) mPenalty.getSelectedItem());
+        }
+        if (mPosition != null) {
+            oneBaseRank = mPosition.getSelectedItemPosition();
+            if (maxPointsReason != MaxPointsReason.NONE) { // reset if penalty
+                oneBaseRank = 0;
+            }
         }
         Double score = null;
         if (mScore != null && !TextUtils.isEmpty(mScore.getText())) {

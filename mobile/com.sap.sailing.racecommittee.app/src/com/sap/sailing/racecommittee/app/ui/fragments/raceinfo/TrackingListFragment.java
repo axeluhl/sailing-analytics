@@ -248,6 +248,13 @@ public class TrackingListFragment extends BaseFragment
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+
+
+    }
+
+    @Override
     public void onDestroy() {
         if (mDragDropManager != null) {
             mDragDropManager.release();
@@ -276,6 +283,10 @@ public class TrackingListFragment extends BaseFragment
         }
 
         super.onDestroy();
+    }
+
+    private void sendUnconfirmed() {
+        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
 
     private void loadCompetitors() {
@@ -351,7 +362,6 @@ public class TrackingListFragment extends BaseFragment
     public void onCompetitorClick(Competitor competitor) {
         moveCompetitorToFinishList(competitor);
         removeCompetitorFromList(competitor);
-        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
 
     private void moveCompetitorToFinishList(Competitor competitor) {
@@ -377,7 +387,7 @@ public class TrackingListFragment extends BaseFragment
 
     @Override
     public void afterMoved() {
-        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
+        // no-op
     }
 
     @Override
@@ -386,7 +396,6 @@ public class TrackingListFragment extends BaseFragment
         if (competitor != null) {
             addNewCompetitorToCompetitorList(competitor);
         }
-        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
 
     private void addNewCompetitorToCompetitorList(Competitor competitor) {
@@ -441,7 +450,6 @@ public class TrackingListFragment extends BaseFragment
                     replaceItemInPositioningList(index, item, newItem);
                 }
                 mFinishedAdapter.notifyDataSetChanged();
-                getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
