@@ -7,7 +7,8 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.common.TimePoint;
 
 public class CompetitorResultEditableImpl implements CompetitorResult {
-
+    private static final long serialVersionUID = 3928498127285186791L;
+    
     private Serializable mCompetitorId;
     private String mCompetitorDisplayName;
     private int mOneBasedRank;

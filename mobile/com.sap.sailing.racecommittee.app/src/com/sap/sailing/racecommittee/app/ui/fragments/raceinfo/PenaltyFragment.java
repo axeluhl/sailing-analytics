@@ -207,14 +207,12 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     }
                 }
             }));
-
         // Force load to get non-cached remote competitors...
         competitorLoader.forceLoad();
     }
 
     private void loadStartOrder() {
         ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
-
         final Loader<?> startOrderLoader = getLoaderManager()
             .initLoader(START_ORDER_LOADER, null, dataManager.createStartOrderLoader(getRace(), new LoadClient<Collection<Competitor>>() {
                 @Override
@@ -227,7 +225,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     ExLog.i(getActivity(), "asd", data.toString());
                 }
             }));
-
         startOrderLoader.forceLoad();
     }
 
