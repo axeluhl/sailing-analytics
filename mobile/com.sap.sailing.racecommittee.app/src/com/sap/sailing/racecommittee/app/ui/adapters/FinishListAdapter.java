@@ -71,6 +71,11 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         holder.penalty.setText(item.getMaxPointsReason().name());
         holder.penalty.setVisibility(item.getMaxPointsReason().equals(MaxPointsReason.NONE) ? View.GONE : View.VISIBLE);
 
+        int bgId = R.attr.sap_gray_black_30;
+        if (!mCompetitor.get(position).getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+            bgId = R.attr.sap_gray_black_20;
+        }
+        holder.container.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
         holder.dragHandle.setVisibility(item.getMaxPointsReason().equals(MaxPointsReason.NONE) ? View.VISIBLE : View.INVISIBLE);
     }
 
@@ -150,15 +155,21 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             case RecyclerViewSwipeManager.DRAWABLE_SWIPE_NEUTRAL_BACKGROUND:
                 bgRes = R.attr.swipe_idle;
                 break;
+
             case RecyclerViewSwipeManager.DRAWABLE_SWIPE_LEFT_BACKGROUND:
                 bgRes = R.attr.swipe_left;
                 break;
+
             case RecyclerViewSwipeManager.DRAWABLE_SWIPE_RIGHT_BACKGROUND:
                 bgRes = R.attr.swipe_right;
                 break;
         }
 
-        viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
+        int bgId = R.attr.sap_gray_black_30;
+        if (!mCompetitor.get(position).getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+            bgId = R.attr.sap_gray_black_20;
+        }
+        viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
         Drawable background = BitmapHelper.getAttrDrawable(mContext, bgRes);
         BitmapHelper.setBackground(viewHolder.itemView, background);
     }
