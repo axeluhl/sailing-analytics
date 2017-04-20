@@ -1,8 +1,7 @@
-package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl;
+package com.sap.sailing.gwt.autoplay.client.nodes.base;
 
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.ResettableEventBus;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 
 public abstract class AutoPlayNodeBase implements AutoPlayNode {
     private ResettableEventBus bus;

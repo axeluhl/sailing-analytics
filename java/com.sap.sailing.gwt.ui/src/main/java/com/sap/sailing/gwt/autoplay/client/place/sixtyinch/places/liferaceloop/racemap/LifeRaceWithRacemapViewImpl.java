@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.liferaceloop.racemap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

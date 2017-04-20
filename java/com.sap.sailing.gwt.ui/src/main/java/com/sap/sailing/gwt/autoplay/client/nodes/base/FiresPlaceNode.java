@@ -1,9 +1,9 @@
-package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl;
+package com.sap.sailing.gwt.autoplay.client.nodes.base;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceChangeEvent;
 
-public abstract class TimedTransitionSimpleNode
+public abstract class FiresPlaceNode
         extends AutoPlayNodeBase {
 
     private Place placeToGo;

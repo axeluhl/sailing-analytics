@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.afterliveraceLoop.boats;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredPresenter;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
@@ -26,7 +26,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class RaceEndWithBoatsPresenterImpl extends ConfiguredSlideBase<AbstractRaceEndWithImagesTop3Place>
+public class RaceEndWithBoatsPresenterImpl extends ConfiguredPresenter<AbstractRaceEndWithImagesTop3Place>
         implements RaceEndWithBoatsView.NextRaceWithBoatsPresenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private RaceEndWithBoatsView view;

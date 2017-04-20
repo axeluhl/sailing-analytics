@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes;
+package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,9 +11,9 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.TimedTransitionSimpleNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.IdleUpNextPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.idleloop.idleupnext.IdleUpNextPlace;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Pair;
 
-public class IdleUpNextNode extends TimedTransitionSimpleNode {
+public class IdleUpNextNode extends FiresPlaceNode {
     private final AutoPlayClientFactorySixtyInch cf;
     private IdleUpNextPlace place;
     private static RaceTimesInfoProvider raceTimesInfoProvider;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;

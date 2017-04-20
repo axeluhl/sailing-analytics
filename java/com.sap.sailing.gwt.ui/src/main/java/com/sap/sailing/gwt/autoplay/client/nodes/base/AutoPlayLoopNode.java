@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl;
+package com.sap.sailing.gwt.autoplay.client.nodes.base;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 
 public class AutoPlayLoopNode extends BaseCompositeNode {
 

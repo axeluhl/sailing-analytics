@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.sap.sailing.gwt.autoplay.client.nodes.SixtyInchStartupNode;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SixtyInchContextImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.nodes.StartupNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.SixtyInchSetting;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
 
@@ -35,7 +35,7 @@ public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyIn
         // setup context
         cf.setSlideContext(new SixtyInchContextImpl(cf.getEventBus(), configurationSixtyInch));
         // start sixty inch slide loop nodes...
-        StartupNode root = new StartupNode(cf);
+        SixtyInchStartupNode root = new SixtyInchStartupNode(cf);
         root.start(cf.getEventBus());
     }
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.racemap;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;

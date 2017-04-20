@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.competitors;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreLeaderBoardWithImageViewImpl.ImageProvider;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.leaderboard.PreLeaderBoardWithImageViewImpl.ImageProvider;
 
 public class CompetitorViewImpl extends ResizeComposite {
     private static CompetitorViewImplUiBinder uiBinder = GWT.create(CompetitorViewImplUiBinder.class);

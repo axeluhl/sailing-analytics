@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes;
+package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
@@ -9,9 +9,9 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.AutoPlayLoopNode;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.BaseCompositeNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
 import com.sap.sse.common.Util.Pair;
 
@@ -28,19 +28,19 @@ public class SixtyInchRootNode extends BaseCompositeNode {
         }
     };
     private AutoPlayNode idleLoop;
-    private AutoPlayNode preLifeRaceLoop;
-    private AutoPlayNode lifeRaceLoop;
-    private AutoPlayNode afterLifeRaceLoop;
+    private AutoPlayNode preLiveRaceLoop;
+    private AutoPlayNode liveRaceLoop;
+    private AutoPlayNode afterLiveRaceLoop;
 
-    public SixtyInchRootNode(AutoPlayClientFactorySixtyInch cf, AutoPlayNode idleLoop, AutoPlayNode preLifeRaceLoop,
-            AutoPlayNode lifeRaceLoop, AutoPlayLoopNode afterLifeRaceLoop) {
+    public SixtyInchRootNode(AutoPlayClientFactorySixtyInch cf, AutoPlayNode idleLoop, AutoPlayNode preLiveRaceLoop,
+            AutoPlayNode liveRaceLoop, AutoPlayLoopNode afterLiveRaceLoop) {
         this.cf = cf;
         this.idleLoop = idleLoop;
-        this.preLifeRaceLoop = preLifeRaceLoop;
-        this.lifeRaceLoop = lifeRaceLoop;
-        this.afterLifeRaceLoop = afterLifeRaceLoop;
+        this.preLiveRaceLoop = preLiveRaceLoop;
+        this.liveRaceLoop = liveRaceLoop;
+        this.afterLiveRaceLoop = afterLiveRaceLoop;
 
-        afterLifeRaceLoop.setOnLoopEnd(new Command() {
+        afterLiveRaceLoop.setOnLoopEnd(new Command() {
             @Override
             public void execute() {
                 transitionTo(idleLoop);
@@ -60,28 +60,28 @@ public class SixtyInchRootNode extends BaseCompositeNode {
                             currentLifeRace = null;
                             currentPreLifeRace = null;
                             GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + true);
-                            transitionTo(comingFromLiferace ? afterLifeRaceLoop : idleLoop);
+                            transitionTo(comingFromLiferace ? afterLiveRaceLoop : idleLoop);
                         } else {
                             final Long timeToRaceStartInMs = result.getA();
-                            final RegattaAndRaceIdentifier loadedLifeRace = result.getB();
-                            if (loadedLifeRace == null) {
+                            final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
+                            if (loadedLiveRace == null) {
                                 boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
                                 currentLifeRace = null;
                                 currentPreLifeRace = null;
                                 GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + true);
-                                transitionTo(comingFromLiferace ? afterLifeRaceLoop : idleLoop);
-                            } else if (/* is pre liferace */ timeToRaceStartInMs > 10000) {
-                                if (/* is new pre life race */!loadedLifeRace.equals(currentPreLifeRace)) {
-                                    currentPreLifeRace = loadedLifeRace;
+                                transitionTo(comingFromLiferace ? afterLiveRaceLoop : idleLoop);
+                            } else if (/* is pre liverace */ timeToRaceStartInMs > 10000) {
+                                if (/* is new pre live race */!loadedLiveRace.equals(currentPreLifeRace)) {
+                                    currentPreLifeRace = loadedLiveRace;
                                     currentLifeRace = null;
-                                    GWT.log("UpcomingLiferaceDetectedEvent: " + loadedLifeRace.toString());
-                                    transitionTo(preLifeRaceLoop);
+                                    GWT.log("UpcomingLiferaceDetectedEvent: " + loadedLiveRace.toString());
+                                    transitionTo(preLiveRaceLoop);
                                 }
-                            } else /* is life race */ {
+                            } else /* is live race */ {
                                 currentPreLifeRace = null;
-                                if (/* is new life race */!loadedLifeRace.equals(currentLifeRace)) {
-                                    currentLifeRace = loadedLifeRace;
-                                    transitionTo(lifeRaceLoop);
+                                if (/* is new live race */!loadedLiveRace.equals(currentLifeRace)) {
+                                    currentLifeRace = loadedLiveRace;
+                                    transitionTo(liveRaceLoop);
                                 }
                             }
                         }

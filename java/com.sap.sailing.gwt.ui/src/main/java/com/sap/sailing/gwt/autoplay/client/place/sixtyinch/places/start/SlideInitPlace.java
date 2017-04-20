@@ -1,9 +1,9 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 
 public class SlideInitPlace extends Place {
 

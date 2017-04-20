@@ -4,17 +4,17 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 
-public abstract class SlideBase<P extends Place> extends AbstractActivity implements Slide<P> {
+public abstract class PresenterBase<P extends Place> extends AbstractActivity {
 
     private P place;
     private AutoPlayClientFactorySixtyInch clientFactory;
 
-    public SlideBase(P place, AutoPlayClientFactorySixtyInch clientFactory) {
+    public PresenterBase(P place, AutoPlayClientFactorySixtyInch clientFactory) {
         this.place = place;
         this.clientFactory = clientFactory;
     }
 
-    protected SlideContext getSlideCtx() {
+    protected SixtyInchContext getSlideCtx() {
         return clientFactory.getSlideCtx();
     }
 

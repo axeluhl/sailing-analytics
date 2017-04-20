@@ -7,12 +7,12 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.StartPlaceSixtyInch;
 
-public abstract class ConfiguredSlideBase<P extends Place> extends SlideBase<P> {
+public abstract class ConfiguredPresenter<P extends Place> extends PresenterBase<P> {
     private EventBus eventBus;
 
-    public ConfiguredSlideBase(P place, AutoPlayClientFactorySixtyInch clientFactory) {
+    public ConfiguredPresenter(P place, AutoPlayClientFactorySixtyInch clientFactory) {
         super(place, clientFactory);
     }
 

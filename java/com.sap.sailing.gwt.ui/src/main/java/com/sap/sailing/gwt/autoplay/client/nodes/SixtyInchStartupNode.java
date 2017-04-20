@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes;
+package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import java.util.UUID;
 
@@ -7,17 +7,25 @@ import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.BaseCompositeNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.SlideInitPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class StartupNode extends BaseCompositeNode {
+public class SixtyInchStartupNode extends BaseCompositeNode {
     private AutoPlayClientFactorySixtyInch cf;
     private AutoPlayNode whenReadyNode;
 
-    public StartupNode(final AutoPlayClientFactorySixtyInch cf) {
+    public SixtyInchStartupNode(final AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
+        AutoPlayLoopNode idleLoop = new AutoPlayLoopNode(30, new IdleUpNextNode(cf));
+        AutoPlayLoopNode preLifeRaceLoop = new AutoPlayLoopNode(30, new PreRaceWithRacemapNode(cf));
+        AutoPlayLoopNode lifeRaceLoop = new AutoPlayLoopNode(30, new LifeRaceWithRacemapNode(cf));
+        AutoPlayLoopNode afterLifeRaceLoop = new AutoPlayLoopNode(30, new RaceEndWithBoatsNode(cf), idleLoop);
+        SixtyInchRootNode raceLoop = new SixtyInchRootNode(cf, idleLoop, lifeRaceLoop, preLifeRaceLoop,
+                afterLifeRaceLoop);
+        setWhenReadyDestination(raceLoop);
     }
 
 
@@ -36,7 +44,7 @@ public class StartupNode extends BaseCompositeNode {
             @Override
             public void onFailure(Throwable caught) {
                 getBus().fireEvent(
-                        new DataLoadFailureEvent(StartupNode.this, caught, "Error loading Event with id " + eventUUID));
+                        new DataLoadFailureEvent(SixtyInchStartupNode.this, caught, "Error loading Event with id " + eventUUID));
             }
         });
     }

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
@@ -8,12 +8,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideBase;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.PresenterBase;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements SlideInitView.SlideInitPresenter {
+public class SlideInitPresenterImpl extends PresenterBase<SlideInitPlace> implements SlideInitView.SlideInitPresenter {
     private SlideInitView view;
 
     public SlideInitPresenterImpl(SlideInitPlace place, AutoPlayClientFactorySixtyInch clientFactory,

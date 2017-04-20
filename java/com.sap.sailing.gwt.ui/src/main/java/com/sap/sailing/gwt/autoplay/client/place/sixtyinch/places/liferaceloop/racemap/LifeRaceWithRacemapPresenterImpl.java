@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.liferaceloop.racemap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredPresenter;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -25,7 +25,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class LifeRaceWithRacemapPresenterImpl extends ConfiguredSlideBase<LifeRaceWithRacemapPlace> implements LifeRaceWithRacemapView.Slide7Presenter {
+public class LifeRaceWithRacemapPresenterImpl extends ConfiguredPresenter<LifeRaceWithRacemapPlace> implements LifeRaceWithRacemapView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private LifeRaceWithRacemapView view;
     private Timer selectionTimer;

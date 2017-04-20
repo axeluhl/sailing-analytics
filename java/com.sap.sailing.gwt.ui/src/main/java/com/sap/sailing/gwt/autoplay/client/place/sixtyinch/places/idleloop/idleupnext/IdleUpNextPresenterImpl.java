@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.idleloop.idleupnext;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,13 +11,13 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredPresenter;
 import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class IdleUpNextPresenterImpl extends ConfiguredSlideBase<IdleUpNextPlace>
+public class IdleUpNextPresenterImpl extends ConfiguredPresenter<IdleUpNextPlace>
         implements IdleUpNextView.IdleUpNextPresenter {
     private static final int SHOW_RACES_STARTED = 1000 * 60 * 30;
     private IdleUpNextView view;

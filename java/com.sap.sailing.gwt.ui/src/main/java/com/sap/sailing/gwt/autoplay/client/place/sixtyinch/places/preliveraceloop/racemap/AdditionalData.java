@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.racemap;
 
 public class AdditionalData {
     float windInKts = 10.3f;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.idleloop.idleupnext;
 
 import java.util.ArrayList;
 import java.util.Date;

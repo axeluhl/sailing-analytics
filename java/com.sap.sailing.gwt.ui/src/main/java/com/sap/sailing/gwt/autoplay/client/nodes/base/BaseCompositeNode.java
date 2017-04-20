@@ -1,6 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl;
-
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
+package com.sap.sailing.gwt.autoplay.client.nodes.base;
 
 public abstract class BaseCompositeNode
         extends AutoPlayNodeBase {

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start;
+package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start;
 
 import java.util.List;
 

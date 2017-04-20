@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes;
+package com.sap.sailing.gwt.autoplay.client.nodes.base;
 
 import com.google.web.bindery.event.shared.EventBus;
 
