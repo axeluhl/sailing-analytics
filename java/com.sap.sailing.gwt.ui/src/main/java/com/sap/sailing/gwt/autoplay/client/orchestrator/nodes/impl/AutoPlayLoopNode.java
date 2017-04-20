@@ -17,19 +17,19 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
     private Timer transitionTimer = new Timer() {
         @Override
         public void run() {
+            currentPos++;
+            if (currentPos > nodes.size() - 1) {
+                if (onLoopEnd != null) {
+                    onLoopEnd.execute();
+                }
+                currentPos = 0;
+            }
            transitionTo(nodes.get(currentPos));
         }
     };
     
     @Override
     protected void transitionTo(AutoPlayNode nextNode) {
-        currentPos++;
-        if (currentPos > nodes.size() - 1) {
-            if (onLoopEnd != null) {
-                onLoopEnd.execute();
-            }
-            currentPos = 0;
-        }
         super.transitionTo(nextNode);
         if (!isStopped()) {
             transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
