@@ -1,17 +1,17 @@
 package com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl;
 
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 
 public abstract class BaseCompositeNode
         extends AutoPlayNodeBase {
 
-    private AutoPlayNodeController currentNode;
+    private AutoPlayNode currentNode;
 
-    public AutoPlayNodeController getCurrentNode() {
+    public AutoPlayNode getCurrentNode() {
         return currentNode;
     }
 
-    protected void transitionTo(AutoPlayNodeController nextNode) {
+    protected void transitionTo(AutoPlayNode nextNode) {
         if (currentNode != null) {
             currentNode.stop();
         }

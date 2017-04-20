@@ -7,16 +7,16 @@ import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.BaseCompositeNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class StartupController extends BaseCompositeNode {
+public class StartupNode extends BaseCompositeNode {
     private AutoPlayClientFactorySixtyInch cf;
-    private AutoPlayNodeController whenReadyNode;
+    private AutoPlayNode whenReadyNode;
 
-    public StartupController(final AutoPlayClientFactorySixtyInch cf) {
+    public StartupNode(final AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
     }
 
@@ -36,12 +36,12 @@ public class StartupController extends BaseCompositeNode {
             @Override
             public void onFailure(Throwable caught) {
                 getBus().fireEvent(
-                        new DataLoadFailureEvent(StartupController.this, caught, "Error loading Event with id " + eventUUID));
+                        new DataLoadFailureEvent(StartupNode.this, caught, "Error loading Event with id " + eventUUID));
             }
         });
     }
 
-    public void setWhenReadyDestination(AutoPlayNodeController whenReadyNode) {
+    public void setWhenReadyDestination(AutoPlayNode whenReadyNode) {
         this.whenReadyNode = whenReadyNode;
     }
 }

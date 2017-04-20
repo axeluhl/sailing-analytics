@@ -22,14 +22,14 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Pair;
 
-public class IdleUpNextController extends TimedTransitionSimpleNode {
+public class IdleUpNextNode extends TimedTransitionSimpleNode {
     private final AutoPlayClientFactorySixtyInch cf;
     private IdleUpNextPlace place;
     private static RaceTimesInfoProvider raceTimesInfoProvider;
     // private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds
     // */1000l);
 
-    public IdleUpNextController(AutoPlayClientFactorySixtyInch cf) {
+    public IdleUpNextNode(AutoPlayClientFactorySixtyInch cf) {
         
         this.cf = cf;
         place = new IdleUpNextPlace();

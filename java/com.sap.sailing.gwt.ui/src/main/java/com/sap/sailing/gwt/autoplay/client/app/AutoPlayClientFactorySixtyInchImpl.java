@@ -37,7 +37,7 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     private AutoPlayClientFactorySixtyInchImpl(EventBus eventBus, PlaceController placeController,
             PlaceNavigatorSixtyInch navigator) {
         super(new AutoPlayMainViewSixtyInchImpl(eventBus), eventBus, placeController, navigator);
-        navigator.setAutoplayFactory(this);
+
     }
     
     @Override

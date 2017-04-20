@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 
 public class AutoPlayLoopNode extends BaseCompositeNode {
 
-    private List<AutoPlayNodeController> nodes = new ArrayList<>();
+    private List<AutoPlayNode> nodes = new ArrayList<>();
     private int loopTimePerNodeInSeconds;
 
-    public AutoPlayLoopNode(int loopTimePerNodeInSeconds, AutoPlayNodeController... nodes) {
+    public AutoPlayLoopNode(int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {
         this.loopTimePerNodeInSeconds = loopTimePerNodeInSeconds;
         this.nodes.addAll(Arrays.asList(nodes));
     }
 
-    public AutoPlayLoopNode(int nrOfLoops, int loopTimePerNodeInSeconds, AutoPlayNodeController... nodes) {
+    public AutoPlayLoopNode(int nrOfLoops, int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {
         this.loopTimePerNodeInSeconds = loopTimePerNodeInSeconds;
         this.nodes.addAll(Arrays.asList(nodes));
     }
