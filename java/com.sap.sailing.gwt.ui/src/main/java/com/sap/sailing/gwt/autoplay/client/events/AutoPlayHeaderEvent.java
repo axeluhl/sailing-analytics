@@ -6,13 +6,13 @@ import com.google.gwt.event.shared.GwtEvent;
 /**
  * Event thrown after the place changed.
  */
-public class SlideHeaderEvent extends GwtEvent<SlideHeaderEvent.Handler> {
+public class AutoPlayHeaderEvent extends GwtEvent<AutoPlayHeaderEvent.Handler> {
 
     /**
      * Implemented by handlers of PlaceChangedEvent.
      */
     public interface Handler extends EventHandler {
-        void onHeaderChanged(SlideHeaderEvent event);
+        void onHeaderChanged(AutoPlayHeaderEvent event);
     }
 
     public static final Type<Handler> TYPE = new Type<Handler>();
@@ -20,7 +20,7 @@ public class SlideHeaderEvent extends GwtEvent<SlideHeaderEvent.Handler> {
     private final String headerText;
     private final String headerSubText;
 
-    public SlideHeaderEvent(String headerText, String headerSubText) {
+    public AutoPlayHeaderEvent(String headerText, String headerSubText) {
         this.headerText = headerText;
         this.headerSubText = headerSubText;
     }

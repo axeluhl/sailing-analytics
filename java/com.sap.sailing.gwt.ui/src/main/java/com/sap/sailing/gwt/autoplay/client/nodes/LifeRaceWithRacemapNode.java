@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
-import com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemap.LifeRaceWithRacemapPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard.LifeRaceWithRacemapAndLeaderBoardPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper;
 import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper.RVWrapper;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
@@ -30,7 +30,7 @@ public class LifeRaceWithRacemapNode extends FiresPlaceNode {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        LifeRaceWithRacemapPlace place = new LifeRaceWithRacemapPlace();
+                        LifeRaceWithRacemapAndLeaderBoardPlace place = new LifeRaceWithRacemapAndLeaderBoardPlace();
                         place.setError(caught);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
@@ -51,7 +51,7 @@ public class LifeRaceWithRacemapNode extends FiresPlaceNode {
                                     @Override
                                     public void onSuccess(ResultWithTTL<GetMiniLeaderboardDTO> resultTTL) {
                                         GetMiniLeaderboardDTO dto = resultTTL.getDto();
-                                        LifeRaceWithRacemapPlace place = new LifeRaceWithRacemapPlace();
+                                        LifeRaceWithRacemapAndLeaderBoardPlace place = new LifeRaceWithRacemapAndLeaderBoardPlace();
                                         place.setLeaderBoardDTO(dto);
                                         place.setRaceMap(result.raceboardPerspective, result.csel);
                                         setPlaceToGo(place);

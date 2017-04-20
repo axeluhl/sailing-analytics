@@ -6,7 +6,7 @@ import com.google.gwt.event.shared.GwtEvent;
 /**
  * Sample custom event class for copy & paste
  */
-public class AutoplayFailureEvent extends GwtEvent<AutoplayFailureEvent.Handler> implements FailureEvent {
+public class AutoPlayFailureEvent extends GwtEvent<AutoPlayFailureEvent.Handler> implements FailureEvent {
     public static final Type<Handler> TYPE = new Type<Handler>();
 
     private Throwable caught;
@@ -16,18 +16,18 @@ public class AutoplayFailureEvent extends GwtEvent<AutoplayFailureEvent.Handler>
      * Event handler interface
      */
     public interface Handler extends EventHandler {
-        void onFailure(AutoplayFailureEvent e);
+        void onFailure(AutoPlayFailureEvent e);
     }
 
-    public AutoplayFailureEvent(Throwable caught) {
+    public AutoPlayFailureEvent(Throwable caught) {
         this(caught, caught.getMessage());
     }
 
-    public AutoplayFailureEvent(String message) {
+    public AutoPlayFailureEvent(String message) {
         this(null, message);
     }
 
-    public AutoplayFailureEvent(Throwable caught, String message) {
+    public AutoPlayFailureEvent(Throwable caught, String message) {
         this.caught = caught;
         this.message = message;
     }
