@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemap;
+package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +25,16 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class LifeRaceWithRacemapPresenterImpl extends ConfiguredPresenter<LifeRaceWithRacemapPlace> implements LifeRaceWithRacemapView.Slide7Presenter {
+public class LifeRaceWithRacemapAndLeaderBoardPresenterImpl extends ConfiguredPresenter<LifeRaceWithRacemapAndLeaderBoardPlace> implements LifeRaceWithRacemapAndLeaderBoardView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
-    private LifeRaceWithRacemapView view;
+    private LifeRaceWithRacemapAndLeaderBoardView view;
     private Timer selectionTimer;
     private SixtyInchLeaderBoard leaderboardPanel;
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
 
-    public LifeRaceWithRacemapPresenterImpl(LifeRaceWithRacemapPlace place, AutoPlayClientFactorySixtyInch clientFactory,
-            LifeRaceWithRacemapView LifeRaceWithRacemapViewImpl) {
+    public LifeRaceWithRacemapAndLeaderBoardPresenterImpl(LifeRaceWithRacemapAndLeaderBoardPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+            LifeRaceWithRacemapAndLeaderBoardView LifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
         this.view = LifeRaceWithRacemapViewImpl;
         selectionTimer = new Timer() {
