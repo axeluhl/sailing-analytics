@@ -16,6 +16,8 @@ import com.sap.sailing.gwt.autoplay.client.utils.HelperSixty;
 import com.sap.sse.common.Util.Pair;
 
 public class SixtyInchRootNode extends BaseCompositeNode {
+    protected static final long PRE_RACE_DELAY = 180000;
+    protected static final long LIVE_SWITCH_DELAY = 1000;
     private final AutoPlayClientFactorySixtyInch cf;
     private String leaderBoardName;
     private int errorCount = 0;;
@@ -56,21 +58,24 @@ public class SixtyInchRootNode extends BaseCompositeNode {
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
                         if (result == null) {
+                            cf.getSlideCtx().setCurrenLifeRace(null);
                             boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
                             currentLifeRace = null;
                             currentPreLifeRace = null;
                             GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + true);
                             transitionTo(comingFromLiferace ? afterLiveRaceLoop : idleLoop);
                         } else {
+                            cf.getSlideCtx().setCurrenLifeRace(result.getB());
                             final Long timeToRaceStartInMs = result.getA();
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
-                            if (loadedLiveRace == null) {
+                            if (loadedLiveRace == null || timeToRaceStartInMs > PRE_RACE_DELAY) {
                                 boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
                                 currentLifeRace = null;
                                 currentPreLifeRace = null;
                                 GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + true);
                                 transitionTo(comingFromLiferace ? afterLiveRaceLoop : idleLoop);
-                            } else if (/* is pre liverace */ timeToRaceStartInMs > 10000) {
+                            } else if (/* is pre liverace */ timeToRaceStartInMs < PRE_RACE_DELAY
+                                    && timeToRaceStartInMs > LIVE_SWITCH_DELAY) {
                                 if (/* is new pre live race */!loadedLiveRace.equals(currentPreLifeRace)) {
                                     currentPreLifeRace = loadedLiveRace;
                                     currentLifeRace = null;

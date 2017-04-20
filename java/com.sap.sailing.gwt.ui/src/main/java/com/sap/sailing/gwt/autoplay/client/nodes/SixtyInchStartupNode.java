@@ -23,7 +23,7 @@ public class SixtyInchStartupNode extends BaseCompositeNode {
         AutoPlayLoopNode preLifeRaceLoop = new AutoPlayLoopNode(30, new PreRaceWithRacemapNode(cf));
         AutoPlayLoopNode lifeRaceLoop = new AutoPlayLoopNode(30, new LifeRaceWithRacemapNode(cf));
         AutoPlayLoopNode afterLifeRaceLoop = new AutoPlayLoopNode(30, new RaceEndWithBoatsNode(cf), idleLoop);
-        SixtyInchRootNode raceLoop = new SixtyInchRootNode(cf, idleLoop, lifeRaceLoop, preLifeRaceLoop,
+        SixtyInchRootNode raceLoop = new SixtyInchRootNode(cf, idleLoop, preLifeRaceLoop, lifeRaceLoop,
                 afterLifeRaceLoop);
         setWhenReadyDestination(raceLoop);
     }

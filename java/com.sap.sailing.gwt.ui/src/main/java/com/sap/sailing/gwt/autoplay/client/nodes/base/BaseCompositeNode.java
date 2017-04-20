@@ -13,6 +13,9 @@ public abstract class BaseCompositeNode
         if (isStopped()) {
             return;
         }
+        if (nextNode == currentNode) {
+            return;
+        }
         if (currentNode != null) {
             currentNode.stop();
         }
