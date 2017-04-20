@@ -6,9 +6,9 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.place.player.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerView;
-import com.sap.sailing.gwt.autoplay.client.place.start.DesktopStartView;
-import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
-import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.DesktopStartView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartView;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 

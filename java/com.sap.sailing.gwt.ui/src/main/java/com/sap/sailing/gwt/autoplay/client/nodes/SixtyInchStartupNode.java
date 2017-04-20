@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.SlideInitPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SlideInitPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class SixtyInchStartupNode extends BaseCompositeNode {

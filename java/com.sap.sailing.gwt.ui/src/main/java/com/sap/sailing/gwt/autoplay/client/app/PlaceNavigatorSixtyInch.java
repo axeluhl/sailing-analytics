@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.SixtyInchSetting;
+import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SixtyInchSetting;
 
 public interface PlaceNavigatorSixtyInch extends PlaceNavigator {
 

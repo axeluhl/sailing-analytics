@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.idleloop.idleupnext.IdleUpNextPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleUpNextPlace;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.shared.EventDTO;

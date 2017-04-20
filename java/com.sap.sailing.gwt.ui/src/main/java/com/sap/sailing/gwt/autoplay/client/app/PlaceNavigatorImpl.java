@@ -4,8 +4,8 @@ import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.autoplay.client.nodes.SixtyInchStartupNode;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SixtyInchContextImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.SixtyInchSetting;
-import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SixtyInchSetting;
 
 public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyInch {
     private final PlaceController placeController;

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.SixtyInchSetting;
+import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SixtyInchSetting;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class SixtyInchContextImpl implements SixtyInchContext {

@@ -5,7 +5,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartPlace;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;

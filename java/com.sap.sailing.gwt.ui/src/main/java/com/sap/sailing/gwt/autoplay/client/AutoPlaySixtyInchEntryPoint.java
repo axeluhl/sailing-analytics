@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInchImp
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayHistoryMapperSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.AutoPlayActivityMapperSixtyInchImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.SixtyInchSetting;
+import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SixtyInchSetting;
 import com.sap.sailing.gwt.autoplay.client.resources.SixtyInchBundle;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;

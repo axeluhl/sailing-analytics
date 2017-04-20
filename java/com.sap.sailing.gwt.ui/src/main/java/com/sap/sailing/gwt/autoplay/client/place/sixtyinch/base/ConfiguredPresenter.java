@@ -7,7 +7,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.StartPlaceSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartPlaceSixtyInch;
 
 public abstract class ConfiguredPresenter<P extends Place> extends PresenterBase<P> {
     private EventBus eventBus;
