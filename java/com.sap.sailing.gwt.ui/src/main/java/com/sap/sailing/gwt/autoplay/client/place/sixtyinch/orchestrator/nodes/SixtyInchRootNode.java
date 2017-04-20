@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -9,6 +10,7 @@ import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.AutoPlayLoopNode;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.BaseCompositeNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
 import com.sap.sse.common.Util.Pair;
@@ -31,12 +33,19 @@ public class SixtyInchRootNode extends BaseCompositeNode {
     private AutoPlayNode afterLifeRaceLoop;
 
     public SixtyInchRootNode(AutoPlayClientFactorySixtyInch cf, AutoPlayNode idleLoop, AutoPlayNode preLifeRaceLoop,
-            AutoPlayNode lifeRaceLoop, AutoPlayNode afterLifeRaceLoop) {
+            AutoPlayNode lifeRaceLoop, AutoPlayLoopNode afterLifeRaceLoop) {
         this.cf = cf;
         this.idleLoop = idleLoop;
         this.preLifeRaceLoop = preLifeRaceLoop;
         this.lifeRaceLoop = lifeRaceLoop;
         this.afterLifeRaceLoop = afterLifeRaceLoop;
+
+        afterLifeRaceLoop.setOnLoopEnd(new Command() {
+            @Override
+            public void execute() {
+                transitionTo(idleLoop);
+            }
+        });
     }
 
     private void doCheck() {

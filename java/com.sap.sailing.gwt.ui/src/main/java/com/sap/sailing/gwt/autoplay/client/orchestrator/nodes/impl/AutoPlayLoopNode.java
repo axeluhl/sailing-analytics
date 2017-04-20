@@ -4,25 +4,59 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Timer;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNode;
 
 public class AutoPlayLoopNode extends BaseCompositeNode {
 
     private List<AutoPlayNode> nodes = new ArrayList<>();
     private int loopTimePerNodeInSeconds;
-
+    private int currentPos = -1;
+    private Command onLoopEnd;
+    private Timer transitionTimer = new Timer() {
+        @Override
+        public void run() {
+           transitionTo(nodes.get(currentPos));
+        }
+    };
+    
+    @Override
+    protected void transitionTo(AutoPlayNode nextNode) {
+        currentPos++;
+        if (currentPos > nodes.size() - 1) {
+            if (onLoopEnd != null) {
+                onLoopEnd.execute();
+            }
+            currentPos = 0;
+        }
+        super.transitionTo(nextNode);
+        if (!isStopped()) {
+            transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
+        }
+    }
+    
     public AutoPlayLoopNode(int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {
         this.loopTimePerNodeInSeconds = loopTimePerNodeInSeconds;
         this.nodes.addAll(Arrays.asList(nodes));
     }
 
-    public AutoPlayLoopNode(int nrOfLoops, int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {
-        this.loopTimePerNodeInSeconds = loopTimePerNodeInSeconds;
-        this.nodes.addAll(Arrays.asList(nodes));
+    public void setOnLoopEnd(Command onLoopEnd) {
+        this.onLoopEnd = onLoopEnd;
     }
 
     @Override
     public void onStart() {
+        currentPos = -1;
+        transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
+    }
+
+    @Override
+    public void onStop() {
+        for (AutoPlayNode autoPlayNode : nodes) {
+            autoPlayNode.stop();
+        }
+        transitionTimer.cancel();
     }
 
 

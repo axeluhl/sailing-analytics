@@ -12,6 +12,9 @@ public abstract class BaseCompositeNode
     }
 
     protected void transitionTo(AutoPlayNode nextNode) {
+        if (isStopped()) {
+            return;
+        }
         if (currentNode != null) {
             currentNode.stop();
         }
