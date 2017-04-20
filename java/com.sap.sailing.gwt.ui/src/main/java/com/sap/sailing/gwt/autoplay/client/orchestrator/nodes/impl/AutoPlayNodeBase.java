@@ -19,7 +19,9 @@ public abstract class AutoPlayNodeBase implements AutoPlayNode {
     public final void stop() {
         isStopped = true;
         onStop();
-        this.bus.removeHandlers();
+        if (bus != null) {
+            this.bus.removeHandlers();
+        }
     }
 
     public abstract void onStart();
