@@ -7,6 +7,9 @@ public abstract class BaseCompositeNode
 
     private AutoPlayNodeController currentNode;
 
+    public AutoPlayNodeController getCurrentNode() {
+        return currentNode;
+    }
 
     protected void transitionTo(AutoPlayNodeController nextNode) {
         if (currentNode != null) {

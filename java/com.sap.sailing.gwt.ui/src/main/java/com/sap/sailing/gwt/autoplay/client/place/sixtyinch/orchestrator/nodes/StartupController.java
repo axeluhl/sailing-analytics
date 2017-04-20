@@ -6,14 +6,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.events.AutoPlayNodeTransitionRequestEvent;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
-import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.TimedTransitionSimpleNode;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.BaseCompositeNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class StartupController extends TimedTransitionSimpleNode {
+public class StartupController extends BaseCompositeNode {
     private AutoPlayClientFactorySixtyInch cf;
     private AutoPlayNodeController whenReadyNode;
 
@@ -31,7 +30,7 @@ public class StartupController extends TimedTransitionSimpleNode {
             public void onSuccess(final EventDTO event) {
                 GWT.log("Event loaded " + event);
                 cf.getSlideCtx().updateEvent(event);
-                getBus().fireEvent(new AutoPlayNodeTransitionRequestEvent(whenReadyNode));
+                transitionTo(whenReadyNode);
             }
 
             @Override

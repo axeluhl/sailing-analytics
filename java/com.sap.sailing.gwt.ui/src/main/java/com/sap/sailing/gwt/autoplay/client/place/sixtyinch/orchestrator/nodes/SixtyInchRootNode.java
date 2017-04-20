@@ -3,16 +3,15 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.events.AutoPlayNodeTransitionRequestEvent;
 import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.BaseCompositeNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
 import com.sap.sse.common.Util.Pair;
 
-public class SixtyInchRootNode implements AutoPlayNodeController {
+public class SixtyInchRootNode extends BaseCompositeNode {
     private final AutoPlayClientFactorySixtyInch cf;
     private String leaderBoardName;
     private int errorCount = 0;;
@@ -25,7 +24,6 @@ public class SixtyInchRootNode implements AutoPlayNodeController {
             doCheck();
         }
     };
-
 
     private AutoPlayNodeController idleLoop;
     private AutoPlayNodeController preLifeRaceLoop;
@@ -66,21 +64,19 @@ public class SixtyInchRootNode implements AutoPlayNodeController {
                             currentLifeRace = null;
                             currentPreLifeRace = null;
                             GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + true);
-                            cf.getEventBus().fireEvent(new AutoPlayNodeTransitionRequestEvent(
-                                    comingFromLiferace ? afterLifeRaceLoop : idleLoop));
+                            transitionTo(comingFromLiferace ? afterLifeRaceLoop : idleLoop);
                         } else if (/* is pre liferace */ timeToRaceStartInMs > 10000) {
                             if (/* is new pre life race */!loadedLifeRace.equals(currentPreLifeRace)) {
                                 currentPreLifeRace = loadedLifeRace;
                                 currentLifeRace = null;
                                 GWT.log("UpcomingLiferaceDetectedEvent: " + loadedLifeRace.toString());
-                                cf.getEventBus().fireEvent(new AutoPlayNodeTransitionRequestEvent(afterLifeRaceLoop));
+                                transitionTo(preLifeRaceLoop);
                             }
                         } else /* is life race */ {
                             currentPreLifeRace = null;
                             if (/* is new life race */!loadedLifeRace.equals(currentLifeRace)) {
                                 currentLifeRace = loadedLifeRace;
-                                cf.getEventBus().fireEvent(new AutoPlayNodeTransitionRequestEvent(lifeRaceLoop));
-
+                                transitionTo(lifeRaceLoop);
                             }
                         }
                         checkTimer.schedule(5000);
@@ -90,6 +86,7 @@ public class SixtyInchRootNode implements AutoPlayNodeController {
                     public void onFailure(Throwable caught) {
                         errorCount++;
                         if (errorCount > 5) {
+                            transitionTo(idleLoop);
                             cf.getEventBus().fireEvent(new AutoplayFailureEvent(caught));
                         }
                     }
@@ -97,14 +94,13 @@ public class SixtyInchRootNode implements AutoPlayNodeController {
     }
 
     @Override
-    public void start(EventBus eventBus) {
+    public void onStart() {
         doCheck();
-        cf.getEventBus().fireEvent(new AutoPlayNodeTransitionRequestEvent(idleLoop));
+        transitionTo(idleLoop);
     }
-
-
     @Override
-    public void stop() {
-        // we don't stop, because we keep monitoring the event
+    public void onStop() {
+        checkTimer.cancel();
     }
+
 }
