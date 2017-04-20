@@ -642,10 +642,12 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
     private void denoteForRaceLogTracking(final RaceColumnDTO raceColumn, final FleetDTO fleet) {
         final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
-        sailingService.denoteForRaceLogTracking(leaderboard.name, raceColumn.getName(), fleet.getName(), new AsyncCallback<Void>() {
+        sailingService.denoteForRaceLogTracking(leaderboard.name, raceColumn.getName(), fleet.getName(), new AsyncCallback<Boolean>() {
             @Override
-            public void onSuccess(Void result) {
-                loadAndRefreshLeaderboard(leaderboard.name);
+            public void onSuccess(Boolean result) {
+                if (result == true) {
+                    loadAndRefreshLeaderboard(leaderboard.name);
+                }
             }
 
             @Override
