@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.player.Timer;
 
 public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
@@ -38,6 +39,28 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     public boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard() {
         return isScreenLargeEnoughToInitiallyDisplayLeaderboard;
+    }
+    
+    @Override
+    public LeaderboardSettings extractContextSpecificSettings(LeaderboardSettings currentLeaderboardSettings) {
+        LeaderboardSettings defaultLeaderboardSettings = SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), currentLeaderboardSettings);
+        LeaderboardSettings contextSpecificLeaderboardSettings = new LeaderboardSettings(
+                currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
+                currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
+                defaultLeaderboardSettings.getNamesOfRaceColumnsToShow(),
+                defaultLeaderboardSettings.getNamesOfRacesToShow(),
+                currentLeaderboardSettings.getNumberOfLastRacesToShow(),
+                currentLeaderboardSettings.isAutoExpandPreSelectedRace(),
+                currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
+                defaultLeaderboardSettings.getNameOfRaceToSort(), currentLeaderboardSettings.isSortAscending(),
+                currentLeaderboardSettings.isUpdateUponPlayStateChange(),
+                currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
+                currentLeaderboardSettings.isShowAddedScores(),
+                currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
+                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                currentLeaderboardSettings.isShowCompetitorFullNameColumn());
+        SettingsDefaultValuesUtils.keepDefaults(currentLeaderboardSettings, contextSpecificLeaderboardSettings);
+        return contextSpecificLeaderboardSettings;
     }
     
     

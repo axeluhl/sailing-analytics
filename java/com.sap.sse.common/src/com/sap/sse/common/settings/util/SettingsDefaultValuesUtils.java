@@ -17,9 +17,9 @@ public class SettingsDefaultValuesUtils {
     
     public static void keepDefaults(GenericSerializableSettings previousSettings, GenericSerializableSettings newSettings) {
         for (Map.Entry<String, Setting> entry : previousSettings.getChildSettings().entrySet()) {
-            Setting newSetting = entry.getValue();
-            Setting previousSetting = newSettings.getChildSettings().get(entry.getKey());
-            if (newSetting instanceof ValueSetting) {
+            Setting previousSetting = entry.getValue();
+            Setting newSetting = newSettings.getChildSettings().get(entry.getKey());
+            if (previousSetting instanceof ValueSetting) {
                 keepDefaults((ValueSetting<?>) previousSetting, (ValueSetting<?>) newSetting);
             } else if (newSetting instanceof ValueCollectionSetting) {
                 keepDefaults((ValueCollectionSetting<?>) previousSetting, (ValueCollectionSetting<?>) newSetting);

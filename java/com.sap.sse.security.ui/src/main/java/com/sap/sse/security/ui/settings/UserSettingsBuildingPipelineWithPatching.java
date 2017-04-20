@@ -63,9 +63,11 @@ class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildingPipel
     
     @Override
     public JSONValue getJsonObject(Settings settings, PipelineLevel pipelineLevel, List<String> path) {
-        List<SettingsPatch<? extends Settings>> settingsPatches = patchesForStoringSettings.getSettingsPatches(path, pipelineLevel);
-        for (SettingsPatch<? extends Settings> settingsPatch : settingsPatches) {
-            settings = patchSettings(settings, settingsPatch);
+        for (PipelineLevel level : pipelineLevel.getSortedLevelsUntilCurrent()) {
+            List<SettingsPatch<? extends Settings>> settingsPatches = patchesForStoringSettings.getSettingsPatches(path, level);
+            for (SettingsPatch<? extends Settings> settingsPatch : settingsPatches) {
+                settings = patchSettings(settings, settingsPatch);
+            }
         }
         return super.getJsonObject(settings, pipelineLevel, path);
     }

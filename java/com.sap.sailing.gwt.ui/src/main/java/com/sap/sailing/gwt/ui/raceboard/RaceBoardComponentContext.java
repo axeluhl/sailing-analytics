@@ -28,11 +28,12 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
 
             @Override
             public void onError(Throwable caught, CS fallbackDefaultSettings) {
-                patchCallback.settingsPatched(fallbackDefaultSettings);
+                onSuccess(fallbackDefaultSettings);
             }
 
             @Override
             public void onSuccess(CS settings) {
+                SettingsDefaultValuesUtils.keepDefaults(component.getSettings(), settings);
                 patchCallback.settingsPatched(settings);
             }
         });
@@ -68,7 +69,7 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
 
         @Override
         public CS patchSettings(CS settingsToPatch) {
-            SettingsDefaultValuesUtils.setDefaults(contextSpecificDefaults, settingsToPatch);
+            SettingsMergeUtils.mergeDefaults(contextSpecificDefaults, settingsToPatch);
             return settingsToPatch;
         }
         

@@ -122,30 +122,6 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
     }
     
-    public LeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow, Long delayBetweenAutoAdvancesInMilliseconds) {
-        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
-        this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
-    }
-    
-    public LeaderboardSettings(Long delayBetweenAutoAdvancesInMilliseconds, Integer numberOfLastRacesToShow,
-            RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy) {
-        this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
-        this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
-        this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
-    }
-    
-    public LeaderboardSettings(List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow,
-            String nameOfRaceToSort, boolean autoExpandPreSelectedRace,
-            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn) {
-        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
-        this.namesOfRacesToShow.setValues(namesOfRacesToShow);
-        this.overallDetailsToShow.setValues(overallDetailsToShow);
-        this.nameOfRaceToSort.setValue(nameOfRaceToSort);
-        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
-        this.showCompetitorSailIdColumn.setValue(showCompetitorSailIdColumn);
-        this.showCompetitorFullNameColumn.setValue(showCompetitorFullNameColumn);
-    }
-    
     /**
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
      */
@@ -298,8 +274,10 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         newSettings.showCompetitorSailIdColumn.setValue(this.isShowCompetitorSailIdColumn());
         newSettings.showCompetitorFullNameColumn.setValue(this.isShowCompetitorFullNameColumn());
         newSettings.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(this.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
+        newSettings.namesOfRacesToShow.setValues(null);
         newSettings.namesOfRaceColumnsToShow.setValues(this.getNamesOfRaceColumnsToShow());
         SettingsDefaultValuesUtils.keepDefaults(this, newSettings);
+        newSettings.namesOfRacesToShow.setDefaultValues(null);
         newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumns);
         return newSettings;
     }

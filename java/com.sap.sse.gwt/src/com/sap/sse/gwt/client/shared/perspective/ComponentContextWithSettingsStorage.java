@@ -11,6 +11,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
+import com.sap.sse.common.settings.util.SettingsMergeUtils;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
@@ -175,9 +177,24 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @return
      */
     private JSONObject patchJsonObject(JSONObject root, List<String> path, Settings newSettings, PipelineLevel pipelineLevel) {
-        return patchJsonObject(root, path, Collections.unmodifiableList(path), newSettings, pipelineLevel);
+        newSettings = cloneSettings(newSettings, path);
+        return patchJsonObject(root, path, Collections.unmodifiableList(new ArrayList<>(path)), newSettings, pipelineLevel);
     }
     
+    @SuppressWarnings("unchecked")
+    private<CS extends Settings> CS cloneSettings(CS settingsToClone, List<String> path) {
+        CS clonedSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(path), rootLifecycle.createDefaultSettings());
+        if(clonedSettings instanceof GenericSerializableSettings) {
+            GenericSerializableSettings newSettings = (GenericSerializableSettings) clonedSettings;
+            GenericSerializableSettings originalSettings = (GenericSerializableSettings) settingsToClone;
+            SettingsDefaultValuesUtils.keepDefaults(originalSettings, newSettings);
+            SettingsMergeUtils.setValues(originalSettings, newSettings);
+            clonedSettings = (CS) newSettings;
+        }
+        //TODO maybe add support for SettingsMap?
+        return clonedSettings;
+    }
+
     private JSONObject patchJsonObject(JSONObject root, List<String> path, List<String> originalPath, Settings newSettings, PipelineLevel pipelineLevel) {
         if(path.isEmpty()) {
             return (JSONObject) settingsStorageManager.settingsToJSON(newSettings, pipelineLevel, originalPath);
