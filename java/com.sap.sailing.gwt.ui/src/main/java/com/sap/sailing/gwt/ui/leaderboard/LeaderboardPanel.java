@@ -82,7 +82,6 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -2387,7 +2386,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            currentSettings = LeaderboardSettingsFactory.getInstance().createSettingsWithNewDefaultRaceColumns(result.getNamesOfRaceColumns(), currentSettings);
+                            currentSettings = currentSettings.overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
                             
                             try {
                                 updateLeaderboard(result);
