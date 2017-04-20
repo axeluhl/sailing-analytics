@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.racemap;
+package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;

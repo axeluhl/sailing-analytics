@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.competitors;
+package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.start;
+package com.sap.sailing.gwt.autoplay.client.places.startclassic;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.afterliveraceLoop.boats;
+package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceLoop.boats;
 
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;

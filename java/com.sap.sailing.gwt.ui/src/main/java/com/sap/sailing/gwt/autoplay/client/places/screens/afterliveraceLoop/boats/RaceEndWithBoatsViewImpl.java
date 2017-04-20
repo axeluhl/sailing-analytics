@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.afterliveraceLoop.boats;
+package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceLoop.boats;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewSixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.LeaderBoardScaleHelper;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.leaderboard.PreLeaderBoardWithImageViewImpl.ImageProvider;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLeaderBoardWithImageViewImpl.ImageProvider;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEndWithBoatsView {

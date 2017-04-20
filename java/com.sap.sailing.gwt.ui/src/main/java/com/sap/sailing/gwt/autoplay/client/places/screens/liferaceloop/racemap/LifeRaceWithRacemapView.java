@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.liferaceloop.racemap;
+package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemap;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;

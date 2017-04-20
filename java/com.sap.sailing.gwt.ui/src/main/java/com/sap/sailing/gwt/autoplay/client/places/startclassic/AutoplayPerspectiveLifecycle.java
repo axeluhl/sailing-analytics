@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.start;
+package com.sap.sailing.gwt.autoplay.client.places.startclassic;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;

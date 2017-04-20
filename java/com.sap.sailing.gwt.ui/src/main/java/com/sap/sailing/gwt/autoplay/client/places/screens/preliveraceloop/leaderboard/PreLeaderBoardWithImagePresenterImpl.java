@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.leaderboard;
+package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard;
 
 import java.util.ArrayList;
 import java.util.Iterator;

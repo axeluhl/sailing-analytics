@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.racemap.statistik;
+package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.statistik;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

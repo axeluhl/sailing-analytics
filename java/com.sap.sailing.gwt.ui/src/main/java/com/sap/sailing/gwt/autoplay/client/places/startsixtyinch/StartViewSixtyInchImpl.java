@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start;
+package com.sap.sailing.gwt.autoplay.client.places.startsixtyinch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInchImpl;
-import com.sap.sailing.gwt.autoplay.client.place.start.StartView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartView;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
