@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.PresenterBase;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
@@ -39,7 +39,7 @@ public class SlideInitPresenterImpl extends PresenterBase<SlideInitPlace> implem
         });
         if (getSlideCtx() != null && getSlideCtx().getSettings() != null) {
             eventBus.fireEvent(
-                    new SlideHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(), "Loading event data"));
+                    new AutoPlayHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(), "Loading event data"));
         }
         view.startingWith(this, panel);
         if (getPlace().getFailureEvent() != null) {

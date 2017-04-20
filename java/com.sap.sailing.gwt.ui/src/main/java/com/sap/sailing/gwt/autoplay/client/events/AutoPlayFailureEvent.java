@@ -2,15 +2,13 @@ package com.sap.sailing.gwt.autoplay.client.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 
 /**
  * Sample custom event class for copy & paste
  */
-public class DataLoadFailureEvent extends GwtEvent<DataLoadFailureEvent.Handler> implements FailureEvent {
+public class AutoPlayFailureEvent extends GwtEvent<AutoPlayFailureEvent.Handler> implements FailureEvent {
     public static final Type<Handler> TYPE = new Type<Handler>();
 
-    private final AutoPlayNode source;
     private Throwable caught;
     private String message;
 
@@ -18,19 +16,18 @@ public class DataLoadFailureEvent extends GwtEvent<DataLoadFailureEvent.Handler>
      * Event handler interface
      */
     public interface Handler extends EventHandler {
-        void onLoadFailure(DataLoadFailureEvent e);
+        void onFailure(AutoPlayFailureEvent e);
     }
 
-    public DataLoadFailureEvent(AutoPlayNode source, Throwable caught) {
-        this(source, caught, null);
+    public AutoPlayFailureEvent(Throwable caught) {
+        this(caught, caught.getMessage());
     }
 
-    public DataLoadFailureEvent(AutoPlayNode source, String message) {
-        this(source, null, message);
+    public AutoPlayFailureEvent(String message) {
+        this(null, message);
     }
 
-    public DataLoadFailureEvent(AutoPlayNode source, Throwable caught, String message) {
-        this.source = source;
+    public AutoPlayFailureEvent(Throwable caught, String message) {
         this.caught = caught;
         this.message = message;
     }
@@ -43,10 +40,6 @@ public class DataLoadFailureEvent extends GwtEvent<DataLoadFailureEvent.Handler>
         return caught;
     }
 
-    public AutoPlayNode getSource() {
-        return source;
-    }
-
     @Override
     public com.google.gwt.event.shared.GwtEvent.Type<Handler> getAssociatedType() {
         return TYPE;
@@ -54,12 +47,12 @@ public class DataLoadFailureEvent extends GwtEvent<DataLoadFailureEvent.Handler>
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onLoadFailure(this);
+        handler.onFailure(this);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("DataLoadFailureEvent");
+        StringBuilder sb = new StringBuilder("AutoplayFailureEvent");
         sb.append(", message: ").append(message);
         if (caught != null) {
             sb.append(", ex: ").append(caught);

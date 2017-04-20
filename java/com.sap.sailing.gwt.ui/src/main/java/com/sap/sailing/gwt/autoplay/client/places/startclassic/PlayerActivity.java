@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.player;
+package com.sap.sailing.gwt.autoplay.client.places.startclassic;
 
 import java.util.UUID;
 
@@ -7,8 +7,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.AutoplayPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch;
+package com.sap.sailing.gwt.autoplay.client.shared;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;

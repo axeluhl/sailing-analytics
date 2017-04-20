@@ -6,9 +6,9 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactoryBase;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorImpl;
-import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.place.player.DesktopPlayerView;
-import com.sap.sailing.gwt.autoplay.client.place.player.PlayerView;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.DesktopPlayerView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.PlayerView;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartView;
 import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartPlaceSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartViewSixtyInchImpl;
@@ -69,7 +69,7 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     @Override
     public SixtyInchContext getSlideCtx() {
         if (currentContext == null) {
-            getEventBus().fireEvent(new AutoplayFailureEvent("No autoplay context found"));
+            getEventBus().fireEvent(new AutoPlayFailureEvent("No autoplay context found"));
         }
         return currentContext;
     }

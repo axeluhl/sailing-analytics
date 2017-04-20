@@ -6,8 +6,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
@@ -98,7 +97,7 @@ public class SixtyInchRootNode extends BaseCompositeNode {
                         errorCount++;
                         if (errorCount > 5) {
                             transitionTo(idleLoop);
-                            cf.getEventBus().fireEvent(new AutoplayFailureEvent(caught));
+                            cf.getEventBus().fireEvent(new AutoPlayFailureEvent(caught));
                         }
                     }
                 });
@@ -113,15 +112,9 @@ public class SixtyInchRootNode extends BaseCompositeNode {
             // data not loaded yet
             throw new RuntimeException("No event loaded");
         }
-        getBus().addHandler(AutoplayFailureEvent.TYPE, new AutoplayFailureEvent.Handler() {
+        getBus().addHandler(AutoPlayFailureEvent.TYPE, new AutoPlayFailureEvent.Handler() {
             @Override
-            public void onFailure(AutoplayFailureEvent e) {
-                processFailure(e);
-            }
-        });
-        getBus().addHandler(DataLoadFailureEvent.TYPE, new DataLoadFailureEvent.Handler() {
-            @Override
-            public void onLoadFailure(DataLoadFailureEvent e) {
+            public void onFailure(AutoPlayFailureEvent e) {
                 processFailure(e);
             }
         });

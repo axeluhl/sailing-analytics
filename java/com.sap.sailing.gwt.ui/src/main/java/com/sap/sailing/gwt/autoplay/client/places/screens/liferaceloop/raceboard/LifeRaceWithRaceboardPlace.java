@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemap;
+package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.raceboard;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
@@ -6,16 +6,16 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 
-public class LifeRaceWithRacemapPlace extends Place {
-    public static class Tokenizer implements PlaceTokenizer<LifeRaceWithRacemapPlace> {
+public class LifeRaceWithRaceboardPlace extends Place {
+    public static class Tokenizer implements PlaceTokenizer<LifeRaceWithRaceboardPlace> {
         @Override
-        public String getToken(LifeRaceWithRacemapPlace place) {
+        public String getToken(LifeRaceWithRaceboardPlace place) {
             return "";
         }
 
         @Override
-        public LifeRaceWithRacemapPlace getPlace(String token) {
-            return new LifeRaceWithRacemapPlace();
+        public LifeRaceWithRaceboardPlace getPlace(String token) {
+            return new LifeRaceWithRaceboardPlace();
         }
     }
 

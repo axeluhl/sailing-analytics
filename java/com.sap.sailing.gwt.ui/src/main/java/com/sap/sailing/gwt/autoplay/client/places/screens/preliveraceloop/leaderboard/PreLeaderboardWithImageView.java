@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leade
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
+import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 
 public interface PreLeaderboardWithImageView {
     void startingWith(Slide1Presenter p, AcceptsOneWidget panel);

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemap;
+package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -10,12 +10,12 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayMainViewSixtyInchImpl;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
+import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
-public class LifeRaceWithRacemapViewImpl extends ResizeComposite implements LifeRaceWithRacemapView {
+public class LifeRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite implements LifeRaceWithRacemapAndLeaderBoardView {
     private static LifeRaceWithRacemapViewImplUiBinder uiBinder = GWT.create(LifeRaceWithRacemapViewImplUiBinder.class);
 
     @UiField
@@ -28,16 +28,16 @@ public class LifeRaceWithRacemapViewImpl extends ResizeComposite implements Life
 
     private RaceMap rawRaceMap;
 
-    interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, LifeRaceWithRacemapViewImpl> {
+    interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, LifeRaceWithRacemapAndLeaderBoardViewImpl> {
     }
 
-    public LifeRaceWithRacemapViewImpl() {
+    public LifeRaceWithRacemapAndLeaderBoardViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
 
     @Override
-    public void showErrorNoLive(LifeRaceWithRacemapPresenterImpl slide7PresenterImpl, AcceptsOneWidget panel, Throwable error) {
+    public void showErrorNoLive(LifeRaceWithRacemapAndLeaderBoardPresenterImpl slide7PresenterImpl, AcceptsOneWidget panel, Throwable error) {
         panel.setWidget(new Label("Could not load RaceMap: " + error.getMessage()));
     }
 

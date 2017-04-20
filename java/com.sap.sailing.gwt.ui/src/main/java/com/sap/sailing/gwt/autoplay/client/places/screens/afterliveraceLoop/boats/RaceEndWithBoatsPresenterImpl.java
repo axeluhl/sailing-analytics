@@ -12,8 +12,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.app.ConfiguredPresenter;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
+import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
@@ -43,7 +43,7 @@ public class RaceEndWithBoatsPresenterImpl extends ConfiguredPresenter<AbstractR
 
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
-        getEventBus().fireEvent(new SlideHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(),
+        getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(),
                 getPlace().getLastRace().getRaceName()));
 
         SailingServiceAsync sailingService = getClientFactory().getSailingService();

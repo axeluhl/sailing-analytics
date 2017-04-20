@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.player;
+package com.sap.sailing.gwt.autoplay.client.places.startclassic;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,8 +10,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.AutoplayPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspective;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;

@@ -6,7 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
@@ -44,7 +44,7 @@ public class SixtyInchStartupNode extends BaseCompositeNode {
             @Override
             public void onFailure(Throwable caught) {
                 getBus().fireEvent(
-                        new DataLoadFailureEvent(SixtyInchStartupNode.this, caught, "Error loading Event with id " + eventUUID));
+                        new AutoPlayFailureEvent(caught, "Error loading Event with id " + eventUUID));
             }
         });
     }
