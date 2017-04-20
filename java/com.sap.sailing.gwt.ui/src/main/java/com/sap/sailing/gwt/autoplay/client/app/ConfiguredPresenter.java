@@ -6,7 +6,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartPlaceSixtyInch;
 
 public abstract class ConfiguredPresenter<P extends Place> extends PresenterBase<P> {
@@ -36,7 +36,7 @@ public abstract class ConfiguredPresenter<P extends Place> extends PresenterBase
                             startConfigured(panel);
                         } catch (Exception e) {
                             hasStarted = false;
-                            getEventBus().fireEvent(new AutoplayFailureEvent(e, "Start failed"));
+                            getEventBus().fireEvent(new AutoPlayFailureEvent(e, "Start failed"));
                         }
                     }
                 });
@@ -45,7 +45,7 @@ public abstract class ConfiguredPresenter<P extends Place> extends PresenterBase
                 getClientFactory().getPlaceController().goTo(new StartPlaceSixtyInch());
             }
         } catch (Exception e) {
-            getEventBus().fireEvent(new AutoplayFailureEvent(e, "Pre-Init failed"));
+            getEventBus().fireEvent(new AutoPlayFailureEvent(e, "Pre-Init failed"));
         }
     }
 

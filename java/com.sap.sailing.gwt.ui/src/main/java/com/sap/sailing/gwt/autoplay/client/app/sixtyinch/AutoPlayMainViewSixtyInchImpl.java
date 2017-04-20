@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.ApplicationTopLevelView;
-import com.sap.sailing.gwt.autoplay.client.events.SlideHeaderEvent;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
@@ -43,10 +43,10 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
         sapHeader.setHeaderTitle("Initializing");
         mainPanel.add(sapHeader);
         mainPanel.setWidgetTopHeight(sapHeader, 0, Unit.PX, SAP_HEADER_IN_PX, Unit.PX);
-        eventBus.addHandler(SlideHeaderEvent.TYPE, new SlideHeaderEvent.Handler() {
+        eventBus.addHandler(AutoPlayHeaderEvent.TYPE, new AutoPlayHeaderEvent.Handler() {
 
             @Override
-            public void onHeaderChanged(SlideHeaderEvent event) {
+            public void onHeaderChanged(AutoPlayHeaderEvent event) {
                 sapHeader.setHeaderTitle(event.getHeaderText());
                 sapHeader.setHeaderSubTitle(event.getHeaderSubText());
             }
