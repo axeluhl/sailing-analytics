@@ -1,12 +1,9 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch;
+package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.CompetitorImageProvider;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.FlagImageProvider;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceLoop.boats.RaceEndWithBoatsPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceLoop.boats.RaceEndWithBoatsViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceLoop.boats.RaceEndWithCompetitorsTop3Place;
@@ -33,6 +30,8 @@ import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SlideInitPresen
 import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SlideInitViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartActivitySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartPlaceSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.utils.CompetitorImageProvider;
+import com.sap.sailing.gwt.autoplay.client.utils.FlagImageProvider;
 
 public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
     private final AutoPlayClientFactorySixtyInch clientFactory;

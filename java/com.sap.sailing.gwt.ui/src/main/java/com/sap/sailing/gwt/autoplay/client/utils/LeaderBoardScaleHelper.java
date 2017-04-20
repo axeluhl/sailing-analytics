@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base;
+package com.sap.sailing.gwt.autoplay.client.utils;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;

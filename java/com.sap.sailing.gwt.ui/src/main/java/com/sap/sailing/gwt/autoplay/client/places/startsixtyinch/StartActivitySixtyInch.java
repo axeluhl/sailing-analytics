@@ -8,7 +8,7 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;

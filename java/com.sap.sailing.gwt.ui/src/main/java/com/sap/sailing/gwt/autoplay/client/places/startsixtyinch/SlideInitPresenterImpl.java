@@ -5,10 +5,10 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.PresenterBase;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.PresenterBase;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 

@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInchImpl;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartView;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;

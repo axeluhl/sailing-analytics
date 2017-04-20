@@ -5,8 +5,8 @@ import java.util.List;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredPresenter;
+import com.sap.sailing.gwt.autoplay.client.app.ConfiguredPresenter;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 
 public class PreRaceCompetitorsPresenterImpl extends ConfiguredPresenter<AbstractPreRaceCompetitorsPlace>
         implements PreRaceCompetitorsView.PreRaceCompetitorsPresenter {

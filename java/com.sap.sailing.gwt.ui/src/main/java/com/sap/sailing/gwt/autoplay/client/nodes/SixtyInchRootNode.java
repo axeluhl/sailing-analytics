@@ -5,14 +5,14 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.AutoplayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.DataLoadFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.HelperSixty;
+import com.sap.sailing.gwt.autoplay.client.utils.HelperSixty;
 import com.sap.sse.common.Util.Pair;
 
 public class SixtyInchRootNode extends BaseCompositeNode {

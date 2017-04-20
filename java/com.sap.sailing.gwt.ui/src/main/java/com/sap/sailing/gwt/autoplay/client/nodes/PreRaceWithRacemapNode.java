@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.RaceMapHelper;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.RaceMapHelper.RVWrapper;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemap.LifeRaceWithRacemapPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPlace;
+import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper;
+import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper.RVWrapper;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;

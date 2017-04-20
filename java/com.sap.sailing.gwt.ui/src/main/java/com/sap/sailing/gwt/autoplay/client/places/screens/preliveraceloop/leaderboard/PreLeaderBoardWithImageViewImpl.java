@@ -10,9 +10,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewSixtyInchImpl;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayMainViewSixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.LeaderBoardScaleHelper;
+import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements PreLeaderboardWithImageView {

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.app;
+package com.sap.sailing.gwt.autoplay.client.app.classic;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;

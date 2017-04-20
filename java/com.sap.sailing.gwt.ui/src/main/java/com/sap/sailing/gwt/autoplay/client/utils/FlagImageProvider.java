@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base;
+package com.sap.sailing.gwt.autoplay.client.utils;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLeaderBoardWithImageViewImpl.ImageProvider;
