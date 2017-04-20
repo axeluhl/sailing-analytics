@@ -2,17 +2,17 @@ package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreRaceLeaderBoardWithCompetitorPlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreRaceLeaderBoardWithFlagPlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide2.IdleUpNextPlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4.PreRaceCompetitorsFlagsPlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide4.PreRaceCompetitorsImagePlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide6.PreRaceRacemapPlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide7.LifeRaceWithRacemapPlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithCompetitorsTop3Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8.RaceEndWithFlagesTop3Place;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slideinit.SlideInitPlace;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.StartPlaceSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.afterliveraceLoop.boats.RaceEndWithCompetitorsTop3Place;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.afterliveraceLoop.boats.RaceEndWithFlagesTop3Place;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.idleloop.idleupnext.IdleUpNextPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.liferaceloop.racemap.LifeRaceWithRacemapPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.competitors.PreRaceCompetitorsFlagsPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.competitors.PreRaceCompetitorsImagePlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.leaderboard.PreRaceLeaderBoardWithCompetitorPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.leaderboard.PreRaceLeaderBoardWithFlagPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.racemap.PreRaceRacemapPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.SlideInitPlace;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.start.StartPlaceSixtyInch;
 
 @WithTokenizers({ SlideInitPlace.Tokenizer.class, StartPlaceSixtyInch.Tokenizer.class,
         PreRaceCompetitorsFlagsPlace.Tokenizer.class, PreRaceCompetitorsImagePlace.Tokenizer.class,

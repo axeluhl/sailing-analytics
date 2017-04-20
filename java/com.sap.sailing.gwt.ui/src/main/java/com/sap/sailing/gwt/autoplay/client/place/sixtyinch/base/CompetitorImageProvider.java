@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide0.PreLeaderBoardWithImageViewImpl.ImageProvider;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.places.preliveraceloop.leaderboard.PreLeaderBoardWithImageViewImpl.ImageProvider;
 
 public class CompetitorImageProvider implements ImageProvider {
 
