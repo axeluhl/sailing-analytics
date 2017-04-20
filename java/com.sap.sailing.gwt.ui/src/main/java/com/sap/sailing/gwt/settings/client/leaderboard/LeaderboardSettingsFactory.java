@@ -110,6 +110,7 @@ public class LeaderboardSettingsFactory {
         return leaderboardSettings;
     }
     
+<<<<<<< HEAD
     public LeaderboardSettings createNewSettingsWithCustomRaceDetails(List<DetailType> raceDetailsToShow) {
         LeaderboardSettings defaultSettings = new LeaderboardSettings();
         return new LeaderboardSettings(
@@ -127,6 +128,66 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 defaultSettings.isShowCompetitorSailIdColumn(),
                 defaultSettings.isShowCompetitorFullNameColumn());
+=======
+    public LeaderboardSettings createNewSettingsWithCustomDefaults(LeaderboardSettings customDefaultSettings) {
+        LeaderboardSettings leaderboardSettings = new LeaderboardSettings();
+        leaderboardSettings.overrideDefaultValues(customDefaultSettings);
+        return leaderboardSettings;
+    }
+    
+    public LeaderboardSettings overrideDefaultValuesWithNewDefaults(LeaderboardSettings settingsWithCustomValues, LeaderboardSettings customDefaultSettings) {
+        LeaderboardSettings leaderboardSettings = new LeaderboardSettings();
+        leaderboardSettings.setValues(settingsWithCustomValues);
+        leaderboardSettings.overrideDefaultValues(customDefaultSettings);
+        return leaderboardSettings;
+    }
+    
+    public LeaderboardSettings keepDefaults(LeaderboardSettings previousSettings, LeaderboardSettings newSettings) {
+        LeaderboardSettings leaderboardSettings = previousSettings.getDefaultSettings();
+        leaderboardSettings.setValues(newSettings);
+        return leaderboardSettings;
+    }
+    
+    public LeaderboardSettings overrideDefaultValuesForRaceDetails(LeaderboardSettings existingSettings, List<DetailType> newRaceDetailsDefaultValues) {
+        LeaderboardSettings newSettings = new LeaderboardSettings(
+                Util.cloneListOrNull(existingSettings.getManeuverDetailsToShow()),
+                Util.cloneListOrNull(existingSettings.getLegDetailsToShow()),
+                newRaceDetailsDefaultValues, Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
+                Util.cloneListOrNull(existingSettings.getNamesOfRaceColumnsToShow()),
+                Util.cloneListOrNull(existingSettings.getNamesOfRacesToShow()),
+                existingSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
+                existingSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
+                existingSettings.getNameOfRaceToSort(), existingSettings.isSortAscending(),
+                existingSettings.isUpdateUponPlayStateChange(),
+                existingSettings.getActiveRaceColumnSelectionStrategy(),
+                existingSettings.isShowAddedScores(),
+                existingSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
+                existingSettings.isShowCompetitorSailIdColumn(),
+                existingSettings.isShowCompetitorFullNameColumn());
+        
+        final LeaderboardSettings existingDefaultSettings = existingSettings.getDefaultSettings();
+        
+        LeaderboardSettings newDefaultSettings = new LeaderboardSettings(
+                Util.cloneListOrNull(existingDefaultSettings.getManeuverDetailsToShow()),
+                Util.cloneListOrNull(existingDefaultSettings.getLegDetailsToShow()),
+                newRaceDetailsDefaultValues, Util.cloneListOrNull(existingDefaultSettings.getOverallDetailsToShow()),
+                Util.cloneListOrNull(existingDefaultSettings.getNamesOfRaceColumnsToShow()),
+                Util.cloneListOrNull(existingDefaultSettings.getNamesOfRacesToShow()),
+                existingDefaultSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
+                existingDefaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
+                existingDefaultSettings.getNameOfRaceToSort(), existingDefaultSettings.isSortAscending(),
+                existingDefaultSettings.isUpdateUponPlayStateChange(),
+                existingDefaultSettings.getActiveRaceColumnSelectionStrategy(),
+                existingDefaultSettings.isShowAddedScores(),
+                existingDefaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
+                existingDefaultSettings.isShowCompetitorSailIdColumn(),
+                existingDefaultSettings.isShowCompetitorFullNameColumn());
+        
+        newDefaultSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomDefaults(newDefaultSettings);
+        
+        newSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(newDefaultSettings, newSettings);
+        return newSettings;
+>>>>>>> refs/remotes/origin/bug3529
     }
     
     public LeaderboardSettings mergeLeaderboardSettings(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
