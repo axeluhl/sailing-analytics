@@ -49,7 +49,7 @@ public class SlideInitPresenterImpl extends SlideBase<SlideInitPlace> implements
                 public void execute() {
                     if (getPlace().getCurrentSlideConfig() != null) {
                         GWT.log("sideinit presenter: doContinue");
-                        getPlace().getCurrentSlideConfig().doContinue();
+
                     }
                 }
             }, new Command() {

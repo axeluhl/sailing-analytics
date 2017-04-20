@@ -10,10 +10,12 @@ import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.AutoPlayNodeController;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.AutoPlayLoopNode;
+import com.sap.sailing.gwt.autoplay.client.orchestrator.nodes.impl.AutoPlaySequenceNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.IdleUpNextController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.LifeRaceWithRacemapController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.PreRaceWithRacemapController;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.RaceEndWithBoatsController;
+import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.SixtyInchRootNode;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.orchestrator.nodes.StartupController;
 
 public class SixtyInchOrchestrator implements Orchestrator {
@@ -25,17 +27,19 @@ public class SixtyInchOrchestrator implements Orchestrator {
 
     public SixtyInchOrchestrator(AutoPlayClientFactorySixtyInch cf) {
         this.cf = cf;
-        AutoPlayLoopNode idleLoop = new AutoPlayLoopNode(new IdleUpNextController(cf));
-        AutoPlayLoopNode preLifeRaceLoop = new AutoPlayLoopNode(new PreRaceWithRacemapController(cf));
-        AutoPlayLoopNode lifeRaceLoop = new AutoPlayLoopNode(new LifeRaceWithRacemapController(cf));
-        AutoPlayLoopNode afterLifeRaceLoop = new AutoPlayLoopNode(new RaceEndWithBoatsController(cf));
-        afterLifeRaceLoop.setLoopEndDestination(idleLoop);
 
-        LifeRaceStateController raceLoop = new LifeRaceStateController(cf, idleLoop, lifeRaceLoop, preLifeRaceLoop,
+        AutoPlayLoopNode idleLoop = new AutoPlayLoopNode(30, new IdleUpNextController(cf));
+        AutoPlayLoopNode preLifeRaceLoop = new AutoPlayLoopNode(30, new PreRaceWithRacemapController(cf));
+        AutoPlayLoopNode lifeRaceLoop = new AutoPlayLoopNode(30, new LifeRaceWithRacemapController(cf));
+        AutoPlayNodeController afterLifeRaceLoop = new AutoPlaySequenceNode(30, new RaceEndWithBoatsController(cf),
+                idleLoop);
+
+        SixtyInchRootNode raceLoop = new SixtyInchRootNode(cf, idleLoop, lifeRaceLoop, preLifeRaceLoop,
                 afterLifeRaceLoop);
 
         root = new StartupController(cf);
         root.setWhenReadyDestination(raceLoop);
+
 
         transitionToNode(root);
 
