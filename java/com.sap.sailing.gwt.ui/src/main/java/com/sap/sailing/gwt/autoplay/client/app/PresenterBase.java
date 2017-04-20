@@ -1,8 +1,9 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base;
+package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchContext;
 
 public abstract class PresenterBase<P extends Place> extends AbstractActivity {
 

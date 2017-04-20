@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.autoplay.client.resources.LeaderboardTableResourcesSixty;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;

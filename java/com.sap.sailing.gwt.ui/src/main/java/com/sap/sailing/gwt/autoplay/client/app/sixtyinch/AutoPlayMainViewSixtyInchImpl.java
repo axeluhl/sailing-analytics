@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.app;
+package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -10,6 +10,8 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
+import com.sap.sailing.gwt.autoplay.client.app.ApplicationTopLevelView;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.StringMessages;

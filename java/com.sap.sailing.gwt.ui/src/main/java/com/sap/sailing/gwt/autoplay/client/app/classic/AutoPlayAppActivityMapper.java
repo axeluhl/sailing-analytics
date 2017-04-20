@@ -1,8 +1,10 @@
-package com.sap.sailing.gwt.autoplay.client.app;
+package com.sap.sailing.gwt.autoplay.client.app.classic;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerActivityProxy;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartActivityProxy;

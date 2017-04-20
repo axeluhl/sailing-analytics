@@ -1,9 +1,13 @@
-package com.sap.sailing.gwt.autoplay.client.app;
+package com.sap.sailing.gwt.autoplay.client.app.classic;
 
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactoryBase;
+import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorImpl;
 import com.sap.sailing.gwt.autoplay.client.place.player.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerView;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.DesktopStartView;

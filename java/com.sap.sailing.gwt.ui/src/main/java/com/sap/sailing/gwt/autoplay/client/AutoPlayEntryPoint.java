@@ -2,10 +2,10 @@ package com.sap.sailing.gwt.autoplay.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayAppActivityMapper;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayHistoryMapperDesktopImpl;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayAppActivityMapper;
+import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayHistoryMapperDesktopImpl;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;

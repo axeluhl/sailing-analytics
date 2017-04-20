@@ -1,6 +1,6 @@
-package com.sap.sailing.gwt.autoplay.client.app;
+package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
 
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SixtyInchContext;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 
 public interface AutoPlayClientFactorySixtyInch extends AutoPlayClientFactory<PlaceNavigatorSixtyInch> {
