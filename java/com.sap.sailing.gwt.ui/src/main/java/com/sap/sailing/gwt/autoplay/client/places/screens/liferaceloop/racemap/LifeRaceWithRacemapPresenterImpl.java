@@ -43,8 +43,6 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredPresenter<LifeRa
                 selectNext();
             }
         };
-        selectionTimer.scheduleRepeating(SWITCH_COMPETITOR_DELAY);
-
     }
 
     protected void selectNext() {
@@ -79,6 +77,7 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredPresenter<LifeRa
                 }
             }
         });
+        selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
     }
 
     private void onSelect(CompetitorDTO marked) {
@@ -124,6 +123,7 @@ public class LifeRaceWithRacemapPresenterImpl extends ConfiguredPresenter<LifeRa
                 StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, false);
 
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
+        selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
     }
 
     @Override
