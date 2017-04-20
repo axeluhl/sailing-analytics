@@ -35,6 +35,7 @@
 	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceRaceboard"/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole"/>
+    <inherits name='com.sap.sailing.gwt.settings.Settings'/>
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
 </module>

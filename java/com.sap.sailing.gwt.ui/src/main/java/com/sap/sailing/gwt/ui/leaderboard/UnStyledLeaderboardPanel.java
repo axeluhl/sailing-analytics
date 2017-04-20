@@ -78,6 +78,11 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -97,7 +102,6 @@ import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -119,12 +123,13 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -132,9 +137,17 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Axel Uhl (D043530)
  * 
  */
-public class UnStyledLeaderboardPanel extends SimplePanel implements Component<LeaderboardSettings>, TimeListener,
-        PlayStateListener, DisplayedLeaderboardRowsProvider, IsEmbeddableComponent, CompetitorSelectionChangeListener,
-        LeaderboardFetcher, BusyStateProvider, LeaderboardUpdateProvider {
+public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<LeaderboardSettings>
+        implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider, IsEmbeddableComponent,
+        CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider, LeaderboardUpdateProvider {
+
+    private final LeaderboardResources resources;
+    private final ComponentResources componentResources;
+    private final LeaderboardTableResources tableResources;
+    // private static final LeaderboardResources RESOURCES = GWT.create(LeaderboardResources.class);
+    // private static final ComponentResources COMPONENT_RESOURCES = GWT.create(ComponentResources.class);
+    // private static final LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
+
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
@@ -191,11 +204,12 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
      * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], boolean, String, com.google.gwt.user.client.rpc.AsyncCallback)
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
+    private LeaderboardSettings currentSettings;
     private String leaderboardName;
 
     private final ErrorReporter errorReporter;
 
-    private final StringMessages stringMessages;
+    public final StringMessages stringMessages;
 
     private final FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable;
 
@@ -211,21 +225,21 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
      * when updated the next time.
      */
-    private final List<DetailType> selectedManeuverDetails;
+    private final List<DetailType> selectedManeuverDetails = new ArrayList<DetailType>();;
 
     /**
      * Passed to the {@link LegColumn}. Modifications to this list will modify the column's children list when updated
      * the next time.
      */
-    private final List<DetailType> selectedLegDetails;
+    private final List<DetailType> selectedLegDetails = new ArrayList<DetailType>();
 
     /**
      * Passed to the {@link TextRaceColumn}. Modifications to this list will modify the column's children list when
      * updated the next time.
      */
-    private final List<DetailType> selectedRaceDetails;
+    private final List<DetailType> selectedRaceDetails = new ArrayList<DetailType>();
 
-    private final List<DetailType> selectedOverallDetailColumns;
+    private final List<DetailType> selectedOverallDetailColumns = new ArrayList<DetailType>();;
 
     private final Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> overallDetailColumnMap;
 
@@ -315,7 +329,7 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
      */
     private final RegattaAndRaceIdentifier preSelectedRace;
 
-    private final FlowPanel contentPanel;
+    private final FlowPanel contentPanel = new FlowPanel();
 
     private HorizontalPanel refreshAndSettingsPanel;
     private Label scoreCorrectionLastUpdateTimeLabel;
@@ -335,22 +349,6 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
     private int busyTaskCounter;
     private final BusyIndicator busyIndicator;
     private final Set<BusyStateChangeListener> busyStateChangeListeners;
-
-    /**
-     * Tells whether the leaderboard settings were explicitly changed by an external call to
-     * {@link #updateSettings(LeaderboardSettings)}. If so, a {@link #playStateChanged(PlayStates, PlayModes) play state
-     * change} will not automatically lead to a settings change.
-     */
-    private boolean settingsUpdatedExplicitly = false;
-
-    /**
-     * Tells if the leaderboard is currently handling a {@link #playStateChanged(PlayStates, PlayModes) play state
-     * change}. If this is the case, a call to {@link #updateSettings(LeaderboardSettings)} won't set the
-     * {@link #settingsUpdatedExplicitly} flag.
-     */
-    private boolean currentlyHandlingPlayStateChange;
-
-    private PlayModes oldPlayMode;
 
     private final AsyncActionsExecutor asyncActionsExecutor;
 
@@ -383,7 +381,7 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
     private Element elementToBlur;
     private boolean showSelectionCheckbox;
 
-    private final List<LeaderboardUpdateListener> leaderboardUpdateListener;
+    private final List<LeaderboardUpdateListener> leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
 
     private boolean initialCompetitorFilterHasBeenApplied = false;
     private final boolean showCompetitorFilterStatus;
@@ -396,14 +394,236 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
      */
     private final boolean enableSyncedScroller;
 
-    private LeaderboardResources resources;
+    public UnStyledLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
+            ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,
+            LeaderboardResources resources, ComponentResources componentResources,
+            LeaderboardTableResources tableResources) {
+        this(parent, context, sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null,
+                competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, showRaceDetails,
+                resources, componentResources, tableResources);
+    }
 
-    private ComponentResources componentResources;
+    public UnStyledLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
+            boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
+            String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
+            boolean showRaceDetails, LeaderboardResources resources, ComponentResources componentResources,
+            LeaderboardTableResources tableResources) {
+        this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
+                competitorSelectionProvider,
+                new Timer(
+                        // perform the first request as "live" but don't by default auto-play
+                        PlayModes.Live, PlayStates.Paused,
+                        /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS),
+                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
+                /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
+                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
+                /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
+                /* enableSyncScroller */ false, resources, componentResources, tableResources);
+    }
 
-    private LeaderboardTableResources tableResources;
+    public UnStyledLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
+            boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
+            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
+            boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
+            RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
+            boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
+            boolean enableSyncScroller, LeaderboardResources resources, ComponentResources componentResources,
+            LeaderboardTableResources tableResources) {
+        super(parent, context);
+        this.resources = resources;
+        this.componentResources = componentResources;
+        this.tableResources = tableResources;
+        this.showSelectionCheckbox = showSelectionCheckbox;
+        this.showRaceDetails = showRaceDetails;
+        this.sailingService = sailingService;
+        this.asyncActionsExecutor = asyncActionsExecutor;
+        this.isEmbedded = isEmbedded;
+        this.preSelectedRace = preSelectedRace;
+        this.competitorSelectionProvider = competitorSelectionProvider;
+        competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
+        this.setLeaderboardName(leaderboardName);
+        this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
+        this.raceTimesInfoProvider = optionalRaceTimesInfoProvider;
+        this.adjustTimerDelay = adjustTimerDelay;
+        this.initialCompetitorFilterHasBeenApplied = !autoApplyTopNFilter;
+        this.showCompetitorFilterStatus = showCompetitorFilterStatus;
+        this.enableSyncedScroller = enableSyncScroller;
+        this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
+        this.timer = timer;
+        RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
+        LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
+        LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
+        RACE_COLUMN_STYLE = tableResources.cellTableStyle().cellTableRaceColumn();
+        LEG_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegColumn();
+        LEG_DETAIL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumn();
+        TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
+        overallDetailColumnMap = createOverallDetailColumnMap();
+        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+        if (settings.getLegDetailsToShow() != null) {
+            selectedLegDetails.addAll(settings.getLegDetailsToShow());
+        }
+        if (settings.getOverallDetailsToShow() != null) {
+            selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
+        }
+        timer.addPlayStateListener(this);
+        timer.addTimeListener(this);
+        switch (settings.getActiveRaceColumnSelectionStrategy()) {
+        case EXPLICIT:
+            if (preSelectedRace == null) {
+                raceColumnSelection = new ExplicitRaceColumnSelection();
+            } else {
+                raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
+            }
+            break;
+        case LAST_N:
+            setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
+            break;
+        }
+        totalRankColumn = new TotalRankColumn();
+        leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
+                tableResources);
+        leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
+            @Override
+            public void onCellPreview(CellPreviewEvent<LeaderboardRowDTO> event) {
+                if (BrowserEvents.FOCUS.equals(event.getNativeEvent().getType())) {
+                    elementToBlur = event.getNativeEvent().getEventTarget().cast();
+                    elementToBlur.blur();
+                    blurInOnSelectionChanged = 2; // blur a couple of times; doing it one time only doesn't seem to work
+                                                  // reliably
+                    blurFocusedElementAfterSelectionChange();
+                }
+            }
+        });
+        leaderboardTable.ensureDebugId("LeaderboardCellTable");
+        selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
+        leaderboardTable.setWidth("100%");
+        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
+        // remember handler registration so we can temporarily remove it and re-add it to suspend selection events while
+        // we're actively changing it
+        selectionChangeHandler = new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                List<CompetitorDTO> selection = new ArrayList<CompetitorDTO>();
+                for (LeaderboardRowDTO row : getSelectedRows()) {
+                    selection.add(row.competitor);
+                }
+                UnStyledLeaderboardPanel.this.competitorSelectionProvider.setSelection(selection,
+                        /* listenersNotToNotify */UnStyledLeaderboardPanel.this);
+                if (blurInOnSelectionChanged > 0) {
+                    blurInOnSelectionChanged--;
+                    blurFocusedElementAfterSelectionChange();
+                }
+            }
+        };
+        leaderboardAsTableSelectionModelRegistration = leaderboardSelectionModel
+                .addSelectionChangeHandler(selectionChangeHandler);
+        leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionCheckboxColumn.getSelectionManager());
+        SimplePanel mainPanel = new SimplePanel();
+        leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
+        contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
+        busyIndicator = new SimpleBusyIndicator(false, 0.8f);
+        busyIndicator.ensureDebugId("BusyIndicator");
+        busyStateChangeListeners = new HashSet<>();
+        // the information panel
+        if (!isEmbedded) {
+            Widget toolbarPanel = createToolbarPanel();
+            contentPanel.add(toolbarPanel);
+        }
+        if (competitorSearchTextBox != null) {
+            competitorSearchTextBox.add(busyIndicator);
+            contentPanel.add(competitorSearchTextBox);
+            competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    new SettingsDialog<LeaderboardSettings>(UnStyledLeaderboardPanel.this, stringMessages).show();
+                }
+            });
+            this.competitorFilterPanel = competitorSearchTextBox;
+        }
+        filterControlPanel = new HorizontalPanel();
+        filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
+        if (enableSyncedScroller) {
+            contentPanel.add(new OverlayAssistantScrollPanel(leaderboardTable));
+        } else {
+            contentPanel.add(leaderboardTable);
+        }
+        if (showCompetitorFilterStatus) {
+            contentPanel.add(createFilterDeselectionControl());
+        }
+        initWidget(mainPanel);
+        mainPanel.setWidget(contentPanel);
+        this.setTitle(stringMessages.leaderboard());
+        if (timer.isInitialized()) {
+            loadCompleteLeaderboard(/* showProgress */ false);
+        }
+        updateSettings(settings);
+    }
 
-    protected StringMessages getStringMessages() {
-        return stringMessages;
+    public void scrollRowIntoView(int selected) {
+        leaderboardTable.getRowElement(selected).scrollIntoView();
+    }
+
+    private Widget createToolbarPanel() {
+        FlowPanel informationPanel = new FlowPanel();
+        informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
+        scoreCorrectionLastUpdateTimeLabel = new Label("");
+        scoreCorrectionCommentLabel = new Label("");
+        informationPanel.add(scoreCorrectionCommentLabel);
+        informationPanel.add(scoreCorrectionLastUpdateTimeLabel);
+
+        liveRaceLabel = new Label(stringMessages.live());
+        liveRaceLabel.setStyleName(STYLE_LEADERBOARD_LIVE_RACE);
+        liveRaceLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        liveRaceLabel.getElement().getStyle().setColor(IS_LIVE_TEXT_COLOR);
+        liveRaceLabel.setVisible(false);
+        informationPanel.add(liveRaceLabel);
+
+        // the toolbar panel
+        DockPanel toolbarPanel = new DockPanel();
+        toolbarPanel.ensureDebugId("ToolbarPanel");
+        toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
+        if (!isEmbedded) {
+            toolbarPanel.add(informationPanel, DockPanel.WEST);
+            toolbarPanel.add(busyIndicator, DockPanel.WEST);
+        }
+        toolbarPanel.setWidth("100%");
+        toolbarPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        ClickHandler playPauseHandler = new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (UnStyledLeaderboardPanel.this.timer.getPlayState() == PlayStates.Playing) {
+                    UnStyledLeaderboardPanel.this.timer.pause();
+                } else {
+                    // playing the standalone leaderboard means putting it into live mode
+                    UnStyledLeaderboardPanel.this.timer.setPlayMode(PlayModes.Live);
+                }
+            }
+        };
+        pauseIcon = resources.autoRefreshEnabledIcon();
+        playIcon = resources.autoRefreshDisabledIcon();
+        refreshAndSettingsPanel = new HorizontalPanel();
+        refreshAndSettingsPanel.ensureDebugId("RefreshAndSettingsPanel");
+        refreshAndSettingsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        FlowPanel refreshPanel = new FlowPanel();
+        refreshPanel.addStyleName("refreshPanel");
+        toolbarPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        toolbarPanel.addStyleName("refreshAndSettings");
+        playPause = new Anchor(getPlayPauseImgHtml(timer.getPlayState()));
+        playPause.ensureDebugId("PlayAndPauseAnchor");
+        playPause.addClickHandler(playPauseHandler);
+        playStateChanged(timer.getPlayState(), timer.getPlayMode());
+        refreshPanel.add(playPause);
+
+        refreshAndSettingsPanel.add(refreshPanel);
+        toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
+        return toolbarPanel;
     }
 
     @Override
@@ -445,13 +665,11 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
     }
 
     public void updateSettings(final LeaderboardSettings newSettings) {
+        this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
         if (newSettings.getOverallDetailsToShow() != null) {
             selectedOverallDetailColumns.clear();
             selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
-        }
-        if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
-            settingsUpdatedExplicitly = true;
         }
         setShowAddedScores(newSettings.isShowAddedScores());
         setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
@@ -484,51 +702,6 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
             selectedRaceDetails.clear();
             selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
         }
-        // update strategy for determining the race columns to show; if settings' race columns to show is null, use the
-        // previously selected race columns / number of race columns for the new configuration
-        Iterable<String> oldNamesOfRaceColumnsToShow = null;
-        if (newSettings.getNamesOfRaceColumnsToShow() == null) {
-            oldNamesOfRaceColumnsToShow = raceColumnSelection.getSelectedRaceColumnNames();
-        }
-        switch (newSettings.getActiveRaceColumnSelectionStrategy()) {
-        case EXPLICIT:
-            if (preSelectedRace == null) {
-                raceColumnSelection = new ExplicitRaceColumnSelection();
-            } else {
-                raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
-            }
-            if (newSettings.getNamesOfRaceColumnsToShow() != null) {
-                raceColumnSelection.requestClear();
-                for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
-                    RaceColumnDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
-                    if (raceColumnToShow != null) {
-                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
-                    }
-                }
-            } else {
-                // apply the old column selections again
-                for (String oldNameOfRaceColumnToShow : oldNamesOfRaceColumnsToShow) {
-                    final RaceColumnDTO raceColumnByName = getLeaderboard()
-                            .getRaceColumnByName(oldNameOfRaceColumnToShow);
-                    if (raceColumnByName != null) {
-                        raceColumnSelection.requestRaceColumnSelection(raceColumnByName);
-                    }
-                }
-                if (newSettings.getNamesOfRacesToShow() != null) {
-                    raceColumnSelection.requestClear();
-                    for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
-                        RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
-                        if (raceColumnToShow != null) {
-                            raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
-                        }
-                    }
-                }
-            }
-            break;
-        case LAST_N:
-            setRaceColumnSelectionToLastNStrategy(newSettings.getNumberOfLastRacesToShow());
-            break;
-        }
 
         addBusyTask();
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
@@ -539,6 +712,52 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
                                                          // later
                                                          // if it was expanded before
                     // update leaderboard after settings panel column selection change
+                    // update strategy for determining the race columns to show; if settings' race columns to show is
+                    // null, use the
+                    // previously selected race columns / number of race columns for the new configuration
+                    Iterable<String> oldNamesOfRaceColumnsToShow = null;
+                    if (newSettings.getNamesOfRaceColumnsToShow() == null) {
+                        oldNamesOfRaceColumnsToShow = raceColumnSelection.getSelectedRaceColumnNames();
+                    }
+                    switch (newSettings.getActiveRaceColumnSelectionStrategy()) {
+                    case EXPLICIT:
+                        if (preSelectedRace == null) {
+                            raceColumnSelection = new ExplicitRaceColumnSelection();
+                        } else {
+                            raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
+                        }
+                        if (newSettings.getNamesOfRaceColumnsToShow() != null) {
+                            raceColumnSelection.requestClear();
+                            for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
+                                RaceColumnDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
+                                if (raceColumnToShow != null) {
+                                    raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
+                                }
+                            }
+                        } else {
+                            // apply the old column selections again
+                            for (String oldNameOfRaceColumnToShow : oldNamesOfRaceColumnsToShow) {
+                                final RaceColumnDTO raceColumnByName = getLeaderboard()
+                                        .getRaceColumnByName(oldNameOfRaceColumnToShow);
+                                if (raceColumnByName != null) {
+                                    raceColumnSelection.requestRaceColumnSelection(raceColumnByName);
+                                }
+                            }
+                            if (newSettings.getNamesOfRacesToShow() != null) {
+                                raceColumnSelection.requestClear();
+                                for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
+                                    RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
+                                    if (raceColumnToShow != null) {
+                                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case LAST_N:
+                        setRaceColumnSelectionToLastNStrategy(newSettings.getNumberOfLastRacesToShow());
+                        break;
+                    }
                     updateLeaderboard(leaderboard);
                     setAutoExpandPreSelectedRace(newSettings.isAutoExpandPreSelectedRace());
 
@@ -1006,9 +1225,9 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
             }
         }
 
-        @Override
+        // @Override
         protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-                UnStyledLeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
+                LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
             result.put(DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL,
@@ -1848,252 +2067,6 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
         }
     }
 
-    public UnStyledLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
-            String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, LeaderboardResources resources,
-            ComponentResources componentResources, LeaderboardTableResources tableResources) {
-        this(sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null,
-                competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, userAgent,
-                showRaceDetails, resources, componentResources, tableResources);
-    }
-
-    public UnStyledLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
-            String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, LeaderboardResources resources,
-            ComponentResources componentResources, LeaderboardTableResources tableResources) {
-        this(sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace, competitorSelectionProvider,
-                new Timer(
-                        // perform the first request as "live" but don't by default auto-play
-                        PlayModes.Live, PlayStates.Paused,
-                        /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS),
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
-                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
-                /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
-                /* enableSyncScroller */ false, resources, componentResources, tableResources);
-    }
-
-    public UnStyledLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
-            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
-            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
-            boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
-            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
-            boolean showCompetitorFilterStatus, boolean enableSyncScroller, LeaderboardResources resources,
-            ComponentResources componentResources, LeaderboardTableResources tableResources) {
-        this.resources = resources;
-        this.componentResources = componentResources;
-        this.tableResources = tableResources;
-        this.showSelectionCheckbox = showSelectionCheckbox;
-        this.showRaceDetails = showRaceDetails;
-        this.sailingService = sailingService;
-        this.asyncActionsExecutor = asyncActionsExecutor;
-        this.isEmbedded = isEmbedded;
-        this.preSelectedRace = preSelectedRace;
-        this.competitorSelectionProvider = competitorSelectionProvider;
-        competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
-        this.setLeaderboardName(leaderboardName);
-        this.errorReporter = errorReporter;
-        this.stringMessages = stringMessages;
-        this.selectedLegDetails = new ArrayList<DetailType>();
-        this.selectedRaceDetails = new ArrayList<DetailType>();
-        this.selectedOverallDetailColumns = new ArrayList<DetailType>();
-        this.raceTimesInfoProvider = optionalRaceTimesInfoProvider;
-        this.selectedManeuverDetails = new ArrayList<DetailType>();
-        this.adjustTimerDelay = adjustTimerDelay;
-        this.initialCompetitorFilterHasBeenApplied = !autoApplyTopNFilter;
-        this.showCompetitorFilterStatus = showCompetitorFilterStatus;
-        this.enableSyncedScroller = enableSyncScroller;
-        overallDetailColumnMap = createOverallDetailColumnMap();
-        settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
-        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
-        this.leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
-        if (settings.getLegDetailsToShow() != null) {
-            selectedLegDetails.addAll(settings.getLegDetailsToShow());
-        }
-        if (settings.getManeuverDetailsToShow() != null) {
-            selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
-        }
-        if (settings.getRaceDetailsToShow() != null) {
-            selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
-        }
-        if (settings.getOverallDetailsToShow() != null) {
-            selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
-        }
-        setAutoExpandPreSelectedRace(settings.isAutoExpandPreSelectedRace());
-        this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
-        if (settings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-            timer.setRefreshInterval(settings.getDelayBetweenAutoAdvancesInMilliseconds());
-        }
-        this.timer = timer;
-        timer.addPlayStateListener(this);
-        timer.addTimeListener(this);
-        switch (settings.getActiveRaceColumnSelectionStrategy()) {
-        case EXPLICIT:
-            if (preSelectedRace == null) {
-                raceColumnSelection = new ExplicitRaceColumnSelection();
-            } else {
-                raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
-            }
-            break;
-        case LAST_N:
-            setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
-            break;
-        }
-        totalRankColumn = new TotalRankColumn();
-        RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
-        LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
-        LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
-        RACE_COLUMN_STYLE = tableResources.cellTableStyle().cellTableRaceColumn();
-        LEG_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegColumn();
-        LEG_DETAIL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumn();
-        TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
-        leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
-                tableResources);
-        leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
-            @Override
-            public void onCellPreview(CellPreviewEvent<LeaderboardRowDTO> event) {
-                if (BrowserEvents.FOCUS.equals(event.getNativeEvent().getType())) {
-                    elementToBlur = event.getNativeEvent().getEventTarget().cast();
-                    elementToBlur.blur();
-                    blurInOnSelectionChanged = 2; // blur a couple of times; doing it one time only doesn't seem to work
-                                                  // reliably
-                    blurFocusedElementAfterSelectionChange();
-                }
-            }
-        });
-        leaderboardTable.ensureDebugId("LeaderboardCellTable");
-        selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
-        leaderboardTable.setWidth("100%");
-        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
-        // remember handler registration so we can temporarily remove it and re-add it to suspend selection events while
-        // we're actively changing it
-        selectionChangeHandler = new Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                List<CompetitorDTO> selection = new ArrayList<CompetitorDTO>();
-                for (LeaderboardRowDTO row : getSelectedRows()) {
-                    selection.add(row.competitor);
-                }
-                UnStyledLeaderboardPanel.this.competitorSelectionProvider.setSelection(selection,
-                        /* listenersNotToNotify */UnStyledLeaderboardPanel.this);
-                if (blurInOnSelectionChanged > 0) {
-                    blurInOnSelectionChanged--;
-                    blurFocusedElementAfterSelectionChange();
-                }
-            }
-        };
-        leaderboardAsTableSelectionModelRegistration = leaderboardSelectionModel
-                .addSelectionChangeHandler(selectionChangeHandler);
-        leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionCheckboxColumn.getSelectionManager());
-        setShowAddedScores(settings.isShowAddedScores());
-        setShowCompetitorSailId(settings.isShowCompetitorSailIdColumn());
-        setShowCompetitorFullName(settings.isShowCompetitorFullNameColumn());
-        setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(
-                settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
-
-        SimplePanel mainPanel = new SimplePanel();
-        contentPanel = new FlowPanel();
-        leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
-        contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
-        busyIndicator = new SimpleBusyIndicator(false, 0.8f);
-        busyIndicator.ensureDebugId("BusyIndicator");
-        busyStateChangeListeners = new HashSet<>();
-
-        // the information panel
-        if (!isEmbedded) {
-            Widget toolbarPanel = createToolbarPanel();
-            contentPanel.add(toolbarPanel);
-        }
-        if (competitorSearchTextBox != null) {
-            competitorSearchTextBox.add(busyIndicator);
-            contentPanel.add(competitorSearchTextBox);
-            competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    new SettingsDialog<LeaderboardSettings>(UnStyledLeaderboardPanel.this, stringMessages).show();
-                }
-            });
-            this.competitorFilterPanel = competitorSearchTextBox;
-        }
-        filterControlPanel = new HorizontalPanel();
-        filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
-        if (enableSyncedScroller) {
-            contentPanel.add(new OverlayAssistantScrollPanel(leaderboardTable));
-        } else {
-            contentPanel.add(leaderboardTable);
-        }
-        if (showCompetitorFilterStatus) {
-            contentPanel.add(createFilterDeselectionControl());
-        }
-        setWidget(mainPanel);
-        mainPanel.setWidget(contentPanel);
-        this.setTitle(stringMessages.leaderboard());
-        if (timer.isInitialized()) {
-            loadCompleteLeaderboard(/* showProgress */ false);
-        }
-    }
-
-    private Widget createToolbarPanel() {
-        FlowPanel informationPanel = new FlowPanel();
-        informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
-        scoreCorrectionLastUpdateTimeLabel = new Label("");
-        scoreCorrectionCommentLabel = new Label("");
-        informationPanel.add(scoreCorrectionCommentLabel);
-        informationPanel.add(scoreCorrectionLastUpdateTimeLabel);
-
-        liveRaceLabel = new Label(stringMessages.live());
-        liveRaceLabel.setStyleName(STYLE_LEADERBOARD_LIVE_RACE);
-        liveRaceLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        liveRaceLabel.getElement().getStyle().setColor(IS_LIVE_TEXT_COLOR);
-        liveRaceLabel.setVisible(false);
-        informationPanel.add(liveRaceLabel);
-
-        // the toolbar panel
-        DockPanel toolbarPanel = new DockPanel();
-        toolbarPanel.ensureDebugId("ToolbarPanel");
-        toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
-        if (!isEmbedded) {
-            toolbarPanel.add(informationPanel, DockPanel.WEST);
-            toolbarPanel.add(busyIndicator, DockPanel.WEST);
-        }
-        toolbarPanel.setWidth("100%");
-        toolbarPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        ClickHandler playPauseHandler = new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (UnStyledLeaderboardPanel.this.timer.getPlayState() == PlayStates.Playing) {
-                    UnStyledLeaderboardPanel.this.timer.pause();
-                } else {
-                    // playing the standalone leaderboard means putting it into live mode
-                    UnStyledLeaderboardPanel.this.timer.setPlayMode(PlayModes.Live);
-                }
-            }
-        };
-        pauseIcon = resources.autoRefreshEnabledIcon();
-        playIcon = resources.autoRefreshDisabledIcon();
-        refreshAndSettingsPanel = new HorizontalPanel();
-        refreshAndSettingsPanel.ensureDebugId("RefreshAndSettingsPanel");
-        refreshAndSettingsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        FlowPanel refreshPanel = new FlowPanel();
-        refreshPanel.addStyleName("refreshPanel");
-        toolbarPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        toolbarPanel.addStyleName("refreshAndSettings");
-        playPause = new Anchor(getPlayPauseImgHtml(timer.getPlayState()));
-        playPause.ensureDebugId("PlayAndPauseAnchor");
-        playPause.addClickHandler(playPauseHandler);
-        playStateChanged(timer.getPlayState(), timer.getPlayMode());
-        refreshPanel.add(playPause);
-
-        refreshAndSettingsPanel.add(refreshPanel);
-        toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        return toolbarPanel;
-    }
-
     private Widget createFilterDeselectionControl() {
         filterStatusLabel = new Label();
         filterStatusLabel.setStyleName("LeaderboardPanel-FilterControl-StatusLabel");
@@ -2430,8 +2403,13 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
+                            currentSettings = LeaderboardSettingsFactory.getInstance()
+                                    .createNewSettingsWithCustomDefaults(
+                                            new LeaderboardSettings(result.getNamesOfRaceColumns()), currentSettings);
                             try {
                                 updateLeaderboard(result);
+                                // reapply, as columns might have changed
+                                updateSettings(currentSettings);
                             } finally {
                                 if (showProgress) {
                                     removeBusyTask();
@@ -3143,7 +3121,7 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
     }
 
     protected CompetitorColumn createCompetitorColumn() {
-        return new CompetitorColumn(new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(),
+        return new CompetitorColumn(new CompetitorColumnBase<LeaderboardRowDTO>(this, stringMessages,
                 new CompetitorFetcher<LeaderboardRowDTO>() {
                     @Override
                     public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
@@ -3262,29 +3240,11 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
 
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
-        currentlyHandlingPlayStateChange = true;
-
         if (!isEmbedded) {
             playPause.setHTML(getPlayPauseImgHtml(playState));
             playPause.setTitle(playState == PlayStates.Playing ? stringMessages.pauseAutomaticRefresh()
                     : stringMessages.autoRefresh());
         }
-        if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
-            // if settings weren't explicitly modified, auto-switch to live mode settings and sort for
-            // any pre-selected race; we need to copy the previously selected race columns to the new
-            // RaceColumnSelection
-            updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(playMode,
-                    /* don't touch columnToSort if no race was pre-selected */ preSelectedRace == null ? null
-                            : preSelectedRace.getRaceName(),
-                    /* don't change nameOfRaceColumnToShow */null,
-                    /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null
-                            : preSelectedRace.getRaceName(),
-                    getRaceColumnSelection(), /* leave showRegattaRank and overall details unchanged */ null,
-                    /* take into account state of competitor columns */isShowCompetitorSailId(),
-                    isShowCompetitorFullName()));
-        }
-        currentlyHandlingPlayStateChange = false;
-        oldPlayMode = playMode;
     }
 
     @Override
@@ -3316,7 +3276,8 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
 
     @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return new LeaderboardSettingsDialogComponent(getSettings(), leaderboard.getRaceList(), stringMessages);
+        return new LeaderboardSettingsDialogComponent(getSettings(), leaderboard.getNamesOfRaceColumns(),
+                stringMessages);
     }
 
     @Override
@@ -3327,18 +3288,16 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
         for (RaceColumnDTO raceColumn : selectedRaceColumns) {
             namesOfRaceColumnsToShow.add(raceColumn.getName());
         }
-        return new LeaderboardSettings(Collections.unmodifiableList(selectedManeuverDetails),
-                Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
+        LeaderboardSettings leaderboardSettings = new LeaderboardSettings(
+                Collections.unmodifiableList(selectedManeuverDetails), Collections.unmodifiableList(selectedLegDetails),
+                Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), namesOfRaceColumnsToShow,
                 /* namesOfRacesToShow */ null, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
                 autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
                 /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 isShowCompetitorSailId(), isShowCompetitorFullName());
-    }
-
-    public void scrollRowIntoView(int selected) {
-        leaderboardTable.getRowElement(selected).scrollIntoView();
+        return LeaderboardSettingsFactory.getInstance().keepDefaults(currentSettings, leaderboardSettings);
     }
 
     @Override
@@ -3461,7 +3420,8 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
     }
 
     protected void informLeaderboardUpdateListenersAboutLeaderboardUpdated(LeaderboardDTO leaderboard) {
-        for (LeaderboardUpdateListener listener : this.leaderboardUpdateListener) {
+        for (LeaderboardUpdateListener listener : new ArrayList<LeaderboardUpdateListener>(
+                this.leaderboardUpdateListener)) {
             listener.updatedLeaderboard(leaderboard);
         }
     }
@@ -3551,6 +3511,7 @@ public class UnStyledLeaderboardPanel extends SimplePanel implements Component<L
 
     @Override
     public String getId() {
-        return getLocalizedShortName();
+        return LeaderboardPanelLifecycle.ID;
     }
+
 }

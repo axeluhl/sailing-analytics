@@ -21,7 +21,9 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> implements QueryRunner {
 
@@ -53,9 +55,11 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
     private final ResultsPresenter<?> resultsPresenter;
     private final Button runButton;
 
-    public SimpleQueryRunner(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
+    public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
+            StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider<?> queryDefinitionProvider,
             ResultsPresenter<?> resultsPresenter) {
+        super(parent, context);
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -164,6 +168,11 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
     @Override
     public String getDependentCssClassName() {
         return "simpleQueryRunner";
+    }
+
+    @Override
+    public String getId() {
+        return "SimpleQueryRunner";
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
@@ -28,7 +29,7 @@ import com.tractrac.model.lib.api.event.IRaceCompetitor;
 public interface MetadataParser {
     public interface ControlPointMetaData extends Named {
         MarkType getType();
-        String getColor();
+        Color getColor();
         String getShape();
         String getPattern();
         Serializable getId();

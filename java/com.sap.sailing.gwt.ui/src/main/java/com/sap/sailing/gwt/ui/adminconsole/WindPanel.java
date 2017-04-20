@@ -109,6 +109,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
     public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
+        ensureDebugId("WindPanel");
+        
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -118,8 +120,10 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         mainPanel.setSize("100%", "100%");
         this.setWidget(mainPanel);
 
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
+                regattaRefresher,
                 stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
+        trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         mainPanel.add(trackedRacesListComposite);
         refreshableRaceSelectionModel = (RefreshableMultiSelectionModel<RaceDTO>) trackedRacesListComposite.getSelectionModel();
         refreshableRaceSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -267,7 +271,9 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         final CheckBox correctByDeclination = new CheckBox(stringMessages.declinationCheckbox());
         correctByDeclination.setValue(true); // by default this is desirable because the Igtimi connector reads uncorrected magnetic values
         final Button importButton = new Button(stringMessages.importWindFromIgtimi());
+        importButton.ensureDebugId("ImportWindFromIgtimi");
         final HTML resultReport = new HTML();
+        resultReport.ensureDebugId("IgtimiImportResultReport");
         importButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

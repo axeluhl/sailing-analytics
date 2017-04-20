@@ -15,19 +15,19 @@ import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredSlideBase<AbstractPreRaceLeaderBoardWithImagePlace> implements PreLeaderboardWithImageView.Slide1Presenter {
+public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredSlideBase<AbstractPreRaceLeaderBoardWithImagePlace>
+        implements PreLeaderboardWithImageView.Slide1Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private int selected = -1;
     private PreLeaderboardWithImageView view;
@@ -35,8 +35,8 @@ public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredSlideBase<Ab
     private Timer selectionTimer;
     private CompetitorSelectionModel competitorSelectionProvider;
 
-    public PreLeaderBoardWithImagePresenterImpl(AbstractPreRaceLeaderBoardWithImagePlace place, AutoPlayClientFactorySixtyInch clientFactory,
-            PreLeaderboardWithImageView slide1ViewImpl) {
+    public PreLeaderBoardWithImagePresenterImpl(AbstractPreRaceLeaderBoardWithImagePlace place,
+            AutoPlayClientFactorySixtyInch clientFactory, PreLeaderboardWithImageView slide1ViewImpl) {
         super(place, clientFactory);
         this.view = slide1ViewImpl;
         selectionTimer = new Timer() {
@@ -57,18 +57,15 @@ public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredSlideBase<Ab
             // no data loaded yet
             return;
         }
-
         if (selected >= 0) {
             CompetitorDTO lastSelected = compList.get(selected);
             competitorSelectionProvider.setSelected(lastSelected, false);
         }
         selected++;
-
         // overflow, restart
         if (selected > compList.size() - 1) {
             selected = 0;
         }
-
         GWT.log("Select " + selected);
         CompetitorDTO newSelected = compList.get(selected);
         competitorSelectionProvider.setSelected(newSelected, true);
@@ -86,7 +83,6 @@ public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredSlideBase<Ab
         });
     }
 
-
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
@@ -102,10 +98,16 @@ public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredSlideBase<Ab
             return;
         }
 
-        final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance()
-                .createNewDefaultSettings(null, racesToShow, null, /* autoExpandFirstRace */ false,
-                        /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true,
-                        /* showCompetitorFullNameColumn */ true);
+        // TODO check if "defaults" are ok
+        LeaderboardSettings leaderboardSettings = new LeaderboardSettings(
+                /* raceColumsToShow */ null, 
+                /* racesToShow*/ racesToShow, 
+                /* overAllDetailsToShow */ null,  
+                /* nameOfRaceToSort */ null,  
+                /* autoExpandPreselectedRace */ false,
+                /* showCompetitorSailIdColumn */ true,
+                /* showCompetitorFullNameColumn */ true
+                );
         GWT.log("event " + getSlideCtx().getEvent());
         List<StrippedLeaderboardDTO> leaderboards = getSlideCtx().getEvent().getLeaderboardGroups().get(0)
                 .getLeaderboards();

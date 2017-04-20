@@ -2,13 +2,13 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardResources;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.UnStyledLeaderboardPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -30,8 +30,9 @@ public class SixtyInchLeaderBoard extends UnStyledLeaderboardPanel {
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
             boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
-        super(sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace, competitorSelectionProvider,
-                timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
+        super(null, null, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
+                competitorSelectionProvider,
+                timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
                 adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, resources,
                 componentResources, tableResources);

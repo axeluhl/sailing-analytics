@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.sixtyinch.slides.slide8;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -15,12 +16,11 @@ import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.ConfiguredSlideBase;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -50,22 +50,29 @@ public class RaceEndWithBoatsPresenterImpl extends ConfiguredSlideBase<AbstractR
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
         view.startingWith(this, panel);
 
-        RegattaAndRaceIdentifier lifeRace = getPlace().getLastRace();
-        if (lifeRace == null) {
+        RegattaAndRaceIdentifier liveRace = getPlace().getLastRace();
+        if (liveRace == null) {
             panel.setWidget(new Label("No raceIdentifier specified"));
             return;
         }
 
-        final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance()
-                .createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true,
-                        /* showCompetitorSailIdColumn */ false, /* showCompetitorFullNameColumn */ true);
+        LeaderboardSettings leaderboardSettings = new LeaderboardSettings( //
+                /* raceColumsToShow */ null, //
+                /* racesToShow */ Arrays.asList(liveRace.getRaceName()), //
+                /* overAllDetailsToShow */ null, //
+                /* nameOfRaceToSort */ null, //
+                /* autoExpandPreselectedRace */ false, //
+                /* showCompetitorSailIdColumn */ false, //
+                /* showCompetitorFullNameColumn */ true //
+                );
+        
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
 
         com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live,
                 PlayStates.Paused,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-                false, lifeRace, competitorSelectionProvider, timer, null,
+                false, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getSettings().getLeaderBoardName(), errorReporter, StringMessages.INSTANCE, null, false,
                 null, false, null, false, true, false, false, false);
         view.setLeaderBoard(leaderboardPanel);
@@ -88,7 +95,7 @@ public class RaceEndWithBoatsPresenterImpl extends ConfiguredSlideBase<AbstractR
 
                 @Override
                 public void run() {
-                    determinePlacement(first, second, third, lifeRace);
+                    determinePlacement(first, second, third, liveRace);
                 }
 
             };

@@ -2,15 +2,10 @@ package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.autoplay.client.orchestrator.Orchestrator;
-import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.base.SlideContextImpl;
 import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.start.SixtyInchSetting;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
+import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
 
 public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyInch {
     private final PlaceController placeController;
@@ -25,13 +20,15 @@ public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyIn
     public void setAutoplayFactory(AutoPlayClientFactorySixtyInch autoplayFactory) {
         this.autoplayFactory = autoplayFactory;
     }
+    
+    @Override
+    public void goToStart() {
+        placeController.goTo(new StartPlace()); 
+    }
 
     @Override
-    public void goToPlayer(
-            AutoPlayerConfiguration playerConfig, 
-            PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings,
-            PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesWithAllSettings) {
-        PlayerPlace playerPlace = new PlayerPlace(playerConfig, leaderboardPerspectiveLifecycleWithAllSettings, raceboardPerspectiveLifecyclesWithAllSettings);
+    public void goToPlayer(String contextAndSettings) {
+        PlayerPlace playerPlace = new PlayerPlace(contextAndSettings);
         placeController.goTo(playerPlace); 
     }
 

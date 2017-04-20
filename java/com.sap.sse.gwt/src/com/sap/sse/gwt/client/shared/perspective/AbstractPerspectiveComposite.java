@@ -1,9 +1,7 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -25,21 +23,41 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     private final PL perspectiveLifecycle;
     private PS perspectiveOwnSettings;
 
-    protected final List<Component<?>> components;
+    private final Map<String, Component<? extends Settings>> childComponents = new HashMap<>();
+    
+    /**
+     * Adds the provided component as a child to this perspective and sets the {@link ComponentTreeNodeInfo}
+     * of the provided component accordingly.
+     * 
+     * @param childComponent The component to be added as a child to this perspective
+     */
+    protected void addChildComponent(Component<? extends Settings> childComponent) {
+        Component<? extends Settings> old = childComponents.put(childComponent.getId(), childComponent);
+        if (old != null) {
+            throw new IllegalStateException("Child with same id is allready added");
+        }
+    }
+    
+    @Override
+    public Collection<Component<? extends Settings>> getComponents() {
+        return childComponents.values();
+    }
     
     protected SettingsDialogComponent<PS> getPerspectiveSettingsDialogComponent(PS perspectiveSettings) {
         return perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(perspectiveSettings);
     }
 
-    public AbstractPerspectiveComposite(PL perspectiveLifecycle, PS perspectiveSettings) {
-        this.components = new ArrayList<>();
-        this.perspectiveLifecycle = perspectiveLifecycle;
-        this.perspectiveOwnSettings = perspectiveSettings;
+    public AbstractPerspectiveComposite(Component<?> parent,
+            ComponentContext<PerspectiveCompositeSettings<PS>> componentContext,
+            PL lifecycle, PerspectiveCompositeSettings<PS> settings) {
+        super(parent, componentContext);
+        this.perspectiveLifecycle = lifecycle;
+        this.perspectiveOwnSettings = settings.getPerspectiveOwnSettings();
     }
 
     @Override
     public PerspectiveCompositeSettings<PS> getSettings() {
-        Map<Serializable, Settings> settingsPerComponent = new HashMap<>();
+        Map<String, Settings> settingsPerComponent = new HashMap<>();
         for (Component<?> c : getComponents()) {
             if (c.hasSettings()) {
                 settingsPerComponent.put(c.getId(), c.getSettings());
@@ -50,13 +68,13 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     @Override
     public void updateSettings(PerspectiveCompositeSettings<PS> newSettings) {
-        for (Entry<Serializable, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
+        for (Entry<String, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
             updateSettings(componentAndSettings);
         }
         this.perspectiveOwnSettings = newSettings.getPerspectiveOwnSettings();
     }
 
-    private <S extends Settings> void updateSettings(Entry<Serializable, S> componentIdAndSettings) {
+    private <S extends Settings> void updateSettings(Entry<String, S> componentIdAndSettings) {
         @SuppressWarnings("unchecked")
         Component<S> component = (Component<S>) findComponentById(componentIdAndSettings.getKey());
         if (component != null) {
@@ -64,7 +82,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
         }
     }
 
-    private Component<?> findComponentById(Serializable componentId) {
+    private Component<?> findComponentById(String componentId) {
         for (Component<?> component : getComponents()) {
             if (component.getId().equals(componentId)) {
                 return component;
@@ -78,10 +96,6 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
         return this.asWidget();
     }
 
-    public List<Component<?>> getComponents() {
-        return components;
-    }
-    
     @Override
     public String getLocalizedShortName() {
         return perspectiveLifecycle.getLocalizedShortName();
@@ -103,5 +117,5 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     protected PL getPerspectiveLifecycle() {
         return perspectiveLifecycle;
     }
-
+    
 }

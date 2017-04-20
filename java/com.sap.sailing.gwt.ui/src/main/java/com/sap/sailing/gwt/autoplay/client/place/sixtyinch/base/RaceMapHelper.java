@@ -171,7 +171,7 @@ public class RaceMapHelper {
         CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(
                 /* hasMultiSelection */ true, colorProvider);
         competitorSelectionProvider.setCompetitors(competitors);
-        raceboardPerspective = new RaceMap(raceMapLifecycle, settings, sailingService, asyncActionsExecutor,
+        raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService, asyncActionsExecutor,
                 errorReporter, raceboardTimer, competitorSelectionProvider, StringMessages.INSTANCE, currentLiveRace,
                 raceMapResources, false);
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,

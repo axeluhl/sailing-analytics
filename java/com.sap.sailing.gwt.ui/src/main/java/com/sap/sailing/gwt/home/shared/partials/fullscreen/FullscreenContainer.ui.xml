@@ -48,6 +48,12 @@
 			width: auto;
 			cursor: pointer;
 			padding: 10px;
+			vertical-align: top;
+		}
+		button.toolbarAction {
+			background-color: transparent;
+			border-radius: initial;
+			font-size: 1.25em;
 		}
 		.toolbarBusyIndicator {
 			display: inline-block;

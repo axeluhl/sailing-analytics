@@ -47,33 +47,6 @@
         
         <div ui:field="screenConfigurationUi">
 			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
-				<div class="{res.mediaCss.columns}"><ui:text from='{i18n.autoplaySettings}' /></div>
-			</div>			
-			<div class="{res.mediaCss.grid} {style.row}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span><ui:text from='{i18n.startBrowserFullscreen}' />:</span>
-		        </div>
-			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:CheckBox ui:field="startInFullscreenModeBox" />
-		        </div>
-			</div>
-			<div class="{res.mediaCss.grid} {style.row}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span><ui:text from='{i18n.switchToLiveRaceAutomatically}' />:</span>
-		        </div>
-			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:CheckBox ui:field="autoSwitchToRaceboard" />
-		        </div>
-			</div>
-			<div class="{res.mediaCss.grid} {style.row}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span><ui:text from='{i18n.timeBeforeRaceStart}' />:</span>
-		        </div>
-			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:IntegerBox ui:field="timeToRaceStartInSeconds" />
-		        </div>
-			</div>
-			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
 				<div class="{res.mediaCss.columns}"><ui:text from='{i18n.page}' />&nbsp;<ui:text from='{i18n.settings}' /></div>
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
@@ -82,14 +55,6 @@
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 					<g:FlowPanel ui:field="leaderboardPerspectiveSettingsPanel" />
-		        </div>
-			</div>
-			<div class="{res.mediaCss.grid} {style.row}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span><ui:text from='{i18n.raceViewer}' /> <ui:text from='{i18n.page}' />:</span>
-		        </div>
-			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:FlowPanel ui:field="raceboardPerspectiveSettingsPanel" />
 		        </div>
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
