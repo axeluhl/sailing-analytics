@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.ApplicationTopLevelView;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
+import com.sap.sailing.gwt.autoplay.client.events.SlideHeaderEvent;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;

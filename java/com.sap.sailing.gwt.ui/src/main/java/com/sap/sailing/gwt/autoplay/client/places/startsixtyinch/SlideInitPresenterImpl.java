@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.PresenterBase;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
-import com.sap.sailing.gwt.autoplay.client.place.sixtyinch.SlideHeaderEvent;
+import com.sap.sailing.gwt.autoplay.client.events.SlideHeaderEvent;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 

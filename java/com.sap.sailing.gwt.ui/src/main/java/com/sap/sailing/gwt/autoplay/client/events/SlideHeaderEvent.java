@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch;
+package com.sap.sailing.gwt.autoplay.client.events;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
