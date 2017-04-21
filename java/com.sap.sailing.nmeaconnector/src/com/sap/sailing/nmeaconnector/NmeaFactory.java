@@ -1,9 +1,12 @@
 package com.sap.sailing.nmeaconnector;
 
-import java.io.Reader;
+import java.io.InputStream;
 
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.nmeaconnector.impl.NmeaFactoryImpl;
+
+import net.sf.marineapi.nmea.sentence.MWVSentence;
+import net.sf.marineapi.nmea.sentence.ZDASentence;
 
 public interface NmeaFactory {
     static NmeaFactory INSTANCE = new NmeaFactoryImpl();
@@ -19,11 +22,11 @@ public interface NmeaFactory {
      * is relative to "true north" which we can only believe; it means that the instrument needs to have an understanding
      * of the magnetic declination at the time and position of the measurement.
      * 
-     * @param reader
+     * @param inputStream
      *            will be consumed up to its end but will not be closed; the caller remains responsible for closing the
-     *            reader.
+     *            input stream.
      * @return a sequence of {@link Wind} objects as extracted from the NMEA 0183 sentences found in the contents of the
      *         {@code reader}; never {@code null}, but possibly empty
      */
-    Iterable<Wind> readWind(Reader reader);
+    Iterable<Wind> readWind(InputStream inputStream);
 }

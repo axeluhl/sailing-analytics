@@ -1,6 +1,6 @@
 package com.sap.sailing.nmeaconnector.impl;
 
-import java.io.Reader;
+import java.io.InputStream;
 
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.nmeaconnector.NmeaFactory;
@@ -14,7 +14,7 @@ public class NmeaFactoryImpl implements NmeaFactory {
     }
 
     @Override
-    public Iterable<Wind> readWind(Reader reader) {
+    public Iterable<Wind> readWind(InputStream inputStream) {
         // TODO Auto-generated method stub
         return null;
     }
