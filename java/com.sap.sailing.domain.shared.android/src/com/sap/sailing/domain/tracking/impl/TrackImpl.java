@@ -275,24 +275,24 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
 
     @Override
     public <InternalType, ValueType> ValueType getInterpolatedValue(TimePoint timePoint, Function<FixType, ScalableValue<InternalType, ValueType>> converter) {
-        final ValueType aws;
-        Pair<FixType, FixType> awsPair = getSurroundingFixes(timePoint);
-        if (awsPair.getA() == null) {
-            if (awsPair.getB() == null) {
-                aws = null;
+        final ValueType result;
+        Pair<FixType, FixType> fixPair = getSurroundingFixes(timePoint);
+        if (fixPair.getA() == null) {
+            if (fixPair.getB() == null) {
+                result = null;
             } else {
-                aws = converter.get(awsPair.getB()).divide(1);
+                result = converter.get(fixPair.getB()).divide(1);
             }
         } else {
-            if (awsPair.getB() == null) {
-                aws = converter.get(awsPair.getA()).divide(1);
+            if (fixPair.getB() == null || fixPair.getA() == fixPair.getB()) {
+                result = converter.get(fixPair.getA()).divide(1);
             } else {
-                aws = timeBasedAverage(timePoint,
-                        converter.get(awsPair.getA()), awsPair.getA().getTimePoint(),
-                        converter.get(awsPair.getB()), awsPair.getB().getTimePoint());
+                result = timeBasedAverage(timePoint,
+                        converter.get(fixPair.getA()), fixPair.getA().getTimePoint(),
+                        converter.get(fixPair.getB()), fixPair.getB().getTimePoint());
             }
         }
-        return aws;
+        return result;
     }
 
     @Override
