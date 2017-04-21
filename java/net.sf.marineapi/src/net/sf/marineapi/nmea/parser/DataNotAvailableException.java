@@ -3,7 +3,7 @@
  * Copyright (C) 2010 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -25,28 +25,27 @@ package net.sf.marineapi.nmea.parser;
  * invoking a getter for sentence data field that contains no value.
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public class DataNotAvailableException extends RuntimeException {
 
-    private static final long serialVersionUID = -3672061046826633631L;
+	private static final long serialVersionUID = -3672061046826633631L;
 
-    /**
-     * Constructor
-     * 
-     * @param msg Exception message
-     */
-    public DataNotAvailableException(String msg) {
-        super(msg);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param msg Exception message
+	 */
+	public DataNotAvailableException(String msg) {
+		super(msg);
+	}
 
-    /**
-     * Constructor
-     * 
-     * @param msg Exception message
-     * @param cause Throwable that caused the exception
-     */
-    public DataNotAvailableException(String msg, Throwable cause) {
-        super(msg, cause);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param msg Exception message
+	 * @param cause Throwable that caused the exception
+	 */
+	public DataNotAvailableException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
 }

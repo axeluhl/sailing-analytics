@@ -3,7 +3,7 @@
  * Copyright (C) 2010 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -26,29 +26,28 @@ package net.sf.marineapi.nmea.parser;
  * parsed to expected native data type.
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public class ParseException extends DataNotAvailableException {
 
-    /** serialVersionUID */
-    private static final long serialVersionUID = 6203761984607273569L;
+	/** serialVersionUID */
+	private static final long serialVersionUID = 6203761984607273569L;
 
-    /**
-     * Constructor with description.
-     * 
-     * @param msg Description of the Exception
-     */
-    public ParseException(String msg) {
-        super(msg);
-    }
+	/**
+	 * Constructor with description.
+	 * 
+	 * @param msg Description of the Exception
+	 */
+	public ParseException(String msg) {
+		super(msg);
+	}
 
-    /**
-     * Constructor with message and cause.
-     * 
-     * @param msg Description of the Exception
-     * @param cause Throwable that caused this exception
-     */
-    public ParseException(String msg, Throwable cause) {
-        super(msg, cause);
-    }
+	/**
+	 * Constructor with message and cause.
+	 * 
+	 * @param msg Description of the Exception
+	 * @param cause Throwable that caused this exception
+	 */
+	public ParseException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
 }

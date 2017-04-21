@@ -1,94 +1,104 @@
-/* 
+/*
  * SentenceValidator.java
  * Copyright (C) 2010 Kimmo Tuukkanen
- * 
+ *
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
- * 
+ * <http://ktuukkan.github.io/marine-api/>
+ *
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * Java Marine API is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Java Marine API. If not, see <http://www.gnu.org/licenses/>.
  */
 package net.sf.marineapi.nmea.sentence;
 
+import java.util.regex.Pattern;
+
 /**
- * SentenceValidator checks any String against NMEA 0183 format.
- * 
+ * SentenceValidator for detecting and validation of sentence Strings.
+ *
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public final class SentenceValidator {
 
-    private SentenceValidator() {
-    }
+	private static final Pattern reChecksum = Pattern.compile(
+		"^[$|!]{1}[A-Z0-9]{3,10}[,][\\x20-\\x7F]*[*][A-F0-9]{2}(\\r|\\n|\\r\\n|\\n\\r){0,1}$");
 
-    /**
-     * Tells if the specified String matches the NMEA 0183 sentence format.
-     * <p>
-     * String is considered as a sentence if it meets the following criteria:
-     * <ul>
-     * <li>Starts with '$' character
-     * <li>'$' is followed by 5 upper-case chars and a comma (sentence type id)
-     * <li>Length is max. 205 chars long (excluding &lt;CR&gt;&lt;LF&gt;). This is a deviation from the NMEA spec,
-     * which allows only for 80 characters, which is not sufficient for long decimal values. Allowing for
-     * more characters is backward-compatible.
-     * <li>String contains only printable ASCII characters
-     * <li>Checksum is correct and separated by '*' char (unless omitted)
-     * </ul>
-     * 
-     * @param nmea String to inspect
-     * @return true if recognized as sentence, otherwise false.
-     */
-    public static boolean isSentence(String nmea) {
+	private static final Pattern reNoChecksum = Pattern.compile(
+		"^[$|!]{1}[A-Z0-9]{3,10}[,][\\x20-\\x7F]*(\\r|\\n|\\r\\n|\\n\\r){0,1}$");
 
-        if (nmea == null || "".equals(nmea)) {
-            return false;
-        }
+	private SentenceValidator() {
+	}
 
-        int i = nmea.indexOf(Sentence.CHECKSUM_DELIMITER);
+	/**
+	 * <p>
+	 * Tells if the specified String matches the NMEA 0183 sentence format.</p>
+	 * <p>
+	 * String is considered as a sentence if it meets the following criteria:
+	 * <ul>
+	 * <li>First character is '$' or '!'
+	 * <li>Begin char is followed by upper-case sentence ID (3 to 10 chars)
+	 * <li>Sentence ID is followed by a comma and an arbitrary number of
+	 *     printable ASCII characters (payload data)
+	 * <li>Data is followed by '*' and a two-char hex checksum (may be omitted)
+	 * </ul>
+	 * <p>
+	 * Notice that format matching is not strict; although NMEA 0183 defines a
+	 * maximum length of 80 chars, the sentence length is not checked. This is
+	 * due to fact that it seems quite common that devices violate this rule,
+	 * some perhaps deliberately, some by mistake. Thus, assuming the formatting
+	 * is otherwise valid, it is not feasible to strictly validate length and
+	 * discard sentences that just exceed the 80 chars limit.
+	 * </p>
+	 *
+	 * @param nmea String to inspect
+	 * @return true if recognized as sentence, otherwise false.
+	 */
+	public static boolean isSentence(String nmea) {
 
-        // printable ASCII chars 0x20 to 0x7E
-        String re = "^[$|!]{1}[A-Z0-9]{5}[,][\\x20-\\x7F]{0,197}[*][A-F0-9]{2}$";
-        if (i < 0) {
-            re = "^[$|!]{1}[A-Z0-9]{5}[,][\\x20-\\x7F]{0,200}$";
-        }
+		if (nmea == null || "".equals(nmea)) {
+			return false;
+		}
 
-        return nmea.matches(re);
-    }
+		if (Checksum.index(nmea) == nmea.length()) {
+			return reNoChecksum.matcher(nmea).matches();
+		}
 
-    /**
-     * Tells if the specified String is a valid NMEA 0183 sentence. String is
-     * considered as valid sentence if it passes the {@link #isSentence(String)}
-     * test and contains a valid checksum. Sentences without checksum are
-     * validated only by checking the general sentence characteristics.
-     * 
-     * @param nmea String to validate
-     * @return <code>true</code> if valid, otherwise <code>false</code>.
-     */
-    public static boolean isValid(String nmea) {
+		return reChecksum.matcher(nmea).matches();
+	}
 
-        boolean isValid = false;
+	/**
+	 * Tells if the specified String is a valid NMEA 0183 sentence. String is
+	 * considered as valid sentence if it passes the {@link #isSentence(String)}
+	 * test and contains correct checksum. Sentences without checksum are
+	 * validated only by checking the general sentence characteristics.
+	 *
+	 * @param nmea String to validate
+	 * @return <code>true</code> if valid, otherwise <code>false</code>.
+	 */
+	public static boolean isValid(String nmea) {
 
-        if (SentenceValidator.isSentence(nmea)) {
-            int i = nmea.indexOf(Sentence.CHECKSUM_DELIMITER);
-            if (i > 0) {
-                String sum = nmea.substring(++i, nmea.length());
-                isValid = sum.equals(Checksum.calculate(nmea));
-            } else {
-                // no checksum
-                isValid = true;
-            }
-        }
+		boolean isValid = false;
 
-        return isValid;
-    }
+		if (SentenceValidator.isSentence(nmea)) {
+			int i = nmea.indexOf(Sentence.CHECKSUM_DELIMITER);
+			if (i > 0) {
+				String sum = nmea.substring(++i, nmea.length());
+				isValid = sum.equals(Checksum.calculate(nmea));
+			} else {
+				// no checksum
+				isValid = true;
+			}
+		}
+
+		return isValid;
+	}
 }

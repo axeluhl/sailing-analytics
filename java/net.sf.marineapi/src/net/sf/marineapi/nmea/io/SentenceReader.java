@@ -1,378 +1,371 @@
-/* 
+/*
  * SentenceReader.java
- * Copyright (C) 2010 Kimmo Tuukkanen
- * 
+ * Copyright (C) 2010-2014 Kimmo Tuukkanen
+ *
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
- * 
+ * <http://ktuukkan.github.io/marine-api/>
+ *
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * Java Marine API is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  * for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Java Marine API. If not, see <http://www.gnu.org/licenses/>.
  */
 package net.sf.marineapi.nmea.io;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.DatagramSocket;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
-import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.SentenceValidator;
 
 /**
  * Sentence reader detects supported NMEA 0183 sentences from the specified
- * <code>InputStream</code> and dispatches them to registered listeners as
- * sentence events. Each event contains a parser for the read sentence.
+ * data source and dispatches them to registered listeners as sentence events.
+ * Each event contains a parser for the read sentence.
  * <p>
- * Parsers dispatched by reader are created using {@link SentenceFactory} class,
+ * Parsers dispatched by reader are created using {@link net.sf.marineapi.nmea.parser.SentenceFactory} class,
  * where you can also register your own custom parsers.
- * 
+ *
  * @author Kimmo Tuukkanen
- * @version $Revision$
- * @see SentenceListener
- * @see SentenceEvent
- * @see SentenceFactory
+ * @see net.sf.marineapi.nmea.event.AbstractSentenceListener
+ * @see net.sf.marineapi.nmea.event.SentenceListener
+ * @see net.sf.marineapi.nmea.event.SentenceEvent
+ * @see net.sf.marineapi.nmea.parser.SentenceFactory
  */
 public class SentenceReader {
 
-    // Map key for listeners that listen any kind of sentences, type
-    // specific listeners are registered with sentence type String
-    private static final String DISPATCH_ALL = "DISPATCH_ALL";
+	/** Default timeout value in milliseconds. */
+	public static final int DEFAULT_TIMEOUT = 5000;
 
-    // Thread for running the worker
-    private Thread thread;
-    // worker that reads the input stream
-    private DataReader reader;
-    // map of sentence listeners
-    private ConcurrentMap<String, List<SentenceListener>> listeners = new ConcurrentHashMap<String, List<SentenceListener>>();
-    // time of latest sentence event
-    private volatile long lastFired = -1;
-    // timeout for "reading paused" in ms
-    private volatile int pauseTimeout = 5000;
+	// Map key for listeners that listen any kind of sentences, type
+	// specific listeners are registered with sentence type String
+	private static final String DISPATCH_ALL = "DISPATCH_ALL";
 
-    /**
-     * Creates a new instance of SentenceReader.
-     * 
-     * @param source Stream from which to read NMEA data
-     */
-    public SentenceReader(InputStream source) {
-        reader = new DataReader(source);
-    }
+	// logging
+	private static final Logger LOGGER = Logger.getLogger(SentenceReader.class.getName());
+	private static final String LOG_MSG = "Exception caught from SentenceListener";
 
-    /**
-     * Adds a {@link SentenceListener} that wants to receive all sentences read
-     * by the reader.
-     * 
-     * @param listener {@link SentenceListener} to be registered.
-     * @see net.sf.marineapi.nmea.event.SentenceListener
-     */
-    public void addSentenceListener(SentenceListener listener) {
-        registerListener(DISPATCH_ALL, listener);
-    }
+	// Thread for running the worker
+	private Thread thread;
+	// worker that reads the input stream
+	private DataReader reader;
+	// map of sentence listeners
+	private ConcurrentMap<String, List<SentenceListener>> listeners = new ConcurrentHashMap<String, List<SentenceListener>>();
+	// timeout for "reading paused" in ms
+	private volatile int pauseTimeout = DEFAULT_TIMEOUT;
+	// Non-NMEA data listener
+	private DataListener dataListener;
+	// Exception listener
+	private ExceptionListener exceptionListener=null;
 
-    /**
-     * Adds a {@link SentenceListener} that is interested in receiving only
-     * sentences of certain type.
-     * 
-     * @param sl SentenceListener to add
-     * @param type Sentence type for which the listener is registered.
-     * @see net.sf.marineapi.nmea.event.SentenceListener
-     */
-    public void addSentenceListener(SentenceListener sl, SentenceId type) {
-        registerListener(type.toString(), sl);
-    }
+	/**
+	 * Creates a SentenceReader for UDP/DatagramSocket.
+	 *
+	 * @param source Socket from which to read NMEA data
+	 */
+	public SentenceReader(DatagramSocket source) {
+		reader = new UDPDataReader(source, this);
+	}
 
-    /**
-     * Adds a {@link SentenceListener} that is interested in receiving only
-     * sentences of certain type.
-     * 
-     * @param sl SentenceListener to add
-     * @param type Sentence type for which the listener is registered.
-     * @see net.sf.marineapi.nmea.event.SentenceListener
-     */
-    public void addSentenceListener(SentenceListener sl, String type) {
-        registerListener(type, sl);
-    }
+	/**
+	 * Creates a new instance of SentenceReader.
+	 *
+	 * @param source Stream from which to read NMEA data
+	 */
+	public SentenceReader(InputStream source) {
+		reader = new DefaultDataReader(source, this);
+	}
 
-    /**
-     * Returns the current reading paused timeout.
-     * 
-     * @return Timeout limit in milliseconds.
-     * @see #setPauseTimeout(int)
-     */
-    public int getPauseTimeout() {
-        return this.pauseTimeout;
-    }
+	/**
+	 * Adds a {@link net.sf.marineapi.nmea.event.SentenceListener} that wants to receive all sentences read
+	 * by the reader.
+	 *
+	 * @param listener {@link net.sf.marineapi.nmea.event.SentenceListener} to be registered.
+	 * @see net.sf.marineapi.nmea.event.SentenceListener
+	 */
+	public void addSentenceListener(SentenceListener listener) {
+		registerListener(listener, DISPATCH_ALL);
+	}
 
-    /**
-     * Remove a listener from reader. When removed, listener will not receive
-     * any events from the reader.
-     * 
-     * @param sl {@link SentenceListener} to be removed.
-     */
-    public void removeSentenceListener(SentenceListener sl) {
-        for (List<SentenceListener> list : listeners.values()) {
-            if (list.contains(sl)) {
-                list.remove(sl);
-            }
-        }
-    }
+	/**
+	 * Adds a {@link net.sf.marineapi.nmea.event.SentenceListener} that is interested in receiving only
+	 * sentences of certain type.
+	 *
+	 * @param sl SentenceListener to add
+	 * @param type Sentence type for which the listener is registered.
+	 * @see net.sf.marineapi.nmea.event.SentenceListener
+	 */
+	public void addSentenceListener(SentenceListener sl, SentenceId type) {
+		registerListener(sl, type.toString());
+	}
 
-    /**
-     * Sets the input stream from which to read NMEA data. If reader is running,
-     * it is first stopped and you must call {@link #start()} to resume reading.
-     * 
-     * @param stream New input stream to set.
-     */
-    public void setInputStream(InputStream stream) {
-        if (reader.isRunning()) {
-            stop();
-        }
-        reader = new DataReader(stream);
-    }
+	/**
+	 * Adds a {@link net.sf.marineapi.nmea.event.SentenceListener} that is interested in receiving only
+	 * sentences of certain type.
+	 *
+	 * @param sl SentenceListener to add
+	 * @param type Sentence type for which the listener is registered.
+	 * @see net.sf.marineapi.nmea.event.SentenceListener
+	 */
+	public void addSentenceListener(SentenceListener sl, String type) {
+		registerListener(sl, type);
+	}
 
-    /**
-     * Set timeout time for reading paused events. Default is 5000 ms.
-     * 
-     * @param millis Timeout in milliseconds.
-     */
-    public void setPauseTimeout(int millis) {
-        this.pauseTimeout = millis;
-    }
+	/**
+	 * Pass data to DataListener.
+	 */
+	void fireDataEvent(String data) {
+		try {
+			if(dataListener != null) {
+				dataListener.dataRead(data);
+			}
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	/**
+	 * Notifies all listeners that reader has paused due to timeout.
+	 */
+	void fireReadingPaused() {
+		for (SentenceListener listener : getSentenceListeners()) {
+			try {
+				listener.readingPaused();
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, LOG_MSG, e);
+			}
+		}
+	}
 
-    /**
-     * Starts reading the input stream and dispatching events.
-     * 
-     * @throws IllegalStateException If reader is already running.
-     */
-    public void start() {
-        if (thread != null && thread.isAlive() && reader != null
-                && reader.isRunning()) {
-            throw new IllegalStateException("Reader is already running");
-        }
-        lastFired = -1;
-        thread = new Thread(reader);
-        thread.start();
-    }
+	/**
+	 * Notifies all listeners that NMEA data has been detected in the stream and
+	 * events will be dispatched until stopped or timeout occurs.
+	 */
+	void fireReadingStarted() {
+		for (SentenceListener listener : getSentenceListeners()) {
+			try {
+				listener.readingStarted();
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, LOG_MSG, e);
+			}
+		}
+	}
 
-    /**
-     * Stops the reader and event dispatching.
-     */
-    public void stop() {
-        if (reader != null && reader.isRunning()) {
-            reader.stop();
-        }
-    }
+	/**
+	 * Notifies all listeners that data reading has stopped.
+	 */
+	void fireReadingStopped() {
+		for (SentenceListener listener : getSentenceListeners()) {
+			try {
+				listener.readingStopped();
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, LOG_MSG, e);
+			}
+		}
+	}
 
-    /**
-     * Notifies all listeners that reader has paused due to timeout.
-     */
-    private void fireReadingPaused() {
-        for (String key : listeners.keySet()) {
-            for (SentenceListener listener : listeners.get(key)) {
-                try {
-                    listener.readingPaused();
-                } catch (Exception e) {
-                    // nevermind
-                }
-            }
-        }
-    }
+	/**
+	 * Dispatch data to all listeners.
+	 *
+	 * @param sentence sentence string.
+	 */
+	void fireSentenceEvent(Sentence sentence) {
 
-    /**
-     * Notifies all listeners that NMEA data has been detected in the stream and
-     * events will be dispatched until stopped or timeout occurs.
-     */
-    private void fireReadingStarted() {
-        for (String key : listeners.keySet()) {
-            for (SentenceListener listener : listeners.get(key)) {
-                try {
-                    listener.readingStarted();
-                } catch (Exception e) {
-                    // nevermind
-                }
-            }
-        }
-    }
+		String type = sentence.getSentenceId();
+		Set<SentenceListener> targets = new HashSet<SentenceListener>();
 
-    /**
-     * Notifies all listeners that data reading has stopped.
-     */
-    private void fireReadingStopped() {
-        for (String key : listeners.keySet()) {
-            for (SentenceListener listener : listeners.get(key)) {
-                try {
-                    listener.readingStopped();
-                } catch (Exception e) {
-                    // nevermind
-                }
-            }
-        }
-    }
+		if (listeners.containsKey(type)) {
+			targets.addAll(listeners.get(type));
+		}
+		if (listeners.containsKey(DISPATCH_ALL)) {
+			targets.addAll(listeners.get(DISPATCH_ALL));
+		}
 
-    /**
-     * Dispatch data to all listeners.
-     * 
-     * @param sentence sentence string.
-     */
-    private void fireSentenceEvent(Sentence sentence) {
+		for (SentenceListener listener : targets) {
+			try {
+				SentenceEvent se = new SentenceEvent(this, sentence);
+				listener.sentenceRead(se);
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, LOG_MSG, e);
+			}
+		}
+	}
+	
+	/**
+	 * Returns the exception call-back listener.
+	 * 
+	 * @return Currently set ExceptionListener, or <code>null</code> if none.
+	 */
+	public ExceptionListener getExceptionListener() {
+		return exceptionListener;
+	}
 
-        if (lastFired < 0) {
-            fireReadingStarted();
-        }
+	/**
+	 * Returns the current reading paused timeout.
+	 *
+	 * @return Timeout limit in milliseconds.
+	 * @see #setPauseTimeout(int)
+	 */
+	public int getPauseTimeout() {
+		return this.pauseTimeout;
+	}
 
-        String type = sentence.getSentenceId();
-        Set<SentenceListener> list = new HashSet<SentenceListener>();
+	/**
+	 * Returns all currently registered SentenceListeners.
+	 * 
+	 * @return List of SentenceListeners or empty list.
+	 */
+	List<SentenceListener> getSentenceListeners() {
+		Set<SentenceListener> all = new HashSet<SentenceListener>();
+		for (List<SentenceListener> sl : listeners.values()) {
+			all.addAll(sl);
+		}
+		return new ArrayList<SentenceListener>(all);
+	}
 
-        if (listeners.containsKey(type)) {
-            list.addAll(listeners.get(type));
-        }
-        if (listeners.containsKey(DISPATCH_ALL)) {
-            list.addAll(listeners.get(DISPATCH_ALL));
-        }
+	/**
+	 * Handles an exception by passing it to ExceptionHandler. If no handler
+	 * is present, logs the error at level WARNING.
+	 * 
+	 * @param msg Error message for logging
+	 * @param ex Exception to handle
+	 */
+	void handleException(String msg, Exception ex) {
+		if(exceptionListener == null) {
+			LOGGER.log(Level.WARNING, msg, ex);
+		} else {
+			try {
+				exceptionListener.onException(ex);
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Exception thrown by ExceptionListener", e);
+			}
+		}
+	}
 
-        for (SentenceListener sl : list) {
-            try {
-                SentenceEvent se = new SentenceEvent(this, sentence);
-                sl.sentenceRead(se);
-            } catch (Exception e) {
-                // ignore listener failures
-            }
-        }
-        lastFired = System.currentTimeMillis();
-    }
+	/**
+	 * Registers a SentenceListener to hash map with given key.
+	 * 
+	 * @param listener SentenceListener to register
+	 * @param type Sentence type to register for
+	 */
+	private void registerListener(SentenceListener listener, String type) {
+		if (listeners.containsKey(type)) {
+			listeners.get(type).add(listener);
+		} else {
+			List<SentenceListener> list = new Vector<SentenceListener>();
+			list.add(listener);
+			listeners.put(type, list);
+		}
+	}
 
-    /**
-     * Registers a SentenceListener to hash map with given key.
-     * 
-     * @param type Sentence type to register for
-     * @param sl SentenceListener to register
-     */
-    private void registerListener(String type, SentenceListener sl) {
-        if (listeners.containsKey(type)) {
-            listeners.get(type).add(sl);
-        } else {
-            List<SentenceListener> list = new Vector<SentenceListener>();
-            list.add(sl);
-            listeners.put(type, list);
-        }
-    }
+	/**
+	 * Remove a listener from reader. When removed, listener will not receive
+	 * any events from the reader.
+	 *
+	 * @param listener {@link net.sf.marineapi.nmea.event.SentenceListener} to be removed.
+	 */
+	public void removeSentenceListener(SentenceListener listener) {
+		for (List<SentenceListener> list : listeners.values()) {
+			if (list.contains(listener)) {
+				list.remove(listener);
+			}
+		}
+	}
 
-    /**
-     * Worker that reads the input stream and fires sentence events.
-     */
-    private class DataReader implements Runnable {
+	/**
+	 * Sets the DatagramSocket to be used as data source. If reader is running,
+	 * it is first stopped and you must call {@link #start()} to resume reading.
+	 *
+	 * @param socket DatagramSocket to set
+	 */
+	public void setDatagramSocket(DatagramSocket socket) {
+		if (reader.isRunning()) {
+			stop();
+		}
+		reader = new UDPDataReader(socket, this);
+	}
+	
+	/**
+	 * Set listener for any data that is not recognized as NMEA 0183. 
+	 * devices and environments that produce mixed content with both NMEA and
+	 * non-NMEA data.
+	 * 
+	 * @param listener Listener to set, <code>null</code> to remove.
+	 */
+	public void setDataListener(DataListener listener) {
+		this.dataListener = listener;
+	}
+	
+	/**
+	 * Set exception call-back listener.
+	 * 
+	 * @param exceptionListener Listener to set, or <code>null</code> to reset.
+	 */
+	public void setExceptionListener(ExceptionListener exceptionListener) {
+		this.exceptionListener = exceptionListener;
+	}
 
-        private PauseMonitor monitor;
-        private Thread monitorThread;
-        private BufferedReader input;
-        private volatile boolean isRunning = true;
+	/**
+	 * Sets the InputStream to be used as data source. If reader is running, it
+	 * is first stopped and you must call {@link #start()} to resume reading.
+	 *
+	 * @param stream InputStream to set.
+	 */
+	public void setInputStream(InputStream stream) {
+		if (reader.isRunning()) {
+			stop();
+		}
+		reader = new DefaultDataReader(stream, this);
+	}
 
-        /**
-         * Creates a new instance of StreamReader.
-         * 
-         * @param source InputStream from where to read data.
-         */
-        public DataReader(InputStream source) {
-            InputStreamReader isr = new InputStreamReader(source);
-            input = new BufferedReader(isr);
-        }
-
-        /**
-         * Tells if the reader is currently running, i.e. actively scanning the
-         * input stream for new data.
-         * 
-         * @return <code>true</code> if running, otherwise <code>false</code>.
-         */
-        public boolean isRunning() {
-            return isRunning;
-        }
-
-        /**
-         * Reads the input stream and fires SentenceEvents
-         */
-        public void run() {
-
-            monitor = new PauseMonitor(DataReader.this);
-            monitorThread = new Thread(monitor);
-            monitorThread.start();
-
-            SentenceFactory factory = SentenceFactory.getInstance();
-
-            while (isRunning) {
-                try {
-                    if (!input.ready()) {
-                        Thread.sleep(50);
-                        continue;
-                    }
-                    String data = input.readLine();
-                    if (SentenceValidator.isValid(data)) {
-                        Sentence s = factory.createParser(data);
-                        fireSentenceEvent(s);
-                    }
-                } catch (Exception e) {
-                    // nevermind, keep trying..
-                }
-            }
-            fireReadingStopped();
-        }
-
-        /**
-         * Stops the run loop.
-         */
-        public void stop() {
-            isRunning = false;
-            monitorThread.interrupt();
-        }
-    }
-
-    /**
-     * Watch dog for sending start/paused notifications.
-     */
-    private class PauseMonitor implements Runnable {
-
-        private DataReader parent;
-
-        public PauseMonitor(DataReader parent) {
-            this.parent = parent;
-        }
-
-        public void run() {
-            while (parent.isRunning()) {
-                try {
-                    int min = pauseTimeout;
-                    int max = pauseTimeout + 1000;
-                    long elapsed = System.currentTimeMillis() - lastFired;
-
-                    if (elapsed > min && elapsed < max) {
-                        lastFired = -1;
-                        fireReadingPaused();
-                    }
-
-                    int sleep = Math.round(pauseTimeout / 4);
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    // nevermind
-                }
-            }
-        }
-    }
+	/**
+	 * Set timeout time for reading paused events. Default is 5000 ms.
+	 *
+	 * @param millis Timeout in milliseconds.
+	 */
+	public void setPauseTimeout(int millis) {
+		this.pauseTimeout = millis;
+	}
+	
+	/**
+	 * Starts reading the input stream and dispatching events.
+	 *
+	 * @throws IllegalStateException If reader is already running.
+	 */
+	public void start() {
+		if (thread != null && thread.isAlive() && reader != null
+			&& reader.isRunning()) {
+			throw new IllegalStateException("Reader is already running");
+		}
+		thread = new Thread(reader);
+		thread.start();
+	}
+	
+	/**
+	 * Stops the reader and event dispatching.
+	 */
+	public void stop() {
+		if (reader != null && reader.isRunning()) {
+			reader.stop();
+		}
+	}
 }

@@ -3,7 +3,7 @@
  * Copyright (C) 2011 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -24,34 +24,33 @@ package net.sf.marineapi.nmea.sentence;
  * Interface for sentences that provide vessel's true or magnetic heading.
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public interface HeadingSentence extends Sentence {
 
-    /**
-     * Returns the vessel's current heading.
-     * 
-     * @return Heading in degrees.
-     * @see #isTrue()
-     */
-    double getHeading();
+	/**
+	 * Returns the vessel's current heading.
+	 * 
+	 * @return Heading in degrees.
+	 * @see #isTrue()
+	 */
+	double getHeading();
 
-    /**
-     * Tells if the heading returned and set by {@link #getHeading()} and
-     * {@link #setHeading(double)} methods is <em>true</em> or <em>magnetic</em>
-     * .
-     * 
-     * @return <code>true</code> if true heading, otherwise <code>false</code>
-     *         for magnetic heading.
-     */
-    boolean isTrue();
+	/**
+	 * Tells if the heading returned and set by {@link #getHeading()} and
+	 * {@link #setHeading(double)} methods is <em>true</em> or <em>magnetic</em>
+	 * .
+	 * 
+	 * @return <code>true</code> if true heading, otherwise <code>false</code>
+	 *         for magnetic heading.
+	 */
+	boolean isTrue();
 
-    /**
-     * Sets the heading value.
-     * 
-     * @param hdt Heading in degrees
-     * @see #isTrue()
-     * @throws IllegalArgumentException If heading value out of range [0..360]
-     */
-    void setHeading(double hdt);
+	/**
+	 * Sets the heading value.
+	 * 
+	 * @param hdt Heading in degrees
+	 * @see #isTrue()
+	 * @throws IllegalArgumentException If heading value out of range [0..360]
+	 */
+	void setHeading(double hdt);
 }

@@ -3,7 +3,7 @@
  * Copyright (C) 2011 Warren Zahra, Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -21,24 +21,25 @@
 package net.sf.marineapi.nmea.sentence;
 
 /**
- * Water temperature in degrees Celsius.
+ * <p>Water temperature in degrees Celsius.</p>
+ * 
+ * <p>Example:<br><code>$YXMTW,17.75,C*5D</code></p>
  * 
  * @author Warren Zahra, Kimmo Tuukkanen
- * @version $Revision$
  */
 public interface MTWSentence extends Sentence {
 
-    /**
-     * Get the water temperature.
-     * 
-     * @return Temperature in degrees Celsius.
-     */
-    double getTemperature();
+	/**
+	 * Get the water temperature.
+	 * 
+	 * @return Temperature in degrees Celsius.
+	 */
+	double getTemperature();
 
-    /**
-     * Set the water temperature.
-     * 
-     * @param temp Water temperature in degrees Celsius.
-     */
-    void setTemperature(double temp);
+	/**
+	 * Set the water temperature.
+	 * 
+	 * @param temp Water temperature in degrees Celsius.
+	 */
+	void setTemperature(double temp);
 }

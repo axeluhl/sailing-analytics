@@ -3,7 +3,7 @@
  * Copyright (C) 2011 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -21,10 +21,11 @@
 package net.sf.marineapi.nmea.sentence;
 
 /**
- * Vessel heading in degrees with respect to magnetic north.
+ * <p>Vessel heading in degrees, relative to magnetic north.</p>
+ * 
+ * <p>Example:<br><code>$IIHDM,213,M*3C</code></p>
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public interface HDMSentence extends HeadingSentence {
 }

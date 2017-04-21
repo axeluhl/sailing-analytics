@@ -3,7 +3,7 @@
  * Copyright (C) 2012 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -21,26 +21,26 @@
 package net.sf.marineapi.nmea.sentence;
 
 /**
- * Air temperature in degrees Celsius.
+ * <p>Air temperature in degrees Celsius.</p>
+ * 
+ * <p>Example:<br><code>$IIMTA,16.7,C*05</code></p>
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public interface MTASentence extends Sentence {
 
-	
 	/**
 	 * Returns the air temperature.
 	 * 
 	 * @return Temperature in degrees Celsius.
 	 */
 	double getTemperature();
-	
+
 	/**
 	 * Sets the air temperature.
 	 * 
 	 * @param temp Temperature in degrees Celsius.
 	 */
 	void setTemperature(double temp);
-	
+
 }

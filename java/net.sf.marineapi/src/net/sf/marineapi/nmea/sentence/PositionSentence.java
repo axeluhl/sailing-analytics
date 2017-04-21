@@ -3,7 +3,7 @@
  * Copyright (C) 2010 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -26,25 +26,24 @@ import net.sf.marineapi.nmea.util.Position;
  * Common interface for sentences that contain geographic position.
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public interface PositionSentence extends Sentence {
 
-    /**
-     * Gets the geographic position.
-     * 
-     * @return Position
-     * @throws net.sf.marineapi.parser.DataNotAvailableException If any of the position related fields
-     *             is empty.
-     * @throws net.sf.marineapi.parser.ParseException If any of the position related fields contains
-     *             unexpected value.
-     */
-    Position getPosition();
+	/**
+	 * Gets the geographic position.
+	 * 
+	 * @return Position
+	 * @throws net.sf.marineapi.nmea.parser.DataNotAvailableException If any of the
+	 *             position related fields is empty.
+	 * @throws net.sf.marineapi.nmea.parser.ParseException If any of the position
+	 *             related fields contains unexpected value.
+	 */
+	Position getPosition();
 
-    /**
-     * Set the geographic position.
-     * 
-     * @param pos Position to set
-     */
-    void setPosition(Position pos);
+	/**
+	 * Set the geographic position.
+	 * 
+	 * @param pos Position to set
+	 */
+	void setPosition(Position pos);
 }
