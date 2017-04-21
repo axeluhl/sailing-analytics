@@ -178,7 +178,8 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     
     private Wind getWind(final TimePoint timePoint, String deviceSerialNumber) throws ClassNotFoundException, IOException, ParseException {
         final Wind result;
-        Bearing awa = getAwaTrack(deviceSerialNumber).getInterpolatedValue(timePoint, a->new ScalableBearing(a.getApparentWindAngle()));
+        Bearing awaFrom = getAwaTrack(deviceSerialNumber).getInterpolatedValue(timePoint, a->new ScalableBearing(a.getApparentWindAngle()));
+        Bearing awa = awaFrom==null?null:awaFrom.reverse();
         Speed aws = getAwsTrack(deviceSerialNumber).getInterpolatedValue(timePoint, a->new ScalableSpeed(a.getApparentWindSpeed()));
         Position pos = getGpsTrack(deviceSerialNumber).getInterpolatedValue(timePoint, g->new ScalablePosition(g.getPosition()));
         if (pos != null) {
