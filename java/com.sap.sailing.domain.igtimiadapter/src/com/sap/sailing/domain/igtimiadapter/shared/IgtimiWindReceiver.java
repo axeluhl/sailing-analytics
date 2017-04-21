@@ -250,7 +250,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             if (awaPair.getB() == null) {
                 awaFrom = awaPair.getA().getApparentWindAngle();
             } else {
-                awaFrom = timeBasedAgerage(timePoint,
+                awaFrom = timeBasedAverage(timePoint,
                         new ScalableBearing(awaPair.getA().getApparentWindAngle()), awaPair.getA().getTimePoint(),
                         new ScalableBearing(awaPair.getB().getApparentWindAngle()), awaPair.getB().getTimePoint());
             }
@@ -270,7 +270,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             if (awsPair.getB() == null) {
                 aws = awsPair.getA().getApparentWindSpeed();
             } else {
-                aws = timeBasedAgerage(timePoint,
+                aws = timeBasedAverage(timePoint,
                         new ScalableSpeed(awsPair.getA().getApparentWindSpeed()), awsPair.getA().getTimePoint(),
                         new ScalableSpeed(awsPair.getB().getApparentWindSpeed()), awsPair.getB().getTimePoint());
             }
@@ -290,7 +290,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             if (sogPair.getB() == null) {
                 sog = sogPair.getA().getSpeedOverGround();
             } else {
-                sog = timeBasedAgerage(timePoint,
+                sog = timeBasedAverage(timePoint,
                         new ScalableSpeed(sogPair.getA().getSpeedOverGround()), sogPair.getA().getTimePoint(),
                         new ScalableSpeed(sogPair.getB().getSpeedOverGround()), sogPair.getB().getTimePoint());
             }
@@ -310,7 +310,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             if (cogPair.getB() == null) {
                 sog = cogPair.getA().getCourseOverGround();
             } else {
-                sog = timeBasedAgerage(timePoint,
+                sog = timeBasedAverage(timePoint,
                         new ScalableBearing(cogPair.getA().getCourseOverGround()), cogPair.getA().getTimePoint(),
                         new ScalableBearing(cogPair.getB().getCourseOverGround()), cogPair.getB().getTimePoint());
             }
@@ -330,7 +330,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             if (gpsPair.getB() == null) {
                 pos = gpsPair.getA().getPosition();
             } else {
-                pos = timeBasedAgerage(timePoint, new ScalablePosition(gpsPair.getA().getPosition()), gpsPair.getA()
+                pos = timeBasedAverage(timePoint, new ScalablePosition(gpsPair.getA().getPosition()), gpsPair.getA()
                         .getTimePoint(), new ScalablePosition(gpsPair.getB().getPosition()), gpsPair.getB()
                         .getTimePoint());
             }
@@ -350,7 +350,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             if (hdgPair.getB() == null) {
                 hdg = hdgPair.getA().getTrueHeading();
             } else {
-                hdg = timeBasedAgerage(timePoint,
+                hdg = timeBasedAverage(timePoint,
                         new ScalableBearing(hdgPair.getA().getTrueHeading()), hdgPair.getA().getTimePoint(),
                         new ScalableBearing(hdgPair.getB().getTrueHeading()), hdgPair.getB().getTimePoint());
             }
@@ -370,7 +370,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             if (hdgmPair.getB() == null) {
                 hdgm = hdgmPair.getA().getMagnetigHeading();
             } else {
-                hdgm = timeBasedAgerage(timePoint,
+                hdgm = timeBasedAverage(timePoint,
                         new ScalableBearing(hdgmPair.getA().getMagnetigHeading()), hdgmPair.getA().getTimePoint(),
                         new ScalableBearing(hdgmPair.getB().getMagnetigHeading()), hdgmPair.getB().getTimePoint());
             }
@@ -405,7 +405,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return trueHeading;
     }
 
-    private <V, T> T timeBasedAgerage(TimePoint timePoint, ScalableValue<V, T> value1, TimePoint timePoint1, ScalableValue<V, T> value2, TimePoint timePoint2) {
+    private <V, T> T timeBasedAverage(TimePoint timePoint, ScalableValue<V, T> value1, TimePoint timePoint1, ScalableValue<V, T> value2, TimePoint timePoint2) {
         final T acc;
         if (timePoint1.equals(timePoint2)) {
             acc = value1.add(value2).divide(2);

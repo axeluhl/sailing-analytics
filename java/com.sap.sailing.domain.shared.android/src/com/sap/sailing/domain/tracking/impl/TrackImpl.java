@@ -10,6 +10,9 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.Util.Function;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
@@ -251,6 +254,47 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         }
     }
     
+    private Pair<FixType, FixType> getSurroundingFixes(TimePoint timePoint) {
+        FixType left = getLastFixAtOrBefore(timePoint);
+        FixType right = getFirstFixAtOrAfter(timePoint);
+        com.sap.sse.common.Util.Pair<FixType, FixType> result = new com.sap.sse.common.Util.Pair<>(left, right);
+        return result;
+    }
+
+    private <V, T> T timeBasedAverage(TimePoint timePoint, ScalableValue<V, T> value1, TimePoint timePoint1, ScalableValue<V, T> value2, TimePoint timePoint2) {
+        final T acc;
+        if (timePoint1.equals(timePoint2)) {
+            acc = value1.add(value2).divide(2);
+        } else {
+            long timeDiff1 = Math.abs(timePoint1.asMillis() - timePoint.asMillis());
+            long timeDiff2 = Math.abs(timePoint2.asMillis() - timePoint.asMillis());
+            acc = value1.multiply(timeDiff2).add(value2.multiply(timeDiff1)).divide(timeDiff1 + timeDiff2);
+        }
+        return acc;
+    }
+
+    @Override
+    public <InternalType, ValueType> ValueType getInterpolatedValue(TimePoint timePoint, Function<FixType, ScalableValue<InternalType, ValueType>> converter) {
+        final ValueType aws;
+        Pair<FixType, FixType> awsPair = getSurroundingFixes(timePoint);
+        if (awsPair.getA() == null) {
+            if (awsPair.getB() == null) {
+                aws = null;
+            } else {
+                aws = converter.get(awsPair.getB()).divide(1);
+            }
+        } else {
+            if (awsPair.getB() == null) {
+                aws = converter.get(awsPair.getA()).divide(1);
+            } else {
+                aws = timeBasedAverage(timePoint,
+                        converter.get(awsPair.getA()), awsPair.getA().getTimePoint(),
+                        converter.get(awsPair.getB()), awsPair.getB().getTimePoint());
+            }
+        }
+        return aws;
+    }
+
     @Override
     public Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive) {
         assertReadLock();
