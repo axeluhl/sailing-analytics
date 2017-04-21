@@ -11,3 +11,4 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sse.common,
  net.sf.marineapi
+Import-Package: org.osgi.framework

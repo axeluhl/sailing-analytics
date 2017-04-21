@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.TimePoint;
 
+import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.util.Units;
 
@@ -22,4 +23,16 @@ public interface NmeaUtil {
      * checksum into a valid checksum again, and an invalid checksum into an invalid checksum.
      */
     String replace(String nmeaSentence, String sequenceToFind, String replaceWith);
+
+    /**
+     * Call this to register proprietary parsers provided by this bundle with the
+     * {@link SentenceFactory} {@link SentenceFactory#getInstance() default instance}.
+     */
+    void registerAdditionalParsers();
+
+    /**
+     * Call this to unregister proprietary parsers provided by this bundle from the
+     * {@link SentenceFactory} {@link SentenceFactory#getInstance() default instance}.
+     */
+    void unregisterAdditionalParsers();
 }

@@ -14,11 +14,27 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.nmeaconnector.NmeaUtil;
 import com.sap.sse.common.TimePoint;
 
+import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.util.Units;
 
 public class NmeaUtilImpl implements NmeaUtil {
-
+    @Override
+    public void registerAdditionalParsers() {
+        SentenceFactory sentenceFactory = SentenceFactory.getInstance();
+        if (!sentenceFactory.hasParser("BAT")) {
+            sentenceFactory.registerParser("BAT", BATParser.class);
+        }
+    }
+    
+    @Override
+    public void unregisterAdditionalParsers() {
+        SentenceFactory sentenceFactory = SentenceFactory.getInstance();
+        if (sentenceFactory.hasParser("BAT")) {
+            sentenceFactory.unregisterParser(BATParser.class);
+        }
+    }
+    
     @Override
     public Wind getWind(TimePoint timePoint, Position position, MWVSentence mwvSentence) {
         return new WindImpl(position, timePoint, new KnotSpeedWithBearingImpl(mwvSentence.getSpeed(),
