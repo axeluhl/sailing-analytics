@@ -28,5 +28,5 @@ public interface NmeaFactory {
      * @return a sequence of {@link Wind} objects as extracted from the NMEA 0183 sentences found in the contents of the
      *         {@code reader}; never {@code null}, but possibly empty
      */
-    Iterable<Wind> readWind(InputStream inputStream);
+    Iterable<Wind> readWind(InputStream inputStream) throws InterruptedException;
 }

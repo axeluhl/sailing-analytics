@@ -10,6 +10,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.nmeaconnector.NmeaFactory;
+import com.sap.sse.common.Util;
+
 import net.sf.marineapi.nmea.event.AbstractSentenceListener;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
@@ -69,5 +73,11 @@ public class GeneralizedSentenceListenerTest {
         readerSupport.startReading();
         readerSupport.waitUntilAllMessagesHaveBeenRead();
         assertFalse(times.isEmpty());
+    }
+    
+    @Test
+    public void testSimpleNmeaWindReceiverScenario() throws FileNotFoundException, InterruptedException {
+        final Iterable<Wind> wind = NmeaFactory.INSTANCE.readWind(new FileInputStream("resources/LogSS.txt"));
+        assertFalse(Util.isEmpty(wind));
     }
 }
