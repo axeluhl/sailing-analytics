@@ -15,7 +15,9 @@ import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
+import net.sf.marineapi.nmea.sentence.TimeSentence;
 import net.sf.marineapi.nmea.util.Position;
+import net.sf.marineapi.nmea.util.Time;
 
 public class GeneralizedSentenceListenerTest {
     private SentenceReader sentenceReader;
@@ -46,5 +48,26 @@ public class GeneralizedSentenceListenerTest {
         readerSupport.startReading();
         readerSupport.waitUntilAllMessagesHaveBeenRead();
         assertFalse(positions.isEmpty());
+    }
+
+    @Test
+    public void testRegisterTimeListener() throws InterruptedException {
+        final List<Time> times = new ArrayList<>();
+        SentenceListener timeListener = new AbstractSentenceListener<TimeSentence>() {
+            @Override
+            public void sentenceRead(TimeSentence sentence) {
+                try {
+                    final Time time = sentence.getTime();
+                    times.add(time);
+                } catch (DataNotAvailableException e) {
+                    // this can happen and simply means we don't have a position; so we
+                    // can safely ignore this exception
+                }
+            }
+        };
+        sentenceReader.addSentenceListener(timeListener);
+        readerSupport.startReading();
+        readerSupport.waitUntilAllMessagesHaveBeenRead();
+        assertFalse(times.isEmpty());
     }
 }
