@@ -1,5 +1,7 @@
 package com.sap.sailing.nmeaconnector.test;
 
+import java.util.concurrent.CountDownLatch;
+
 import com.sap.sailing.nmeaconnector.NmeaFactory;
 
 import net.sf.marineapi.nmea.event.AbstractSentenceListener;
@@ -20,23 +22,22 @@ import net.sf.marineapi.nmea.sentence.Sentence;
  *
  */
 public class SentenceReaderSupport {
-    private final Object monitor;
-    private final boolean[] paused;
     private final SentenceReader reader;
+    private final CountDownLatch finishedLatch;
 
     protected SentenceReaderSupport(SentenceReader reader) {
-        this.paused = new boolean[1];
+        finishedLatch = new CountDownLatch(1);
         this.reader = reader;
-        this.monitor = new Object();
         NmeaFactory.INSTANCE.getUtil().registerAdditionalParsers();
         reader.addSentenceListener(new AbstractSentenceListener<Sentence>() {
             @Override
             public void readingPaused() {
-                synchronized (monitor) {
-                    super.readingPaused();
-                    paused[0] = true;
-                    monitor.notifyAll();
-                }
+                finishedLatch.countDown();
+            }
+
+            @Override
+            public void readingStopped() {
+                finishedLatch.countDown();
             }
 
             @Override
@@ -51,10 +52,6 @@ public class SentenceReaderSupport {
     }
     
     protected void waitUntilAllMessagesHaveBeenRead() throws InterruptedException {
-        synchronized (monitor) {
-            while (!paused[0]) {
-                monitor.wait(1000);
-            }
-        }
+        finishedLatch.await();
     }
 }
