@@ -59,10 +59,10 @@ public class SixtyInchRootNode extends BaseCompositeNode {
                         if (result == null) {
                             cf.getSlideCtx().setCurrenLifeRace(null);
                             boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
-                            currentLifeRace = null;
-                            currentPreLifeRace = null;
                             GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + true);
                             transitionTo(comingFromLiferace ? afterLiveRaceLoop : idleLoop);
+                            currentLifeRace = null;
+                            currentPreLifeRace = null;
                         } else {
                             cf.getSlideCtx().setCurrenLifeRace(result.getB());
                             final Long timeToRaceStartInMs = result.getA();

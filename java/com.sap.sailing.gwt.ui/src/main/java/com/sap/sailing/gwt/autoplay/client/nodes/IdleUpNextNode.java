@@ -35,8 +35,7 @@ public class IdleUpNextNode extends FiresPlaceNode {
         place = new IdleUpNextPlace();
     }
 
-
-
+    @Override
     public void onStart() {
         setPlaceToGo(place);
         firePlaceChangeAndStartTimer();
@@ -55,10 +54,6 @@ public class IdleUpNextNode extends FiresPlaceNode {
                         raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
                     }
                 }
-            }
-            if (raceTimesInfoProvider.getRaceIdentifiers().isEmpty()) {
-                throw new IllegalStateException(
-                        "No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
             }
             raceTimesInfoProvider.forceTimesInfosUpdate();
             raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {

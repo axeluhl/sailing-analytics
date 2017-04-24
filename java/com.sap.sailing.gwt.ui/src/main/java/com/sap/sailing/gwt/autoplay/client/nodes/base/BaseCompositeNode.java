@@ -10,10 +10,10 @@ public abstract class BaseCompositeNode
     }
 
     protected void transitionTo(AutoPlayNode nextNode) {
-        if (isStopped()) {
+        if (nextNode == currentNode) {
             return;
         }
-        if (nextNode == currentNode) {
+        if (isStopped()) {
             return;
         }
         if (currentNode != null) {
@@ -21,6 +21,12 @@ public abstract class BaseCompositeNode
         }
         currentNode = nextNode;
         nextNode.start(getBus());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        currentNode = null;
     }
 
 

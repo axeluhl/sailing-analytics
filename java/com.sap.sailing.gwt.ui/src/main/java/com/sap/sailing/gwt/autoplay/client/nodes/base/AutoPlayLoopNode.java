@@ -56,6 +56,7 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
 
     @Override
     public void onStop() {
+        super.onStop();
         for (AutoPlayNode autoPlayNode : nodes) {
             autoPlayNode.stop();
         }
