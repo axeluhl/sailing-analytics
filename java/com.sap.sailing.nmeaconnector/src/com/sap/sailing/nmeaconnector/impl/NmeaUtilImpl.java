@@ -1,5 +1,9 @@
 package com.sap.sailing.nmeaconnector.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
@@ -15,23 +19,37 @@ import com.sap.sailing.nmeaconnector.NmeaUtil;
 import com.sap.sse.common.TimePoint;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.parser.SentenceParser;
 import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.util.Units;
 
 public class NmeaUtilImpl implements NmeaUtil {
+    private static Map<String, Class<? extends SentenceParser>> proprietaryParsers;
+    
+    static {
+        proprietaryParsers = new HashMap<>();
+        proprietaryParsers.put("BAT", BATParser.class);
+        proprietaryParsers.put("AAM", AAMParser.class);
+        proprietaryParsers.put("GLC", GLCParser.class);
+    }
+    
     @Override
     public void registerAdditionalParsers() {
         SentenceFactory sentenceFactory = SentenceFactory.getInstance();
-        if (!sentenceFactory.hasParser("BAT")) {
-            sentenceFactory.registerParser("BAT", BATParser.class);
+        for (Entry<String, Class<? extends SentenceParser>> e : proprietaryParsers.entrySet()) {
+            if (!sentenceFactory.hasParser(e.getKey())) {
+                sentenceFactory.registerParser(e.getKey(), e.getValue());
+            }
         }
     }
     
     @Override
     public void unregisterAdditionalParsers() {
         SentenceFactory sentenceFactory = SentenceFactory.getInstance();
-        if (sentenceFactory.hasParser("BAT")) {
-            sentenceFactory.unregisterParser(BATParser.class);
+        for (Entry<String, Class<? extends SentenceParser>> e : proprietaryParsers.entrySet()) {
+            if (!sentenceFactory.hasParser(e.getKey())) {
+                sentenceFactory.unregisterParser(e.getValue());
+            }
         }
     }
     
