@@ -1,5 +1,9 @@
 package com.sap.sailing.nmeaconnector;
 
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.tracking.WindListener;
+import com.sap.sse.common.TimePoint;
+
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.DateSentence;
@@ -12,7 +16,9 @@ import net.sf.marineapi.nmea.sentence.TimeSentence;
  * for which it acts as a {@link SentenceListener} for sentences providing information
  * about wind measurements, date/time reference, location of measurements and data
  * that may be required to convert apparent wind speeds and angles into true wind
- * speeds and directions.<p>
+ * speeds and directions. Clients can {@link #addWindListener(WindListener) register}
+ * as a {@link WindListener} and receive {@link WindListener#windDataReceived} callbacks
+ * whenever a {@link Wind} fix was assembled out of the various NMEA sentences.<p>
  * 
  * The NMEA 0183 protocol specifies that a {@link SentenceId#MWV} sentence may provide
  * "true" (relative to true north) or "relative" (relative to bow) wind angles. However,
@@ -41,5 +47,7 @@ import net.sf.marineapi.nmea.sentence.TimeSentence;
  *
  */
 public interface NMEAWindReceiver {
-
+    void addWindListener(WindListener listener);
+    
+    void removeWindListener(WindListener listener);
 }
