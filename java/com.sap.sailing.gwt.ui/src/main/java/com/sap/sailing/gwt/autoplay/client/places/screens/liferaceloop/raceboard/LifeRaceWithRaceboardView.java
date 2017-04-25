@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.raceboard;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 
 public interface LifeRaceWithRaceboardView {
-    void startingWith(Slide7Presenter p, AcceptsOneWidget panel, RaceMap raceMap);
+    void startingWith(Slide7Presenter p, AcceptsOneWidget panel, RaceBoardPanel raceBoardPanel);
 
     public interface Slide7Presenter {
     }

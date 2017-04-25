@@ -3,18 +3,18 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.raceboar
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.app.ConfiguredPresenter;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 
-public class LifeRaceWithRaceboardPresenterImpl extends ConfiguredPresenter<LifeRaceWithRaceboardPlace> implements LifeRaceWithRaceboardView.Slide7Presenter {
+public class LifeRaceWithRaceboardPresenterImpl extends ConfiguredPresenter<LifeRaceWithRaceboardPlace>
+        implements LifeRaceWithRaceboardView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private LifeRaceWithRaceboardView view;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
 
-    public LifeRaceWithRaceboardPresenterImpl(LifeRaceWithRaceboardPlace place, AutoPlayClientFactorySixtyInch clientFactory,
-            LifeRaceWithRaceboardView LifeRaceWithRacemapViewImpl) {
+    public LifeRaceWithRaceboardPresenterImpl(LifeRaceWithRaceboardPlace place,
+            AutoPlayClientFactorySixtyInch clientFactory, LifeRaceWithRaceboardView LifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
         this.view = LifeRaceWithRacemapViewImpl;
     }
@@ -25,18 +25,7 @@ public class LifeRaceWithRaceboardPresenterImpl extends ConfiguredPresenter<Life
             view.showErrorNoLive(this, panel, getPlace().getError());
             return;
         }
-
-        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLifeRace();
-        ArrayList<String> racesToShow = null;
-        if (lifeRace != null) {
-            racesToShow = new ArrayList<>();
-            racesToShow.add(lifeRace.getRaceName());
-        } else {
-            view.showErrorNoLive(this, panel, new IllegalStateException("Na race is life"));
-            return;
-        }
-
-        view.startingWith(this, panel, getPlace().getRaceMap());
+        view.startingWith(this, panel, getPlace().getRaceBoardPanel());
     }
 
     @Override

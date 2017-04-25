@@ -3,12 +3,11 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.raceboar
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class LifeRaceWithRaceboardViewImpl extends ResizeComposite implements LifeRaceWithRaceboardView {
@@ -16,8 +15,6 @@ public class LifeRaceWithRaceboardViewImpl extends ResizeComposite implements Li
 
     @UiField
     ResizableFlowPanel racemap;
-
-    private Timer resizer;
 
     interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, LifeRaceWithRaceboardViewImpl> {
     }
@@ -32,28 +29,12 @@ public class LifeRaceWithRaceboardViewImpl extends ResizeComposite implements Li
         panel.setWidget(new Label("Could not load RaceMap: " + error.getMessage()));
     }
 
-    @Override
     public void onStop() {
-        resizer.cancel();
     }
 
     @Override
-    public void startingWith(Slide7Presenter p, AcceptsOneWidget panel, RaceMap raceMap) {
+    public void startingWith(Slide7Presenter p, AcceptsOneWidget panel, RaceBoardPanel raceMap) {
         panel.setWidget(this);
         racemap.add(raceMap);
-        resizeMapOnceInitially();
-
-        // resizer.scheduleRepeating(00);
     }
-
-
-    private void resizeMapOnceInitially() {
-        new Timer() {
-            @Override
-            public void run() {
-                racemap.onResize();
-            }
-        }.schedule(50);
-    }
-
 }

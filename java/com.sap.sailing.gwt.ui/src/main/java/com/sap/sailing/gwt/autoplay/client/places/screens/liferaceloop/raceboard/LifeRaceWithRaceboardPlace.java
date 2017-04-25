@@ -2,9 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.raceboar
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 
 public class LifeRaceWithRaceboardPlace extends Place {
     public static class Tokenizer implements PlaceTokenizer<LifeRaceWithRaceboardPlace> {
@@ -19,18 +17,15 @@ public class LifeRaceWithRaceboardPlace extends Place {
         }
     }
 
-    private GetMiniLeaderboardDTO leaderBoardDTO;
-    private RaceMap raceMap;
+    private RaceBoardPanel raceBoardPanel;
     private Throwable error;
-    private CompetitorSelectionModel raceMapSelectionProvider;
 
-    public void setRaceMap(RaceMap result, CompetitorSelectionModel csel) {
-        this.raceMap = result;
-        this.raceMapSelectionProvider = csel;
+    public void setRaceMap(RaceBoardPanel result) {
+        this.raceBoardPanel = result;
     }
 
-    public RaceMap getRaceMap() {
-        return raceMap;
+    public RaceBoardPanel getRaceBoardPanel() {
+        return raceBoardPanel;
     }
 
     public Throwable getError() {
@@ -40,17 +35,4 @@ public class LifeRaceWithRaceboardPlace extends Place {
     public void setError(Throwable caught) {
         this.error = caught;
     }
-
-    public GetMiniLeaderboardDTO getLeaderBoardDTO() {
-        return leaderBoardDTO;
-    }
-
-    public CompetitorSelectionModel getRaceMapSelectionProvider() {
-        return raceMapSelectionProvider;
-    }
-
-    public void setLeaderBoardDTO(GetMiniLeaderboardDTO leaderBoardDTO) {
-        this.leaderBoardDTO = leaderBoardDTO;
-    }
-
 }
