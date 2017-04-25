@@ -24,8 +24,8 @@ public class AutoPlayAppActivityMapper implements ActivityMapper {
     public Activity getActivity(Place place) {
 
         if (place instanceof ClassicConfigPlace) {
-            return new ClassicConfigPresenterImpl((ClassicConfigPlace) place, clientFactory, new ClassicConfigViewImpl(
-                    clientFactory.getPlaceNavigator(), clientFactory.getEventBus(), clientFactory.getUserService()));
+            return new ClassicConfigPresenterImpl((ClassicConfigPlace) place, clientFactory,
+                    new ClassicConfigViewImpl(clientFactory));
         } else if (place instanceof ClassicInitialPlace) {
             return new ClassicInitialPresenterImpl((ClassicInitialPlace) place, clientFactory,
                     new ClassicInitialImpl());

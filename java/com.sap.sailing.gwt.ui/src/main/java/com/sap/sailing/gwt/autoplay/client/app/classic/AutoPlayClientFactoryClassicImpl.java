@@ -5,8 +5,6 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactoryBase;
-import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorImpl;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.PlayerView;
@@ -16,7 +14,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 
-public class AutoPlayClientFactoryClassicImpl extends AutoPlayClientFactoryBase<PlaceNavigator>
+public class AutoPlayClientFactoryClassicImpl extends AutoPlayClientFactoryBase<ClassicPlaceNavigator>
         implements AutoPlayClientFactoryClassic {
 
     private ClassicContext currentContext;
@@ -31,10 +29,11 @@ public class AutoPlayClientFactoryClassicImpl extends AutoPlayClientFactoryBase<
     }
 
     private AutoPlayClientFactoryClassicImpl(EventBus eventBus, PlaceController placeController) {
-        this(eventBus, placeController, new PlaceNavigatorImpl(placeController));
+        this(eventBus, placeController, new ClassicPlaceNavigatorImpl(placeController));
     }
 
-    private AutoPlayClientFactoryClassicImpl(EventBus eventBus, PlaceController placeController, PlaceNavigator navigator) {
+    private AutoPlayClientFactoryClassicImpl(EventBus eventBus, PlaceController placeController,
+            ClassicPlaceNavigator navigator) {
         super(new AutoPlayMainViewDesktopImpl(), eventBus, placeController, navigator);
     }
     

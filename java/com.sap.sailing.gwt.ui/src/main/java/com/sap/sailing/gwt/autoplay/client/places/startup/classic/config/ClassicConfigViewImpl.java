@@ -21,7 +21,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayClientFactoryClassic;
+import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicPlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoPlayerContextDefinition;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoplayPerspectiveOwnSettings;
@@ -40,7 +41,6 @@ import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToStringSerializer;
-import com.sap.sse.security.ui.client.UserService;
 
 public class ClassicConfigViewImpl extends Composite implements ClassicConfigView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -65,21 +65,23 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
     @UiField
     FlowPanel leaderboardPerspectiveSettingsPanel;
 
-    private final PlaceNavigator navigator;
+    private final ClassicPlaceNavigator navigator;
     private final EventBus eventBus;
     private final List<EventDTO> events;
 
     private AutoplayPerspectiveLifecycle autoplayLifecycle;
     protected PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings;
+    private AutoPlayClientFactoryClassic clientFactory;
 
-    public ClassicConfigViewImpl(PlaceNavigator navigator, EventBus eventBus, UserService userService) {
+    public ClassicConfigViewImpl(AutoPlayClientFactoryClassic clientFactory) {
         super();
-        this.navigator = navigator;
-        this.eventBus = eventBus;
+        this.clientFactory = clientFactory;
+        this.navigator = clientFactory.getPlaceNavigator();
+        this.eventBus = clientFactory.getEventBus();
         this.events = new ArrayList<EventDTO>();
 
         sapHeader = new SAPSailingHeaderWithAuthentication(StringMessages.INSTANCE.autoplayConfiguration());
-        new FixedSailingAuthentication(userService, sapHeader.getAuthenticationMenuView());
+        new FixedSailingAuthentication(clientFactory.getUserService(), sapHeader.getAuthenticationMenuView());
 
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
@@ -206,7 +208,7 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
             // TODO generate place settings url, and directly start other place
             String contextAndSettings = new SettingsToStringSerializer().fromSettings(
                     new AutoPlayerContextDefinition(selectedEvent.id, selectedLeaderboardName), autoplayPerspectiveSettings);
-            navigator.goToPlayer(contextAndSettings);
+            navigator.goToPlayer(contextAndSettings, clientFactory);
         }
     }
 

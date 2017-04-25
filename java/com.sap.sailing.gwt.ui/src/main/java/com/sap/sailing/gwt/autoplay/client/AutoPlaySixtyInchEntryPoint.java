@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayActivityMapperS
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayHistoryMapperSixtyInch;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.PlaceNavigatorSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchPlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchSetting;
 import com.sap.sailing.gwt.autoplay.client.resources.SixtyInchBundle;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
 public class AutoPlaySixtyInchEntryPoint
-        extends AbstractMvpEntryPoint<StringMessages, AutoPlayClientFactory<PlaceNavigatorSixtyInch>> {
+        extends AbstractMvpEntryPoint<StringMessages, AutoPlayClientFactory<SixtyInchPlaceNavigator>> {
 
     private final SixtyInchBundle RES = GWT.create(SixtyInchBundle.class);
 

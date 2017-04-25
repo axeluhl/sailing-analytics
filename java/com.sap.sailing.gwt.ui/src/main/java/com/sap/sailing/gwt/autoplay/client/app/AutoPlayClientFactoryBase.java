@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
-public abstract class AutoPlayClientFactoryBase<P extends PlaceNavigator>
+public abstract class AutoPlayClientFactoryBase<P extends PlaceNavigator<?>>
         extends SecureClientFactoryImpl<ApplicationTopLevelView> implements AutoPlayClientFactory<P> {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;

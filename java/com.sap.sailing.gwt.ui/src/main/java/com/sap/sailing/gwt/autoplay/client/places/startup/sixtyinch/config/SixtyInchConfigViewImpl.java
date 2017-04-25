@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
+import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 
 public class SixtyInchConfigViewImpl extends Composite implements SixtyInchConfigView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -125,10 +126,13 @@ public class SixtyInchConfigViewImpl extends Composite implements SixtyInchConfi
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
         
+        // TODO
+        String serializedSettings = "";// new SettingsToStringSerializer().fromSettings(new
+                                       // SixtyInchSetting(selectedEvent.id, selectedLeaderboardName));
+        
         if(selectedEvent != null && selectedLeaderboardName != null) {
-            clientFactory.getPlaceNavigator().goToPlayerSixtyInch(
-                    new SixtyInchSetting(selectedEvent.id, selectedLeaderboardName),
-                    clientFactory);
+            clientFactory.getPlaceNavigator()
+                    .goToPlayer(serializedSettings, clientFactory);
         }
     }
 
