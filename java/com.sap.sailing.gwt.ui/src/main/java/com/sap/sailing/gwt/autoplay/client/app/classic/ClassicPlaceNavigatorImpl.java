@@ -48,10 +48,10 @@ public class ClassicPlaceNavigatorImpl implements ClassicPlaceNavigator {
 
             @Override
             public void onFailure(Throwable caught) {
-                createErrorView("Error while loading the event with service getEventById()", caught, panel);
+                caught.printStackTrace();
             }
         };
-        clientFactory.getSailingService().getEventById(eventUUID, true, getEventByIdAsyncCallback);
+        cf.getSailingService().getEventById(eventUUID, true, getEventByIdAsyncCallback);
     }
 
 }
