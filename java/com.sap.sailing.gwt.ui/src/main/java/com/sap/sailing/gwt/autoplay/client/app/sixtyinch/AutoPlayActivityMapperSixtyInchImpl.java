@@ -11,9 +11,9 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boat
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleNextUpViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleUpNextPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleUpNextPresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard.LifeRaceWithRacemapAndLeaderBoardPlace;
-import com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard.LifeRaceWithRacemapAndLeaderBoardPresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard.LifeRaceWithRacemapAndLeaderBoardViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsFlagsPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsImagePlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsPresenterImpl;
@@ -74,8 +74,8 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
             return new PreRaceRacemapPresenterImpl((PreRaceRacemapPlace) place, clientFactory,
                     new PreRaceRacemapViewImpl());
         }
-        if (place instanceof LifeRaceWithRacemapAndLeaderBoardPlace) {
-            return new LifeRaceWithRacemapAndLeaderBoardPresenterImpl((LifeRaceWithRacemapAndLeaderBoardPlace) place, clientFactory, new LifeRaceWithRacemapAndLeaderBoardViewImpl());
+        if (place instanceof LiveRaceWithRacemapAndLeaderBoardPlace) {
+            return new LiveRaceWithRacemapAndLeaderBoardPresenterImpl((LiveRaceWithRacemapAndLeaderBoardPlace) place, clientFactory, new LiveRaceWithRacemapAndLeaderBoardViewImpl());
         }
         if (place instanceof RaceEndWithCompetitorsTop3Place) {
             return new RaceEndWithBoatsPresenterImpl((RaceEndWithCompetitorsTop3Place) place, clientFactory,

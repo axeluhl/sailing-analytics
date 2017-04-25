@@ -19,7 +19,7 @@ public class SixtyInchStartupNode extends BaseCompositeNode {
         this.cf = cf;
         AutoPlayLoopNode idleLoop = new AutoPlayLoopNode(30, new IdleUpNextNode(cf));
         AutoPlayLoopNode preLifeRaceLoop = new AutoPlayLoopNode(30, new PreRaceWithRacemapNode(cf));
-        AutoPlayLoopNode lifeRaceLoop = new AutoPlayLoopNode(30, new LifeRaceWithRacemapNode(cf));
+        AutoPlayLoopNode lifeRaceLoop = new AutoPlayLoopNode(30, new LiveRaceWithRacemapNode(cf));
         AutoPlayLoopNode afterLifeRaceLoop = new AutoPlayLoopNode(30, new RaceEndWithCompetitorsNode(cf), idleLoop);
         SixtyInchRootNode raceLoop = new SixtyInchRootNode(cf, idleLoop, preLifeRaceLoop, lifeRaceLoop,
                 afterLifeRaceLoop);

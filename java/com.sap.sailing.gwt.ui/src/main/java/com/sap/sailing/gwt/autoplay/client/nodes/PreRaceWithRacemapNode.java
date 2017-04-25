@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.nodes;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
-import com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard.LifeRaceWithRacemapAndLeaderBoardPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper;
 import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper.RVWrapper;
@@ -27,7 +27,7 @@ public class PreRaceWithRacemapNode extends FiresPlaceNode {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        LifeRaceWithRacemapAndLeaderBoardPlace place = new LifeRaceWithRacemapAndLeaderBoardPlace();
+                        LiveRaceWithRacemapAndLeaderBoardPlace place = new LiveRaceWithRacemapAndLeaderBoardPlace();
                         place.setError(caught);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();

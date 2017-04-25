@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard;
+package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
-public class LifeRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite implements LifeRaceWithRacemapAndLeaderBoardView {
+public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite implements LiveRaceWithRacemapAndLeaderBoardView {
     private static LifeRaceWithRacemapViewImplUiBinder uiBinder = GWT.create(LifeRaceWithRacemapViewImplUiBinder.class);
 
     @UiField
@@ -28,16 +28,16 @@ public class LifeRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
 
     private RaceMap rawRaceMap;
 
-    interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, LifeRaceWithRacemapAndLeaderBoardViewImpl> {
+    interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, LiveRaceWithRacemapAndLeaderBoardViewImpl> {
     }
 
-    public LifeRaceWithRacemapAndLeaderBoardViewImpl() {
+    public LiveRaceWithRacemapAndLeaderBoardViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
 
     @Override
-    public void showErrorNoLive(LifeRaceWithRacemapAndLeaderBoardPresenterImpl slide7PresenterImpl, AcceptsOneWidget panel, Throwable error) {
+    public void showErrorNoLive(LiveRaceWithRacemapAndLeaderBoardPresenterImpl slide7PresenterImpl, AcceptsOneWidget panel, Throwable error) {
         panel.setWidget(new Label("Could not load RaceMap: " + error.getMessage()));
     }
 

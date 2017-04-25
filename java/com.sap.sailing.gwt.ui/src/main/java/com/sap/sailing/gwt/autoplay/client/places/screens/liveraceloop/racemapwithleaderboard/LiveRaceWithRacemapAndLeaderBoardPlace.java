@@ -1,20 +1,20 @@
-package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard;
+package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 
-public class LifeRaceWithRacemapAndLeaderBoardPlace extends Place {
-    public static class Tokenizer implements PlaceTokenizer<LifeRaceWithRacemapAndLeaderBoardPlace> {
+public class LiveRaceWithRacemapAndLeaderBoardPlace extends Place {
+    public static class Tokenizer implements PlaceTokenizer<LiveRaceWithRacemapAndLeaderBoardPlace> {
         @Override
-        public String getToken(LifeRaceWithRacemapAndLeaderBoardPlace place) {
+        public String getToken(LiveRaceWithRacemapAndLeaderBoardPlace place) {
             return "";
         }
 
         @Override
-        public LifeRaceWithRacemapAndLeaderBoardPlace getPlace(String token) {
-            return new LifeRaceWithRacemapAndLeaderBoardPlace();
+        public LiveRaceWithRacemapAndLeaderBoardPlace getPlace(String token) {
+            return new LiveRaceWithRacemapAndLeaderBoardPlace();
         }
     }
 
