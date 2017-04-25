@@ -50,6 +50,7 @@ public class LifeRaceWithRacemapAndLeaderBoardPresenterImpl extends ConfiguredPr
             for (LeaderboardRowDTO item : leaderboardPanel.getLeaderboardTable().getVisibleItems()) {
                 compList.add(item.competitor);
             }
+            selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
             return;
         }
         if (selected >= 0) {

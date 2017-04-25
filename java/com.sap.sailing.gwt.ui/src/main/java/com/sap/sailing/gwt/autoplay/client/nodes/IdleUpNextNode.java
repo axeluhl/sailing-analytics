@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleUpNextPlace;
-import com.sap.sailing.gwt.autoplay.client.utils.HelperSixty;
+import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -41,7 +41,7 @@ public class IdleUpNextNode extends FiresPlaceNode {
         firePlaceChangeAndStartTimer();
 
         if (raceTimesInfoProvider == null) {
-            raceTimesInfoProvider = new RaceTimesInfoProvider(cf.getSailingService(), HelperSixty.asyncActionsExecutor,
+            raceTimesInfoProvider = new RaceTimesInfoProvider(cf.getSailingService(), AutoplayHelper.asyncActionsExecutor,
                     cf.getErrorReporter(), new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
             raceTimesInfoProvider.reset();
 

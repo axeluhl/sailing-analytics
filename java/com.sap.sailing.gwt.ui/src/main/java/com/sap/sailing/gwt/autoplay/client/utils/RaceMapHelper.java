@@ -63,12 +63,12 @@ public class RaceMapHelper {
         raceboardTimer.setRefreshInterval(1000);
 
         if (raceTimesInfoProvider == null) {
-            raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, HelperSixty.asyncActionsExecutor,
+            raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, AutoplayHelper.asyncActionsExecutor,
                     errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
         }
         raceTimesInfoProvider.reset();
 
-        StrippedLeaderboardDTO selectedLeaderboard = HelperSixty.getSelectedLeaderboard(event, leaderBoardName);
+        StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(event, leaderBoardName);
 
         sailingService.getCompetitorsOfLeaderboard(leaderBoardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
 
@@ -92,7 +92,7 @@ public class RaceMapHelper {
                                         public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
                                             createRaceMapIfNotExist(regattaAndRaceIdentifier, selectedLeaderboard,
                                                     result, competitors,
-                                                    sailingService, HelperSixty.asyncActionsExecutor, errorReporter,
+                                                    sailingService, AutoplayHelper.asyncActionsExecutor, errorReporter,
                                                     raceboardTimer, callback, clientTimeWhenResponseWasReceived,
                                                     serverTimeDuringRequest, clientTimeWhenRequestWasSent,
                                                     raceTimesInfo);
