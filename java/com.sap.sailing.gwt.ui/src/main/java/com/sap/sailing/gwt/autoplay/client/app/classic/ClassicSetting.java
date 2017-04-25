@@ -2,27 +2,35 @@ package com.sap.sailing.gwt.autoplay.client.app.classic;
 
 import java.util.UUID;
 
-public class ClassicSetting {
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.StringSetting;
+import com.sap.sse.common.settings.generic.UUIDSetting;
 
-    private UUID eventId;
-    private String leaderBoardName;
-    private boolean manualMode;
+public class ClassicSetting extends AbstractGenericSerializableSettings {
+    private static final long serialVersionUID = 2880854263616658272L;
 
-    public ClassicSetting(UUID eventUuid, String selectedLeaderboardName) {
-        this.eventId = eventUuid;
-        this.leaderBoardName = selectedLeaderboardName;
+    private transient UUIDSetting eventUUID;
+    private transient StringSetting leaderboardName;
+
+    public ClassicSetting(UUID eventUUID, String leaderboardName) {
+        this.eventUUID.setValue(eventUUID);
+        this.leaderboardName.setValue(leaderboardName);
     }
 
-    public UUID getEventId() {
-        return eventId;
+    public ClassicSetting() {
     }
 
-    public String getLeaderBoardName() {
-        return leaderBoardName;
+    @Override
+    protected void addChildSettings() {
+        eventUUID = new UUIDSetting("eventId", this);
+        leaderboardName = new StringSetting("name", this);
     }
 
-    public boolean isManualMode() {
-        return manualMode;
+    public UUID getEventUidAsString() {
+        return eventUUID.getValue();
+    }
+
+    public String getLeaderboardName() {
+        return leaderboardName.getValue();
     }
 }
-

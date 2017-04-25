@@ -2,27 +2,34 @@ package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
 
 import java.util.UUID;
 
-public class SixtyInchSetting {
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.StringSetting;
+import com.sap.sse.common.settings.generic.UUIDSetting;
 
-    private UUID eventId;
-    private String leaderBoardName;
-    private boolean manualMode;
+public class SixtyInchSetting extends AbstractGenericSerializableSettings {
+    private static final long serialVersionUID = -5170519954446053233L;
+
+    private UUIDSetting eventId;
+    private StringSetting leaderBoardName;
 
     public SixtyInchSetting(UUID eventUuid, String selectedLeaderboardName) {
-        this.eventId = eventUuid;
-        this.leaderBoardName = selectedLeaderboardName;
+        eventId.setValue(eventUuid);
+        leaderBoardName.setValue(selectedLeaderboardName);
+    }
+
+    @Override
+    protected void addChildSettings() {
+        this.eventId = new UUIDSetting("eventUuid", this);
+        this.leaderBoardName = new StringSetting("name", this);
     }
 
     public UUID getEventId() {
-        return eventId;
+        return eventId.getValue();
     }
 
     public String getLeaderBoardName() {
-        return leaderBoardName;
+        return leaderBoardName.getValue();
     }
 
-    public boolean isManualMode() {
-        return manualMode;
-    }
 }
 
