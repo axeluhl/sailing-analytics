@@ -4,6 +4,7 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspective;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
@@ -45,6 +46,8 @@ public class LiveRaceLeaderboard extends FiresPlaceNode {
                 leaderboardTimer, cf.getSlideCtx().getSettings().getLeaderboardName(), cf.getErrorReporter(),
                 StringMessages.INSTANCE,
                 withFullscreenButton);
+        setPlaceToGo(new LeaderboardPlace(leaderboardPerspective));
+        firePlaceChangeAndStartTimer();
 
     };
 

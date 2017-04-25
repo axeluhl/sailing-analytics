@@ -19,12 +19,16 @@ public class LeaderboardPlace extends Place {
 
     private LeaderboardWithHeaderPerspective leaderboardPerspective;
 
+    public LeaderboardPlace(LeaderboardWithHeaderPerspective leaderboardPerspective) {
+        this.leaderboardPerspective = leaderboardPerspective;
+    }
+
+    private LeaderboardPlace() {
+    }
+
     public LeaderboardWithHeaderPerspective getLeaderboardPerspective() {
         return leaderboardPerspective;
     }
 
-    public void setLeaderboardPerspective(LeaderboardWithHeaderPerspective leaderboardPerspective) {
-        this.leaderboardPerspective = leaderboardPerspective;
-    }
 
 }
