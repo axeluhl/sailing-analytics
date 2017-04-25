@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
+import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.raceboard.LiveRaceWithRaceboardPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -74,6 +75,8 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         /** leaderboardGroupName */
                         null, /** eventId */
                         null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true);
+                setPlaceToGo(new LiveRaceWithRaceboardPlace(raceboardPerspective));
+                firePlaceChangeAndStartTimer();
             }
 
             @Override

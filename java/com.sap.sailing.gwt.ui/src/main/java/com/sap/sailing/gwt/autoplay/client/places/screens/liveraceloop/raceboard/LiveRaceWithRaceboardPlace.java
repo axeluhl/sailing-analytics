@@ -20,6 +20,13 @@ public class LiveRaceWithRaceboardPlace extends Place {
     private RaceBoardPanel raceBoardPanel;
     private Throwable error;
 
+    public LiveRaceWithRaceboardPlace(RaceBoardPanel raceBoardPanel) {
+        this.raceBoardPanel = raceBoardPanel;
+    }
+
+    private LiveRaceWithRaceboardPlace() {
+    }
+
     public void setRaceMap(RaceBoardPanel result) {
         this.raceBoardPanel = result;
     }
