@@ -13,5 +13,7 @@ public interface SixtyInchContext {
 
     public RegattaAndRaceIdentifier getLifeRace();
 
+    public RegattaAndRaceIdentifier getLastRace();
+
     public void setCurrenLifeRace(RegattaAndRaceIdentifier lifeRace);
 }

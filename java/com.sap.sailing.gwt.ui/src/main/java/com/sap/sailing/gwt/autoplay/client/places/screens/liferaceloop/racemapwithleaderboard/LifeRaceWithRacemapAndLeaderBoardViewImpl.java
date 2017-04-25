@@ -43,7 +43,6 @@ public class LifeRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
 
     @Override
     public void onCompetitorSelect(CompetitorDTO marked) {
-        GWT.log("Highlight in raceboard");
         rawRaceMap.addedToSelection(marked);
     }
 
