@@ -7,7 +7,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartPlaceSixtyInch;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartClassicPlace;
 
 public abstract class ConfiguredPresenter<P extends Place> extends PresenterBase<P> {
     private EventBus eventBus;
@@ -42,7 +42,7 @@ public abstract class ConfiguredPresenter<P extends Place> extends PresenterBase
                 });
             } else {
                 GWT.log("Not configured, go back to start place");
-                getClientFactory().getPlaceController().goTo(new StartPlaceSixtyInch());
+                getClientFactory().getPlaceController().goTo(new StartClassicPlace());
             }
         } catch (Exception e) {
             getEventBus().fireEvent(new AutoPlayFailureEvent(e, "Pre-Init failed"));

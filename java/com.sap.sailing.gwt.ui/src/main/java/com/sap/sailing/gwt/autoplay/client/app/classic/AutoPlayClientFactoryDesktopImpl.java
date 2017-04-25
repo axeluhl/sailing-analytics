@@ -8,11 +8,11 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactoryBase;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorImpl;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.DesktopPlayerView;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.DesktopStartView;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.PlayerView;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartPlace;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.DesktopPlayerView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.DesktopStartView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.PlayerView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.StartPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.StartView;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 

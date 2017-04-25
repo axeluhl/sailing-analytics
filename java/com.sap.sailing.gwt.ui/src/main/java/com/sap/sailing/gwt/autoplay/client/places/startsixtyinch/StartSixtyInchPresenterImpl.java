@@ -8,15 +8,16 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.PresenterBase;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartClassicPlace;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class SlideInitPresenterImpl extends PresenterBase<SlideInitPlace> implements SlideInitView.SlideInitPresenter {
-    private SlideInitView view;
+public class StartSixtyInchPresenterImpl extends PresenterBase<StartSixtyInchPlace> implements StartSixtyInchView.Presenter {
+    private StartSixtyInchView view;
 
-    public SlideInitPresenterImpl(SlideInitPlace place, AutoPlayClientFactorySixtyInch clientFactory,
-            SlideInitView slideinitViewImpl) {
+    public StartSixtyInchPresenterImpl(StartSixtyInchPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+            StartSixtyInchView slideinitViewImpl) {
         super(place, clientFactory);
         this.view = slideinitViewImpl;
         updateEventImage();
@@ -26,7 +27,7 @@ public class SlideInitPresenterImpl extends PresenterBase<SlideInitPlace> implem
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
 
         if (getClientFactory().getSlideCtx() == null || getClientFactory().getSlideCtx().getEvent() != null) {
-            getClientFactory().getPlaceController().goTo(new StartPlaceSixtyInch());
+            getClientFactory().getPlaceController().goTo(new StartClassicPlace());
             return;
         }
         eventBus.addHandler(EventChanged.TYPE, new EventChanged.Handler() {
@@ -55,7 +56,7 @@ public class SlideInitPresenterImpl extends PresenterBase<SlideInitPlace> implem
                 @Override
                 public void execute() {
                     GWT.log("sideinit presenter: doContinue");
-                    getClientFactory().getPlaceController().goTo(new StartPlaceSixtyInch());
+                    getClientFactory().getPlaceController().goTo(new StartClassicPlace());
                 }
             });
         }

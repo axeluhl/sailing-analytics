@@ -7,11 +7,11 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactoryBase;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorImpl;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.DesktopPlayerView;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.PlayerView;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartView;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartPlaceSixtyInch;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartViewSixtyInchImpl;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartClassicPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.DesktopPlayerView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.PlayerView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.StartView;
+import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.views.ConfigViewImpl;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sse.gwt.client.mvp.ErrorView;
@@ -43,7 +43,7 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     
     @Override
     public StartView createStartView() {
-        return new StartViewSixtyInchImpl(this);
+        return new ConfigViewImpl(this);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
 
     @Override
     public Place getDefaultPlace() {
-        return new StartPlaceSixtyInch();
+        return new StartClassicPlace();
     }
 
     @Override

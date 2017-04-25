@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startsixtyinch;
+package com.sap.sailing.gwt.autoplay.client.places.startclassic;
 
 import java.util.List;
 
@@ -9,18 +9,18 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartView;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.StartView;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.event.LocaleChangeEventHandler;
 
-public class StartActivitySixtyInch extends AbstractActivity {
+public class StartClassicPresenterImpl extends AbstractActivity implements StartClassicView.Presenter {
     private final AutoPlayClientFactorySixtyInch clientFactory;
 
     public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
 
-    public StartActivitySixtyInch(StartPlaceSixtyInch place, AutoPlayClientFactorySixtyInch clientFactory) {
+    public StartClassicPresenterImpl(StartClassicPlace place, AutoPlayClientFactorySixtyInch clientFactory) {
         this.clientFactory = clientFactory;
     }
 

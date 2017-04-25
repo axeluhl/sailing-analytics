@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startsixtyinch;
+package com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.views;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -14,16 +14,16 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
+import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartSixtyInchView;
 
-public class SlideInitViewImpl extends ResizeComposite implements SlideInitView {
+public class InitialViewImpl extends ResizeComposite implements StartSixtyInchView {
     private static SlideInitViewImplUiBinder uiBinder = GWT.create(SlideInitViewImplUiBinder.class);
 
-    interface SlideInitViewImplUiBinder extends UiBinder<Widget, SlideInitViewImpl> {
+    interface SlideInitViewImplUiBinder extends UiBinder<Widget, InitialViewImpl> {
     }
 
     @UiField
     SimplePanel content;
-
     @UiField
     DivElement errorBoxUi;
     @UiField
@@ -33,13 +33,13 @@ public class SlideInitViewImpl extends ResizeComposite implements SlideInitView 
     @UiField
     Anchor errorResetUi;
 
-    public SlideInitViewImpl() {
+    public InitialViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
 
     }
 
     @Override
-    public void startingWith(SlideInitPresenter p, AcceptsOneWidget panel) {
+    public void startingWith(Presenter p, AcceptsOneWidget panel) {
         panel.setWidget(this);
 
 

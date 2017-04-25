@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startclassic;
+package com.sap.sailing.gwt.autoplay.client.places.startclassic.old;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;

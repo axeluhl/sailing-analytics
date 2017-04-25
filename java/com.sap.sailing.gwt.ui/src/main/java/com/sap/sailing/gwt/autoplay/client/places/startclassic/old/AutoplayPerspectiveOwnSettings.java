@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startclassic;
+package com.sap.sailing.gwt.autoplay.client.places.startclassic.old;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startclassic;
+package com.sap.sailing.gwt.autoplay.client.places.startclassic.old;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;

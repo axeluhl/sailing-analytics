@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startclassic;
+package com.sap.sailing.gwt.autoplay.client.places.startclassic.old;
 
 import java.util.ArrayList;
 import java.util.Date;

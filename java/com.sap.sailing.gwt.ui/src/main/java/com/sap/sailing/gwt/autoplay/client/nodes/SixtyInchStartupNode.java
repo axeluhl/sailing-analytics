@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SlideInitPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartSixtyInchPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class SixtyInchStartupNode extends BaseCompositeNode {
@@ -31,7 +31,7 @@ public class SixtyInchStartupNode extends BaseCompositeNode {
 
     @Override
     public void onStart() {
-        cf.getEventBus().fireEvent(new PlaceChangeEvent(new SlideInitPlace()));
+        cf.getEventBus().fireEvent(new PlaceChangeEvent(new StartSixtyInchPlace()));
         final UUID eventUUID = cf.getSlideCtx().getSettings().getEventId();
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override

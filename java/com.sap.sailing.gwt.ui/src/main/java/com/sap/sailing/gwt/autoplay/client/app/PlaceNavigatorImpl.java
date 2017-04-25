@@ -5,8 +5,8 @@ import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySi
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.PlaceNavigatorSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchContextImpl;
 import com.sap.sailing.gwt.autoplay.client.nodes.SixtyInchStartupNode;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.PlayerPlace;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.PlayerPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.StartPlace;
 import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SixtyInchSetting;
 
 public class PlaceNavigatorImpl implements PlaceNavigator, PlaceNavigatorSixtyInch {
