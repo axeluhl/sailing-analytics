@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceLoop.boats;
+package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 
