@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapw
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.Timer;
@@ -46,38 +45,43 @@ public class LifeRaceWithRacemapAndLeaderBoardPresenterImpl extends ConfiguredPr
     }
 
     protected void selectNext() {
-        if (compList.isEmpty()) {
+        try {
+            compList.clear();
+            // sync with Leaderboard sorting
             for (LeaderboardRowDTO item : leaderboardPanel.getLeaderboardTable().getVisibleItems()) {
                 compList.add(item.competitor);
+                getPlace().getRaceMapSelectionProvider().setSelected(item.competitor, false);
             }
-            selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
-            return;
-        }
-        if (selected >= 0) {
-            CompetitorDTO lastSelected = compList.get(selected);
-            getPlace().getRaceMapSelectionProvider().setSelected(lastSelected, false);
-        }
-        selected++;
+            // wait for data in leaderboard, if empty no need to proceed
+            if (compList.isEmpty()) {
+                selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
+                return;
+            }
 
-        // overflow, restart
-        if (selected > compList.size() - 1) {
+            selected++;
+            // overflow, restart
+            if (selected > compList.size() - 1) {
+                selected = 0;
+            }
+
+            CompetitorDTO marked = compList.get(selected);
+            getPlace().getRaceMapSelectionProvider().setSelected(marked, true);
+            onSelect(marked);
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    if (selected == 0) {
+                        view.scrollLeaderBoardToTop();
+                    } else {
+                        leaderboardPanel.scrollRowIntoView(selected);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            // ensure that the loop keeps running, no matter if errors occur
+            e.printStackTrace();
             selected = 0;
         }
-
-        GWT.log("Select " + selected);
-        CompetitorDTO marked = compList.get(selected);
-        getPlace().getRaceMapSelectionProvider().setSelected(marked, true);
-        onSelect(marked);
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                if (selected == 0) {
-                    view.scrollLeaderBoardToTop();
-                } else {
-                    leaderboardPanel.scrollRowIntoView(selected);
-                }
-            }
-        });
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
     }
 

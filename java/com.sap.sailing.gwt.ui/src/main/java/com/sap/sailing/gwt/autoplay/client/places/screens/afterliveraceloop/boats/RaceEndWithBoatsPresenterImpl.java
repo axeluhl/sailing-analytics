@@ -43,8 +43,7 @@ public class RaceEndWithBoatsPresenterImpl extends ConfiguredPresenter<AbstractR
 
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
-        getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(),
-                getPlace().getLastRace().getRaceName()));
+
 
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
@@ -55,6 +54,8 @@ public class RaceEndWithBoatsPresenterImpl extends ConfiguredPresenter<AbstractR
             panel.setWidget(new Label("No raceIdentifier specified"));
             return;
         }
+        getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(),
+                getPlace().getLastRace().getRaceName()));
 
         LeaderboardSettings leaderboardSettings = new LeaderboardSettings( //
                 /* raceColumsToShow */ null, //

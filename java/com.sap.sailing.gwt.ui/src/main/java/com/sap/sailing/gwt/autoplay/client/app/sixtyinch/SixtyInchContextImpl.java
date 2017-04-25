@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
@@ -11,6 +12,7 @@ public class SixtyInchContextImpl implements SixtyInchContext {
     private EventBus eventBus;
     private EventDTO event;
     private RegattaAndRaceIdentifier lifeRace;
+    private RegattaAndRaceIdentifier lastRace;
 
 
     public SixtyInchContextImpl(EventBus eventBus, SixtyInchSetting settings) {
@@ -36,6 +38,12 @@ public class SixtyInchContextImpl implements SixtyInchContext {
 
     @Override
     public void setCurrenLifeRace(RegattaAndRaceIdentifier lifeRace) {
+        if(this.lifeRace != null){
+            if(!this.lifeRace.equals(lifeRace)){
+                this.lastRace = this.lifeRace;
+                GWT.log("lastrace is not " + lastRace);
+            }
+        }
         this.lifeRace = lifeRace;
     }
 
@@ -48,5 +56,10 @@ public class SixtyInchContextImpl implements SixtyInchContext {
     public void updateEvent(EventDTO event) {
         this.event = event;
         eventBus.fireEvent(new EventChanged(event));
+    }
+
+    @Override
+    public RegattaAndRaceIdentifier getLastRace() {
+        return lastRace;
     }
 }
