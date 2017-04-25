@@ -23,7 +23,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
-public class HelperSixty {
+public class AutoplayHelper {
     private static RaceTimesInfoProvider raceTimesInfoProvider;
     private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
     public static final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();

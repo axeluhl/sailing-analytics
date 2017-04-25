@@ -45,7 +45,7 @@ public class PreRaceRacemapPresenterImpl extends ConfiguredPresenter<PreRaceRace
         updateStatistics = new Timer() {
             @Override
             public void run() {
-                if (lastStatisticResult != null) {
+                if (lastStatisticResult != null && getPlace().getRaceMap().getLastCombinedWindTrackInfoDTO() != null) {
                     String windSpeed = "";
                     String windDegree = "";
                     for (WindSource windSource : getPlace().getRaceMap()

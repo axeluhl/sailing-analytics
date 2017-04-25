@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
-import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceLoop.boats.RaceEndWithCompetitorsTop3Place;
-import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceLoop.boats.RaceEndWithFlagesTop3Place;
+import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsTop3Place;
+import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithFlagesTop3Place;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleUpNextPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard.LifeRaceWithRacemapAndLeaderBoardPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsFlagsPlace;

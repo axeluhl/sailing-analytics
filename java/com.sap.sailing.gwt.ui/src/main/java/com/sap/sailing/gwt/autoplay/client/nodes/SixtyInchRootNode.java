@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
-import com.sap.sailing.gwt.autoplay.client.utils.HelperSixty;
+import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sse.common.Util.Pair;
 
 public class SixtyInchRootNode extends BaseCompositeNode {
@@ -50,8 +50,13 @@ public class SixtyInchRootNode extends BaseCompositeNode {
     }
 
     private void doCheck() {
+        if (getCurrentNode() == afterLiveRaceLoop) {
+            GWT.log("do change state while in afterrace");
+            return;
+        }
+
         this.leaderBoardName = cf.getSlideCtx().getSettings().getLeaderBoardName();
-        HelperSixty.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getSlideCtx().getEvent(),
+        AutoplayHelper.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getSlideCtx().getEvent(),
                 leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
                     @Override
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
@@ -59,7 +64,7 @@ public class SixtyInchRootNode extends BaseCompositeNode {
                         if (result == null) {
                             cf.getSlideCtx().setCurrenLifeRace(null);
                             boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
-                            GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + true);
+                            GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + comingFromLiferace);
                             transitionTo(comingFromLiferace ? afterLiveRaceLoop : idleLoop);
                             currentLifeRace = null;
                             currentPreLifeRace = null;
@@ -69,10 +74,10 @@ public class SixtyInchRootNode extends BaseCompositeNode {
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
                             if (loadedLiveRace == null || timeToRaceStartInMs > PRE_RACE_DELAY) {
                                 boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
+                                GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + comingFromLiferace);
+                                transitionTo(comingFromLiferace ? afterLiveRaceLoop : idleLoop);
                                 currentLifeRace = null;
                                 currentPreLifeRace = null;
-                                GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + true);
-                                transitionTo(comingFromLiferace ? afterLiveRaceLoop : idleLoop);
                             } else if (/* is pre liverace */ timeToRaceStartInMs < PRE_RACE_DELAY
                                     && timeToRaceStartInMs > LIVE_SWITCH_DELAY) {
                                 if (/* is new pre live race */!loadedLiveRace.equals(currentPreLifeRace)) {
