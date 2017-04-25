@@ -126,9 +126,8 @@ public class SixtyInchConfigViewImpl extends Composite implements SixtyInchConfi
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
         
-        // TODO
-        String serializedSettings = "";// new SettingsToStringSerializer().fromSettings(new
-                                       // SixtyInchSetting(selectedEvent.id, selectedLeaderboardName));
+        String serializedSettings = new SettingsToStringSerializer()
+                .fromSettings(new SixtyInchSetting(selectedEvent.id, selectedLeaderboardName));
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
             clientFactory.getPlaceNavigator()

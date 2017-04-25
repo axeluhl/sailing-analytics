@@ -17,6 +17,9 @@ public class SixtyInchSetting extends AbstractGenericSerializableSettings {
         leaderBoardName.setValue(selectedLeaderboardName);
     }
 
+    public SixtyInchSetting() {
+    }
+
     @Override
     protected void addChildSettings() {
         this.eventId = new UUIDSetting("eventUuid", this);
