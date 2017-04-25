@@ -19,8 +19,6 @@ public class LifeRaceWithRaceboardViewImpl extends ResizeComposite implements Li
 
     private Timer resizer;
 
-    private RaceMap rawRaceMap;
-
     interface LifeRaceWithRacemapViewImplUiBinder extends UiBinder<Widget, LifeRaceWithRaceboardViewImpl> {
     }
 
@@ -42,11 +40,10 @@ public class LifeRaceWithRaceboardViewImpl extends ResizeComposite implements Li
     @Override
     public void startingWith(Slide7Presenter p, AcceptsOneWidget panel, RaceMap raceMap) {
         panel.setWidget(this);
-        rawRaceMap = raceMap;
         racemap.add(raceMap);
         resizeMapOnceInitially();
 
-        resizer.scheduleRepeating(100);
+        // resizer.scheduleRepeating(00);
     }
 
 
