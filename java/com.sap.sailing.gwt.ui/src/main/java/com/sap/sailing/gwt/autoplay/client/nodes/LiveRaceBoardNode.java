@@ -51,8 +51,9 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
 
     }
 
-
     public void onStart() {
+        raceTimesInfoProvider.addRaceIdentifier(cf.getSlideCtx().getLifeRace(), true);
+
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
         AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getSlideCtx().getAutoplayLifecycle();
         UserService userService = cf.getUserService();
