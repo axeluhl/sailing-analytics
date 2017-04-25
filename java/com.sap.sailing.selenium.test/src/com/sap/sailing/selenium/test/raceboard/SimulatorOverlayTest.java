@@ -59,6 +59,11 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         super.setUp();
     }
 
+    /**
+     * The simulator overlay option in RaceBoard is only available if polar data is available for the specific boat
+     * class. This test verifies that the checkbox isn't available for a race when wind data isn't loaded yet but
+     * appears after successfully loading wind.
+     */
     @Test
     public void testSimulatorOverlayIsAvailableFor49erAtKW2015() throws InterruptedException, UnsupportedEncodingException {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
