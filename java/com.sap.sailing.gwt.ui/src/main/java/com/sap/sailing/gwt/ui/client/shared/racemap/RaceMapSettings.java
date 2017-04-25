@@ -165,7 +165,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      * copy constructor that produces a new settings object that equals the one passed as argument but takes the zoom settings from the second parameter
      */
     public RaceMapSettings(RaceMapSettings settings, RaceMapZoomSettings zoomSettings) {
-        this.buoyZoneRadius.setDefaultValue(settings.buoyZoneRadius.getDefaultValue());
         this.buoyZoneRadius.setValue(settings.buoyZoneRadius.getValue());
         this.helpLinesSettings.init(settings.getHelpLinesSettings());
         this.transparentHoverlines.setValue(settings.transparentHoverlines.getValue());
@@ -250,7 +249,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         return buoyZoneRadius.isDefaultValue();
     }
     
-    public static RaceMapSettings createSettingsWithNewDefaultBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
+    public static RaceMapSettings createSettingsWithNewBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
         final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
                 settings.getZoomSettings(), settings.getHelpLinesSettings(),
                 settings.getTransparentHoverlines(),
@@ -263,7 +262,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(),
                 settings.getManeuverTypesToShow(),
                 settings.isShowDouglasPeuckerPoints());
-        newRaceMapSettings.buoyZoneRadius.setDefaultValue(newDefaultBuoyZoneRadius);
         return newRaceMapSettings;
     }
 

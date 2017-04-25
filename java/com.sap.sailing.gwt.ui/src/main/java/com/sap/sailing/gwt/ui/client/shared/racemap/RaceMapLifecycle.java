@@ -47,11 +47,12 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
     @Override
     public RaceMapSettings extractGlobalSettings(RaceMapSettings settings) {
         RaceMapSettings defaultSettings = createDefaultSettings();
-        return RaceMapSettings.createSettingsWithNewDefaultBuoyZoneRadius(settings, defaultSettings.getBuoyZoneRadius());
+        return new RaceMapSettings(settings.getZoomSettings(), settings.getHelpLinesSettings(), settings.getTransparentHoverlines(), settings.getHoverlineStrokeWeight(), settings.getTailLengthInMilliseconds(), settings.isWindUp(), defaultSettings.getBuoyZoneRadius(), settings.isShowOnlySelectedCompetitors(), settings.isShowSelectedCompetitorsInfo(), settings.isShowWindStreamletColors(), settings.isShowWindStreamletOverlay(), settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(), settings.isShowDouglasPeuckerPoints());
     }
 
     @Override
     public RaceMapSettings extractContextSpecificSettings(RaceMapSettings settings) {
-        return settings;
+        RaceMapSettings defaultSettings = createDefaultSettings();
+        return new RaceMapSettings(settings.getZoomSettings(), settings.getHelpLinesSettings(), settings.getTransparentHoverlines(), settings.getHoverlineStrokeWeight(), settings.getTailLengthInMilliseconds(), settings.isWindUp(), defaultSettings.getBuoyZoneRadius(), settings.isShowOnlySelectedCompetitors(), settings.isShowSelectedCompetitorsInfo(), settings.isShowWindStreamletColors(), settings.isShowWindStreamletOverlay(), settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(), settings.isShowDouglasPeuckerPoints());
     }
 }

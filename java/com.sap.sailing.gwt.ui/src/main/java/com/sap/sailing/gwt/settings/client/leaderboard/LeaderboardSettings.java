@@ -274,10 +274,14 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         newSettings.showCompetitorSailIdColumn.setValue(this.isShowCompetitorSailIdColumn());
         newSettings.showCompetitorFullNameColumn.setValue(this.isShowCompetitorFullNameColumn());
         newSettings.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(this.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
-        newSettings.namesOfRacesToShow.setValues(null);
+        if(namesOfRaceColumns != null && !namesOfRaceColumns.isEmpty()) {
+            newSettings.namesOfRacesToShow.setValues(null);
+        }
         newSettings.namesOfRaceColumnsToShow.setValues(this.getNamesOfRaceColumnsToShow());
         SettingsDefaultValuesUtils.keepDefaults(this, newSettings);
-        newSettings.namesOfRacesToShow.setDefaultValues(null);
+        if(namesOfRaceColumns != null && !namesOfRaceColumns.isEmpty()) {
+            newSettings.namesOfRacesToShow.setDefaultValues(null);
+        }
         newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumns);
         return newSettings;
     }

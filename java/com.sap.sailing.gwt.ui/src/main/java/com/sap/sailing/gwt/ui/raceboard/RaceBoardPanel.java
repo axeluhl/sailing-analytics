@@ -255,7 +255,7 @@ public class RaceBoardPanel
                     Distance buoyZoneRadius = regattaDTO.getCalculatedBuoyZoneRadius();
                     RaceMapSettings existingMapSettings = raceMap.getSettings();
                     if (!Util.equalsWithNull(buoyZoneRadius, existingMapSettings.getBuoyZoneRadius())) {
-                        final RaceMapSettings newRaceMapSettings = RaceMapSettings.createSettingsWithNewDefaultBuoyZoneRadius(existingMapSettings, buoyZoneRadius);
+                        final RaceMapSettings newRaceMapSettings = RaceMapSettings.createSettingsWithNewBuoyZoneRadius(existingMapSettings, buoyZoneRadius);
                         raceMap.updateSettings(newRaceMapSettings);
                     }
                 }
