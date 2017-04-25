@@ -49,7 +49,9 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 import com.sap.sse.security.ui.client.UserService;
@@ -85,10 +87,13 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private PlayerChangeListener playerChangeListener;
 
-    public MediaPlayerManagerComponent(MediaPlayerLifecycle mediaPlayerLifecycle, RegattaAndRaceIdentifier selectedRaceIdentifier,
+    public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
+            MediaPlayerLifecycle mediaPlayerLifecycle,
+            RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings) {
+        super(parent, context);
         this.mediaPlayerLifecycle = mediaPlayerLifecycle;
         this.userService = userService;
         this.raceIdentifier = selectedRaceIdentifier;
@@ -742,7 +747,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public SettingsDialogComponent<MediaPlayerSettings> getSettingsDialogComponent() {
-        return mediaPlayerLifecycle.getSettingsDialogComponent(mediaPlayerLifecycle.cloneSettings(settings));
+        return mediaPlayerLifecycle.getSettingsDialogComponent(settings);
     }
 
     @Override
@@ -804,5 +809,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     @Override
     public ErrorReporter getErrorReporter() {
         return errorReporter;
+    }
+
+    @Override
+    public String getId() {
+        return mediaPlayerLifecycle.getComponentId();
     }
 }

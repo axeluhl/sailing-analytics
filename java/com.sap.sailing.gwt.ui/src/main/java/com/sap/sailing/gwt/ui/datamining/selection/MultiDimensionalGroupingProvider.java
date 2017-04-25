@@ -27,9 +27,13 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
-public class MultiDimensionalGroupingProvider implements GroupingProvider {
+public class MultiDimensionalGroupingProvider extends AbstractComponent<SerializableSettings>
+        implements GroupingProvider {
     
     private static final String GROUPING_PROVIDER_ELEMENT_STYLE = "groupingProviderElement";
     
@@ -45,8 +49,10 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
     private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
     private final List<FunctionDTO> availableDimensions;
 
-    public MultiDimensionalGroupingProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+    public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?> context,
+            StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                             DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
@@ -269,6 +275,6 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
 
     @Override
     public String getId() {
-        return getLocalizedShortName();
+        return "MultiDimensionalGroupingProvider";
     }
 }

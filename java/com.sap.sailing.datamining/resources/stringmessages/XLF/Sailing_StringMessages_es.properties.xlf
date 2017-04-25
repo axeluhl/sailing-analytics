@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2017-03-03T16:43:53Z" original="/usr/sap/ljs/app/Converter_7519916557605079548/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="es">
+	<file datatype="javapropertyresourcebundle" date="2017-04-12T15:28:32Z" original="/usr/sap/ljs/app/Converter_429408536936316109/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="es">
 		<header>
 			<skl>
-				<internal-file crc="687dae536d957f976a561fc5861eb426" form="base64">H4sIAAAAAAAAAI1XS2/jNhC+81fwskB8KJrs9omCBZy4cdLmYcTGBgv0QssjmbAsGiSd1P31nRmKEu3ETi8UOfNxOJwnNd0ALNSURsHjDJopFLZZ+EsorYPIkxfnXs6ZIEbGB90UMHP6BWrcnQgyUcSDXoOiQdxBNdttQOFX0kRMtalvR4o+8mG7noMT30A7RQOhI43xLftBB2MbXZuwU9lcDAtnm91atV/xBJUOQav2K67s1nkYOtAqTiXNxaXV4arW3iuaSZ6K6xogKB7Fky5A0YAS1hsIJlin+ikL4L1iBnqtaBBT1L5YznSl4kziFG+jF+DmVrsFXdc01ciutWmeIDgDL+CulrhSGczz4afAxPdkp9MSKy/Gk+m1+ecUDBESISjvEh1nP0Az5gCPDi9WH29iGBrZMnAK1Rqa4E/tIyhGXYKKZ9MsPtCPIK1699qtJuhWOuzEDoLJFhct/wR+W4eP7C8jLG55LPvQ+NBx0payh5OiDWwRclrLiMnDaezsdpMHjmRKDsm5FC8UFLlh9m5PgPwinH6oa9FH/Xjj0bgpZroI6MNiPyh6evR+8mDnpu7u/QWJNQ0Omiosb5tL0FusNyHuSHRpGpk44rIM5+pK12uaXag7Uy2D1MbR8nO7nDuAf4EoX9QYY6mGjPSDurdoJB1y4o/q2oFfZpSfFB5vmyoj/axuULx8Rd1o+Ysa65oZvyZs1RIuzpFiXdTxQn01tkY1pO9on9XN1jlToBmwhtVY4V5gWlDpTSvJS3l2jiXYh9/khXzF6AmDffhtMwFXoOzDfWiyT4dQCsdTGzjOeeNw7m29DfCkm5VKC0mr6DBqD2+8xT2DXFWGrl8MwzRoRHTtIljJFIllmCexAz0vsQXRkqI0StoHHLaoKLbvU5Ha7iBFh+HaoL0o4hWtSR5TJJFE7DOPZQpEryKFMqCjdagZ1bIMweuO+6dBF2VcXnfcCWDvCrsr44p6D9YyZMthrceY/f7R3VnvEct6M0laJyOxb8WWLhs7jVkctXQsFYSQZ5/o2DvOqUGvn12Y7fraNMYvc+2YLCM9uw76Or8ELd9qfgnhFaDpPDCkOsAHvHcleXbRukV+93t74kDcei4i+Na49bKddlr0ZYurf6ZQz2kbQ+9ptzoE85mpf0Sn88slLeLzhbytaIihuPdGauOuq2dMHZYBa1wE8Lznj4yDgt4zWOibClS3lpFACTSCCmuO77LwcE+XkCc2y7OJ9YbyeyAwUtD9ambbMJhgzsrv++gYdJcnf/SXp5V41ruNNVgv0kSkLksy2zkLZjulMKT50RRmmxxmcDRUn8CzpXFh93YHR9CXgw1UgV7xKn1yDBcvugm6Arv1fzSLx/LONKASTuZpkkMlYjlLDFVmqiN0yo2uS6wCS+CIps4aSwprEJYglwigbTQvucrU2Hrf1+HocTOzBrRHE26ToRSRJNPIty1V3MNC1/xk5RkX7liY8c2Ll6cQjjWZ1zGKez6/1HM+v9qprV07i49btwXJ7D6+zmbPowFD2GF/NTb4DBi9eLYKfiCFj90hYjKOmOMzmep7JvbvbVmWi9mAtYuPCBYY3w8hGaR9RUZzeDZHGUlip1/VN/0qNiYUSzWhUSwBanWDg3AYlzdAjwL1RLEf5xmZciFnSU6Om22d7+0yZQ/ZV1eG3/qkJdardpqev6Ot458Y1a5lInSANhz78h1fw5hTK7BlOc1smkzbsqRPjXdFZHGnmwWlZ+6FlnYITYWEHElmHzZVjY2kFdzXmUCOJudLTQiKhuGAsjtE5DFB7bH/Q1AdkUeeg71KHBw+exfOW0iuzTEhSZ2TQnJNDs49OOJAYLaXa5J/bNKPMA2U5VgTciGY+8dBSdbBD9Sbv6QhVmqsJe96QLVMqY844H3HfeAvvjzfWXy9H6uvUNsC/82xx2FujK1diP8A9Xa4EWEQAAA=</internal-file>
+				<internal-file crc="55d97c936efd173e49b813c706e1fc52" form="base64">H4sIAAAAAAAAAI1XW28qNxB+96/wy5HCQ1VyTq+qXImEhtDmggI60ZH6YpZhsVjWyDZJ6a/vzHi9a0ggffHaM5/H47l6p1uAhZrSKHicQT2FwtYLfwVL6yDy5GXfyzkTxND4oOsCZk6/QIW7E0EminjQG1A0iDsoZ/stKPxKmoipNtV4qOgjH3abOTjxDbRTNBA60hjfsB90MLbWlQl7lc3FoHC23m9U8xVPUOoQtGq+4trunIeBA63iVNJcXFkdrivtvaKZ5Km4qQCC4lE86QIUDShhs4VggnWqm7IA3itmoDeKBjFF7YvVTJcqziRO8TZ6AW5utVvQdU1dDu1Gm/oJgjPwAu56hSuVwTwffg5MfE92Oi+x9GI0md6Yf87BECERgvKu0HH2AzRjjvDo8GL98SaGoZEtA6dQbqAO/tw+gmLUJah4NvXiA/0I0qh3r916gm6lw87sIJhscNHyT+B3VfjI/jLC4pbHZRcaHzpO2qXs4KRoDTuEnNcyYvJwGjm72+aBI5mSQ3IuxQsFRW6Yg9sTIL8Ipx/qWnRRP9p6NG6KmTYCurA4DIqOHr2fPNi6qb17d0FiTYODugyrcX0Feof1JsQdiS5NLRNHXC1DX13rakOzS3VnylWQ2jhafm6WcwfwLxDlixphLFWQkX5Q9xaNpENO/FHdOPCrjPKTwuNtXWakn9UtipevqBstf1EjXTHj14QtG8JlHynWRR0v1VdjK1RD+pb2Wd3unDMFmgFrWIUV7gWmBZXetJK8lBd9LME+/CYv5StGT+gdwsf1BFyBso/3ock+HUMpHM9t4DjnjYO5t9UuwJOu1yotJK2iw6g9vPEW9wxy1TK0/WIQpkEjom0XwUqmSCzDPIkd6HmFLYiWFKVR0iHguEVFsV2fitRmByk6CDcG7UURr2hN8pgiiSRin3lcpkD0KlIoA1pai5pRLcsQvG65fxp0UcbldcudAPausL82rqgOYA1DNhzWeoTZ7x/dnfUesaw3k6R1MhK7VmzpsrHTmMVJS8dSQQh58YmOveOc6nX62YXZbW5Mbfwq147JMtKz66Cv80vQ8q3mVxBeAerWAwOqA3zAe1eSF5eNW+R3vzcn9sTYcxHBt8bYy2baatGVLa7+mUIdp2kMnafd+hjMZ6b+EZ3OL5e0iM8X8raiIYbiwRupibu2njF1sAxY4yKA5x1/aBwU9J7BQl+XoNq1jARKoCGUWHN8m4XHe9qEPLNZXkysN5TfPYGRgu5XM9uEwQRzVn7fRUevvTz5o7s8rcSz3m+twXqRJiJ1WZLZzFkw2ymFIc1PpjDb5DiDo6G6BJ6tjAv7tzs4gr4cbaAK9IpX6ZJjsHjRddAl2J3/o148Lu9MDSrhZJ4mOVQilrPEUGWmOkKn3OpqiVVgBRzR1FljSWENwgrkCgG0jeZLrjIVtt73dTh53MxsAO1Rh3EylCKSZBr5tqGKe1joip+sPOPCHQszvnnx8hTCsSbzOkZxx+eXes7nVzu1tRtn8XHrdiCZ3cXXxex52GMIO+yv2gafAaMXL9bB96TwsTtETMYRc3wmU33PxP696/fn/VmPtYuPCBYY3w8hGaR5RUZzeDbHMpLEXr+qb/pVbE0oVmpCo1gBVOoWB+EwLm+BHgXqiWI/zjMy5ULOkpwct7sq39tmygGyq64MH/ukJdarZpqev8Od458Y1axlIrSAJhy78h1fw5hTa7DL5TSzaTJtw5I+Nd41kcWdrheUnrkXGtoxNBUSciSZfVCXFTaSRnBXZwI5mpwvNSEoGgY9yu4QkacENcf+D0FVRJ54DnYqcXD47F04byC5NqeEJHXOCsk1OTr36Igjgdlerkn+sU4/wjRQlmNNyIVg7p8GJVlHP1Bv/pIGWKmxlrzrAdUwpT7hgPcd94G/+PJ8Z/H1fqS+QmUL/DfHHoe5MbJ2If4DmZsW2WEQAAA=</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2017-02-23T16:17:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2017-04-06T12:41:24Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Java properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
@@ -57,7 +57,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CourseArea" resname="CourseArea">
 				<source>Course Area</source>
-				<target state="signed-off">Campo de regatas</target>
+				<target state="signed-off">Zona de regata</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="BoatClass" resname="BoatClass">
 				<source>Boat Class</source>
@@ -408,8 +408,8 @@
 				<target state="signed-off">Velocidad (nudos)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="bearing" resname="bearing">
-				<source>Direction (�T)</source>
-				<target state="signed-off">Dirección (�T)</target>
+				<source>Direction (°T)</source>
+				<target state="signed-off">Dirección (°T)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindTrack" resname="WindTrack">
 				<source>Wind Track</source>

@@ -55,12 +55,15 @@ public interface RaceLogTrackingAdapter {
     /**
      * Denotes the {@link RaceLog} for racelog-tracking, by inserting a {@link RaceLogDenoteForTrackingEvent}.
      * 
+     * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
+     *         so
+     * 
      * @throws NotDenotableForRaceLogTrackingException
      *             Fails, if no {@link RaceLog}, or a non-empty {@link RaceLog}, or one with attached
      *             {@link TrackedRace} is found already in place. Also fails, if the {@code leaderboard} is not a
      *             {@link RegattaLeaderboard}.
      */
-    void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
+    boolean denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
             Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException;
 
     /**

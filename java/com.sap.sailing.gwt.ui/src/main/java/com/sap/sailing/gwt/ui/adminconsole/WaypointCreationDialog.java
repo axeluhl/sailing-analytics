@@ -24,9 +24,14 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
     private final ListBox passingInstructions;
     private final StringMessages stringMessages;
     
+    public static interface DefaultPassingInstructionProvider {
+        PassingInstruction getDefaultPassingInstruction(int numberOfMarksInControlPoint, String controlPointIdAsString);
+    }
+    
     public WaypointCreationDialog(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, AdminConsoleTableResources tableRes,
-            List<ControlPointDTO> controlPoints, DialogCallback<WaypointDTO> callback) {
+            List<ControlPointDTO> controlPoints, final DefaultPassingInstructionProvider defaultPassingInstructionProvider,
+            DialogCallback<WaypointDTO> callback) {
         super(stringMessages.waypoint(), stringMessages.waypoint(),
                 stringMessages.ok(), stringMessages.cancel(), new DataEntryDialog.Validator<WaypointDTO>() {
                     @Override
@@ -36,37 +41,36 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
                         }
                         return null;
                     }
-
                 }, /* animationEnabled */ false, callback);
         this.stringMessages = stringMessages;
         controlPointsWrapper = new ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         controlPointsWrapper.getDataProvider().getList().addAll(controlPoints);
-        
         passingInstructions = createListBox(false);
-        updatePassingInstructions();
-        
+        updatePassingInstructions(defaultPassingInstructionProvider);
         controlPointsWrapper.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                updatePassingInstructions();
-                validate();
+                updatePassingInstructions(defaultPassingInstructionProvider);
+                validateAndUpdate();
             }
         });
     }
     
-    private void updatePassingInstructions() {
+    private void updatePassingInstructions(DefaultPassingInstructionProvider defaultPassingInstructionProvider) {
         passingInstructions.clear();
-        
-        int numMarks = controlPointsWrapper.getSelectionModel().getSelectedObject() != null ?
-                Util.size(controlPointsWrapper.getSelectionModel().getSelectedObject().getMarks()) : 0;
-                
+        final ControlPointDTO controlPoint = controlPointsWrapper.getSelectionModel().getSelectedObject();
+        final int numMarks = controlPoint != null ? Util.size(controlPoint.getMarks()) : 0;
+        PassingInstruction defaultPassingInstruction = defaultPassingInstructionProvider.getDefaultPassingInstruction(numMarks,
+                controlPoint == null ? null : controlPoint.getIdAsString());
         int i = 0;
         passingInstructions.insertItem(PassingInstruction.None.name(), i++);
         for (PassingInstruction pi : PassingInstruction.relevantValues()) {
             for (int numApplicableMarks : pi.applicability) {
                 if (numApplicableMarks == numMarks) {
-                    passingInstructions.insertItem(pi.name(), i++);
+                    passingInstructions.insertItem(pi.name(), i);
+                    passingInstructions.setItemSelected(i, pi == defaultPassingInstruction);
+                    i++;
                 }
             }
         }
@@ -77,7 +81,6 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
         PassingInstruction pi = passingInstructions.getSelectedIndex() > 0 ?
                 PassingInstruction.valueOf(passingInstructions.getItemText(passingInstructions.getSelectedIndex()))
                 : PassingInstruction.None;
-        
         ControlPointDTO controlPoint = controlPointsWrapper.getSelectionModel().getSelectedObject();
         String name = null;
         if (controlPoint != null) {
@@ -89,14 +92,11 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
     @Override
     protected Widget getAdditionalWidget() {
         Grid grid = new Grid(2,1);
-        
         grid.setWidget(0, 0, controlPointsWrapper);
-        
         HorizontalPanel passingInstructionsRow = new HorizontalPanel();
         grid.setWidget(1, 0, passingInstructionsRow);
         passingInstructionsRow.add(new Label(stringMessages.passingInstructions() + ":"));
         passingInstructionsRow.add(passingInstructions);
-        
         return grid;
     }
 }

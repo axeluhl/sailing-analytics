@@ -159,7 +159,7 @@ public class RegattaLogImportFixesAndAddMappingsDialog extends DataEntryDialog<C
             }
         }
         select();
-        validate();
+        validateAndUpdate();
     }
 
     private void deviceSelectionChanged(TrackFileImportDeviceIdentifierDTO deviceId) {

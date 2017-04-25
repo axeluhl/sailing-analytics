@@ -23,12 +23,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.SelectedLeaderboardChangeListener;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
@@ -56,7 +56,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
-    private MultiLeaderboardPanel multiLeaderboardPanel;
+    private MultiLeaderboardProxyPanel multiLeaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldMultiLeaderboardDelegate delegate;
     private LeaderboardPanel lastSelectedLeaderboardPanel;
@@ -183,7 +183,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         }
     }
 
-    public void setMultiLeaderboard(MultiLeaderboardPanel multiLeaderboardPanel, final Timer timer) {
+    public void setMultiLeaderboard(MultiLeaderboardProxyPanel multiLeaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.multiLeaderboardPanel = multiLeaderboardPanel;
         this.multiLeaderboardPanel.addSelectedLeaderboardChangeListener(this);
@@ -240,6 +240,6 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         lastSelectedLeaderboardPanel = selectedLeaderboard;
     }
     
-    public interface OldMultiLeaderboardDelegate extends LeaderboardDelegate<MultiLeaderboardPanel>{
+    public interface OldMultiLeaderboardDelegate extends LeaderboardDelegate<MultiLeaderboardProxyPanel>{
     }
 }
