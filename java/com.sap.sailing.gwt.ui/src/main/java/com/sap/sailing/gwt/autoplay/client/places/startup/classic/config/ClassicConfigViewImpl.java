@@ -22,10 +22,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayClientFactoryClassic;
+import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicPlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoPlayerContextDefinition;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoplayPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoplayPerspectiveOwnSettings;
+import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicSetting;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -207,7 +207,7 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
         if (selectedEvent != null && selectedLeaderboardName != null) {
             // TODO generate place settings url, and directly start other place
             String contextAndSettings = new SettingsToStringSerializer().fromSettings(
-                    new AutoPlayerContextDefinition(selectedEvent.id, selectedLeaderboardName), autoplayPerspectiveSettings);
+                    new ClassicSetting(selectedEvent.id, selectedLeaderboardName), autoplayPerspectiveSettings);
             navigator.goToPlayer(contextAndSettings, clientFactory);
         }
     }

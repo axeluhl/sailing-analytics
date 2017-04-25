@@ -5,29 +5,38 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class ClassicContextImpl implements ClassicContext {
-    private ClassicSetting settings;
+    private ClassicSetting contextSettings;
     private EventBus eventBus;
     private EventDTO event;
     private RegattaAndRaceIdentifier lifeRace;
     private RegattaAndRaceIdentifier lastRace;
+    private AutoplayPerspectiveLifecycle autoplayLifecycle;
+    private PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplaySettings;
 
 
-    public ClassicContextImpl(EventBus eventBus, ClassicSetting settings) {
-        if (settings == null) {
-            throw new IllegalStateException("No settings in ctx creation");
+    public ClassicContextImpl(EventBus eventBus, AutoplayPerspectiveLifecycle autoplayLifecycle,
+            PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplaySettings, ClassicSetting settings) {
+        if (autoplayLifecycle == null) {
+            throw new IllegalStateException("No autoplayLifecycle in creation");
         }
-        if (eventBus == null) {
-            throw new IllegalStateException("No settings in eventBus creation");
+        if (autoplaySettings == null) {
+            throw new IllegalStateException("No autoplaySettings in creation");
+        }
+        if (settings == null) {
+            throw new IllegalStateException("No settings in creation");
         }
         this.eventBus = eventBus;
-        this.settings = settings;
+        this.contextSettings = settings;
+        this.autoplayLifecycle = autoplayLifecycle;
+        this.autoplaySettings = autoplaySettings;
     }
 
     @Override
     public ClassicSetting getSettings() {
-        return settings;
+        return contextSettings;
     }
 
     @Override
