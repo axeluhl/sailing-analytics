@@ -1,19 +1,56 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspective;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
+import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class LiveRaceLeaderboard extends FiresPlaceNode {
+    private static final int REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD = 10000;
     private final AutoPlayClientFactory cf;
+    private final Timer leaderboardTimer;
 
     public LiveRaceLeaderboard(AutoPlayClientFactory cf) {
-
         this.cf = cf;
-
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
+        leaderboardTimer = new Timer(PlayModes.Live,
+                /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
+        leaderboardTimer
+                .setLivePlayDelayInMillis(settings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart());
+        leaderboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD);
+        leaderboardTimer.play();
     }
 
 
     public void onStart() {
-        // todo
+
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
+        AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getSlideCtx().getAutoplayLifecycle();
+        boolean withFullscreenButton = settings.getPerspectiveOwnSettings().isFullscreen();
+        PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings = settings
+                .findSettingsByComponentId(autoplayLifecycle.getLeaderboardLifecycle().getComponentId());
+        LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(null, null,
+                autoplayLifecycle.getLeaderboardLifecycle(), leaderboardSettings, cf.getSailingService(),
+                cf.getUserService(),
+                AutoplayHelper.asyncActionsExecutor, new CompetitorSelectionModel(/* hasMultiSelection */ true),
+                leaderboardTimer, cf.getSlideCtx().getSettings().getLeaderboardName(), cf.getErrorReporter(),
+                StringMessages.INSTANCE,
+                withFullscreenButton);
+
     };
+
+    @Override
+    public void onStop() {
+        leaderboardTimer.pause();
+        leaderboardTimer.reset();
+    }
 }

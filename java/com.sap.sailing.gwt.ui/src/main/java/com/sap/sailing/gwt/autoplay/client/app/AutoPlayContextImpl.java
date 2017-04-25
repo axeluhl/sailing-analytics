@@ -80,4 +80,12 @@ public class AutoPlayContextImpl implements AutoPlayContext {
     public RegattaAndRaceIdentifier getLastRace() {
         return lastRace;
     }
+
+    public PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> getAutoplaySettings() {
+        return autoplaySettings;
+    }
+
+    public AutoplayPerspectiveLifecycle getAutoplayLifecycle() {
+        return autoplayLifecycle;
+    }
 }
