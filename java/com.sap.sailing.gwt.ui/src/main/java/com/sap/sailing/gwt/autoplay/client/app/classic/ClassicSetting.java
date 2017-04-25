@@ -26,7 +26,7 @@ public class ClassicSetting extends AbstractGenericSerializableSettings {
         leaderboardName = new StringSetting("name", this);
     }
 
-    public UUID getEventUidAsString() {
+    public UUID getEventId() {
         return eventUUID.getValue();
     }
 

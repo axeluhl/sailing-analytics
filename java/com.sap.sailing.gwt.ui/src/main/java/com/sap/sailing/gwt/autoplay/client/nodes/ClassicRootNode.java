@@ -56,7 +56,7 @@ public class ClassicRootNode extends BaseCompositeNode {
             return;
         }
 
-        this.leaderBoardName = cf.getSlideCtx().getSettings().getLeaderBoardName();
+        this.leaderBoardName = cf.getSlideCtx().getSettings().getLeaderboardName();
         AutoplayHelper.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getSlideCtx().getEvent(),
                 leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
                     @Override
