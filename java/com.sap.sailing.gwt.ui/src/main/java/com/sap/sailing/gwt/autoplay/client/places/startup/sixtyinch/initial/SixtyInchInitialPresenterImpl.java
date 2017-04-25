@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startsixtyinch;
+package com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
@@ -8,16 +8,16 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.PresenterBase;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartClassicPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPlace;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class StartSixtyInchPresenterImpl extends PresenterBase<StartSixtyInchPlace> implements StartSixtyInchView.Presenter {
-    private StartSixtyInchView view;
+public class SixtyInchInitialPresenterImpl extends PresenterBase<SixtyInchInitialPlace> implements SixtyInchInitialView.Presenter {
+    private SixtyInchInitialView view;
 
-    public StartSixtyInchPresenterImpl(StartSixtyInchPlace place, AutoPlayClientFactorySixtyInch clientFactory,
-            StartSixtyInchView slideinitViewImpl) {
+    public SixtyInchInitialPresenterImpl(SixtyInchInitialPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+            SixtyInchInitialView slideinitViewImpl) {
         super(place, clientFactory);
         this.view = slideinitViewImpl;
         updateEventImage();
@@ -27,7 +27,7 @@ public class StartSixtyInchPresenterImpl extends PresenterBase<StartSixtyInchPla
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
 
         if (getClientFactory().getSlideCtx() == null || getClientFactory().getSlideCtx().getEvent() != null) {
-            getClientFactory().getPlaceController().goTo(new StartClassicPlace());
+            getClientFactory().getPlaceController().goTo(new SixtyInchConfigPlace());
             return;
         }
         eventBus.addHandler(EventChanged.TYPE, new EventChanged.Handler() {
@@ -56,7 +56,7 @@ public class StartSixtyInchPresenterImpl extends PresenterBase<StartSixtyInchPla
                 @Override
                 public void execute() {
                     GWT.log("sideinit presenter: doContinue");
-                    getClientFactory().getPlaceController().goTo(new StartClassicPlace());
+                    getClientFactory().getPlaceController().goTo(new SixtyInchConfigPlace());
                 }
             });
         }

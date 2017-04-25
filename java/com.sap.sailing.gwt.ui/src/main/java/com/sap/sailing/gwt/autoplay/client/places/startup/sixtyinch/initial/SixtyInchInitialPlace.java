@@ -1,21 +1,21 @@
-package com.sap.sailing.gwt.autoplay.client.places.startsixtyinch;
+package com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 
-public class StartSixtyInchPlace extends Place {
+public class SixtyInchInitialPlace extends Place {
 
     private FailureEvent failureEvent;
     private AutoPlayNode currentSlideConfig;
 
-    public StartSixtyInchPlace(FailureEvent failureEvent, AutoPlayNode currentSlideConfig) {
+    public SixtyInchInitialPlace(FailureEvent failureEvent, AutoPlayNode currentSlideConfig) {
         this.failureEvent = failureEvent;
         this.currentSlideConfig = currentSlideConfig;
     }
 
-    public StartSixtyInchPlace() {
+    public SixtyInchInitialPlace() {
     }
 
     public FailureEvent getFailureEvent() {
@@ -26,15 +26,15 @@ public class StartSixtyInchPlace extends Place {
         return currentSlideConfig;
     }
 
-    public static class Tokenizer implements PlaceTokenizer<StartSixtyInchPlace> {
+    public static class Tokenizer implements PlaceTokenizer<SixtyInchInitialPlace> {
         @Override
-        public String getToken(StartSixtyInchPlace place) {
+        public String getToken(SixtyInchInitialPlace place) {
             return "";
         }
 
         @Override
-        public StartSixtyInchPlace getPlace(String token) {
-            return new StartSixtyInchPlace();
+        public SixtyInchInitialPlace getPlace(String token) {
+            return new SixtyInchInitialPlace();
         }
     }
 }

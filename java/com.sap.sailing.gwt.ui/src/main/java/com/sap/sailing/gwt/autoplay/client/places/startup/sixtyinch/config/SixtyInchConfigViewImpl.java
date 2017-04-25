@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.views;
+package com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +16,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInchImpl;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.StartView;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.SixtyInchSetting;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial.SixtyInchSetting;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -28,10 +27,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 
-public class ConfigViewImpl extends Composite implements StartView {
+public class SixtyInchConfigViewImpl extends Composite implements SixtyInchConfigView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
 
-    interface StartPageViewUiBinder extends UiBinder<Widget, ConfigViewImpl> {
+    interface StartPageViewUiBinder extends UiBinder<Widget, SixtyInchConfigViewImpl> {
     }
 
     @UiField(provided=true) ListBox localeSelectionBox;
@@ -42,9 +41,9 @@ public class ConfigViewImpl extends Composite implements StartView {
     @UiField DivElement screenConfigurationUi;
     
     private final List<EventDTO> events;
-    private AutoPlayClientFactorySixtyInchImpl clientFactory;
+    private AutoPlayClientFactorySixtyInch clientFactory;
     
-    public ConfigViewImpl(AutoPlayClientFactorySixtyInchImpl clientFactory) {
+    public SixtyInchConfigViewImpl(AutoPlayClientFactorySixtyInch clientFactory) {
         this.events = new ArrayList<EventDTO>();
         this.clientFactory = clientFactory;
         

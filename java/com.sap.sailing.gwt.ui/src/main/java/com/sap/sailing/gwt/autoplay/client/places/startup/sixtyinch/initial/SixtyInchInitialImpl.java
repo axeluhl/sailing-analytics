@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.views;
+package com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -14,12 +14,11 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartSixtyInchView;
 
-public class InitialViewImpl extends ResizeComposite implements StartSixtyInchView {
+public class SixtyInchInitialImpl extends ResizeComposite implements SixtyInchInitialView {
     private static SlideInitViewImplUiBinder uiBinder = GWT.create(SlideInitViewImplUiBinder.class);
 
-    interface SlideInitViewImplUiBinder extends UiBinder<Widget, InitialViewImpl> {
+    interface SlideInitViewImplUiBinder extends UiBinder<Widget, SixtyInchInitialImpl> {
     }
 
     @UiField
@@ -33,7 +32,7 @@ public class InitialViewImpl extends ResizeComposite implements StartSixtyInchVi
     @UiField
     Anchor errorResetUi;
 
-    public InitialViewImpl() {
+    public SixtyInchInitialImpl() {
         initWidget(uiBinder.createAndBindUi(this));
 
     }

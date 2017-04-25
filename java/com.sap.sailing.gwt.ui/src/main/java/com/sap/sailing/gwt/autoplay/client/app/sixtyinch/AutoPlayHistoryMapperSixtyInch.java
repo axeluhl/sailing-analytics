@@ -11,10 +11,10 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.compet
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderBoardWithCompetitorPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderBoardWithFlagPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPlace;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartClassicPlace;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartSixtyInchPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial.SixtyInchInitialPlace;
 
-@WithTokenizers({ StartSixtyInchPlace.Tokenizer.class, StartClassicPlace.Tokenizer.class,
+@WithTokenizers({ SixtyInchInitialPlace.Tokenizer.class, SixtyInchConfigPlace.Tokenizer.class,
         PreRaceCompetitorsFlagsPlace.Tokenizer.class, PreRaceCompetitorsImagePlace.Tokenizer.class,
         IdleUpNextPlace.Tokenizer.class, PreRaceLeaderBoardWithCompetitorPlace.Tokenizer.class,
         PreRaceLeaderBoardWithFlagPlace.Tokenizer.class, PreRaceRacemapPlace.Tokenizer.class,

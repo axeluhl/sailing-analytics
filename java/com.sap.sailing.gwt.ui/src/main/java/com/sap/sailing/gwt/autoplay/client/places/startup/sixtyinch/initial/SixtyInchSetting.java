@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startsixtyinch;
+package com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial;
 
 import java.util.UUID;
 

@@ -1,10 +1,10 @@
-package com.sap.sailing.gwt.autoplay.client.places.startclassic;
+package com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 
-public interface StartClassicView {
+public interface SixtyInchInitialView {
 
     public interface Presenter {
     }

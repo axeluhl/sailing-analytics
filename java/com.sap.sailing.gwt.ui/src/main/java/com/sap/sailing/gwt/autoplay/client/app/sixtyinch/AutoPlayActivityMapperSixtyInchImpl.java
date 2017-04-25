@@ -25,11 +25,12 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leader
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapViewImpl;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartClassicPlace;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.StartClassicPresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartSixtyInchPlace;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.StartSixtyInchPresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.startsixtyinch.views.InitialViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial.SixtyInchInitialImpl;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial.SixtyInchInitialPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial.SixtyInchInitialPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.utils.CompetitorImageProvider;
 import com.sap.sailing.gwt.autoplay.client.utils.FlagImageProvider;
 
@@ -43,11 +44,12 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
 
     @Override
     public Activity getActivity(Place place) {
-        if (place instanceof StartClassicPlace) {
-            return new StartClassicPresenterImpl((StartClassicPlace) place, clientFactory);
+        if (place instanceof SixtyInchConfigPlace) {
+            return new SixtyInchConfigPresenterImpl((SixtyInchConfigPlace) place, clientFactory,
+                    new SixtyInchConfigViewImpl(clientFactory));
         }
-        if (place instanceof StartSixtyInchPlace) {
-            return new StartSixtyInchPresenterImpl((StartSixtyInchPlace) place, clientFactory, new InitialViewImpl());
+        if (place instanceof SixtyInchInitialPlace) {
+            return new SixtyInchInitialPresenterImpl((SixtyInchInitialPlace) place, clientFactory, new SixtyInchInitialImpl());
         }
         if (place instanceof PreRaceLeaderBoardWithCompetitorPlace) {
             return new PreLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithCompetitorPlace) place,
@@ -85,6 +87,6 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
         }
 
         GWT.log("unknown place! " + place);
-        return new StartSixtyInchPresenterImpl(new StartSixtyInchPlace(), clientFactory, new InitialViewImpl());
+        return new SixtyInchInitialPresenterImpl(new SixtyInchInitialPlace(), clientFactory, new SixtyInchInitialImpl());
     }
 }

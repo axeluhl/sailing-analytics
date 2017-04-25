@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startclassic.old;
+package com.sap.sailing.gwt.autoplay.client.places.startup.classic.config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoPlayerContextDefinition;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoplayPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -39,10 +42,10 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 import com.sap.sse.security.ui.client.UserService;
 
-public class DesktopStartView extends Composite implements StartView {
+public class ClassicConfigViewImpl extends Composite implements ClassicConfigView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
 
-    interface StartPageViewUiBinder extends UiBinder<Widget, DesktopStartView> {
+    interface StartPageViewUiBinder extends UiBinder<Widget, ClassicConfigViewImpl> {
     }
 
     @UiField(provided = true)
@@ -69,7 +72,7 @@ public class DesktopStartView extends Composite implements StartView {
     private AutoplayPerspectiveLifecycle autoplayLifecycle;
     protected PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings;
 
-    public DesktopStartView(PlaceNavigator navigator, EventBus eventBus, UserService userService) {
+    public ClassicConfigViewImpl(PlaceNavigator navigator, EventBus eventBus, UserService userService) {
         super();
         this.navigator = navigator;
         this.eventBus = eventBus;

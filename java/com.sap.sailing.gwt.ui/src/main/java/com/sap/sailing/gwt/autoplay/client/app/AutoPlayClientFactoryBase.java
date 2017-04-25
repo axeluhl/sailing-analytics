@@ -5,7 +5,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.StartPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startup.classic.config.ClassicConfigPlace;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -34,7 +34,7 @@ public abstract class AutoPlayClientFactoryBase<P extends PlaceNavigator>
 
     @Override
     public Place getDefaultPlace() {
-        return new StartPlace();
+        return new ClassicConfigPlace();
     }
 
     @Override
