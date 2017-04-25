@@ -8,6 +8,9 @@ import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.places.startup.classic.config.ClassicConfigPlace;
 import com.sap.sailing.gwt.autoplay.client.places.startup.classic.config.ClassicConfigPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.startup.classic.config.ClassicConfigViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.startup.classic.initial.ClassicInitialImpl;
+import com.sap.sailing.gwt.autoplay.client.places.startup.classic.initial.ClassicInitialPlace;
+import com.sap.sailing.gwt.autoplay.client.places.startup.classic.initial.ClassicInitialPresenterImpl;
 
 public class AutoPlayAppActivityMapper implements ActivityMapper {
     private final AutoPlayClientFactoryClassic clientFactory;
@@ -23,6 +26,9 @@ public class AutoPlayAppActivityMapper implements ActivityMapper {
         if (place instanceof ClassicConfigPlace) {
             return new ClassicConfigPresenterImpl((ClassicConfigPlace) place, clientFactory, new ClassicConfigViewImpl(
                     clientFactory.getPlaceNavigator(), clientFactory.getEventBus(), clientFactory.getUserService()));
+        } else if (place instanceof ClassicInitialPlace) {
+            return new ClassicInitialPresenterImpl((ClassicInitialPlace) place, clientFactory,
+                    new ClassicInitialImpl());
         } else if (place instanceof PlayerPlace) {
             return new PlayerActivityProxy((PlayerPlace) place, clientFactory);
         } else {

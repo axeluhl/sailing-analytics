@@ -8,11 +8,11 @@ import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicPresenterBase;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class ClassicPresenterImpl extends ClassicPresenterBase<ClassicInitialPlace>
+public class ClassicInitialPresenterImpl extends ClassicPresenterBase<ClassicInitialPlace>
         implements ClassicInitialView.Presenter {
     private ClassicInitialView view;
 
-    public ClassicPresenterImpl(ClassicInitialPlace place, AutoPlayClientFactoryClassic clientFactory,
+    public ClassicInitialPresenterImpl(ClassicInitialPlace place, AutoPlayClientFactoryClassic clientFactory,
             ClassicInitialView slideinitViewImpl) {
         super(place, clientFactory);
         this.view = slideinitViewImpl;
