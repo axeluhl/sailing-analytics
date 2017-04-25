@@ -6,7 +6,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
 
 public class DesktopPlayerView extends Composite implements PlayerView {
     private static PlayerViewUiBinder uiBinder = GWT.create(PlayerViewUiBinder.class);
@@ -16,7 +16,7 @@ public class DesktopPlayerView extends Composite implements PlayerView {
 
     @UiField SimpleLayoutPanel contentPanel;
     
-    public DesktopPlayerView(PlaceNavigator navigator) {
+    public DesktopPlayerView(AutoPlayPlaceNavigator navigator) {
         initWidget(uiBinder.createAndBindUi(this));
     }
 

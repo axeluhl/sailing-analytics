@@ -5,7 +5,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
@@ -17,7 +17,7 @@ import com.sap.sse.common.Util.Pair;
 public class SixtyInchRootNode extends BaseCompositeNode {
     protected static final long PRE_RACE_DELAY = 180000;
     protected static final long LIVE_SWITCH_DELAY = 1000;
-    private final AutoPlayClientFactorySixtyInch cf;
+    private final AutoPlayClientFactory cf;
     private String leaderBoardName;
     private int errorCount = 0;;
     private RegattaAndRaceIdentifier currentPreLifeRace;
@@ -33,7 +33,7 @@ public class SixtyInchRootNode extends BaseCompositeNode {
     private AutoPlayNode liveRaceLoop;
     private AutoPlayNode afterLiveRaceLoop;
 
-    public SixtyInchRootNode(AutoPlayClientFactorySixtyInch cf, AutoPlayNode idleLoop, AutoPlayNode preLiveRaceLoop,
+    public SixtyInchRootNode(AutoPlayClientFactory cf, AutoPlayNode idleLoop, AutoPlayNode preLiveRaceLoop,
             AutoPlayNode liveRaceLoop, AutoPlayLoopNode afterLiveRaceLoop) {
         this.cf = cf;
         this.idleLoop = idleLoop;
@@ -55,7 +55,7 @@ public class SixtyInchRootNode extends BaseCompositeNode {
             return;
         }
 
-        this.leaderBoardName = cf.getSlideCtx().getSettings().getLeaderBoardName();
+        this.leaderBoardName = cf.getSlideCtx().getSettings().getLeaderboardName();
         AutoplayHelper.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getSlideCtx().getEvent(),
                 leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
                     @Override

@@ -54,7 +54,7 @@ public class RaceEndWithBoatsPresenterImpl extends ConfiguredPresenter<AbstractR
             panel.setWidget(new Label("No raceIdentifier specified"));
             return;
         }
-        getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getSettings().getLeaderBoardName(),
+        getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getSettings().getLeaderboardName(),
                 getPlace().getLastRace().getRaceName()));
 
         LeaderboardSettings leaderboardSettings = new LeaderboardSettings( //
@@ -74,7 +74,7 @@ public class RaceEndWithBoatsPresenterImpl extends ConfiguredPresenter<AbstractR
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 false, liveRace, competitorSelectionProvider, timer, null,
-                getSlideCtx().getSettings().getLeaderBoardName(), errorReporter, StringMessages.INSTANCE, null, false,
+                getSlideCtx().getSettings().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, null, false,
                 null, false, null, false, true, false, false, false);
         view.setLeaderBoard(leaderboardPanel);
 

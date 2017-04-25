@@ -7,13 +7,12 @@ import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayAppActivityMapper
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayClientFactoryClassic;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayClientFactoryClassicImpl;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayHistoryMapperDesktopImpl;
-import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicPlaceNavigator;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
 public class AutoPlayEntryPoint
-        extends AbstractMvpEntryPoint<StringMessages, AutoPlayClientFactory<ClassicPlaceNavigator>> {
+        extends AbstractMvpEntryPoint<StringMessages, AutoPlayClientFactory> {
     @Override
     public void doOnModuleLoad() {
 

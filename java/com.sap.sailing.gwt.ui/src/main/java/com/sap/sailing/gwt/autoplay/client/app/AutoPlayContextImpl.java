@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
+package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.web.bindery.event.shared.EventBus;
@@ -6,15 +6,15 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class SixtyInchContextImpl implements SixtyInchContext {
-    private SixtyInchSetting settings;
+public class AutoPlayContextImpl implements AutoPlayContext {
+    private AutoPlaySettings settings;
     private EventBus eventBus;
     private EventDTO event;
     private RegattaAndRaceIdentifier lifeRace;
     private RegattaAndRaceIdentifier lastRace;
 
 
-    public SixtyInchContextImpl(EventBus eventBus, SixtyInchSetting settings) {
+    public AutoPlayContextImpl(EventBus eventBus, AutoPlaySettings settings) {
         if (settings == null) {
             throw new IllegalStateException("No settings in ctx creation");
         }
@@ -26,7 +26,7 @@ public class SixtyInchContextImpl implements SixtyInchContext {
     }
 
     @Override
-    public SixtyInchSetting getSettings() {
+    public AutoPlaySettings getSettings() {
         return settings;
     }
 

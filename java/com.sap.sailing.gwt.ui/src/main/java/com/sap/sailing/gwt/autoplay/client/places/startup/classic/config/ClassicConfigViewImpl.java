@@ -21,8 +21,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayClientFactoryClassic;
-import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicPlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoPlayerContextDefinition;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.AutoplayPerspectiveOwnSettings;
@@ -65,7 +65,7 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
     @UiField
     FlowPanel leaderboardPerspectiveSettingsPanel;
 
-    private final ClassicPlaceNavigator navigator;
+    private final AutoPlayPlaceNavigator navigator;
     private final EventBus eventBus;
     private final List<EventDTO> events;
 

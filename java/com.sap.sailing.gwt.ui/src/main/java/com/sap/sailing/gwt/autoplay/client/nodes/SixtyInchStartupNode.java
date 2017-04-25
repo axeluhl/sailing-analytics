@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceChangeEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
@@ -14,10 +14,10 @@ import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial.Sixt
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class SixtyInchStartupNode extends BaseCompositeNode {
-    private AutoPlayClientFactorySixtyInch cf;
+    private AutoPlayClientFactory cf;
     private AutoPlayNode whenReadyNode;
 
-    public SixtyInchStartupNode(final AutoPlayClientFactorySixtyInch cf) {
+    public SixtyInchStartupNode(final AutoPlayClientFactory cf) {
         this.cf = cf;
         AutoPlayLoopNode idleLoop = new AutoPlayLoopNode(30, new IdleUpNextNode(cf));
         AutoPlayLoopNode preLifeRaceLoop = new AutoPlayLoopNode(30, new PreRaceWithRacemapNode(cf));

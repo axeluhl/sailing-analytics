@@ -5,6 +5,8 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactoryBase;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayContext;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.PlayerView;
@@ -14,10 +16,10 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 
-public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBase<SixtyInchPlaceNavigator>
+public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBase
         implements AutoPlayClientFactorySixtyInch {
 
-    private SixtyInchContext currentContext;
+    private AutoPlayContext currentContext;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
 
     public AutoPlayClientFactorySixtyInchImpl() {
@@ -33,7 +35,7 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     }
 
     private AutoPlayClientFactorySixtyInchImpl(EventBus eventBus, PlaceController placeController,
-            SixtyInchPlaceNavigator navigator) {
+            AutoPlayPlaceNavigator navigator) {
         super(new AutoPlayMainViewSixtyInchImpl(eventBus), eventBus, placeController, navigator);
 
     }
@@ -54,12 +56,12 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     }
 
     @Override
-    public void setSlideContext(SixtyInchContext configurationSixtyInch) {
+    public void setSlideContext(AutoPlayContext configurationSixtyInch) {
         this.currentContext = configurationSixtyInch;
     }
 
     @Override
-    public SixtyInchContext getSlideCtx() {
+    public AutoPlayContext getSlideCtx() {
         if (currentContext == null) {
             getEventBus().fireEvent(new AutoPlayFailureEvent("No autoplay context found"));
         }

@@ -1,16 +1,16 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liferaceloop.racemapwithleaderboard.LifeRaceWithRacemapAndLeaderBoardPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper;
 import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper.RVWrapper;
 
 public class LifeRaceWithRacemapNode extends FiresPlaceNode {
-    private final AutoPlayClientFactorySixtyInch cf;
+    private final AutoPlayClientFactory cf;
 
-    public LifeRaceWithRacemapNode(AutoPlayClientFactorySixtyInch cf) {
+    public LifeRaceWithRacemapNode(AutoPlayClientFactory cf) {
 
         this.cf = cf;
 
@@ -18,7 +18,7 @@ public class LifeRaceWithRacemapNode extends FiresPlaceNode {
 
     public void onStart() {
         RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),
-                cf.getSlideCtx().getSettings().getLeaderBoardName(), cf.getSlideCtx().getSettings().getEventId(),
+                cf.getSlideCtx().getSettings().getLeaderboardName(), cf.getSlideCtx().getSettings().getEventId(),
                 cf.getSlideCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getSlideCtx().getLifeRace(),
                 new AsyncCallback<RVWrapper>() {
 

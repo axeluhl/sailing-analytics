@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleUpNextPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
@@ -23,13 +23,13 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Pair;
 
 public class IdleUpNextNode extends FiresPlaceNode {
-    private final AutoPlayClientFactorySixtyInch cf;
+    private final AutoPlayClientFactory cf;
     private IdleUpNextPlace place;
     private static RaceTimesInfoProvider raceTimesInfoProvider;
     // private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds
     // */1000l);
 
-    public IdleUpNextNode(AutoPlayClientFactorySixtyInch cf) {
+    public IdleUpNextNode(AutoPlayClientFactory cf) {
         
         this.cf = cf;
         place = new IdleUpNextPlace();
@@ -46,7 +46,7 @@ public class IdleUpNextNode extends FiresPlaceNode {
             raceTimesInfoProvider.reset();
 
             StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard(cf.getSlideCtx().getEvent(),
-                    cf.getSlideCtx().getSettings().getLeaderBoardName());
+                    cf.getSlideCtx().getSettings().getLeaderboardName());
             for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : race.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);

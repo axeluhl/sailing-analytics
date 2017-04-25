@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.place.shared.Place;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayContext;
 
 public abstract class SixtyInchPresenterBase<P extends Place> extends AbstractActivity {
 
@@ -13,7 +14,7 @@ public abstract class SixtyInchPresenterBase<P extends Place> extends AbstractAc
         this.clientFactory = clientFactory;
     }
 
-    protected SixtyInchContext getSlideCtx() {
+    protected AutoPlayContext getSlideCtx() {
         return clientFactory.getSlideCtx();
     }
 

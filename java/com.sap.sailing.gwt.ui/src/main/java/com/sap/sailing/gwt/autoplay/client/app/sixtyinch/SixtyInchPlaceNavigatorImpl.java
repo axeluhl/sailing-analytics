@@ -1,10 +1,13 @@
 package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayContextImpl;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.nodes.SixtyInchStartupNode;
 import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 
-public class SixtyInchPlaceNavigatorImpl implements SixtyInchPlaceNavigator {
+public class SixtyInchPlaceNavigatorImpl implements AutoPlayPlaceNavigator {
 
     private PlaceController placeController;
 
@@ -14,11 +17,11 @@ public class SixtyInchPlaceNavigatorImpl implements SixtyInchPlaceNavigator {
     }
 
     @Override
-    public void goToPlayer(String serializedSettings, AutoPlayClientFactorySixtyInch cf) {
+    public void goToPlayer(String serializedSettings, AutoPlayClientFactory cf) {
         // setup context
         SixtyInchSetting settings = new SixtyInchSetting();
         new SettingsToStringSerializer().fromString(serializedSettings, settings);
-        cf.setSlideContext(new SixtyInchContextImpl(cf.getEventBus(), settings));
+        cf.setSlideContext(new AutoPlayContextImpl(cf.getEventBus(), settings));
         // start sixty inch slide loop nodes...
         SixtyInchStartupNode root = new SixtyInchStartupNode(cf);
         root.start(cf.getEventBus());

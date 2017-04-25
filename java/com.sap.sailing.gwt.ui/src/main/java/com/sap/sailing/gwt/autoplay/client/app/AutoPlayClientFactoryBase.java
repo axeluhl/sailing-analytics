@@ -14,14 +14,14 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
-public abstract class AutoPlayClientFactoryBase<P extends PlaceNavigator<?>>
-        extends SecureClientFactoryImpl<ApplicationTopLevelView> implements AutoPlayClientFactory<P> {
+public abstract class AutoPlayClientFactoryBase
+        extends SecureClientFactoryImpl<ApplicationTopLevelView> implements AutoPlayClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
-    private final P navigator;
+    private final AutoPlayPlaceNavigator navigator;
 
     public AutoPlayClientFactoryBase(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController,
-            P navigator) {
+            AutoPlayPlaceNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         sailingService = GWT.create(SailingService.class);
@@ -48,7 +48,7 @@ public abstract class AutoPlayClientFactoryBase<P extends PlaceNavigator<?>>
     }
 
     @Override
-    public P getPlaceNavigator() {
+    public AutoPlayPlaceNavigator getPlaceNavigator() {
         return navigator;
     }
 }

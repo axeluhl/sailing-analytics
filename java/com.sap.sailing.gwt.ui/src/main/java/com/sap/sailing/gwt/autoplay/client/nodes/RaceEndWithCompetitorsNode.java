@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.nodes;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsTop3Place;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
@@ -11,16 +11,16 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 public class RaceEndWithCompetitorsNode extends FiresPlaceNode {
-    private final AutoPlayClientFactorySixtyInch cf;
+    private final AutoPlayClientFactory cf;
 
-    public RaceEndWithCompetitorsNode(AutoPlayClientFactorySixtyInch cf) {
+    public RaceEndWithCompetitorsNode(AutoPlayClientFactory cf) {
         this.cf = cf;
     }
 
     public void onStart() {
 
         UUID eventId = cf.getSlideCtx().getSettings().getEventId();
-        String leaderBoardName = cf.getSlideCtx().getSettings().getLeaderBoardName();
+        String leaderBoardName = cf.getSlideCtx().getSettings().getLeaderboardName();
 
         cf.getDispatch().execute(new GetMiniLeaderbordAction(eventId, leaderBoardName),
                 new AsyncCallback<ResultWithTTL<GetMiniLeaderboardDTO>>() {
