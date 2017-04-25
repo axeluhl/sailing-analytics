@@ -5,15 +5,15 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.autoplay.client.app.PresenterBase;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchPresenterBase;
 import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPlace;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class SixtyInchInitialPresenterImpl extends PresenterBase<SixtyInchInitialPlace> implements SixtyInchInitialView.Presenter {
+public class SixtyInchInitialPresenterImpl extends SixtyInchPresenterBase<SixtyInchInitialPlace> implements SixtyInchInitialView.Presenter {
     private SixtyInchInitialView view;
 
     public SixtyInchInitialPresenterImpl(SixtyInchInitialPlace place, AutoPlayClientFactorySixtyInch clientFactory,

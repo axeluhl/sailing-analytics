@@ -7,14 +7,21 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactoryBase;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigatorImpl;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.PlayerView;
 import com.sap.sailing.gwt.autoplay.client.places.startup.classic.config.ClassicConfigPlace;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 
 public class AutoPlayClientFactoryClassicImpl extends AutoPlayClientFactoryBase<PlaceNavigator>
         implements AutoPlayClientFactoryClassic {
+
+    private ClassicContext currentContext;
+    private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
+
     public AutoPlayClientFactoryClassicImpl() {
         this(new SimpleEventBus());
     }
@@ -47,5 +54,21 @@ public class AutoPlayClientFactoryClassicImpl extends AutoPlayClientFactoryBase<
         return new ClassicConfigPlace();
     }
 
+    @Override
+    public void setSlideContext(ClassicContext configurationSixtyInch) {
+        this.currentContext = configurationSixtyInch;
+    }
 
+    @Override
+    public ClassicContext getSlideCtx() {
+        if (currentContext == null) {
+            getEventBus().fireEvent(new AutoPlayFailureEvent("No autoplay context found"));
+        }
+        return currentContext;
+    }
+
+    @Override
+    public SailingDispatchSystem getDispatch() {
+        return dispatch;
+    }
 }

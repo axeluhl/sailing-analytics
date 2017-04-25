@@ -6,10 +6,11 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchPresenterBase;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPlace;
 
-public abstract class ConfiguredPresenter<P extends Place> extends PresenterBase<P> {
+public abstract class ConfiguredPresenter<P extends Place> extends SixtyInchPresenterBase<P> {
     private EventBus eventBus;
 
     public ConfiguredPresenter(P place, AutoPlayClientFactorySixtyInch clientFactory) {

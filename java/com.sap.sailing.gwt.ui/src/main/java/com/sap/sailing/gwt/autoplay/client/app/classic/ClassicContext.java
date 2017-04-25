@@ -1,10 +1,10 @@
-package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
+package com.sap.sailing.gwt.autoplay.client.app.classic;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public interface SixtyInchContext {
-    SixtyInchSetting getSettings();
+public interface ClassicContext {
+    ClassicSetting getSettings();
 
     void updateEvent(EventDTO event);
 

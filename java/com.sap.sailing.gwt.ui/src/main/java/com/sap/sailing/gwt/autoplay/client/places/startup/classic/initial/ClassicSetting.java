@@ -1,14 +1,14 @@
-package com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial;
+package com.sap.sailing.gwt.autoplay.client.places.startup.classic.initial;
 
 import java.util.UUID;
 
-public class SixtyInchSetting {
+public class ClassicSetting {
 
     private UUID eventId;
     private String leaderBoardName;
     private boolean manualMode;
 
-    public SixtyInchSetting(UUID eventUuid, String selectedLeaderboardName) {
+    public ClassicSetting(UUID eventUuid, String selectedLeaderboardName) {
         this.eventId = eventUuid;
         this.leaderBoardName = selectedLeaderboardName;
     }
