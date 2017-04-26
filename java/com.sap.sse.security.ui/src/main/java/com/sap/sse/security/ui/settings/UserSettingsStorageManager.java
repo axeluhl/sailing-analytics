@@ -13,13 +13,13 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
-import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
-import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
-import com.sap.sse.gwt.client.shared.perspective.PipelineLevel;
-import com.sap.sse.gwt.client.shared.perspective.SettingsBuildingPipeline;
-import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStrings;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
+import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
+import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
+import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
+import com.sap.sse.gwt.client.shared.settings.SettingsStrings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -36,67 +36,72 @@ import com.sap.sse.security.ui.shared.UserDTO;
  *            for itself and its subcomponents
  * @see SettingsStorageManager
  */
-public class UserSettingsStorageManager<S extends Settings> extends SimpleSettingsStorageManager<S> {
+public class UserSettingsStorageManager<S extends Settings> implements SettingsStorageManager<S> {
+    
+    /**
+     * The pipeline used for the settings construction.
+     */
+    protected final SettingsBuildingPipeline settingsBuildingPipeline;
 
     /**
-     * The key which is associated with the global settings. Different keys will cause multiple/different settings
-     * instances stored in the storage.
+     * The key which is associated with the User Settings. Different keys will cause multiple/different settings
+     * instances to be stored in the storage.
      */
     private final String storageGlobalKey;
 
     /**
-     * The key which is used to store the context specific settings. Each context with own context specific settings
-     * must have a unique key.
+     * The key which is associated with the Document Settings. Different keys will cause multiple/different settings
+     * instances to be stored in the storage.
      */
     private final String storageContextSpecificKey;
 
+    /**
+     * The userService instance which is used for server communication regarding settings loading and storing
+     */
     private UserService userService;
 
     /**
-     * This is used, to ensure that only once the data is loaded remote, if a user logs in later, he must refresh, to
-     * avoid "complicated problems"
+     * Indicates whether the settings have been already loaded for the first time in order to maintain a single attachment of {@link UserStatusEventHandler}.
      */
     private boolean initialUserSetting = false;
     
+    /**
+     * Handler which is currently attached for listening the user's login state
+     */
     private UserStatusEventHandler userStatusEventHandler = null;
     
+    /**
+     * Callbacks which are waiting to be called when persistent settings representation has loaded.
+     */
     private Queue<AsyncCallback<SettingsJsons>> retrieveSettingsCallbacksQueue = new LinkedList<>();
     
     /**
+     * Constructs the instance with a custom {@link SettingsBuildingPipeline}.
      * 
-     * @param userService
-     *            The {@link UserService} which is used for settings storage on server when the current user is logged
-     *            in
-     * @param globalDefinitionId
-     *            The key which is associated with the global settings. Different keys will cause multiple/different
-     *            settings instances stored in the storage.
-     * @param contextDefinitionId
-     *            The key which is used to store the context specific settings. Each context with own context specific
-     *            settings must have a unique key.
+     * @param userService The service which is used for server-side settings storage
+     * @param storageDefinitionId The definition for User Settings and Document Settings storage keys
+     * @param settingsBuildingPipeline The custom pipeline to be used for settings construction
      */
-    public UserSettingsStorageManager(UserService userService, StorageDefinitionId storageDefinitionId, SettingsBuildingPipeline settingsBuildingPipeline) {
-        super(settingsBuildingPipeline);
+    protected UserSettingsStorageManager(UserService userService, StorageDefinitionId storageDefinitionId, SettingsBuildingPipeline settingsBuildingPipeline) {
+        this.settingsBuildingPipeline = settingsBuildingPipeline;
         this.userService = userService;
         this.storageGlobalKey = storageDefinitionId.generateStorageGlobalKey();
         this.storageContextSpecificKey = storageDefinitionId.generateStorageContextSpecificKey();
     }
     
     /**
+     * Constructs the instance with {@link UserSettingsBuildingPipeline}.
      * 
-     * @param userService
-     *            The {@link UserService} which is used for settings storage on server when the current user is logged
-     *            in
-     * @param globalDefinitionId
-     *            The key which is associated with the global settings. Different keys will cause multiple/different
-     *            settings instances stored in the storage.
-     * @param contextDefinitionId
-     *            The key which is used to store the context specific settings. Each context with own context specific
-     *            settings must have a unique key.
+     * @param userService The service which is used for server-side settings storage
+     * @param storageDefinitionId The definition for User Settings and Document Settings storage keys
      */
     public UserSettingsStorageManager(UserService userService, StorageDefinitionId storageDefinitionId) {
         this(userService, storageDefinitionId, new UserSettingsBuildingPipeline());
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean supportsStore() {
         return true;
@@ -142,6 +147,9 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void retrieveDefaultSettings(final S defaultSettings, final OnSettingsLoadedCallback<S> callback) {
         retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
@@ -161,9 +169,11 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         });
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void dispose() {
-        super.dispose();
         if(userStatusEventHandler != null) {
             userService.removeUserStatusEventHandler(userStatusEventHandler);
         }
@@ -198,16 +208,14 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         });
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public JSONValue settingsToJSON(Settings newSettings, PipelineLevel pipelineLevel, List<String> path) {
         return settingsBuildingPipeline.getJsonObject(newSettings, pipelineLevel, path);
     }
     
-    @Override
-    public void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback) {
-        storeSettingsJsons(settingsJsons, onSettingsStoredCallback, true, true);
-    }
-
     private void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback, boolean storeGlobalSettings, boolean storeContextSpecificSettings) {
         SettingsStrings settingsStrings = settingsBuildingPipeline.getSettingsStringConverter().convertToSettingsStrings(settingsJsons);
         storeSettingsStringsOnLocalStorage(settingsStrings, storeGlobalSettings, storeContextSpecificSettings);
@@ -218,6 +226,9 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         }
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void storeGlobalSettingsJson(JSONObject globalSettingsJson,
             OnSettingsStoredCallback onSettingsStoredCallback) {
@@ -225,6 +236,9 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         storeSettingsJsons(settingsJsons, onSettingsStoredCallback, true, false);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void storeContextSpecificSettingsJson(JSONObject contextSpecificSettingsJson,
             OnSettingsStoredCallback onSettingsStoredCallback) {
@@ -232,6 +246,9 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         storeSettingsJsons(settingsJsons, onSettingsStoredCallback, false, true);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void retrieveSettingsJsons(AsyncCallback<SettingsJsons> asyncCallback) {
         retrieveSettingsCallbacksQueue.add(asyncCallback);

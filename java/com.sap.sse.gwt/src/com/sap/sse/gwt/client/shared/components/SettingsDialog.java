@@ -7,8 +7,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
-import com.sap.sse.gwt.client.shared.perspective.DummyOnSettingsStoredCallback;
-import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
 
 public class SettingsDialog<SettingsType extends Settings> extends AbstractSettingsDialog<SettingsType> {
 

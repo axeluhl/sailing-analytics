@@ -3,7 +3,7 @@ package com.sap.sse.security.ui.settings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStringConverter;
+import com.sap.sse.gwt.client.shared.settings.SettingsStringConverter;
 import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 
 public class PlaceBasedUserSettingsBuildingPipeline extends UserSettingsBuildingPipeline {

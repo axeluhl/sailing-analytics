@@ -13,7 +13,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboardChart<MultiCompetitorLeaderboardChartSettings>  {
     private MultiCompetitorLeaderboardChartSettings settings;

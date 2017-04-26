@@ -10,12 +10,12 @@ import java.util.Map.Entry;
 import com.google.gwt.json.client.JSONValue;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.perspective.ComponentUtils;
-import com.sap.sse.gwt.client.shared.perspective.PipelineLevel;
-import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStringConverter;
+import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
+import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
+import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
+import com.sap.sse.gwt.client.shared.settings.SettingsStringConverter;
 
-class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildingPipeline {
+public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildingPipeline {
     
     private SettingsPatches patchesForStoringSettings = new SettingsPatches();
     private SettingsPatches patchesForLoadingSettings = new SettingsPatches();

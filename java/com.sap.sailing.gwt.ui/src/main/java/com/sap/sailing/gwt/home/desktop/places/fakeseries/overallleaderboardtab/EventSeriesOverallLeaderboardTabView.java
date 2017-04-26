@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 
 /**
  * Created by pgtaboada on 25.11.14.

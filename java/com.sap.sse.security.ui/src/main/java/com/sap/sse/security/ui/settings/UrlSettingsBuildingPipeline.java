@@ -4,9 +4,9 @@ import java.util.List;
 
 import com.google.gwt.json.client.JSONValue;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.perspective.AbstractSettingsBuildingPipeline;
-import com.sap.sse.gwt.client.shared.perspective.PipelineLevel;
-import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
+import com.sap.sse.gwt.client.shared.settings.AbstractSettingsBuildingPipeline;
+import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
+import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
 
 public class UrlSettingsBuildingPipeline extends AbstractSettingsBuildingPipeline {
     
