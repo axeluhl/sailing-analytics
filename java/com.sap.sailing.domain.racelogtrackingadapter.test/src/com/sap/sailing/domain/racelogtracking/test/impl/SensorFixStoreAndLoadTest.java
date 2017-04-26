@@ -671,4 +671,47 @@ public class SensorFixStoreAndLoadTest {
         assertNull(trackedRace.getSensorTrack(compNotPartOfRace, BravoFixTrack.TRACK_NAME));
         fixLoaderAndTracker.stop(true);
     }
+    
+    @Test
+    /** Test for changes of bug 4044 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4044 */
+    public void testThatNoSensorFixesAreLoadedAsLongAsStartOfTrackingIsNull() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
+        
+        addBravoFixes();
+        
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        
+        // raceLog is intentionally not attached
+        trackedRace.attachRegattaLog(regattaLog);
+        trackedRace.waitForLoadingToFinish();
+        
+        // No fixes are loaded because startOfTracking isn't set through the raceLog yet
+        assertNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
+        
+        // Loading of fixes is triggered by setting startOfTracking
+        trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
+        trackedRace.waitForLoadingToFinish();
+        testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
+        
+        fixLoaderAndTracker.stop(true);
+    }
+    
+    @Test
+    /** Test for changes of bug 4044 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4044 */
+    public void testThatNoSensorFixesAreRecordedAsWhenStartOfTrackingIsNull() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
+        
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        
+        // raceLog is intentionally not attached
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        addBravoFixes();
+        
+        assertNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
+        
+        fixLoaderAndTracker.stop(true);
+    }
 }
