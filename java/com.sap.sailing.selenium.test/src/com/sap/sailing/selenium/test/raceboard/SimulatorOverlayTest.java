@@ -108,7 +108,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
                     REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
             MapSettingsPO mapSettings = raceboard.openMapSettings();
             // Simulator overlay option must not be available without wind data
-            Assert.assertFalse(mapSettings.isSimulatorOverlayAvailable());
+            Assert.assertFalse(mapSettings.isShowSimulationOverlayCheckBoxVisible());
         }
         
         {
@@ -125,7 +125,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
                     REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
             MapSettingsPO mapSettings = raceboard.openMapSettings();
             // Simulator overlay option must be available with the wind data being available
-            Assert.assertTrue(mapSettings.isSimulatorOverlayAvailable());
+            Assert.assertTrue(mapSettings.isShowSimulationOverlayCheckBoxVisible());
         }
     }
 

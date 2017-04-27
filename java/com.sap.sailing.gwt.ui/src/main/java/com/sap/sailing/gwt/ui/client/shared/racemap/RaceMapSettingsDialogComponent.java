@@ -76,7 +76,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
         windUpCheckbox.setValue(initialSettings.isWindUp());
         windUpCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isWindUp()));
-        windUpCheckbox.ensureDebugId("raceMapSettingsWindChart");
+        windUpCheckbox.ensureDebugId("windUpCheckBox");
         vp.add(windUpCheckbox);
 
         showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
@@ -98,7 +98,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         
         if (isSimulationEnabled) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
-            showSimulationOverlayCheckbox.ensureDebugId("showSimulatorOverlay");
+            showSimulationOverlayCheckbox.ensureDebugId("showSimulationOverlayCheckbox");
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
             vp.add(showSimulationOverlayCheckbox);
         }
@@ -107,6 +107,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(competitorsLabel);
 
         showOnlySelectedCompetitorsCheckBox = dialog.createCheckbox(stringMessages.showOnlySelectedCompetitors());
+        showOnlySelectedCompetitorsCheckBox.ensureDebugId("showOnlySelectedCompetitorsCheckBox");
         showOnlySelectedCompetitorsCheckBox.setValue(initialSettings.isShowOnlySelectedCompetitors());
         vp.add(showOnlySelectedCompetitorsCheckBox);
 

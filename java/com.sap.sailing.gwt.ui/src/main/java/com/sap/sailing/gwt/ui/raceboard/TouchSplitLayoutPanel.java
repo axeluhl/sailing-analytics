@@ -639,6 +639,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (additionalButtonsAndStyles != null) {
             for (Pair<Button, String> buttonAndComponentPair : additionalButtonsAndStyles) {
                 Button button = buttonAndComponentPair.getA();
+                button.ensureDebugId("TouchSplitLayoutPanelToggleButton-" + buttonAndComponentPair.getB());
                 button.setStyleName(buttonStyleName);
                 button.addStyleDependentName("Closed-"+buttonAndComponentPair.getB());
                 if (Document.get().getClientWidth() <= 1024) {
