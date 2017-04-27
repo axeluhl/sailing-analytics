@@ -1,40 +1,51 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.gwt.dom.client.Document;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
-import com.sap.sse.gwt.client.player.Timer;
 
 public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
     
+    private static final long DEFAULT_REFRESH_INTERVAL = 1000L;
+    
     private final boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard;
-    private final Timer timer;
     private final RegattaAndRaceIdentifier raceIdentifier;
 
-    public SingleRaceLeaderboardPanelLifecycle(Timer timer, RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages) {
+    public SingleRaceLeaderboardPanelLifecycle(RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages) {
         super(null, stringMessages);
         this.raceIdentifier = raceIdentifier;
-        this.timer = timer;
         this.isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
     }
     
     @Override
-    public LeaderboardSettings createDefaultSettings() {
-        ExplicitRaceColumnSelectionWithPreselectedRace raceColumn = new ExplicitRaceColumnSelectionWithPreselectedRace(raceIdentifier);
-        LeaderboardSettings defaultLeaderboardSettingsForCurrentPlayMode = LeaderboardSettingsFactory.getInstance()
-                .createNewDefaultSettingsForPlayMode(timer.getPlayMode(),
-                        /* nameOfRaceToSort */ raceIdentifier.getRaceName(),
-                        /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ raceIdentifier.getRaceName(),
-                        /* showRegattaRank */ false,
-                        /*showCompetitorSailIdColumn*/true,
-                        /* don't showCompetitorFullNameColumn in case screen is so small that we don't
-                         * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard,raceColumn.getNumberOfLastRaceColumnsToShow(),raceColumn.getType());
-        return defaultLeaderboardSettingsForCurrentPlayMode;
+    public LeaderboardSettings createDefaultSettings() {        
+        List<String> namesOfRaceColumnsToShow = null;
+        List<String> namesOfRacesToShow = Collections.singletonList(raceIdentifier.getRaceName());
+        
+        List<DetailType> raceDetails = new ArrayList<DetailType>();
+        raceDetails.add(DetailType.RACE_DISTANCE_TRAVELED);
+        raceDetails.add(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
+        raceDetails.add(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS);
+        raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
+        raceDetails.add(DetailType.DISPLAY_LEGS);
+        List<DetailType> overallDetails = new ArrayList<>();
+        LeaderboardSettings defaultSettings = new LeaderboardSettings();
+        LeaderboardSettings  settings = new LeaderboardSettings(defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(), defaultSettings.getRaceDetailsToShow(), overallDetails, namesOfRaceColumnsToShow, namesOfRacesToShow,
+                defaultSettings.getNumberOfLastRacesToShow(), false, DEFAULT_REFRESH_INTERVAL, raceIdentifier.getRaceName(), defaultSettings.isSortAscending(), defaultSettings.isUpdateUponPlayStateChange(), defaultSettings.getActiveRaceColumnSelectionStrategy(), defaultSettings.isShowAddedScores(), defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
+                /*showCompetitorSailIdColumn*/ true,
+                /* don't showCompetitorFullNameColumn in case screen is so small that we don't
+                 * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard);
+        SettingsDefaultValuesUtils.setDefaults(settings, settings);
+        
+        return settings;
     }
     
     public boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard() {

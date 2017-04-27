@@ -10,7 +10,6 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
-import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 
@@ -28,20 +27,20 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     //constructor used by Standalone RaceBoard
-    public RaceBoardPerspectiveLifecycle(Timer timer, RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages) {
-        this(timer, raceIdentifier, null, stringMessages);
+    public RaceBoardPerspectiveLifecycle(RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages) {
+        this(raceIdentifier, null, stringMessages);
     }
     
     //constructor used by AutoPlay raceBoard
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
-        this(null, null, leaderboard, stringMessages);
+        this(null, leaderboard, stringMessages);
     }
     
-    private RaceBoardPerspectiveLifecycle(Timer timer, RegattaAndRaceIdentifier raceIdentifier, AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
+    private RaceBoardPerspectiveLifecycle(RegattaAndRaceIdentifier raceIdentifier, AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
-        leaderboardPanelLifecycle = raceIdentifier == null ? new LeaderboardPanelLifecycle(leaderboard, stringMessages) : new SingleRaceLeaderboardPanelLifecycle(timer, raceIdentifier, stringMessages);
+        leaderboardPanelLifecycle = raceIdentifier == null ? new LeaderboardPanelLifecycle(leaderboard, stringMessages) : new SingleRaceLeaderboardPanelLifecycle(raceIdentifier, stringMessages);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, false);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages);
