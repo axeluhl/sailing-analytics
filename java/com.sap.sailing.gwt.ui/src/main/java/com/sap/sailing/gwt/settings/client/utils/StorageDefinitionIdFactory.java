@@ -5,6 +5,12 @@ import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sse.security.ui.settings.StorageDefinitionId;
 
+/**
+ * Factory for {@link StorageDefinitionId}s which are used in Sailing Analytics.
+ * 
+ * @author Vladislav Chumak
+ *
+ */
 public class StorageDefinitionIdFactory {
 
     private StorageDefinitionIdFactory() {

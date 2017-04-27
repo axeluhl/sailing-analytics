@@ -7,7 +7,7 @@ import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Specialization of {@link UserSettingsStorageManager} which uses {@link UserSettingsBuildingPipelineWithPatching} for settings construction.
- * This implementation provides additional methods for attaching of {@link SettingsPatch}. There are multiple hooks in
+ * This implementation provides additional methods for attachment of {@link SettingsPatch}s. There are multiple hooks in
  * the underlying {@link UserSettingsBuildingPipelineWithPatching} which can be used to influence the
  * settings construction in its construction pipeline. After each {@link PipelineLevel} a custom {@link SettingsPatch}
  * may be applied. The patch may partially or completely modify the resulting settings object in order to provide

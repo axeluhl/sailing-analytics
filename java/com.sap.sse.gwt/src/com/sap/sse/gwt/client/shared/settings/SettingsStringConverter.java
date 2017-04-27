@@ -8,6 +8,16 @@ import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
+/**
+ * Conversion helper which is used by this instance for type conversion/serialization
+ * between settings objects and JSON Strings. The class encapsulates all serializers
+ * which are required for serialization and deserialization and provides methods 
+ * for an indirect serialization/deserialization functionality required by
+ * {@link SettingsBuildingPipeline} and {@link SettingsStorageManager} implementations.
+ * 
+ * @author Vladislav Chumak
+ * 
+ */
 public class SettingsStringConverter {
 
     private final SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();

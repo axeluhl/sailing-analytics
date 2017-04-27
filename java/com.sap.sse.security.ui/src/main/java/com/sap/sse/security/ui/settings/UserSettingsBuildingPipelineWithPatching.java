@@ -13,20 +13,33 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
-import com.sap.sse.gwt.client.shared.settings.SettingsStringConverter;
 
+/**
+ * Specialization of {@link UserSettingsBuildingPipeline} which offers multiple hooks for settings patching
+ * throughout the pipeline. These hooks may be used to patch the settings at different pipeline levels during its construction.
+ * This implementation provides additional methods for attachment of {@link SettingsPatch}s.
+ * After each {@link PipelineLevel} a custom {@link SettingsPatch}
+ * may be applied. The patch may partially or completely modify the resulting settings object in order to provide
+ * the desired behavior of default settings for a dynamic environment, e.g. RaceBoard which determines its default settings regarding
+ * to RaceModes, PlayModes and etc.
+ * 
+ * @author Vladislav Chumak
+ *
+ */
 public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildingPipeline {
     
     private SettingsPatches patchesForStoringSettings = new SettingsPatches();
     private SettingsPatches patchesForLoadingSettings = new SettingsPatches();
     
-    public UserSettingsBuildingPipelineWithPatching(SettingsStringConverter settingsStringConverter) {
-        super(settingsStringConverter);
-    }
-    
-    public UserSettingsBuildingPipelineWithPatching() {
-    }
-    
+    /**
+     * Constructs a settings object by means of provided defaultSettings, persisted representations of
+     * User Settings and Document Settings, current URL, and loading patches, which have been added to this
+     * pipeline instance.
+     * 
+     * @param defaultSettings The basic settings to be used
+     * @param settingsJsons The persisted representation of User Settings and Document Settings
+     * @return The constructed settings object
+     */
     @Override
     public <CS extends Settings> CS getSettingsObject(CS defaultSettings, SettingsJsons settingsJsons) {
         defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.SYSTEM_DEFAULTS);
@@ -61,6 +74,15 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
         return defaultSettings;
     }
     
+    /**
+     * Converts the provided settings object into a JSON representation considering storing patches,
+     * which have been added to this pipeline instance.
+     * 
+     * @param settings The settings to convert to JSON representation
+     * @param pipelineLevel The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
+     * @param path The path of the settings in the settings tree
+     * @return The JSON representation of the provided settings
+     */
     @Override
     public JSONValue getJsonObject(Settings settings, PipelineLevel pipelineLevel, List<String> path) {
         for (PipelineLevel level : pipelineLevel.getSortedLevelsUntilCurrent()) {
@@ -77,14 +99,35 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
         return settingsPatch.patchSettings((CS) settings);
     }
     
+    /**
+     * Adds a settings patch for transforming settings before storing them.
+     * 
+     * @param component The component which the targeted settings for patching belong to
+     * @param pipelineLevel The pipeline level <b>AFTER</b> that the patch should be applied on settings
+     * @param settingsPatch The settings patch to apply on settings
+     */
     public<CS extends Settings> void addPatchForStoringSettings(Component<CS> component, PipelineLevel pipelineLevel, SettingsPatch<CS> settingsPatch) {
         patchesForStoringSettings.addSettingsPatch(component.getPath(), settingsPatch, pipelineLevel);
     }
     
+    /**
+     * Adds a settings patch for settings object construction.
+     * 
+     * @param component The component which the targeted settings for patching belong to
+     * @param pipelineLevel The pipeline level <b>AFTER</b> that the patch should be applied on settings
+     * @param settingsPatch The settings patch to apply on settings
+     */
     public<CS extends Settings> void addPatchForLoadingSettings(Component<CS> component, PipelineLevel pipelineLevel, SettingsPatch<CS> settingsPatch) {
         patchesForLoadingSettings.addSettingsPatch(component.getPath(), settingsPatch, pipelineLevel);
     }
     
+    /**
+     * Internal helper class for management of provided settings patches in relation to its pipeline levels
+     * and components that provided patches belong to.
+     * 
+     * @author Vladislav Chumak
+     *
+     */
     private static class SettingsPatches {
         
         private Map<PipelineLevel, Map<List<String>, List<SettingsPatch<? extends Settings>>>> patchesForSettings = new HashMap<>();

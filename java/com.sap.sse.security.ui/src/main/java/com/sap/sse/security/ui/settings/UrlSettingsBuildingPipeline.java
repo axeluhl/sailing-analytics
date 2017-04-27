@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
 import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
 
 /**
- * Settings building pipeline which is capable of reading settings from URL.
+ * Settings building pipeline which is only capable of reading settings from URL.
  * Conversion to JSON is not supported. This implementation is supposed to be used by {@link SettingsStorageManager}
  * which offers read-only functionality for settings, and thus, does not provide persistence support.
  * 
