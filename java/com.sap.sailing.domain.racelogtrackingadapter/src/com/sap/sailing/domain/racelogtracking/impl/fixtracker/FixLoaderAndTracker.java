@@ -91,7 +91,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
         @Override
         public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
-            if (trackedRace.getStartOfRace() == null) {
+            if (trackedRace.getStartOfTracking() == null) {
                 // Fixes aren't loaded at all if startOfTracking isn't set yet
                 return;
             }
