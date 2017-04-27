@@ -48,12 +48,9 @@ public abstract class AbstractSentenceListener<T extends Sentence>
 	private final Type expectedType;
 
 	public AbstractSentenceListener() {
-
 		ParameterizedType superClass =
 			(ParameterizedType) getClass().getGenericSuperclass();
-
 		Type[] superClassTypeArgs = superClass.getActualTypeArguments();
-
 		this.expectedType = superClassTypeArgs[0];
 	}
 

@@ -1,6 +1,7 @@
 package com.sap.sailing.nmeaconnector.test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,6 +20,7 @@ import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
+import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TimeSentence;
 import net.sf.marineapi.nmea.util.Position;
 import net.sf.marineapi.nmea.util.Time;
@@ -79,5 +81,33 @@ public class GeneralizedSentenceListenerTest {
     public void testSimpleNmeaWindReceiverScenario() throws FileNotFoundException, InterruptedException {
         final Iterable<Wind> wind = NmeaFactory.INSTANCE.readWind(new FileInputStream("resources/LogSS.txt"));
         assertFalse(Util.isEmpty(wind));
+    }
+ 
+    private static class MyGenericSentenceListener<A, B extends Sentence> extends AbstractSentenceListener<B> {
+        private B lastSentence;
+        
+        @Override
+        public void sentenceRead(B sentence) {
+            lastSentence = sentence;
+        }
+
+        public B getLastSentence() {
+            return lastSentence;
+        }
+    }
+    
+    private static class MyOtherGenericSentenceListener<A> extends MyGenericSentenceListener<A, TimeSentence> {}
+    
+    private static class MyConcreteSentenceListener extends MyOtherGenericSentenceListener<String> {}
+    
+    private static class MyConcreteSentenceListenerSubclass extends MyConcreteSentenceListener {}
+    
+    @Test
+    public void testComplicatedGenericSentenceListenerSubclass() throws InterruptedException {
+        MyConcreteSentenceListenerSubclass listener = new MyConcreteSentenceListenerSubclass();
+        sentenceReader.addSentenceListener(listener);
+        readerSupport.startReading();
+        readerSupport.waitUntilAllMessagesHaveBeenRead();
+        assertNotNull(listener.getLastSentence());
     }
 }
