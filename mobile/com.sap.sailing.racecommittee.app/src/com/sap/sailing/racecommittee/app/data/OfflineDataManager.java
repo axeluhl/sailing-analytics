@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 
@@ -51,6 +52,7 @@ import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbac
 import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
+import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
@@ -243,6 +245,17 @@ public class OfflineDataManager extends DataManager {
                     return managedRace.getCompetitors();
                 }
             });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<LeaderboardResult>> createLeaderboardLoader(ManagedRace managedRace,
+        LoadClient<LeaderboardResult> callback) {
+        return new ImmediateDataLoaderCallbacks<>(context, callback, new Callable<LeaderboardResult>() {
+            @Override
+            public LeaderboardResult call() throws Exception {
+                return null;
+            }
+        });
     }
 
     @Override

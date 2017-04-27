@@ -52,6 +52,8 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
@@ -65,6 +67,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
     private static final int COMPETITOR_LOADER = 0;
     private static final int START_ORDER_LOADER = 1;
+    private static final int LEADERBOARD_ORDER_LOADER = 2;
+
     private View mButtonBar;
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
@@ -293,6 +297,23 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         startOrderLoader.forceLoad();
     }
 
+    private void loadLeaderboardResult() {
+        ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+        final Loader<?> leaderboardResultLoader = getLoaderManager()
+            .initLoader(LEADERBOARD_ORDER_LOADER, null, dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
+                @Override
+                public void onLoadFailed(Exception reason) {
+
+                }
+
+                @Override
+                public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
+                    onLoadLeaderboardResultSucceeded(data);
+                }
+            }));
+        leaderboardResultLoader.forceLoad();
+    }
+
     private void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
         mCompetitorResults.clear();
         for (Competitor item : data) { // add loaded competitors
@@ -322,14 +343,33 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         setPublishButton();
     }
 
+    private void onLoadLeaderboardResultSucceeded(LeaderboardResult data) {
+        final String raceName = getRace().getName();
+        List<CompetitorWithRaceRankImpl> sortByRank = data.getCompetitors();
+        Collections.sort(sortByRank, new Comparator<CompetitorWithRaceRankImpl>() {
+            @Override
+            public int compare(CompetitorWithRaceRankImpl left, CompetitorWithRaceRankImpl right) {
+                return (int)left.getRaceRank(raceName) - (int)right.getRaceRank(raceName);
+            }
+        });
+        List<CompetitorResultEditableImpl> sortedList = new ArrayList<>();
+        for (CompetitorWithRaceRankImpl item : sortByRank) {
+            for (CompetitorResultEditableImpl competitor : mCompetitorResults) {
+                if (competitor.getCompetitorId().toString().equals(item.getId())) {
+                    sortedList.add(competitor);
+                    break;
+                }
+            }
+        }
+        mCompetitorResults.clear();
+        mCompetitorResults.addAll(sortedList);
+        mAdapter.setCompetitor(mCompetitorResults);
+    }
+
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        OrderBy orderBy;
+        OrderBy orderBy = OrderBy.SAILING_NUMBER;
         switch (item.getItemId()) {
-            case R.id.by_boat:
-                orderBy = OrderBy.SAILING_NUMBER;
-                break;
-
             case R.id.by_name:
                 orderBy = OrderBy.COMPETITOR_NAME;
                 break;
@@ -340,10 +380,11 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
             case R.id.by_goal:
                 orderBy = OrderBy.FINISH_LINE;
+                loadLeaderboardResult();
                 break;
 
             default:
-                orderBy = OrderBy.SAILING_NUMBER;
+                break;
 
         }
         mAdapter.setOrderedBy(orderBy);
