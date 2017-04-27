@@ -3,12 +3,15 @@ package com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -89,11 +92,12 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
                 public void consume(LeaderboardPanel leaderboardPanel) {
                     leaderboardUpdateProvider = leaderboardPanel;
                     leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaLeaderboardTabView.this);
-                    leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
+                    OldLeaderboardDelegateFullscreenViewer leaderboardDelegate = new OldLeaderboardDelegateFullscreenViewer();
+                    leaderboard = new OldLeaderboard(leaderboardDelegate);
                     liveRaces = new LiveRacesList(currentPresenter, false);
                     initWidget(ourUiBinder.createAndBindUi(RegattaLeaderboardTabView.this));
                     leaderboardAndLiveRacesPresenter = new OldLeaderboardAndLiveRacesPresenter(leaderboard, liveRaces,
-                            buttonContainer, liveRacesContainer);
+                            buttonContainer, liveRacesContainer, leaderboardDelegate);
                     RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(RegattaLeaderboardTabView.this,
                             contentArea, currentPresenter.getDispatch(),
                             currentPresenter.getErrorAndBusyClientFactory());
@@ -178,15 +182,22 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         private final OldLeaderboard leaderboard;
         private final LiveRacesList liveRaces;
         private final FlowPanel buttonContainer, liveRacesContainer;
+        private final OldLeaderboardDelegateFullscreenViewer leaderboardDelegate;
         boolean enabled = false;
 
         private OldLeaderboardAndLiveRacesPresenter(OldLeaderboard leaderboard, LiveRacesList liveRaces,
-                FlowPanel buttonContainer, FlowPanel liveRacesContainer) {
+                FlowPanel buttonContainer, FlowPanel liveRacesContainer,
+                OldLeaderboardDelegateFullscreenViewer leaderboardDelegate) {
             this.leaderboard = leaderboard;
             this.liveRaces = liveRaces;
             this.buttonContainer = buttonContainer;
             this.liveRacesContainer = liveRacesContainer;
-            this.leaderboard.getShowLiveRacesControl().addClickHandler(getShowLivesRacesClickHandler());
+            this.leaderboardDelegate = leaderboardDelegate;
+            ClickHandler showLivesRacesClickHandler = getShowLivesRacesClickHandler();
+            this.leaderboard.getShowLiveRacesControl().addClickHandler(showLivesRacesClickHandler);
+            this.leaderboardDelegate.getShowLiveRacesControl().addClickHandler(showLivesRacesClickHandler);
+            this.leaderboard.getFullscreenControl().addClickHandler(getFullscreenClickHandler());
+            this.configureLeaderboardDelegate();
             this.setShowLiveRaces(false);
         }
 
@@ -194,7 +205,27 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             return new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    OldLeaderboardAndLiveRacesPresenter.this.setShowLiveRaces(true);
+                    OldLeaderboardAndLiveRacesPresenter.this.setShowLiveRaces(!liveRacesContainer.isVisible());
+                }
+            };
+        }
+
+        private void configureLeaderboardDelegate() {
+            leaderboardDelegate.addCloseHandler(new CloseHandler<PopupPanel>() {
+                @Override
+                public void onClose(CloseEvent<PopupPanel> event) {
+                    liveRaces.removeFromParent();
+                    liveRacesContainer.add(liveRaces);
+                }
+            });
+        }
+
+        private ClickHandler getFullscreenClickHandler() {
+            return new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    liveRaces.removeFromParent();
+                    leaderboardDelegate.setLiveRacesPanel(liveRaces);
                 }
             };
         }
@@ -204,6 +235,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
                 @Override
                 public void setData(CollectionResult<LiveRaceDTO> data) {
                     enabled = data != null && !data.getValues().isEmpty();
+                    leaderboardDelegate.getShowLiveRacesControl().setVisible(enabled);
                     OldLeaderboardAndLiveRacesPresenter.this.setShowLiveRaces(liveRacesContainer.isVisible());
                     liveRaces.getRefreshable().setData(data);
                 }
@@ -215,6 +247,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             leaderboard.getFullscreenControl().setVisible(!enabled || !show);
             buttonContainer.setVisible(enabled && show);
             liveRacesContainer.setVisible(enabled && show);
+            leaderboardDelegate.setShowLiveRaces(enabled && show);
         }
 
     }

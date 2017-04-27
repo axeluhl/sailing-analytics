@@ -16,13 +16,14 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 public abstract class AbstractLeaderboardFullscreenViewer extends FullscreenContainer<Widget> implements
         LeaderboardDelegate {
 
-    private final Image autoRefreshControl = new Image("images/home/reload.svg");
-    private final Image settingsControl = new Image("images/home/settings.svg");
+    protected final Image autoRefreshControl = new Image("images/home/reload.svg");
+    protected final Image settingsControl = new Image("images/home/settings.svg");
 
     private final static BusyIndicatorResources RESOURCES = GWT.create(BusyIndicatorResources.class);
 
     private final Label lastScoringUpdateTime = new Label();
     private final Label lastScoringUpdateText = new Label();
+    protected final Widget lastScoringUpdatePanel;
     protected final Label lastScoringComment = new Label();
     protected final Label scoringScheme = new Label();
     protected final BusyIndicator busyIndicator = new SimpleBusyIndicator(false, 0.9f, RESOURCES.busyIndicatorCircleInverted());
@@ -31,7 +32,7 @@ public abstract class AbstractLeaderboardFullscreenViewer extends FullscreenCont
         showLogo();
         showBorder();
         addToolbarBusyIndicator(busyIndicator);
-        addToolbarInfo(createPanel(lastScoringUpdateText, lastScoringUpdateTime));
+        addToolbarInfo(lastScoringUpdatePanel = createPanel(lastScoringUpdateText, lastScoringUpdateTime));
         addToolbarAction(autoRefreshControl);
         addToolbarAction(settingsControl);
     }
