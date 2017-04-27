@@ -23,7 +23,7 @@ import com.sap.sse.common.settings.Settings;
 public interface SettingsBuildingPipeline {
 
     /**
-     * Constructs a settings object by means of provided defaultSettings by considering
+     * Constructs a settings object by means of provided defaultSettings and persisted representations of
      * User Settings and Document Settings.
      * This method implements the settings construction pipeline for a settings object which is used for settings loading operations.
      * 
@@ -34,7 +34,7 @@ public interface SettingsBuildingPipeline {
     <S extends Settings> S getSettingsObject(S defaultSettings, SettingsJsons settingsJsons);
     
     /**
-     * Constructs a settings object by means of provided defaultSettings by considering
+     * Constructs a settings object by means of provided defaultSettings and persisted representations of
      * User Settings and Document Settings.
      * This method implements the settings construction pipeline for a settings object which is used for settings loading operations.
      * 
@@ -66,7 +66,8 @@ public interface SettingsBuildingPipeline {
     JSONValue getJsonObject(Settings settings, PipelineLevel pipelineLevel, List<String> path);
 
     /**
-     * Gets the {@link SettingsStringConverter} which is used by this instance for conversion between settings objects and JSON.
+     * Gets the {@link SettingsStringConverter} which is used by this instance for type conversion/serialization
+     * between settings objects and JSON Strings.
      * 
      * @return The conversion helper instance used by this pipeline
      */
