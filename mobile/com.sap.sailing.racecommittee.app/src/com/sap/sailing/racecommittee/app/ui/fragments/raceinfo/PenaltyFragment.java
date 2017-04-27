@@ -5,6 +5,8 @@ import static com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.Order
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.content.Context;
@@ -27,12 +29,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -41,14 +45,19 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.SearchView;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Util;
@@ -58,11 +67,16 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
     private static final int COMPETITOR_LOADER = 0;
     private static final int START_ORDER_LOADER = 1;
+    private static final int LEADERBOARD_ORDER_LOADER = 2;
+
     private View mButtonBar;
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
     private TextView mEntryCount;
     private List<CompetitorResultEditableImpl> mCompetitorResults;
+    private View mListButtonLayout;
+    private ImageView mListButton;
+    private HeaderLayout mHeader;
 
     public static PenaltyFragment newInstance() {
         Bundle args = new Bundle();
@@ -82,6 +96,30 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         if (searchView != null) {
             searchView.setSearchTextWatcher(this);
         }
+
+        mHeader = ViewHelper.get(layout, R.id.header);
+
+        mListButtonLayout = ViewHelper.get(layout, R.id.list_button_layout);
+        if (mListButtonLayout != null) {
+            mListButtonLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sendUnconfirmed();
+                    RaceFragment fragment = TrackingListFragment.newInstance(new Bundle(), 1);
+                    int viewId = R.id.race_content;
+                    switch (getRaceState().getStatus()) {
+                        case FINISHED:
+                            viewId = getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true);
+                            break;
+
+                        default:
+                            break;
+                    }
+                    replaceFragment(fragment, viewId);
+                }
+            });
+        }
+        mListButton = ViewHelper.get(layout, R.id.list_button);
 
         View sortByButton = ViewHelper.get(layout, R.id.competitor_sort);
         if (sortByButton != null) {
@@ -157,6 +195,37 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        switch (getRaceState().getStatus()) {
+            case FINISHED:
+                if (mHeader != null) {
+                    if (AppUtils.with(getActivity()).isPhone()) {
+                        mHeader.setVisibility(View.VISIBLE);
+                        mHeader.setHeaderOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                                sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                            }
+                        });
+                    } else {
+                        mHeader.setVisibility(View.GONE);
+                    }
+                }
+            case FINISHING:
+                if (mListButton != null) {
+                    mListButton.setImageDrawable(BitmapHelper.getAttrDrawable(getActivity(), R.attr.list_both_24dp));
+                }
+                if (mListButtonLayout != null) {
+                    mListButtonLayout.setVisibility(View.VISIBLE);
+                }
+                break;
+
+            default:
+                if (mListButtonLayout != null) {
+                    mListButtonLayout.setVisibility(View.GONE);
+                }
+        }
+
         loadCompetitors();
     }
 
@@ -228,6 +297,23 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         startOrderLoader.forceLoad();
     }
 
+    private void loadLeaderboardResult() {
+        ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+        final Loader<?> leaderboardResultLoader = getLoaderManager()
+            .initLoader(LEADERBOARD_ORDER_LOADER, null, dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
+                @Override
+                public void onLoadFailed(Exception reason) {
+
+                }
+
+                @Override
+                public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
+                    onLoadLeaderboardResultSucceeded(data);
+                }
+            }));
+        leaderboardResultLoader.forceLoad();
+    }
+
     private void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
         mCompetitorResults.clear();
         for (Competitor item : data) { // add loaded competitors
@@ -257,14 +343,33 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         setPublishButton();
     }
 
+    private void onLoadLeaderboardResultSucceeded(LeaderboardResult data) {
+        final String raceName = getRace().getName();
+        List<CompetitorWithRaceRankImpl> sortByRank = data.getCompetitors();
+        Collections.sort(sortByRank, new Comparator<CompetitorWithRaceRankImpl>() {
+            @Override
+            public int compare(CompetitorWithRaceRankImpl left, CompetitorWithRaceRankImpl right) {
+                return (int)left.getRaceRank(raceName) - (int)right.getRaceRank(raceName);
+            }
+        });
+        List<CompetitorResultEditableImpl> sortedList = new ArrayList<>();
+        for (CompetitorWithRaceRankImpl item : sortByRank) {
+            for (CompetitorResultEditableImpl competitor : mCompetitorResults) {
+                if (competitor.getCompetitorId().toString().equals(item.getId())) {
+                    sortedList.add(competitor);
+                    break;
+                }
+            }
+        }
+        mCompetitorResults.clear();
+        mCompetitorResults.addAll(sortedList);
+        mAdapter.setCompetitor(mCompetitorResults);
+    }
+
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        OrderBy orderBy;
+        OrderBy orderBy = OrderBy.SAILING_NUMBER;
         switch (item.getItemId()) {
-            case R.id.by_boat:
-                orderBy = OrderBy.SAILING_NUMBER;
-                break;
-
             case R.id.by_name:
                 orderBy = OrderBy.COMPETITOR_NAME;
                 break;
@@ -275,10 +380,11 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
             case R.id.by_goal:
                 orderBy = OrderBy.FINISH_LINE;
+                loadLeaderboardResult();
                 break;
 
             default:
-                orderBy = OrderBy.SAILING_NUMBER;
+                break;
 
         }
         mAdapter.setOrderedBy(orderBy);
@@ -308,9 +414,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
         }
         String text = getString(R.string.publish_button_empty);
-        if (count != 0) {
-            text = getString(R.string.publish_button_other, count);
-        }
+        // FIXME needs redefine later
+//        if (count != 0) {
+//            text = getString(R.string.publish_button_other, count);
+//        }
         mPublishButton.setText(text);
         mPublishButton.setEnabled(count != 0);
         mButtonBar.setVisibility((count != 0 || isChecked) ? View.VISIBLE : View.GONE);
@@ -366,14 +473,41 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     }
 
     private CompetitorResults getCompetitorResults() {
-        CompetitorResults results = new CompetitorResultsImpl();
+        CompetitorResultsImpl results = new CompetitorResultsImpl();
+        Collections.sort(mCompetitorResults, new Comparator<CompetitorResultEditableImpl>() {
+            @Override
+            public int compare(CompetitorResultEditableImpl left, CompetitorResultEditableImpl right) {
+                int result;
+                if (left.getOneBasedRank() == 0 || left.getOneBasedRank() != right.getOneBasedRank()) {
+                    result = 1;
+                } else {
+                    result = left.getOneBasedRank() - right.getOneBasedRank();
+                }
+                return result;
+            }
+        });
         for (CompetitorResultEditableImpl item : mCompetitorResults) {
-            if (!MaxPointsReason.NONE.equals(item.getMaxPointsReason())) {
+            if (!MaxPointsReason.NONE.equals(item.getMaxPointsReason()) || item.getOneBasedRank() > 0) {
                 CompetitorResult result = new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item
                     .getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment());
                 results.add(result);
             }
         }
+        // sort penalty result to the end
+        Collections.sort(results, new Comparator<CompetitorResult>() {
+            @Override
+            public int compare(CompetitorResult left, CompetitorResult right) {
+                int result;
+                if (left.getOneBasedRank() > 0 && right.getOneBasedRank() > 0) {
+                    result = left.getOneBasedRank() - right.getOneBasedRank();
+                } else if (left.getOneBasedRank() == 0 && right.getOneBasedRank() == 0) {
+                    result = 0;
+                } else {
+                    result = right.getOneBasedRank() - left.getOneBasedRank();
+                }
+                return result;
+            }
+        });
         return results;
     }
 

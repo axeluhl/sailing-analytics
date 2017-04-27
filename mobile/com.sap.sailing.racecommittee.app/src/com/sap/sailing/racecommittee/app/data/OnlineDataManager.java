@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Loader;
@@ -34,10 +35,12 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.deserializer.LeaderboardDeserializer;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.LeaderboardResultDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.NullDataHandler;
@@ -51,6 +54,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.CourseBaseParser;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.DeviceConfigurationParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.LeaderboardDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.RaceColumnsParser;
@@ -59,6 +63,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -291,6 +296,27 @@ public class OnlineDataManager extends DataManager {
                 uri.appendPath("races");
                 uri.appendPath(managedRace.getName());
                 uri.appendPath("startorder");
+                return new OnlineDataLoader<>(context, new URL(uri.build().toString()), parser, handler);
+            }
+        }, getContext());
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<LeaderboardResult>> createLeaderboardLoader(final ManagedRace managedRace,
+        LoadClient<LeaderboardResult> callback) {
+        return new DataLoaderCallbacks<>(callback, new LoaderCreator<LeaderboardResult>() {
+            @Override
+            public Loader<DataLoaderResult<LeaderboardResult>> create(int id, Bundle args) throws Exception {
+                JsonDeserializer<LeaderboardResult> competitorDeserializer = new LeaderboardDeserializer();
+                DataParser<LeaderboardResult> parser = new LeaderboardDataParser(competitorDeserializer);
+                DataHandler<LeaderboardResult> handler = new LeaderboardResultDataHandler(OnlineDataManager.this);
+
+                Uri.Builder uri = Uri.parse(preferences.getServerBaseURL()).buildUpon();
+                uri.appendPath("sailingserver");
+                uri.appendPath("api");
+                uri.appendPath("v1");
+                uri.appendPath("leaderboards");
+                uri.appendPath(managedRace.getIdentifier().getRaceGroup().getName());
                 return new OnlineDataLoader<>(context, new URL(uri.build().toString()), parser, handler);
             }
         }, getContext());
