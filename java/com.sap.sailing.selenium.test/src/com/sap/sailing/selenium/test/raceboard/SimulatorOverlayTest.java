@@ -11,6 +11,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -64,7 +65,9 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
      * class. This test verifies that the checkbox isn't available for a race when wind data isn't loaded yet but
      * appears after successfully loading wind.
      */
+    //FIXME Fix the timeout problem with igtimi wind data import in order to make the test work again
     @Test
+    @Ignore
     public void testSimulatorOverlayIsAvailableFor49erAtKW2015() throws InterruptedException, UnsupportedEncodingException {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
         
@@ -117,7 +120,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             igtimiAccountsManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
             
             WindPanelPO windPanel = adminConsole.goToWind();
-            windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 10 * 60);
+            windPanel.importWindFromIgtimi(/* waiting up to 20 min */ 20 * 60);
         }
         
         {
