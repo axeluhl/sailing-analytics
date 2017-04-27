@@ -246,5 +246,5 @@
 }
 .regattaleaderboard_meta_liveraces_button {
   background-color: #9f9f9f;
-  background-image: url("images/home/launch-loupe.svg");
+  background-image: url("images/home/liveraces.svg");
 }

@@ -22,7 +22,7 @@ public class OldLeaderboardDelegateFullscreenViewer extends AbstractLeaderboardF
     private static OldLeaderboardDelegateFullscreenViewerUiBinder uiBinder = GWT
             .create(OldLeaderboardDelegateFullscreenViewerUiBinder.class);
 
-    private final Image showLiveRacesControl = new Image("images/home/launch-loupe.svg");
+    private final Image showLiveRacesControl = new Image("images/home/liveraces.svg");
     private final Label hasLiveRace = new Label();
     private final Widget headerWidget;
     private final ContentLayout contentLayout = new ContentLayout();
