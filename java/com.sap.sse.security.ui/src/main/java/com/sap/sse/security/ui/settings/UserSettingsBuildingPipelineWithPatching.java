@@ -43,18 +43,14 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
     @Override
     public <CS extends Settings> CS getSettingsObject(CS defaultSettings, SettingsJsons settingsJsons) {
         defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.SYSTEM_DEFAULTS);
-        if(settingsJsons.getContextSpecificSettingsJson() != null) {
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
-            defaultSettings = settingsStringConverter.deserializeFromJson(defaultSettings, settingsJsons.getContextSpecificSettingsJson());
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
-        } else if (settingsJsons.getGlobalSettingsJson() != null) {
+        if (settingsJsons.getGlobalSettingsJson() != null) {
             defaultSettings = settingsStringConverter.deserializeFromJson(defaultSettings, settingsJsons.getGlobalSettingsJson());
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
-        } else {
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
         }
+        defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
+        if(settingsJsons.getContextSpecificSettingsJson() != null) {
+            defaultSettings = settingsStringConverter.deserializeFromJson(defaultSettings, settingsJsons.getContextSpecificSettingsJson());
+        }
+        defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
         defaultSettings = settingsStringConverter.deserializeFromCurrentUrl(defaultSettings);
         return defaultSettings;
     }
