@@ -37,6 +37,7 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeMana
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -57,6 +58,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.SearchView;
@@ -122,6 +124,28 @@ public class TrackingListFragment extends BaseFragment
         }
 
         mTools = ViewHelper.get(layout, R.id.tools_layout);
+
+        ImageView listButton = ViewHelper.get(layout, R.id.list_button);
+        if (listButton != null) {
+            listButton.setImageDrawable(BitmapHelper.getAttrDrawable(getActivity(), R.attr.list_single_24dp));
+            listButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sendUnconfirmed();
+                    RaceFragment fragment = PenaltyFragment.newInstance();
+                    int viewId = R.id.race_content;
+                    switch (getRaceState().getStatus()) {
+                        case FINISHED:
+                            viewId = getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true);
+                            break;
+
+                        default:
+                            break;
+                    }
+                    replaceFragment(fragment, viewId);
+                }
+            });
+        }
 
         ImageView btnPrev = ViewHelper.get(layout, R.id.nav_prev);
         if (btnPrev != null) {
@@ -555,9 +579,9 @@ public class TrackingListFragment extends BaseFragment
         CompetitorResults result = new CompetitorResultsImpl();
         int oneBasedRank = 1;
         for (CompetitorResultWithIdImpl item : mFinishedData) {
-            result
-                .add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), oneBasedRank++, item.getMaxPointsReason(), item
-                    .getScore(), item.getFinishingTime(), item.getComment()));
+            result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(),
+                item.getMaxPointsReason() == MaxPointsReason.NONE ? oneBasedRank++ : 0, item.getMaxPointsReason(), item.getScore(), item
+                .getFinishingTime(), item.getComment()));
         }
         return result;
     }
