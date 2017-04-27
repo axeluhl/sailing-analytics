@@ -291,7 +291,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         }
     }
 
-    public interface OldLeaderboardDelegate extends LeaderboardDelegate<LeaderboardPanel> {
+    public interface OldLeaderboardDelegate extends LeaderboardDelegate {
         Element getHasLiveRaceElement();
     }
 

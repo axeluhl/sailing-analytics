@@ -6,7 +6,7 @@ import com.sap.sailing.gwt.home.desktop.partials.old.AbstractLeaderboardFullscre
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard.OldLeaderboardDelegate;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
-public class OldLeaderboardDelegateFullscreenViewer extends AbstractLeaderboardFullscreenViewer<LeaderboardPanel>
+public class OldLeaderboardDelegateFullscreenViewer extends AbstractLeaderboardFullscreenViewer
         implements OldLeaderboardDelegate {
     
     private final Label hasLiveRace = new Label();

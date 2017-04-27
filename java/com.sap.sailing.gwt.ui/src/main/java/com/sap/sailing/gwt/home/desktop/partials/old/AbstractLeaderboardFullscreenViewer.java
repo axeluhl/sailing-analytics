@@ -13,8 +13,8 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicatorResources;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
-public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> extends FullscreenContainer<T> implements
-        LeaderboardDelegate<T> {
+public abstract class AbstractLeaderboardFullscreenViewer extends FullscreenContainer<Widget> implements
+        LeaderboardDelegate {
 
     private final Image autoRefreshControl = new Image("images/home/reload.svg");
     private final Image settingsControl = new Image("images/home/settings.svg");
@@ -56,13 +56,14 @@ public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> exte
 
     protected Widget createPanel(Widget... contentWidgets) {
         FlowPanel panel = new FlowPanel();
-        for (Widget widget : contentWidgets)
+        for (Widget widget : contentWidgets) {
             panel.add(widget);
+        }
         return panel;
     }
 
     @Override
-    public void setLeaderboardPanel(T leaderboardPanel) {
+    public void setLeaderboardPanel(Widget leaderboardPanel) {
         showContent(leaderboardPanel);
     }
 
