@@ -308,9 +308,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
         }
         String text = getString(R.string.publish_button_empty);
-        if (count != 0) {
-            text = getString(R.string.publish_button_other, count);
-        }
+        // FIXME needs redefine later
+//        if (count != 0) {
+//            text = getString(R.string.publish_button_other, count);
+//        }
         mPublishButton.setText(text);
         mPublishButton.setEnabled(count != 0);
         mButtonBar.setVisibility((count != 0 || isChecked) ? View.VISIBLE : View.GONE);
