@@ -72,17 +72,39 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         @Override
         public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
-            if ((newStartOfTracking == null
-                    || (oldStartOfTracking != null && newStartOfTracking.before(oldStartOfTracking)))) {
-                loadFixesForExtendedTimeRange(newStartOfTracking, oldStartOfTracking);
+            if (newStartOfTracking == null) {
+                // Fixes aren't loaded at all if startOfTracking isn't set yet
+                return;
             }
+            TimeRange timeRangeToLoad;
+            if(oldStartOfTracking == null) {
+                // Fixes wheren't loaded while startOfTracking was null. So we need to load all fixes in the tracking interval now.
+                timeRangeToLoad = getTrackingTimeRange();
+            } else if (newStartOfTracking.before(oldStartOfTracking)) {
+                timeRangeToLoad = new TimeRangeImpl(newStartOfTracking, oldStartOfTracking);
+            } else {
+                // no new timerange is covered
+                return;
+            }
+            loadFixesForExtendedTimeRange(timeRangeToLoad);
         }
 
         @Override
         public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
-            if (newEndOfTracking == null || (oldEndOfTracking != null && newEndOfTracking.after(oldEndOfTracking))) {
-                loadFixesForExtendedTimeRange(oldEndOfTracking, newEndOfTracking);
+            if (trackedRace.getStartOfRace() == null) {
+                // Fixes aren't loaded at all if startOfTracking isn't set yet
+                return;
             }
+            TimeRange timeRangeToLoad;
+            if(newEndOfTracking == null && oldEndOfTracking != null) {
+                timeRangeToLoad = new TimeRangeImpl(oldEndOfTracking, TimePoint.EndOfTime);
+            } else if(newEndOfTracking != null && oldEndOfTracking != null && oldEndOfTracking.before(newEndOfTracking)) {
+                timeRangeToLoad = new TimeRangeImpl(oldEndOfTracking, newEndOfTracking);
+            } else {
+                // no new timerange is covered
+                return;
+            }
+            loadFixesForExtendedTimeRange(timeRangeToLoad);
         }
 
         public void regattaLogAttached(RegattaLog regattaLog) {
@@ -92,7 +114,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     private final FixReceivedListener<Timed> listener = new FixReceivedListener<Timed>() {
         @Override
         public void fixReceived(DeviceIdentifier device, Timed fix) {
-            if (preemptiveStopRequested.get()) {
+            if (preemptiveStopRequested.get() || trackedRace.getStartOfTracking() == null) {
                 return;
             }
             final TimePoint timePoint = fix.getTimePoint();
@@ -215,6 +237,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      */
     private void loadFixesForNewlyCoveredTimeRanges(WithID item,
             Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
+        if(trackedRace.getStartOfTracking() == null) {
+            // No fixes are loaded if startOfTracking isn't set.
+            // This helps to prevent that all fixes are loaded into tracks of the tracked race.
+            return;
+        }
         TimeRange trackingTimeRange = getTrackingTimeRange();
         loadFixesInTrackingTimeRange(newlyCoveredTimeRanges, trackingTimeRange);
         if (item instanceof Mark) {
@@ -435,8 +462,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    private void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
-        final TimeRangeImpl extendedTimeRange = new TimeRangeImpl(loadFixesFrom, loadFixesTo);
+    private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {
         deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> loadFixesInTrackingTimeRange(mappingsAndCoveredTimeRanges, extendedTimeRange));
     }
 
