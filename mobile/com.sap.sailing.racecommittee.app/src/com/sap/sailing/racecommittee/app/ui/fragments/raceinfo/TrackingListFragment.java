@@ -88,6 +88,7 @@ public class TrackingListFragment extends BaseFragment
     private Comparator<Competitor> mComparator;
     private List<Comparator<Competitor>> mComparators;
     private String mFilter;
+    private View mTools;
 
     public TrackingListFragment() {
         mCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
@@ -119,6 +120,8 @@ public class TrackingListFragment extends BaseFragment
         if (dot != null) {
             mDots.add(dot);
         }
+
+        mTools = ViewHelper.get(layout, R.id.tools_layout);
 
         ImageView btnPrev = ViewHelper.get(layout, R.id.nav_prev);
         if (btnPrev != null) {
@@ -581,6 +584,10 @@ public class TrackingListFragment extends BaseFragment
                 default:
                     mHeader.setHeaderText(R.string.tracking_list_02);
             }
+        }
+
+        if (mTools != null) {
+            mTools.setVisibility(mActivePage == 0 ? View.VISIBLE : View.GONE);
         }
         mConfirm.setEnabled(mActivePage != 0 || mDots.size() == 0);
     }
