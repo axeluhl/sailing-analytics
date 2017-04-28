@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -12,7 +11,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.CoursePosition;

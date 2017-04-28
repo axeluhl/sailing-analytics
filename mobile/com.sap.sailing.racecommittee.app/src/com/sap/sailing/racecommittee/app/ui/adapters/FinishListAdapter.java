@@ -48,8 +48,8 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     public void onBindViewHolder(ViewHolder holder, int position) {
         CompetitorResultWithIdImpl item = mCompetitor.get(position);
 
-        if (item.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
-            holder.position.setText(String.valueOf(position + 1));
+        if (item.getMaxPointsReason()==null || item.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+            holder.position.setText(String.valueOf(item.getOneBasedRank()));
         } else {
             holder.position.setText(null);
         }
@@ -112,18 +112,21 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public void onMoveItem(int fromPosition, int toPosition) {
-        if (fromPosition == toPosition) {
-            return;
+        // Note: fromPosition may be greater than toPosition if item is moved towards the top of the list
+        if (fromPosition != toPosition) {
+            CompetitorResultWithIdImpl item = mCompetitor.get(fromPosition);
+            mCompetitor.remove(item);
+            mCompetitor.add(toPosition, item);
+            // now adjust ranks of all in-between results
+            for (int i=Math.min(fromPosition, toPosition); i<=Math.max(fromPosition, toPosition); i++) {
+                mCompetitor.set(i, cloneCompetitorResultAndAdjustRank(mCompetitor.get(i),
+                        /* newOneBasedRank */ mCompetitor.get(i).getOneBasedRank() == 0 ? 0 : i+1));
+            }
+            if (mListener != null) {
+                mListener.afterMoved();
+            }
+            notifyItemMoved(fromPosition, toPosition);
         }
-
-        CompetitorResultWithIdImpl item = mCompetitor.get(fromPosition);
-        mCompetitor.remove(item);
-        mCompetitor.add(toPosition, item);
-        if (mListener != null) {
-            mListener.afterMoved();
-        }
-
-        notifyItemMoved(fromPosition, toPosition);
     }
 
     public int getFirstPenalty() {
@@ -190,15 +193,36 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
                 if (mListener != null) {
                     CompetitorResultWithIdImpl competitor = mCompetitor.get(position);
-                    mCompetitor.remove(competitor);
-                    notifyItemRemoved(position);
-                    mListener.onItemRemoved(competitor);
+                    final int indexOfCompetitor = mCompetitor.indexOf(competitor);
+                    if (indexOfCompetitor >= 0) { // found
+                        mCompetitor.remove(indexOfCompetitor);
+                        for (int i=indexOfCompetitor; i<mCompetitor.size(); i++) {
+                            CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition = mCompetitor.get(i);
+                            final int newOneBasedRank = Math.max(0, competitorToReplaceWithAdjustedPosition.getOneBasedRank()-1);  // adjust rank for removed competitor
+                            mCompetitor.set(i, cloneCompetitorResultAndAdjustRank(competitorToReplaceWithAdjustedPosition, newOneBasedRank));
+                        }
+                        notifyItemRemoved(position);
+                        mListener.onItemRemoved(competitor);
+                    }
                 }
                 break;
 
             default:
                 break;
         }
+    }
+
+    private CompetitorResultWithIdImpl cloneCompetitorResultAndAdjustRank(
+            CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition, final int newOneBasedRank) {
+        return new CompetitorResultWithIdImpl(
+                competitorToReplaceWithAdjustedPosition.getId(),
+                competitorToReplaceWithAdjustedPosition.getCompetitorId(),
+                competitorToReplaceWithAdjustedPosition.getCompetitorDisplayName(),
+                newOneBasedRank,
+                competitorToReplaceWithAdjustedPosition.getMaxPointsReason(),
+                competitorToReplaceWithAdjustedPosition.getScore(),
+                competitorToReplaceWithAdjustedPosition.getFinishingTime(),
+                competitorToReplaceWithAdjustedPosition.getComment());
     }
 
     public interface FinishEvents {
@@ -208,7 +232,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
         void onLongClick(CompetitorResultWithIdImpl item);
 
-        void onEditItem(CompetitorResultWithIdImpl item, int position);
+        void onEditItem(CompetitorResultWithIdImpl item);
     }
 
     public class ViewHolder extends AbstractDraggableSwipeableItemViewHolder implements View.OnLongClickListener {
@@ -231,7 +255,8 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
                     @Override
                     public void onClick(View v) {
                         if (mListener != null) {
-                            mListener.onEditItem(mCompetitor.get(getAdapterPosition()), getAdapterPosition() + 1);
+                            final CompetitorResultWithIdImpl competitorResultItem = mCompetitor.get(getAdapterPosition());
+                            mListener.onEditItem(competitorResultItem);
                         }
                     }
                 });

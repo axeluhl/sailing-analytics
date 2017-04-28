@@ -12,7 +12,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
 public class CompetitorWithRaceRankImpl extends CompetitorImpl {
-
+    private static final long serialVersionUID = -6427316368214398951L;
     private List<RaceRankImpl> mRankList;
 
     public CompetitorWithRaceRankImpl(Serializable id, String name, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat,

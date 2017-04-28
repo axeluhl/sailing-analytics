@@ -11,10 +11,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-import android.app.LoaderManager;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
-
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
@@ -59,6 +55,9 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 
 public class OfflineDataManager extends DataManager {
 

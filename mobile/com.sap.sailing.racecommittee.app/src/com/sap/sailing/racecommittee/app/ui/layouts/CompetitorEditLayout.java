@@ -50,11 +50,10 @@ public class CompetitorEditLayout extends ScrollView {
     private boolean mRestricted;
 
     public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor) {
-        this(context, null, competitor, 0, 1, true);
+        this(context, null, competitor, 1, true);
     }
 
-    public CompetitorEditLayout(Context context, TimePoint startTime, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos,
-        boolean restrictedView) {
+    public CompetitorEditLayout(Context context, TimePoint startTime, CompetitorResultWithIdImpl competitor, int maxPos, boolean restrictedView) {
         super(context);
 
         mRestricted = restrictedView;
@@ -111,10 +110,10 @@ public class CompetitorEditLayout extends ScrollView {
 
         mPosition = ViewHelper.get(layout, R.id.competitor_position);
         if (mPosition != null) {
-            StringArraySpinnerAdapter positionAdapter = new StringArraySpinnerAdapter(getPositionList(maxPos));
+            StringArraySpinnerAdapter positionAdapter = new StringArraySpinnerAdapter(getPositionList(Math.max(maxPos, competitor.getOneBasedRank())));
             mPosition.setAdapter(positionAdapter);
             mPosition.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(positionAdapter));
-            mPosition.setSelection(currentPos);
+            mPosition.setSelection(competitor.getOneBasedRank());
         }
 
         mPenalty = ViewHelper.get(layout, R.id.competitor_penalty);
@@ -181,9 +180,13 @@ public class CompetitorEditLayout extends ScrollView {
     private String[] getPositionList(int maxPos) {
         List<String> result = new ArrayList<>();
         for (int i = 0; i <= maxPos; i++) {
-            result.add(String.format(Locale.US, "%d", i));
+            addPositionToPositionList(result, i);
         }
         return result.toArray(new String[result.size()]);
+    }
+
+    private void addPositionToPositionList(List<String> result, int i) {
+        result.add(String.format(Locale.US, "%d", i));
     }
 
     public CompetitorResultWithIdImpl getValue() {

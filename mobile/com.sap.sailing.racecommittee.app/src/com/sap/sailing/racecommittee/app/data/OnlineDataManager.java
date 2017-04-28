@@ -8,14 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import android.app.LoaderManager;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
-import android.content.Loader;
-import android.net.Uri;
-import android.os.Bundle;
-import android.util.Log;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -87,6 +79,13 @@ import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
 import com.sap.sse.common.Util;
+
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
+import android.content.Loader;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Log;
 
 /**
  * Enables accessing of data.
