@@ -25,4 +25,9 @@ public class KnotSpeedWithBearingAndTimepoint extends KnotSpeedWithBearingImpl i
     public TimePoint getTimePoint() {
         return timePoint;
     }
+    
+    @Override
+    public String toString() {
+        return getTimePoint().toString()+": "+super.toString();
+    }
 }

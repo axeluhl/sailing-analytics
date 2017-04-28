@@ -20,7 +20,7 @@ public class NMEAWindImportTest {
     @Before
     public void setUp() throws FileNotFoundException, InterruptedException {
         NmeaFactory.INSTANCE.getUtil().registerAdditionalParsers();
-        windFixes = NmeaFactory.INSTANCE.readWind(new FileInputStream("resources/LogSS.txt"));
+        windFixes = NmeaFactory.INSTANCE.readWind(new FileInputStream("resources/ExcerptFromLogJB010815.txt"));
     }
     
     @Test
