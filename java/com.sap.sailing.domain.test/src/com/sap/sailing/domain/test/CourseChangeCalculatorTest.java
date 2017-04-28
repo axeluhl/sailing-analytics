@@ -36,7 +36,22 @@ public class CourseChangeCalculatorTest {
     public void testMoreThan360() {
         assertEquals(450, getTotalCourseChange(0, 90, 420, NauticalSide.STARBOARD), 0.000001);
     }
-    
+
+    @Test
+    public void testMoreThan360WithSlightBackSpin() {
+        assertEquals(440, getTotalCourseChange(0, 80, 450, NauticalSide.STARBOARD), 0.000001);
+    }
+
+    @Test
+    public void testMoreThan360WithHeavyBackSpinThatWorksTheOtherWay() {
+        assertEquals(450+(340-(450%360)), getTotalCourseChange(0, 340, 450, NauticalSide.STARBOARD), 0.000001);
+    }
+
+    @Test
+    public void testToPortMoreThan360WithSlightBackSpin() {
+        assertEquals(-440, getTotalCourseChange(0, 280, -450, NauticalSide.PORT), 0.000001);
+    }
+
     private double getTotalCourseChange(double courseBeforeManeuverInDegrees, double currentCourseInDegrees,
             double courseChangeInDegreesSoFar, NauticalSide maneuverDirection) {
         return ccc.getTotalCourseChange(new DegreeBearingImpl(courseBeforeManeuverInDegrees), new DegreeBearingImpl(currentCourseInDegrees),
