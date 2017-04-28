@@ -32,7 +32,7 @@ public class CourseChangeCalculator {
                 diffToCurrentCourseInDegrees = -360.+diffToCurrentCourseInDegrees;
             }
         }
-        double result = lastCourseInDegrees + diffToCurrentCourseInDegrees;
+        double result = courseChangeInDegreesSoFar + diffToCurrentCourseInDegrees;
         return result;
     }
 }
