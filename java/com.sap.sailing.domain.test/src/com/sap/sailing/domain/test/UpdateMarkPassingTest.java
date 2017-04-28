@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Series;
@@ -41,7 +41,7 @@ public class UpdateMarkPassingTest {
         when(race.getName()).thenReturn("Test Race");
         Course c = new CourseImpl("Test Course", Collections.singleton(waypoint));
         when(race.getCourse()).thenReturn(c);
-        CompetitorWithBoat competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("Test Competitor");
+        CompetitorAndBoat competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("Test Competitor");
         Competitor competitor = competitorAndBoat.getCompetitor();
         when(race.getBoatClass()).thenReturn(new BoatClassImpl("49er", /* typicallyStartsUpwind */ true));
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));

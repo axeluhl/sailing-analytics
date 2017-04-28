@@ -22,7 +22,6 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -84,7 +83,6 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null),
                 new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
-                new BoatImpl("123", "GER 61", boatClass470, "GER 61"),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
         Boat boat = masterDomainFactory.getCompetitorStore().getOrCreateBoat(competitor, "GER 61", boatClass470, "GER 61", null);
         final String baseEventName = "Test Event";

@@ -136,11 +136,9 @@ import com.sap.sailing.domain.base.configuration.impl.RacingProcedureWithConfigu
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.SWCStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -3895,9 +3893,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
                         seriesDTO.getFleets().add(fleetDTO);
                         seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
+                        
                         for(Competitor c: leaderboard.getCompetitors()) {
-                            if(c.getBoat() != null && c.getBoat().getBoatClass() != null) {
-                                raceGroup.boatClass = c.getBoat().getBoatClass().getDisplayName();
+                            Boat b = null;  // TODO: How di we get the boat?
+                            if(b != null && b.getBoatClass() != null) {
+                                raceGroup.boatClass = b.getBoatClass().getDisplayName();
                             }
                         }
                     }
@@ -4803,21 +4803,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             // new competitor
             if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
                 UUID competitorUUID = UUID.randomUUID();
-                BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
                 DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
                 DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
-                DynamicBoat boat = new BoatImpl(competitorUUID, competitor.getName() + " boat", boatClass, competitor.getSailID());
                 result = getBaseDomainFactory().convertToCompetitorDTO(
                         getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(), competitor.getShortName(),
                                 competitor.getColor(), competitor.getEmail(), 
-                                competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team, boat,
+                                competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team,
                                         competitor.getTimeOnTimeFactor(),
                                         competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
             } else {
                 result = getBaseDomainFactory().convertToCompetitorDTO(
                         getService().apply(
                                 new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(), competitor
-                                        .getColor(), competitor.getEmail(), competitor.getSailID(), nationality,
+                                        .getColor(), competitor.getEmail(), nationality,
                                         competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
                                         competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                         competitor.getTimeOnTimeFactor(),
@@ -4852,14 +4850,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 || competitorDescriptor.getCountryCode().getThreeLetterIOCCode().isEmpty()) ? null
                         : getBaseDomainFactory().getOrCreateNationality(competitorDescriptor.getCountryCode().getThreeLetterIOCCode());
         UUID competitorUUID = UUID.randomUUID();
-        BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
         DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
         DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
-        DynamicBoat boat = new BoatImpl(competitorUUID, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber());
         Competitor competitor = new CompetitorImpl(competitorUUID, competitorDescriptor.getName(), competitorDescriptor.getSailNumber(),
                 /* color */ null, /* eMail */ null,
                 /* flag image */ null, team,
-                boat, competitorDescriptor.getTimeOnTimeFactor(),
+                competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag);
 
         return competitor;

@@ -15,7 +15,6 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     private final String newName;
     private final String newShortName;
     private final Color newDisplayColor;
-    private final String newSailId;
     private final String newEmail;
     private final Nationality newNationality;
     private final URI newTeamImageUri;
@@ -32,14 +31,13 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
      *            flag
      */
     public UpdateCompetitor(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
-            String newSailId, Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
+            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag) {
         super();
         this.idAsString = idAsString;
         this.newName = newName;
-        this.newShortName = newShortName;
+        this.newShortName = newShortName; 
         this.newDisplayColor = newDisplayColor;
-        this.newSailId = newSailId;
         this.newNationality = newNationality;
         this.newTeamImageUri = newTeamImageUri;
         this.newEmail = newEmail;
@@ -60,7 +58,7 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     @Override
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
         Competitor result = toState.getBaseDomainFactory().getCompetitorStore()
-                .updateCompetitor(idAsString, newName, newShortName, newDisplayColor, newEmail, newSailId, newNationality,
+                .updateCompetitor(idAsString, newName, newShortName, newDisplayColor, newEmail, newNationality,
                         newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, newSearchTag);
         return result;
     }

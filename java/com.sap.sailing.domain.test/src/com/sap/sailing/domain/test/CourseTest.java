@@ -21,7 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -304,7 +304,7 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertWaypointIndexes(course);
         final BoatClass boatClass = new BoatClassImpl("505", /* upwind start */true);
-        final CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorAndBoat("Hasso");
+        final CompetitorAndBoat hasso = AbstractLeaderboardTest.createCompetitorAndBoat("Hasso");
         final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(hasso.getCompetitor(), hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new DynamicTrackedRegattaImpl(
@@ -338,7 +338,7 @@ public class CourseTest {
         waypoints.add(wp2);
         Course course = new CourseImpl("Test Course", waypoints);
         final BoatClass boatClass = new BoatClassImpl("505", /* upwind start */true);
-        final CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorAndBoat("Hasso");
+        final CompetitorAndBoat hasso = AbstractLeaderboardTest.createCompetitorAndBoat("Hasso");
         final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(hasso.getCompetitor(), hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new DynamicTrackedRegattaImpl(

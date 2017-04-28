@@ -2,16 +2,17 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import java.util.List;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.racecommittee.app.R;
+
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.racecommittee.app.R;
 
 public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.ViewHolder> {
 

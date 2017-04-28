@@ -24,7 +24,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -79,7 +78,6 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", masterDomainFactory.getOrCreateNationality("GER"), null, null),
                 new PersonImpl("Tina Lutz", masterDomainFactory.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", masterDomainFactory.getOrCreateNationality("NED"), null, null)),
-                new BoatImpl("123", "GER 61", masterDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
         Boat boat = masterDomainFactory.getCompetitorStore().getOrCreateBoat(competitor, "boat123",
                 masterDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61", null);

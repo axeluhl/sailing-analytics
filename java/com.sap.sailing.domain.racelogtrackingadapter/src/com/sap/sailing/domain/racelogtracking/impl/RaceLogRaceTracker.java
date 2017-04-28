@@ -46,7 +46,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -300,21 +299,9 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             }
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
-        Iterable<Competitor> competitors = raceColumn.getAllCompetitors(params.getFleet());
+        Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats(params.getFleet());
         Serializable raceId = denoteEvent.getRaceId();
-        // TODO: How do we retrieve the boats for the competitors of this raceColumn
-        // For now we create the boats here which MUST be corrected later on
-        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
-        for (Competitor c: competitors) {
-            Boat b;
-            if (c.getBoat() != null) {
-                b = new BoatImpl(c.getId(), c.getBoat().getName(), boatClass, c.getBoat().getSailID(), c.getBoat().getColor());
-            } else {
-                b = new BoatImpl(c.getId(), c.getShortName(), boatClass, c.getShortName(), null);
-            }
-            competitorsAndBoats.put(c, b);
-        }
-        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats, raceId);
+        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndTheirBoats, raceId);
         Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
         // set race definition, so race is linked to leaderboard automatically
         trackedRegatta.getRegatta().addRace(raceDef);

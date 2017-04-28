@@ -27,6 +27,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetito
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -274,6 +275,33 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         return result;
     }
     
+    @Override
+    public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats() {
+        Map<Competitor, Boat> result = new HashMap<>();
+        for (Fleet fleet : getFleets()) {
+            result.putAll(getAllCompetitorsAndTheirBoats(fleet));
+        }
+        return result;
+    }        
+
+    @Override
+    public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats(Fleet fleet) {
+        Map<Competitor, Boat> result = new HashMap<>();
+        TrackedRace trackedRace = getTrackedRace(fleet);
+        if (trackedRace != null) {
+            result = trackedRace.getRace().getCompetitorsAndTheirBoats();
+        } else {
+            // if no tracked race is found, use competitors from race/regatta log depending on whether
+            // the mapping event is present or not; this assumes that if a tracked
+            // race exists, its competitors set takes precedence over what's in the race log. Usually,
+            // the tracked race will have the same competitors as those in the race log, or more because
+            // those from the regatta log are added to the tracked race as well.
+            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
+            result = viaRaceLog;
+        }
+        return result;
+    }
+
     @Override
     public void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
         registerCompetitors(Collections.singleton(competitor), fleet);

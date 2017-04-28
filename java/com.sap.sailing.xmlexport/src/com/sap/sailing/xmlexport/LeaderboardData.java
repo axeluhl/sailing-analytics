@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jdom.Element;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
@@ -628,10 +629,11 @@ public class LeaderboardData extends ExportAction {
         if (shortVersion)
             return competitorElement;
         
-        if (competitor.getBoat() != null) {
-            addNamedElementWithValue(competitorElement, "sail_id", cleanSailId(competitor.getBoat().getSailID(), competitor));
-            addNamedElementWithValue(competitorElement, "boat_class", competitor.getBoat().getBoatClass().getName());
-            addNamedElementWithValue(competitorElement, "boat_name", competitor.getBoat().getName());
+        final Boat boatOfCompetitor = leaderboard.getBoatOfCompetitor(competitor);
+        if (boatOfCompetitor != null) {
+            addNamedElementWithValue(competitorElement, "sail_id", cleanSailId(boatOfCompetitor.getSailID(), competitor));
+            addNamedElementWithValue(competitorElement, "boat_class", boatOfCompetitor.getBoatClass().getName());
+            addNamedElementWithValue(competitorElement, "boat_name", boatOfCompetitor.getName());
         } else {
             addNamedElementWithValue(competitorElement, "sail_id", "");
             addNamedElementWithValue(competitorElement, "boat_class", "");
@@ -946,13 +948,13 @@ public class LeaderboardData extends ExportAction {
         return new Util.Pair<Double, Vector<String>>(simpleConfidence, messages);
     }
     
-    private Util.Pair<Double, Vector<String>> checkData(Competitor competitor) throws Exception {
+    private Util.Pair<Double, Vector<String>> checkData(Competitor competitor, Boat boatOfCompetitor) throws Exception {
         double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
         if (competitor.getName() == null || competitor.getName().equals("")) {
             messages.add("Competitor " + competitor.getId() + " has no name!");
             simpleConfidence -= 1;
         }
-        if (competitor.getBoat() == null || competitor.getBoat().getSailID() == null || competitor.getBoat().getSailID().equals("")) {
+        if (boatOfCompetitor == null || boatOfCompetitor.getSailID() == null || boatOfCompetitor.getSailID().equals("")) {
             messages.add("Competitor " + competitor.getId() + " has no sail id that can be used!");
             simpleConfidence -= 1;
         }
@@ -1029,7 +1031,8 @@ public class LeaderboardData extends ExportAction {
         final List<Element> racesElements = new ArrayList<Element>();
         final List<Element> competitorElements = new ArrayList<Element>();
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
-            Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor);
+            Boat boatOfCompetitor = leaderboard.getBoatOfCompetitor(competitor);
+            Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor, boatOfCompetitor);
             competitorElements.add(createCompetitorXML(competitor, leaderboard, /*shortVersion*/ false, competitorConfidenceAndErrorMessages));
         }
         List<Element> windData = new ArrayList<Element>();

@@ -37,9 +37,6 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     private Object whatChangedNationality;
     private Object oldNationality;
     private Object newNationality;
-    private boolean sailIdChanged;
-    private String oldSailId;
-    private String newSailId;
     private boolean nameChanged;
     private String oldName;
     private String newName;
@@ -75,9 +72,6 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         whatChangedNationality = null;
         oldNationality = null;
         newNationality = null;
-        sailIdChanged = false;
-        oldSailId = null;
-        newSailId = null;
         nameChanged = false;
         oldName = null;
         newName = null;
@@ -111,13 +105,6 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
                 whatChangedNationality = what;
                 CompetitorListenerTest.this.oldNationality = oldNationality;
                 CompetitorListenerTest.this.newNationality = newNationality;
-            }
-            
-            @Override
-            public void sailIdChanged(String oldSailId, String newSailId) {
-                sailIdChanged = true;
-                CompetitorListenerTest.this.oldSailId = oldSailId;
-                CompetitorListenerTest.this.newSailId = newSailId;
             }
             
             @Override
@@ -215,7 +202,6 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         assertTrue(nameChanged);
         assertEquals("Hasso", oldName);
         assertEquals("Dr. Hasso Plattner", newName);
-        assertFalse(sailIdChanged);
         assertFalse(colorChanged);
         assertFalse(nationalityChanged);
     }
@@ -253,24 +239,11 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     }
 
     @Test
-    public void testSimpleCompetitorListenerPatternForSailId() {
-        final String myOldSailId = competitor.getBoat().getSailID();
-        competitor.getBoat().setSailId("POR 40");
-        assertFalse(nameChanged);
-        assertTrue(sailIdChanged);
-        assertEquals(myOldSailId, oldSailId);
-        assertEquals("POR 40", newSailId);
-        assertFalse(colorChanged);
-        assertFalse(nationalityChanged);
-    }
-
-    @Test
     public void testSimpleCompetitorListenerPatternForColor() {
         final Color myOldColor = competitor.getColor();
         final RGBColor myNewColor = new RGBColor(123, 12, 234);
         competitor.setColor(myNewColor);
         assertFalse(nameChanged);
-        assertFalse(sailIdChanged);
         assertTrue(colorChanged);
         assertEquals(myOldColor, oldColor);
         assertEquals(myNewColor, newColor);
@@ -283,7 +256,6 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         final Nationality myNewNationality = DomainFactory.INSTANCE.getOrCreateNationality("POR");
         competitor.getTeam().setNationality(myNewNationality);
         assertFalse(nameChanged);
-        assertFalse(sailIdChanged);
         assertFalse(colorChanged);
         assertTrue(nationalityChanged);
         assertEquals(myOldNationality, oldNationality);
@@ -296,13 +268,11 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
         clonedCompetitor.setName("Dr. Hasso Plattner");
-        clonedCompetitor.getBoat().setSailId("POR 40");
         final RGBColor myNewColor = new RGBColor(123, 12, 234);
         clonedCompetitor.setColor(myNewColor);
         final Nationality myNewNationality = baseDomainFactory.getOrCreateNationality("POR");
         clonedCompetitor.getTeam().setNationality(myNewNationality);
         assertFalse(nameChanged);
-        assertFalse(sailIdChanged);
         assertFalse(colorChanged);
         assertFalse(nationalityChanged);
     }
@@ -328,7 +298,6 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
         competitor = clonedCompetitor;
         competitor.addCompetitorChangeListener(listener);
-        testSimpleCompetitorListenerPatternForSailId();
     }
     
     @Test

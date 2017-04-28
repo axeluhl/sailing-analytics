@@ -208,7 +208,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningListChangeEvent() {
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.RED, 
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
         RaceLogFinishPositioningListChangedEvent event = new RaceLogFinishPositioningListChangedEventImpl(now, author, 0, storedPositioningList);
@@ -232,7 +232,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningConfirmedEvent() {   
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.RED, 
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
         RaceLogFinishPositioningConfirmedEvent event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, storedPositioningList);

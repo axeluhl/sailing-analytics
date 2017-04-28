@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -129,7 +131,12 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * It will, however, continue to be returned from {@link #getAllCompetitors()}.
      */
     void setSuppressed(Competitor competitor, boolean suppressed);
-    
+
+    /**
+     * Retrieves the boat for a given competitor.
+     */
+    Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet);
+
     /**
      * Returns the first fleet found in the sequence of this leaderboard's {@link #getRaceColumns() race columns}'
      * {@link RaceColumn#getFleets() fleets} whose name equals <code>fleetName</code>. If no such fleet is found,

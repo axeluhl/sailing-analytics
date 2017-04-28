@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -50,7 +50,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest {
     private List<Competitor> competitors;
-    private List<CompetitorWithBoat> competitorsWithBoats;
+    private List<CompetitorAndBoat> competitorsWithBoats;
     private static final String[] competitorNames = new String[] { "Wolfgang Hunger", "Dr. Hasso Plattner",  "Robert Stanjek", "Simon Grotelueschen" };
     
     @Before
@@ -58,16 +58,16 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         competitorsWithBoats = new ArrayList<>();
         competitors = new ArrayList<>();
         for (String name : competitorNames) {
-            CompetitorWithBoat competitorAndBoat = createCompetitorAndBoat(name);
+            CompetitorAndBoat competitorAndBoat = createCompetitorAndBoat(name);
             competitorsWithBoats.add(competitorAndBoat);
             competitors.add(competitorAndBoat.getCompetitor());
         }
     }
     
     private void initRace(int numberOfCompetitorsToUse, int[] numberOfMarksPassed, TimePoint timePointForFixes) {
-        List<CompetitorWithBoat> subList = competitorsWithBoats.subList(0, numberOfCompetitorsToUse);
+        List<CompetitorAndBoat> subList = competitorsWithBoats.subList(0, numberOfCompetitorsToUse);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
-        for (CompetitorWithBoat competitorAndBoat: subList) {
+        for (CompetitorAndBoat competitorAndBoat: subList) {
             competitorsAndBoats.put(competitorAndBoat.getCompetitor(), competitorAndBoat.getBoat());
         }
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505",

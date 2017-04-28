@@ -17,7 +17,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -82,9 +82,9 @@ public class TestFarthestAheadWithSkippedMarkPassing {
     private Waypoint finish;
     
     private void setUp(TimeOnTimeFactorMapping timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
-        CompetitorWithBoat fastCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("FastBoat");
+        CompetitorAndBoat fastCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("FastBoat");
         c1 = fastCompetitorAndBoat.getCompetitor();
-        CompetitorWithBoat slowCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("SlowBoat");
+        CompetitorAndBoat slowCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("SlowBoat");
         c2 = slowCompetitorAndBoat.getCompetitor();
         trackedRace = createTrackedRace(TrackBasedTest.createCompetitorAndBoatsMap(fastCompetitorAndBoat, slowCompetitorAndBoat));
         rankingMetric = trackedRace.getRankingMetric();

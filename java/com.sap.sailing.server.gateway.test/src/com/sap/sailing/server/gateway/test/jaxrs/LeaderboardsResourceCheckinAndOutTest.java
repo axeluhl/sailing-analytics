@@ -24,7 +24,6 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnaly
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -49,7 +48,7 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         super.setUp();
         Competitor c = createCompetitors(1).get(0);
         competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitor(c.getId(), c.getName(), c.getShortName(),
-                c.getColor(), c.getEmail(), c.getFlagImage(), (DynamicTeam) c.getTeam(), (DynamicBoat) c.getBoat(),
+                c.getColor(), c.getEmail(), c.getFlagImage(), (DynamicTeam) c.getTeam(),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), /* canBoatsOfCompetitorsChangePerRace */ true, MillisecondsTimePoint.now(),
                 MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections

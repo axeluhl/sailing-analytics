@@ -10,9 +10,6 @@ import org.json.simple.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -33,8 +30,7 @@ public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
     public void setUp() {
         super.setUp();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(nationality), null, null)), null);
-        DynamicBoat boat = new BoatImpl("123", "My boat", new BoatClassImpl(boatClassName, false), sailID);
-        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, shortName, null, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, shortName, null, null, null, team, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }
 
     @Test

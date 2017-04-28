@@ -92,7 +92,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")),
-                new BoatImpl("123", competitorName + "'s boat", boatClass, /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
         Boat boat = new BoatImpl(competitor.getId(), competitorName + "'s boat", boatClass, /* sailID */ null);
         Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(competitor, boat);
@@ -109,20 +109,22 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
         RaceDefinition replicatedRace = replicatedRegatta.getRaceByName(raceName);
         assertNotNull(replicatedRace);
-        Competitor replicatedCompetitor = replicatedRace.getCompetitors().iterator().next();
+        Map.Entry<Competitor,Boat> replicatedCompetitorAndBoat = replicatedRace.getCompetitorsAndTheirBoats().entrySet().iterator().next();
+        Competitor replicatedCompetitor = replicatedCompetitorAndBoat.getKey();
+        Boat replicatedBoat = replicatedCompetitorAndBoat.getValue();
         assertNotSame(replicatedCompetitor, competitor);
         assertEquals(competitor.getId(), replicatedCompetitor.getId());
         assertEquals(competitor.getName(), replicatedCompetitor.getName());
         assertEquals(competitor.getShortName(), replicatedCompetitor.getShortName());
         assertEquals(competitor.getColor(), replicatedCompetitor.getColor());
         assertEquals(competitor.getFlagImage(), replicatedCompetitor.getFlagImage());
-        assertEquals(competitor.getBoat().getSailID(), replicatedCompetitor.getBoat().getSailID());
+        assertEquals(boat.getSailID(), replicatedBoat.getSailID());
         assertEquals(competitor.getTeam().getNationality(), replicatedCompetitor.getTeam().getNationality());
         
         // now update competitor on master using replicating operation
         final String newCompetitorName = "Der Vogel, der mit dem Kiel zieht";
         final String newCompetitorShortName = "VK";
-        master.apply(new UpdateCompetitor(competitor.getId().toString(), newCompetitorName, newCompetitorShortName, competitor.getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
+        master.apply(new UpdateCompetitor(competitor.getId().toString(), newCompetitorName, newCompetitorShortName, competitor.getColor(), competitor.getEmail(), competitor.getTeam().getNationality(),
                 competitor.getTeam().getImage(), competitor.getFlagImage(),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         Thread.sleep(1000);
@@ -133,7 +135,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         master.apply(new AllowCompetitorResetToDefaults(Collections.singleton(competitor.getId().toString())));
         // modify the competitor on the master "from below" without an UpdateCompetitor operation, only locally:
         master.getBaseDomainFactory().getCompetitorStore().updateCompetitor(competitor.getId().toString(), competitorName, competitorShortName, Color.RED, competitor.getEmail(),
-                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), competitor.getTeam().getImage(), competitor.getFlagImage(), 
+                competitor.getTeam().getNationality(), competitor.getTeam().getImage(), competitor.getFlagImage(), 
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,

@@ -16,10 +16,12 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
@@ -99,6 +101,12 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     @Override
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
         return getOrCreateCompetitorsProvider().getAllCompetitors(raceColumn, fleet);
+    }
+
+    @Override
+    public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
+        RaceDefinition race = raceColumn.getRaceDefinition(fleet);
+        return race.getBoatOfCompetitorById(competitor.getId());
     }
 
     @Override

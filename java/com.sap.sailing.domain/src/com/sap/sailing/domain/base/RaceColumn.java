@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import java.util.Map;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -255,6 +257,21 @@ public interface RaceColumn extends Named {
      * Same as {@link #getAllCompetitors()}, but restricted to the single race identified by the <code>fleet</code> parameter.
      */
     Iterable<Competitor> getAllCompetitors(Fleet fleet);
+
+    /**
+     * Provides the combined set of competitors and their boats from all {@link #getTrackedRace(Fleet) tracked races attached to this
+     * column} or, in case a fleet does not have a tracked race attached, the competitors registered through the
+     * respective {@link RaceLog} {@link #getRaceLog(Fleet)} attached to this column for that fleet (if this is
+     * {@link #enableCompetitorRegistrationOnRaceLog(Fleet) enabled) or registered through the {@link #getRegattaLog()
+     * regatta log}.
+     */
+    Map<Competitor, Boat> getAllCompetitorsAndTheirBoats();
+
+    /**
+     * Same as {@link #getAllCompetitorsAndTheirBoats()}, but restricted to the single race identified by the <code>fleet</code> parameter.
+     */
+    Map<Competitor, Boat> getAllCompetitorsAndTheirBoats(Fleet fleet);
+
     
     /**
      * Provides the combined set of marks from the courses of all {@link #getTrackedRace(Fleet) tracked races attached

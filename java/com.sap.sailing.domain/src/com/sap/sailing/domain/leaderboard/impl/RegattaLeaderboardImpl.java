@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;

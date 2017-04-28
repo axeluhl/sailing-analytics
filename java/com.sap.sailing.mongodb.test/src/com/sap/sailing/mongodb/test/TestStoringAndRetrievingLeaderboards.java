@@ -15,13 +15,13 @@ import org.junit.Test;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -79,14 +79,14 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        CompetitorWithBoat wolfgangWithBoat = createCompetitorAndBoat();
+        CompetitorAndBoat wolfgangWithBoat = createCompetitorAndBoat();
         Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "KYC", Color.RED, null, null,
                         new TeamImpl("STG", Collections.singleton(
                                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
-                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("123", "Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                        /* dateOfBirth */ null, "This is Patty, the coach")), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat hassosBoat = new BoatImpl("123", "Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null);
-        CompetitorWithBoat hassoWithBoat = new CompetitorWithBoatImpl(hasso, hassosBoat);
+        CompetitorAndBoat hassoWithBoat = new CompetitorAndBoatImpl(hasso, hassosBoat);
         final String raceColumnName1 = "My First Race 1";
         MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgangWithBoat, /* rank */ 1, /* started */ true);
         raceWithTwoCompetitors.addCompetitorAndBoat(hassoWithBoat);
@@ -124,7 +124,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        CompetitorWithBoat competitorWithBoat = createCompetitorAndBoat();
+        CompetitorAndBoat competitorWithBoat = createCompetitorAndBoat();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 1, /* started */ true);
         final String raceColumnName1 = "My First Race 1";
         leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false);
@@ -172,7 +172,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        CompetitorWithBoat competitorWithBoat = createCompetitorAndBoat();
+        CompetitorAndBoat competitorWithBoat = createCompetitorAndBoat();
         TrackedRace raceWithOneCompetitor = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 1, /* started */ true);
         leaderboard.addRace(raceWithOneCompetitor, raceColumnName, /* medalRace */ false);
         leaderboard.setCarriedPoints(competitorWithBoat.getCompetitor(), carriedPointsForWolfgangHunger);
@@ -197,7 +197,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        CompetitorWithBoat competitorWithBoat = createCompetitorAndBoat();
+        CompetitorAndBoat competitorWithBoat = createCompetitorAndBoat();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 2, /* started */ true);
         leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false);
@@ -223,7 +223,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        CompetitorWithBoat competitor = createCompetitorAndBoat();
+        CompetitorAndBoat competitor = createCompetitorAndBoat();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);
         leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false);
@@ -249,7 +249,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        CompetitorWithBoat competitorWithBoat = createCompetitorAndBoat();
+        CompetitorAndBoat competitorWithBoat = createCompetitorAndBoat();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 2, /* started */ true);
         leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false);
@@ -276,7 +276,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        CompetitorWithBoat competitorWithBoat = createCompetitorAndBoat();
+        CompetitorAndBoat competitorWithBoat = createCompetitorAndBoat();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 2, /* started */ true);
         leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false);
@@ -314,7 +314,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        CompetitorWithBoat competitorWithBoat = createCompetitorAndBoat();
+        CompetitorAndBoat competitorWithBoat = createCompetitorAndBoat();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 2, /* started */ true);
         RaceColumn r1 = leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false);
@@ -359,10 +359,10 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         Competitor competitor = domainFactory.getOrCreateCompetitor(123, "$$$Dr. Wolfgang+Hunger$$$", "WH", Color.RED, "someone@nowhere.de", null, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("123", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null),
+                        /* dateOfBirth */ null, "This is Rigo, the coach")),
                         /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat boat = domainFactory.getOrCreateBoat(competitor, "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null, null);
-        CompetitorWithBoat competitorWithBoat = new CompetitorWithBoatImpl(competitor, boat);
+        CompetitorAndBoat competitorWithBoat = new CompetitorAndBoatImpl(competitor, boat);
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitorWithBoat, /* rank */ 2, /* started */ true);
         leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false);
@@ -385,12 +385,12 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         assertEquals(maxPointsReason, loadedLeaderboard2.getScoreCorrection().getMaxPointsReason(competitor, loadedColumn2, MillisecondsTimePoint.now()));
     }
 
-    private CompetitorWithBoat createCompetitorAndBoat() {
+    private CompetitorAndBoat createCompetitorAndBoat() {
         Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("123", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                        /* dateOfBirth */ null, "This is Rigo, the coach")), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat boat = new BoatImpl(competitor.getId(), "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null);
-        return new CompetitorWithBoatImpl(competitor, boat);
+        return new CompetitorAndBoatImpl(competitor, boat);
     }
 }

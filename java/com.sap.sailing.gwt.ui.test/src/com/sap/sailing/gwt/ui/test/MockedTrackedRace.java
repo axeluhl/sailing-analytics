@@ -12,6 +12,7 @@ import java.util.Set;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
@@ -868,6 +869,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
+
+    @Override
+    public Boat getBoatOfCompetitor(Serializable competitorId) {
         return null;
     }
 }

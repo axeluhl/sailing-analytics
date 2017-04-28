@@ -11,7 +11,6 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -24,22 +23,21 @@ import com.sap.sse.common.impl.RGBColor;
 public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> {
     protected final CompetitorFactory competitorFactory;
     protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
-    protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
+
     private static final Logger logger = Logger.getLogger(CompetitorJsonDeserializer.class.getName());
 
     public static CompetitorJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
         return new CompetitorJsonDeserializer(baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
-                new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
+                new NationalityJsonDeserializer(baseDomainFactory))));
     }
 
     public CompetitorJsonDeserializer(CompetitorFactory competitorFactory) {
-        this(competitorFactory, null, /* boatDeserializer */ null);
+        this(competitorFactory, null);
     }
 
-    public CompetitorJsonDeserializer(CompetitorFactory competitorFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
+    public CompetitorJsonDeserializer(CompetitorFactory competitorFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer) {
         this.competitorFactory = competitorFactory;
         this.teamJsonDeserializer = teamJsonDeserializer;
-        this.boatJsonDeserializer = boatDeserializer;
     }
 
     @Override
@@ -76,20 +74,15 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
                 displayColor = new RGBColor(displayColorAsString);
             }
             DynamicTeam team = null;
-            DynamicBoat boat = null;
             if (teamJsonDeserializer != null && object.get(CompetitorJsonConstants.FIELD_TEAM) != null) {
                 team = teamJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonConstants.FIELD_TEAM));
-            }
-            if (boatJsonDeserializer != null && object.get(CompetitorJsonConstants.FIELD_BOAT) != null) {
-                boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
-                        CompetitorJsonConstants.FIELD_BOAT));
             }
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
             Competitor competitor = competitorFactory.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
-                    flagImageURI, team, boat, timeOnTimeFactor,
+                    flagImageURI, team, timeOnTimeFactor,
                     timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null :
                         new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
             return competitor;

@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -79,7 +79,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         // resolved properly on the replica.
         final DomainFactory domainFactory = new DomainFactoryImpl((srlid)->null);
         BoatClass boatClass = domainFactory.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        CompetitorWithBoat hassoWithBoat = AbstractLeaderboardTest.createCompetitorAndBoat("Dr. Hasso Plattner"); // don't create competitor using CompetitorStore
+        CompetitorAndBoat hassoWithBoat = AbstractLeaderboardTest.createCompetitorAndBoat("Dr. Hasso Plattner"); // don't create competitor using CompetitorStore
         final DynamicTrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hassoWithBoat, /* rank */ 1, /* started */ false, boatClass) {
             private static final long serialVersionUID = 1234L;
             @Override

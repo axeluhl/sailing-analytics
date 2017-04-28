@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -49,7 +49,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     private Set<TrackedRace> testRaces;
     private Map<TrackedRace, RaceColumn> raceColumnsInLeaderboard;
-    private CompetitorWithBoat competitorWithBoat;
+    private CompetitorAndBoat competitorWithBoat;
 
     @Before
     public void setUp() {
@@ -164,8 +164,8 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     public void testMaxPointsDiscard() throws NoWindException {
         testRaces = new HashSet<TrackedRace>();
         raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
-        CompetitorWithBoat c2 = createCompetitorAndBoat("Marcus Baur");
-        CompetitorWithBoat c3 = createCompetitorAndBoat("Robert Stanjek");
+        CompetitorAndBoat c2 = createCompetitorAndBoat("Marcus Baur");
+        CompetitorAndBoat c3 = createCompetitorAndBoat("Robert Stanjek");
         for (int i=0; i<3; i++) {
             MockedTrackedRaceWithFixedRankAndManyCompetitors r = new MockedTrackedRaceWithFixedRankAndManyCompetitors(competitorWithBoat, i+1, /* started */ true);
             r.addCompetitorAndBoat(c2);
@@ -198,8 +198,8 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     @Test
     public void testCarriedPointsCountInSorting() throws NoWindException {
         raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
-        CompetitorWithBoat c2 = createCompetitorAndBoat("Marcus Baur");
-        CompetitorWithBoat c3 = createCompetitorAndBoat("Robert Stanjek");
+        CompetitorAndBoat c2 = createCompetitorAndBoat("Marcus Baur");
+        CompetitorAndBoat c3 = createCompetitorAndBoat("Robert Stanjek");
         TimePoint now = MillisecondsTimePoint.now();
         MockedTrackedRaceWithFixedRankAndManyCompetitors testRace = new MockedTrackedRaceWithFixedRankAndManyCompetitors(
                 competitorWithBoat, /* rank */ 1, /* started */true);
@@ -226,8 +226,8 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     @Test
     public void testDNDNotDiscardedInUntrackedRace() throws NoWindException {
         raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
-        CompetitorWithBoat c2 = createCompetitorAndBoat("Marcus Baur");
-        CompetitorWithBoat c3 = createCompetitorAndBoat("Robert Stanjek");
+        CompetitorAndBoat c2 = createCompetitorAndBoat("Marcus Baur");
+        CompetitorAndBoat c3 = createCompetitorAndBoat("Robert Stanjek");
         MockedTrackedRaceWithFixedRankAndManyCompetitors testRace = new MockedTrackedRaceWithFixedRankAndManyCompetitors(
                 competitorWithBoat, /* rank */ 1, /* started */true);
         testRace.addCompetitorAndBoat(c2);
@@ -250,8 +250,8 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     public void testNoDNDDiscard() throws NoWindException {
         testRaces = new HashSet<TrackedRace>();
         raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
-        CompetitorWithBoat  c2 = createCompetitorAndBoat("Marcus Baur");
-        CompetitorWithBoat  c3 = createCompetitorAndBoat("Robert Stanjek");
+        CompetitorAndBoat  c2 = createCompetitorAndBoat("Marcus Baur");
+        CompetitorAndBoat  c3 = createCompetitorAndBoat("Robert Stanjek");
         for (int i=0; i<3; i++) {
             MockedTrackedRaceWithFixedRankAndManyCompetitors r = new MockedTrackedRaceWithFixedRankAndManyCompetitors(competitorWithBoat, i+1, /* started */ true);
             r.addCompetitorAndBoat(c2);

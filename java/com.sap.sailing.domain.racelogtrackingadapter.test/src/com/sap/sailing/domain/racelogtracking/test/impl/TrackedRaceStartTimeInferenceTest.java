@@ -63,7 +63,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartTimeInferencePrecedenceOrder() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
@@ -130,7 +130,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartTimeChangeNotificationForFirstUpdateThroughRaceLog() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
@@ -172,7 +172,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartTimeChangeNotificationForFirstUpdateThroughStartMarkPassing() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
@@ -217,7 +217,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartAndEndTrackingTimeInferencePrecedenceOrderTriggersListener() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
@@ -325,7 +325,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     @Test
     public void testStartAndEndOfTrackingTimeChangeNotificationForFirstUpdateThroughRaceLog() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null, null,
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();

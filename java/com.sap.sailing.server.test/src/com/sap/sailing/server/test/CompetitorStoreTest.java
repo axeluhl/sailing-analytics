@@ -28,19 +28,19 @@ public class CompetitorStoreTest {
     public void testAddingCompetitorsToTransientStore() {
         CompetitorStore transientStore = new TransientCompetitorStoreImpl();
         DynamicCompetitor template = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Test Competitor").getCompetitor();
-        Competitor competitor = transientStore.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(), template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(), template.getBoat(),
+        Competitor competitor = transientStore.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(), template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
                 /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null);
         assertTrue(competitor != template);
         Competitor competitor2 = transientStore.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(), 
                 template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
-                template.getBoat(), /* timeOnTimeFactor */ 1.345,
+                /* timeOnTimeFactor */ 1.345,
                 /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(750.2), null);
         assertSame(competitor, competitor2);
         assertEquals(DomainFactory.INSTANCE.getOrCreateNationality("GER"), competitor.getTeam().getNationality());
         DynamicTeam differentTeam = (DynamicTeam) AbstractLeaderboardTest.createCompetitorAndBoat("Test Competitor").getCompetitor().getTeam();
         differentTeam.setNationality(DomainFactory.INSTANCE.getOrCreateNationality("GHA")); // Ghana
         Competitor competitor3 = transientStore.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(), 
-                template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, template.getBoat(), /* timeOnTimeFactor */
+                template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, /* timeOnTimeFactor */
                 null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */null, null);
         assertSame(competitor, competitor3); // use existing competitor despite the different team
         assertSame(competitor.getTeam(), competitor3.getTeam());
@@ -48,7 +48,7 @@ public class CompetitorStoreTest {
         // now mark the competitor as to update from defaults
         transientStore.allowCompetitorResetToDefaults(competitor);
         Competitor competitor4 = transientStore.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(), 
-                template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, template.getBoat(), /* timeOnTimeFactor */
+                template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, /* timeOnTimeFactor */
                 null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */null, null);
         assertSame(competitor, competitor4); // expecting an in-place update
         assertEquals(differentTeam.getNationality(), competitor4.getTeam().getNationality());
@@ -61,7 +61,7 @@ public class CompetitorStoreTest {
         DynamicCompetitor template = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Test Competitor").getCompetitor();
         Competitor competitor = persistentStore1.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
-                template.getBoat(), /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null);
+                /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null);
 
         CompetitorStore persistentStore2 = new PersistentCompetitorStore(
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
@@ -75,7 +75,7 @@ public class CompetitorStoreTest {
         DynamicTeam differentTeam = (DynamicTeam) AbstractLeaderboardTest.createCompetitorAndBoat("Test Competitor").getCompetitor().getTeam();
         differentTeam.setNationality(DomainFactory.INSTANCE.getOrCreateNationality("GHA")); // Ghana
         Competitor competitor3 = persistentStore2.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(),
-                template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, template.getBoat(), /* timeOnTimeFactor */
+                template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, /* timeOnTimeFactor */
                 null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */null, null);
         assertSame(competitor2, competitor3); // use existing competitor despite the different team
         assertNotSame(differentTeam, competitor2.getTeam()); // team expected to remain unchanged
@@ -84,7 +84,7 @@ public class CompetitorStoreTest {
         // now mark the competitor as to update from defaults
         persistentStore2.allowCompetitorResetToDefaults(competitor2);
         Competitor competitor4 = persistentStore2.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(),
-                template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, template.getBoat(), /* timeOnTimeFactor */
+                template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, /* timeOnTimeFactor */
                 null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */null, null);
         assertSame(competitor2, competitor4); // expecting an in-place update
         assertEquals(differentTeam.getNationality(), competitor4.getTeam().getNationality());

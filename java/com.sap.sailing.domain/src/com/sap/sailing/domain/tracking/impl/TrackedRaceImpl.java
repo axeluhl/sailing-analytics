@@ -53,6 +53,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -1412,6 +1413,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
         return result;
+    }
+
+    @Override
+    public Boat getBoatOfCompetitor(Serializable competitorId) {
+        return getRace().getBoatOfCompetitorById(competitorId);
     }
 
     @Override
@@ -2902,7 +2908,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         List<Maneuver> result = new ArrayList<Maneuver>();
         List<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> group = new ArrayList<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
-            Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
+            Distance threeHullLengths = getBoatOfCompetitor(competitor).getBoatClass().getHullLength().scale(3);
             SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing before group
             SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing before current course change
             Iterator<com.sap.sse.common.Util.Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();

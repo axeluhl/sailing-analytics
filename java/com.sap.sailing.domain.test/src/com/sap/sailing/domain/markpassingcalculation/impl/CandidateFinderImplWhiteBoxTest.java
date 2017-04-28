@@ -20,7 +20,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.ReadonlyRacingProcedureFactory;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.Position;
@@ -63,7 +63,7 @@ public class CandidateFinderImplWhiteBoxTest {
     @Before
     public void setUp() {
         now = MillisecondsTimePoint.now();
-        CompetitorWithBoat competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("Competitor");
+        CompetitorAndBoat competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("Competitor");
         competitor = competitorAndBoat.getCompetitor();
         Map<Competitor, Boat> competitorAndBoats = TrackBasedTest.createCompetitorAndBoatsMap(competitorAndBoat);
         trackedRace = TrackBasedTest.createTestTrackedRace("Test Regatta", "Test Race", "505", competitorAndBoats, now, /* useMarkPassingCalculator */ true);

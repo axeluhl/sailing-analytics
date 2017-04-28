@@ -70,7 +70,7 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
      * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an exception.
      */
     Competitor updateCompetitor(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
-            String newSailId, Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
+            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
 
     void addCompetitors(Iterable<Competitor> competitors);

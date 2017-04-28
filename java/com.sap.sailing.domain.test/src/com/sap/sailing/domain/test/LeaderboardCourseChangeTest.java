@@ -29,7 +29,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -160,7 +159,7 @@ public class LeaderboardCourseChangeTest {
         Set<Competitor> competitors = new HashSet<>();
         
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", "BYC", Color.BLACK, null, null,
-                mock(DynamicTeam.class), new BoatImpl("123", "boat", boatClass, "GER 124"),
+                mock(DynamicTeam.class),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         return competitors;
     }

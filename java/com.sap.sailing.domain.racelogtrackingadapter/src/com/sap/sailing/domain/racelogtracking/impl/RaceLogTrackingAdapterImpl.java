@@ -35,6 +35,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackin
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -150,7 +151,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors());
             } else if (!Util.isEmpty(leaderboard.getAllCompetitors())) {
                 boatClass = findDominatingBoatClass(leaderboard.getAllCompetitors());
-            } else {
+            } else { 
                 throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
             }
         }
@@ -167,8 +168,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         raceLog.add(event);
     }
     
-    private BoatClass findDominatingBoatClass(Iterable<Competitor> allCompetitors) {
-        return Util.getDominantObject(()->StreamSupport.stream(allCompetitors.spliterator(), /* parallel */ false).map(c->c.getBoat().getBoatClass()).iterator());
+    private BoatClass findDominatingBoatClass(Iterable<Boat> allBoats) {
+        return Util.getDominantObject(()->StreamSupport.stream(allBoats.spliterator(), /* parallel */ false).map(b->b.getBoatClass()).iterator());
     }
 
     @Override

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -138,7 +139,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     public MetaLeaderboardScoreCorrection getScoreCorrection() {
         return (MetaLeaderboardScoreCorrection) super.getScoreCorrection();
     }
-
+    
     @Override
     public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<Competitor>();
@@ -159,6 +160,11 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         return result;
     }
 
+    @Override
+    public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
+        return null;
+    }
+    
     @Override
     public Fleet getFleet(String fleetName) {
         return fleetName.equals(metaFleet.getName()) ? metaFleet : null;

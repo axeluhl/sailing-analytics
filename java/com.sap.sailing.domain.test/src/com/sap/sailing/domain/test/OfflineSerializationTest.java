@@ -29,7 +29,6 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -192,8 +191,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
                         new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
                         /* dateOfBirth */ null, "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("123",
-                        competitorName + "'s boat", senderDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                        /* dateOfBirth */null, "This is Rigo, the coach")), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Competitor receiversCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         Competitor receiversSecondCopyOfCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         assertSame(receiversCompetitor1, receiversSecondCopyOfCompetitor1);

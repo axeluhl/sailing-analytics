@@ -349,13 +349,13 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public Competitor getOrCreateCompetitor(Serializable competitorId, String name, String shortname, Color displayColor, String email,
-            URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor,
+            URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
         }
         return getCompetitorStore().getOrCreateCompetitor(competitorId, name, shortname, displayColor, email, flagImage, team,
-                boat, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
     }
 
     @Override

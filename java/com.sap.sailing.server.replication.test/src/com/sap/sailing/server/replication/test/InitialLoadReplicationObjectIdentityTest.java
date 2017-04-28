@@ -29,7 +29,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -256,7 +256,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         Regatta regatta = master.apply(addEventOperation);
         final String raceName1 = "Test Race 1";
         final String raceName2 = "Test Race 2";
-        CompetitorWithBoat competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("The Same Competitor");
+        CompetitorAndBoat competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("The Same Competitor");
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
         final Map<Competitor,Boat> competitors = new HashMap<>();
         competitors.put(competitorAndBoat.getCompetitor(), competitorAndBoat.getBoat());

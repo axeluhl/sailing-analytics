@@ -14,9 +14,6 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
     @Connector(messageKey="Team", ordinal=9)
     Team getTeam();
 
-    @Connector(messageKey="Boat", ordinal=10)
-    Boat getBoat();
-    
     Color getColor();
     
     String getEmail();

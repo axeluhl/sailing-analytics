@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
@@ -20,19 +19,17 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_ID = "id";
     
     private final JsonSerializer<Team> teamJsonSerializer;
-    private final JsonSerializer<Boat> boatJsonSerializer;
 
     public static CompetitorJsonSerializer create() {
-        return new CompetitorJsonSerializer(TeamJsonSerializer.create(), BoatJsonSerializer.create());
+        return new CompetitorJsonSerializer(TeamJsonSerializer.create());
     }
 
     public CompetitorJsonSerializer() {
-        this(null, null);
+        this(null);
     }
 
-    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer, JsonSerializer<Boat> teamBoatSerializer) {
+    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer) {
         this.teamJsonSerializer = teamJsonSerializer;
-        this.boatJsonSerializer = teamBoatSerializer;
     }
     
     public static JSONObject getCompetitorIdQuery(Competitor competitor) {
@@ -60,7 +57,6 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         result.put(CompetitorJsonConstants.FIELD_DISPLAY_COLOR, color == null ? null : color.getAsHtml());
         result.put(CompetitorJsonConstants.FIELD_EMAIL, competitor.getEmail());
         result.put(CompetitorJsonConstants.FIELD_SEARCHTAG, competitor.getSearchTag());
-        result.put(CompetitorJsonConstants.FIELD_SAIL_ID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
         final Nationality nationality = competitor.getTeam() == null ? null : competitor.getTeam().getNationality();
         result.put(CompetitorJsonConstants.FIELD_NATIONALITY, nationality == null ? "" : nationality.getThreeLetterIOCAcronym());
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
@@ -72,9 +68,6 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         if (teamJsonSerializer != null) {
             result.put(CompetitorJsonConstants.FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
         }
-        if (boatJsonSerializer != null) {
-            result.put(CompetitorJsonConstants.FIELD_BOAT, boatJsonSerializer.serialize(getBoat(competitor)));
-        }
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                 competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
@@ -85,9 +78,4 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     protected Color getColor(Competitor competitor ) {
         return competitor.getColor();
     }
-    
-    protected Boat getBoat(Competitor competitor ) {
-        return competitor.getBoat();
-    }
-
 }

@@ -30,7 +30,7 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -432,7 +432,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         // for some reason the dropping of collections doesn't work reliably on Linux... explicitly drop those collections that we depend on
         getMongoService().getDB().getCollection(CollectionNames.LEADERBOARDS.name()).drop();
         getMongoService().getDB().getCollection(CollectionNames.REGATTAS.name()).drop();
-        CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorAndBoat("Dr. Hasso Plattner");
+        CompetitorAndBoat hasso = AbstractLeaderboardTest.createCompetitorAndBoat("Dr. Hasso Plattner");
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         final DynamicTrackedRegatta[] trackedRegatta = new DynamicTrackedRegatta[1];
         final DynamicTrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
@@ -892,7 +892,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, OneDesignRankingMetric::new);
 
         Map<Competitor, Boat> competitorsAndBoats = new LinkedHashMap<>();
-        Competitor c = new CompetitorImpl("Axel", "Axel Uhl", "KYC", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Competitor c = new CompetitorImpl("Axel", "Axel Uhl", "KYC", Color.RED, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat b = new BoatImpl("123", "boat", boatClass, "GER 124");
         competitorsAndBoats.put(c, b);
         Iterable<Waypoint> waypoints = Collections.emptyList();

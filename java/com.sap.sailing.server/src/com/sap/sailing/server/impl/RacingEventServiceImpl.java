@@ -597,7 +597,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override
             public void competitorUpdated(Competitor competitor) {
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor.getShortName(), competitor
-                        .getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
+                        .getColor(), competitor.getEmail(), competitor.getTeam().getNationality(),
                         competitor.getTeam().getImage(), competitor.getFlagImage(),
                         competitor.getTimeOnTimeFactor(), competitor.getTimeOnDistanceAllowancePerNauticalMile(),
                         competitor.getSearchTag()));
@@ -2846,7 +2846,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             // competitor store
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getShortName(),
                     dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
-                    dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat(), dynamicCompetitor.getTimeOnTimeFactor(),
+                    dynamicCompetitor.getTeam(), dynamicCompetitor.getTimeOnTimeFactor(),
                     dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag());
         }
         logoutput.append("Received " + competitorStore.getCompetitorsCount() + " NEW competitors\n");

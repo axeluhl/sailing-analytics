@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
 
-import junit.framework.Assert;
-
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +42,8 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDe
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import junit.framework.Assert;
 
 public class RaceLogCourseDesignChangedEventSerializerTest {
 

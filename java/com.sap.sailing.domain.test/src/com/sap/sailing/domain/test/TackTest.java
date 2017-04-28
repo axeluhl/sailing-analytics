@@ -44,8 +44,8 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
                                 new PersonImpl("Wolfgang Hunger", new NationalityImpl("GER"),
                                 /* dateOfBirth */null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas",
                                         new NationalityImpl("NED"),
-                                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("123",
-                "Wolfgang Hunger's boat", boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                        /* dateOfBirth */null, "This is Rigo, the coach")),
+                                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat boat = new BoatImpl(competitor.getId(), "Wolfgang Hunger's boat", boatClass, "123", null);
         Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(competitor, boat);

@@ -20,7 +20,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
@@ -85,12 +85,12 @@ public class SearchServiceTest {
     private Venue flensburg;
     private Event pfingstbusch;
     private Regatta pfingstbusch29er;
-    private CompetitorWithBoat hassoPlattner;
-    private CompetitorWithBoat alexanderRies;
-    private CompetitorWithBoat antonKoch;
-    private CompetitorWithBoat  tobiasSchadewaldt;
-    private CompetitorWithBoat  philippBuhl;
-    private CompetitorWithBoat  dennisGehrlein;
+    private CompetitorAndBoat hassoPlattner;
+    private CompetitorAndBoat alexanderRies;
+    private CompetitorAndBoat antonKoch;
+    private CompetitorAndBoat  tobiasSchadewaldt;
+    private CompetitorAndBoat  philippBuhl;
+    private CompetitorAndBoat  dennisGehrlein;
     private Regatta pfingstbusch470;
     private Regatta aalRegatta;
     private DynamicTrackedRace pfingstbusch29erTrackedR1;

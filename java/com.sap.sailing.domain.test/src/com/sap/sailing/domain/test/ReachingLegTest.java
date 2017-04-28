@@ -18,7 +18,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -75,13 +75,13 @@ public class ReachingLegTest extends TrackBasedTest {
     @Before
     public void setUp() {
         competitorsAndBoats = new LinkedHashMap<>();
-        CompetitorWithBoat hungerWithBoat = createCompetitorAndBoat("Wolfgang Hunger");
+        CompetitorAndBoat hungerWithBoat = createCompetitorAndBoat("Wolfgang Hunger");
         hunger = hungerWithBoat.getCompetitor();
         competitorsAndBoats.put(hungerWithBoat.getCompetitor(), hungerWithBoat.getBoat());
-        CompetitorWithBoat plattnerWithBoat = createCompetitorAndBoat("Dr. Hasso Plattner");
+        CompetitorAndBoat plattnerWithBoat = createCompetitorAndBoat("Dr. Hasso Plattner");
         plattner = plattnerWithBoat.getCompetitor();
         competitorsAndBoats.put(plattnerWithBoat.getCompetitor(), plattnerWithBoat.getBoat());
-        CompetitorWithBoat schomaekerWithBoat = createCompetitorAndBoat("Meike Schom�ker");
+        CompetitorAndBoat schomaekerWithBoat = createCompetitorAndBoat("Meike Schom�ker");
         schomaeker = schomaekerWithBoat.getCompetitor();
         competitorsAndBoats.put(schomaekerWithBoat.getCompetitor(), schomaekerWithBoat.getBoat());
         start = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());

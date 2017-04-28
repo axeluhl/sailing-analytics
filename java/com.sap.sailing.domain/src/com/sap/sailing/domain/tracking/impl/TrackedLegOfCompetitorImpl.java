@@ -7,6 +7,7 @@ import java.util.ListIterator;
 import java.util.NavigableSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
@@ -50,10 +51,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private static final long serialVersionUID = -7060076837717432808L;
     private final TrackedLegImpl trackedLeg;
     private final Competitor competitor;
+    private final Boat boat;
     
-    public TrackedLegOfCompetitorImpl(TrackedLegImpl trackedLeg, Competitor competitor) {
+    public TrackedLegOfCompetitorImpl(TrackedLegImpl trackedLeg, Competitor competitor, Boat boat) {
         this.trackedLeg = trackedLeg;
         this.competitor = competitor;
+        this.boat = boat;
     }
 
     @Override
@@ -64,6 +67,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Competitor getCompetitor() {
         return competitor;
+    }
+
+    @Override
+    public Boat getBoat() {
+        return boat;
     }
 
     @Override
@@ -762,7 +770,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      */
     private List<GPSFixMoving> getFixesToConsiderForManeuverLossAnalysis(TimePoint timePointBeforeManeuver,
             TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) {
-        final long EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
+        final long EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS = getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
         final long EXCESS_TIME_AFTER_MANEUVER_END_TO_SCAN_IN_MILLIS = 3*EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS;
         List<GPSFixMoving> fixes = new ArrayList<>();
         NavigableSet<GPSFixMoving> maxima = new ArrayListNavigableSet<GPSFixMoving>(new TimedComparator());
@@ -811,7 +819,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
         // now remove all fixes before the last maximum before the fix with the lowest speed over ground during the maneuver if
         // there was such a maximum; otherwise, leave all fixes from the maneuver start on in place.
-        final long MAX_SMOOTHENING_INTERVAL_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
+        final long MAX_SMOOTHENING_INTERVAL_MILLIS = getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
         GPSFixMoving lastMaxSpeedFixBeforeLowSpeed = maxima.lower(fixWithLowestSpeedOverGround);
         // now check if there's a greater one that's only a little bit earlier
         if (lastMaxSpeedFixBeforeLowSpeed != null) {
@@ -861,7 +869,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (maxSpeed != null) {
             double speedDifferenceBetweenMaxAndMinInKnots = maxSpeed.getKnots() - minimumSpeed.getKnots();
             double lowestBadness = Double.MAX_VALUE;
-            final long approximateManeuverTimeInMillis = getCompetitor().getBoat().getBoatClass()
+            final long approximateManeuverTimeInMillis = getBoat().getBoatClass()
                     .getApproximateManeuverDurationInMilliseconds();
             final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
             for (GPSFixMoving minimum : minima) {

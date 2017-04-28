@@ -37,7 +37,6 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
@@ -252,7 +251,6 @@ public class DomainFactoryImpl implements DomainFactory {
         CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
         Competitor result = competitorStore.getExistingCompetitorById(competitorId);
         if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
-            BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
             Nationality nationality;
             try {
                 nationality = getOrCreateNationality(nationalityAsString);
@@ -262,9 +260,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
             DynamicTeam team = createTeam(name, nationality, competitorId);
-            DynamicBoat boat = new BoatImpl(competitorId, shortName, boatClass, shortName);
             result = competitorStore.getOrCreateCompetitor(competitorId, name, shortName, null /* displayColor */,
-                    null /* email */, null /* flagImag */, team, boat, (double) timeOnTimeFactor,
+                    null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
         }
         return result;
@@ -606,7 +603,7 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         return competitorBoatInfos;
     }
-
+ 
     
     @Override
     public Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {

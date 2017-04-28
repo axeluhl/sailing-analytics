@@ -5,7 +5,7 @@ import java.net.URI;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
-public interface CompetitorChangeListener extends /** MUST BE REMOVED AFTER AFTER bug 2822 IS SOLVED */BoatChangeListener, NationalityChangeListener {
+public interface CompetitorChangeListener extends NationalityChangeListener {
     void colorChanged(Color oldColor, Color newColor);
     
     void nameChanged(String oldName, String newName);

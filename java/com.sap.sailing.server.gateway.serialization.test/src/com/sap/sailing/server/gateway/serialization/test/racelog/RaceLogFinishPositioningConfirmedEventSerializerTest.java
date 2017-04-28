@@ -48,8 +48,8 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
         serializer = new RaceLogFinishPositioningConfirmedEventSerializer(new CompetitorJsonSerializer(
-                new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer())), null));
-        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null, /* boatDeserializer */ null));
+                new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer()))));
+        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null));
 
         now = MillisecondsTimePoint.now();
         positioningList = new CompetitorResultsImpl();

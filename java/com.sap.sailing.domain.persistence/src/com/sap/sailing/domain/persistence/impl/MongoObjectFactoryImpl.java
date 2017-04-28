@@ -114,6 +114,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 import com.sap.sse.common.Duration;
@@ -131,7 +132,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
-    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
+    private final CompetitorWithBoatJsonSerializer competitorSerializer = CompetitorWithBoatJsonSerializer.create();
     private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;

@@ -135,7 +135,7 @@ public class FoilingData {
                 					result.append("UNKNOWN").append(";");
                 				}
                 				result.append(competitor.getName()).append(";");
-                				result.append(competitor.getBoat().getSailID()).append(";");
+                				result.append(trackedRace.getBoatOfCompetitor(competitor.getId()).getSailID()).append(";");
                 				result.append(competitor.getId()).append(";");
                 				result.append(speedOfCompetitor != null ? speedOfCompetitor.getKnots() : "0.0").append(";");
                 				result.append(rideHeight).append(";");

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +32,7 @@ import java.util.stream.StreamSupport;
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;

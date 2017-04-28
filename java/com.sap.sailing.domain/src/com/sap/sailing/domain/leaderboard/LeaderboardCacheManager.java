@@ -100,11 +100,6 @@ public class LeaderboardCacheManager {
         }
 
         @Override
-        public void sailIdChanged(String oldSailId, String newSailId) {
-            removeFromCache(leaderboard);
-        }
-
-        @Override
         public void nationalityChanged(WithNationality what, Nationality oldNationality, Nationality newNationality) {
             removeFromCache(leaderboard);
         }

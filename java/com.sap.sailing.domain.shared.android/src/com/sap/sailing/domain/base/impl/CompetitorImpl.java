@@ -17,7 +17,6 @@ import com.sap.sse.common.Util;
 public class CompetitorImpl implements DynamicCompetitor {
     private static final long serialVersionUID = 294603681016643157L;
     private final DynamicTeam team;
-    private final DynamicBoat boat;
     private final Serializable id;
     private String name;
     private String shortName;
@@ -29,12 +28,11 @@ public class CompetitorImpl implements DynamicCompetitor {
     private Double timeOnTimeFactor;
     private Duration timeOnDistanceAllowancePerNauticalMile;
     
-    public CompetitorImpl(Serializable id, String name, String shortName, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+    public CompetitorImpl(Serializable id, String name, String shortName, Color color, String email, URI flagImage, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
         this.team = team;
-        this.boat = boat;
         this.color = color;
         this.email = email;
         this.flagImage = flagImage;
@@ -98,15 +96,10 @@ public class CompetitorImpl implements DynamicCompetitor {
     }
 
     @Override
-    public DynamicBoat getBoat() {
-        return boat;
-    }
-
-    @Override
     public Competitor resolve(SharedDomainFactory domainFactory) {
         Competitor result = domainFactory
                 .getOrCreateCompetitor(getId(), getName(), getShortName(), getColor(), getEmail(), getFlagImage(), getTeam(),
-                        getBoat(), getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag);
+                        getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag);
         return result;
     }
 
@@ -130,7 +123,6 @@ public class CompetitorImpl implements DynamicCompetitor {
         synchronized (listeners) {
             listeners.add(listener);
         }
-        getBoat().addBoatChangeListener(listener);
         getTeam().addNationalityChangeListener(listener);
     }
 
@@ -139,7 +131,6 @@ public class CompetitorImpl implements DynamicCompetitor {
         synchronized (listeners) {
             listeners.remove(listener);
         }
-        getBoat().removeBoatChangeListener(listener);
         getTeam().removeNationalityChangeListener(listener);
     }
     

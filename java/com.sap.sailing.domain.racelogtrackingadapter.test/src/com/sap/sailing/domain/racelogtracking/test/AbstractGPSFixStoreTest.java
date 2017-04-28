@@ -65,7 +65,7 @@ public class AbstractGPSFixStoreTest {
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
     protected final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
     protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat(comp, "boat", boatClass, "GER 234", null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 

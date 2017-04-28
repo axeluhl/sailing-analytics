@@ -16,7 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
@@ -32,7 +32,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -88,23 +88,23 @@ public abstract class TrackBasedTest {
     }
 
     @SafeVarargs
-    public static Map<Competitor,Boat> createCompetitorAndBoatsMap(CompetitorWithBoat... competitorsAndBoats) {
+    public static Map<Competitor,Boat> createCompetitorAndBoatsMap(CompetitorAndBoat... competitorsAndBoats) {
         Map<Competitor,Boat> result = new LinkedHashMap<>(); 
-        for (CompetitorWithBoat competitorAndBoat: competitorsAndBoats) {
+        for (CompetitorAndBoat competitorAndBoat: competitorsAndBoats) {
             result.put(competitorAndBoat.getCompetitor(), competitorAndBoat.getBoat());
         }
         return result;
     }
 
-    public static CompetitorWithBoat createCompetitorAndBoat(String competitorName) {
+    public static CompetitorAndBoat createCompetitorAndBoat(String competitorName) {
         Competitor c = new CompetitorImpl(UUID.randomUUID(), competitorName, "HP", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
                         /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("123",
-                competitorName + "'s boat", boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                        /* dateOfBirth */null, "This is Rigo, the coach")), 
+                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat b = new BoatImpl(c.getId(), competitorName + "'s boat", boatClass, null, null);
-        return new CompetitorWithBoatImpl(c, b);
+        return new CompetitorAndBoatImpl(c, b);
     }
 
     /**

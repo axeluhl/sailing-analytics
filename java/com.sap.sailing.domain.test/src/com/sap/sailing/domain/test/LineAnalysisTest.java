@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -26,7 +26,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class LineAnalysisTest extends TrackBasedTest {
     private TimePoint now;
     private DynamicTrackedRace trackedRace;
-    private CompetitorWithBoat competitorWithBoat;
+    private CompetitorAndBoat competitorWithBoat;
 
     @Before
     public void setUp() {

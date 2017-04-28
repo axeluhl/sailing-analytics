@@ -10,7 +10,7 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -26,7 +26,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     private final BoatClass boatClass;
     protected RaceDefinition raceDefinition;
     
-    public MockedTrackedRaceWithFixedRank(CompetitorWithBoat competitorWithBoat, int rank, boolean started, BoatClass boatClass) {
+    public MockedTrackedRaceWithFixedRank(CompetitorAndBoat competitorWithBoat, int rank, boolean started, BoatClass boatClass) {
         this.rank = rank;
         this.started = started;
         this.competitorsAndBoats = new HashMap<>();
@@ -35,7 +35,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
         this.competitorsAndBoats.put(competitorWithBoat.getCompetitor(), competitorWithBoat.getBoat());
     }
 
-    public MockedTrackedRaceWithFixedRank(CompetitorWithBoat competitorWithBoat,int rank, boolean started) {
+    public MockedTrackedRaceWithFixedRank(CompetitorAndBoat competitorWithBoat,int rank, boolean started) {
         this(competitorWithBoat, rank, started, /* boatClass */ null);
     }
 

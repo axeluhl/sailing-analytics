@@ -296,8 +296,8 @@ public class WindTest {
                         new PersonImpl("Test Competitor", new NationalityImpl("GER"),
                         /* dateOfBirth */null, "This is famous " + "Test Competitor")), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("123",
-                "Test Competitor" + "'s boat", boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                        /* dateOfBirth */null, "This is Rigo, the coach")), 
+                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Boat boat = new BoatImpl("123", "Test Competitor" + "'s boat", boatClass, null);
         Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(competitor, boat);

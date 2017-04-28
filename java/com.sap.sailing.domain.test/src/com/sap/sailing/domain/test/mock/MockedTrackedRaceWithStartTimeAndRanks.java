@@ -703,4 +703,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
         return null;
     }
+
+    @Override
+    public Boat getBoatOfCompetitor(Serializable competitorId) {
+        return null;
+    }
 }
