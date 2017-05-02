@@ -73,7 +73,7 @@ import difflib.PatchFailedException;
  * Track a race using the data defined in the {@link RaceLog} and possibly the Leaderboards
  * {@link IsRegattaLike#getRegattaLog RegattaLog}. If the events suggest that the race is already in the
  * {@link RaceLogTrackingState#TRACKING} state, tracking commences immediately and existing fixes are loaded immediately
- * from the database.Thinkpad
+ * from the database.
  * <p>
  * Otherwise, the tracker waits until a {@link RaceLogStartTrackingEvent} is received to perform these tasks.
  * 
