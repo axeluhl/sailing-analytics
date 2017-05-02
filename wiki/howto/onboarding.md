@@ -118,6 +118,8 @@ In cases where code was reformatted, you can also ignore all whitespace changes 
 
 When doing a diff, you can also use the parameters `--ignore-space-at-eol` and `--ignore-space-change`.
 
+When doing a merge in Eclipse, you can tell the merge editor to do a similar thing by right clicking and selecting "Ignore White Space". Other merge/diff tools also provide such a functionality. 
+
 #### Additional steps required for Android projects
 
 To ensure that all components of the Analysis Suite are working, you should also import all Android projects (mobile/) into your workspace. There are some additional requirements to enable the build process of these projects.
