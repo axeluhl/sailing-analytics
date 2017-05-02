@@ -66,7 +66,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<version>${gwt.version}</version>
+				<version>${gwt.plugin.version}</version>
 				<executions>
 					<!-- GWT version detected from dependencyManagement -->
 					<execution>
@@ -103,7 +103,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>gwt-maven-plugin</artifactId>
-						<version>${gwt.version}</version>
+						<version>${gwt.plugin.version}</version>
 						<executions>
 							<execution>
 								<configuration combine.self="override">
