@@ -152,6 +152,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private static final Color LOWLIGHTED_TAIL_COLOR = new RGBColor(200, 200, 200);
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
+    private static final double LOWLIGHTED_TAIL_OPACITY = 0.3;
     
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
     public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
@@ -2745,6 +2746,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             options.setStrokeColor(competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
         } else {
             options.setStrokeColor(LOWLIGHTED_TAIL_COLOR.getAsHtml());
+            options.setStrokeOpacity(LOWLIGHTED_TAIL_OPACITY);
         }
         if (isHighlighted) {
             options.setStrokeWeight(2);
