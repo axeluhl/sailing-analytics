@@ -77,7 +77,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 return;
             }
             TimeRange timeRangeToLoad;
-            if(oldStartOfTracking == null) {
+            if (oldStartOfTracking == null) {
                 // Fixes wheren't loaded while startOfTracking was null. So we need to load all fixes in the tracking interval now.
                 timeRangeToLoad = getTrackingTimeRange();
             } else if (newStartOfTracking.before(oldStartOfTracking)) {
@@ -96,9 +96,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 return;
             }
             TimeRange timeRangeToLoad;
-            if(newEndOfTracking == null && oldEndOfTracking != null) {
+            if (newEndOfTracking == null && oldEndOfTracking != null) {
                 timeRangeToLoad = new TimeRangeImpl(oldEndOfTracking, TimePoint.EndOfTime);
-            } else if(newEndOfTracking != null && oldEndOfTracking != null && oldEndOfTracking.before(newEndOfTracking)) {
+            } else if (newEndOfTracking != null && oldEndOfTracking != null && oldEndOfTracking.before(newEndOfTracking)) {
                 timeRangeToLoad = new TimeRangeImpl(oldEndOfTracking, newEndOfTracking);
             } else {
                 // no new timerange is covered
@@ -237,7 +237,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      */
     private void loadFixesForNewlyCoveredTimeRanges(WithID item,
             Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
-        if(trackedRace.getStartOfTracking() == null) {
+        if (trackedRace.getStartOfTracking() == null) {
             // No fixes are loaded if startOfTracking isn't set.
             // This helps to prevent that all fixes are loaded into tracks of the tracked race.
             return;
@@ -289,7 +289,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      */
     public boolean containsMappingThatIntersectsTimeRange(Iterable<DeviceMappingWithRegattaLogEvent<WithID>> mappings, TimeRange timeRange) {
         for (DeviceMappingWithRegattaLogEvent<WithID> mapping : mappings) {
-            if(timeRange.intersects(mapping.getTimeRange())) {
+            if (timeRange.intersects(mapping.getTimeRange())) {
                 return true;
             }
         }
