@@ -50,11 +50,10 @@ public class UserSettingsBuildingPipeline extends AbstractSettingsBuildingPipeli
      * @return The constructed settings object
      */
     public<S extends Settings> S getSettingsObject(S defaultSettings, SettingsJsons settingsJsons) {
-        if(settingsJsons.getGlobalSettingsJson() != null) {
-            defaultSettings = settingsStringConverter.deserializeFromJson(defaultSettings, settingsJsons.getGlobalSettingsJson());
-        }
         if(settingsJsons.getContextSpecificSettingsJson() != null) {
             defaultSettings = settingsStringConverter.deserializeFromJson(defaultSettings, settingsJsons.getContextSpecificSettingsJson());
+        } else if(settingsJsons.getGlobalSettingsJson() != null) {
+            defaultSettings = settingsStringConverter.deserializeFromJson(defaultSettings, settingsJsons.getGlobalSettingsJson());
         }
         defaultSettings = settingsStringConverter.deserializeFromCurrentUrl(defaultSettings);
         return defaultSettings;
