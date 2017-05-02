@@ -120,7 +120,7 @@ When doing a diff, you can also use the parameters `--ignore-space-at-eol` and `
 
 When doing a merge in Eclipse, you can tell the merge editor to do a similar thing by right clicking and selecting "Ignore White Space". Other merge/diff tools also provide such a functionality.
 
-When a file has "wrong line endings" (line endings are different to what is configured in ".gitattributes" file) and you touch those files without changing the contents, git will potentially show that these files are changed. To get rid of those phantom changes, you can do a "git reset --hard -- path/toFile/in/repository".
+When a file has "wrong line endings" (line endings are different to what is configured in ".gitattributes" file) and you touch those files without changing the contents, git will potentially show that these files are changed. To get rid of those phantom changes, you can do a "git checkout HEAD path/toFile/in/repository".
 
 #### Additional steps required for Android projects
 
