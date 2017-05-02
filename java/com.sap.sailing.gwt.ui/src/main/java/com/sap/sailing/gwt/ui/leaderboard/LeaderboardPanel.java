@@ -530,7 +530,9 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
+                    SettingsDialog<LeaderboardSettings> settingsDialog = new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages);
+                    settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
+                    settingsDialog.show();
                 }
             });
             this.competitorFilterPanel = competitorSearchTextBox;

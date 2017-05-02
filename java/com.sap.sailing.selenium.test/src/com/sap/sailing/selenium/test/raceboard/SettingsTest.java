@@ -86,18 +86,17 @@ public class SettingsTest extends AbstractSeleniumTest {
                 BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
 
         initTrackingForBmwCupRace(adminConsole);
-
-        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES");
         
-        DetailCheckboxInfo[] detailsToSelect = {
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+        
+        DetailCheckboxInfo[] detailsToSelect = new DetailCheckboxInfo[] {
                 // Overall details
 
                 // Race details
-                DetailCheckboxInfo.RACE_TIME,
-                DetailCheckboxInfo.RACE_DISTANCE,
-                DetailCheckboxInfo.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR,
-                DetailCheckboxInfo.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR,
+                DetailCheckboxInfo.RACE_GAP_TO_LEADER,
+                DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
+                DetailCheckboxInfo.DISPLAY_LEGS,
 
                 // Race Start Analysis
 
@@ -109,61 +108,33 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.PENALTY_CIRCLE
 
         };
-        
         
         LeaderboardSettingsDialogPO leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
         LeaderboardSettingsPanelPO leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-        leaderboardSettingsDialog.pressCancel();
-        
-        MapSettingsPO mapSettings = raceboard.openMapSettings();
-        Assert.assertTrue(mapSettings.isWindUp());
-        Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
-        
-        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
-        
-        detailsToSelect = new DetailCheckboxInfo[] {
-                // Overall details
-
-                // Race details
-                DetailCheckboxInfo.DISPLAY_LEGS,
-                DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND, DetailCheckboxInfo.RACE_GAP_TO_LEADER,
-
-                // Race Start Analysis
-
-                // Leg Details
-                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
-
-                // Maneuvers
-                DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE,
-                DetailCheckboxInfo.PENALTY_CIRCLE
-
-        };
-        
-        leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
-        leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
-        selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
-        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
         leaderboardSettingsPanelPO.setRefreshInterval(2);
         leaderboardSettingsDialog.pressMakeDefault();
         leaderboardSettingsDialog.pressCancel();
         
-        mapSettings = raceboard.openMapSettings();
+        MapSettingsPO mapSettings = raceboard.openMapSettings();
         Assert.assertFalse(mapSettings.isWindUp());
         Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
-        mapSettings.setShowSimulationOverlay(true);
+        mapSettings.setTransparentHoverlines(true);
+        mapSettings.setWindUp(false);
         mapSettings.pressMakeDefault();
-        
+
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
                 BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES");
+        
         detailsToSelect = new DetailCheckboxInfo[] {
                 // Overall details
 
                 // Race details
-                DetailCheckboxInfo.RACE_TIME,
+                DetailCheckboxInfo.RACE_GAP_TO_LEADER, //merged from user settings
                 DetailCheckboxInfo.RACE_DISTANCE,
+                DetailCheckboxInfo.RACE_TIME,
+                DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND, //merged from user settings
                 DetailCheckboxInfo.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR,
                 DetailCheckboxInfo.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR,
 
@@ -183,14 +154,65 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-        leaderboardSettingsDialog.pressCancel();
+        
+        detailsToSelect = new DetailCheckboxInfo[] {
+                // Overall details
+
+                // Race details
+                DetailCheckboxInfo.RACE_GAP_TO_LEADER,
+                DetailCheckboxInfo.RACE_DISTANCE,
+                DetailCheckboxInfo.RACE_TIME,
+                DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
+                DetailCheckboxInfo.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL, //new value
+
+                // Race Start Analysis
+
+                // Leg Details
+                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+
+                // Maneuvers
+                DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE,
+                DetailCheckboxInfo.PENALTY_CIRCLE
+
+        };
+        leaderboardSettingsPanelPO.selectDetailsAndDeselectOther(detailsToSelect);
+        leaderboardSettingsPanelPO.setRefreshInterval(1);
+        leaderboardSettingsDialog.pressOk();
         
         mapSettings = raceboard.openMapSettings();
-        //Mode settings
+        //verify default mode settings override custom user settings
         Assert.assertTrue(mapSettings.isWindUp());
+        //verify default mode settings override system defaults
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
-        //User settings
-        Assert.assertTrue(mapSettings.isShowSimulationOverlay());
+        //Verify custom user settings override system defaults
+        Assert.assertTrue(mapSettings.isTransparentHoverlines());
+        mapSettings.setWindUp(false);
+        mapSettings.pressOk();
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES");
+        
+        leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+        leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+        
+        //verify highest precedence of document settings
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+        //verify that document settings are able to override custom user settings by a system default value
+        Assert.assertEquals(1, leaderboardSettingsPanelPO.getRefreshInterval());
+        
+        leaderboardSettingsDialog.pressCancel();
+        mapSettings = raceboard.openMapSettings();
+        //Verify that mode settings are overridden by document settings
+        Assert.assertFalse(mapSettings.isWindUp());
+        
+        //verify that custom document settings override mode settings of other modes
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+        leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+        leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+        selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
     }
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {

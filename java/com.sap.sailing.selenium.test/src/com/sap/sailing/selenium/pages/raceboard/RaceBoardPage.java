@@ -65,9 +65,12 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         WebElement leaderboardSettingsButton = null;
         try {
             leaderboardSettingsButton = findElementBySeleniumId("leaderboardSettingsButton");
+            if(leaderboardSettingsButton == null || !leaderboardSettingsButton.isDisplayed()) {
+                leaderboardSettingsButton = null;
+            }
         } catch(Exception e) {}
         if(leaderboardSettingsButton == null) {
-            findElementBySeleniumId("TouchSplitLayoutPanelToggleButton-leaderboard").click();
+            findElementBySeleniumId("SplitLayoutPanelToggleButton-leaderboard").click();
             leaderboardSettingsButton = findElementBySeleniumId("leaderboardSettingsButton");
         }
         leaderboardSettingsButton.click();

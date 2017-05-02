@@ -38,6 +38,26 @@ public class MapSettingsPO extends DataEntryDialogPO {
         return new CheckBoxPO(driver, showOnlySelectedCompetitorsCheckBox).isSelected();
     }
     
+    public void setShowWindStreamletOverlay(boolean selected) {
+        WebElement element = findElementBySeleniumId("showWindStreamletOverlayCheckBox");
+        new CheckBoxPO(driver, element).setSelected(selected);
+    }
+    
+    public boolean isShowWindStreamletOverlay() {
+        WebElement element = findElementBySeleniumId("showWindStreamletOverlayCheckBox");
+        return new CheckBoxPO(driver, element).isSelected();
+    }
+    
+    public void setTransparentHoverlines(boolean selected) {
+        WebElement element = findElementBySeleniumId("transparentHoverlinesCheckBox");
+        new CheckBoxPO(driver, element).setSelected(selected);
+    }
+    
+    public boolean isTransparentHoverlines() {
+        WebElement element = findElementBySeleniumId("transparentHoverlinesCheckBox");
+        return new CheckBoxPO(driver, element).isSelected();
+    }
+    
     public void setShowSimulationOverlay(boolean selected) {
         WebElement element = findElementBySeleniumId("showSimulationOverlayCheckbox");
         new CheckBoxPO(driver, element).setSelected(selected);
