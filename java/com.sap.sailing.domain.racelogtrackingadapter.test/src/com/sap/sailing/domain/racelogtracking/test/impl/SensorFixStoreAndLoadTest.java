@@ -4,6 +4,7 @@ import static com.sap.sse.common.Util.size;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
@@ -513,9 +515,23 @@ public class SensorFixStoreAndLoadTest {
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {
-        track.lockForRead();
-        assertEquals(expected, size(track.getRawFixes()));
-        track.unlockAfterRead();
+        if (expected == 0) {
+            if (track != null) {
+                track.lockForRead();
+                try {
+                    assertTrue(size(track.getRawFixes()) == 0);
+                } finally {
+                    track.unlockAfterRead();
+                }
+            }
+        } else {
+            track.lockForRead();
+            try {
+                assertEquals(expected, size(track.getRawFixes()));
+            } finally {
+                track.unlockAfterRead();
+            }
+        }
     }
 
     private DoubleVectorFix createBravoDoubleVectorFixWithRideHeight(long timestamp, double rideHeight) {
@@ -749,4 +765,28 @@ public class SensorFixStoreAndLoadTest {
         
         fixLoaderAndTracker.stop(true);
     }
+    
+    @Test
+    /** Test for changes of bug 4044 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4044 */
+    public void testThatNoMoreSensorFixesAreLoadedWhenStartOfTrackingChangesFromNullBySettingStartTime() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
+        addBravoFixes();
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 0);
+        raceLog.add(new RaceLogStartTimeEventImpl(new MillisecondsTimePoint(START_OF_TRACKING), author, 0, 
+                new MillisecondsTimePoint(START_OF_TRACKING)));
+        assertNotNull(trackedRace.getStartOfTracking());
+        trackedRace.waitForLoadingToFinish();
+        testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(null, author, 0));
+        addMoreBravoFixes();
+        trackedRace.waitForLoadingToFinish();
+        // only the initial 3 fixes are available
+        testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
+        fixLoaderAndTracker.stop(true);
+    }
+
 }
