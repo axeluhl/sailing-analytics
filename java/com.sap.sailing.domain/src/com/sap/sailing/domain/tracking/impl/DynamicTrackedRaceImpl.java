@@ -274,8 +274,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if (!onlyWhenInTrackingTimeInterval || isWithinStartAndEndOfTracking(fixTimePoint)) {
             getOrCreateTrack(mark).addGPSFix(fix);
         } else {
-			logger.finer(() -> "Dropped fix " + fix + " because it is outside the tracking interval "
-					+ getStartOfTracking() + ".." + getEndOfTracking());
+            logger.finer(() -> "Dropped fix " + fix + " because it is outside the tracking interval "
+                    + getStartOfTracking() + ".." + getEndOfTracking());
         }
     }
 
