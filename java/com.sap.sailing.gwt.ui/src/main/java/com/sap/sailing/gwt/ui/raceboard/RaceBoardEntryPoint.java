@@ -103,13 +103,13 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
                 final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRaceBoard(raceboardContextDefinition);
                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(raceboardData.getRace().getRaceIdentifier(), StringMessages.INSTANCE);
-                RaceBoardComponentContext context = new RaceBoardComponentContext(lifeCycle, new UserSettingsStorageManagerWithPatching<>(getUserService(), storageDefinitionId));
+                RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, new UserSettingsStorageManagerWithPatching<>(getUserService(), storageDefinitionId));
                 
-                context.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
+                componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override
                     public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
                         Timer timer = new Timer(PlayModes.Replay, 1000l);
-                        final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, context, initialSettings,
+                        final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, componentContext, initialSettings,
                                         raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle, timer);
                                 if (finalMode != null) {
                                     finalMode.getMode().applyTo(raceBoardPanel);

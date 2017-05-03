@@ -97,10 +97,7 @@ public interface ComponentContext<S extends Settings> {
      * The provided callback gets called when initial/default settings are available. Depending on implementation
      * the callback may be called after a delay, e.g. after the settings have been retrieved from a server,
      * or immediately, e.g. when the implementation does not query information from server.
-     * This method produces no side-effects if it gets called multiple times. Be aware, that each call of this method
-     * may produce a server round-trip. That's why  {@link #getInitialSettings(OnSettingsLoadedCallback)} should be
-     * preferred for initial settings retrievement. Use this method only, if due to some event a separate retrievement
-     * of settings for a component is required.
+     * This method produces no side-effects if it gets called multiple times.
      * 
      * @param settingsReceiverCallback The callback which supplies the caller with initial settings
      */

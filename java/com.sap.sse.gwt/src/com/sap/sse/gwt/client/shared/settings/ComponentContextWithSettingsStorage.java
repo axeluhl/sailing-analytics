@@ -42,6 +42,11 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *            
  */
 public class ComponentContextWithSettingsStorage<S extends Settings> extends SimpleComponentContext<S> {
+    
+    /**
+     * Settings which have been already constructed, or {@code null} if settings have not been initialized yet.
+     */
+    protected S cachedRootComponentSettings = null;
 
     /**
      * Manages the persistence layer of settings.
@@ -61,28 +66,55 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
     
     /**
+     * Retrieves the initial settings and caches them for further calls of
+     * {@link #getInitialSettings(OnSettingsLoadedCallback)} and {@link #getInitialSettingsForComponent(Component, OnSettingsLoadedCallback)}.
+     */
+    public void initialize() {
+        getInitialSettings(new OnSettingsLoadedCallback<S>() {
+            @Override
+            public void onError(Throwable caught, S fallbackDefaultSettings) {}
+            @Override
+            public void onSuccess(S settings) {}
+        });
+    }
+    
+    /**
      * Gets initial settings and passes these settings to the provided callback.
      * The provided callback gets called when initial/default settings are available. The callback may be called after a delay, e.g. after the settings have been retrieved from a server,
      * or immediately, e.g. when the implementation does not query information from server.
-     * This method produces no side-effects if it gets called multiple times.
+     * This method produces no side-effects if it gets called multiple times. After this method has been called for the first time, subsequent calls will not produce any server round-trips
+     * or LocalStorage accesses due to its internal caching.
      * 
      * @param settingsReceiverCallback The callback which supplies the caller with initial settings
      */
     @Override
-    public void getInitialSettings(OnSettingsLoadedCallback<S> callback) {
-        S systemDefaultSettings = rootLifecycle.createDefaultSettings();
-        settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, callback);
+    public void getInitialSettings(final OnSettingsLoadedCallback<S> callback) {
+        if(cachedRootComponentSettings == null) {
+            S systemDefaultSettings = rootLifecycle.createDefaultSettings();
+            settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, new OnSettingsLoadedCallback<S>() {
+
+                @Override
+                public void onError(Throwable caught, S fallbackDefaultSettings) {
+                    cachedRootComponentSettings = fallbackDefaultSettings;
+                    callback.onError(caught, fallbackDefaultSettings);
+                }
+
+                @Override
+                public void onSuccess(S settings) {
+                    cachedRootComponentSettings = settings;
+                    callback.onSuccess(settings);
+                }
+            });
+        } else {
+            callback.onSuccess(cachedRootComponentSettings);
+        }
     }
     
     /**
      * Gets initial settings of the provided component and passes these settings to the provided callback.
      * The provided callback gets called when initial/default settings are available. The callback may be called after a delay, e.g. after the settings have been retrieved from a server,
      * or immediately, e.g. when the implementation does not query information from server.
-     * This method produces no side-effects if it gets called multiple times. Be aware, that each call of this method
-     * may produce a server round-trip. That's why  {@link #getInitialSettings(OnSettingsLoadedCallback)} should be
-     * preferred for initial settings retrievement. Use this method only, if due to some event a separate retrievement
-     * of settings for a component is required.
-     * 
+     * This method produces no side-effects if it gets called multiple times.
      * @param settingsReceiverCallback The callback which supplies the caller with initial settings
      */
     @Override
@@ -102,6 +134,10 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             }
         };
         getInitialSettings(internalCallback);
+    }
+    
+    protected void invalidateCachedSettings() {
+        cachedRootComponentSettings = null;
     }
 
     /**
@@ -142,6 +178,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      */
     @Override
     public<CS extends Settings> void makeSettingsDefault(Component<CS> component, CS newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
+        invalidateCachedSettings();
         ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()), rootLifecycle);
         CS globalSettings = targetLifecycle.extractGlobalSettings(newDefaultSettings);
         updateGlobalSettings(component.getPath(), globalSettings, onSettingsStoredCallback);
@@ -160,6 +197,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      */
     @Override
     public<CS extends Settings> void storeSettingsForContext(Component<CS> component, CS newSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
+        invalidateCachedSettings();
         ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()), rootLifecycle);
         CS contextSpecificSettings = targetLifecycle.extractContextSpecificSettings(newSettings);
         updateContextSpecificSettings(component.getPath(), contextSpecificSettings, onSettingsStoredCallback);

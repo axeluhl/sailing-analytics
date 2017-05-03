@@ -39,6 +39,11 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class UserSettingsStorageManager<S extends Settings> implements SettingsStorageManager<S> {
     
     /**
+     * {@code SettingsJsons} which have which have been already queried from persistence layer, or {@code null} if previous settings retrievement has not been initiated.
+     */
+    protected SettingsJsons cachedSettingsJsons = null;
+    
+    /**
      * The pipeline used for the settings construction.
      */
     protected final SettingsBuildingPipeline settingsBuildingPipeline;
@@ -152,21 +157,28 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
      */
     @Override
     public void retrieveDefaultSettings(final S defaultSettings, final OnSettingsLoadedCallback<S> callback) {
-        retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                SettingsStrings localStorageSettings = retrieveSettingsStringsFromLocalStorage();
-                S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(defaultSettings, localStorageSettings);
-                callback.onError(caught, newDefaultSettings);
-            }
-
-            @Override
-            public void onSuccess(SettingsJsons settingsJsons) {
-                S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(defaultSettings, settingsJsons);
-                callback.onSuccess(newDefaultSettings);
-            }
-        });
+        if(cachedSettingsJsons == null) {
+            retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
+    
+                @Override
+                public void onFailure(Throwable caught) {
+                    SettingsStrings localStorageSettings = retrieveSettingsStringsFromLocalStorage();
+                    S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(defaultSettings, localStorageSettings);
+                    cachedSettingsJsons = settingsBuildingPipeline.getSettingsStringConverter().convertToSettingsJson(localStorageSettings);
+                    callback.onError(caught, newDefaultSettings);
+                }
+    
+                @Override
+                public void onSuccess(SettingsJsons settingsJsons) {
+                    S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(defaultSettings, settingsJsons);
+                    cachedSettingsJsons = settingsJsons;
+                    callback.onSuccess(newDefaultSettings);
+                }
+            });
+        } else {
+            S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(defaultSettings, cachedSettingsJsons);
+            callback.onSuccess(newDefaultSettings);
+        }
     }
     
     /**
@@ -217,6 +229,7 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
     }
     
     private void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback, boolean storeGlobalSettings, boolean storeContextSpecificSettings) {
+        invalidateCache();
         SettingsStrings settingsStrings = settingsBuildingPipeline.getSettingsStringConverter().convertToSettingsStrings(settingsJsons);
         storeSettingsStringsOnLocalStorage(settingsStrings, storeGlobalSettings, storeContextSpecificSettings);
         if (userService.getCurrentUser() != null) {
@@ -226,6 +239,10 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
         }
     }
     
+    public void invalidateCache() {
+        cachedSettingsJsons = null;
+    }
+
     /**
      * {@inheritDoc}
      */

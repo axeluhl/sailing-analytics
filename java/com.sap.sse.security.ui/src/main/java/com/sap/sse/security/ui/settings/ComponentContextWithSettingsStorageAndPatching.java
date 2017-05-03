@@ -61,6 +61,7 @@ public class ComponentContextWithSettingsStorageAndPatching<S extends Settings> 
      * @param settingsPatch The settings patch to apply on settings
      */
     public<CS extends Settings> void addPatchForLoadingSettings(Component<CS> component, PipelineLevel pipelineLevel, SettingsPatch<CS> settingsPatch) {
+        invalidateCachedSettings();
         settingsStorageManager.addPatchForLoadingSettings(component, pipelineLevel, settingsPatch);
     }
 
