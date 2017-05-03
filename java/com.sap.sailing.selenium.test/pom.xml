@@ -17,7 +17,7 @@
     <!-- NOTE: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the local 
       settings.xml, because of the differences between the CI-Build and the local setup. -->
     <tycho.tests.argLine>
-      ${parameters.integration-tests} ${parameters.proxy} ${parameters.jetty} -Xmx1024m
+      ${parameters.integration-tests} ${parameters.proxy} ${parameters.jetty} -Xmx1536m
     </tycho.tests.argLine>
   </properties>
 
@@ -38,6 +38,16 @@
               <requirement>
                 <type>eclipse-feature</type>
                 <id>com.sap.sailing.feature.runtime</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+              <requirement>
+                <type>eclipse-feature</type>
+                <id>com.sap.sse.feature</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+              <requirement>
+                <type>eclipse-feature</type>
+                <id>com.sap.sse.feature.runtime</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
@@ -166,6 +176,11 @@
                 </bundle>
                 <bundle>
                   <id>com.sap.sailing.datamining</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sailing.polars</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>

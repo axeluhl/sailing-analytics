@@ -22,7 +22,44 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+    
+                    <h2 class="articleSubheadline">April 2017</h2>
+                    <ul class="bulletList">
+                        <li><code>/gwt/AutoPlay.html</code> can be fully parameterized. Previously, only few of the
+                            available settings for Leaderboard and RaceBoard embedded into this view were effectively passed via URL
+                            to the views. <code>/gwt/AutoPlay.html</code> is now based on the settings framework so that specific
+                            URL parameters may have changed. Please recreate your bookmarks if you are affected by non-working parameters.
+                        </li>
+                        <li>The leaderboard configuration dialog in the admin console has been updated. Now it is possible to configure
+                        a leaderboard with the whole range of settings it supports.
+                        </li>
+                    </ul>
 
+                    <h2 class="articleSubheadline">April 2017</h2>
+                    <ul class="bulletList">
+                    	<li>Marks can now be given any valid CSS color. This will be considered also in the
+                    	    SAP Race Management app where the mark will be shown in their actual color in
+                    	    the "By Marks" course editor.
+                    	</li>
+                    	<li>Polar diagrams (also known as VPPs) will now be updated after importing wind.
+                    	</li>
+                    	<li>Competitors that the TracTrac connector declares as "non-competing" are consistently
+                    	    ignored. This may include camera boats, jury boats and other moving objects that do
+                    	    not represent competitor boats.
+                    	</li>
+                    	<li>Upgraded to TracAPI 3.6.3 which offers improvements regarding the identification of
+                    	    marks and waypoints.
+                    	</li>
+                    	<li>A bug regarding the regatta filter setting for the tracked races list has been fixed.
+                    	    The filter setting now survives a refresh cycle of the tracked races list.
+                    	</li>
+                    	<li>When using the TracTrac connector, identification of marks has slightly changed for
+                    	    gates and lines. Before, the mark IDs were constructed based on the control point's
+                    	    name. Now, the control point's ID plus a numeric suffic (1/2) is used instead,
+                    	    providing uniqueness at the same scope that TracTrac provides uniqueness regarding
+                    	    their control point IDs. 
+                    	</li>
+                    </ul>
                     <h2 class="articleSubheadline">March 2017</h2>
                     <ul class="bulletList">
                     	<li>A more compact internal storage format for GPS and Wind fixes is now being used. Instead of a full

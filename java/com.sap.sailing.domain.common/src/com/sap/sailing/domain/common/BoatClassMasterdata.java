@@ -65,6 +65,7 @@ public enum BoatClassMasterdata {
     LASER_INT ("Laser Int.", true, 4.19, 1.39, BoatHullType.MONOHULL, false, "Laser", "LSR"),
     LASER_SB3 ("Laser SB3", true, 6.15, 2.15, BoatHullType.MONOHULL, false, "LSB3", "SB20"),
     LAGO_26 ("Lago 26", true, 7.95, 2.50, BoatHullType.MONOHULL, true, "Lago26"),
+    LONGTZE ("Longtze", true, 6.85, 2.57, BoatHullType.MONOHULL, true, "Swiss Longtze Class"),
     M32 ("M32", false, 9.70, 5.50, BoatHullType.CATAMARAN, true, "M/32", "M32 Catamaran", "M/32 Catamaran"),
     MELGES_20 ("Melges 20", true, 6.10, 2.13, BoatHullType.MONOHULL, true, "Melges-20", "M20"),
     MELGES_24 ("Melges 24", true, 7.32, 2.50, BoatHullType.MONOHULL, true, "Melges-24", "M24"),

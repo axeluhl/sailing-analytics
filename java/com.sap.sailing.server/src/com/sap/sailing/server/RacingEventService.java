@@ -318,13 +318,19 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
     /**
-     * @param series the series must not have any {@link RaceColumn}s yet
-     * @param controlTrackingFromStartAndFinishTimes TODO
+     * @param series
+     *            the series must not have any {@link RaceColumn}s yet
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
      */
     Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
-    
+
+    /**
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
+     */
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,

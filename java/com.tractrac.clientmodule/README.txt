@@ -17,6 +17,21 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.6.1 ****************
+********************************************
+This is a final version. It adds support for these new features:
+
+- IControl and IRace now have a method getCourseArea() that returns the course area.
+- IControlPoint has a getId method that returns the UUID. It will be initialized with the value set in the P1.UUID and
+  P2.UUID properties defined in the parent IControl. In case these properties are not defined the UUID will fallback to
+  the parent IControl UUID.
+
+Release date: 04/04/2017
+Build number: 13554
+
+This version provides a new JavaDoc version.
+
+********************************************
 ************* TracAPI 3.6.0 ****************
 ********************************************
 This is a final version. It change the signature of a couple of methods, breaking the

@@ -10,12 +10,12 @@ import com.sap.sailing.domain.common.Speed;
  * types that sacrifice very little accuracy from a real-world perspective, yet use a data type for
  * encoding that requires fewer bytes than a {@code double} value.<p>
  * 
- * Latitude and longitude values are represented using a signed {@code int} value, scaling their range (-90°..+90° and
- * -180°..+180°, respectively over the full {@code int} range. This gives a resolution of 4.6mm for latitudes,
+ * Latitude and longitude values are represented using a signed {@code int} value, scaling their range (-90Â°..+90Â° and
+ * -180Â°..+180Â°, respectively over the full {@code int} range. This gives a resolution of 4.6mm for latitudes,
  * and at the equator of 9.3mm for longitudes.<p>
  * 
- * Bearings / courses over ground are represented as a signed {@code short} value, mapping the range of -360°..+360° to the
- * value range of the {@code short} datatype. This results in a resolution of 0.01°.<p>
+ * Bearings / courses over ground are represented as a signed {@code short} value, mapping the range of -360Â°..+360Â° to the
+ * value range of the {@code short} datatype. This results in a resolution of 0.01Â°.<p>
  * 
  * Speed values are represented in knots in their compact form; lossy compaction uses a signed {@code short} value for
  * the knot speeds, assuming a range of -500kts..+500kts, spreading this range over the value range of the {@code short}

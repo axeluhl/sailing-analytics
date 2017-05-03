@@ -2,39 +2,37 @@ package com.sap.sailing.gwt.autoplay.client.shared.leaderboard;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
+/**
+ * A special stand alone Leaderboard with an SAP Header is handled by this lifecycle
+ *
+ */
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings> {
     
     private final SAPHeaderComponentLifecycle sapHeaderLifecycle;
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
     private final StringMessages stringMessages;
+    
+    public static final String ID = "lbwh";
 
     public LeaderboardWithHeaderPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
-        super();
         this.stringMessages = stringMessages;
         this.leaderboardPanelLifecycle = new LeaderboardPanelLifecycle(leaderboard, stringMessages);
         this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " +
                 (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName()),
                         stringMessages);
         
-        this.componentLifecycles.add(leaderboardPanelLifecycle);
-        this.componentLifecycles.add(sapHeaderLifecycle);
+        addLifeCycle(leaderboardPanelLifecycle);
+        addLifeCycle(sapHeaderLifecycle);
     }
     
     @Override
     public LeaderboardWithHeaderPerspectiveSettings createPerspectiveOwnDefaultSettings() {
         return new LeaderboardWithHeaderPerspectiveSettings();
-    }
-
-    @Override
-    public PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> cloneSettings(
-            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
     }
 
     @Override
@@ -60,4 +58,20 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
         return leaderboardPanelLifecycle;
     }
 
+    @Override
+    public String getComponentId() {
+        return ID;
+    }
+
+    @Override
+    protected LeaderboardWithHeaderPerspectiveSettings extractOwnGlobalSettings(
+            LeaderboardWithHeaderPerspectiveSettings settings) {
+        return settings;
+    }
+
+    @Override
+    protected LeaderboardWithHeaderPerspectiveSettings extractOwnContextSettings(
+            LeaderboardWithHeaderPerspectiveSettings settings) {
+        return settings;
+    }
 }

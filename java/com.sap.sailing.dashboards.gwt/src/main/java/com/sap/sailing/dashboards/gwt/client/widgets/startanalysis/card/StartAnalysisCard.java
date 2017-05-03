@@ -34,8 +34,8 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -170,7 +170,9 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        raceMap = new RaceMap(new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings, sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
+        raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings,
+                sailingServiceAsync,
+                asyncActionsExecutor, null, timer, competitorSelectionModel, 
                 StringMessages.INSTANCE, startAnalysisDTO.regattaAndRaceIdentifier,
                 raceMapResources, /* showHeaderPanel */ true);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);

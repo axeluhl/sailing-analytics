@@ -40,6 +40,8 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorContextDefinition;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -53,6 +55,7 @@ import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
+import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 
 /**
  * 
@@ -230,11 +233,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         Column<LeaderboardGroupDTO, SafeHtml> groupsNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(groupsNameAnchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Spectator.html?"+
-                        (showRaceDetails ? "showRaceDetails=true&" : "") +
-                        "leaderboardGroupName=" + group.getName() + "&root=overview"
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                String link = new LinkWithSettingsGenerator<SpectatorSettings>(new SpectatorContextDefinition(group.getName()))
+                        .createUrl(new SpectatorSettings(showRaceDetails));
                 return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), group.getName());
             }
         };

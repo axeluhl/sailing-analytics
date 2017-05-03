@@ -85,7 +85,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                validate();
+                validateAndUpdate();
             }
         });
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);

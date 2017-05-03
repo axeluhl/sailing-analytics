@@ -279,7 +279,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                             estimatedDistanceProbability = 1; // can't tell distance sailed either because we don't know the start time
                         } else {
                             // no gate start and we know the race start time
-                            if (late.getWaypoint() == race.getRace().getCourse().getFirstWaypoint()) {
+                            if (late.getWaypoint() != null && late.getWaypoint() == race.getRace().getCourse().getFirstWaypoint()) {
                                 // no skips; going from the start proxy node to a candidate for the start mark passing;
                                 // calculate the probability for the start being the start given its timing and multiply
                                 // with the estimation for the distance-based probability:

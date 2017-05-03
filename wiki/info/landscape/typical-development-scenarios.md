@@ -252,3 +252,13 @@ Now connect an Eclipse debugger to that VM's port 8000. This may require an SSH 
 $ stop debugging
 $ exit
 </pre>
+
+## Upgrade TracTrac TracAPI Release
+
+The TracAPI is a Java API provided by TracTrac that allows applications to interact with TracTrac's tracking services. It comes as a binary JAR file, a JAR file containing the source code of the API interfaces, as well as a JAR file containing the Javadocs. The SAP Sailing Analytics wrap all of this in an OSGi bundle called ``com.tractrac.clientmodule``. We keep this bundle's version in sync with the TracAPI version. The version is encoded in the ``META-INF/MANIFEST.MF`` file as well as the Maven ``pom.xml`` file and needs to be adjusted during an upgrade.
+
+When TracTrac publishes a TracAPI upgrade, they usually notify us by e-mail and provide download locations for the new release pointing to TracTrac's Maven site, such as http://tracdev.dk/maven-sites-clients/releases/TracAPI-3.6.3.tar.gz. You will need credentials for that site.
+
+After downloading, extract the ``lib/TracAPI.jar`` and ``src/TracAPI-src.jar`` from the ``TracAPI-x.y.z.tar.gz`` to ``java/com.tractrac.clientmodule/lib``. Unpack the ``TracAPI-x.y.z-javadoc.tar.gz`` into ``java/com.tractrac.clientmodule/javadoc`` and adjust the versions in ``META-INF/MANIFEST.MF`` and ``pom.xml`` accordingly. Unpack the ``Readme.txt`` file from ``TracAPI-x.y.z.tar.gz`` to ``java/com.tractrac.clientmodule``. Optionally, unpack the sample sources from the ``src/com`` folder contained in ``TracAPI-x.y.z.tar.gz`` into ``java/com.tractrac.clientmodule/src``.
+
+For non-trivial upgrades use of a git branch and dedicated build job is recommended. Otherwise, committing and pushing to master with the ``SAPSailingAnalytics-master`` build job picking up and testing the changes should suffice.

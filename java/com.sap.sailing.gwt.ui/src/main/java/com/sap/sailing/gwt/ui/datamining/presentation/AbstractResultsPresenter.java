@@ -16,6 +16,8 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public abstract class AbstractResultsPresenter<SettingsType extends Settings> extends AbstractComponent<SettingsType>
 implements ResultsPresenterWithControls<SettingsType> {
@@ -36,7 +38,9 @@ implements ResultsPresenterWithControls<SettingsType> {
     private boolean isCurrentResultSimple;
     private boolean isCurrentResultTwoDimensional;
     
-    public AbstractResultsPresenter(StringMessages stringMessages) {
+    public AbstractResultsPresenter(Component<?> parent, ComponentContext<?> context,
+            StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         mainPanel = new DockLayoutPanel(Unit.PX);
         

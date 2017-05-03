@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -54,11 +53,13 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.panels.CustomizableFilterablePanel;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
-public abstract class AbstractTrackedRacesListComposite extends SimplePanel
-        implements Component<TrackedRacesSettings>, RegattasDisplayer {
+public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
+        RegattasDisplayer {
 
     protected final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
 
@@ -96,9 +97,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
         }
     }
 
-    public AbstractTrackedRacesListComposite(final SailingServiceAsync sailingService,
+    public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
+            final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages, boolean hasMultiSelection) {
+        super(parent, context);
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
@@ -129,14 +132,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
         VerticalPanel panel = new VerticalPanel();
-        setWidget(panel);
+        initWidget(panel);
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
         
         noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
-
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new FlushableCellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRacesCellTable");
@@ -183,7 +185,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
         filterablePanelRaces.add(lblFilterRacesByName);
         filterablePanelRaces.addDefaultTextBox();
         filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
-
+        
         filterPanel.add(filterablePanelRaces);
         filterPanel.setCellVerticalAlignment(filterablePanelRaces, HasVerticalAlignment.ALIGN_MIDDLE);
 
@@ -586,8 +588,4 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
         return refreshableSelectionModel;
     }
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
-    }
 }
