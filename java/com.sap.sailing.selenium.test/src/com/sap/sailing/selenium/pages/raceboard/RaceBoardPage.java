@@ -70,6 +70,14 @@ public class RaceBoardPage extends HostPageWithAuthentication {
             }
         } catch(Exception e) {}
         if(leaderboardSettingsButton == null) {
+            WebElement toggleButtonElement = findElementBySeleniumId("SplitLayoutPanelToggleButton-leaderboard");
+            waitUntil(new BooleanSupplier() {
+
+                @Override
+                public boolean getAsBoolean() {
+                    return toggleButtonElement.isDisplayed();
+                }
+            });
             findElementBySeleniumId("SplitLayoutPanelToggleButton-leaderboard").click();
             leaderboardSettingsButton = findElementBySeleniumId("leaderboardSettingsButton");
         }

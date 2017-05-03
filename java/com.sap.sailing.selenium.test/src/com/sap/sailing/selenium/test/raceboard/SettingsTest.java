@@ -109,6 +109,8 @@ public class SettingsTest extends AbstractSeleniumTest {
 
         };
         
+        Thread.sleep(45 * 1000);
+        
         LeaderboardSettingsDialogPO leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
         LeaderboardSettingsPanelPO leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
