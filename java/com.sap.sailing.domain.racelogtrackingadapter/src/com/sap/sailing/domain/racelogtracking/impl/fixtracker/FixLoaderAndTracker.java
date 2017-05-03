@@ -56,10 +56,6 @@ import com.sap.sse.util.ThreadPoolUtil;
  * </ul>
  * 
  */
-/**
- * @author sschaefe
- *
- */
 public class FixLoaderAndTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
     protected final DynamicTrackedRace trackedRace;
