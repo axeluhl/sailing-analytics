@@ -3,7 +3,7 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="lb_res" type="com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources" />
-    <ui:style>
+    <ui:style type="com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardTabView.Style">
         .mainPanel {
             position: relative;
         }
@@ -11,14 +11,17 @@
             text-align: right;
             position: absolute;
         }
+        .showLiveRacesActive {
+            background-color: red;
+        }
     </ui:style>
     <g:FlowPanel addStyleNames="{res.mediaCss.grid} {style.mainPanel}">
         <g:FlowPanel ui:field="liveRacesContainer" addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmedium}">
-	        <dp:liveraces.LiveRacesList ui:field="liveRaces" />
+            <dp:liveraces.LiveRacesList ui:field="liveRaces" />
         </g:FlowPanel>
         <g:FlowPanel ui:field="buttonContainer" addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopsmall} {style.buttons}">
-            <g:Anchor href="javascript:;" ui:field="collapseLiveRacesButton" title="{i18n.hideLiveNow}" 
-                    addStyleNames="{res.mainCss.button} {lb_res.css.regattaleaderboard_meta_liveraces_button}" />
+            <g:Anchor href="javascript:;" ui:field="collapseLiveRacesButton" title="{i18n.showLiveNow}" 
+                    addStyleNames="{res.mainCss.button} {lb_res.css.regattaleaderboard_meta_liveraces_button} {style.showLiveRacesActive}" />
             <g:Anchor href="javascript:;" ui:field="fullscreenButton" title="{i18n.openFullscreenView}"
                     addStyleNames="{res.mainCss.button} {lb_res.css.regattaleaderboard_meta_fullscreen_button}" />
         </g:FlowPanel>

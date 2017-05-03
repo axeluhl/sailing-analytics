@@ -3,15 +3,13 @@ package com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -45,10 +43,15 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     interface MyBinder extends UiBinder<FlowPanel, RegattaLeaderboardTabView> {
     }
 
+    interface Style extends CssResource {
+        String showLiveRacesActive();
+    }
+
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     private Presenter currentPresenter;
 
+    @UiField Style style;
     @UiField FlowPanel buttonContainer;
     @UiField FlowPanel liveRacesContainer;
     @UiField(provided = true) LiveRacesList liveRaces;
@@ -96,6 +99,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
                     leaderboard = new OldLeaderboard(leaderboardDelegate);
                     liveRaces = new LiveRacesList(currentPresenter, false);
                     initWidget(ourUiBinder.createAndBindUi(RegattaLeaderboardTabView.this));
+                    style.ensureInjected();
                     leaderboardAndLiveRacesPresenter = new OldLeaderboardAndLiveRacesPresenter(leaderboard, liveRaces,
                             buttonContainer, liveRacesContainer, leaderboardDelegate);
                     RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(RegattaLeaderboardTabView.this,
@@ -183,7 +187,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         private final LiveRacesList liveRaces;
         private final FlowPanel buttonContainer, liveRacesContainer;
         private final OldLeaderboardDelegateFullscreenViewer leaderboardDelegate;
-        boolean enabled = false;
+        boolean show = false, available = false;
 
         private OldLeaderboardAndLiveRacesPresenter(OldLeaderboard leaderboard, LiveRacesList liveRaces,
                 FlowPanel buttonContainer, FlowPanel liveRacesContainer,
@@ -193,62 +197,47 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             this.buttonContainer = buttonContainer;
             this.liveRacesContainer = liveRacesContainer;
             this.leaderboardDelegate = leaderboardDelegate;
-            ClickHandler showLivesRacesClickHandler = getShowLivesRacesClickHandler();
+
+            ClickHandler showLivesRacesClickHandler = event -> setShowLiveRaces(!show);
             this.leaderboard.getShowLiveRacesControl().addClickHandler(showLivesRacesClickHandler);
             this.leaderboardDelegate.getShowLiveRacesControl().addClickHandler(showLivesRacesClickHandler);
-            this.leaderboard.getFullscreenControl().addClickHandler(getFullscreenClickHandler());
-            this.configureLeaderboardDelegate();
-            this.setShowLiveRaces(false);
-        }
+            this.leaderboardDelegate.getShowLiveRacesControl().setTitle(StringMessages.INSTANCE.showLiveNow());
 
-        private ClickHandler getShowLivesRacesClickHandler() {
-            return new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    OldLeaderboardAndLiveRacesPresenter.this.setShowLiveRaces(!liveRacesContainer.isVisible());
-                }
-            };
-        }
-
-        private void configureLeaderboardDelegate() {
-            leaderboardDelegate.addCloseHandler(new CloseHandler<PopupPanel>() {
-                @Override
-                public void onClose(CloseEvent<PopupPanel> event) {
-                    liveRaces.removeFromParent();
-                    liveRacesContainer.add(liveRaces);
-                }
+            this.leaderboardDelegate.addCloseHandler(event -> {
+                liveRaces.removeFromParent();
+                liveRacesContainer.add(liveRaces);
             });
-        }
-
-        private ClickHandler getFullscreenClickHandler() {
-            return new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    liveRaces.removeFromParent();
-                    leaderboardDelegate.setLiveRacesPanel(liveRaces);
-                }
-            };
+            this.leaderboard.getFullscreenControl().addClickHandler(event -> {
+                liveRaces.removeFromParent();
+                leaderboardDelegate.setLiveRacesPanel(liveRaces);
+            });
+            this.setShowLiveRaces(false);
         }
 
         private RefreshableWidget<CollectionResult<LiveRaceDTO>> getLiveRacesRefreshableWrapper() {
             return new RefreshableWidget<CollectionResult<LiveRaceDTO>>() {
                 @Override
                 public void setData(CollectionResult<LiveRaceDTO> data) {
-                    enabled = data != null && !data.getValues().isEmpty();
-                    leaderboardDelegate.getShowLiveRacesControl().setVisible(enabled);
-                    OldLeaderboardAndLiveRacesPresenter.this.setShowLiveRaces(liveRacesContainer.isVisible());
+                    available = data != null && !data.getValues().isEmpty();
+                    OldLeaderboardAndLiveRacesPresenter.this.updateLiveRaces();
                     liveRaces.getRefreshable().setData(data);
                 }
             };
         }
 
         private void setShowLiveRaces(boolean show) {
-            leaderboard.getShowLiveRacesControl().setVisible(enabled && !show);
-            leaderboard.getFullscreenControl().setVisible(!enabled || !show);
-            buttonContainer.setVisible(enabled && show);
-            liveRacesContainer.setVisible(enabled && show);
-            leaderboardDelegate.setShowLiveRaces(enabled && show);
+            this.show = show;
+            leaderboard.getShowLiveRacesControl().setStyleName(style.showLiveRacesActive(), show);
+            leaderboardDelegate.getShowLiveRacesControl().setStyleName(style.showLiveRacesActive(), show);
+            this.updateLiveRaces();
         }
 
+        private void updateLiveRaces() {
+            leaderboard.getShowLiveRacesControl().setVisible(!available || !show);
+            leaderboard.getFullscreenControl().setVisible(!available || !show);
+            buttonContainer.setVisible(available && show);
+            liveRacesContainer.setVisible(available && show);
+            leaderboardDelegate.setShowLiveRaces(available && show);
+        }
     }
 }
