@@ -34,6 +34,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -113,6 +114,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         new FixLoaderAndTracker(trackedRace, store, null);
         
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(TimePoint.BeginningOfTime, author, 0));
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
