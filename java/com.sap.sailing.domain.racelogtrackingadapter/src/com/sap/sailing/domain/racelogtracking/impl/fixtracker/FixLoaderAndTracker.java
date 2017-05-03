@@ -16,6 +16,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMapping
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
@@ -32,6 +33,8 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
@@ -47,10 +50,49 @@ import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * This class listens to RaceLog Events, changes to the race and fix loading events and properly handles mappings and
- * fix loading.
- *
+ * fix loading.<br>
+ * The two main responsibility are to 1. load fixes already available in the DB when a race is tracked and 2. add fixes
+ * newly send by trackers to {@link Track}s of a {@link TrackedRace} if the fix is relevant for the race. In order to
+ * save memory we try to keep the set of loaded fixes as constrained as possible. In general the following rules apply:
  * <ul>
- * <li>{@link RaceChangeListener},</li>
+ * <li>The fixes loaded to a track for a specific item (Mark, Competitor) are associated to a device that needs to be
+ * mapped to the specific item using a {@link RegattaLogDeviceMappingEvent} in the {@link RegattaLog}. Only fixes that
+ * are associated to the mapped device in the mapped {@link TimeRange} are allowed to be loaded into an item's
+ * {@link Track}</li>
+ * <li>If startOfTracking isn't available for the underlying {@link TrackedRace}, no fixes are loaded at all. This
+ * prevents everything to be loaded in cases where a device is mapped for a whole {@link Regatta}'s time range and a
+ * late race is tracked without startOfTracking being initially available.</li>
+ * <li>If endOfTracking isn't available yet for a race, all fixes after startOfTracking are loaded into the respective
+ * {@link Track}. This case is assumed to only occur in live scenarios where the endOfTracking is defined late while
+ * boats cross the finishing line. This isn't much of a problem because no fixes are available for the future.</li>
+ * <li>No loaded fixes are ever removed from {@link Track}s. Even if the tracking times change to be more restrictive,
+ * the fixes in the time range not covered anymore are held in the {@link Track}.</li>
+ * </ul>
+ * Marks can either be tracked or just pinged using the respective app. If a Mark is pinged early in the morning before
+ * the start of a race, no fix is available for this Mark in the tracked {@link TimeRange}. The semantic of pinging a
+ * Mark is that the position is assumed to be correct until it is pinged again. So in extreme cases this single fix
+ * needs to be used for all races of a day. To ensure this semantic there are additional special rules for
+ * {@link Mark}s:
+ * <ul>
+ * <li>Fixes in the tracking time range are loaded/tracked using the above mentioned rules.</li>
+ * <li>If at least one fix is available, no additional fix is loaded at all. If no fix is available for a {@link Mark}
+ * in the tracking time range, the following rules apply:
+ * <ul>
+ * <li>If no fix isn't available yet before/after the tracking time range, the single fix is loaded that is the best
+ * (nearest) before startOfTracking/after endOfTracking.</li>
+ * <li>If additional fixes get available (either by tracking or by a new device mapping), only the best single fixes are
+ * taken using the rule above. If there is already a best fix before startOfTracking/after endOfTracking, the new best
+ * fix is only used if it is better (nearer) as the existing one.</li>
+ * </ul>
+ * </li>
+ * </ul>
+ * There is a corner cases that is assumed to be acceptable for the specific semantic of a {@link Mark}'s fixes:<br>
+ * If a Marks is tracked and not pinged, any new fix transferred from the tracking device is treated as being better
+ * than the one before. So all fixes are being recorded starting at the time point when the operator starts tracking for
+ * a race and startOfTracking is in the future.<br>
+ * Some related classes:
+ * <ul>
+ * <li>{@link RaceChangeListener}</li>
  * <li>{@link RegattaLogEventVisitor}</li>
  * <li>{@link FixReceivedListener}</li>
  * </ul>
