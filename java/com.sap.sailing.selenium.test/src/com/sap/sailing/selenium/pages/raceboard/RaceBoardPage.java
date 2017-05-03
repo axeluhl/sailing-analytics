@@ -73,6 +73,14 @@ public class RaceBoardPage extends HostPageWithAuthentication {
             findElementBySeleniumId("SplitLayoutPanelToggleButton-leaderboard").click();
             leaderboardSettingsButton = findElementBySeleniumId("leaderboardSettingsButton");
         }
+        final WebElement finalLeaderboardSettingsButton = leaderboardSettingsButton;
+        waitUntil(new BooleanSupplier() {
+
+            @Override
+            public boolean getAsBoolean() {
+                return finalLeaderboardSettingsButton.isDisplayed();
+            }
+        });
         leaderboardSettingsButton.click();
         return new LeaderboardSettingsDialogPO(driver, findElementBySeleniumId("LeaderboardSettingsDialog"));
     }
