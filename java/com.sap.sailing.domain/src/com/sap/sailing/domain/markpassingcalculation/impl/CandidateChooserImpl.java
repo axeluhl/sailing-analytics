@@ -13,6 +13,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
@@ -34,6 +36,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * The standard implementation of {@link CandidateChooser}. A graph is created, with each {@link Candidate} as a
@@ -72,14 +75,14 @@ public class CandidateChooserImpl implements CandidateChooser {
      * as identified by {@link TrackedRace#getStartOfRace()} is therefore {@link #EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME}
      * after {@link #raceStartTime}.
      */
-    private static final Duration EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME = new MillisecondsDurationImpl(5000);
+    private static final Duration EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME = Duration.ONE_SECOND.times(30);
     
     /**
      * The duration after which a start mark passing's probability is considered only 50%. A perfect start mark
      * passing happening exactly at the race start time has time-wise probability of 1.0. Another delay of this much
      * lets the probability drop to 1/3, and so on.
      */
-    private static final Duration DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES = Duration.ONE_MINUTE;
+    private static final Duration DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES = Duration.ONE_MINUTE.times(5);
     
     private static final double MINIMUM_PROBABILITY = Edge.getPenaltyForSkipping();
 
@@ -118,7 +121,17 @@ public class CandidateChooserImpl implements CandidateChooser {
     private final CandidateWithSettableWaypointIndex end;
     private final DynamicTrackedRace race;
     
+    /**
+     * Most data structures in this candidate chooser are keyed by {@link Competitor} objects. When a method iterates
+     * over or manipulates such a per-competitor structure it must obtain the corresponding lock from here and
+     * acquire the read/write lock respectively. See {@link #getCompetitorLock}. The map is initialized in the
+     * constructor and populated for all the race's competitors already. From there on it is used in read-only
+     * mode, so no synchronization is necessary.
+     */
+    private final HashMap<Competitor, NamedReentrantReadWriteLock> perCompetitorLocks;
+    
     public CandidateChooserImpl(DynamicTrackedRace race) {
+        this.perCompetitorLocks = new HashMap<>();
         this.race = race;
         waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
         final TimePoint startOfRaceWithoutInference = race.getStartOfRace(/* inferred */ false);
@@ -130,6 +143,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         candidates = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
+            perCompetitorLocks.put(c, createCompetitorLock(c));
             candidates.put(c, Collections.synchronizedSet(new TreeSet<Candidate>()));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
@@ -164,6 +178,10 @@ public class CandidateChooserImpl implements CandidateChooser {
             fixedPasses.addAll(startAndEnd);
             addCandidates(c, startAndEnd);
         }
+    }
+    
+    private NamedReentrantReadWriteLock createCompetitorLock(Competitor c) {
+        return new NamedReentrantReadWriteLock("Competitor lock for "+c+" in candidate chooser "+this, /* fair */ false);
     }
 
     @Override
