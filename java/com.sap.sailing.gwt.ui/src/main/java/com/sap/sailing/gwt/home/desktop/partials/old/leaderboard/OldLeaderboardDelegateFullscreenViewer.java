@@ -33,9 +33,30 @@ public class OldLeaderboardDelegateFullscreenViewer extends AbstractLeaderboardF
         @UiField FlowPanel subHeaderUi, subHeaderContentUi, subHeaderToolbarUi;
     }
 
+    /**
+     * Create a new {@link OldLeaderboardDelegateFullscreenViewer} instance including live races information.
+     * 
+     * @see #OldLeaderboardDelegateFullscreenViewer(boolean)
+     */
     public OldLeaderboardDelegateFullscreenViewer() {
+        this(true);
+    }
+
+    /**
+     * Create a new {@link OldLeaderboardDelegateFullscreenViewer} instance optionally including live races information
+     * which expand when they are selected and available.
+     * 
+     * @param includeLiveRaces
+     *            <code>true</code> to include live races information, <code>false</code> to not include
+     */
+    public OldLeaderboardDelegateFullscreenViewer(boolean includeLiveRaces) {
         setHeaderWidget(headerWidget = createPanel(lastScoringComment, hasLiveRace, scoringScheme));
-        addToolbarAction(showLiveRacesControl);
+        if (includeLiveRaces) {
+            addToolbarAction(showLiveRacesControl);
+        } else {
+            contentLayout.liveRacesContainerUi.removeFromParent();
+            contentLayout.subHeaderUi.removeFromParent();
+        }
     }
 
     @Override
