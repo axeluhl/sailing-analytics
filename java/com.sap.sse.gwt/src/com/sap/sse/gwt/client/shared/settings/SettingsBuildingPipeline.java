@@ -11,48 +11,25 @@ import com.sap.sse.common.settings.Settings;
  * implementation of this interface to define the desired way of how the settings are constructed from its persisted
  * JSON representation, and how the settings are transformed back into its persisted JSON representation.
  * The pipeline is being used in {@link SettingsStorageManager} when it loads and stores settings.
- * It is highly recommended to use at least {@link AbstractSettingsBuildingPipeline} as basic class for
- * implementation of this interface.
  * 
  * @author Vladislav Chumak
  * 
+ * @param <S> The type of settings representation
  * @see SettingsStorageManager
  * @see AbstractSettingsBuildingPipeline
  *
  */
-public interface SettingsBuildingPipeline {
+public interface SettingsBuildingPipeline<S> {
 
     /**
-     * Constructs a settings object by means of provided defaultSettings and persisted representations of
-     * User Settings and Document Settings.
+     * Constructs a settings object by means of provided defaultSettings and persisted representations of Settings.
      * This method implements the settings construction pipeline for a settings object which is used for settings loading operations.
      * 
      * @param defaultSettings The basic settings to be used
-     * @param settingsJsons The persisted representation of User Settings and Document Settings
+     * @param settingsRepresentation The persisted representation of Settings
      * @return The constructed settings object
      */
-    <S extends Settings> S getSettingsObject(S defaultSettings, SettingsJsons settingsJsons);
-    
-    /**
-     * Constructs a settings object by means of provided defaultSettings and persisted representations of
-     * User Settings and Document Settings.
-     * This method implements the settings construction pipeline for a settings object which is used for settings loading operations.
-     * 
-     * @param defaultSettings The basic settings to be used
-     * @param settingsJsons The persisted representation of User Settings and Document Settings
-     * @return The constructed settings object
-     */
-    <S extends Settings> S getSettingsObject(S defaultSettings, SettingsStrings settingsStrings);
-    
-    /**
-     * Constructs a settings object by means of provided defaultSettings without considering
-     * User Settings and Document Settings.
-     * This method implements the settings construction pipeline for a settings object which is used for settings loading operations.
-     * 
-     * @param defaultSettings The basic settings to be used
-     * @return The constructed settings object
-     */
-    <S extends Settings> S getSettingsObject(S defaultSettings);
+    <CS extends Settings> CS getSettingsObject(CS defaultSettings, S settingsRepresentation);
     
     /**
      * Converts the provided settings according the storage scope and path of the provided settings in the settings tree.
@@ -64,13 +41,5 @@ public interface SettingsBuildingPipeline {
      * @return The JSON representation of the provided settings
      */
     JSONValue getJsonObject(Settings settings, PipelineLevel pipelineLevel, List<String> path);
-
-    /**
-     * Gets the {@link SettingsStringConverter} which is used by this instance for type conversion/serialization
-     * between settings objects and JSON Strings.
-     * 
-     * @return The conversion helper instance used by this pipeline
-     */
-    SettingsStringConverter getSettingsStringConverter();
 
 }

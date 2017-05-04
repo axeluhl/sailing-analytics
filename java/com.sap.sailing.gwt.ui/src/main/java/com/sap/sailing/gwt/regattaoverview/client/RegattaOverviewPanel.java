@@ -40,13 +40,12 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.gwt.client.shared.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
-import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StorageDefinitionId;
-import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class RegattaOverviewPanel extends SimplePanel {
     
@@ -130,7 +129,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                 // TODO should we always set ignoreLocalSettings=true when creating links?
                 new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages,
                         new LinkWithSettingsGenerator<>(regattaOverviewContextDefinition,
-                                UserSettingsStorageManager.getIgnoreLocalSettings())).show();
+                                IgnoreLocalSettings.getIgnoreLocalSettingsFromCurrentUrl())).show();
             }            
         });
         
@@ -154,10 +153,8 @@ public class RegattaOverviewPanel extends SimplePanel {
         
         final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRegattaOverview(regattaOverviewContextDefinition);
         final RegattaRaceStatesComponentLifecycle lifecycle = new RegattaRaceStatesComponentLifecycle();
-        final SettingsStorageManager<RegattaRaceStatesSettings> settingsStorageManager = UserSettingsStorageManager
-                .createSettingsStorageManager(userService, storageDefinitionId);
         final ComponentContext<RegattaRaceStatesSettings> componentContext = new ComponentContextWithSettingsStorage<>(
-                lifecycle, settingsStorageManager);
+                lifecycle, userService, storageDefinitionId);
         
         regattaRaceStatesComponent = new RegattaRaceStatesComponent(null, componentContext, sailingService, errorReporter,
                 stringMessages,

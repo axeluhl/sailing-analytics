@@ -37,7 +37,7 @@ public interface ComponentContext<S extends Settings> {
 
     /**
      * Stores the provided {@link Settings} of the provided {@link Component} as "User Settings" globally. Make sure to
-     * call this method only when {@link #hasMakeCustomDefaultSettingsSupport(Component)} method returns {@code true}
+     * call this method only when {@link #isStorageSupported(Component)} method returns {@code true}
      * for the provided {@link Component}.
      * 
      * @param component
@@ -50,7 +50,7 @@ public interface ComponentContext<S extends Settings> {
     
     /**
      * Stores the provided {@link Settings} of the provided {@link Component} as "Document Settings" (old term "Context specific Settings") for the current context. Make sure to
-     * call this method only when {@link #hasMakeCustomDefaultSettingsSupport(Component)} method returns {@code true}
+     * call this method only when {@link #isStorageSupported(Component)} method returns {@code true}
      * for the provided {@link Component}.
      * 
      * @param component
@@ -79,7 +79,7 @@ public interface ComponentContext<S extends Settings> {
      * <b>AND</b> the {@link ComponentContext} implementation has settings
      * storage support
      */
-    boolean hasMakeCustomDefaultSettingsSupport(Component<?> component);
+    boolean isStorageSupported(Component<?> component);
     
     /**
      * Gets initial settings and passes these settings to the provided callback.

@@ -3,8 +3,9 @@ package com.sap.sse.security.ui.settings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
-import com.sap.sse.gwt.client.shared.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
+import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Adds settings patching functionality to {@link ComponentContextWithSettingsStorage} implementation.
@@ -27,19 +28,23 @@ import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 public class ComponentContextWithSettingsStorageAndPatching<S extends Settings> extends ComponentContextWithSettingsStorage<S> {
     
     /**
-     * Manages the persistence layer of settings.
-     */
-    protected final UserSettingsStorageManagerWithPatching<S> settingsStorageManager;
-    
-    /**
      * @param rootLifecycle
      *            The {@link ComponentLifecycle} of the root component/perspective
-     * @param settingsStorageManager
-     *            The {@link UserSettingsStorageManagerWithPatching} to be used to access stored settings and to store new settings
+     * @param userService
+     *            The service which is used for server-side settings storage
+     * @param storageDefinitionId
+     *            The definition for User Settings and Document Settings storage keys
      */
-    public ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserSettingsStorageManagerWithPatching<S> settingsStorageManager) {
-        super(rootLifecycle, settingsStorageManager);
-        this.settingsStorageManager = (UserSettingsStorageManagerWithPatching<S>) super.settingsStorageManager;
+    public ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService, StorageDefinitionId storageDefinitionId) {
+        this(rootLifecycle, userService, storageDefinitionId, new SettingsSerializationHelper());
+    }
+    
+    protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService, StorageDefinitionId storageDefinitionId, SettingsSerializationHelper settingsSerializationHelper) {
+        this(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper, new UserSettingsBuildingPipelineWithPatching(settingsSerializationHelper));
+    }
+    
+    protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService, StorageDefinitionId storageDefinitionId, SettingsSerializationHelper settingsSerializationHelper, UserSettingsBuildingPipelineWithPatching settingsBuildingPipeline) {
+        super(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper, settingsBuildingPipeline);
     }
     
     /**
@@ -50,7 +55,7 @@ public class ComponentContextWithSettingsStorageAndPatching<S extends Settings> 
      * @param settingsPatch The settings patch to apply on settings
      */
     public<CS extends Settings> void addPatchForStoringSettings(Component<CS> component, PipelineLevel pipelineLevel, SettingsPatch<CS> settingsPatch) {
-        settingsStorageManager.addPatchForStoringSettings(component, pipelineLevel, settingsPatch);
+        ((UserSettingsBuildingPipelineWithPatching) settingsBuildingPipeline).addPatchForStoringSettings(component, pipelineLevel, settingsPatch);
     }
     
     /**
@@ -61,8 +66,7 @@ public class ComponentContextWithSettingsStorageAndPatching<S extends Settings> 
      * @param settingsPatch The settings patch to apply on settings
      */
     public<CS extends Settings> void addPatchForLoadingSettings(Component<CS> component, PipelineLevel pipelineLevel, SettingsPatch<CS> settingsPatch) {
-        invalidateCachedSettings();
-        settingsStorageManager.addPatchForLoadingSettings(component, pipelineLevel, settingsPatch);
+        ((UserSettingsBuildingPipelineWithPatching) settingsBuildingPipeline).addPatchForLoadingSettings(component, pipelineLevel, settingsPatch);
     }
 
 }

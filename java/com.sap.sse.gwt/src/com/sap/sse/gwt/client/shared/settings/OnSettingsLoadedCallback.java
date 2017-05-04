@@ -1,8 +1,6 @@
 package com.sap.sse.gwt.client.shared.settings;
 
-import com.sap.sse.common.settings.Settings;
-
-public interface OnSettingsLoadedCallback<S extends Settings> {
+public interface OnSettingsLoadedCallback<S> {
     void onError(Throwable caught, S fallbackDefaultSettings);
     void onSuccess(S settings);
 }

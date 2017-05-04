@@ -33,11 +33,10 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.gwt.client.shared.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StorageDefinitionId;
-import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
@@ -117,15 +116,13 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         // make a single live request as the default but don't continue to play by default
 
         final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForLeaderboard(leaderboardContextDefinition);
-        final UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager = new UserSettingsStorageManager<>(
-                getUserService(), storageDefinitionId);
         if (leaderboardType.isMetaLeaderboard()) {
             // overall
 
             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
                     stringmessages);
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
-                    rootComponentLifeCycle, settingsManager);
+                    rootComponentLifeCycle, getUserService(), storageDefinitionId);
             context.getInitialSettings(
                     new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                         @Override
@@ -153,7 +150,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
                     StringMessages.INSTANCE);
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
-                    rootComponentLifeCycle, settingsManager);
+                    rootComponentLifeCycle, getUserService(), storageDefinitionId);
             context.getInitialSettings(
                     new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                         @Override

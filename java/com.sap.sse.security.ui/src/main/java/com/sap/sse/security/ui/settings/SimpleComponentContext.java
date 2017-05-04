@@ -1,16 +1,22 @@
-package com.sap.sse.gwt.client.shared.settings;
+package com.sap.sse.security.ui.settings;
 
 import java.util.ArrayList;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
+import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
+import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
 
 /**
  * Manages all default settings of perspectives and components. This simple implementation has no support for settings
  * storage. It is only capable of creating new default settings by means of {@link ComponentLifecycle#createDefaultSettings()} of the root
- * component managed by this {@link ComponentContext}. All in all, it is a dummy implementation for components which does
- * not have support for settings storage. If you need settings to be stored, consider
+ * component managed by this {@link ComponentContext}, considering the URL parameters. If you need settings to be stored, consider
  * {@link ComponentContextWithSettingsStorage}.
  * 
  * @author Vladislav Chumak
@@ -20,6 +26,13 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *            for itself and its subcomponents
  */
 public class SimpleComponentContext<S extends Settings> implements ComponentContext<S> {
+    
+    protected final SettingsSerializationHelper settingsSerializationHelper;
+    
+    /**
+     * The pipeline used for the settings construction.
+     */
+    protected final SettingsBuildingPipeline<SettingsJsons> settingsBuildingPipeline;
 
     /**
      * The {@link ComponentLifecycle} of the root component/perspective
@@ -32,7 +45,17 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
      *            The {@link ComponentLifecycle} of the root component/perspective
      */
     public SimpleComponentContext(ComponentLifecycle<S> rootLifecycle) {
+        this(rootLifecycle, new SettingsSerializationHelper());
+    }
+    
+    protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle, SettingsSerializationHelper settingsSerializationHelper) {
+        this(rootLifecycle, settingsSerializationHelper, new UrlSettingsBuildingPipeline(settingsSerializationHelper));
+    }
+    
+    protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle, SettingsSerializationHelper settingsSerializationHelper, SettingsBuildingPipeline<SettingsJsons> settingsBuildingPipeline) {
         this.rootLifecycle = rootLifecycle;
+        this.settingsSerializationHelper = settingsSerializationHelper;
+        this.settingsBuildingPipeline = settingsBuildingPipeline;
     }
 
     /**
@@ -70,15 +93,16 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
      * 
      * @return The {@link Settings} of the root component
      */
-    public S getDefaultSettings() {
-        return rootLifecycle.createDefaultSettings();
+    private S getDefaultSettings() {
+        S defaultSettings = rootLifecycle.createDefaultSettings();
+        return settingsBuildingPipeline.getSettingsObject(defaultSettings, new SettingsJsons(null, null));
     }
 
     /**
      * This method returns always {@code false}, because it does not offer functionality for settings storage.
      */
     @Override
-    public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
+    public boolean isStorageSupported(Component<?> component) {
         return false;
     }
     
@@ -101,14 +125,25 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     }
     
     /**
-     * Retrieves the "System Default" {@link Settings} of the provided component and passes them to the provided callback.
-     * 
-     * @see #getDefaultSettings()
+     * {@inheritDoc}
      */
     @Override
     public <CS extends Settings> void getInitialSettingsForComponent(final Component<CS> component, final OnSettingsLoadedCallback<CS> callback) {
-        ComponentLifecycle<CS> componentLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()), rootLifecycle);
-        callback.onSuccess(componentLifecycle.createDefaultSettings());
-    }
+        OnSettingsLoadedCallback<S> internalCallback = new OnSettingsLoadedCallback<S>() {
 
+            @Override
+            public void onError(Throwable caught, S fallbackDefaultSettings) {
+                CS componentFallbackSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(component.getPath()), fallbackDefaultSettings);
+                callback.onError(caught, componentFallbackSettings);
+            }
+
+            @Override
+            public void onSuccess(S settings) {
+                CS componentSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(component.getPath()), settings);
+                callback.onSuccess(componentSettings);
+            }
+        };
+        getInitialSettings(internalCallback);
+    }
+    
 }

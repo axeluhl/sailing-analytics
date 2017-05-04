@@ -9,22 +9,21 @@ import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 /**
- * Conversion helper which is used by this instance for type conversion/serialization
- * between settings objects and JSON Strings. The class encapsulates all serializers
- * which are required for serialization and deserialization and provides methods 
- * for an indirect serialization/deserialization functionality required by
- * {@link SettingsBuildingPipeline} and {@link SettingsStorageManager} implementations.
+ * Conversion helper which is used by this instance for type conversion/serialization between settings objects and JSON
+ * Strings. The class encapsulates all serializers which are required for serialization and deserialization and provides
+ * methods for an indirect serialization/deserialization functionality required by {@link SettingsBuildingPipeline} and
+ * {@link ComponentContext} implementations.
  * 
  * @author Vladislav Chumak
  * 
  */
-public class SettingsStringConverter {
+public class SettingsSerializationHelper {
 
     private final SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();
     private final SettingsToJsonSerializerGWT jsonSerializer = new SettingsToJsonSerializerGWT();
-    
+
     @SuppressWarnings("unchecked")
-    public<S extends Settings> S deserializeFromCurrentUrl(S defaultSettings) {
+    public <S extends Settings> S deserializeFromCurrentUrl(S defaultSettings) {
         if (defaultSettings instanceof GenericSerializableSettings) {
             defaultSettings = (S) urlSerializer
                     .deserializeFromCurrentLocation((GenericSerializableSettings) defaultSettings);
@@ -34,9 +33,9 @@ public class SettingsStringConverter {
         }
         return defaultSettings;
     }
-    
+
     @SuppressWarnings("unchecked")
-    public<S extends Settings> S deserializeFromJson(S defaultSettings, JSONObject jsonToDeserialize) {
+    public <S extends Settings> S deserializeFromJson(S defaultSettings, JSONObject jsonToDeserialize) {
         if (defaultSettings instanceof GenericSerializableSettings) {
             defaultSettings = (S) jsonSerializer.deserialize((GenericSerializableSettings) defaultSettings,
                     jsonToDeserialize);
@@ -46,31 +45,19 @@ public class SettingsStringConverter {
         return defaultSettings;
     }
 
-    public SettingsJsons convertToSettingsJson(SettingsStrings settingsStrings) {
-        JSONObject globalSettingsJson = convertStringToJson(settingsStrings.getGlobalSettingsString());
-        JSONObject contextSpecificSettingsJson = convertStringToJson(settingsStrings.getContextSpecificSettingsString());
-        return new SettingsJsons(globalSettingsJson, contextSpecificSettingsJson);
-    }
-    
     public JSONObject convertStringToJson(String str) {
         return str == null ? null : jsonSerializer.parseStringToJsonObject(str);
     }
-    
+
     public String convertJsonToString(JSONObject json) {
         return json == null ? null : jsonSerializer.jsonObjectToString(json);
     }
-    
-    public SettingsStrings convertToSettingsStrings(SettingsJsons settingsJsons) {
-        String globalSettingsString = convertJsonToString(settingsJsons.getGlobalSettingsJson());
-        String contextSpecificSettingsString = convertJsonToString(settingsJsons.getContextSpecificSettingsJson());
-        return new SettingsStrings(globalSettingsString, contextSpecificSettingsString);
-    }
-    
+
     public JSONValue serializeFromSettingsObject(Settings newSettings) {
         if (newSettings instanceof GenericSerializableSettings) {
             return jsonSerializer.serialize((GenericSerializableSettings) newSettings);
         }
         throw new IllegalStateException("Requested save of settings that is not Serializable!");
     }
-    
+
 }

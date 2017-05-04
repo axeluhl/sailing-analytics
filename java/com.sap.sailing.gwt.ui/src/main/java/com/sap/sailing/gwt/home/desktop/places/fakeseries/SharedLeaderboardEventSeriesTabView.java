@@ -12,12 +12,10 @@ import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.gwt.client.shared.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
-import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.settings.PlaceBasedUserSettingsStorageManager;
+import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StorageDefinitionId;
 
 /**
@@ -64,13 +62,11 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
 
     protected ComponentContext<LeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken) {
-        final LeaderboardPanelLifecycle lifeCycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
+        final LeaderboardPanelLifecycle lifecycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
         final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForSeriesOverallLeaderboard(leaderboardName);
-        final SettingsStorageManager<LeaderboardSettings> settingsStorageManager = new PlaceBasedUserSettingsStorageManager<>(
-                userService, storageDefinitionId, placeToken);
 
-        final ComponentContext<LeaderboardSettings> componentContext = new ComponentContextWithSettingsStorage<>(
-                lifeCycle, settingsStorageManager);
+        final ComponentContext<LeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(
+                lifecycle, userService, storageDefinitionId, placeToken);
         return componentContext;
     }
 }

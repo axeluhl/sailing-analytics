@@ -61,7 +61,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
                 new SettingsDialogCallback<>(component, callback));
 
         if (component.getComponentContext() != null
-                && component.getComponentContext().hasMakeCustomDefaultSettingsSupport(component)) {
+                && component.getComponentContext().isStorageSupported(component)) {
             initMakeDefaultButtons(component, stringMessages);
         }
     }
@@ -117,7 +117,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
         @Override
         public void ok(SettingsType editedSettings) {
             if (component.getComponentContext() != null
-                    && component.getComponentContext().hasMakeCustomDefaultSettingsSupport(component)) {
+                    && component.getComponentContext().isStorageSupported(component)) {
                 component.getComponentContext().storeSettingsForContext(component, editedSettings, new DummyOnSettingsStoredCallback());
             }
             component.updateSettings(editedSettings);

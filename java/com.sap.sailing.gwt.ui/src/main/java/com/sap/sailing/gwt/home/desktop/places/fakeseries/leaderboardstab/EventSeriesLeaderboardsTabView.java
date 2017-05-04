@@ -27,12 +27,10 @@ import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.gwt.client.shared.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
-import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.settings.PlaceBasedUserSettingsStorageManager;
+import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StorageDefinitionId;
 
 public class EventSeriesLeaderboardsTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
@@ -130,11 +128,9 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             String placeToken) {
         final MultiLeaderboardPanelLifecycle lifecycle = new MultiLeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
         final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForSeriesRegattaLeaderboards(leaderboardName);
-        final SettingsStorageManager<LeaderboardSettings> settingsStorageManager = new PlaceBasedUserSettingsStorageManager<>(
-                userService, storageDefinitionId, placeToken);
 
-        final ComponentContext<LeaderboardSettings> componentContext = new ComponentContextWithSettingsStorage<>(
-                lifecycle, settingsStorageManager);
+        final ComponentContext<LeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(
+                lifecycle, userService, storageDefinitionId, placeToken);
         return componentContext;
     }
 

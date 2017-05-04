@@ -8,12 +8,13 @@ import com.sap.sse.common.settings.util.SettingsMergeUtils;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndPatching;
 import com.sap.sse.security.ui.settings.SettingsPatch;
-import com.sap.sse.security.ui.settings.UserSettingsStorageManagerWithPatching;
+import com.sap.sse.security.ui.settings.StorageDefinitionId;
 
 /**
  * A specialization of {@link ComponentContextWithSettingsStorageAndPatching} which is specially designed for
@@ -32,13 +33,15 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
     /**
      * @param rootLifecycle
      *            The {@link ComponentLifecycle} of the root component/perspective
-     * @param settingsStorageManager
-     *            The {@link UserSettingsStorageManagerWithPatching} to be used to access stored settings and to store new settings
+     * @param userService
+     *            The service which is used for server-side settings storage
+     * @param storageDefinitionId
+     *            The definition for User Settings and Document Settings storage keys
      */
     public RaceBoardComponentContext(
             RaceBoardPerspectiveLifecycle rootLifecycle,
-            UserSettingsStorageManagerWithPatching<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> settingsStorageManager) {
-        super(rootLifecycle, settingsStorageManager);
+            UserService userService, StorageDefinitionId storageDefinitionId) {
+        super(rootLifecycle, userService, storageDefinitionId);
     }
     
     /**
