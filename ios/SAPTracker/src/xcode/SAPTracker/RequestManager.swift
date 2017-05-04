@@ -43,6 +43,7 @@ class RequestManager: NSObject {
         static let FixesSpeed = "speed"
         static let FixesTimestamp = "timestamp"
         static let FromMillis = "fromMillis"
+        static let MarkID = "markId"
         static let PushDeviceID = "pushDeviceId"
         static let ToMillis = "toMillis"
     }
@@ -113,31 +114,60 @@ class RequestManager: NSObject {
                                            failure: (error: Error) -> Void)
     {
         regattaData.leaderboardData = leaderboardData
-        getCompetitorData(regattaData, success: success, failure: failure)
+        if (regattaData.competitorID != nil) {
+            getCompetitorData(regattaData, competitorID: regattaData.competitorID!, success: success, failure: failure)
+        } else if (regattaData.markID != nil) {
+            getMarkData(regattaData, markID: regattaData.markID!, success: success, failure: failure)
+        } else {
+            failure(error: Error(message: Translation.RequestManager.NoDataFailure.Message.String))
+        }
     }
     
     private func getCompetitorData(regattaData: RegattaData,
+                                   competitorID: String,
                                    success: (regattaData: RegattaData) -> Void,
                                    failure: (error: Error) -> Void)
     {
-        getCompetitor(regattaData.competitorID,
-                      success: { (data) in self.getCompetitorDataSuccess(data, regattaData: regattaData, success: success, failure: failure) },
+        getCompetitor(competitorID,
+                      success: { (data) in self.getCompetitorDataSuccess(data, regattaData: regattaData, competitorID: competitorID, success: success, failure: failure) },
                       failure: { (error) in failure(error: error) }
         )
     }
     
     private func getCompetitorDataSuccess(competitorData: CompetitorData,
                                           regattaData: RegattaData,
+                                          competitorID: String,
                                           success: (regattaData: RegattaData) -> Void,
                                           failure: (error: Error) -> Void)
     {
         regattaData.competitorData = competitorData
-        getTeamImageURL(regattaData.competitorID, result: { (imageURL) in
+        getTeamImageURL(competitorID, result: { (imageURL) in
             regattaData.teamImageURL = imageURL
             success(regattaData: regattaData)
         })
     }
-    
+
+    private func getMarkData(regattaData: RegattaData,
+                             markID: String,
+                             success: (regattaData: RegattaData) -> Void,
+                             failure: (error: Error) -> Void)
+    {
+        getMark(regattaData.leaderboardName,
+                markID: markID,
+                success: { (data) in self.getMarkDataSuccess(data, regattaData: regattaData, success: success, failure: failure) },
+                failure: { (error) in failure(error: error) }
+        )
+    }
+
+    private func getMarkDataSuccess(markData: MarkData,
+                                    regattaData: RegattaData,
+                                    success: (regattaData: RegattaData) -> Void,
+                                    failure: (error: Error) -> Void)
+    {
+        regattaData.markData = markData
+        success(regattaData: regattaData)
+    }
+
     // MARK: - Event
     
     private func getEvent(eventID: String,
@@ -149,15 +179,17 @@ class RequestManager: NSObject {
         manager.GET(urlString,
                     parameters: nil,
                     success: { (requestOperation, responseObject) in self.getEventSuccess(responseObject, success: success) },
-                    failure: { (requestOperation, error) in self.getEventFailure(eventID, failure: failure) }
+                    failure: { (requestOperation, error) in self.getEventFailure(error, eventID: eventID, failure: failure) }
         )
     }
     
     private func getEventSuccess(responseObject: AnyObject, success: (eventData: EventData) -> Void) {
+        logInfo("\(#function)", info: responseObjectToString(responseObject))
         success(eventData: EventData(dictionary: responseObject as? [String: AnyObject]))
     }
     
-    private func getEventFailure(eventID: String, failure: (error: Error) -> Void) -> Void {
+    private func getEventFailure(error: NSError, eventID: String, failure: (error: Error) -> Void) -> Void {
+        logError("\(#function)", error: error)
         let message = String(format: Translation.RequestManager.EventLoadingFailure.Message.String, eventID)
         failure(error: Error(message: message))
     }
@@ -173,15 +205,17 @@ class RequestManager: NSObject {
         manager.GET(urlString,
                     parameters: nil,
                     success: { (requestOperation, responseObject) in self.getLeaderboardSuccess(responseObject, success: success) },
-                    failure: { (requestOperation, error) in self.getLeaderboardFailure(leaderboardName, failure: failure) }
+                    failure: { (requestOperation, error) in self.getLeaderboardFailure(error, leaderboardName: leaderboardName, failure: failure) }
         )
     }
     
     private func getLeaderboardSuccess(responseObject: AnyObject, success: (leaderboardData: LeaderboardData) -> Void) {
+        logInfo("\(#function)", info: responseObjectToString(responseObject))
         success(leaderboardData: LeaderboardData(dictionary: responseObject as? [String: AnyObject]))
     }
     
-    private func getLeaderboardFailure(leaderboardName: String, failure: (error: Error) -> Void) {
+    private func getLeaderboardFailure(error: NSError, leaderboardName: String, failure: (error: Error) -> Void) {
+        logError("\(#function)", error: error)
         let message = String(format: Translation.RequestManager.LeaderboardLoadingFailure.Message.String, leaderboardName)
         failure(error: Error(message: message))
     }
@@ -197,19 +231,49 @@ class RequestManager: NSObject {
         manager.GET(urlString,
                     parameters: nil,
                     success: { (requestOperation, responseObject) in self.getCompetitorSuccess(responseObject, success: success) },
-                    failure: { (requestOperation, error) in self.getCompetitorFailure(competitorID, failure: failure) }
+                    failure: { (requestOperation, error) in self.getCompetitorFailure(error, competitorID: competitorID, failure: failure) }
         )
     }
     
     private func getCompetitorSuccess(responseObject: AnyObject, success: (competitorData: CompetitorData) -> Void) {
+        logInfo("\(#function)", info: responseObjectToString(responseObject))
         success(competitorData: CompetitorData(dictionary: responseObject as? [String: AnyObject]))
     }
     
-    private func getCompetitorFailure(competitorID: String, failure: (error: Error) -> Void) {
+    private func getCompetitorFailure(error: NSError, competitorID: String, failure: (error: Error) -> Void) {
+        logError("\(#function)", error: error)
         let message = String(format: Translation.RequestManager.CompetitorLoadingFailure.Message.String, competitorID)
         failure(error: Error(message: message))
     }
     
+    // MARK: - Mark
+
+    private func getMark(leaderboardName: String,
+                         markID: String,
+                         success: (markData: MarkData) -> Void,
+                         failure: (error: Error) -> Void)
+    {
+        let encodedLeaderboardName = leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLPathAllowedCharacterSet()) ?? ""
+        let encodedMarkID = markID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
+        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/marks/\(encodedMarkID)"
+        manager.GET(urlString,
+                    parameters: nil,
+                    success: { (requestOperation, responseObject) in self.getMarkSuccess(responseObject, success: success) },
+                    failure: { (requestOperation, error) in self.getMarkFailure(error, markID: markID, failure: failure) }
+        )
+    }
+
+    private func getMarkSuccess(responseObject: AnyObject, success: (markData: MarkData) -> Void) {
+        logInfo("\(#function)", info: responseObjectToString(responseObject))
+        success(markData: MarkData(dictionary: responseObject as? [String: AnyObject]))
+    }
+    
+    private func getMarkFailure(error: NSError, markID: String, failure: (error: Error) -> Void) {
+        logError("\(#function)", error: error)
+        let message = String(format: Translation.RequestManager.MarkLoadingFailure.Message.String, markID)
+        failure(error: Error(message: message))
+    }
+
     // MARK: - Team
     
     private func getTeam(competitorID: String,
@@ -221,15 +285,17 @@ class RequestManager: NSObject {
         manager.GET(urlString,
                     parameters: nil,
                     success: { (requestOperation, responseObject) in self.getTeamSuccess(responseObject, success: success) },
-                    failure: { (requestOperation, error) in self.getTeamFailure(failure) }
+                    failure: { (requestOperation, error) in self.getTeamFailure(error, failure: failure) }
         )
     }
     
     private func getTeamSuccess(responseObject: AnyObject, success: (teamData: TeamData) -> Void) {
+        logInfo("\(#function)", info: responseObjectToString(responseObject))
         success(teamData: TeamData(dictionary: responseObject as? [String: AnyObject]))
     }
     
-    private func getTeamFailure(failure: (error: Error) -> Void) {
+    private func getTeamFailure(error: NSError, failure: (error: Error) -> Void) {
+        logError("\(#function)", error: error)
         failure(error: Error())
     }
     
@@ -242,63 +308,79 @@ class RequestManager: NSObject {
     
     // MARK: CheckIn
     
-    func postCheckIn(leaderboardName: String!,
-                     competitorID: String!,
+    func postCheckIn(regattaData: RegattaData!,
                      success: () -> Void,
                      failure: (error: Error) -> Void)
     {
         // Setup body
         var body = [String: AnyObject]()
-        body[BodyKeys.CompetitorID] = competitorID
         body[BodyKeys.DeviceType] = DeviceType.IOS
         body[BodyKeys.DeviceUUID] = Preferences.uuid
         body[BodyKeys.PushDeviceID] = ""
         body[BodyKeys.FromMillis] = millisSince1970()
+        switch regattaData.type() {
+        case .Competitor:
+            body[BodyKeys.CompetitorID] = regattaData.competitorData.competitorID
+            break
+        case .Mark:
+            body[BodyKeys.MarkID] = regattaData.markData.markID
+            break
+        default:
+            break
+        }
         
         // Post body
-        let urlString = "\(basePathString)/leaderboards/\(leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/start"
+        let urlString = "\(basePathString)/leaderboards/\(regattaData.leaderboardData.name.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/start"
         manager.POST(urlString,
                      parameters: body,
-                     success: { (requestOperation, responseObject) in self.postCheckInSuccess(success) },
-                     failure: { (requestOperation, error) in self.postCheckInFailure(failure) }
+                     success: { (requestOperation, responseObject) in self.postCheckInSuccess(responseObject, success: success) },
+                     failure: { (requestOperation, error) in self.postCheckInFailure(error, failure: failure) }
         )
     }
     
-    private func postCheckInSuccess(success: () -> Void) {
+    private func postCheckInSuccess(responseObject: AnyObject, success: () -> Void) {
+        logInfo("\(#function)", info: responseObjectToString(responseObject))
         success()
     }
     
-    private func postCheckInFailure(failure: (error: Error) -> Void) {
+    private func postCheckInFailure(error: NSError, failure: (error: Error) -> Void) {
+        logError("\(#function)", error: error)
         failure(error: Error())
     }
     
     // MARK: - CheckOut
     
-    func postCheckOut(leaderboardName: String!,
-                      competitorId: String!,
+    func postCheckOut(regatta: Regatta,
                       success:() -> Void,
                       failure: (error: Error) -> Void)
     {
         // Setup body
         var body = [String: AnyObject]()
-        body[BodyKeys.CompetitorID] = competitorId
         body[BodyKeys.DeviceUUID] = Preferences.uuid
         body[BodyKeys.ToMillis] = millisSince1970()
+        if (regatta.competitor != nil) {
+            body[BodyKeys.CompetitorID] = regatta.competitor!.competitorID
+        }
+        if (regatta.mark != nil) {
+            body[BodyKeys.MarkID] = regatta.mark!.markID
+        }
         
         // Post body
-        let urlString = "\(basePathString)/leaderboards/\(leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/end"
+        let urlString = "\(basePathString)/leaderboards/\(regatta.leaderboard.name.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/end"
         manager.POST(urlString,
                      parameters: body,
-                     success: { (requestOperation, responseObject) in self.postCheckOutSuccess(success) },
+                     success: { (requestOperation, responseObject) in self.postCheckOutSuccess(responseObject, success: success) },
                      failure: { (requestOperation, error) in self.postCheckOutFailure(error, failure: failure) }
         )
     }
     
-    private func postCheckOutSuccess(success: () -> Void) {
+    private func postCheckOutSuccess(responseObject: AnyObject, success: () -> Void) {
+        logInfo("\(#function)", info: responseObjectToString(responseObject))
         success()
     }
     
     private func postCheckOutFailure(error: NSError, failure: (error: Error) -> Void) {
+        logError("\(#function)", error: error)
         failure(error: Error(message: error.localizedDescription))
     }
     
@@ -326,16 +408,18 @@ class RequestManager: NSObject {
         let urlString = "\(basePathString)/gps_fixes"
         manager.POST(urlString,
                      parameters: body,
-                     success: { (requestOperation, responseObject) in self.postGPSFixesSuccess(success) },
+                     success: { (requestOperation, responseObject) in self.postGPSFixesSuccess(responseObject, success: success) },
                      failure: { (requestOperation, error) in self.postGPSFixesFailure(error, failure: failure) }
         )
     }
     
-    private func postGPSFixesSuccess(success: () -> Void) {
+    private func postGPSFixesSuccess(responseObject: AnyObject, success: () -> Void) {
+        logInfo("\(#function)", info: responseObjectToString(responseObject))
         success()
     }
     
     private func postGPSFixesFailure(error: NSError, failure: (error: Error) -> Void) {
+        logError("\(#function)", error: error)
         failure(error: Error(message: error.localizedDescription))
     }
     
@@ -374,10 +458,12 @@ class RequestManager: NSObject {
             postTeamImageDataFailure(Translation.RequestManager.Failure.Message.String, failure: failure)
             return
         }
+        logInfo("\(#function)", info: responseObjectToString(responseObject))
         success(teamImageURL: teamImageURL)
     }
     
     private func postTeamImageDataFailure(message: String, failure: (error: Error) -> Void) {
+        logError("\(#function)", error: message)
         let title = Translation.RequestManager.TeamImageUploadFailure.Title.String
         failure(error: Error(title: title, message: message))
     }
@@ -387,5 +473,9 @@ class RequestManager: NSObject {
     private func millisSince1970() -> NSNumber {
         return NSNumber(longLong: Int64(NSDate().timeIntervalSince1970 * 1000))
     }
-    
+
+    private func responseObjectToString(responseObject: AnyObject?) -> String {
+        return (responseObject as? String) ?? "response object is empty or cannot be casted"
+    }
+
 }

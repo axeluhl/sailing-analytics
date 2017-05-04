@@ -27,8 +27,7 @@ class CheckInController : NSObject {
     func checkIn(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
         SVProgressHUD.show()
         requestManager = RequestManager(baseURLString: regattaData.serverURL)
-        requestManager.getRegattaData(regattaData,
-                                      success:
+        requestManager.getRegattaData(regattaData, success:
             { (regattaData) in
                 SVProgressHUD.popActivity()
                 self.checkInSuccess(regattaData, completion: completion)
@@ -40,19 +39,29 @@ class CheckInController : NSObject {
     }
     
     private func checkInSuccess(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
-        let alertController = UIAlertController(title: String(format: Translation.CheckInController.WelcomeAlert.Title.String, regattaData.competitorData.name),
-                                                message: String(format: Translation.CheckInController.WelcomeAlert.Message.String, regattaData.competitorData.sailID),
-                                                preferredStyle: .Alert
-        )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
+        switch regattaData.type() {
+        case .Competitor:
+            let alertController = UIAlertController(title: String(format: Translation.CheckInController.WelcomeAlert.Title.String, regattaData.competitorData.name),
+                                                    message: String(format: Translation.CheckInController.WelcomeAlert.Message.String, regattaData.competitorData.sailID),
+                                                    preferredStyle: .Alert
+            )
+            let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
+                self.postCheckIn(regattaData, completion: completion)
+            }
+            let cancelAction = UIAlertAction(title: Translation.CheckInController.WelcomeAlert.CancelAction.Title.String, style: .Cancel) { (action) in
+                self.checkInDidFinish(withSuccess: false, completion: completion)
+            }
+            alertController.addAction(okAction)
+            alertController.addAction(cancelAction)
+            showCheckInAlert(alertController)
+            break
+        case .Mark:
             self.postCheckIn(regattaData, completion: completion)
-        }
-        let cancelAction = UIAlertAction(title: Translation.CheckInController.WelcomeAlert.CancelAction.Title.String, style: .Cancel) { (action) in
+            break
+        case .None:
             self.checkInDidFinish(withSuccess: false, completion: completion)
+            break
         }
-        alertController.addAction(okAction)
-        alertController.addAction(cancelAction)
-        showCheckInAlert(alertController)
     }
     
     private func checkInFailure(error: RequestManager.Error, completion: (withSuccess: Bool) -> Void) {
@@ -71,10 +80,7 @@ class CheckInController : NSObject {
     
     private func postCheckIn(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
         SVProgressHUD.show()
-        requestManager.postCheckIn(regattaData.leaderboardData.name,
-                                   competitorID: regattaData.competitorData.competitorID,
-                                   success:
-            { () -> Void in
+        requestManager.postCheckIn(regattaData, success: { () -> Void in
                 SVProgressHUD.popActivity()
                 self.postCheckInSuccess(regattaData, completion: completion)
             }, failure: { (error) -> Void in

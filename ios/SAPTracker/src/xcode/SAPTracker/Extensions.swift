@@ -12,13 +12,21 @@ import Foundation
 
 func logInfo(name: String, info: String) {
     #if DEBUG
-        NSLog("\(name): \(info)")
+        NSLog("[INFO] \(name): %@", info)
     #endif
 }
 
+func logError(name: String, error: NSError) {
+    logError(name, error: error.description)
+}
+
 func logError(name: String, error: ErrorType) {
+    logError(name, error: error as? String ?? "")
+}
+
+func logError(name: String, error: String) {
     #if DEBUG
-        NSLog("\(name): \(error)")
+        NSLog("[ERROR] \(name): %@", error)
     #endif
 }
 

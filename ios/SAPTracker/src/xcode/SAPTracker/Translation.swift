@@ -126,6 +126,16 @@ class Translation: NSObject {
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
+        struct MarkLoadingFailure { static let Key = "\(RequestManager.Key).\(MarkLoadingFailure.self)"
+            struct Message { static let Key = "\(MarkLoadingFailure.Key).\(Message.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct NoDataFailure { static let Key = "\(RequestManager.Key).\(NoDataFailure.self)"
+            struct Message { static let Key = "\(NoDataFailure.Key).\(Message.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
     }
     
     // MARK: - AboutView

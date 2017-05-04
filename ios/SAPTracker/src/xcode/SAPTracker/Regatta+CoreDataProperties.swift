@@ -18,9 +18,11 @@ extension Regatta {
     @NSManaged var teamImageData: NSData?
     @NSManaged var teamImageRetry: Bool
     @NSManaged var teamImageURL: String?
-    @NSManaged var competitor: Competitor
     @NSManaged var event: Event
     @NSManaged var gpsFixes: NSSet?
     @NSManaged var leaderboard: Leaderboard
+
+    @NSManaged var competitor: Competitor?
+    @NSManaged var mark: Mark?
 
 }

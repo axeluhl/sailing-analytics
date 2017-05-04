@@ -365,7 +365,9 @@ extension HomeViewController: UITableViewDataSource {
         guard let regatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta else { return }
         regattaCell.eventLabel.text = regatta.event.name
         regattaCell.leaderboardLabel.text = regatta.leaderboard.name
-        regattaCell.competitorLabel.text = regatta.competitor.name
+        if (regatta.competitor != nil) {
+            regattaCell.competitorLabel.text = regatta.competitor!.name
+        }
     }
     
 }

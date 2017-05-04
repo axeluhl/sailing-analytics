@@ -112,9 +112,9 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     private func refreshCompetitor() {
-        competitorNameLabel.text = regatta.competitor.name
-        competitorFlagImageView.image = UIImage(named: regatta.competitor.countryCode)
-        competitorSailLabel.text = regatta.competitor.sailID
+        competitorNameLabel.text = regatta.competitor!.name
+        competitorFlagImageView.image = UIImage(named: regatta.competitor!.countryCode)
+        competitorSailLabel.text = regatta.competitor!.sailID
     }
     
     private func refreshTeamImage() {
@@ -402,7 +402,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
     
     private func uploadTeamImageData(imageData: NSData!) {
         SVProgressHUD.show()
-        regattaController.postTeamImageData(imageData,
+        regattaController.postTeamImageData(imageData, competitorID: regatta.competitor!.competitorID,
                                             success: { (teamImageURL) in
                                                 SVProgressHUD.popActivity()
                                                 self.uploadTeamImageDataSuccess(teamImageURL)
@@ -428,7 +428,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         refreshTeamImage()
     }
     
-    // MARK: - Alert
+    // MARK: - Alerts
     
     private func showUploadTeamImageFailureAlert(error: RequestManager.Error) {
         let alertController = UIAlertController(title: error.title,

@@ -94,7 +94,8 @@ class RegattaController: NSObject {
         let regattaData = RegattaData(serverURL: regatta.serverURL,
                                       eventID: regatta.event.eventID,
                                       leaderboardName: regatta.leaderboard.name,
-                                      competitorID: regatta.competitor.competitorID
+                                      competitorID: regatta.competitor?.competitorID,
+                                      markID: regatta.mark?.markID
         )
         requestManager.getRegattaData(regattaData,
                                       success: { (regattaData) in self.updateSuccess(regattaData, completion: completion) },
@@ -105,7 +106,9 @@ class RegattaController: NSObject {
     func updateSuccess(regattaData: RegattaData, completion: () -> Void) {
         regatta.event.updateWithEventData(regattaData.eventData)
         regatta.leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
-        regatta.competitor.updateWithCompetitorData(regattaData.competitorData)
+        if (regatta.competitor != nil) {
+            regatta.competitor!.updateWithCompetitorData(regattaData.competitorData)
+        }
         CoreDataManager.sharedManager.saveContext()
         completion()
     }
@@ -130,11 +133,12 @@ class RegattaController: NSObject {
     // MARK: - TeamImage
     
     func postTeamImageData(imageData: NSData,
+                           competitorID: String,
                            success: (teamImageURL: String) -> Void,
                            failure: (error: RequestManager.Error) -> Void)
     {
         requestManager.postTeamImageData(imageData,
-                                         competitorID: regatta.competitor.competitorID,
+                                         competitorID: competitorID,
                                          success: success,
                                          failure: failure
         )
@@ -143,8 +147,7 @@ class RegattaController: NSObject {
     // MARK: - CheckOut
     
     func checkOut(completion: (withSuccess: Bool) -> Void) {
-        requestManager.postCheckOut(regatta.leaderboard.name,
-                                    competitorId: regatta.competitor.competitorID,
+        requestManager.postCheckOut(regatta,
                                     success: { () in completion(withSuccess: true) },
                                     failure: { (error) in completion(withSuccess: false) }
         )

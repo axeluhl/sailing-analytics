@@ -14,43 +14,56 @@ public class RegattaData: NSObject {
         static let EventID = "event_id"
         static let LeaderboardName = "leaderboard_name"
         static let CompetitorID = "competitor_id"
+        static let MarkID = "mark_id"
+    }
+    
+    public enum Type {
+        case None
+        case Competitor
+        case Mark
     }
     
     let serverURL: String
     let eventID: String
     let leaderboardName: String
-    let competitorID: String
+    let competitorID: String?
+    let markID: String?
 
     var eventData = EventData()
     var leaderboardData = LeaderboardData()
     var competitorData = CompetitorData()
+    var markData = MarkData()
     var teamImageURL: String?
     
     override init() {
         serverURL = ""
         eventID = ""
         leaderboardName = ""
-        competitorID = ""
+        competitorID = nil
+        markID = nil
         super.init()
     }
     
     init(serverURL: String,
          eventID: String,
          leaderboardName: String,
-         competitorID: String)
+         competitorID: String?,
+         markID: String?)
     {
         self.serverURL = serverURL
         self.eventID = eventID
         self.leaderboardName = leaderboardName
         self.competitorID = competitorID
+        self.markID = markID
         super.init()
     }
     
     init(regatta: Regatta) {
         serverURL = regatta.serverURL
         eventID = regatta.event.eventID
-        competitorID = regatta.competitor.competitorID
+        competitorID = regatta.competitor?.competitorID
         leaderboardName = regatta.leaderboard.name
+        markID = regatta.mark?.markID
         super.init()
     }
     
@@ -68,13 +81,16 @@ public class RegattaData: NSObject {
         // Get check-in items
         guard let eventID = RegattaData.queryItemValue(queryItems, itemName: ItemNames.EventID) else { return nil }
         guard let leaderboardName = RegattaData.queryItemValue(queryItems, itemName: ItemNames.LeaderboardName) else { return nil }
-        guard let competitorID = RegattaData.queryItemValue(queryItems, itemName: ItemNames.CompetitorID) else { return nil }
+        let competitorID = RegattaData.queryItemValue(queryItems, itemName: ItemNames.CompetitorID)
+        let markID = RegattaData.queryItemValue(queryItems, itemName: ItemNames.MarkID)
+        guard competitorID != nil || markID != nil else { return nil }
         
         // Init with values
         self.init(serverURL: serverURL,
                   eventID: eventID,
                   leaderboardName: leaderboardName,
-                  competitorID: competitorID)
+                  competitorID: competitorID,
+                  markID: markID)
     }
     
     convenience init?(urlString: String) {
@@ -84,6 +100,12 @@ public class RegattaData: NSObject {
         self.init(url: url)
     }    
     
+    // MARK: - Getter
+
+    func type() -> Type {
+        return competitorID != nil ? .Competitor : markID != nil ? .Mark : .None
+    }
+
     // MARK: - Helper
     
     class private func queryItemValue(queryItems: [NSURLQueryItem]?, itemName: String) -> String? {

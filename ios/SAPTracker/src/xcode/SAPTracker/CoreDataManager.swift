@@ -16,6 +16,7 @@ public class CoreDataManager: NSObject {
         case Event
         case GPSFix
         case Leaderboard
+        case Mark
         case Regatta
     }
     
@@ -46,7 +47,8 @@ public class CoreDataManager: NSObject {
         fetchRequest.predicate = NSPredicate(format: "event.eventID = %@ AND leaderboard.name = %@ AND competitor.competitorID = %@",
                                              regattaData.eventID,
                                              regattaData.leaderboardName,
-                                             regattaData.competitorID)
+                                             // FIXME: refactor data model and fetch competitors and marks in two different fetches
+                                             regattaData.competitorID ?? "")
         do {
             let regattas = try managedObjectContext.executeFetchRequest(fetchRequest)
             if regattas.count == 0 {
@@ -74,6 +76,7 @@ public class CoreDataManager: NSObject {
         regatta.event = newEvent(regatta)
         regatta.leaderboard = newLeaderboard(regatta)
         regatta.competitor = newCompetitor(regatta)
+        regatta.mark = newMark(regatta)
         return regatta
     }
     
@@ -94,13 +97,19 @@ public class CoreDataManager: NSObject {
         competitor.regatta = regatta
         return competitor
     }
-    
+
     func newGPSFix(regatta: Regatta) -> GPSFix {
         let gpsFix = NSEntityDescription.insertNewObjectForEntityForName(Entities.GPSFix.rawValue, inManagedObjectContext: managedObjectContext) as! GPSFix
         gpsFix.regatta = regatta
         return gpsFix
     }
-    
+
+    func newMark(regatta: Regatta) -> Mark {
+        let mark = NSEntityDescription.insertNewObjectForEntityForName(Entities.Mark.rawValue, inManagedObjectContext: managedObjectContext) as! Mark
+        mark.regatta = regatta
+        return mark
+    }
+
     // MARK: - Delete
     
     func deleteObject(object: AnyObject?) {

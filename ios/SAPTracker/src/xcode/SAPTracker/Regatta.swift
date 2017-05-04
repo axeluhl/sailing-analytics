@@ -18,7 +18,12 @@ class Regatta: NSManagedObject {
         teamImageRetry = false
         event.updateWithEventData(regattaData.eventData)
         leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
-        competitor.updateWithCompetitorData(regattaData.competitorData)
+        if (competitor != nil) {
+            competitor!.updateWithCompetitorData(regattaData.competitorData)
+        }
+        if (mark != nil) {
+            mark!.updateWithMarkData(regattaData.markData)
+        }
     }
     
     func eventURL() -> NSURL? {
