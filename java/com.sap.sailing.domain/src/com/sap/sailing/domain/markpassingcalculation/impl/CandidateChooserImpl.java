@@ -21,7 +21,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
@@ -34,8 +33,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
@@ -103,7 +102,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     
     private Map<Competitor, Set<Candidate>> candidates = new HashMap<>();
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
-    private Map<Competitor, Integer> suppressedPassings = new HashMap<>();
+    private ConcurrentHashMap<Competitor, Integer> suppressedPassings = new ConcurrentHashMap<>();
     
     /**
      * Set to {@link #EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME} milliseconds before the actual race start,
@@ -185,11 +184,19 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     @Override
-    public synchronized void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
+    public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
        final TimePoint startOfRace = race.getStartOfRace(/* inference */ false);
         if (startOfRace != null) {
-            if (raceStartTime == null || !startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME).equals(raceStartTime)) {
-                raceStartTime = startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME);
+            final boolean startTimeUpdated;
+            synchronized (this) { // protect raceStartTime check and update
+                if (raceStartTime == null || !startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME).equals(raceStartTime)) {
+                    raceStartTime = startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME);
+                    startTimeUpdated = true;
+                } else {
+                    startTimeUpdated = false;
+                }
+            }
+            if (startTimeUpdated) {
                 List<Candidate> startList = new ArrayList<>();
                 startList.add(start);
                 for (Competitor com : candidates.keySet()) {
@@ -222,33 +229,43 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t) {
-        Candidate fixedCan = new CandidateImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
-        NavigableSet<Candidate> fixed = fixedPassings.get(c);
-        if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
-            if (!fixed.add(fixedCan)) {
-                Candidate old = fixed.ceiling(fixedCan);
-                fixed.remove(old);
-                removeCandidates(c, Arrays.asList(old));
-                fixed.add(fixedCan);
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            Candidate fixedCan = new CandidateImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
+            NavigableSet<Candidate> fixed = fixedPassings.get(c);
+            if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
+                if (!fixed.add(fixedCan)) {
+                    Candidate old = fixed.ceiling(fixedCan);
+                    fixed.remove(old);
+                    removeCandidates(c, Arrays.asList(old));
+                    fixed.add(fixedCan);
+                }
+                addCandidates(c, Arrays.asList(fixedCan));
+                findShortestPath(c);
             }
-            addCandidates(c, Arrays.asList(fixedCan));
-            findShortestPath(c);
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 
     @Override
     public void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint) {
-        Candidate toRemove = null;
-        for (Candidate can : fixedPassings.get(c)) {
-            if (can.getOneBasedIndexOfWaypoint() - 1 == zeroBasedIndexOfWaypoint) {
-                toRemove = can;
-                break;
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            Candidate toRemove = null;
+            for (Candidate can : fixedPassings.get(c)) {
+                if (can.getOneBasedIndexOfWaypoint() - 1 == zeroBasedIndexOfWaypoint) {
+                    toRemove = can;
+                    break;
+                }
             }
-        }
-        if (toRemove != null) {
-            fixedPassings.get(c).remove(toRemove);
-            removeCandidates(c, Arrays.asList(toRemove));
-            findShortestPath(c);
+            if (toRemove != null) {
+                fixedPassings.get(c).remove(toRemove);
+                removeCandidates(c, Arrays.asList(toRemove));
+                findShortestPath(c);
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 
@@ -264,7 +281,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         findShortestPath(c);
     }
 
-    private synchronized void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
+    private void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
+        assert perCompetitorLocks.get(c).isWriteLocked();
         final Boolean isGateStart = race.isGateStart();
         Map<Candidate, Set<Edge>> edges = allEdges.get(c);
         for (Candidate newCan : newCandidates) {
@@ -361,100 +379,105 @@ public class CandidateChooserImpl implements CandidateChooser {
      * candidates are the only fixed elements. If more fixed elements are provided, the algorithm solves the
      * optimization problem separately for each segment and concatenates the solutions.
      */
-    private synchronized void findShortestPath(Competitor c) {
-        Map<Candidate, Set<Edge>> allCompetitorEdges = allEdges.get(c);
-        SortedSet<Candidate> mostLikelyCandidates = new TreeSet<>();
-        NavigableSet<Candidate> fixedPasses = fixedPassings.get(c);
-        Candidate startOfFixedInterval = fixedPasses.first();
-        Candidate endOfFixedInterval = fixedPasses.higher(startOfFixedInterval);
-        Integer zeroBasedIndexOfWaypoint = suppressedPassings.get(c);
-        Integer oneBasedIndexOfSuppressedWaypoint = zeroBasedIndexOfWaypoint != null ? zeroBasedIndexOfWaypoint + 1 : end
-                .getOneBasedIndexOfWaypoint();
-        while (endOfFixedInterval != null) {
-            if (oneBasedIndexOfSuppressedWaypoint <= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
-                endOfFixedInterval = end;
-            }
-            NavigableSet<Util.Pair<Edge, Double>> currentEdgesMoreLikelyFirst = new TreeSet<>(new Comparator<Util.Pair<Edge, Double>>() {
-                @Override
-                public int compare(Util.Pair<Edge, Double> o1, Util.Pair<Edge, Double> o2) {
-                    int result = o2.getB().compareTo(o1.getB());
-                    return result != 0 ? result : o1.getA().compareTo(o2.getA());
+    private void findShortestPath(Competitor c) {
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            Map<Candidate, Set<Edge>> allCompetitorEdges = allEdges.get(c);
+            SortedSet<Candidate> mostLikelyCandidates = new TreeSet<>();
+            NavigableSet<Candidate> fixedPasses = fixedPassings.get(c);
+            Candidate startOfFixedInterval = fixedPasses.first();
+            Candidate endOfFixedInterval = fixedPasses.higher(startOfFixedInterval);
+            Integer zeroBasedIndexOfWaypoint = suppressedPassings.get(c);
+            Integer oneBasedIndexOfSuppressedWaypoint = zeroBasedIndexOfWaypoint != null ? zeroBasedIndexOfWaypoint + 1 : end
+                    .getOneBasedIndexOfWaypoint();
+            while (endOfFixedInterval != null) {
+                if (oneBasedIndexOfSuppressedWaypoint <= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
+                    endOfFixedInterval = end;
                 }
-            });
-            Map<Candidate, Util.Pair<Candidate, Double>> candidateWithParentAndHighestTotalProbability = new HashMap<>();
-            int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
-
-            boolean endFound = false;
-            currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
-                    1, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
-            while (!endFound) {
-                Util.Pair<Edge, Double> mostLikelyEdgeWithProbability = currentEdgesMoreLikelyFirst.pollFirst();
-                if (mostLikelyEdgeWithProbability == null) {
-                    endFound = true;
-                } else {
-                    Edge currentMostLikelyEdge = mostLikelyEdgeWithProbability.getA();
-                    Double currentHighestProbability = mostLikelyEdgeWithProbability.getB();
-                    // If the shortest path to this candidate is already known the new edge is not added.
-                    if (!candidateWithParentAndHighestTotalProbability.containsKey(currentMostLikelyEdge.getEnd())) {
-                        // The most likely edge taking us to currentMostLikelyEdge.getEnd() is found. Remember it.
-                        candidateWithParentAndHighestTotalProbability.put(currentMostLikelyEdge.getEnd(), new Util.Pair<Candidate, Double>(
-                                currentMostLikelyEdge.getStart(), currentHighestProbability));
-                        logger.finest(()->"Added "+ currentMostLikelyEdge + " as most likely edge for " + c);
-                        endFound = currentMostLikelyEdge.getEnd() == endOfFixedInterval;
-                        if (!endFound) {
-                            // the end of the segment was not yet found; add edges leading away from
-                            // currentMostLikelyEdge.getEnd(), multiplying up their probabilities with the probability
-                            // of reaching currentMostLikelyEdge.getEnd()
-                            Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentMostLikelyEdge.getEnd());
-                            if (edgesForNewCandidate != null) {
-                                for (Edge e : edgesForNewCandidate) {
-                                    int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
-                                    // only add edge if it stays within the current segment, not exceeding
-                                    // the next fixed mark passing
-                                    if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
-                                            && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
-                                        currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(e, currentHighestProbability * e.getProbability()));
+                NavigableSet<Util.Pair<Edge, Double>> currentEdgesMoreLikelyFirst = new TreeSet<>(new Comparator<Util.Pair<Edge, Double>>() {
+                    @Override
+                    public int compare(Util.Pair<Edge, Double> o1, Util.Pair<Edge, Double> o2) {
+                        int result = o2.getB().compareTo(o1.getB());
+                        return result != 0 ? result : o1.getA().compareTo(o2.getA());
+                    }
+                });
+                Map<Candidate, Util.Pair<Candidate, Double>> candidateWithParentAndHighestTotalProbability = new HashMap<>();
+                int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
+    
+                boolean endFound = false;
+                currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
+                        1, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
+                while (!endFound) {
+                    Util.Pair<Edge, Double> mostLikelyEdgeWithProbability = currentEdgesMoreLikelyFirst.pollFirst();
+                    if (mostLikelyEdgeWithProbability == null) {
+                        endFound = true;
+                    } else {
+                        Edge currentMostLikelyEdge = mostLikelyEdgeWithProbability.getA();
+                        Double currentHighestProbability = mostLikelyEdgeWithProbability.getB();
+                        // If the shortest path to this candidate is already known the new edge is not added.
+                        if (!candidateWithParentAndHighestTotalProbability.containsKey(currentMostLikelyEdge.getEnd())) {
+                            // The most likely edge taking us to currentMostLikelyEdge.getEnd() is found. Remember it.
+                            candidateWithParentAndHighestTotalProbability.put(currentMostLikelyEdge.getEnd(), new Util.Pair<Candidate, Double>(
+                                    currentMostLikelyEdge.getStart(), currentHighestProbability));
+                            logger.finest(()->"Added "+ currentMostLikelyEdge + " as most likely edge for " + c);
+                            endFound = currentMostLikelyEdge.getEnd() == endOfFixedInterval;
+                            if (!endFound) {
+                                // the end of the segment was not yet found; add edges leading away from
+                                // currentMostLikelyEdge.getEnd(), multiplying up their probabilities with the probability
+                                // of reaching currentMostLikelyEdge.getEnd()
+                                Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentMostLikelyEdge.getEnd());
+                                if (edgesForNewCandidate != null) {
+                                    for (Edge e : edgesForNewCandidate) {
+                                        int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
+                                        // only add edge if it stays within the current segment, not exceeding
+                                        // the next fixed mark passing
+                                        if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
+                                                && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
+                                            currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(e, currentHighestProbability * e.getProbability()));
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+                final Pair<Candidate, Double> bestCandidateAndProbabilityForEndOfFixedInterval = candidateWithParentAndHighestTotalProbability.get(endOfFixedInterval);
+                Candidate marker = bestCandidateAndProbabilityForEndOfFixedInterval == null ? null : bestCandidateAndProbabilityForEndOfFixedInterval.getA();
+                while (marker != null && marker.getOneBasedIndexOfWaypoint() > 0) {
+                    mostLikelyCandidates.add(marker);
+                    marker = candidateWithParentAndHighestTotalProbability.get(marker).getA();
+                }
+                startOfFixedInterval = endOfFixedInterval;
+                endOfFixedInterval = fixedPasses.higher(endOfFixedInterval);
             }
-            final Pair<Candidate, Double> bestCandidateAndProbabilityForEndOfFixedInterval = candidateWithParentAndHighestTotalProbability.get(endOfFixedInterval);
-            Candidate marker = bestCandidateAndProbabilityForEndOfFixedInterval == null ? null : bestCandidateAndProbabilityForEndOfFixedInterval.getA();
-            while (marker != null && marker.getOneBasedIndexOfWaypoint() > 0) {
-                mostLikelyCandidates.add(marker);
-                marker = candidateWithParentAndHighestTotalProbability.get(marker).getA();
-            }
-            startOfFixedInterval = endOfFixedInterval;
-            endOfFixedInterval = fixedPasses.higher(endOfFixedInterval);
-        }
-        boolean changed = false;
-        Map<Waypoint, MarkPassing> currentPasses = currentMarkPasses.get(c);
-        if (currentPasses.size() != mostLikelyCandidates.size()) {
-            changed = true;
-        } else {
-            for (Candidate can : mostLikelyCandidates) {
-                MarkPassing currentPassing = currentPasses.get(can.getWaypoint());
-                if (currentPassing == null || currentPassing.getTimePoint().compareTo(can.getTimePoint()) != 0) {
-                    changed = true;
-                    break;
+            boolean changed = false;
+            Map<Waypoint, MarkPassing> currentPasses = currentMarkPasses.get(c);
+            if (currentPasses.size() != mostLikelyCandidates.size()) {
+                changed = true;
+            } else {
+                for (Candidate can : mostLikelyCandidates) {
+                    MarkPassing currentPassing = currentPasses.get(can.getWaypoint());
+                    if (currentPassing == null || currentPassing.getTimePoint().compareTo(can.getTimePoint()) != 0) {
+                        changed = true;
+                        break;
+                    }
                 }
             }
-        }
-        if (changed) {
-            currentPasses.clear();
-            List<MarkPassing> newMarkPassings = new ArrayList<>();
-            for (Candidate can : mostLikelyCandidates) {
-                if (can != start && can != end) {
-                    MarkPassingImpl newMarkPassing = new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c);
-                    currentPasses.put(newMarkPassing.getWaypoint(), newMarkPassing);
-                    newMarkPassings.add(newMarkPassing);
+            if (changed) {
+                currentPasses.clear();
+                List<MarkPassing> newMarkPassings = new ArrayList<>();
+                for (Candidate can : mostLikelyCandidates) {
+                    if (can != start && can != end) {
+                        MarkPassingImpl newMarkPassing = new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c);
+                        currentPasses.put(newMarkPassing.getWaypoint(), newMarkPassing);
+                        newMarkPassings.add(newMarkPassing);
+                    }
                 }
+                logger.fine(()->"Updating MarkPasses for " + c + " in case "+race.getRace().getName());
+                race.updateMarkPassings(c, newMarkPassings);
             }
-            logger.fine(()->"Updating MarkPasses for " + c + " in case "+race.getRace().getName());
-            race.updateMarkPassings(c, newMarkPassings);
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 
@@ -559,26 +582,36 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private void addCandidates(Competitor c, Iterable<Candidate> newCandidates) {
-        for (Candidate can : newCandidates) {
-            candidates.get(c).add(can);
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            for (Candidate can : newCandidates) {
+                candidates.get(c).add(can);
+            }
+            createNewEdges(c, newCandidates);
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
-        createNewEdges(c, newCandidates);
     }
 
     private synchronized void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
-        for (Candidate can : wrongCandidates) {
-            logger.finest(()->"Removing all edges containing " + can + "of "+ c);
-            candidates.get(c).remove(can);
-            Map<Candidate, Set<Edge>> edges = allEdges.get(c);
-            edges.remove(can);
-            for (Set<Edge> set : edges.values()) {
-                for (Iterator<Edge> i = set.iterator(); i.hasNext();) {
-                    final Edge e = i.next();
-                    if (e.getStart() == can || e.getEnd() == can) {
-                        i.remove();
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            for (Candidate can : wrongCandidates) {
+                logger.finest(()->"Removing all edges containing " + can + "of "+ c);
+                candidates.get(c).remove(can);
+                Map<Candidate, Set<Edge>> edges = allEdges.get(c);
+                edges.remove(can);
+                for (Set<Edge> set : edges.values()) {
+                    for (Iterator<Edge> i = set.iterator(); i.hasNext();) {
+                        final Edge e = i.next();
+                        if (e.getStart() == can || e.getEnd() == can) {
+                            i.remove();
+                        }
                     }
                 }
             }
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 
