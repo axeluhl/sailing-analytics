@@ -2452,16 +2452,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 // data for newly selected competitor supposedly missing; refresh
                 timeChanged(timer.getTime(), null);
             }
-        }
         
-        // Now update tails for all competitors because selection change may also affect all unselected competitors
-        for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
-            Polyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
+            Polyline tail = fixesAndTails.getTail(competitor);
             if (tail != null) {
-                PolylineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
+                PolylineOptions newOptions = createTailStyle(competitor, displayHighlighted(competitor));
                 tail.setOptions(newOptions);
             }
         }
+       
         timeChanged(timer.getTime(), null);
         // Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
@@ -2765,18 +2763,22 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         options.setClickable(true);
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
-        boolean noCompetitorSelected = Util.isEmpty(competitorSelection.getSelectedCompetitors());
-        if (displayMode == DisplayMode.SELECTED || noCompetitorSelected || getSettings().isShowOnlySelectedCompetitors()) {
+
+        switch(displayMode){
+        case DEFAULT:
             options.setStrokeColor(competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
-        } else {
+            options.setStrokeWeight(1);
+            break;
+        case SELECTED:
+            options.setStrokeColor(competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
+            options.setStrokeWeight(2);
+            break;
+        case NOT_SELECTED:
             options.setStrokeColor(LOWLIGHTED_TAIL_COLOR.getAsHtml());
             options.setStrokeOpacity(LOWLIGHTED_TAIL_OPACITY);
+            break;
         }
-        if (displayMode == DisplayMode.SELECTED) {
-            options.setStrokeWeight(2);
-        } else {
-            options.setStrokeWeight(1);
-        }
+
         options.setZindex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
         return options;
     }
