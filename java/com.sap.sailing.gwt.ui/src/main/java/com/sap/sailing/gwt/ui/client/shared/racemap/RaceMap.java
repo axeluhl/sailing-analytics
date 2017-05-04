@@ -101,6 +101,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
@@ -1915,12 +1916,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (boatOverlay == null) {
                 boatOverlay = createBoatOverlay(RaceMapOverlaysZIndexes.BOATS_ZINDEX, competitorDTO, displayHighlighted(competitorDTO));
                 boatOverlays.put(competitorDTO, boatOverlay);
-                boatOverlay.setSelected(displayHighlighted(competitorDTO));
+                boatOverlay.setDisplayMode(displayHighlighted(competitorDTO));
                 boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
                 boatOverlay.addToMap();
             } else {
                 usedExistingCanvas = true;
-                boatOverlay.setSelected(displayHighlighted(competitorDTO));
+                boatOverlay.setDisplayMode(displayHighlighted(competitorDTO));
                 boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
                 boatOverlay.draw();
             }
@@ -1929,8 +1930,29 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return usedExistingCanvas;
     }
 
-    private boolean displayHighlighted(CompetitorDTO competitorDTO) {
-        return !settings.isShowOnlySelectedCompetitors() && competitorSelection.isSelected(competitorDTO);
+    private DisplayMode displayHighlighted(CompetitorDTO competitorDTO) {
+        boolean competitorisSelected = competitorSelection.isSelected(competitorDTO);
+        if(!settings.isShowOnlySelectedCompetitors()){
+            if(competitorisSelected){
+                return DisplayMode.SELECTED;
+            }
+            else{
+                if(isSomeOtherCompetitorSelected()){
+                    return DisplayMode.NOT_SELECTED;
+                }
+                else{
+                    return DisplayMode.DEFAULT;
+                }
+            }
+        }
+        else{
+            return competitorSelection.isSelected(competitorDTO) ? DisplayMode.SELECTED : DisplayMode.DEFAULT;
+        }
+       
+    }
+    
+    private boolean isSomeOtherCompetitorSelected(){
+        return Util.size(competitorSelection.getSelectedCompetitors()) > 0;
     }
     
     private class CourseMarkInfoWindowClickHandler implements ClickMapHandler {
@@ -1987,9 +2009,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return infoText.toString();
     }
     
-    private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
+    private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, DisplayMode displayMode) {
         final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
-        boatCanvas.setSelected(highlighted);
+        boatCanvas.setDisplayMode(displayMode);
         boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
@@ -2421,7 +2443,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             // only change highlighting
             BoatOverlay boatCanvas = boatOverlays.get(competitor);
             if (boatCanvas != null) {
-                boatCanvas.setSelected(displayHighlighted(competitor));
+                boatCanvas.setDisplayMode(displayHighlighted(competitor));
                 boatCanvas.draw();
                 showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             } else {
@@ -2431,6 +2453,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 timeChanged(timer.getTime(), null);
             }
         }
+        
         // Now update tails for all competitors because selection change may also affect all unselected competitors
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
             Polyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
@@ -2439,6 +2462,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 tail.setOptions(newOptions);
             }
         }
+        timeChanged(timer.getTime(), null);
         // Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
@@ -2471,7 +2495,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 // "lowlight" currently selected competitor
                 BoatOverlay boatCanvas = boatOverlays.get(competitor);
                 if (boatCanvas != null) {
-                    boatCanvas.setSelected(displayHighlighted(competitor));
+                    boatCanvas.setDisplayMode(displayHighlighted(competitor));
                     boatCanvas.draw();
                 }
                 showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
@@ -2736,19 +2760,19 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     @Override
-    public PolylineOptions createTailStyle(CompetitorDTO competitor, boolean isHighlighted) {
+    public PolylineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode) {
         PolylineOptions options = PolylineOptions.newInstance();
         options.setClickable(true);
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
         boolean noCompetitorSelected = Util.isEmpty(competitorSelection.getSelectedCompetitors());
-        if (isHighlighted || noCompetitorSelected || getSettings().isShowOnlySelectedCompetitors()) {
+        if (displayMode == DisplayMode.SELECTED || noCompetitorSelected || getSettings().isShowOnlySelectedCompetitors()) {
             options.setStrokeColor(competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
         } else {
             options.setStrokeColor(LOWLIGHTED_TAIL_COLOR.getAsHtml());
             options.setStrokeOpacity(LOWLIGHTED_TAIL_OPACITY);
         }
-        if (isHighlighted) {
+        if (displayMode == DisplayMode.SELECTED) {
             options.setStrokeWeight(2);
         } else {
             options.setStrokeWeight(1);

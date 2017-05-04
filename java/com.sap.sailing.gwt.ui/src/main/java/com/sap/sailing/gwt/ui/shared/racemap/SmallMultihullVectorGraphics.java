@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 
 public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
     
@@ -11,9 +12,9 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
     }
 
     @Override
-    protected void drawBoat(Context2d ctx, boolean isSelected, String color) {
+    protected void drawBoat(Context2d ctx, DisplayMode displayMode, String color) {
         // outer net
-        if(isSelected) {
+        if(displayMode == DisplayMode.SELECTED) {
             ctx.setFillStyle(color);
             ctx.setStrokeStyle(color);
         } else {
@@ -37,7 +38,7 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
         ctx.stroke();
 
         // inner net
-        if(isSelected) {
+        if(displayMode == DisplayMode.SELECTED) {
             ctx.setFillStyle("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
         } else {
@@ -61,7 +62,7 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
         ctx.stroke();
         
         // hull - left and right part
-        if(isSelected) {
+        if(displayMode == DisplayMode.SELECTED) {
             ctx.setFillStyle(color);
             ctx.setStrokeStyle(color);
         } else {

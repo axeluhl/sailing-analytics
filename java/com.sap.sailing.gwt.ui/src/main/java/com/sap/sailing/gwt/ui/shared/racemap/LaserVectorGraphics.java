@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 
 public class LaserVectorGraphics extends BoatClassVectorGraphics {
     
@@ -10,9 +11,9 @@ public class LaserVectorGraphics extends BoatClassVectorGraphics {
     }
 
     @Override
-    protected void drawBoat(Context2d ctx, boolean isSelected, String color) {
+    protected void drawBoat(Context2d ctx, DisplayMode displayMode, String color) {
         // outer part of the hull
-        if(isSelected) {
+        if(displayMode == DisplayMode.SELECTED) {
             ctx.setFillStyle(color);
             ctx.setStrokeStyle(color);
         } else {
@@ -33,7 +34,7 @@ public class LaserVectorGraphics extends BoatClassVectorGraphics {
         ctx.stroke();
 
         // inner part of the hull
-        if(isSelected) {
+        if(displayMode == DisplayMode.SELECTED) {
             ctx.setFillStyle ("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
         } else {

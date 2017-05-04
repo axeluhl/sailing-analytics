@@ -9,6 +9,7 @@ import com.google.gwt.maps.client.base.Size;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 import com.sap.sse.common.Color;
 
 /**
@@ -55,7 +56,7 @@ public abstract class BoatClassVectorGraphics {
         return Collections.unmodifiableSet(compatibleBoatClasses);
     }
 
-    protected abstract void drawBoat(Context2d ctx, boolean isSelected, String color);
+    protected abstract void drawBoat(Context2d ctx, DisplayMode displayMode, String color);
     
     protected abstract void drawDownwindPortTackSails(Context2d ctx);
 
@@ -111,14 +112,14 @@ public abstract class BoatClassVectorGraphics {
         }
     }
 
-    public void drawBoatToCanvas(Context2d ctx, LegType legType, Tack tack, boolean isSelected, double width,
+    public void drawBoatToCanvas(Context2d ctx, LegType legType, Tack tack, DisplayMode displayMode, double width,
             double height, Size scaleFactor, Color color) {
         ctx.save();
         ctx.clearRect(0, 0, width, height);
         ctx.translate(width / 2.0, height / 2.0);
         ctx.scale(scaleFactor.getWidth(), scaleFactor.getHeight());
         ctx.translate(-hullLengthInPx / 2.0, -beamInPx / 2.0);
-        drawBoat(ctx, isSelected, color.getAsHtml());
+        drawBoat(ctx, displayMode, color.getAsHtml());
         drawSails(ctx, legType, tack);
         ctx.restore();
     }
