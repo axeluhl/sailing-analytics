@@ -99,7 +99,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     private func update() {
         SVProgressHUD.show()
-        competitorController.update {
+        competitorSessionController.update {
             self.refresh()
             SVProgressHUD.popActivity()
         }
@@ -255,7 +255,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     private func startTracking(sender: AnyObject) {
         do {
-            try competitorController.startTracking()
+            try competitorSessionController.startTracking()
             performSegueWithIdentifier(Segue.Tracking, sender: sender)
         } catch let error as LocationManager.LocationManagerError {
             showStartTrackingFailureAlert(error.description)
@@ -281,7 +281,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     }
     
     private func performCheckOut() {
-        competitorController.checkOut { (withSuccess) in
+        competitorSessionController.checkOut { (withSuccess) in
             self.performCheckOutCompleted(withSuccess)
         }
     }
@@ -355,7 +355,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
             let trackingNC = segue.destinationViewController as! UINavigationController
             let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
             trackingVC.checkIn = competitorCheckIn
-            trackingVC.competitorController = competitorController
+            trackingVC.sessionController = competitorSessionController
         } else if (segue.identifier == Segue.Leaderboard) {
             let leaderboardNC = segue.destinationViewController as! UINavigationController
             let leaderboardVC = leaderboardNC.viewControllers[0] as! LeaderboardViewController
@@ -365,8 +365,8 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     // MARK: - Properties
     
-    private lazy var competitorController: CompetitorController = {
-        return CompetitorController(checkIn: self.competitorCheckIn)
+    private lazy var competitorSessionController: SessionController = {
+        return SessionController(checkIn: self.competitorCheckIn)
     }()
     
 }
@@ -403,7 +403,7 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
     
     private func uploadTeamImageData(imageData: NSData!) {
         SVProgressHUD.show()
-        competitorController.postTeamImageData(imageData, competitorID: competitorCheckIn.competitorID,
+        competitorSessionController.postTeamImageData(imageData, competitorID: competitorCheckIn.competitorID,
                                             success: { (teamImageURL) in
                                                 SVProgressHUD.popActivity()
                                                 self.uploadTeamImageDataSuccess(teamImageURL)

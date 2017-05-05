@@ -1,5 +1,5 @@
 //
-//  CompetitorController.swift
+//  SessionController.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 05.07.16.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CompetitorController: NSObject {
+class SessionController: NSObject {
         
     let checkIn: CheckIn
     
@@ -30,15 +30,17 @@ class CompetitorController: NSObject {
     // MARK: - Notifications
     
     private func subscribeForNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(locationManagerUpdated(_:)),
-                                                         name:LocationManager.NotificationType.Updated,
-                                                         object: nil
+        NSNotificationCenter.defaultCenter().addObserver(
+            self,
+            selector:#selector(locationManagerUpdated(_:)),
+            name: LocationManager.NotificationType.Updated,
+            object: nil
         )
-        NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(batterySavingChanged(_:)),
-                                                         name:Preferences.NotificationType.BatterySavingChanged,
-                                                         object: nil
+        NSNotificationCenter.defaultCenter().addObserver(
+            self,
+            selector:#selector(batterySavingChanged(_:)),
+            name: Preferences.NotificationType.BatterySavingChanged,
+            object: nil
         )
     }
     
