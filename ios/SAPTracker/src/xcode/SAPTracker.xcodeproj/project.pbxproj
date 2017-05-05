@@ -292,7 +292,7 @@
 		7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* CourseViewController.swift */; };
 		7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */; };
 		7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */; };
-		7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaViewController.swift */; };
+		7F99DE3C1A126554009B3619 /* CompetitorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* CompetitorViewController.swift */; };
 		7FA2220B1A25E55400FD364B /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
 		7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* CoreDataManager.swift */; };
 		7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FAFA7941A126B5700D230F1 /* AboutViewController.swift */; };
@@ -668,7 +668,7 @@
 		7F8B8D421A373D4400C34B88 /* CourseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseViewController.swift; sourceTree = "<group>"; };
 		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderboardViewController.swift; sourceTree = "<group>"; };
-		7F99DE3B1A126554009B3619 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
+		7F99DE3B1A126554009B3619 /* CompetitorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorViewController.swift; sourceTree = "<group>"; };
 		7FA6551919F6661900A1B92D /* CoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CoreDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7FAFA7941A126B5700D230F1 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -1289,7 +1289,7 @@
 		C89C60101D0FF036002AAAD2 /* Regatta */ = {
 			isa = PBXGroup;
 			children = (
-				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
+				7F99DE3B1A126554009B3619 /* CompetitorViewController.swift */,
 				7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */,
 				C89C5FC61D06CE62002AAAD2 /* Tracking */,
 			);
@@ -1848,7 +1848,7 @@
 				C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
 				C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */,
-				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
+				7F99DE3C1A126554009B3619 /* CompetitorViewController.swift in Sources */,
 				C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */,
 				C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */,
 				C8F71EF31D86A15F00826DE4 /* SMTWiFiStatus.m in Sources */,

@@ -321,8 +321,8 @@ class HomeViewController: UIViewController {
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == Segue.Regatta) {
-            guard let regattaVC = segue.destinationViewController as? RegattaViewController else { return }
-            regattaVC.competitorCheckIn = selectedCheckIn as! CompetitorCheckIn // TODO: isKindOfClass Marker...
+            guard let competitorVC = segue.destinationViewController as? CompetitorViewController else { return }
+            competitorVC.competitorCheckIn = selectedCheckIn as! CompetitorCheckIn // TODO: isKindOfClass Marker...
             selectedCheckIn = nil
         } else if (segue.identifier == Segue.Scan) {
             guard let scanVC = segue.destinationViewController as? ScanViewController else { return }

@@ -1,5 +1,5 @@
 //
-//  RegattaViewController.swift
+//  CompetitorViewController.swift
 //  SAPTracker
 //
 //  Created by computing on 10/11/14.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-class RegattaViewController : UIViewController, UINavigationControllerDelegate {
+class CompetitorViewController : UIViewController, UINavigationControllerDelegate {
     
     private struct Segue {
         static let About = "About"
@@ -70,11 +70,12 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
     private func setupCountdownTimer() {
         countdownTimer?.invalidate()
-        countdownTimer = NSTimer.scheduledTimerWithTimeInterval(1,
-                                                                target: self,
-                                                                selector: #selector(RegattaViewController.countdownTimerTick),
-                                                                userInfo: nil,
-                                                                repeats: true
+        countdownTimer = NSTimer.scheduledTimerWithTimeInterval(
+            1,
+            target: self,
+            selector: #selector(CompetitorViewController.countdownTimerTick),
+            userInfo: nil,
+            repeats: true
         )
         countdownTimerTick()
     }
@@ -372,7 +373,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
 
 // MARK: - UIImagePickerControllerDelegate
 
-extension RegattaViewController: UIImagePickerControllerDelegate {
+extension CompetitorViewController: UIImagePickerControllerDelegate {
     
     private func showImagePicker(sourceType: UIImagePickerControllerSourceType) {
         let imagePickerController = UIImagePickerController()

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pqQ-jd-OwW">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15G1217" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pqQ-jd-OwW">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -420,10 +420,10 @@
             </objects>
             <point key="canvasLocation" x="1971" y="-1116"/>
         </scene>
-        <!--Regatta View Controller-->
+        <!--Competitor View Controller-->
         <scene sceneID="kcD-1R-9q1">
             <objects>
-                <viewController id="G3a-SV-Maf" customClass="RegattaViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="G3a-SV-Maf" customClass="CompetitorViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="wYi-P2-UTF"/>
                         <viewControllerLayoutGuide type="bottom" id="cNo-41-lUw"/>
@@ -1929,8 +1929,8 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="QMa-LQ-D8c"/>
-        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="Irs-ey-Uhs"/>
+        <segue reference="tzB-PL-31j"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="calibratedRGB"/>
 </document>
