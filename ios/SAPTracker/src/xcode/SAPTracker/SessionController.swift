@@ -126,26 +126,13 @@ class SessionController: NSObject {
         LocationManager.sharedManager.stopTracking()
     }
     
-    // MARK: - TeamImage
-    
-    func postTeamImageData(imageData: NSData,
-                           competitorID: String,
-                           success: (teamImageURL: String) -> Void,
-                           failure: (error: RequestManager.Error) -> Void)
-    {
-        requestManager.postTeamImageData(imageData,
-                                         competitorID: competitorID,
-                                         success: success,
-                                         failure: failure
-        )
-    }
-    
     // MARK: - CheckOut
     
     func checkOut(completion: (withSuccess: Bool) -> Void) {
-        requestManager.postCheckOut(checkIn,
-                                    success: { () in completion(withSuccess: true) },
-                                    failure: { (error) in completion(withSuccess: false) }
+        requestManager.postCheckOut(
+            checkIn,
+            success: { () in completion(withSuccess: true) },
+            failure: { (error) in completion(withSuccess: false) }
         )
     }
     

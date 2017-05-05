@@ -46,10 +46,10 @@ class MarkViewController: UIViewController {
     
     private func update() {
         SVProgressHUD.show()
-        //markController.update {
+        markSessionController.update {
             self.refresh()
             SVProgressHUD.popActivity()
-        //}
+        }
     }
     
     // MARK: - Refresh
@@ -62,5 +62,11 @@ class MarkViewController: UIViewController {
 
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
     }
+
+    // MARK: - Properties
+    
+    private lazy var markSessionController: MarkSessionController = {
+        return MarkSessionController(checkIn: self.markCheckIn)
+    }()
 
 }
