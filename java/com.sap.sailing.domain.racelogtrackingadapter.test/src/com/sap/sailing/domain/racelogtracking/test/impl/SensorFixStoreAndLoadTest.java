@@ -816,7 +816,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         
-        // This thread solved the 
+        // This thread solves the loading state through the CyclicBarrier
         new Thread() {
             public void run() {
                 try {
