@@ -1,30 +1,31 @@
 package com.sap.sse.security.ui.settings;
 
+import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
-import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
 import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
 import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * Specialization of {@link ComponentContextWithSettingsStorage} which reimplements URL deserialization. This implementation
- * handles URL deserialization in such a way, that only the provided {@code serializedSettings} {@code String} is
- * considered as URL, and not the URL in the browser.
+ * Specialization of {@link ComponentContextWithSettingsStorage} which reimplements URL deserialization. This
+ * implementation handles URL deserialization in such a way, that only the provided {@code serializedSettings}
+ * {@code String} is considered as URL, and not the URL in the browser.
  * 
  * @author Vladislav Chumak
  * 
  * @see ComponentContextWithSettingsStorage
  *
  */
-public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings> extends ComponentContextWithSettingsStorage<S> {
+public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings>
+        extends ComponentContextWithSettingsStorage<S> {
 
     /**
-     * Constructs a special case of {@link ComponentContextWithSettingsStorage} which considers the provided {@code serializedSettings} as
-     * URL parameters for deserialization of URL Settings.
+     * Constructs a special case of {@link ComponentContextWithSettingsStorage} which considers the provided
+     * {@code serializedSettings} as URL parameters for deserialization of URL Settings.
      * 
      * @param rootLifecycle
      *            The {@link ComponentLifecycle} of the root component/perspective
@@ -59,16 +60,18 @@ public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings> e
 
         });
     }
-    
-    protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StorageDefinitionId storageDefinitionId, SettingsSerializationHelper settingsSerializationHelper) {
+
+    protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
+            UserService userService, StorageDefinitionId storageDefinitionId,
+            SettingsSerializationHelper settingsSerializationHelper) {
         this(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper,
                 new UserSettingsBuildingPipeline(settingsSerializationHelper));
     }
 
-    protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StorageDefinitionId storageDefinitionId, SettingsSerializationHelper settingsSerializationHelper,
-            SettingsBuildingPipeline<SettingsJsons> settingsBuildingPipeline) {
+    protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
+            UserService userService, StorageDefinitionId storageDefinitionId,
+            SettingsSerializationHelper settingsSerializationHelper,
+            SettingsBuildingPipeline<JSONObject> settingsBuildingPipeline) {
         super(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper, settingsBuildingPipeline);
     }
 

@@ -8,13 +8,13 @@ import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * Adds settings patching functionality to {@link ComponentContextWithSettingsStorage} implementation.
- * This implementation provides additional methods for attaching of {@link SettingsPatch}. There are multiple hooks in
- * the underlying {@link UserSettingsBuildingPipelineWithPatching} which can be used to influence the
- * settings construction in its construction pipeline. After each {@link PipelineLevel} a custom {@link SettingsPatch}
- * may be applied. The patch may partially or completely modify the resulting settings object in order to provide
- * the desired behavior of default settings for a dynamic environment, e.g. RaceBoard which determines its default settings regarding
- * to RaceModes, PlayModes and etc.
+ * Adds settings patching functionality to {@link ComponentContextWithSettingsStorage} implementation. This
+ * implementation provides additional methods for attaching of {@link SettingsPatch}. There are multiple hooks in the
+ * underlying {@link UserSettingsBuildingPipelineWithPatching} which can be used to influence the settings construction
+ * in its construction pipeline. After each {@link PipelineLevel} a custom {@link SettingsPatch} may be applied. The
+ * patch may partially or completely modify the resulting settings object in order to provide the desired behavior of
+ * default settings for a dynamic environment, e.g. RaceBoard which determines its default settings regarding to
+ * RaceModes, PlayModes and etc.
  * 
  * 
  * @author Vladislav Chumak
@@ -23,10 +23,11 @@ import com.sap.sse.security.ui.client.UserService;
  * @param <S>
  *            The {@link Settings} type of the settings of the root component/perspective containing all the settings
  *            for itself and its subcomponents
- *            
+ * 
  */
-public class ComponentContextWithSettingsStorageAndPatching<S extends Settings> extends ComponentContextWithSettingsStorage<S> {
-    
+public class ComponentContextWithSettingsStorageAndPatching<S extends Settings>
+        extends ComponentContextWithSettingsStorage<S> {
+
     /**
      * @param rootLifecycle
      *            The {@link ComponentLifecycle} of the root component/perspective
@@ -35,38 +36,55 @@ public class ComponentContextWithSettingsStorageAndPatching<S extends Settings> 
      * @param storageDefinitionId
      *            The definition for User Settings and Document Settings storage keys
      */
-    public ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService, StorageDefinitionId storageDefinitionId) {
+    public ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService,
+            StorageDefinitionId storageDefinitionId) {
         this(rootLifecycle, userService, storageDefinitionId, new SettingsSerializationHelper());
     }
-    
-    protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService, StorageDefinitionId storageDefinitionId, SettingsSerializationHelper settingsSerializationHelper) {
-        this(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper, new UserSettingsBuildingPipelineWithPatching(settingsSerializationHelper));
+
+    protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
+            UserService userService, StorageDefinitionId storageDefinitionId,
+            SettingsSerializationHelper settingsSerializationHelper) {
+        this(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper,
+                new UserSettingsBuildingPipelineWithPatching(settingsSerializationHelper));
     }
-    
-    protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService, StorageDefinitionId storageDefinitionId, SettingsSerializationHelper settingsSerializationHelper, UserSettingsBuildingPipelineWithPatching settingsBuildingPipeline) {
+
+    protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
+            UserService userService, StorageDefinitionId storageDefinitionId,
+            SettingsSerializationHelper settingsSerializationHelper,
+            UserSettingsBuildingPipelineWithPatching settingsBuildingPipeline) {
         super(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper, settingsBuildingPipeline);
     }
-    
+
     /**
      * Adds a settings patch for transforming settings before storing them.
      * 
-     * @param component The component which the targeted settings for patching belong to
-     * @param pipelineLevel The pipeline level <b>AFTER</b> that the patch should be applied on settings
-     * @param settingsPatch The settings patch to apply on settings
+     * @param component
+     *            The component which the targeted settings for patching belong to
+     * @param pipelineLevel
+     *            The pipeline level <b>AFTER</b> that the patch should be applied on settings
+     * @param settingsPatch
+     *            The settings patch to apply on settings
      */
-    public<CS extends Settings> void addPatchForStoringSettings(Component<CS> component, PipelineLevel pipelineLevel, SettingsPatch<CS> settingsPatch) {
-        ((UserSettingsBuildingPipelineWithPatching) settingsBuildingPipeline).addPatchForStoringSettings(component, pipelineLevel, settingsPatch);
+    public <CS extends Settings> void addPatchForStoringSettings(Component<CS> component, PipelineLevel pipelineLevel,
+            SettingsPatch<CS> settingsPatch) {
+        ((UserSettingsBuildingPipelineWithPatching) settingsBuildingPipeline).addPatchForStoringSettings(component,
+                pipelineLevel, settingsPatch);
     }
-    
+
     /**
      * Adds a settings patch for settings object construction.
      * 
-     * @param component The component which the targeted settings for patching belong to
-     * @param pipelineLevel The pipeline level <b>AFTER</b> that the patch should be applied on settings
-     * @param settingsPatch The settings patch to apply on settings
+     * @param component
+     *            The component which the targeted settings for patching belong to
+     * @param pipelineLevel
+     *            The pipeline level <b>AFTER</b> that the patch should be applied on settings
+     * @param settingsPatch
+     *            The settings patch to apply on settings
      */
-    public<CS extends Settings> void addPatchForLoadingSettings(Component<CS> component, PipelineLevel pipelineLevel, SettingsPatch<CS> settingsPatch) {
-        ((UserSettingsBuildingPipelineWithPatching) settingsBuildingPipeline).addPatchForLoadingSettings(component, pipelineLevel, settingsPatch);
+    public <CS extends Settings> void addPatchForLoadingSettings(Component<CS> component, PipelineLevel pipelineLevel,
+            SettingsPatch<CS> settingsPatch) {
+        ((UserSettingsBuildingPipelineWithPatching) settingsBuildingPipeline).addPatchForLoadingSettings(component,
+                pipelineLevel, settingsPatch);
     }
 
 }

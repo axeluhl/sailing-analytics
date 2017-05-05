@@ -9,5 +9,5 @@ public class DummyOnSettingsStoredCallback implements OnSettingsStoredCallback {
     @Override
     public void onSuccess() {
     }
-    
+
 }

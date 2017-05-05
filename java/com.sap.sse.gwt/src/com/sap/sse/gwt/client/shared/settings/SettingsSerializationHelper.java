@@ -1,7 +1,6 @@
 package com.sap.sse.gwt.client.shared.settings;
 
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
@@ -53,7 +52,7 @@ public class SettingsSerializationHelper {
         return json == null ? null : jsonSerializer.jsonObjectToString(json);
     }
 
-    public JSONValue serializeFromSettingsObject(Settings newSettings) {
+    public JSONObject serializeFromSettingsObject(Settings newSettings) {
         if (newSettings instanceof GenericSerializableSettings) {
             return jsonSerializer.serialize((GenericSerializableSettings) newSettings);
         }

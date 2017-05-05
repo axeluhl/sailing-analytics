@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
+import com.sap.sse.gwt.client.shared.settings.PersistableSettingsRepresentations;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
-import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
 import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
 
 /**
@@ -47,22 +47,21 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
      * 
      * @param defaultSettings
      *            The basic settings to be used
-     * @param settingsJsons
+     * @param settingsRepresentations
      *            The persisted representation of User Settings and Document Settings
      * @return The constructed settings object
      */
     @Override
-    public <CS extends Settings> CS getSettingsObject(CS defaultSettings, SettingsJsons settingsJsons) {
-        boolean ignoreLocalSettings = isIgnoreLocalSettingsUrlFlagPresent();
-        
+    public <CS extends Settings> CS getSettingsObject(CS defaultSettings,
+            PersistableSettingsRepresentations<JSONObject> settingsRepresentations) {
         defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.SYSTEM_DEFAULTS);
-        if (!ignoreLocalSettings && settingsJsons.getContextSpecificSettingsJson() != null) {
+        if (settingsRepresentations.getContextSpecificSettingsRepresentation() != null) {
             defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
             defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
-                    settingsJsons.getContextSpecificSettingsJson());
-        } else if (!ignoreLocalSettings && settingsJsons.getGlobalSettingsJson() != null) {
+                    settingsRepresentations.getContextSpecificSettingsRepresentation());
+        } else if (settingsRepresentations.getGlobalSettingsRepresentation() != null) {
             defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
-                    settingsJsons.getGlobalSettingsJson());
+                    settingsRepresentations.getGlobalSettingsRepresentation());
             defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
         } else {
             defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
@@ -103,7 +102,8 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
      * @return The JSON representation of the provided settings
      */
     @Override
-    public JSONValue getJsonObject(Settings settings, PipelineLevel pipelineLevel, List<String> path) {
+    public JSONObject getPersistableSettingsRepresentation(Settings settings, PipelineLevel pipelineLevel,
+            List<String> path) {
         for (PipelineLevel level : pipelineLevel.getSortedLevelsUntilCurrent()) {
             List<SettingsPatch<? extends Settings>> settingsPatches = patchesForStoringSettings.getSettingsPatches(path,
                     level);
@@ -111,7 +111,7 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
                 settings = patchSettings(settings, settingsPatch);
             }
         }
-        return super.getJsonObject(settings, pipelineLevel, path);
+        return super.getPersistableSettingsRepresentation(settings, pipelineLevel, path);
     }
 
     @SuppressWarnings("unchecked")

@@ -2,11 +2,10 @@ package com.sap.sse.security.ui.settings;
 
 import java.util.List;
 
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
+import com.sap.sse.gwt.client.shared.settings.PersistableSettingsRepresentations;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
-import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
 import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
 
 /**
@@ -40,20 +39,19 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
      * 
      * @param defaultSettings
      *            The basic settings to be used
-     * @param settingsJsons
+     * @param settingsRepresentations
      *            The persisted representation of User Settings and Document Settings
      * @return The constructed settings object
      */
     @Override
-    public <CS extends Settings> CS getSettingsObject(CS defaultSettings, SettingsJsons settingsJsons) {
-        if (!isIgnoreLocalSettingsUrlFlagPresent()) {
-            if (settingsJsons.getContextSpecificSettingsJson() != null) {
-                defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
-                        settingsJsons.getContextSpecificSettingsJson());
-            } else if (settingsJsons.getGlobalSettingsJson() != null) {
-                defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
-                        settingsJsons.getGlobalSettingsJson());
-            }
+    public <CS extends Settings> CS getSettingsObject(CS defaultSettings,
+            PersistableSettingsRepresentations<JSONObject> settingsRepresentations) {
+        if (settingsRepresentations.getContextSpecificSettingsRepresentation() != null) {
+            defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
+                    settingsRepresentations.getContextSpecificSettingsRepresentation());
+        } else if (settingsRepresentations.getGlobalSettingsRepresentation() != null) {
+            defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
+                    settingsRepresentations.getGlobalSettingsRepresentation());
         }
         defaultSettings = settingsSerializationHelper.deserializeFromCurrentUrl(defaultSettings);
         return defaultSettings;
@@ -72,12 +70,9 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
      * @return The JSON representation of the provided settings
      */
     @Override
-    public JSONValue getJsonObject(Settings newSettings, PipelineLevel pipelineLevel, List<String> path) {
+    public JSONObject getPersistableSettingsRepresentation(Settings newSettings, PipelineLevel pipelineLevel,
+            List<String> path) {
         return settingsSerializationHelper.serializeFromSettingsObject(newSettings);
-    }
-
-    public boolean isIgnoreLocalSettingsUrlFlagPresent() {
-        return settingsSerializationHelper.deserializeFromCurrentUrl(new IgnoreLocalSettings()).isIgnoreLocalSettings();
     }
 
 }

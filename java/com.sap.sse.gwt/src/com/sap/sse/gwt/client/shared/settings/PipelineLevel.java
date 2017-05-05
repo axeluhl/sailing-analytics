@@ -5,10 +5,10 @@ import java.util.List;
 
 public enum PipelineLevel {
     SYSTEM_DEFAULTS, GLOBAL_DEFAULTS, CONTEXT_SPECIFIC_DEFAULTS;
-    
+
     public List<PipelineLevel> getSortedLevelsUntilCurrent() {
         List<PipelineLevel> levels = new LinkedList<>();
-        switch(this) {
+        switch (this) {
         case CONTEXT_SPECIFIC_DEFAULTS:
             levels.add(0, CONTEXT_SPECIFIC_DEFAULTS);
         case GLOBAL_DEFAULTS:

@@ -19,12 +19,11 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.settings.PersistableSettingsRepresentations;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
-import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
 import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
 import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
-import com.sap.sse.gwt.client.shared.settings.SettingsStrings;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -46,7 +45,9 @@ import com.sap.sse.security.ui.client.UserService;
  * </dl>
  * That means that Document Settings are stored per context (e.g. race in RaceBoard) whereas User Settings are stored
  * globally for all possible contexts (e.g. for the whole RaceBoard independently from selected race).
- * <p>The underlying access to settings storage gets disabled if the URL contains {@code ignoreLocalSettings=true} flag.</p>
+ * <p>
+ * The underlying access to settings storage gets disabled if the URL contains {@code ignoreLocalSettings=true} flag.
+ * </p>
  * 
  * 
  * @author Vladislav Chumak
@@ -58,17 +59,17 @@ import com.sap.sse.security.ui.client.UserService;
  * 
  */
 public class ComponentContextWithSettingsStorage<S extends Settings> extends SimpleComponentContext<S> {
-    
+
     /**
-     * {@code SettingsJsons} which have which have been already queried from persistence layer, or {@code null} if
+     * Persistable settings representations which have been already queried from persistence layer, or {@code null} if
      * previous settings retrievement has not been initiated.
      */
-    protected SettingsJsons cachedSettingsJsons = null;
+    protected PersistableSettingsRepresentations<JSONObject> retrievedPersistableSettingsRepresentations = null;
 
     /**
      * Manages the persistence layer of settings.
      */
-    protected final SettingsStorageManager<SettingsStrings> settingsStorageManager;
+    protected final SettingsStorageManager<String> settingsStorageManager;
 
     /**
      * @param rootLifecycle
@@ -91,9 +92,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
     protected ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
             StorageDefinitionId storageDefinitionId, SettingsSerializationHelper settingsSerializationHelper,
-            SettingsBuildingPipeline<SettingsJsons> settingsBuildingPipeline) {
+            SettingsBuildingPipeline<JSONObject> settingsBuildingPipeline) {
         super(rootLifecycle, settingsSerializationHelper, settingsBuildingPipeline);
-        if(IgnoreLocalSettings.getIgnoreLocalSettingsFromCurrentUrl().isIgnoreLocalSettings()) {
+        if (IgnoreLocalSettings.getIgnoreLocalSettingsFromCurrentUrl().isIgnoreLocalSettings()) {
             this.settingsStorageManager = null;
         } else {
             this.settingsStorageManager = new UserSettingsStorageManager(userService, storageDefinitionId);
@@ -131,36 +132,41 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     @Override
     public void getInitialSettings(final OnSettingsLoadedCallback<S> callback) {
         final S systemDefaultSettings = rootLifecycle.createDefaultSettings();
-        if (cachedSettingsJsons == null) {
-            if(settingsStorageManager != null) {
-                settingsStorageManager.retrieveSettingsRepresentation(new OnSettingsLoadedCallback<SettingsStrings>() {
-    
-                    @Override
-                    public void onError(Throwable caught, SettingsStrings fallbackSettingsRepresentation) {
-                        callback.onError(caught, getSettingsObject(fallbackSettingsRepresentation, systemDefaultSettings));
-                    }
-    
-                    @Override
-                    public void onSuccess(SettingsStrings settingsRepresentation) {
-                        callback.onSuccess(getSettingsObject(settingsRepresentation, systemDefaultSettings));
-                    }
-    
-                });
+        if (retrievedPersistableSettingsRepresentations == null) {
+            if (settingsStorageManager != null) {
+                settingsStorageManager.retrieveSettingsRepresentation(
+                        new OnSettingsLoadedCallback<PersistableSettingsRepresentations<String>>() {
+
+                            @Override
+                            public void onError(Throwable caught,
+                                    PersistableSettingsRepresentations<String> fallbackSettingsRepresentation) {
+                                callback.onError(caught,
+                                        getSettingsObject(fallbackSettingsRepresentation, systemDefaultSettings));
+                            }
+
+                            @Override
+                            public void onSuccess(PersistableSettingsRepresentations<String> settingsRepresentation) {
+                                callback.onSuccess(getSettingsObject(settingsRepresentation, systemDefaultSettings));
+                            }
+
+                        });
             } else {
-                callback.onSuccess(getSettingsObject(new SettingsStrings(null, null), systemDefaultSettings));
+                callback.onSuccess(getSettingsObject(new PersistableSettingsRepresentations<String>(null, null),
+                        systemDefaultSettings));
             }
 
         } else {
             S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(systemDefaultSettings,
-                    cachedSettingsJsons);
+                    retrievedPersistableSettingsRepresentations);
             callback.onSuccess(newDefaultSettings);
         }
     }
-    
-    private S getSettingsObject(SettingsStrings settingsRepresentation, S systemDefaultSettings) {
-        cachedSettingsJsons = convertToSettingsJson(settingsRepresentation);
+
+    private S getSettingsObject(PersistableSettingsRepresentations<String> settingsRepresentation,
+            S systemDefaultSettings) {
+        retrievedPersistableSettingsRepresentations = convertToSettingsJson(settingsRepresentation);
         S settingsObject = settingsBuildingPipeline.getSettingsObject(systemDefaultSettings,
-                cachedSettingsJsons);
+                retrievedPersistableSettingsRepresentations);
         return settingsObject;
     }
 
@@ -178,7 +184,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         if (!component.hasSettings()) {
             return false;
         }
-        if(settingsStorageManager == null) {
+        if (settingsStorageManager == null) {
             return false;
         }
         Settings settings = component.getSettings();
@@ -187,11 +193,11 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         }
         return false;
     }
-    
+
     /**
      * Stores the provided {@link Settings} of the provided {@link Component} as "User Settings" globally. Make sure to
-     * call this method only when {@link #isStorageSupported(Component)} method returns {@code true}
-     * for the provided {@link Component}.
+     * call this method only when {@link #isStorageSupported(Component)} method returns {@code true} for the provided
+     * {@link Component}.
      * 
      * @param component
      *            The component which corresponds to the provided {@link Settings}
@@ -212,8 +218,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     /**
      * Stores the provided {@link Settings} of the provided {@link Component} as "Document Settings" (old term "Context
      * specific Settings") for the current context. Make sure to call this method only when
-     * {@link #isStorageSupported(Component)} method returns {@code true} for the provided
-     * {@link Component}.
+     * {@link #isStorageSupported(Component)} method returns {@code true} for the provided {@link Component}.
      * 
      * @param component
      *            The component which corresponds to the provided {@link Settings}
@@ -280,7 +285,8 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     private JSONObject patchJsonObject(JSONObject root, List<String> path, List<String> originalPath,
             Settings newSettings, PipelineLevel pipelineLevel) {
         if (path.isEmpty()) {
-            return (JSONObject) settingsBuildingPipeline.getJsonObject(newSettings, pipelineLevel, originalPath);
+            return settingsBuildingPipeline.getPersistableSettingsRepresentation(newSettings, pipelineLevel,
+                    originalPath);
         }
         if (root == null) {
             root = new JSONObject();
@@ -299,7 +305,8 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             }
             return patchJsonObject(child.isObject(), path, originalPath, newSettings, pipelineLevel);
         } else {
-            JSONValue json = settingsBuildingPipeline.getJsonObject(newSettings, pipelineLevel, originalPath);
+            JSONObject json = settingsBuildingPipeline.getPersistableSettingsRepresentation(newSettings, pipelineLevel,
+                    originalPath);
             root.put(current, json);
         }
         return root;
@@ -319,24 +326,32 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      */
     private void updateGlobalSettings(final ArrayList<String> path, final Settings globalSettings,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
-        settingsStorageManager.retrieveSettingsRepresentation(new OnSettingsLoadedCallback<SettingsStrings>() {
+        settingsStorageManager.retrieveSettingsRepresentation(
+                new OnSettingsLoadedCallback<PersistableSettingsRepresentations<String>>() {
 
-            @Override
-            public void onError(Throwable caught, SettingsStrings fallbackDefaultSettings) {
-                onSettingsStoredCallback.onError(caught);
-            }
+                    @Override
+                    public void onError(Throwable caught,
+                            PersistableSettingsRepresentations<String> fallbackDefaultSettings) {
+                        onSettingsStoredCallback.onError(caught);
+                    }
 
-            @Override
-            public void onSuccess(SettingsStrings settingsRepresentation) {
-                SettingsJsons result = convertToSettingsJson(settingsRepresentation);
-                final JSONObject patchedGlobalSettings = patchJsonObject(result.getGlobalSettingsJson(),
-                        new ArrayList<>(path), globalSettings, PipelineLevel.GLOBAL_DEFAULTS);
-                settingsRepresentation = convertToSettingsStrings(new SettingsJsons(patchedGlobalSettings, null));
-                cachedSettingsJsons = new SettingsJsons(patchedGlobalSettings, cachedSettingsJsons.getContextSpecificSettingsJson());
-                settingsStorageManager.storeSettingsRepresentation(settingsRepresentation, onSettingsStoredCallback);
-            }
+                    @Override
+                    public void onSuccess(PersistableSettingsRepresentations<String> settingsRepresentation) {
+                        PersistableSettingsRepresentations<JSONObject> result = convertToSettingsJson(
+                                settingsRepresentation);
+                        final JSONObject patchedGlobalSettings = patchJsonObject(
+                                result.getGlobalSettingsRepresentation(), new ArrayList<>(path), globalSettings,
+                                PipelineLevel.GLOBAL_DEFAULTS);
+                        settingsRepresentation = convertToSettingsStrings(
+                                new PersistableSettingsRepresentations<JSONObject>(patchedGlobalSettings, null));
+                        retrievedPersistableSettingsRepresentations = new PersistableSettingsRepresentations<JSONObject>(
+                                patchedGlobalSettings,
+                                retrievedPersistableSettingsRepresentations.getContextSpecificSettingsRepresentation());
+                        settingsStorageManager.storeSettingsRepresentation(settingsRepresentation,
+                                onSettingsStoredCallback);
+                    }
 
-        });
+                });
     }
 
     /**
@@ -353,25 +368,32 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      */
     private void updateContextSpecificSettings(final ArrayList<String> path, final Settings contextSpecificSettings,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
-        settingsStorageManager.retrieveSettingsRepresentation(new OnSettingsLoadedCallback<SettingsStrings>() {
+        settingsStorageManager.retrieveSettingsRepresentation(
+                new OnSettingsLoadedCallback<PersistableSettingsRepresentations<String>>() {
 
-            @Override
-            public void onError(Throwable caught, SettingsStrings fallbackDefaultSettings) {
-                onSettingsStoredCallback.onError(caught);
-            }
+                    @Override
+                    public void onError(Throwable caught,
+                            PersistableSettingsRepresentations<String> fallbackDefaultSettings) {
+                        onSettingsStoredCallback.onError(caught);
+                    }
 
-            @Override
-            public void onSuccess(SettingsStrings settingsRepresentation) {
-                SettingsJsons result = convertToSettingsJson(settingsRepresentation);
-                final JSONObject patchedContextSpecificSettings = patchJsonObject(
-                        result.getContextSpecificSettingsJson(), new ArrayList<>(path), contextSpecificSettings,
-                        PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
-                settingsRepresentation = convertToSettingsStrings(
-                        new SettingsJsons(null, patchedContextSpecificSettings));
-                cachedSettingsJsons = new SettingsJsons(cachedSettingsJsons.getGlobalSettingsJson(), patchedContextSpecificSettings);
-                settingsStorageManager.storeSettingsRepresentation(settingsRepresentation, onSettingsStoredCallback);
-            }
-        });
+                    @Override
+                    public void onSuccess(PersistableSettingsRepresentations<String> settingsRepresentation) {
+                        PersistableSettingsRepresentations<JSONObject> result = convertToSettingsJson(
+                                settingsRepresentation);
+                        final JSONObject patchedContextSpecificSettings = patchJsonObject(
+                                result.getContextSpecificSettingsRepresentation(), new ArrayList<>(path),
+                                contextSpecificSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
+                        settingsRepresentation = convertToSettingsStrings(
+                                new PersistableSettingsRepresentations<JSONObject>(null,
+                                        patchedContextSpecificSettings));
+                        retrievedPersistableSettingsRepresentations = new PersistableSettingsRepresentations<JSONObject>(
+                                retrievedPersistableSettingsRepresentations.getGlobalSettingsRepresentation(),
+                                patchedContextSpecificSettings);
+                        settingsStorageManager.storeSettingsRepresentation(settingsRepresentation,
+                                onSettingsStoredCallback);
+                    }
+                });
     }
 
     /**
@@ -380,25 +402,27 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     @Override
     public void dispose() {
         super.dispose();
-        if(settingsStorageManager != null) {
+        if (settingsStorageManager != null) {
             settingsStorageManager.dispose();
         }
     }
 
-    public SettingsJsons convertToSettingsJson(SettingsStrings settingsStrings) {
+    public PersistableSettingsRepresentations<JSONObject> convertToSettingsJson(
+            PersistableSettingsRepresentations<String> settingsStrings) {
         JSONObject globalSettingsJson = settingsSerializationHelper
-                .convertStringToJson(settingsStrings.getGlobalSettingsString());
+                .convertStringToJson(settingsStrings.getGlobalSettingsRepresentation());
         JSONObject contextSpecificSettingsJson = settingsSerializationHelper
-                .convertStringToJson(settingsStrings.getContextSpecificSettingsString());
-        return new SettingsJsons(globalSettingsJson, contextSpecificSettingsJson);
+                .convertStringToJson(settingsStrings.getContextSpecificSettingsRepresentation());
+        return new PersistableSettingsRepresentations<JSONObject>(globalSettingsJson, contextSpecificSettingsJson);
     }
 
-    public SettingsStrings convertToSettingsStrings(SettingsJsons settingsJsons) {
+    public PersistableSettingsRepresentations<String> convertToSettingsStrings(
+            PersistableSettingsRepresentations<JSONObject> settingsJsons) {
         String globalSettingsString = settingsSerializationHelper
-                .convertJsonToString(settingsJsons.getGlobalSettingsJson());
+                .convertJsonToString(settingsJsons.getGlobalSettingsRepresentation());
         String contextSpecificSettingsString = settingsSerializationHelper
-                .convertJsonToString(settingsJsons.getContextSpecificSettingsJson());
-        return new SettingsStrings(globalSettingsString, contextSpecificSettingsString);
+                .convertJsonToString(settingsJsons.getContextSpecificSettingsRepresentation());
+        return new PersistableSettingsRepresentations<String>(globalSettingsString, contextSpecificSettingsString);
     }
 
 }

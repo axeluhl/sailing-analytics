@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.settings;
 
 import java.util.ArrayList;
 
+import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
@@ -9,14 +10,15 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.settings.PersistableSettingsRepresentations;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
-import com.sap.sse.gwt.client.shared.settings.SettingsJsons;
 import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
 
 /**
  * Manages all default settings of perspectives and components. This simple implementation has no support for settings
- * storage. It is only capable of creating new default settings by means of {@link ComponentLifecycle#createDefaultSettings()} of the root
- * component managed by this {@link ComponentContext}, considering the URL parameters. If you need settings to be stored, consider
+ * storage. It is only capable of creating new default settings by means of
+ * {@link ComponentLifecycle#createDefaultSettings()} of the root component managed by this {@link ComponentContext},
+ * considering the URL parameters. If you need settings to be stored, consider
  * {@link ComponentContextWithSettingsStorage}.
  * 
  * @author Vladislav Chumak
@@ -26,13 +28,13 @@ import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
  *            for itself and its subcomponents
  */
 public class SimpleComponentContext<S extends Settings> implements ComponentContext<S> {
-    
+
     protected final SettingsSerializationHelper settingsSerializationHelper;
-    
+
     /**
      * The pipeline used for the settings construction.
      */
-    protected final SettingsBuildingPipeline<SettingsJsons> settingsBuildingPipeline;
+    protected final SettingsBuildingPipeline<JSONObject> settingsBuildingPipeline;
 
     /**
      * The {@link ComponentLifecycle} of the root component/perspective
@@ -47,12 +49,15 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     public SimpleComponentContext(ComponentLifecycle<S> rootLifecycle) {
         this(rootLifecycle, new SettingsSerializationHelper());
     }
-    
-    protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle, SettingsSerializationHelper settingsSerializationHelper) {
+
+    protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle,
+            SettingsSerializationHelper settingsSerializationHelper) {
         this(rootLifecycle, settingsSerializationHelper, new UrlSettingsBuildingPipeline(settingsSerializationHelper));
     }
-    
-    protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle, SettingsSerializationHelper settingsSerializationHelper, SettingsBuildingPipeline<SettingsJsons> settingsBuildingPipeline) {
+
+    protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle,
+            SettingsSerializationHelper settingsSerializationHelper,
+            SettingsBuildingPipeline<JSONObject> settingsBuildingPipeline) {
         this.rootLifecycle = rootLifecycle;
         this.settingsSerializationHelper = settingsSerializationHelper;
         this.settingsBuildingPipeline = settingsBuildingPipeline;
@@ -63,17 +68,19 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
      * {@link UnsupportedOperationException} when it is called.
      */
     @Override
-    public<CS extends Settings> void makeSettingsDefault(Component<CS> component, CS newDefaultSettings, final OnSettingsStoredCallback onSettingsStoredCallback) {
+    public <CS extends Settings> void makeSettingsDefault(Component<CS> component, CS newDefaultSettings,
+            final OnSettingsStoredCallback onSettingsStoredCallback) {
         throw new UnsupportedOperationException("Make Default action is unsupported for this type of ComponentContext "
                 + this.getClass().getName() + " " + component.getPath() + " " + newDefaultSettings);
     }
-    
+
     /**
      * This operation is unsupported for this simple implementation and will throw a
      * {@link UnsupportedOperationException} when it is called.
      */
     @Override
-    public<CS extends Settings> void storeSettingsForContext(Component<CS> component, CS newSettings, OnSettingsStoredCallback onSettingsStoredCallback) {
+    public <CS extends Settings> void storeSettingsForContext(Component<CS> component, CS newSettings,
+            OnSettingsStoredCallback onSettingsStoredCallback) {
         throw new UnsupportedOperationException("Settings storage is unsupported for this type of ComponentContext "
                 + this.getClass().getName() + " " + component.getPath() + " " + newSettings);
     }
@@ -87,15 +94,15 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     }
 
     /**
-     * Gets the "System Default" {@link Settings} of the root component managed
-     * by this {@link ComponentContext}. The returned {@link Settings} should
-     * contain all settings for the root component and its subcomponents.
+     * Gets the "System Default" {@link Settings} of the root component managed by this {@link ComponentContext}. The
+     * returned {@link Settings} should contain all settings for the root component and its subcomponents.
      * 
      * @return The {@link Settings} of the root component
      */
     private S getDefaultSettings() {
         S defaultSettings = rootLifecycle.createDefaultSettings();
-        return settingsBuildingPipeline.getSettingsObject(defaultSettings, new SettingsJsons(null, null));
+        return settingsBuildingPipeline.getSettingsObject(defaultSettings,
+                new PersistableSettingsRepresentations<JSONObject>(null, null));
     }
 
     /**
@@ -105,10 +112,10 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     public boolean isStorageSupported(Component<?> component) {
         return false;
     }
-    
+
     /**
-     * Retrieves the "System Default" {@link Settings} of the root component managed
-     * by this {@link ComponentContext} and passes them to the provided callback.
+     * Retrieves the "System Default" {@link Settings} of the root component managed by this {@link ComponentContext}
+     * and passes them to the provided callback.
      * 
      * @see #getDefaultSettings()
      */
@@ -116,34 +123,37 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     public void getInitialSettings(final OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
         onInitialSettingsLoaded.onSuccess(getDefaultSettings());
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void dispose() {
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public <CS extends Settings> void getInitialSettingsForComponent(final Component<CS> component, final OnSettingsLoadedCallback<CS> callback) {
+    public <CS extends Settings> void getInitialSettingsForComponent(final Component<CS> component,
+            final OnSettingsLoadedCallback<CS> callback) {
         OnSettingsLoadedCallback<S> internalCallback = new OnSettingsLoadedCallback<S>() {
 
             @Override
             public void onError(Throwable caught, S fallbackDefaultSettings) {
-                CS componentFallbackSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(component.getPath()), fallbackDefaultSettings);
+                CS componentFallbackSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(
+                        new ArrayList<>(component.getPath()), fallbackDefaultSettings);
                 callback.onError(caught, componentFallbackSettings);
             }
 
             @Override
             public void onSuccess(S settings) {
-                CS componentSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(component.getPath()), settings);
+                CS componentSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(
+                        new ArrayList<>(component.getPath()), settings);
                 callback.onSuccess(componentSettings);
             }
         };
         getInitialSettings(internalCallback);
     }
-    
+
 }

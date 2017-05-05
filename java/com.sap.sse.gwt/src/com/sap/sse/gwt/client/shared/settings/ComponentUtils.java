@@ -16,13 +16,17 @@ public class ComponentUtils {
     /**
      * Determines the lifecycle from the provided current lifecycle tree which corresponds to the provided path.
      * 
-     * @param path The path of the component which lifecycle should be determined
-     * @param current The root lifecycle from that the desired lifecycle is reachable by the provided path
+     * @param path
+     *            The path of the component which lifecycle should be determined
+     * @param current
+     *            The root lifecycle from that the desired lifecycle is reachable by the provided path
      * @return The lifecycle which was determined for the provided path starting from the provided root lifecycle
-     * @throws IllegalStateException When the path cannot be resolved from the provided root lifecycle
+     * @throws IllegalStateException
+     *             When the path cannot be resolved from the provided root lifecycle
      */
     @SuppressWarnings("unchecked")
-    public static<CS extends Settings> ComponentLifecycle<CS> determineLifecycle(List<String> path, ComponentLifecycle<? extends Settings> current) {
+    public static <CS extends Settings> ComponentLifecycle<CS> determineLifecycle(List<String> path,
+            ComponentLifecycle<? extends Settings> current) {
         while (current instanceof PerspectiveLifecycle<?> && !path.isEmpty()) {
             String last = path.remove(path.size() - 1);
             current = ((PerspectiveLifecycle<?>) current).getLifecycleForId(last);
@@ -32,9 +36,10 @@ public class ComponentUtils {
         }
         return (ComponentLifecycle<CS>) current;
     }
-    
+
     @SuppressWarnings("unchecked")
-    public static<CS extends Settings> CS determineComponentSettingsFromPerspectiveSettings(List<String> path, Settings current) {
+    public static <CS extends Settings> CS determineComponentSettingsFromPerspectiveSettings(List<String> path,
+            Settings current) {
         while (current instanceof PerspectiveCompositeSettings<?> && !path.isEmpty()) {
             String last = path.remove(path.size() - 1);
             current = ((PerspectiveCompositeSettings<?>) current).findSettingsByComponentId(last);
@@ -44,24 +49,25 @@ public class ComponentUtils {
         }
         return (CS) current;
     }
-    
+
     @SuppressWarnings("unchecked")
-    public static<CS extends Settings> CS patchSettingsTree(List<String> path, Settings newSettings, CS settingsTree) {
-        
+    public static <CS extends Settings> CS patchSettingsTree(List<String> path, Settings newSettings, CS settingsTree) {
+
         List<PerspectiveCompositeSettings<?>> perspectiveSettingsPath = new ArrayList<>();
-        
-        if(path.isEmpty() && !(settingsTree instanceof PerspectiveCompositeSettings<?>)) {
-            //top level settings belong to a component, not perspective
+
+        if (path.isEmpty() && !(settingsTree instanceof PerspectiveCompositeSettings<?>)) {
+            // top level settings belong to a component, not perspective
             return (CS) newSettings;
         }
-        
+
         if (!(settingsTree instanceof PerspectiveCompositeSettings<?>)) {
-            throw new IllegalStateException("Settings tree does not belong to a perspective, but due to a not empty path it has to");
+            throw new IllegalStateException(
+                    "Settings tree does not belong to a perspective, but due to a not empty path it has to");
         }
-        
+
         Settings current = settingsTree;
         PerspectiveCompositeSettings<?> perspectiveSettings = (PerspectiveCompositeSettings<?>) settingsTree;
-        
+
         String childComponentId = null;
         while (current instanceof PerspectiveCompositeSettings<?> && !path.isEmpty()) {
             childComponentId = path.remove(path.size() - 1);
@@ -72,29 +78,31 @@ public class ComponentUtils {
         if (!path.isEmpty() || current == null) {
             throw new IllegalStateException("Settings path is not finished, but no settings at current level");
         }
-        
-        if(current instanceof PerspectiveCompositeSettings<?>) {
+
+        if (current instanceof PerspectiveCompositeSettings<?>) {
             Settings perspectiveOwnSettings = ((PerspectiveCompositeSettings<?>) current).getPerspectiveOwnSettings();
-            newSettings = new PerspectiveCompositeSettings<Settings>(perspectiveOwnSettings, perspectiveSettings.getSettingsPerComponentId());
+            newSettings = new PerspectiveCompositeSettings<Settings>(perspectiveOwnSettings,
+                    perspectiveSettings.getSettingsPerComponentId());
         }
-        
-        while(!perspectiveSettingsPath.isEmpty()) {
+
+        while (!perspectiveSettingsPath.isEmpty()) {
             PerspectiveCompositeSettings<?> parent = perspectiveSettingsPath.remove(perspectiveSettingsPath.size() - 1);
             Map<String, Settings> originalSettingsPerComponent = parent.getSettingsPerComponentId();
             Map<String, Settings> newSettingsPerComponent = new HashMap<>();
             for (Entry<String, Settings> entry : originalSettingsPerComponent.entrySet()) {
                 String componentId = entry.getKey();
-                if(childComponentId.equals(componentId)) {
+                if (childComponentId.equals(componentId)) {
                     newSettingsPerComponent.put(childComponentId, newSettings);
                 } else {
                     newSettingsPerComponent.put(componentId, entry.getValue());
                 }
             }
-            
-            newSettings = new PerspectiveCompositeSettings<Settings>(parent.getPerspectiveOwnSettings(), newSettingsPerComponent);
+
+            newSettings = new PerspectiveCompositeSettings<Settings>(parent.getPerspectiveOwnSettings(),
+                    newSettingsPerComponent);
         }
-        
+
         return (CS) newSettings;
     }
-    
+
 }
