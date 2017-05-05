@@ -28,7 +28,7 @@ class CheckInController : NSObject {
         SVProgressHUD.show()
         requestManager = RequestManager(baseURLString: checkInData.serverURL)
         requestManager.getCheckInData(checkInData, success:
-            { (checkInData) in // TODO: check checkInData vs. checkInData
+            { (checkInData) in
                 SVProgressHUD.popActivity()
                 self.checkInSuccess(checkInData, completion: completion)
             }, failure: { (error) in
