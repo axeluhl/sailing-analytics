@@ -70,7 +70,7 @@ class RequestManager: NSObject {
         super.init()
     }
     
-    // MARK: - Regatta
+    // MARK: - CheckIn
     
     func getCheckInData(checkInData: CheckInData,
                         success: (checkInData: CheckInData) -> Void,
