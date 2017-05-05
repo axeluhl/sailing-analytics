@@ -81,13 +81,13 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     }
     
     private func setupLocalization() {
-        countdownDaysTitleLabel.text = Translation.RegattaView.CountdownDaysTitleLabel.Text.String
-        countdownHoursTitleLabel.text = Translation.RegattaView.CountdownHoursTitleLabel.Text.String
-        countdownMinutesTitleLabel.text = Translation.RegattaView.CountdownMinutesTitleLabel.Text.String
-        eventButton.setTitle(Translation.RegattaView.EventButton.Title.String, forState: .Normal)
+        countdownDaysTitleLabel.text = Translation.CompetitorView.CountdownDaysTitleLabel.Text.String
+        countdownHoursTitleLabel.text = Translation.CompetitorView.CountdownHoursTitleLabel.Text.String
+        countdownMinutesTitleLabel.text = Translation.CompetitorView.CountdownMinutesTitleLabel.Text.String
+        eventButton.setTitle(Translation.CompetitorView.EventButton.Title.String, forState: .Normal)
         leaderboardButton.setTitle(Translation.LeaderboardView.Title.String, forState: .Normal)
-        startTrackingButton.setTitle(Translation.RegattaView.StartTrackingButton.Title.String, forState: .Normal)
-        announcementLabel.text = Translation.RegattaView.AnnouncementLabel.Text.String
+        startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, forState: .Normal)
+        announcementLabel.text = Translation.CompetitorView.AnnouncementLabel.Text.String
     }
     
     private func setupNavigationBar() {
@@ -179,7 +179,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     @objc private func countdownTimerTick() {
         if competitorCheckIn.event.startDate - NSDate().timeIntervalSince1970 > 0 {
-            regattaStartLabel.text = Translation.RegattaView.RegattaStartLabel.Text.BeforeRegattaDidStart.String
+            regattaStartLabel.text = Translation.CompetitorView.RegattaStartLabel.Text.BeforeRegattaDidStart.String
             let duration = competitorCheckIn.event.startDate - NSDate().timeIntervalSince1970
             let days = Int(duration / (60 * 60 * 24))
             let hours = Int(duration / (60 * 60)) - (days * 24)
@@ -190,7 +190,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
             countdownView.hidden = false
             countdownViewHeight.constant = 60
         } else {
-            regattaStartLabel.text = Translation.RegattaView.RegattaStartLabel.Text.AfterRegattaDidStart.String
+            regattaStartLabel.text = Translation.CompetitorView.RegattaStartLabel.Text.AfterRegattaDidStart.String
             countdownView.hidden = true
             countdownViewHeight.constant = 0
         }
@@ -222,13 +222,13 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .Default) { (action) in
             self.performSegueWithIdentifier(Segue.Settings, sender: self)
         }
-        let checkOutAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.CheckOutAction.Title.String, style: .Default) { (action) in
+        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .Default) { (action) in
             self.showCheckOutAlert()
         }
-        let replaceImageAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.ReplaceImageAction.Title.String, style: .Default) { (action) in
+        let replaceImageAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .Default) { (action) in
             self.showSelectImageAlert()
         }
-        let updateAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.UpdateAction.Title.String, style: .Default) { (action) -> Void in
+        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .Default) { (action) -> Void in
             self.update()
         }
         let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .Default) { (action) -> Void in
@@ -268,7 +268,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     private func showCheckOutAlert() {
         let alertController = UIAlertController(title: Translation.Common.Warning.String,
-                                                message: Translation.RegattaView.CheckOutAlert.Message.String,
+                                                message: Translation.CompetitorView.CheckOutAlert.Message.String,
                                                 preferredStyle: .Alert
         )
         let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .Default) { (action) in
@@ -294,14 +294,14 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     private func showSelectImageAlert() {
         if UIImagePickerController.isSourceTypeAvailable(.Camera) && UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
-            let alertController = UIAlertController(title: Translation.RegattaView.SelectImageAlert.Title.String,
-                                                    message: Translation.RegattaView.SelectImageAlert.Message.String,
+            let alertController = UIAlertController(title: Translation.CompetitorView.SelectImageAlert.Title.String,
+                                                    message: Translation.CompetitorView.SelectImageAlert.Message.String,
                                                     preferredStyle: .Alert
             )
-            let cameraAction = UIAlertAction(title: Translation.RegattaView.SelectImageAlert.CameraAction.Title.String, style: .Default) { (action) in
+            let cameraAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.CameraAction.Title.String, style: .Default) { (action) in
                 self.showImagePicker(.Camera)
             }
-            let photoLibraryAction = UIAlertAction(title: Translation.RegattaView.SelectImageAlert.PhotoLibraryAction.Title.String, style: .Default) { (action) in
+            let photoLibraryAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.PhotoLibraryAction.Title.String, style: .Default) { (action) in
                 self.showImagePicker(.PhotoLibrary)
             }
             let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
