@@ -25,20 +25,9 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
     private RegattaConfigurationDTO currentRegattaConfiguration;
 
-    protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
-        private StringMessages stringMessages;
-
+    protected static class RegattaParameterValidator extends AbstractRegattaParameterValidator {
         public RegattaParameterValidator(StringMessages stringMessages) {
-            this.stringMessages = stringMessages;
-        }
-
-        @Override
-        public String getErrorMessage(RegattaDTO regattaToValidate) {
-            String errorMessage = null;
-            if (regattaToValidate.buoyZoneRadiusInHullLengths == null) {
-                errorMessage = stringMessages.incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
-            }
-            return errorMessage;
+            super(stringMessages);
         }
     }
     
