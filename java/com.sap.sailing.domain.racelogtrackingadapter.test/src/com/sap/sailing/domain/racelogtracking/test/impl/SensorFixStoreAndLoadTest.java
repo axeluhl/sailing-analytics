@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CyclicBarrier;
 
 import org.junit.After;
 import org.junit.Before;
@@ -82,6 +83,7 @@ import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -786,6 +788,49 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.waitForLoadingToFinish();
         // only the initial 3 fixes are available
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
+        fixLoaderAndTracker.stop(true);
+    }
+    
+    @Test(timeout=10_000)
+    /** Test for regression introduced while working on bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
+    public void testPreemptiveStopDoesNotBlockThread() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
+        addBravoFixes();
+        
+        CyclicBarrier cb = new CyclicBarrier(2);
+        
+        // This listener enforces the race to stay in loading state until a preemptive stop is triggered below
+        trackedRace.addListener(new AbstractRaceChangeListener() {
+            @Override
+            public void competitorSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
+                try {
+                    cb.await();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        
+        final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        // This thread solved the 
+        new Thread() {
+            public void run() {
+                try {
+                    while(!fixLoaderAndTracker.isStopRequested()) {
+                        sleep(100);
+                    }
+                    
+                    cb.await();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        }.start();
+        
         fixLoaderAndTracker.stop(true);
     }
 

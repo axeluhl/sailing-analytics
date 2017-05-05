@@ -540,6 +540,13 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         loadingJobs.add(job);
     }
     
+    /**
+     * Used for testing purposes only. 
+     */
+    public boolean isStopRequested() {
+        return stopRequested.get();
+    }
+    
     private class FixLoaderDeviceMappings extends RegattaLogDeviceMappings<WithID> {
         public FixLoaderDeviceMappings(Iterable<RegattaLog> initialRegattaLogs, String raceNameForLock) {
             super(initialRegattaLogs, raceNameForLock);
