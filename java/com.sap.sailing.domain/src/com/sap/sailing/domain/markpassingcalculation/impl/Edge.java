@@ -13,9 +13,18 @@ import com.sap.sailing.domain.markpassingcalculation.Candidate;
  * @author Nicolas Klose
  * 
  */
-public abstract class Edge implements Comparable<Edge> {
+public class Edge implements Comparable<Edge> {
     private final Candidate start;
     private final Candidate end;
+
+    /**
+     * The probability-reducing factor for skipping a waypoint is {@link #PENALTY_FOR_SKIPPED} but is reduced to
+     * {@link #PENALTY_FOR_SKIPPED_TO_END} when skipping to the end. The reason for preferring skips to the end proxy node
+     * is that in live situations where the course hasn't been completed yet it is required to skip to the end. The main
+     * probability comes from the probability of the product of the start node, end node and distance-based
+     * probabilities.
+     */
+    private final double estimatedDistanceAndStartTimingProbability;
     
     /**
      * The penalty for an edge's probability in case the edge skips one or more waypoints and does not
@@ -39,9 +48,10 @@ public abstract class Edge implements Comparable<Edge> {
 
     private final int numberOfWaypoints;
 
-    public Edge(Candidate start, Candidate end, int numberOfWaypoints) {
+    public Edge(Candidate start, Candidate end, double estimatedDistanceAndStartTimingProbability, int numberOfWaypoints) {
         this.start = start;
         this.end = end;
+        this.estimatedDistanceAndStartTimingProbability = estimatedDistanceAndStartTimingProbability;
         this.numberOfWaypoints = numberOfWaypoints;
     }
     
@@ -56,20 +66,11 @@ public abstract class Edge implements Comparable<Edge> {
      * probability comes from the probability of the product of the start node, end node and distance-based
      * probabilities.
      */
-    protected abstract double getEstimatedDistanceAndStartTimingProbability();
-    
-    /**
-     * The probability-reducing factor for skipping a waypoint is {@link #PENALTY_FOR_SKIPPED} but is reduced to
-     * {@link #PENALTY_FOR_SKIPPED_TO_END} when skipping to the end. The reason for preferring skips to the end proxy node
-     * is that in live situations where the course hasn't been completed yet it is required to skip to the end. The main
-     * probability comes from the probability of the product of the start node, end node and distance-based
-     * probabilities.
-     */
     public double getProbability() {
         final double penalty = getEnd().getOneBasedIndexOfWaypoint() == numberOfWaypoints + 1 ? PENALTY_FOR_SKIPPED_TO_END : getPenaltyForSkipping();
         // See bug 3241 comment #38: only use the edge's end candidate's probability; the start candidate's probability is the
         // previous edge's end probability. The only probability we'll miss this way is that of the start proxy node and that is always 1.
-        return getEnd().getProbability() * getEstimatedDistanceAndStartTimingProbability() *
+        return getEnd().getProbability() * estimatedDistanceAndStartTimingProbability *
                 Math.pow(penalty, (getEnd().getOneBasedIndexOfWaypoint() - getStart().getOneBasedIndexOfWaypoint() - 1));
     }
 
