@@ -107,8 +107,19 @@ public class CheckInData: NSObject {
         
         // Init with URL
         self.init(url: url)
-    }    
-    
+    }
+
+    convenience init?(checkIn: CheckIn) {
+        if let competitorCheckIn = checkIn as? CompetitorCheckIn {
+            self.init(competitorCheckIn: competitorCheckIn)
+        } else if let markCheckIn = checkIn as? MarkCheckIn {
+            self.init(markCheckIn: markCheckIn)
+        } else {
+            logError("\(#function)", error: "unknown check-in type")
+            return nil
+        }
+    }
+
     // MARK: - Getter
 
     func type() -> Type {

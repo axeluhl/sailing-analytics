@@ -91,14 +91,7 @@ class RegattaController: NSObject {
     // MARK: - Update
     
     func update(completion: () -> Void) {
-        // TODO: CheckInData(checkIn)
-        let checkInData = CheckInData(
-            serverURL: checkIn.serverURL,
-            eventID: checkIn.event.eventID,
-            leaderboardName: checkIn.leaderboard.name,
-            competitorID: "", // TODO: regatta.competitorID,
-            markID: "" // TODO: regatta.mark?.markID
-        )
+        guard let checkInData = CheckInData(checkIn: checkIn) else { updateFailure(completion); return }
         requestManager.getCheckInData(
             checkInData,
             success: { (checkInData) in self.updateSuccess(checkInData, completion: completion) },
@@ -109,12 +102,7 @@ class RegattaController: NSObject {
     func updateSuccess(checkInData: CheckInData, completion: () -> Void) {
         checkIn.event.updateWithEventData(checkInData.eventData)
         checkIn.leaderboard.updateWithLeaderboardData(checkInData.leaderboardData)
-
-        // TODO:
-        // if (regatta.competitor != nil) {
-        //     regatta.competitor!.updateWithCompetitorData(checkInData.competitorData)
-        //}
-
+        checkIn.updateWithCheckInData(checkInData)
         CoreDataManager.sharedManager.saveContext()
         completion()
     }
