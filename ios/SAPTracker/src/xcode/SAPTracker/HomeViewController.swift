@@ -13,7 +13,8 @@ class HomeViewController: UIViewController {
     
     private struct Segue {
         static let About = "About"
-        static let Regatta = "Regatta"
+        static let Competitor = "Competitor"
+        static let Mark = "Mark"
         static let Scan = "Scan"
         static let Settings = "Settings"
     }
@@ -127,8 +128,8 @@ class HomeViewController: UIViewController {
                     logInfo("\(#function)", info: "Review GPS fixes done.")
                     self.reviewNewCheckIn({
                         logInfo("\(#function)", info: "Review new check-in done.")
-                        self.reviewSelectedRegatta({
-                            logInfo("\(#function)", info: "Review selected regatta done.")
+                        self.reviewSelectedCheckIn({
+                            logInfo("\(#function)", info: "Review selected check-in done.")
                         })
                     })
                 })
@@ -219,21 +220,26 @@ class HomeViewController: UIViewController {
         })
     }
     
-    // MARK: 5. Review Selected Regatta
+    // MARK: 5. Review Selected Check-In
     
-    private func reviewSelectedRegatta(completion: () -> Void) {
-        guard shouldPerformRegattaSegue() else { completion(); return }
-        performSegueWithIdentifier(Segue.Regatta, sender: self)
+    private func reviewSelectedCheckIn(completion: () -> Void) {
+        if shouldPerformCompetitorSegue() {
+            performSegueWithIdentifier(Segue.Competitor, sender: self)
+        } else if shouldPerformMarkSegue() {
+            performSegueWithIdentifier(Segue.Mark, sender: self)
+        }
         completion()
     }
     
     // MARK: - Notifications
     
     private func subscribeForNewCheckInURLNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector: #selector(HomeViewController.newCheckInURLNotification(_:)),
-                                                         name: Preferences.NotificationType.NewCheckInURLChanged,
-                                                         object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(
+            self,
+            selector: #selector(HomeViewController.newCheckInURLNotification(_:)),
+            name: Preferences.NotificationType.NewCheckInURLChanged,
+            object: nil
+        )
     }
     
     private func unsubscribeFromNewCheckInURLNotifications() {
@@ -244,8 +250,8 @@ class HomeViewController: UIViewController {
         dispatch_async(dispatch_get_main_queue(), {
             self.reviewNewCheckIn({
                 logInfo("\(#function)", info: "Review new check-in done.")
-                self.reviewSelectedRegatta({
-                    logInfo("\(#function)", info: "Review selected regatta done.")
+                self.reviewSelectedCheckIn({
+                    logInfo("\(#function)", info: "Review selected check-in done.")
                 })
             })
         })
@@ -308,21 +314,33 @@ class HomeViewController: UIViewController {
     // MARK: - Segues
     
     override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
-        if (identifier == Segue.Regatta) {
-            return shouldPerformRegattaSegue()
+        if (identifier == Segue.Competitor) {
+            return shouldPerformCompetitorSegue()
+        } else if (identifier == Segue.Mark) {
+            return shouldPerformMarkSegue()
         } else {
             return true
         }
     }
     
-    private func shouldPerformRegattaSegue() -> Bool {
-        return selectedCheckIn != nil
+    private func shouldPerformCompetitorSegue() -> Bool {
+        return selectedCheckIn != nil && selectedCheckIn is CompetitorCheckIn
     }
-    
+
+    private func shouldPerformMarkSegue() -> Bool {
+        return selectedCheckIn != nil && selectedCheckIn is MarkCheckIn
+    }
+
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if (segue.identifier == Segue.Regatta) {
+        if (segue.identifier == Segue.Competitor) {
             guard let competitorVC = segue.destinationViewController as? CompetitorViewController else { return }
-            competitorVC.competitorCheckIn = selectedCheckIn as! CompetitorCheckIn // TODO: isKindOfClass Marker...
+            guard let competitorCheckIn = selectedCheckIn as? CompetitorCheckIn else { return }
+            competitorVC.competitorCheckIn = competitorCheckIn
+            selectedCheckIn = nil
+        } else if (segue.identifier == Segue.Mark) {
+            guard let markVC = segue.destinationViewController as? MarkViewController else { return }
+            guard let markCheckIn = selectedCheckIn as? MarkCheckIn else { return }
+            markVC.markCheckIn = markCheckIn
             selectedCheckIn = nil
         } else if (segue.identifier == Segue.Scan) {
             guard let scanVC = segue.destinationViewController as? ScanViewController else { return }
@@ -380,7 +398,9 @@ extension HomeViewController: UITableViewDelegate {
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        reviewSelectedCheckIn { 
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        }
     }
     
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {

@@ -311,6 +311,7 @@
 		C843D4821EBC54A300250F01 /* MarkCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */; };
 		C843D4831EBC54A300250F01 /* CheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */; };
 		C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47E1EBC54A300250F01 /* CheckIn.swift */; };
+		C843D4861EBC927800250F01 /* MarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4851EBC927800250F01 /* MarkViewController.swift */; };
 		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
 		C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */; };
 		C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C85291511D48FB91009E9A9D /* Localizable.strings */; };
@@ -686,6 +687,7 @@
 		C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkCheckIn.swift; sourceTree = "<group>"; };
 		C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C843D47E1EBC54A300250F01 /* CheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckIn.swift; sourceTree = "<group>"; };
+		C843D4851EBC927800250F01 /* MarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkViewController.swift; sourceTree = "<group>"; };
 		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
 		C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewRegattaCell.swift; sourceTree = "<group>"; };
 		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -834,7 +836,7 @@
 				7F83F15719F154F000C53328 /* HomeViewController.swift */,
 				C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */,
 				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
-				C89C60101D0FF036002AAAD2 /* Regatta */,
+				C89C60101D0FF036002AAAD2 /* Session */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
@@ -1286,14 +1288,15 @@
 			name = Cells;
 			sourceTree = "<group>";
 		};
-		C89C60101D0FF036002AAAD2 /* Regatta */ = {
+		C89C60101D0FF036002AAAD2 /* Session */ = {
 			isa = PBXGroup;
 			children = (
 				7F99DE3B1A126554009B3619 /* CompetitorViewController.swift */,
 				7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */,
+				C843D4851EBC927800250F01 /* MarkViewController.swift */,
 				C89C5FC61D06CE62002AAAD2 /* Tracking */,
 			);
-			name = Regatta;
+			name = Session;
 			sourceTree = "<group>";
 		};
 		C89C60131D0FF61E002AAAD2 /* Resources */ = {
@@ -1844,6 +1847,7 @@
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */,
 				C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */,
+				C843D4861EBC927800250F01 /* MarkViewController.swift in Sources */,
 				C8F71EDE1D8691F700826DE4 /* AFSecurityPolicy.m in Sources */,
 				C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,

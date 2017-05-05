@@ -53,6 +53,8 @@
             <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
+            <string>OpenSans</string>
+            <string>OpenSans</string>
         </mutableArray>
         <mutableArray key="OpenSans-Semibold.ttf">
             <string>OpenSans-Semibold</string>
@@ -178,7 +180,6 @@
                                             <outlet property="competitorLabel" destination="sNr-Dr-sM5" id="XjN-ac-0yL"/>
                                             <outlet property="eventLabel" destination="4Xi-He-o21" id="W7y-Nr-cR6"/>
                                             <outlet property="leaderboardLabel" destination="yqN-BN-c2a" id="nGQ-81-E6W"/>
-                                            <segue destination="G3a-SV-Maf" kind="show" identifier="Regatta" id="XWZ-NP-fiD"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -354,6 +355,8 @@
                         <segue destination="plm-Uw-c62" kind="show" identifier="Scan" id="U8l-If-CrF"/>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Xxn-jp-xEB"/>
                         <segue destination="dfN-Ch-vpm" kind="presentation" identifier="About" id="QMa-LQ-D8c"/>
+                        <segue destination="G3a-SV-Maf" kind="show" identifier="Competitor" id="uWx-s6-z1P"/>
+                        <segue destination="dMx-RA-QpG" kind="show" identifier="Mark" id="Kjg-G3-mig"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
@@ -418,7 +421,78 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xZl-Qp-1x0" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1971" y="-1116"/>
+            <point key="canvasLocation" x="1923" y="-2220"/>
+        </scene>
+        <!--Mark View Controller-->
+        <scene sceneID="ixb-Dt-xRB">
+            <objects>
+                <viewController id="dMx-RA-QpG" customClass="MarkViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="lXo-q6-uiy"/>
+                        <viewControllerLayoutGuide type="bottom" id="mxr-xl-HDh"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="wCk-xq-nRG" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="64" width="600" height="536"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OCn-GA-zIR">
+                                <rect key="frame" x="20" y="434" width="560" height="82"/>
+                                <color key="backgroundColor" red="0.054901960780000002" green="0.46666666670000001" blue="0.20000000000000001" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="82" id="NQi-qz-pNW">
+                                        <variation key="heightClass=compact" constant="62"/>
+                                    </constraint>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
+                                <state key="normal" title="Start Tracking Button">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="1"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="startTrackingButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="kU3-5M-fso"/>
+                                    <action selector="startTrackingButtonTapped:" destination="dMx-RA-QpG" eventType="touchUpInside" id="qcg-1Y-akf"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mark Name Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="12" adjustsLetterSpacingToFitWidth="YES" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="BQe-Id-ec3">
+                                <rect key="frame" x="214" y="257" width="173" height="22"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="22" id="g3A-7J-yFy"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="OCn-GA-zIR" secondAttribute="trailing" constant="20" id="GRE-D0-gWr"/>
+                            <constraint firstItem="BQe-Id-ec3" firstAttribute="centerX" secondItem="wCk-xq-nRG" secondAttribute="centerX" id="LYL-oS-sCq"/>
+                            <constraint firstItem="OCn-GA-zIR" firstAttribute="leading" secondItem="wCk-xq-nRG" secondAttribute="leading" constant="20" id="VcJ-bJ-3cd"/>
+                            <constraint firstItem="mxr-xl-HDh" firstAttribute="top" secondItem="OCn-GA-zIR" secondAttribute="bottom" constant="20" id="XNR-e9-plK"/>
+                            <constraint firstItem="BQe-Id-ec3" firstAttribute="centerY" secondItem="wCk-xq-nRG" secondAttribute="centerY" id="xv9-xZ-uzo"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="firstColor">
+                                <color key="value" red="0.87058823529411766" green="0.94509803921568625" blue="0.94509803921568625" alpha="1" colorSpace="calibratedRGB"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="secondColor">
+                                <color key="value" red="0.86274509803921573" green="0.8901960784313725" blue="0.92156862745098034" alpha="1" colorSpace="calibratedRGB"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                    <connections>
+                        <outlet property="markNameLabel" destination="BQe-Id-ec3" id="veh-f3-mX9"/>
+                        <outlet property="startTrackingButton" destination="OCn-GA-zIR" id="1gb-cj-Uwg"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="mIV-mP-h2T" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1978" y="-1105"/>
         </scene>
         <!--Competitor View Controller-->
         <scene sceneID="kcD-1R-9q1">
@@ -597,13 +671,13 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6rV-hv-c3D" userLabel="Countdown View">
-                                        <rect key="frame" x="119.5" y="38" width="362.5" height="50"/>
+                                        <rect key="frame" x="118.5" y="38" width="363.5" height="50"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pjH-rV-MGI" userLabel="Days View">
                                                 <rect key="frame" x="0.0" y="0.0" width="121" height="50"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="356" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="18" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sGD-0U-P4b">
-                                                        <rect key="frame" x="8" y="0.0" width="103.5" height="29"/>
+                                                        <rect key="frame" x="8" y="0.0" width="104.5" height="29"/>
                                                         <fontDescription key="fontDescription" name="OpenSans-Semibold" family="Open Sans" pointSize="21"/>
                                                         <nil key="highlightedColor"/>
                                                         <variation key="heightClass=compact" misplaced="YES">
@@ -611,7 +685,7 @@
                                                         </variation>
                                                     </label>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Days Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l8F-Sg-cUb" userLabel="Days Description Label">
-                                                        <rect key="frame" x="8" y="28" width="103.5" height="22"/>
+                                                        <rect key="frame" x="8" y="28" width="104.5" height="22"/>
                                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                         <nil key="highlightedColor"/>
@@ -620,7 +694,7 @@
                                                         </variation>
                                                     </label>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="joW-cG-ai8" userLabel="Separator View">
-                                                        <rect key="frame" x="119.5" y="10" width="1" height="30"/>
+                                                        <rect key="frame" x="120" y="10" width="1" height="30"/>
                                                         <color key="backgroundColor" red="0.81960784313725488" green="0.82745098039215681" blue="0.83137254901960778" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="30" id="Jj2-tX-SU9"/>
@@ -646,7 +720,7 @@
                                                 </variation>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5is-0I-Kv3" userLabel="Hours View">
-                                                <rect key="frame" x="120.5" y="0.0" width="121" height="50"/>
+                                                <rect key="frame" x="121" y="0.0" width="121" height="50"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="24" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="18" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gaG-Iv-Xyq">
                                                         <rect key="frame" x="8" y="0.0" width="105" height="29"/>
@@ -666,7 +740,7 @@
                                                         </variation>
                                                     </label>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JBv-xm-KUq" userLabel="Separator View">
-                                                        <rect key="frame" x="119.5" y="10" width="1" height="30"/>
+                                                        <rect key="frame" x="120" y="10" width="1" height="30"/>
                                                         <color key="backgroundColor" red="0.81960784313725488" green="0.82745098039215681" blue="0.83137254901960778" alpha="1" colorSpace="calibratedRGB"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="1" id="Gck-dw-et7"/>
@@ -692,7 +766,7 @@
                                                 </variation>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tvc-eS-Us6" userLabel="Minutes View">
-                                                <rect key="frame" x="241" y="0.0" width="121" height="50"/>
+                                                <rect key="frame" x="242" y="0.0" width="121" height="50"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="59" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="18" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Txm-uf-MP4">
                                                         <rect key="frame" x="8" y="0.0" width="105" height="29"/>
@@ -1929,8 +2003,8 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Irs-ey-Uhs"/>
         <segue reference="tzB-PL-31j"/>
+        <segue reference="Irs-ey-Uhs"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="calibratedRGB"/>
 </document>
