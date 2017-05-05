@@ -213,16 +213,17 @@ public class SettingsTest extends AbstractSeleniumTest {
         // verify that document settings are able to override custom user settings by a system default value
         Assert.assertFalse(mapSettings.isTransparentHoverlines());
 
-        // verify that custom document settings override mode settings of other modes
-        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
-                String.format(BMW_RACE, 1), "START_ANALYSIS");
+        // // verify that custom document settings override mode settings of other modes
+        // raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+        // BMW_CUP_REGATTA,
+        // String.format(BMW_RACE, 1), "START_ANALYSIS");
         // leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
         // leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         // selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
         // Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-
-        mapSettings = raceboard.openMapSettings();
-        Assert.assertFalse(mapSettings.isWindUp());
+        //
+        // mapSettings = raceboard.openMapSettings();
+        // Assert.assertFalse(mapSettings.isWindUp());
     }
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {
