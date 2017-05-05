@@ -312,6 +312,8 @@
 		C843D4831EBC54A300250F01 /* CheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */; };
 		C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47E1EBC54A300250F01 /* CheckIn.swift */; };
 		C843D4861EBC927800250F01 /* MarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4851EBC927800250F01 /* MarkViewController.swift */; };
+		C843D4881EBCADDC00250F01 /* CompetitorSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */; };
+		C843D48A1EBCADF500250F01 /* MarkSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4891EBCADF500250F01 /* MarkSessionController.swift */; };
 		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
 		C84936291D47645F000F30E8 /* HomeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* HomeViewCell.swift */; };
 		C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C85291511D48FB91009E9A9D /* Localizable.strings */; };
@@ -688,6 +690,8 @@
 		C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C843D47E1EBC54A300250F01 /* CheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckIn.swift; sourceTree = "<group>"; };
 		C843D4851EBC927800250F01 /* MarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkViewController.swift; sourceTree = "<group>"; };
+		C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorSessionController.swift; sourceTree = "<group>"; };
+		C843D4891EBCADF500250F01 /* MarkSessionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkSessionController.swift; sourceTree = "<group>"; };
 		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
 		C84936281D47645F000F30E8 /* HomeViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewCell.swift; sourceTree = "<group>"; };
 		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -845,7 +849,9 @@
 			isa = PBXGroup;
 			children = (
 				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
+				C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */,
 				C84936171D40D295000F30E8 /* GPSFixController.swift */,
+				C843D4891EBCADF500250F01 /* MarkSessionController.swift */,
 				C8739E0E1D2BEE7900A89F3C /* SessionController.swift */,
 				C8739E101D2BF13200A89F3C /* Data */,
 			);
@@ -1816,6 +1822,7 @@
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
 				C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */,
 				C8739E121D2BF14F00A89F3C /* EventData.swift in Sources */,
+				C843D4881EBCADDC00250F01 /* CompetitorSessionController.swift in Sources */,
 				C8F71EDF1D8691F700826DE4 /* AFURLConnectionOperation.m in Sources */,
 				C8F71EE31D8691F700826DE4 /* SVIndefiniteAnimatedView.m in Sources */,
 				C8739E0F1D2BEE7900A89F3C /* SessionController.swift in Sources */,
@@ -1871,6 +1878,7 @@
 				C8F71EDD1D8691F700826DE4 /* AFNetworkReachabilityManager.m in Sources */,
 				C843D4801EBC54A300250F01 /* CompetitorCheckIn.swift in Sources */,
 				C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */,
+				C843D48A1EBCADF500250F01 /* MarkSessionController.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
 				C843D4831EBC54A300250F01 /* CheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEC1D8691F700826DE4 /* UIButton+AFNetworking.m in Sources */,

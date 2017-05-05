@@ -365,8 +365,8 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     // MARK: - Properties
     
-    private lazy var competitorSessionController: SessionController = {
-        return SessionController(checkIn: self.competitorCheckIn)
+    private lazy var competitorSessionController: CompetitorSessionController = {
+        return CompetitorSessionController(checkIn: self.competitorCheckIn)
     }()
     
 }
