@@ -9,8 +9,10 @@ import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CyclicBarrier;
@@ -53,6 +55,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -83,6 +86,7 @@ import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
@@ -90,6 +94,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.SensorFixTrackImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -831,7 +836,120 @@ public class SensorFixStoreAndLoadTest {
             };
         }.start();
         
+        // When the bug is triggered, this call would hang until the test timeout is reached
         fixLoaderAndTracker.stop(true);
     }
+    
+    @Test
+    /** Test for bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
+    public void testThatLoadingStateIsTriggeredOnInitialLoad() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
+        addBravoFixes();
+        
+        StatusTransitionListener statusTransitionListener = new StatusTransitionListener();
+        trackedRace.addListener(statusTransitionListener);
+        
+        final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        trackedRace.waitForLoadingToFinish();
+        
+        fixLoaderAndTracker.stop(true);
+        
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+    }
+    
+    @Test
+    /** Test for bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
+    public void testThatLoadingStateIsTriggeredWhenAddingMapping() throws InterruptedException {
+        addBravoFixes();
+        
+        StatusTransitionListener statusTransitionListener = new StatusTransitionListener();
+        trackedRace.addListener(statusTransitionListener);
+        
+        final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
+        trackedRace.waitForLoadingToFinish();
+        
+        fixLoaderAndTracker.stop(true);
+        
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+    }
+    
+    @Test
+    /** Test for bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
+    public void testThatLoadingStateIsTriggeredWhenStartOfTrackingIsSet() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
+        addBravoFixes();
+        
+        StatusTransitionListener statusTransitionListener = new StatusTransitionListener();
+        trackedRace.addListener(statusTransitionListener);
+        
+        final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        // raceLog is intentionally not attached
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
+        trackedRace.waitForLoadingToFinish();
+        
+        fixLoaderAndTracker.stop(true);
+        
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+    }
+    
+    @Test
+    /** Test for bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
+    public void testThatLoadingStateIsTriggeredWhenStartOfTrackingChanges() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
+        addBravoFixes();
+        
+        StatusTransitionListener statusTransitionListener = new StatusTransitionListener();
+        trackedRace.addListener(statusTransitionListener);
+        trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(END_OF_TRACKING));
+        
+        final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        // raceLog is intentionally not attached
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
+        trackedRace.waitForLoadingToFinish();
+        
+        fixLoaderAndTracker.stop(true);
+        
+        statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
+    }
 
+    private class StatusTransitionListener extends AbstractRaceChangeListener {
+        List<Pair<TrackedRaceStatusEnum, TrackedRaceStatusEnum>> transitions = new ArrayList<>();
+        
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+            TrackedRaceStatusEnum oldStatusEnum = oldStatus.getStatus();
+            TrackedRaceStatusEnum newStatusEnum = newStatus.getStatus();
+            if(oldStatusEnum != newStatusEnum) {
+                transitions.add(new Pair<>(oldStatusEnum, newStatusEnum));
+            }
+        }
+        
+        public void assertTransitions(TrackedRaceStatusEnum... expectedStates) {
+            TrackedRaceStatusEnum oldValue = null;
+            Iterator<Pair<TrackedRaceStatusEnum, TrackedRaceStatusEnum>> recordedTransitionsIterator = transitions.iterator();
+            for (TrackedRaceStatusEnum newStatusEnum : expectedStates) {
+                if(oldValue != null) {
+                    Pair<TrackedRaceStatusEnum, TrackedRaceStatusEnum> recordedTransition = recordedTransitionsIterator.next();
+                    assertEquals(oldValue, recordedTransition.getA());
+                    assertEquals(newStatusEnum, recordedTransition.getB());
+                }
+                oldValue = newStatusEnum;
+            }
+        }
+    }
 }
