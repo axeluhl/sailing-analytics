@@ -10,7 +10,7 @@ import UIKit
 
 class TrackingViewGPSFixesCell: UITableViewCell {
 
-    var regatta: Regatta?
+    var checkIn: CheckIn?
     
     @IBOutlet weak var gpsFixesTitleLabel: UILabel!
     @IBOutlet weak var gpsFixesLabel: UILabel!
@@ -37,7 +37,7 @@ class TrackingViewGPSFixesCell: UITableViewCell {
     }
     
     private func setupGPSFixesLabel() {
-        gpsFixesLabel.text = String(format: "%d", regatta?.gpsFixes?.count ?? 0)
+        gpsFixesLabel.text = String(format: "%d", checkIn?.gpsFixes?.count ?? 0)
     }
     
     // MARK: - Notifications

@@ -18,7 +18,7 @@ class HomeViewController: UIViewController {
         static let Settings = "Settings"
     }
     
-    var selectedRegatta: Regatta?
+    var selectedCheckIn: CheckIn?
     
     @IBOutlet var headerView: UIView! // Strong reference needed to avoid deallocation when not attached to table view
     
@@ -187,17 +187,17 @@ class HomeViewController: UIViewController {
     private func reviewGPSFixes(completion: () -> Void) {
         SVProgressHUD.show()
         fetchedResultsController.delegate = nil
-        var regattas = CoreDataManager.sharedManager.fetchRegattas() ?? []
-        reviewGPSFixes(&regattas) {
+        var checkIns = CoreDataManager.sharedManager.fetchCheckIns() ?? []
+        reviewGPSFixes(&checkIns) {
             self.reviewGPSFixesCompleted(completion)
         }
     }
     
-    private func reviewGPSFixes(inout regattas: [Regatta], completion: () -> Void) {
-        guard let regatta = regattas.popLast() else { completion(); return }
-        let gpsFixController = GPSFixController.init(regatta: regatta)
+    private func reviewGPSFixes(inout checkIns: [CheckIn], completion: () -> Void) {
+        guard let checkIn = checkIns.popLast() else { completion(); return }
+        let gpsFixController = GPSFixController.init(checkIn: checkIn)
         gpsFixController.sendAll({ (withSuccess) in
-            self.reviewGPSFixes(&regattas, completion: completion)
+            self.reviewGPSFixes(&checkIns, completion: completion)
         })
     }
     
@@ -214,7 +214,7 @@ class HomeViewController: UIViewController {
         guard let regattaData = RegattaData(urlString: urlString) else { completion(); return }
         checkInController.checkIn(regattaData, completion: { (withSuccess) in
             Preferences.newCheckInURL = nil
-            self.selectedRegatta = CoreDataManager.sharedManager.fetchRegatta(regattaData)
+            self.selectedCheckIn = CoreDataManager.sharedManager.fetchCheckIn(regattaData)
             completion()
         })
     }
@@ -316,14 +316,14 @@ class HomeViewController: UIViewController {
     }
     
     private func shouldPerformRegattaSegue() -> Bool {
-        return selectedRegatta != nil
+        return selectedCheckIn != nil
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == Segue.Regatta) {
             guard let regattaVC = segue.destinationViewController as? RegattaViewController else { return }
-            regattaVC.regatta = selectedRegatta
-            selectedRegatta = nil
+            regattaVC.competitorCheckIn = selectedCheckIn as! CompetitorCheckIn // TODO: isKindOfClass Marker...
+            selectedCheckIn = nil
         } else if (segue.identifier == Segue.Scan) {
             guard let scanVC = segue.destinationViewController as? ScanViewController else { return }
             scanVC.homeViewController = self
@@ -339,7 +339,7 @@ class HomeViewController: UIViewController {
     }()
     
     private lazy var fetchedResultsController: NSFetchedResultsController = {
-        let fetchedResultsController = CoreDataManager.sharedManager.regattaFetchedResultsController()
+        let fetchedResultsController = CoreDataManager.sharedManager.checkInFetchedResultsController()
         fetchedResultsController.delegate = self
         return fetchedResultsController
     }()
@@ -362,12 +362,10 @@ extension HomeViewController: UITableViewDataSource {
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
         guard let regattaCell = cell as? HomeViewRegattaCell else { return }
-        guard let regatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta else { return }
-        regattaCell.eventLabel.text = regatta.event.name
-        regattaCell.leaderboardLabel.text = regatta.leaderboard.name
-        if (regatta.competitor != nil) {
-            regattaCell.competitorLabel.text = regatta.competitor!.name
-        }
+        guard let checkIn = fetchedResultsController.objectAtIndexPath(indexPath) as? CheckIn else { return }
+        regattaCell.eventLabel.text = checkIn.event.name
+        regattaCell.leaderboardLabel.text = checkIn.leaderboard.name
+        regattaCell.competitorLabel.text = checkIn.name
     }
     
 }
@@ -377,7 +375,7 @@ extension HomeViewController: UITableViewDataSource {
 extension HomeViewController: UITableViewDelegate {
     
     func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
-        selectedRegatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta
+        selectedCheckIn = fetchedResultsController.objectAtIndexPath(indexPath) as? CheckIn
         return indexPath
     }
     

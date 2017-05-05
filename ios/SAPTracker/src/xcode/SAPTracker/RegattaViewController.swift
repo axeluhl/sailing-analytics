@@ -38,7 +38,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     @IBOutlet weak var startTrackingButton: UIButton!
     @IBOutlet weak var announcementLabel: UILabel!
     
-    var regatta: Regatta!
+    var competitorCheckIn: CompetitorCheckIn!
     
     var countdownTimer: NSTimer?
     
@@ -90,7 +90,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     private func setupNavigationBar() {
-        navigationItem.titleView = TitleView(title: regatta.event.name, subtitle: regatta.leaderboard.name)
+        navigationItem.titleView = TitleView(title: competitorCheckIn.event.name, subtitle: competitorCheckIn.leaderboard.name)
         navigationController?.navigationBar.setNeedsLayout()
     }
     
@@ -112,25 +112,25 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     private func refreshCompetitor() {
-        competitorNameLabel.text = regatta.competitor!.name
-        competitorFlagImageView.image = UIImage(named: regatta.competitor!.countryCode)
-        competitorSailLabel.text = regatta.competitor!.sailID
+        competitorNameLabel.text = competitorCheckIn.name
+        competitorFlagImageView.image = UIImage(named: competitorCheckIn.countryCode)
+        competitorSailLabel.text = competitorCheckIn.sailID
     }
     
     private func refreshTeamImage() {
-        if let imageData = regatta.teamImageData {
+        if let imageData = competitorCheckIn.teamImageData {
             teamImageView.image = UIImage(data: imageData)
-            if regatta.teamImageRetry {
+            if competitorCheckIn.teamImageRetry {
                 refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: true)
             } else {
                 self.refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
-                setTeamImageWithURLRequest(regatta.teamImageURL, completion: { (withSuccess) in
+                setTeamImageWithURLRequest(competitorCheckIn.teamImageURL, completion: { (withSuccess) in
                     self.refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
                 })
             }
         } else {
             self.refreshTeamImageButtons(showAddButton: true, showEditButton: false, showRetryButton: false)
-            setTeamImageWithURLRequest(regatta.teamImageURL, completion: { (withSuccess) in
+            setTeamImageWithURLRequest(competitorCheckIn.teamImageURL, completion: { (withSuccess) in
                 self.refreshTeamImageButtons(showAddButton: !withSuccess, showEditButton: withSuccess, showRetryButton: false)
             })
         }
@@ -164,8 +164,8 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
     private func setTeamImageWithURLSuccess(image: UIImage, success: () -> Void) {
         teamImageView.image = image
-        regatta.teamImageRetry = false
-        regatta.teamImageData = UIImageJPEGRepresentation(image, 0.8)
+        competitorCheckIn.teamImageRetry = false
+        competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
         CoreDataManager.sharedManager.saveContext()
         success()
     }
@@ -177,9 +177,9 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     // MARK: - Timer
     
     @objc private func countdownTimerTick() {
-        if regatta.event.startDate - NSDate().timeIntervalSince1970 > 0 {
+        if competitorCheckIn.event.startDate - NSDate().timeIntervalSince1970 > 0 {
             regattaStartLabel.text = Translation.RegattaView.RegattaStartLabel.Text.BeforeRegattaDidStart.String
-            let duration = regatta.event.startDate - NSDate().timeIntervalSince1970
+            let duration = competitorCheckIn.event.startDate - NSDate().timeIntervalSince1970
             let days = Int(duration / (60 * 60 * 24))
             let hours = Int(duration / (60 * 60)) - (days * 24)
             let minutes = Int(duration / 60) - (days * 24 * 60) - (hours * 60)
@@ -206,11 +206,11 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     @IBAction func teamImageRetryButtonTapped(sender: AnyObject) {
-        uploadTeamImageData(regatta.teamImageData)
+        uploadTeamImageData(competitorCheckIn.teamImageData)
     }
     
     @IBAction func eventButtonTapped(sender: UIButton) {
-        UIApplication.sharedApplication().openURL(regatta.eventURL() ?? NSURL())
+        UIApplication.sharedApplication().openURL(competitorCheckIn.eventURL() ?? NSURL())
     }
     
     @IBAction func optionButtonTapped(sender: AnyObject) {
@@ -286,7 +286,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     private func performCheckOutCompleted(withSuccess: Bool) {
-        CoreDataManager.sharedManager.deleteObject(self.regatta)
+        CoreDataManager.sharedManager.deleteObject(competitorCheckIn)
         CoreDataManager.sharedManager.saveContext()
         self.navigationController!.popViewControllerAnimated(true)
     }
@@ -353,19 +353,19 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         if (segue.identifier == Segue.Tracking) {
             let trackingNC = segue.destinationViewController as! UINavigationController
             let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
-            trackingVC.regatta = regatta
+            trackingVC.checkIn = competitorCheckIn
             trackingVC.regattaController = regattaController
         } else if (segue.identifier == Segue.Leaderboard) {
             let leaderboardNC = segue.destinationViewController as! UINavigationController
             let leaderboardVC = leaderboardNC.viewControllers[0] as! LeaderboardViewController
-            leaderboardVC.regatta = regatta
+            leaderboardVC.checkIn = competitorCheckIn
         }
     }
     
     // MARK: - Properties
     
     private lazy var regattaController: RegattaController = {
-        return RegattaController(regatta: self.regatta)
+        return RegattaController(checkIn: self.competitorCheckIn)
     }()
     
 }
@@ -393,16 +393,16 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
     
     private func pickedImage(image: UIImage) {
         teamImageView.image = image
-        regatta.teamImageData = UIImageJPEGRepresentation(image, 0.8)
+        competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
         CoreDataManager.sharedManager.saveContext()
-        uploadTeamImageData(regatta.teamImageData)
+        uploadTeamImageData(competitorCheckIn.teamImageData)
     }
     
     // MARK: - Upload
     
     private func uploadTeamImageData(imageData: NSData!) {
         SVProgressHUD.show()
-        regattaController.postTeamImageData(imageData, competitorID: regatta.competitor!.competitorID,
+        regattaController.postTeamImageData(imageData, competitorID: competitorCheckIn.competitorID,
                                             success: { (teamImageURL) in
                                                 SVProgressHUD.popActivity()
                                                 self.uploadTeamImageDataSuccess(teamImageURL)
@@ -415,14 +415,14 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
     }
     
     private func uploadTeamImageDataSuccess(teamImageURL: String) {
-        regatta.teamImageRetry = false
-        regatta.teamImageURL = teamImageURL
+        competitorCheckIn.teamImageRetry = false
+        competitorCheckIn.teamImageURL = teamImageURL
         CoreDataManager.sharedManager.saveContext()
         refreshTeamImage()
     }
     
     private func uploadTeamImageDataFailure(error: RequestManager.Error) {
-        regatta.teamImageRetry = true
+        competitorCheckIn.teamImageRetry = true
         CoreDataManager.sharedManager.saveContext()
         showUploadTeamImageFailureAlert(error)
         refreshTeamImage()

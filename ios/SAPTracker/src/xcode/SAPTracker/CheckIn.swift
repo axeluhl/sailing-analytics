@@ -1,31 +1,28 @@
 //
-//  Regatta.swift
+//  CheckIn.swift
 //  SAPTracker
 //
-//  Created by Raimund Wege on 04.07.16.
-//  Copyright © 2016 com.sap.sailing. All rights reserved.
+//  Created by Raimund Wege on 05.05.17.
+//  Copyright © 2017 com.sap.sailing. All rights reserved.
 //
 
 import Foundation
 import CoreData
 
-@objc(Regatta)
-class Regatta: NSManagedObject {
+@objc(CheckIn)
+class CheckIn: NSManagedObject {
+
+    func initialize() {
+        event = CoreDataManager.sharedManager.newEvent(self)
+        leaderboard = CoreDataManager.sharedManager.newLeaderboard(self)
+    }
 
     func updateWithRegattaData(regattaData: RegattaData) {
         serverURL = regattaData.serverURL
-        teamImageURL = regattaData.teamImageURL
-        teamImageRetry = false
         event.updateWithEventData(regattaData.eventData)
         leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
-        if (competitor != nil) {
-            competitor!.updateWithCompetitorData(regattaData.competitorData)
-        }
-        if (mark != nil) {
-            mark!.updateWithMarkData(regattaData.markData)
-        }
     }
-    
+
     func eventURL() -> NSURL? {
         return NSURL(string: "\(serverURL)/gwt/Home.html?navigationTab=Regattas#EventPlace:eventId=\(event.eventID)")
     }

@@ -39,10 +39,10 @@ class GPSFixController: NSObject {
         }
     }
     
-    let regatta: Regatta
+    let checkIn: CheckIn
     
-    init(regatta: Regatta) {
-        self.regatta = regatta
+    init(checkIn: CheckIn) {
+        self.checkIn = checkIn
     }
     
     // MARK: - Send All
@@ -56,7 +56,7 @@ class GPSFixController: NSObject {
     }
     
     private func sendAll(success: () -> Void, failure: (error: RequestManager.Error, gpsFixesLeft: Set<GPSFix>) -> Void) {
-        sendAll(regatta.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
+        sendAll(checkIn.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
     }
     
     private func sendAll(gpsFixesLeft: Set<GPSFix>,
@@ -82,7 +82,7 @@ class GPSFixController: NSObject {
     }
     
     private func sendSlice(success: (gpsFixesLeft: Set<GPSFix>) -> Void, failure: (error: RequestManager.Error, gpsFixesLeft: Set<GPSFix>?) -> Void) {
-        sendSlice(regatta.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
+        sendSlice(checkIn.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
     }
     
     private func sendSlice(gpsFixes: Set<GPSFix>,
@@ -147,7 +147,7 @@ class GPSFixController: NSObject {
     // MARK: - Properties
     
     private lazy var requestManager: RequestManager = {
-        let requestManager = RequestManager(baseURLString: self.regatta.serverURL)
+        let requestManager = RequestManager(baseURLString: self.checkIn.serverURL)
         return requestManager
     }()
     

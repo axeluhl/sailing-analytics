@@ -350,7 +350,7 @@ class RequestManager: NSObject {
     
     // MARK: - CheckOut
     
-    func postCheckOut(regatta: Regatta,
+    func postCheckOut(checkIn: CheckIn,
                       success:() -> Void,
                       failure: (error: Error) -> Void)
     {
@@ -358,15 +358,16 @@ class RequestManager: NSObject {
         var body = [String: AnyObject]()
         body[BodyKeys.DeviceUUID] = Preferences.uuid
         body[BodyKeys.ToMillis] = millisSince1970()
-        if (regatta.competitor != nil) {
-            body[BodyKeys.CompetitorID] = regatta.competitor!.competitorID
-        }
-        if (regatta.mark != nil) {
-            body[BodyKeys.MarkID] = regatta.mark!.markID
+        if let competitorCheckIn = checkIn as? CompetitorCheckIn {
+            body[BodyKeys.CompetitorID] = competitorCheckIn.competitorID
+        } else if let markCheckIn = checkIn as? MarkCheckIn {
+            body[BodyKeys.MarkID] = markCheckIn.markID
+        } else {
+            logError("\(#function)", error: "unknown check-in type")
         }
         
         // Post body
-        let urlString = "\(basePathString)/leaderboards/\(regatta.leaderboard.name.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/end"
+        let urlString = "\(basePathString)/leaderboards/\(checkIn.leaderboard.name.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/end"
         manager.POST(urlString,
                      parameters: body,
                      success: { (requestOperation, responseObject) in self.postCheckOutSuccess(responseObject, success: success) },

@@ -1,9 +1,9 @@
 //
-//  Regatta+CoreDataProperties.swift
+//  CheckIn+CoreDataProperties.swift
 //  SAPTracker
 //
-//  Created by Raimund Wege on 04.07.16.
-//  Copyright © 2016 com.sap.sailing. All rights reserved.
+//  Created by Raimund Wege on 05.05.17.
+//  Copyright © 2017 com.sap.sailing. All rights reserved.
 //
 //  Choose "Create NSManagedObject Subclass…" from the Core Data editor menu
 //  to delete and recreate this implementation file for your updated model.
@@ -12,17 +12,12 @@
 import Foundation
 import CoreData
 
-extension Regatta {
+extension CheckIn {
 
     @NSManaged var serverURL: String
-    @NSManaged var teamImageData: NSData?
-    @NSManaged var teamImageRetry: Bool
-    @NSManaged var teamImageURL: String?
+    @NSManaged var name: String
     @NSManaged var event: Event
     @NSManaged var gpsFixes: NSSet?
     @NSManaged var leaderboard: Leaderboard
-
-    @NSManaged var competitor: Competitor?
-    @NSManaged var mark: Mark?
 
 }

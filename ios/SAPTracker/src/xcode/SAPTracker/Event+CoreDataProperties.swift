@@ -18,6 +18,6 @@ extension Event {
     @NSManaged var eventID: String
     @NSManaged var name: String
     @NSManaged var startDate: NSTimeInterval
-    @NSManaged var regatta: Regatta
+    @NSManaged var checkIn: CheckIn
 
 }

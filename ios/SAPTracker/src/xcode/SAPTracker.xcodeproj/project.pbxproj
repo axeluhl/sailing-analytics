@@ -305,20 +305,22 @@
 		9E95C3D61C723AB30016632B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95C3D51C723AB30016632B /* Constants.swift */; };
 		9ECBDDAE1C9C4F0300F76AEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */; };
 		C8150BA51DCC6FDB0087C9C2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8150BA71DCC6FDB0087C9C2 /* InfoPlist.strings */; };
+		C843D47F1EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */; };
+		C843D4801EBC54A300250F01 /* CompetitorCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */; };
+		C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */; };
+		C843D4821EBC54A300250F01 /* MarkCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */; };
+		C843D4831EBC54A300250F01 /* CheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */; };
+		C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47E1EBC54A300250F01 /* CheckIn.swift */; };
 		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
 		C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */; };
 		C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C85291511D48FB91009E9A9D /* Localizable.strings */; };
 		C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */; };
 		C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAA1CF736680093B0C5 /* Preferences.swift */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
-		C8739E041D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */; };
-		C8739E051D2AA2A500A89F3C /* Regatta.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFB1D2AA2A500A89F3C /* Regatta.swift */; };
 		C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */; };
 		C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */; };
 		C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */; };
 		C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */; };
-		C8739E0A1D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */; };
-		C8739E0B1D2AA2A500A89F3C /* Competitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E011D2AA2A500A89F3C /* Competitor.swift */; };
 		C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */; };
 		C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E031D2AA2A500A89F3C /* Event.swift */; };
 		C8739E0F1D2BEE7900A89F3C /* RegattaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */; };
@@ -337,8 +339,6 @@
 		C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCC31D51C53500FC1A27 /* TeamData.swift */; };
 		C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
-		C8D938B61EB9B20200B1B4BC /* Mark+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D938B31EB9B20200B1B4BC /* Mark+CoreDataProperties.swift */; };
-		C8D938B71EB9B20200B1B4BC /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D938B41EB9B20200B1B4BC /* Mark.swift */; };
 		C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F1B1E01D488B6D004C3379 /* Translation.swift */; };
 		C8F71EDA1D8691F700826DE4 /* AFHTTPRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EA61D8691F700826DE4 /* AFHTTPRequestOperation.m */; };
 		C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EA81D8691F700826DE4 /* AFHTTPRequestOperationManager.m */; };
@@ -680,6 +680,12 @@
 		9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C8150BA61DCC6FDB0087C9C2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C8150BA81DCC6FDD0087C9C2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CompetitorCheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorCheckIn.swift; sourceTree = "<group>"; };
+		C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MarkCheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkCheckIn.swift; sourceTree = "<group>"; };
+		C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C843D47E1EBC54A300250F01 /* CheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckIn.swift; sourceTree = "<group>"; };
 		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
 		C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewRegattaCell.swift; sourceTree = "<group>"; };
 		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -688,14 +694,10 @@
 		C85FAA501D4F84460087C2A2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
 		C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 2.xcdatamodel"; sourceTree = "<group>"; };
-		C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Regatta+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8739DFB1D2AA2A500A89F3C /* Regatta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regatta.swift; sourceTree = "<group>"; };
 		C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GPSFix+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
 		C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Leaderboard+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Leaderboard.swift; sourceTree = "<group>"; };
-		C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Competitor+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8739E011D2AA2A500A89F3C /* Competitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Competitor.swift; sourceTree = "<group>"; };
 		C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Event+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C8739E031D2AA2A500A89F3C /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaController.swift; sourceTree = "<group>"; };
@@ -715,8 +717,6 @@
 		C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 3.xcdatamodel"; sourceTree = "<group>"; };
-		C8D938B31EB9B20200B1B4BC /* Mark+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Mark+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8D938B41EB9B20200B1B4BC /* Mark.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
 		C8F1B1E01D488B6D004C3379 /* Translation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translation.swift; sourceTree = "<group>"; };
 		C8F71EA51D8691F700826DE4 /* AFHTTPRequestOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPRequestOperation.h; sourceTree = "<group>"; };
 		C8F71EA61D8691F700826DE4 /* AFHTTPRequestOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPRequestOperation.m; sourceTree = "<group>"; };
@@ -807,8 +807,10 @@
 		7F06590019F7FE750077FF95 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				C8739E011D2AA2A500A89F3C /* Competitor.swift */,
-				C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */,
+				C843D47E1EBC54A300250F01 /* CheckIn.swift */,
+				C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */,
+				C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */,
+				C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */,
 				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
 				7FA6551919F6661900A1B92D /* CoreDataManager.swift */,
 				C8739E031D2AA2A500A89F3C /* Event.swift */,
@@ -817,10 +819,8 @@
 				C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */,
 				C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */,
 				C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */,
-				C8D938B41EB9B20200B1B4BC /* Mark.swift */,
-				C8D938B31EB9B20200B1B4BC /* Mark+CoreDataProperties.swift */,
-				C8739DFB1D2AA2A500A89F3C /* Regatta.swift */,
-				C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */,
+				C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */,
+				C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -1821,9 +1821,9 @@
 				7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
 				C8739E161D2BF17900A89F3C /* CompetitorData.swift in Sources */,
-				C8739E0A1D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift in Sources */,
 				C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */,
 				C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */,
+				C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEE1D8691F700826DE4 /* UIProgressView+AFNetworking.m in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */,
@@ -1837,19 +1837,19 @@
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
 				C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */,
 				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
+				C843D47F1EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EDC1D8691F700826DE4 /* AFHTTPSessionManager.m in Sources */,
 				C8F71EE91D8691F700826DE4 /* AFNetworkActivityIndicatorManager.m in Sources */,
 				C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */,
-				C8739E041D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift in Sources */,
 				C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */,
-				C8739E051D2AA2A500A89F3C /* Regatta.swift in Sources */,
 				C8F71EDE1D8691F700826DE4 /* AFSecurityPolicy.m in Sources */,
 				C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
 				C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
+				C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */,
 				C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */,
 				C8F71EF31D86A15F00826DE4 /* SMTWiFiStatus.m in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
@@ -1859,15 +1859,16 @@
 				C8F71EF01D8691F700826DE4 /* UIWebView+AFNetworking.m in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */,
-				C8D938B61EB9B20200B1B4BC /* Mark+CoreDataProperties.swift in Sources */,
 				C8739E141D2BF16300A89F3C /* LeaderboardData.swift in Sources */,
-				C8D938B71EB9B20200B1B4BC /* Mark.swift in Sources */,
 				C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */,
 				C8F71EEF1D8691F700826DE4 /* UIRefreshControl+AFNetworking.m in Sources */,
 				C8F71EE21D8691F700826DE4 /* AFURLSessionManager.m in Sources */,
+				C843D4821EBC54A300250F01 /* MarkCheckIn.swift in Sources */,
 				C8F71EDD1D8691F700826DE4 /* AFNetworkReachabilityManager.m in Sources */,
+				C843D4801EBC54A300250F01 /* CompetitorCheckIn.swift in Sources */,
 				C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
+				C843D4831EBC54A300250F01 /* CheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEC1D8691F700826DE4 /* UIButton+AFNetworking.m in Sources */,
 				C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */,
 				C8F71EE81D8691F700826DE4 /* TSMarkdownParser.m in Sources */,
@@ -1879,7 +1880,6 @@
 				C8F71EED1D8691F700826DE4 /* UIImageView+AFNetworking.m in Sources */,
 				C8F71EEB1D8691F700826DE4 /* UIAlertView+AFNetworking.m in Sources */,
 				C89C5FCE1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift in Sources */,
-				C8739E0B1D2AA2A500A89F3C /* Competitor.swift in Sources */,
 				C8F71EE11D8691F700826DE4 /* AFURLResponseSerialization.m in Sources */,
 				C8F71EE61D8691F700826DE4 /* SVProgressHUD.m in Sources */,
 				7F0658FF19F7EE910077FF95 /* RegattaData.swift in Sources */,

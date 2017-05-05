@@ -10,7 +10,7 @@ import Foundation
 
 class TrackingViewController : UIViewController {
     
-    var regatta: Regatta!
+    var checkIn: CheckIn!
     var regattaController: RegattaController!
     
     @IBOutlet weak var tableView: UITableView!
@@ -45,7 +45,7 @@ class TrackingViewController : UIViewController {
     
     private func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
-        navigationItem.titleView = TitleView(title: regatta.event.name, subtitle: regatta.leaderboard.name)
+        navigationItem.titleView = TitleView(title: checkIn.event.name, subtitle: checkIn.leaderboard.name)
         navigationController?.navigationBar.setNeedsLayout()
     }
     
@@ -97,7 +97,7 @@ extension TrackingViewController: UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(TrackingViewController.Rows[indexPath.row]) ?? UITableViewCell()
         if let gpsFixesCell = cell as? TrackingViewGPSFixesCell {
-            gpsFixesCell.regatta = regatta
+            gpsFixesCell.checkIn = checkIn
         }
         return cell
     }

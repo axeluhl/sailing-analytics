@@ -10,15 +10,15 @@ import UIKit
 
 class RegattaController: NSObject {
         
-    let regatta: Regatta
+    let checkIn: CheckIn
     
     var sendingBackgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
     var sendingDate: NSDate = NSDate()
     
     private (set) var isTracking: Bool = false
     
-    init(regatta: Regatta) {
-        self.regatta = regatta
+    init(checkIn: CheckIn) {
+        self.checkIn = checkIn
         super.init()
         subscribeForNotifications()
     }
@@ -51,7 +51,7 @@ class RegattaController: NSObject {
             guard self.isTracking else { return }
             guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
             guard locationData.isValid else { return }
-            let gpsFix = CoreDataManager.sharedManager.newGPSFix(self.regatta)
+            let gpsFix = CoreDataManager.sharedManager.newGPSFix(self.checkIn)
             gpsFix.updateWithLocationData(locationData)
             CoreDataManager.sharedManager.saveContext()
             if self.sendingDate.compare(NSDate()) == .OrderedAscending {
@@ -91,11 +91,13 @@ class RegattaController: NSObject {
     // MARK: - Update
     
     func update(completion: () -> Void) {
-        let regattaData = RegattaData(serverURL: regatta.serverURL,
-                                      eventID: regatta.event.eventID,
-                                      leaderboardName: regatta.leaderboard.name,
-                                      competitorID: regatta.competitor?.competitorID,
-                                      markID: regatta.mark?.markID
+        // TODO: RegattaData(checkIn)
+        let regattaData = RegattaData(
+            serverURL: checkIn.serverURL,
+            eventID: checkIn.event.eventID,
+            leaderboardName: checkIn.leaderboard.name,
+            competitorID: "", // TODO: regatta.competitorID,
+            markID: "" // TODO: regatta.mark?.markID
         )
         requestManager.getRegattaData(regattaData,
                                       success: { (regattaData) in self.updateSuccess(regattaData, completion: completion) },
@@ -104,11 +106,14 @@ class RegattaController: NSObject {
     }
     
     func updateSuccess(regattaData: RegattaData, completion: () -> Void) {
-        regatta.event.updateWithEventData(regattaData.eventData)
-        regatta.leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
-        if (regatta.competitor != nil) {
-            regatta.competitor!.updateWithCompetitorData(regattaData.competitorData)
-        }
+        checkIn.event.updateWithEventData(regattaData.eventData)
+        checkIn.leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
+
+        // TODO:
+        // if (regatta.competitor != nil) {
+        //     regatta.competitor!.updateWithCompetitorData(regattaData.competitorData)
+        //}
+
         CoreDataManager.sharedManager.saveContext()
         completion()
     }
@@ -147,7 +152,7 @@ class RegattaController: NSObject {
     // MARK: - CheckOut
     
     func checkOut(completion: (withSuccess: Bool) -> Void) {
-        requestManager.postCheckOut(regatta,
+        requestManager.postCheckOut(checkIn,
                                     success: { () in completion(withSuccess: true) },
                                     failure: { (error) in completion(withSuccess: false) }
         )
@@ -156,12 +161,12 @@ class RegattaController: NSObject {
     // MARK: - Properties
     
     lazy var gpsFixController: GPSFixController = {
-        let gpsFixController = GPSFixController(regatta: self.regatta)
+        let gpsFixController = GPSFixController(checkIn: self.checkIn)
         return gpsFixController
     }()
     
     lazy var requestManager: RequestManager = {
-        let requestManager = RequestManager(baseURLString: self.regatta.serverURL)
+        let requestManager = RequestManager(baseURLString: self.checkIn.serverURL)
         return requestManager
     }()
     

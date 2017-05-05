@@ -18,11 +18,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         logInfo("\(#function)", info: "Background fetch started...")
         var noData = true
         var allSuccess = true
-        let regattas = CoreDataManager.sharedManager.fetchRegattas()
-        regattas?.forEach({ (regatta) in
-            if regatta.gpsFixes?.count > 0 {
+        let checkIns = CoreDataManager.sharedManager.fetchCheckIns()
+        checkIns?.forEach({ (checkIn) in
+            if checkIn.gpsFixes?.count > 0 {
                 noData = false
-                let gpsFixController = GPSFixController(regatta: regatta)
+                let gpsFixController = GPSFixController(checkIn: checkIn)
                 gpsFixController.sendAll({ (withSuccess) in
                     allSuccess = allSuccess && withSuccess
                 })

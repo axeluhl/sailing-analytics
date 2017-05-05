@@ -58,15 +58,24 @@ public class RegattaData: NSObject {
         super.init()
     }
     
-    init(regatta: Regatta) {
-        serverURL = regatta.serverURL
-        eventID = regatta.event.eventID
-        competitorID = regatta.competitor?.competitorID
-        leaderboardName = regatta.leaderboard.name
-        markID = regatta.mark?.markID
+    init(competitorCheckIn: CompetitorCheckIn) {
+        serverURL = competitorCheckIn.serverURL
+        eventID = competitorCheckIn.event.eventID
+        competitorID = competitorCheckIn.competitorID
+        leaderboardName = competitorCheckIn.leaderboard.name
+        markID = ""
         super.init()
     }
-    
+
+    init(markCheckIn: MarkCheckIn) {
+        serverURL = markCheckIn.serverURL
+        eventID = markCheckIn.event.eventID
+        competitorID = ""
+        leaderboardName = markCheckIn.leaderboard.name
+        markID = markCheckIn.markID
+        super.init()
+    }
+
     convenience init?(url: NSURL) {
         guard let host = url.host else { return nil }
         guard let components = NSURLComponents(string: url.absoluteString) else { return nil }

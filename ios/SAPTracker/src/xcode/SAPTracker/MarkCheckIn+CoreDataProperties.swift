@@ -1,8 +1,8 @@
 //
-//  Mark+CoreDataProperties.swift
+//  MarkCheckIn+CoreDataProperties.swift
 //  SAPTracker
 //
-//  Created by Raimund Wege on 03.05.17.
+//  Created by Raimund Wege on 05.05.17.
 //  Copyright © 2017 com.sap.sailing. All rights reserved.
 //
 //  Choose "Create NSManagedObject Subclass…" from the Core Data editor menu
@@ -12,10 +12,8 @@
 import Foundation
 import CoreData
 
-extension Mark {
+extension MarkCheckIn {
 
-    @NSManaged var markID: String
-    @NSManaged var name: String
-    @NSManaged var regatta: Regatta
+    @NSManaged var markID: String?
 
 }

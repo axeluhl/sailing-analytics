@@ -91,10 +91,31 @@ class CheckInController : NSObject {
     }
     
     private func postCheckInSuccess(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
-        let regatta = CoreDataManager.sharedManager.fetchRegatta(regattaData) ?? CoreDataManager.sharedManager.newRegatta()
-        regatta.updateWithRegattaData(regattaData)
-        CoreDataManager.sharedManager.saveContext()
-        checkInDidFinish(withSuccess: true, completion: completion)
+        switch regattaData.type() {
+        case .Competitor:
+            let competitorCheckIn = CoreDataManager.sharedManager.fetchCompetitorCheckIn(
+                regattaData.eventID,
+                leaderboardName: regattaData.leaderboardName,
+                competitorID: regattaData.competitorID!
+            ) ?? CoreDataManager.sharedManager.newCompetitorCheckIn()
+            competitorCheckIn.updateWithRegattaData(regattaData)
+            CoreDataManager.sharedManager.saveContext()
+            checkInDidFinish(withSuccess: true, completion: completion)
+            break
+        case .Mark:
+            let markCheckIn = CoreDataManager.sharedManager.fetchMarkCheckIn(
+                regattaData.eventID,
+                leaderboardName: regattaData.leaderboardName,
+                markID: regattaData.markID!
+            ) ?? CoreDataManager.sharedManager.newMarkCheckIn()
+            markCheckIn.updateWithRegattaData(regattaData)
+            CoreDataManager.sharedManager.saveContext()
+            checkInDidFinish(withSuccess: true, completion: completion)
+            break
+        default:
+            logError("\(#function)", error: "unknown check-in type")
+            checkInDidFinish(withSuccess: false, completion: completion)
+        }
     }
     
     private func postCheckInFailure(error: RequestManager.Error, completion: (withSuccess: Bool) -> Void) {
