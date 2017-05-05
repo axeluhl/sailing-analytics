@@ -526,6 +526,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             progress = 1.0;
         }
         setStatusAndProgress(status, progress);
+        loadingJobs.notifyAll();
     }
     
     private void addLoadingJob(AbstractLoadingJob job) {
