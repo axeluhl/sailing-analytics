@@ -1,5 +1,5 @@
 //
-//  RegattaController.swift
+//  CompetitorController.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 05.07.16.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class RegattaController: NSObject {
+class CompetitorController: NSObject {
         
     let checkIn: CheckIn
     

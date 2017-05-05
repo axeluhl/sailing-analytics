@@ -41,10 +41,11 @@ class TrackingViewModeCell: UITableViewCell {
     // MARK: - Notifications
 
     private func subscribeForNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(regattaControllerModeChanged),
-                                                         name:GPSFixController.NotificationType.ModeChanged,
-                                                         object: nil
+        NSNotificationCenter.defaultCenter().addObserver(
+            self,
+            selector:#selector(gpsFixControllerModeChanged),
+            name:GPSFixController.NotificationType.ModeChanged,
+            object: nil
         )
     }
     
@@ -52,7 +53,7 @@ class TrackingViewModeCell: UITableViewCell {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    @objc private func regattaControllerModeChanged(notification: NSNotification) {
+    @objc private func gpsFixControllerModeChanged(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             guard let rawValue = notification.userInfo?[GPSFixController.UserInfo.Mode] as? String else { return }
             guard let mode = GPSFixController.Mode(rawValue: rawValue) else { return }

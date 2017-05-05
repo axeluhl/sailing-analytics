@@ -11,7 +11,7 @@ import UIKit
 class GPSFixController: NSObject {
     
     struct NotificationType {
-        static let ModeChanged = "RegattaController.ModeChanged"
+        static let ModeChanged = "GPSFixController.ModeChanged"
     }
     
     struct UserInfo {

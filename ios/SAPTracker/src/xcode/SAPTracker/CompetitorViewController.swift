@@ -99,7 +99,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     private func update() {
         SVProgressHUD.show()
-        regattaController.update {
+        competitorController.update {
             self.refresh()
             SVProgressHUD.popActivity()
         }
@@ -255,7 +255,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     private func startTracking(sender: AnyObject) {
         do {
-            try regattaController.startTracking()
+            try competitorController.startTracking()
             performSegueWithIdentifier(Segue.Tracking, sender: sender)
         } catch let error as LocationManager.LocationManagerError {
             showStartTrackingFailureAlert(error.description)
@@ -281,7 +281,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     }
     
     private func performCheckOut() {
-        regattaController.checkOut { (withSuccess) in
+        competitorController.checkOut { (withSuccess) in
             self.performCheckOutCompleted(withSuccess)
         }
     }
@@ -355,7 +355,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
             let trackingNC = segue.destinationViewController as! UINavigationController
             let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
             trackingVC.checkIn = competitorCheckIn
-            trackingVC.regattaController = regattaController
+            trackingVC.competitorController = competitorController
         } else if (segue.identifier == Segue.Leaderboard) {
             let leaderboardNC = segue.destinationViewController as! UINavigationController
             let leaderboardVC = leaderboardNC.viewControllers[0] as! LeaderboardViewController
@@ -365,8 +365,8 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     // MARK: - Properties
     
-    private lazy var regattaController: RegattaController = {
-        return RegattaController(checkIn: self.competitorCheckIn)
+    private lazy var competitorController: CompetitorController = {
+        return CompetitorController(checkIn: self.competitorCheckIn)
     }()
     
 }
@@ -403,7 +403,7 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
     
     private func uploadTeamImageData(imageData: NSData!) {
         SVProgressHUD.show()
-        regattaController.postTeamImageData(imageData, competitorID: competitorCheckIn.competitorID,
+        competitorController.postTeamImageData(imageData, competitorID: competitorCheckIn.competitorID,
                                             success: { (teamImageURL) in
                                                 SVProgressHUD.popActivity()
                                                 self.uploadTeamImageDataSuccess(teamImageURL)

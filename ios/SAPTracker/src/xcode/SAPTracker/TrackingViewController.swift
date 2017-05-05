@@ -11,7 +11,7 @@ import Foundation
 class TrackingViewController : UIViewController {
     
     var checkIn: CheckIn!
-    var regattaController: RegattaController!
+    var competitorController: CompetitorController!
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
@@ -59,7 +59,7 @@ class TrackingViewController : UIViewController {
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { action in
             LocationManager.sharedManager.stopTracking()
             SVProgressHUD.show()
-            self.regattaController.gpsFixController.sendAll({ (withSuccess) in
+            self.competitorController.gpsFixController.sendAll({ (withSuccess) in
                 SVProgressHUD.popActivity()
                 self.dismissViewControllerAnimated(true, completion: nil)
             })
