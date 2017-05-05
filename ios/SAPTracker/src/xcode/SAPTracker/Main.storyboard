@@ -121,7 +121,7 @@
                                     </constraints>
                                 </view>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Regatta" id="01f-yF-69S" userLabel="Regatta Cell" customClass="HomeViewRegattaCell" customModule="SAPTracker" customModuleProvider="target">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" id="01f-yF-69S" customClass="HomeViewCell" customModule="SAPTracker" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="74" width="600" height="81"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" tableViewCell="01f-yF-69S" id="vse-xJ-e2c">
@@ -2003,8 +2003,8 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
-        <segue reference="Irs-ey-Uhs"/>
+        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="QMa-LQ-D8c"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="calibratedRGB"/>
 </document>

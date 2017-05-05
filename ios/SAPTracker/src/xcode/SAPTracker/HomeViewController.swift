@@ -373,17 +373,17 @@ extension HomeViewController: UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Regatta") ?? UITableViewCell()
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") ?? UITableViewCell()
         self.configureCell(cell, atIndexPath: indexPath)
         return cell
     }
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        guard let regattaCell = cell as? HomeViewRegattaCell else { return }
+        guard let homeViewCell = cell as? HomeViewCell else { return }
         guard let checkIn = fetchedResultsController.objectAtIndexPath(indexPath) as? CheckIn else { return }
-        regattaCell.eventLabel.text = checkIn.event.name
-        regattaCell.leaderboardLabel.text = checkIn.leaderboard.name
-        regattaCell.competitorLabel.text = checkIn.name
+        homeViewCell.eventLabel.text = checkIn.event.name
+        homeViewCell.leaderboardLabel.text = checkIn.leaderboard.name
+        homeViewCell.competitorLabel.text = checkIn.name
     }
     
 }
