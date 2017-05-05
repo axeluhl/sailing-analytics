@@ -169,10 +169,10 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     {
         if metadataObjects.count > 0 {
             let metadataObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
-            if let regattaData = RegattaData(urlString: metadataObject.stringValue) {
+            if let checkInData = CheckInData(urlString: metadataObject.stringValue) {
                 stopScanning()
                 dispatch_async(dispatch_get_main_queue(), {
-                    self.captureOutputSuccess(regattaData)
+                    self.captureOutputSuccess(checkInData)
                 })
             } else {
                 dispatch_async(dispatch_get_main_queue(), {
@@ -182,10 +182,10 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
         }
     }
     
-    private func captureOutputSuccess(regattaData: RegattaData) {
-        checkInController.checkIn(regattaData, completion: { (withSuccess) in
+    private func captureOutputSuccess(checkInData: CheckInData) {
+        checkInController.checkIn(checkInData, completion: { (withSuccess) in
             if withSuccess {
-                self.homeViewController?.selectedCheckIn = CoreDataManager.sharedManager.fetchCheckIn(regattaData)
+                self.homeViewController?.selectedCheckIn = CoreDataManager.sharedManager.fetchCheckIn(checkInData)
                 self.navigationController?.popViewControllerAnimated(true)
             } else {
                 self.startScanning()

@@ -72,100 +72,100 @@ class RequestManager: NSObject {
     
     // MARK: - Regatta
     
-    func getRegattaData(regattaData: RegattaData,
-                        success: (regattaData: RegattaData) -> Void,
+    func getCheckInData(checkInData: CheckInData,
+                        success: (checkInData: CheckInData) -> Void,
                         failure: (error: Error) -> Void)
     {
-        getEventData(regattaData, success: success, failure: failure)
+        getEventData(checkInData, success: success, failure: failure)
     }
     
-    private func getEventData(regattaData: RegattaData,
-                              success: (regattaData: RegattaData) -> Void,
+    private func getEventData(checkInData: CheckInData,
+                              success: (checkInData: CheckInData) -> Void,
                               failure: (error: Error) -> Void)
     {
-        getEvent(regattaData.eventID,
-                 success: { (data) in self.getEventDataSuccess(data, regattaData: regattaData, success: success, failure: failure) },
+        getEvent(checkInData.eventID,
+                 success: { (data) in self.getEventDataSuccess(data, checkInData: checkInData, success: success, failure: failure) },
                  failure: { (error) in failure(error: error) }
         )
     }
     
     private func getEventDataSuccess(eventData: EventData,
-                                     regattaData: RegattaData,
-                                     success: (regattaData: RegattaData) -> Void,
+                                     checkInData: CheckInData,
+                                     success: (checkInData: CheckInData) -> Void,
                                      failure: (error: Error) -> Void)
     {
-        regattaData.eventData = eventData
-        getLeaderboardData(regattaData, success: success, failure: failure)
+        checkInData.eventData = eventData
+        getLeaderboardData(checkInData, success: success, failure: failure)
     }
     
-    private func getLeaderboardData(regattaData: RegattaData,
-                                    success: (regattaData: RegattaData) -> Void,
+    private func getLeaderboardData(checkInData: CheckInData,
+                                    success: (checkInData: CheckInData) -> Void,
                                     failure: (error: Error) -> Void)
     {
-        getLeaderboard(regattaData.leaderboardName,
-                       success: { (data) in self.getLeaderboardDataSuccess(data, regattaData: regattaData, success: success, failure: failure) },
+        getLeaderboard(checkInData.leaderboardName,
+                       success: { (data) in self.getLeaderboardDataSuccess(data, checkInData: checkInData, success: success, failure: failure) },
                        failure: { (error) in failure(error: error) }
         )
     }
     
     private func getLeaderboardDataSuccess(leaderboardData: LeaderboardData,
-                                           regattaData: RegattaData,
-                                           success: (regattaData: RegattaData) -> Void,
+                                           checkInData: CheckInData,
+                                           success: (checkInData: CheckInData) -> Void,
                                            failure: (error: Error) -> Void)
     {
-        regattaData.leaderboardData = leaderboardData
-        if (regattaData.competitorID != nil) {
-            getCompetitorData(regattaData, competitorID: regattaData.competitorID!, success: success, failure: failure)
-        } else if (regattaData.markID != nil) {
-            getMarkData(regattaData, markID: regattaData.markID!, success: success, failure: failure)
+        checkInData.leaderboardData = leaderboardData
+        if (checkInData.competitorID != nil) {
+            getCompetitorData(checkInData, competitorID: checkInData.competitorID!, success: success, failure: failure)
+        } else if (checkInData.markID != nil) {
+            getMarkData(checkInData, markID: checkInData.markID!, success: success, failure: failure)
         } else {
             failure(error: Error(message: Translation.RequestManager.NoDataFailure.Message.String))
         }
     }
     
-    private func getCompetitorData(regattaData: RegattaData,
+    private func getCompetitorData(checkInData: CheckInData,
                                    competitorID: String,
-                                   success: (regattaData: RegattaData) -> Void,
+                                   success: (checkInData: CheckInData) -> Void,
                                    failure: (error: Error) -> Void)
     {
         getCompetitor(competitorID,
-                      success: { (data) in self.getCompetitorDataSuccess(data, regattaData: regattaData, competitorID: competitorID, success: success, failure: failure) },
+                      success: { (data) in self.getCompetitorDataSuccess(data, checkInData: checkInData, competitorID: competitorID, success: success, failure: failure) },
                       failure: { (error) in failure(error: error) }
         )
     }
     
     private func getCompetitorDataSuccess(competitorData: CompetitorData,
-                                          regattaData: RegattaData,
+                                          checkInData: CheckInData,
                                           competitorID: String,
-                                          success: (regattaData: RegattaData) -> Void,
+                                          success: (checkInData: CheckInData) -> Void,
                                           failure: (error: Error) -> Void)
     {
-        regattaData.competitorData = competitorData
+        checkInData.competitorData = competitorData
         getTeamImageURL(competitorID, result: { (imageURL) in
-            regattaData.teamImageURL = imageURL
-            success(regattaData: regattaData)
+            checkInData.teamImageURL = imageURL
+            success(checkInData: checkInData)
         })
     }
 
-    private func getMarkData(regattaData: RegattaData,
+    private func getMarkData(checkInData: CheckInData,
                              markID: String,
-                             success: (regattaData: RegattaData) -> Void,
+                             success: (checkInData: CheckInData) -> Void,
                              failure: (error: Error) -> Void)
     {
-        getMark(regattaData.leaderboardName,
+        getMark(checkInData.leaderboardName,
                 markID: markID,
-                success: { (data) in self.getMarkDataSuccess(data, regattaData: regattaData, success: success, failure: failure) },
+                success: { (data) in self.getMarkDataSuccess(data, checkInData: checkInData, success: success, failure: failure) },
                 failure: { (error) in failure(error: error) }
         )
     }
 
     private func getMarkDataSuccess(markData: MarkData,
-                                    regattaData: RegattaData,
-                                    success: (regattaData: RegattaData) -> Void,
+                                    checkInData: CheckInData,
+                                    success: (checkInData: CheckInData) -> Void,
                                     failure: (error: Error) -> Void)
     {
-        regattaData.markData = markData
-        success(regattaData: regattaData)
+        checkInData.markData = markData
+        success(checkInData: checkInData)
     }
 
     // MARK: - Event
@@ -308,7 +308,7 @@ class RequestManager: NSObject {
     
     // MARK: CheckIn
     
-    func postCheckIn(regattaData: RegattaData!,
+    func postCheckIn(checkInData: CheckInData!,
                      success: () -> Void,
                      failure: (error: Error) -> Void)
     {
@@ -318,19 +318,19 @@ class RequestManager: NSObject {
         body[BodyKeys.DeviceUUID] = Preferences.uuid
         body[BodyKeys.PushDeviceID] = ""
         body[BodyKeys.FromMillis] = millisSince1970()
-        switch regattaData.type() {
+        switch checkInData.type() {
         case .Competitor:
-            body[BodyKeys.CompetitorID] = regattaData.competitorData.competitorID
+            body[BodyKeys.CompetitorID] = checkInData.competitorData.competitorID
             break
         case .Mark:
-            body[BodyKeys.MarkID] = regattaData.markData.markID
+            body[BodyKeys.MarkID] = checkInData.markData.markID
             break
         default:
             break
         }
         
         // Post body
-        let urlString = "\(basePathString)/leaderboards/\(regattaData.leaderboardData.name.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/start"
+        let urlString = "\(basePathString)/leaderboards/\(checkInData.leaderboardData.name.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/start"
         manager.POST(urlString,
                      parameters: body,
                      success: { (requestOperation, responseObject) in self.postCheckInSuccess(responseObject, success: success) },

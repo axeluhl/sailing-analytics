@@ -211,10 +211,10 @@ class HomeViewController: UIViewController {
     
     private func reviewNewCheckIn(completion: () -> Void) {
         guard let urlString = Preferences.newCheckInURL else { completion(); return }
-        guard let regattaData = RegattaData(urlString: urlString) else { completion(); return }
-        checkInController.checkIn(regattaData, completion: { (withSuccess) in
+        guard let checkInData = CheckInData(urlString: urlString) else { completion(); return }
+        checkInController.checkIn(checkInData, completion: { (withSuccess) in
             Preferences.newCheckInURL = nil
-            self.selectedCheckIn = CoreDataManager.sharedManager.fetchCheckIn(regattaData)
+            self.selectedCheckIn = CoreDataManager.sharedManager.fetchCheckIn(checkInData)
             completion()
         })
     }

@@ -24,13 +24,13 @@ class CheckInController : NSObject {
     
     // MARK: - CheckIn
     
-    func checkIn(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
+    func checkIn(checkInData: CheckInData, completion: (withSuccess: Bool) -> Void) {
         SVProgressHUD.show()
-        requestManager = RequestManager(baseURLString: regattaData.serverURL)
-        requestManager.getRegattaData(regattaData, success:
-            { (regattaData) in
+        requestManager = RequestManager(baseURLString: checkInData.serverURL)
+        requestManager.getCheckInData(checkInData, success:
+            { (checkInData) in // TODO: check checkInData vs. checkInData
                 SVProgressHUD.popActivity()
-                self.checkInSuccess(regattaData, completion: completion)
+                self.checkInSuccess(checkInData, completion: completion)
             }, failure: { (error) in
                 SVProgressHUD.popActivity()
                 self.checkInFailure(error, completion: completion)
@@ -38,15 +38,16 @@ class CheckInController : NSObject {
         )
     }
     
-    private func checkInSuccess(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
-        switch regattaData.type() {
+    private func checkInSuccess(checkInData: CheckInData, completion: (withSuccess: Bool) -> Void) {
+        switch checkInData.type() {
         case .Competitor:
-            let alertController = UIAlertController(title: String(format: Translation.CheckInController.WelcomeAlert.Title.String, regattaData.competitorData.name),
-                                                    message: String(format: Translation.CheckInController.WelcomeAlert.Message.String, regattaData.competitorData.sailID),
-                                                    preferredStyle: .Alert
+            let alertController = UIAlertController(
+                title: String(format: Translation.CheckInController.WelcomeAlert.Title.String, checkInData.competitorData.name),
+                message: String(format: Translation.CheckInController.WelcomeAlert.Message.String, checkInData.competitorData.sailID),
+                preferredStyle: .Alert
             )
             let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
-                self.postCheckIn(regattaData, completion: completion)
+                self.postCheckIn(checkInData, completion: completion)
             }
             let cancelAction = UIAlertAction(title: Translation.CheckInController.WelcomeAlert.CancelAction.Title.String, style: .Cancel) { (action) in
                 self.checkInDidFinish(withSuccess: false, completion: completion)
@@ -56,7 +57,7 @@ class CheckInController : NSObject {
             showCheckInAlert(alertController)
             break
         case .Mark:
-            self.postCheckIn(regattaData, completion: completion)
+            self.postCheckIn(checkInData, completion: completion)
             break
         case .None:
             self.checkInDidFinish(withSuccess: false, completion: completion)
@@ -78,11 +79,11 @@ class CheckInController : NSObject {
     
     // MARK: - PostCheckIn
     
-    private func postCheckIn(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
+    private func postCheckIn(checkInData: CheckInData, completion: (withSuccess: Bool) -> Void) {
         SVProgressHUD.show()
-        requestManager.postCheckIn(regattaData, success: { () -> Void in
+        requestManager.postCheckIn(checkInData, success: { () -> Void in
                 SVProgressHUD.popActivity()
-                self.postCheckInSuccess(regattaData, completion: completion)
+                self.postCheckInSuccess(checkInData, completion: completion)
             }, failure: { (error) -> Void in
                 SVProgressHUD.popActivity()
                 self.postCheckInFailure(error, completion: completion)
@@ -90,25 +91,25 @@ class CheckInController : NSObject {
         )
     }
     
-    private func postCheckInSuccess(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
-        switch regattaData.type() {
+    private func postCheckInSuccess(checkInData: CheckInData, completion: (withSuccess: Bool) -> Void) {
+        switch checkInData.type() {
         case .Competitor:
             let competitorCheckIn = CoreDataManager.sharedManager.fetchCompetitorCheckIn(
-                regattaData.eventID,
-                leaderboardName: regattaData.leaderboardName,
-                competitorID: regattaData.competitorID!
+                checkInData.eventID,
+                leaderboardName: checkInData.leaderboardName,
+                competitorID: checkInData.competitorID!
             ) ?? CoreDataManager.sharedManager.newCompetitorCheckIn()
-            competitorCheckIn.updateWithRegattaData(regattaData)
+            competitorCheckIn.updateWithCheckInData(checkInData)
             CoreDataManager.sharedManager.saveContext()
             checkInDidFinish(withSuccess: true, completion: completion)
             break
         case .Mark:
             let markCheckIn = CoreDataManager.sharedManager.fetchMarkCheckIn(
-                regattaData.eventID,
-                leaderboardName: regattaData.leaderboardName,
-                markID: regattaData.markID!
+                checkInData.eventID,
+                leaderboardName: checkInData.leaderboardName,
+                markID: checkInData.markID!
             ) ?? CoreDataManager.sharedManager.newMarkCheckIn()
-            markCheckIn.updateWithRegattaData(regattaData)
+            markCheckIn.updateWithCheckInData(checkInData)
             CoreDataManager.sharedManager.saveContext()
             checkInDidFinish(withSuccess: true, completion: completion)
             break
@@ -119,9 +120,10 @@ class CheckInController : NSObject {
     }
     
     private func postCheckInFailure(error: RequestManager.Error, completion: (withSuccess: Bool) -> Void) {
-        let alertController = UIAlertController(title: error.title,
-                                                message: error.message,
-                                                preferredStyle: .Alert
+        let alertController = UIAlertController(
+            title: error.title,
+            message: error.message,
+            preferredStyle: .Alert
         )
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
             self.checkInDidFinish(withSuccess: false, completion: completion)

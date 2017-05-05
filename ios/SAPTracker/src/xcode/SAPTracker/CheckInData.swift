@@ -1,5 +1,5 @@
 //
-//  RegattaData.swift
+//  CheckInData.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 25.05.16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class RegattaData: NSObject {
+public class CheckInData: NSObject {
     
     private struct ItemNames {
         static let EventID = "event_id"
@@ -88,10 +88,10 @@ public class RegattaData: NSObject {
         let queryItems = components.queryItems
         
         // Get check-in items
-        guard let eventID = RegattaData.queryItemValue(queryItems, itemName: ItemNames.EventID) else { return nil }
-        guard let leaderboardName = RegattaData.queryItemValue(queryItems, itemName: ItemNames.LeaderboardName) else { return nil }
-        let competitorID = RegattaData.queryItemValue(queryItems, itemName: ItemNames.CompetitorID)
-        let markID = RegattaData.queryItemValue(queryItems, itemName: ItemNames.MarkID)
+        guard let eventID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.EventID) else { return nil }
+        guard let leaderboardName = CheckInData.queryItemValue(queryItems, itemName: ItemNames.LeaderboardName) else { return nil }
+        let competitorID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.CompetitorID)
+        let markID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.MarkID)
         guard competitorID != nil || markID != nil else { return nil }
         
         // Init with values

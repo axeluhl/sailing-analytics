@@ -91,27 +91,28 @@ class RegattaController: NSObject {
     // MARK: - Update
     
     func update(completion: () -> Void) {
-        // TODO: RegattaData(checkIn)
-        let regattaData = RegattaData(
+        // TODO: CheckInData(checkIn)
+        let checkInData = CheckInData(
             serverURL: checkIn.serverURL,
             eventID: checkIn.event.eventID,
             leaderboardName: checkIn.leaderboard.name,
             competitorID: "", // TODO: regatta.competitorID,
             markID: "" // TODO: regatta.mark?.markID
         )
-        requestManager.getRegattaData(regattaData,
-                                      success: { (regattaData) in self.updateSuccess(regattaData, completion: completion) },
-                                      failure: { (error) in self.updateFailure(completion) }
+        requestManager.getCheckInData(
+            checkInData,
+            success: { (checkInData) in self.updateSuccess(checkInData, completion: completion) },
+            failure: { (error) in self.updateFailure(completion) }
         )
     }
     
-    func updateSuccess(regattaData: RegattaData, completion: () -> Void) {
-        checkIn.event.updateWithEventData(regattaData.eventData)
-        checkIn.leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
+    func updateSuccess(checkInData: CheckInData, completion: () -> Void) {
+        checkIn.event.updateWithEventData(checkInData.eventData)
+        checkIn.leaderboard.updateWithLeaderboardData(checkInData.leaderboardData)
 
         // TODO:
         // if (regatta.competitor != nil) {
-        //     regatta.competitor!.updateWithCompetitorData(regattaData.competitorData)
+        //     regatta.competitor!.updateWithCompetitorData(checkInData.competitorData)
         //}
 
         CoreDataManager.sharedManager.saveContext()

@@ -17,10 +17,10 @@ class CheckIn: NSManagedObject {
         leaderboard = CoreDataManager.sharedManager.newLeaderboard(self)
     }
 
-    func updateWithRegattaData(regattaData: RegattaData) {
-        serverURL = regattaData.serverURL
-        event.updateWithEventData(regattaData.eventData)
-        leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
+    func updateWithCheckInData(checkInData: CheckInData) {
+        serverURL = checkInData.serverURL
+        event.updateWithEventData(checkInData.eventData)
+        leaderboard.updateWithLeaderboardData(checkInData.leaderboardData)
     }
 
     func eventURL() -> NSURL? {

@@ -11,16 +11,16 @@ import CoreData
 
 class CompetitorCheckIn: CheckIn {
 
-    override func updateWithRegattaData(regattaData: RegattaData) {
-        super.updateWithRegattaData(regattaData)
-        teamImageURL = regattaData.teamImageURL
+    override func updateWithCheckInData(checkInData: CheckInData) {
+        super.updateWithCheckInData(checkInData)
+        teamImageURL = checkInData.teamImageURL
         teamImageRetry = false
-        boatClassName = regattaData.competitorData.boatClassName
-        competitorID = regattaData.competitorData.competitorID
-        countryCode = regattaData.competitorData.countryCode
-        name = regattaData.competitorData.name
-        nationality = regattaData.competitorData.nationality
-        sailID = regattaData.competitorData.sailID
+        boatClassName = checkInData.competitorData.boatClassName
+        competitorID = checkInData.competitorData.competitorID
+        countryCode = checkInData.competitorData.countryCode
+        name = checkInData.competitorData.name
+        nationality = checkInData.competitorData.nationality
+        sailID = checkInData.competitorData.sailID
     }
 
 }

@@ -11,10 +11,10 @@ import CoreData
 
 class MarkCheckIn: CheckIn {
 
-    override func updateWithRegattaData(regattaData: RegattaData) {
-        super.updateWithRegattaData(regattaData)
-        markID = regattaData.markID
-        name = regattaData.markData.name
+    override func updateWithCheckInData(checkInData: CheckInData) {
+        super.updateWithCheckInData(checkInData)
+        markID = checkInData.markID
+        name = checkInData.markData.name
     }
 
 }
