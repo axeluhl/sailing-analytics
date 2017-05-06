@@ -14,12 +14,21 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
     @Override
     protected void drawBoat(Context2d ctx, DisplayMode displayMode, String color) {
         // outer net
-        if(displayMode == DisplayMode.SELECTED) {
-            ctx.setFillStyle(color);
-            ctx.setStrokeStyle(color);
-        } else {
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle ("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case SELECTED:
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
         }
         
         ctx.setLineWidth(1.0);
@@ -38,13 +47,23 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
         ctx.stroke();
 
         // inner net
-        if(displayMode == DisplayMode.SELECTED) {
+        
+        switch (displayMode){
+        case DEFAULT:
+            ctx.setFillStyle (color);
+            ctx.setStrokeStyle(color);
+            break;
+        case SELECTED:
             ctx.setFillStyle("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
-        } else {
-            ctx.setFillStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle (color);
             ctx.setStrokeStyle(color);
+            break;
         }
+        
         ctx.setLineWidth(1.0);
 
         ctx.beginPath();
@@ -62,12 +81,21 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
         ctx.stroke();
         
         // hull - left and right part
-        if(displayMode == DisplayMode.SELECTED) {
-            ctx.setFillStyle(color);
-            ctx.setStrokeStyle(color);
-        } else {
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle("#FFFFFF");
             ctx.setStrokeStyle("#000000");
+            break;
+        case SELECTED:
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle("#FFFFFF");
+            ctx.setStrokeStyle("#000000");
+            break;
         }
         
         ctx.setLineWidth(5.0);

@@ -29,6 +29,7 @@ import com.sap.sse.common.Color;
 public abstract class BoatClassVectorGraphics {
     protected static final String SAIL_FILLCOLOR = "#888888";
     protected static final String SAIL_STROKECOLOR = "#000000";
+    protected static final double BOAT_NOT_SELECTED_OPACITY = 0.3;
 
     /** the minimal length of the hull in pixel when the boat is drawn */
     private static final double MIN_HULL_LENGTH_IN_PX = 25;

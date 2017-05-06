@@ -16,13 +16,23 @@ public class KeelBoatWithGennakerVectorGraphics extends BoatClassVectorGraphics 
         ctx.translate(0,-803);
         
         //draw hull
-        if(displayMode == DisplayMode.SELECTED) {
-            ctx.setFillStyle(color);
-            ctx.setStrokeStyle(color);
-        } else {
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle ("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case SELECTED:
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
         }
+        
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(2.4885714,1009.9999);
@@ -54,13 +64,24 @@ public class KeelBoatWithGennakerVectorGraphics extends BoatClassVectorGraphics 
         ctx.stroke();
         
         //draw cockpit
-        if(displayMode == DisplayMode.SELECTED) {
-            ctx.setFillStyle ("#FFFFFF");
-            ctx.setStrokeStyle("#FFFFFF");
-        } else {
-            ctx.setFillStyle(color);
+        
+        switch (displayMode){
+        case DEFAULT:
+            ctx.setFillStyle (color);
             ctx.setStrokeStyle(color);
+            break;
+        case SELECTED:
+            ctx.setFillStyle("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle (color);
+            ctx.setStrokeStyle(color);
+            break;
         }
+        
+        
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(343.42857,966.99996);

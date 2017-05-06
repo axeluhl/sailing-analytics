@@ -16,7 +16,7 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
         ctx.translate(0,-823);
 
         //draw hull
-        //draw cockpit
+        
         switch (displayMode){
         case DEFAULT:
             ctx.setFillStyle ("#FFFFFF");
@@ -27,9 +27,9 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
             ctx.setStrokeStyle(color);
             break;
         case NOT_SELECTED:
-            ctx.setGlobalAlpha(0.1);
-            ctx.setFillStyle(color);
-            ctx.setStrokeStyle(color);
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
             break;
         }
         
@@ -53,8 +53,9 @@ public class DinghyWithSpinnakerVectorGraphics extends BoatClassVectorGraphics {
             ctx.setStrokeStyle("#FFFFFF");
             break;
         case NOT_SELECTED:
-            ctx.setFillStyle ("#FFFFFF");
-            ctx.setStrokeStyle("#FFFFFF");
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
             break;
         }
         

@@ -13,12 +13,22 @@ public class _49erVectorGraphics extends BoatClassVectorGraphics {
 
     @Override
     protected void drawBoat(Context2d ctx, DisplayMode displayMode, String color) {
-        if(displayMode == DisplayMode.SELECTED) {
-            ctx.setFillStyle(color);
-            ctx.setStrokeStyle(color);
-        } else {
+        // draw hull
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle ("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case SELECTED:
+            ctx.setFillStyle (color);
+            ctx.setStrokeStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
         }
 
         ctx.setLineJoin(LineJoin.ROUND);
@@ -62,13 +72,21 @@ public class _49erVectorGraphics extends BoatClassVectorGraphics {
         ctx.lineTo(226,68.5);
         ctx.fill();
         ctx.stroke();
-
-        if(displayMode == DisplayMode.SELECTED) {
-            ctx.setFillStyle ("#FFFFFF");
-            ctx.setStrokeStyle("#FFFFFF");
-        } else {
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle(color);
             ctx.setStrokeStyle(color);
+            break;
+        case SELECTED:
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+            break;
         }
 
         ctx.beginPath();
