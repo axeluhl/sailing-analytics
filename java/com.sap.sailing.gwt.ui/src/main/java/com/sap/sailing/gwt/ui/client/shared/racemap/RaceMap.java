@@ -762,7 +762,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     public void redraw() {
-        timeChanged(timer.getTime(), null);
+        refreshData();
     }
     
     Map<CompetitorDTO, BoatOverlay> getBoatOverlays() {
@@ -2422,50 +2422,88 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
         if (settings.isShowOnlySelectedCompetitors()) {
-            if (Util.size(competitorSelection.getSelectedCompetitors()) == 1) {
-                // first competitors selected; remove all others from map
-                Iterator<Map.Entry<CompetitorDTO, BoatOverlay>> i = boatOverlays.entrySet().iterator();
-                while (i.hasNext()) {
-                    Entry<CompetitorDTO, BoatOverlay> next = i.next();
-                    if (!next.getKey().equals(competitor)) {
-                        CanvasOverlayV3 boatOverlay = next.getValue();
-                        boatOverlay.removeFromMap();
-                        fixesAndTails.removeTail(next.getKey());
-                        i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
-                    }
-                }
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
+            if (onlyOneCompetitorIsSelected()) {
+                removeAllCompetitorsExceptedThisOne(competitor);
+                showInfoForSelectedCompetitors();
             } else {
-                // adding a single competitor; may need to re-load data, so refresh:
-                timeChanged(timer.getTime(), null);
+                refreshData();
             }
         } else {
-            // only change highlighting
-            BoatOverlay boatCanvas = boatOverlays.get(competitor);
-            if (boatCanvas != null) {
-                boatCanvas.setDisplayMode(displayHighlighted(competitor));
-                boatCanvas.draw();
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
+            if (boatExists(competitor)) {
+                showInfoForSelectedCompetitors();
             } else {
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
                 // data for newly selected competitor supposedly missing; refresh
-                timeChanged(timer.getTime(), null);
+                refreshData();
             }
-        
-            Polyline tail = fixesAndTails.getTail(competitor);
-            if (tail != null) {
-                PolylineOptions newOptions = createTailStyle(competitor, displayHighlighted(competitor));
-                tail.setOptions(newOptions);
-            }
+            updateDisplayModeForAllCompetitors();
         }
-       
-        timeChanged(timer.getTime(), null);
-        // Trigger auto-zoom if needed
+        updateMapZoom();
+    }
+
+    private void updateMapZoom() {
         RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
         }
+    }
+    
+    private boolean boatExists(CompetitorDTO competitor){
+        return boatOverlays.get(competitor) != null; 
+    }
+
+    private void updateDisplayModeForAllCompetitors() {
+        for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
+            updateDisplayMode(oneOfAllCompetitors);
+        }
+    }
+
+    private void showInfoForSelectedCompetitors() {
+        showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
+    }
+
+    private void refreshData() {
+                timeChanged(timer.getTime(), null);
+            }
+        
+    private void updateDisplayMode(CompetitorDTO oneOfAllCompetitors) {
+        updateTailDisplayMode(oneOfAllCompetitors);
+        updateBoatDisplayMode(oneOfAllCompetitors);
+    }
+
+    private void updateTailDisplayMode(CompetitorDTO oneOfAllCompetitors) {
+        Polyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
+            if (tail != null) {
+            PolylineOptions newOptions = createTailStyle(oneOfAllCompetitors,
+                    displayHighlighted(oneOfAllCompetitors));
+                tail.setOptions(newOptions);
+            }
+        }
+       
+    private void updateBoatDisplayMode(CompetitorDTO oneOfAllCompetitors) {
+        BoatOverlay boatCanvas = boatOverlays.get(oneOfAllCompetitors);
+        if (boatCanvas != null) {
+            boatCanvas.setDisplayMode(displayHighlighted(oneOfAllCompetitors));
+            boatCanvas.draw();
+        }
+    }
+
+    private void removeAllCompetitorsExceptedThisOne(CompetitorDTO competitor) {
+        Iterator<Map.Entry<CompetitorDTO, BoatOverlay>> i = boatOverlays.entrySet().iterator();
+        while (i.hasNext()) {
+            Entry<CompetitorDTO, BoatOverlay> next = i.next();
+            if (!next.getKey().equals(competitor)) {
+                CanvasOverlayV3 boatOverlay = next.getValue();
+                boatOverlay.removeFromMap();
+                fixesAndTails.removeTail(next.getKey());
+                i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
+            }
+        }
+        }
+
+    private boolean onlyOneCompetitorIsSelected() {
+        return Util.size(competitorSelection.getSelectedCompetitors()) == 1;
     }
     
     @Override
@@ -2473,37 +2511,33 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (isShowAnyHelperLines()) {
             // helper lines depend on which competitor is visible, because the *visible* leader is used for
             // deciding which helper lines to show:
-            timeChanged(timer.getTime(), null);
+            refreshData();
         } else {
-            // try a more incremental update otherwise
             if (settings.isShowOnlySelectedCompetitors()) {
-                // if selection is now empty, show all competitors
-                if (Util.isEmpty(competitorSelection.getSelectedCompetitors())) {
-                    timeChanged(timer.getTime(), null);
+                if (noCompetitorsSelected()) {
+                    refreshData();
                 } else {
-                    // otherwise remove only deselected competitor's boat images and tail
-                    BoatOverlay removedBoatOverlay = boatOverlays.remove(competitor);
-                    if (removedBoatOverlay != null) {
-                        removedBoatOverlay.removeFromMap();
-                    }
-                    fixesAndTails.removeTail(competitor);
-                    showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
+                    removeFromMap(competitor);
+                    showInfoForSelectedCompetitors();
                 }
             } else {
-                // "lowlight" currently selected competitor
-                BoatOverlay boatCanvas = boatOverlays.get(competitor);
-                if (boatCanvas != null) {
-                    boatCanvas.setDisplayMode(displayHighlighted(competitor));
-                    boatCanvas.draw();
+                updateBoatDisplayMode(competitor);
+                showInfoForSelectedCompetitors();
                 }
-                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             }
+        updateMapZoom();
         }
-        //Trigger auto-zoom if needed
-        RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
-        if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
-            zoomMapToNewBounds(zoomSettings.getNewBounds(this));
+
+    private boolean noCompetitorsSelected() {
+        return Util.isEmpty(competitorSelection.getSelectedCompetitors());
         }
+
+    private void removeFromMap(CompetitorDTO competitor) {
+        BoatOverlay removedBoatOverlay = boatOverlays.remove(competitor);
+        if (removedBoatOverlay != null) {
+            removedBoatOverlay.removeFromMap();
+        }
+        fixesAndTails.removeTail(competitor);
     }
 
     private boolean isShowAnyHelperLines() {
@@ -2743,12 +2777,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime(), null);
+        refreshData();
     }
     
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
-        timeChanged(timer.getTime(), null);
+        refreshData();
     }
     
     @Override
