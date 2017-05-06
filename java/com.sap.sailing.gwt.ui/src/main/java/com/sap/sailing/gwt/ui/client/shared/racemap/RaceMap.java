@@ -2423,7 +2423,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public void addedToSelection(CompetitorDTO competitor) {
         if (settings.isShowOnlySelectedCompetitors()) {
             if (onlyOneCompetitorIsSelected()) {
-                removeAllCompetitorsExceptedThisOne(competitor);
+                removeAllCompetitorsExceptThisOne(competitor);
                 showInfoForSelectedCompetitors();
             } else {
                 refreshData();
@@ -2489,7 +2489,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    private void removeAllCompetitorsExceptedThisOne(CompetitorDTO competitor) {
+    private void removeAllCompetitorsExceptThisOne(CompetitorDTO competitor) {
         Iterator<Map.Entry<CompetitorDTO, BoatOverlay>> i = boatOverlays.entrySet().iterator();
         while (i.hasNext()) {
             Entry<CompetitorDTO, BoatOverlay> next = i.next();
