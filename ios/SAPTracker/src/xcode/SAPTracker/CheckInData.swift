@@ -63,14 +63,14 @@ public class CheckInData: NSObject {
         eventID = competitorCheckIn.event.eventID
         competitorID = competitorCheckIn.competitorID
         leaderboardName = competitorCheckIn.leaderboard.name
-        markID = ""
+        markID = nil
         super.init()
     }
 
     init(markCheckIn: MarkCheckIn) {
         serverURL = markCheckIn.serverURL
         eventID = markCheckIn.event.eventID
-        competitorID = ""
+        competitorID = nil
         leaderboardName = markCheckIn.leaderboard.name
         markID = markCheckIn.markID
         super.init()
