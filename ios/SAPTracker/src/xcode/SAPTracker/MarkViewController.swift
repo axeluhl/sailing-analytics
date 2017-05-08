@@ -8,15 +8,15 @@
 
 import UIKit
 
-class MarkViewController: UIViewController {
+class MarkViewController: SessionViewController {
 
     @IBOutlet weak var markNameLabel: UILabel!
-    @IBOutlet weak var startTrackingButton: UIButton!
 
     var markCheckIn: MarkCheckIn!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        delegate = self
         setup()
         update()
     }
@@ -58,15 +58,20 @@ class MarkViewController: UIViewController {
         markNameLabel.text = markCheckIn.name
     }
 
-    // MARK: - Actions
-
-    @IBAction func startTrackingButtonTapped(sender: AnyObject) {
-    }
-
     // MARK: - Properties
     
     private lazy var markSessionController: MarkSessionController = {
         return MarkSessionController(checkIn: self.markCheckIn)
     }()
+
+}
+
+// MARK: SessionViewControllerDelegate
+
+extension MarkViewController: SessionViewControllerDelegate {
+
+    func startTracking() throws {
+        try markSessionController.startTracking()
+    }
 
 }

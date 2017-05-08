@@ -314,6 +314,7 @@
 		C843D4861EBC927800250F01 /* MarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4851EBC927800250F01 /* MarkViewController.swift */; };
 		C843D4881EBCADDC00250F01 /* CompetitorSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */; };
 		C843D48A1EBCADF500250F01 /* MarkSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4891EBCADF500250F01 /* MarkSessionController.swift */; };
+		C843D48C1EBCB36900250F01 /* SessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D48B1EBCB36900250F01 /* SessionViewController.swift */; };
 		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
 		C84936291D47645F000F30E8 /* HomeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* HomeViewCell.swift */; };
 		C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C85291511D48FB91009E9A9D /* Localizable.strings */; };
@@ -692,6 +693,7 @@
 		C843D4851EBC927800250F01 /* MarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkViewController.swift; sourceTree = "<group>"; };
 		C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorSessionController.swift; sourceTree = "<group>"; };
 		C843D4891EBCADF500250F01 /* MarkSessionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkSessionController.swift; sourceTree = "<group>"; };
+		C843D48B1EBCB36900250F01 /* SessionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
 		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
 		C84936281D47645F000F30E8 /* HomeViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewCell.swift; sourceTree = "<group>"; };
 		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1300,6 +1302,7 @@
 				7F99DE3B1A126554009B3619 /* CompetitorViewController.swift */,
 				7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */,
 				C843D4851EBC927800250F01 /* MarkViewController.swift */,
+				C843D48B1EBCB36900250F01 /* SessionViewController.swift */,
 				C89C5FC61D06CE62002AAAD2 /* Tracking */,
 			);
 			name = Session;
@@ -1891,6 +1894,7 @@
 				7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */,
 				C8F71EED1D8691F700826DE4 /* UIImageView+AFNetworking.m in Sources */,
 				C8F71EEB1D8691F700826DE4 /* UIAlertView+AFNetworking.m in Sources */,
+				C843D48C1EBCB36900250F01 /* SessionViewController.swift in Sources */,
 				C89C5FCE1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift in Sources */,
 				C8F71EE11D8691F700826DE4 /* AFURLResponseSerialization.m in Sources */,
 				C8F71EE61D8691F700826DE4 /* SVProgressHUD.m in Sources */,

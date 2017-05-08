@@ -8,14 +8,7 @@
 
 import Foundation
 
-class CompetitorViewController : UIViewController, UINavigationControllerDelegate {
-    
-    private struct Segue {
-        static let About = "About"
-        static let Leaderboard = "Leaderboard"
-        static let Settings = "Settings"
-        static let Tracking = "Tracking"
-    }
+class CompetitorViewController : SessionViewController, UINavigationControllerDelegate {
     
     @IBOutlet weak var teamImageView: UIImageView!
     @IBOutlet weak var teamImageAddButton: UIButton!
@@ -35,7 +28,6 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     @IBOutlet weak var countdownMinutesTitleLabel: UILabel!
     @IBOutlet weak var leaderboardButton: UIButton!
     @IBOutlet weak var eventButton: UIButton!
-    @IBOutlet weak var startTrackingButton: UIButton!
     @IBOutlet weak var announcementLabel: UILabel!
     
     var competitorCheckIn: CompetitorCheckIn!
@@ -44,6 +36,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        delegate = self
         setup()
         update()
     }
@@ -244,26 +237,6 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
         presentViewController(alertController, animated: true, completion: nil)
     }
     
-    @IBAction func startTrackingButtonTapped(sender: AnyObject) {
-        // TODO: Add or add not WiFi Alert?
-        //if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {
-        //    showStartTrackingWiFiAlert(sender)
-        //} else {
-        startTracking(sender)
-        //}
-    }
-    
-    private func startTracking(sender: AnyObject) {
-        do {
-            try competitorSessionController.startTracking()
-            performSegueWithIdentifier(Segue.Tracking, sender: sender)
-        } catch let error as LocationManager.LocationManagerError {
-            showStartTrackingFailureAlert(error.description)
-        } catch {
-            logError("\(#function)", error: error)
-        }
-    }
-    
     // MARK: - Alerts
     
     private func showCheckOutAlert() {
@@ -315,39 +288,7 @@ class CompetitorViewController : UIViewController, UINavigationControllerDelegat
             showImagePicker(.PhotoLibrary)
         }
     }
-    
-    private func showStartTrackingWiFiAlert(sender: AnyObject) {
-        let alertController = UIAlertController(title: "INFO",
-                                                message: "WIFI IS ON BUT NOT CONNECTED",
-                                                preferredStyle: .Alert
-        )
-        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .Default) { (action) in
-            UIApplication.sharedApplication().openURL(NSURL(string: "prefs:root=WIFI") ?? NSURL())
-        }
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
-            self.startTracking(sender)
-        }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
-        alertController.addAction(settingsAction)
-        alertController.addAction(okAction)
-        alertController.addAction(cancelAction)
-        presentViewController(alertController, animated: true, completion: nil)
-    }
-    
-    private func showStartTrackingFailureAlert(message: String) {
-        let alertController = UIAlertController(title: Translation.Common.Warning.String,
-                                                message: message,
-                                                preferredStyle: .Alert
-        )
-        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .Default) { (action) in
-            UIApplication.sharedApplication().openURL(NSURL(string: "prefs:root=LOCATION_SERVICES") ?? NSURL())
-        }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Default, handler: nil)
-        alertController.addAction(settingsAction)
-        alertController.addAction(cancelAction)
-        presentViewController(alertController, animated: true, completion: nil)
-    }
-    
+
     // MARK: - Segue
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -439,6 +380,16 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
         alertController.addAction(okAction)
         presentViewController(alertController, animated: true, completion: nil)
+    }
+    
+}
+
+// MARK: SessionViewControllerDelegate
+
+extension CompetitorViewController: SessionViewControllerDelegate {
+
+    func startTracking() throws {
+        try competitorSessionController.startTracking()
     }
     
 }
