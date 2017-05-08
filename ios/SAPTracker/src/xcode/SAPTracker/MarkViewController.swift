@@ -85,7 +85,18 @@ class MarkViewController: SessionViewController {
         alertController.addAction(cancelAction)
         presentViewController(alertController, animated: true, completion: nil)
     }
-
+    
+    // MARK: - Segues
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier == Segue.Tracking) {
+            let trackingNC = segue.destinationViewController as! UINavigationController
+            let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
+            trackingVC.checkIn = markCheckIn
+            trackingVC.sessionController = markSessionController
+        }
+    }
+    
     // MARK: - Properties
     
     private lazy var markSessionController: MarkSessionController = {

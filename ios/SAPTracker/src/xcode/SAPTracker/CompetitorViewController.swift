@@ -262,8 +262,8 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
             showImagePicker(.PhotoLibrary)
         }
     }
-
-    // MARK: - Segue
+    
+    // MARK: - Segues
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == Segue.Tracking) {
