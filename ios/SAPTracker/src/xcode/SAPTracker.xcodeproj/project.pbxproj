@@ -315,6 +315,7 @@
 		C843D4881EBCADDC00250F01 /* CompetitorSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */; };
 		C843D48A1EBCADF500250F01 /* MarkSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4891EBCADF500250F01 /* MarkSessionController.swift */; };
 		C843D48C1EBCB36900250F01 /* SessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D48B1EBCB36900250F01 /* SessionViewController.swift */; };
+		C843D48F1EC099EB00250F01 /* CoreData2-3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = C843D48E1EC099EB00250F01 /* CoreData2-3.xcmappingmodel */; };
 		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
 		C84936291D47645F000F30E8 /* HomeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* HomeViewCell.swift */; };
 		C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C85291511D48FB91009E9A9D /* Localizable.strings */; };
@@ -694,6 +695,7 @@
 		C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorSessionController.swift; sourceTree = "<group>"; };
 		C843D4891EBCADF500250F01 /* MarkSessionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkSessionController.swift; sourceTree = "<group>"; };
 		C843D48B1EBCB36900250F01 /* SessionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
+		C843D48E1EC099EB00250F01 /* CoreData2-3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = "CoreData2-3.xcmappingmodel"; sourceTree = "<group>"; };
 		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
 		C84936281D47645F000F30E8 /* HomeViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewCell.swift; sourceTree = "<group>"; };
 		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -819,7 +821,6 @@
 				C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */,
 				C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */,
 				C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */,
-				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
 				7FA6551919F6661900A1B92D /* CoreDataManager.swift */,
 				C8739E031D2AA2A500A89F3C /* Event.swift */,
 				C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */,
@@ -829,6 +830,8 @@
 				C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */,
 				C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */,
 				C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */,
+				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
+				C843D48D1EC0999D00250F01 /* Migration */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -1206,6 +1209,14 @@
 				7FED45C61A25F5900022505F /* leaderboard1.json */,
 			);
 			name = JSON;
+			sourceTree = "<group>";
+		};
+		C843D48D1EC0999D00250F01 /* Migration */ = {
+			isa = PBXGroup;
+			children = (
+				C843D48E1EC099EB00250F01 /* CoreData2-3.xcmappingmodel */,
+			);
+			name = Migration;
 			sourceTree = "<group>";
 		};
 		C852BAA91CF736440093B0C5 /* Preferences */ = {
@@ -1861,6 +1872,7 @@
 				C8F71EDE1D8691F700826DE4 /* AFSecurityPolicy.m in Sources */,
 				C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
+				C843D48F1EC099EB00250F01 /* CoreData2-3.xcmappingmodel in Sources */,
 				C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* CompetitorViewController.swift in Sources */,
 				C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */,
