@@ -318,14 +318,12 @@ class RequestManager: NSObject {
         body[BodyKeys.DeviceUUID] = Preferences.uuid
         body[BodyKeys.PushDeviceID] = ""
         body[BodyKeys.FromMillis] = millisSince1970()
-        switch checkInData.type() {
+        switch checkInData.type {
         case .Competitor:
             body[BodyKeys.CompetitorID] = checkInData.competitorData.competitorID
             break
         case .Mark:
             body[BodyKeys.MarkID] = checkInData.markData.markID
-            break
-        default:
             break
         }
         

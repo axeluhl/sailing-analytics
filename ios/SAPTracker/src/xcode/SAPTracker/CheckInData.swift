@@ -18,7 +18,6 @@ public class CheckInData: NSObject {
     }
     
     public enum Type {
-        case None
         case Competitor
         case Mark
     }
@@ -28,6 +27,7 @@ public class CheckInData: NSObject {
     let leaderboardName: String
     let competitorID: String?
     let markID: String?
+    let type: Type
 
     var eventData = EventData()
     var leaderboardData = LeaderboardData()
@@ -35,45 +35,50 @@ public class CheckInData: NSObject {
     var markData = MarkData()
     var teamImageURL: String?
     
-    override init() {
-        serverURL = ""
-        eventID = ""
-        leaderboardName = ""
-        competitorID = nil
-        markID = nil
-        super.init()
-    }
-    
     init(serverURL: String,
          eventID: String,
          leaderboardName: String,
-         competitorID: String?,
-         markID: String?)
+         competitorID: String)
     {
-        self.serverURL = serverURL
+        self.competitorID = competitorID
         self.eventID = eventID
         self.leaderboardName = leaderboardName
-        self.competitorID = competitorID
-        self.markID = markID
-        super.init()
-    }
-    
-    init(competitorCheckIn: CompetitorCheckIn) {
-        serverURL = competitorCheckIn.serverURL
-        eventID = competitorCheckIn.event.eventID
-        competitorID = competitorCheckIn.competitorID
-        leaderboardName = competitorCheckIn.leaderboard.name
-        markID = nil
+        self.markID = nil
+        self.serverURL = serverURL
+        self.type = Type.Competitor
         super.init()
     }
 
-    init(markCheckIn: MarkCheckIn) {
-        serverURL = markCheckIn.serverURL
-        eventID = markCheckIn.event.eventID
-        competitorID = nil
-        leaderboardName = markCheckIn.leaderboard.name
-        markID = markCheckIn.markID
+    init(serverURL: String,
+         eventID: String,
+         leaderboardName: String,
+         markID: String)
+    {
+        self.competitorID = nil
+        self.eventID = eventID
+        self.leaderboardName = leaderboardName
+        self.markID = markID
+        self.serverURL = serverURL
+        type = Type.Mark
         super.init()
+    }
+
+    convenience init(competitorCheckIn: CompetitorCheckIn) {
+        self.init(
+            serverURL: competitorCheckIn.serverURL,
+            eventID: competitorCheckIn.event.eventID,
+            leaderboardName: competitorCheckIn.leaderboard.name,
+            competitorID: competitorCheckIn.competitorID
+        )
+    }
+
+    convenience init(markCheckIn: MarkCheckIn) {        
+        self.init(
+            serverURL: markCheckIn.serverURL,
+            eventID: markCheckIn.event.eventID,
+            leaderboardName: markCheckIn.leaderboard.name,
+            markID: markCheckIn.markID
+        )
     }
 
     convenience init?(url: NSURL) {
@@ -90,16 +95,22 @@ public class CheckInData: NSObject {
         // Get check-in items
         guard let eventID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.EventID) else { return nil }
         guard let leaderboardName = CheckInData.queryItemValue(queryItems, itemName: ItemNames.LeaderboardName) else { return nil }
-        let competitorID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.CompetitorID)
-        let markID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.MarkID)
-        guard competitorID != nil || markID != nil else { return nil }
-        
-        // Init with values
-        self.init(serverURL: serverURL,
-                  eventID: eventID,
-                  leaderboardName: leaderboardName,
-                  competitorID: competitorID,
-                  markID: markID)
+        if let competitorID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.CompetitorID) {
+            self.init(serverURL: serverURL,
+                      eventID: eventID,
+                      leaderboardName: leaderboardName,
+                      competitorID: competitorID
+            )
+        } else if let markID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.MarkID) {
+            self.init(serverURL: serverURL,
+                      eventID: eventID,
+                      leaderboardName: leaderboardName,
+                      markID: markID
+            )
+        } else {
+            logError("\(#function)", error: "unknown check-in type")
+            return nil
+        }
     }
     
     convenience init?(urlString: String) {
@@ -118,12 +129,6 @@ public class CheckInData: NSObject {
             logError("\(#function)", error: "unknown check-in type")
             return nil
         }
-    }
-
-    // MARK: - Getter
-
-    func type() -> Type {
-        return competitorID != nil ? .Competitor : markID != nil ? .Mark : .None
     }
 
     // MARK: - Helper

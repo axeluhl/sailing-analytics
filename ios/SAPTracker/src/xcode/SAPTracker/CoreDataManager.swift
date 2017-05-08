@@ -41,9 +41,9 @@ public class CoreDataManager: NSObject {
         }
         return checkIns as? [CheckIn]
     }
-
+    
     func fetchCheckIn(checkInData: CheckInData) -> CheckIn? {
-        switch checkInData.type() {
+        switch checkInData.type {
         case .Competitor:
             return fetchCompetitorCheckIn(
                 checkInData.eventID,
@@ -56,8 +56,6 @@ public class CoreDataManager: NSObject {
                 leaderboardName: checkInData.leaderboardName,
                 markID: checkInData.markID!
             )
-        default:
-            return nil
         }
     }
 

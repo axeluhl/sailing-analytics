@@ -39,7 +39,7 @@ class CheckInController : NSObject {
     }
     
     private func checkInSuccess(checkInData: CheckInData, completion: (withSuccess: Bool) -> Void) {
-        switch checkInData.type() {
+        switch checkInData.type {
         case .Competitor:
             let alertController = UIAlertController(
                 title: String(format: Translation.CheckInController.WelcomeAlert.Title.String, checkInData.competitorData.name),
@@ -58,9 +58,6 @@ class CheckInController : NSObject {
             break
         case .Mark:
             self.postCheckIn(checkInData, completion: completion)
-            break
-        case .None:
-            self.checkInDidFinish(withSuccess: false, completion: completion)
             break
         }
     }
@@ -92,7 +89,7 @@ class CheckInController : NSObject {
     }
     
     private func postCheckInSuccess(checkInData: CheckInData, completion: (withSuccess: Bool) -> Void) {
-        switch checkInData.type() {
+        switch checkInData.type {
         case .Competitor:
             let competitorCheckIn = CoreDataManager.sharedManager.fetchCompetitorCheckIn(
                 checkInData.eventID,
@@ -113,9 +110,6 @@ class CheckInController : NSObject {
             CoreDataManager.sharedManager.saveContext()
             checkInDidFinish(withSuccess: true, completion: completion)
             break
-        default:
-            logError("\(#function)", error: "unknown check-in type")
-            checkInDidFinish(withSuccess: false, completion: completion)
         }
     }
     

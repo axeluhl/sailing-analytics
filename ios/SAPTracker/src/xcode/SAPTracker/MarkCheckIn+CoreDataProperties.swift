@@ -14,6 +14,6 @@ import CoreData
 
 extension MarkCheckIn {
 
-    @NSManaged var markID: String?
+    @NSManaged var markID: String
 
 }

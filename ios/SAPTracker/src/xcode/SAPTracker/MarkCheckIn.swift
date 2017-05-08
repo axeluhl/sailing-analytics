@@ -13,7 +13,7 @@ class MarkCheckIn: CheckIn {
 
     override func updateWithCheckInData(checkInData: CheckInData) {
         super.updateWithCheckInData(checkInData)
-        markID = checkInData.markID
+        markID = checkInData.markData.markID
         name = checkInData.markData.name
     }
 
