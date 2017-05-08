@@ -496,6 +496,8 @@
                         <outlet property="markNameLabel" destination="BQe-Id-ec3" id="veh-f3-mX9"/>
                         <outlet property="startTrackingButton" destination="OCn-GA-zIR" id="1gb-cj-Uwg"/>
                         <segue destination="I54-NN-JAf" kind="presentation" identifier="Tracking" id="LsB-Xh-501"/>
+                        <segue destination="dfN-Ch-vpm" kind="presentation" identifier="About" id="DI8-aY-hHi"/>
+                        <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="dH2-8c-PlZ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mIV-mP-h2T" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -2011,9 +2013,9 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="LsB-Xh-501"/>
-        <segue reference="Irs-ey-Uhs"/>
         <segue reference="tzB-PL-31j"/>
+        <segue reference="dH2-8c-PlZ"/>
+        <segue reference="LsB-Xh-501"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="calibratedRGB"/>
 </document>
