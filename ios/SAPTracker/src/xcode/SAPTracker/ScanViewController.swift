@@ -91,11 +91,12 @@ class ScanViewController: UIViewController {
     // MARK: - Scanning
     
     private func startScanning() {
-        targetImageView.image = UIImage(named: "scan_white")
-        if let error = scanError {
-            let alertController = UIAlertController(title: error.localizedDescription,
-                                                    message: error.localizedFailureReason,
-                                                    preferredStyle: .Alert
+        guard scanError == nil else {
+            let error = scanError!
+            let alertController = UIAlertController(
+                title: error.localizedDescription,
+                message: error.localizedFailureReason,
+                preferredStyle: .Alert
             )
             let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .Default) { (action) in
                 UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString) ?? NSURL())
@@ -107,18 +108,15 @@ class ScanViewController: UIViewController {
             alertController.addAction(settingsAction)
             alertController.addAction(cancelAction)
             presentViewController(alertController, animated: true, completion: nil)
-        } else {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-                self.scanSession?.startRunning()
-            })
+            return
         }
+        targetImageView.image = UIImage(named: "scan_white")
+        scanSession?.startRunning()
     }
     
-    private func stopScanning() {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-            self.scanSession?.stopRunning()
-        })
+    func stopScanning() {
         targetImageView.image = UIImage(named: "scan_green")
+        scanSession?.stopRunning()
     }
     
     // MARK: - UIViewControllerDelegate
@@ -168,9 +166,9 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
                                                 fromConnection connection: AVCaptureConnection!)
     {
         if metadataObjects.count > 0 {
+            performSelectorOnMainThread(#selector(stopScanning), withObject: nil, waitUntilDone: false)
             let metadataObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
             if let checkInData = CheckInData(urlString: metadataObject.stringValue) {
-                stopScanning()
                 dispatch_async(dispatch_get_main_queue(), {
                     self.captureOutputSuccess(checkInData)
                 })
@@ -200,11 +198,14 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     // MARK: - Alerts
     
     private func showIncorrectCodeAlert() {
-        let alertController = UIAlertController(title: Translation.Common.Error.String,
-                                                message: Translation.ScanView.IncorrectCodeAlert.Message.String,
-                                                preferredStyle: .Alert
+        let alertController = UIAlertController(
+            title: Translation.Common.Error.String,
+            message: Translation.ScanView.IncorrectCodeAlert.Message.String,
+            preferredStyle: .Alert
         )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
+            self.startScanning()
+        }
         alertController.addAction(okAction)
         presentViewController(alertController, animated: true, completion: nil)
     }
