@@ -216,7 +216,7 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
             self.performSegueWithIdentifier(Segue.Settings, sender: self)
         }
         let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .Default) { (action) in
-            self.showCheckOutAlert()
+            self.checkOut()
         }
         let replaceImageAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .Default) { (action) in
             self.showSelectImageAlert()
@@ -238,32 +238,6 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     }
     
     // MARK: - Alerts
-    
-    private func showCheckOutAlert() {
-        let alertController = UIAlertController(title: Translation.Common.Warning.String,
-                                                message: Translation.CompetitorView.CheckOutAlert.Message.String,
-                                                preferredStyle: .Alert
-        )
-        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .Default) { (action) in
-            self.performCheckOut()
-        }
-        let noAction = UIAlertAction(title: Translation.Common.No.String, style: .Cancel, handler: nil)
-        alertController.addAction(yesAction)
-        alertController.addAction(noAction)
-        presentViewController(alertController, animated: true, completion: nil)
-    }
-    
-    private func performCheckOut() {
-        competitorSessionController.checkOut { (withSuccess) in
-            self.performCheckOutCompleted(withSuccess)
-        }
-    }
-    
-    private func performCheckOutCompleted(withSuccess: Bool) {
-        CoreDataManager.sharedManager.deleteObject(competitorCheckIn)
-        CoreDataManager.sharedManager.saveContext()
-        self.navigationController!.popViewControllerAnimated(true)
-    }
     
     private func showSelectImageAlert() {
         if UIImagePickerController.isSourceTypeAvailable(.Camera) && UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
@@ -387,6 +361,18 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
 // MARK: SessionViewControllerDelegate
 
 extension CompetitorViewController: SessionViewControllerDelegate {
+
+    func performCheckOut() {
+        competitorSessionController.checkOut { (withSuccess) in
+            self.performCheckOutCompleted(withSuccess)
+        }
+    }
+    
+    private func performCheckOutCompleted(withSuccess: Bool) {
+        CoreDataManager.sharedManager.deleteObject(competitorCheckIn)
+        CoreDataManager.sharedManager.saveContext()
+        self.navigationController!.popViewControllerAnimated(true)
+    }
 
     func startTracking() throws {
         try competitorSessionController.startTracking()

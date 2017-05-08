@@ -10,6 +10,8 @@ import UIKit
 
 protocol SessionViewControllerDelegate {
 
+    func performCheckOut()
+
     func startTracking() throws
 
 }
@@ -50,9 +52,30 @@ class SessionViewController: UIViewController {
             logError("\(#function)", error: error)
         }
     }
-
+    
+    // MARK: - CheckOut
+    
+    func checkOut() {
+        showCheckOutAlert()
+    }
+    
     // MARK: - Alerts
     
+    private func showCheckOutAlert() {
+        let alertController = UIAlertController(
+            title: Translation.Common.Warning.String,
+            message: Translation.CompetitorView.CheckOutAlert.Message.String,
+            preferredStyle: .Alert
+        )
+        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .Default) { (action) in
+            self.delegate.performCheckOut()
+        }
+        let noAction = UIAlertAction(title: Translation.Common.No.String, style: .Cancel, handler: nil)
+        alertController.addAction(yesAction)
+        alertController.addAction(noAction)
+        presentViewController(alertController, animated: true, completion: nil)
+    }
+
     private func showStartTrackingWiFiAlert(sender: AnyObject) {
         let alertController = UIAlertController(title: "INFO",
                                                 message: "WIFI IS ON BUT NOT CONNECTED",
