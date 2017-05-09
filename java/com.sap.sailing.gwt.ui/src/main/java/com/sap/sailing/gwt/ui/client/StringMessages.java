@@ -1795,7 +1795,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String floatNumber();
     String integer();
     String sampleColor();
-    String leaderboardPage();    
+    String leaderboardPage();
+    String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
     String estimatedDistance();
     String estimatedTime();
     String nothingUpcoming();

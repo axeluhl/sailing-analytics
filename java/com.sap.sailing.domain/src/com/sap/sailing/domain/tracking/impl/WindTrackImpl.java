@@ -451,6 +451,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         public Distance travel(Duration duration) {
             return null;
         }
+        @Override
+        public double divide(Speed speed) {
+            return 0;
+        }
     }
 
     @Override

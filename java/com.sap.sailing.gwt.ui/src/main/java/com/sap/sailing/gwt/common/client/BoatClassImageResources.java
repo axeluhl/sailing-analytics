@@ -273,6 +273,10 @@ public interface BoatClassImageResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VIPER_640.png")
     ImageResource Viper640Icon();
-    
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/DELPHIA_24.png")
+    ImageResource Delphia24Icon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TOM_28_MAX.png")
+    ImageResource Tom28MaxIcon();    
 }
