@@ -5,16 +5,16 @@ import java.util.List;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.app.ConfiguredPresenter;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 
-public class PreRaceCompetitorsPresenterImpl extends ConfiguredPresenter<AbstractPreRaceCompetitorsPlace>
+public class PreRaceCompetitorsPresenterImpl extends AutoPlayPresenterConfigured<AbstractPreRaceCompetitorsPlace>
         implements PreRaceCompetitorsView.PreRaceCompetitorsPresenter {
     static final int DELAY_NEXT = 2000;
     private PreRaceCompetitorsView view;
     private Timer selectionScroll;
 
-    public PreRaceCompetitorsPresenterImpl(AbstractPreRaceCompetitorsPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+    public PreRaceCompetitorsPresenterImpl(AbstractPreRaceCompetitorsPlace place, AutoPlayClientFactory clientFactory,
             PreRaceCompetitorsView slide4ViewImpl) {
         super(place, clientFactory);
         this.view = slide4ViewImpl;

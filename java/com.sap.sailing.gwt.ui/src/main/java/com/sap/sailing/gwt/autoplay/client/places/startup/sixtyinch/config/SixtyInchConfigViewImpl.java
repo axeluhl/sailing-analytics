@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchSetting;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -42,9 +42,9 @@ public class SixtyInchConfigViewImpl extends Composite implements SixtyInchConfi
     @UiField DivElement screenConfigurationUi;
     
     private final List<EventDTO> events;
-    private AutoPlayClientFactorySixtyInch clientFactory;
+    private AutoPlayClientFactory clientFactory;
     
-    public SixtyInchConfigViewImpl(AutoPlayClientFactorySixtyInch clientFactory) {
+    public SixtyInchConfigViewImpl(AutoPlayClientFactory clientFactory) {
         this.events = new ArrayList<EventDTO>();
         this.clientFactory = clientFactory;
         

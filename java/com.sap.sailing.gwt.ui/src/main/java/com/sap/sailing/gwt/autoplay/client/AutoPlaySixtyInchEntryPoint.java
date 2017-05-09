@@ -5,7 +5,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayActivityMapperSixtyInchImpl;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayHistoryMapperSixtyInch;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchSetting;
@@ -22,7 +21,7 @@ public class AutoPlaySixtyInchEntryPoint
     @Override
     public void doOnModuleLoad() {
         RES.style().ensureInjected();
-        AutoPlayClientFactorySixtyInch cf = GWT.create(AutoPlayClientFactorySixtyInchImpl.class);
+        AutoPlayClientFactory cf = GWT.create(AutoPlayClientFactorySixtyInchImpl.class);
 
         AutoPlayHistoryMapperSixtyInch applicationHistoryMapper = GWT.create(AutoPlayHistoryMapperSixtyInch.class);
         initMvp(cf, applicationHistoryMapper, new AutoPlayActivityMapperSixtyInchImpl(cf));

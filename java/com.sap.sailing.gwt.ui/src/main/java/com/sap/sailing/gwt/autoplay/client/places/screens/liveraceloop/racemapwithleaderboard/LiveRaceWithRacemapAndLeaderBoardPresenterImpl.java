@@ -10,8 +10,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
-import com.sap.sailing.gwt.autoplay.client.app.ConfiguredPresenter;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
@@ -24,7 +24,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends ConfiguredPresenter<LiveRaceWithRacemapAndLeaderBoardPlace> implements LiveRaceWithRacemapAndLeaderBoardView.Slide7Presenter {
+public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPresenterConfigured<LiveRaceWithRacemapAndLeaderBoardPlace> implements LiveRaceWithRacemapAndLeaderBoardView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private LiveRaceWithRacemapAndLeaderBoardView view;
     private Timer selectionTimer;
@@ -32,7 +32,8 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends ConfiguredPr
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
 
-    public LiveRaceWithRacemapAndLeaderBoardPresenterImpl(LiveRaceWithRacemapAndLeaderBoardPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+    public LiveRaceWithRacemapAndLeaderBoardPresenterImpl(LiveRaceWithRacemapAndLeaderBoardPlace place,
+            AutoPlayClientFactory clientFactory,
             LiveRaceWithRacemapAndLeaderBoardView LifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
         this.view = LifeRaceWithRacemapViewImpl;

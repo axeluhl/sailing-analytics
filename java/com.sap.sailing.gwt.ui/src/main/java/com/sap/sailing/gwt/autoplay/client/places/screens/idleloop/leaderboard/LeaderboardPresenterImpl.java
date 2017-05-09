@@ -1,16 +1,16 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayClientFactoryClassic;
-import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicConfiguredPresenter;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 
-public class LeaderboardPresenterImpl extends ClassicConfiguredPresenter<LeaderboardPlace>
+public class LeaderboardPresenterImpl extends AutoPlayPresenterConfigured<LeaderboardPlace>
         implements LeaderboardView.Presenter {
 
     private LeaderboardView view;
 
 
-    public LeaderboardPresenterImpl(LeaderboardPlace place, AutoPlayClientFactoryClassic clientFactory,
+    public LeaderboardPresenterImpl(LeaderboardPlace place, AutoPlayClientFactory clientFactory,
             LeaderboardView LifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
         this.view = LifeRaceWithRacemapViewImpl;

@@ -16,8 +16,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
 
-public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBase
-        implements AutoPlayClientFactorySixtyInch {
+public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBase {
 
     private AutoPlayContext currentContext;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();

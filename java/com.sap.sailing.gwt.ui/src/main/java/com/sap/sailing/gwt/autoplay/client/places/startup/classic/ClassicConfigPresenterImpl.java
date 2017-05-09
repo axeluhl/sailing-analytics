@@ -8,7 +8,7 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayClientFactoryClassic;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
@@ -16,11 +16,11 @@ import com.sap.sse.gwt.client.event.LocaleChangeEventHandler;
 
 public class ClassicConfigPresenterImpl extends AbstractActivity implements ClassicConfigView.Presenter {
     public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
-    private final AutoPlayClientFactoryClassic clientFactory;
+    private final AutoPlayClientFactory clientFactory;
 
     private ClassicConfigView view;
 
-    public ClassicConfigPresenterImpl(ClassicConfigPlace place, AutoPlayClientFactoryClassic clientFactory,
+    public ClassicConfigPresenterImpl(ClassicConfigPlace place, AutoPlayClientFactory clientFactory,
             ClassicConfigView view) {
         this.clientFactory = clientFactory;
         this.view = view;

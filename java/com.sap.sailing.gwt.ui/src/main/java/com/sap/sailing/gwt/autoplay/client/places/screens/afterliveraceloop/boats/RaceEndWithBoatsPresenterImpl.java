@@ -10,8 +10,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.app.ConfiguredPresenter;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
@@ -26,7 +26,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class RaceEndWithBoatsPresenterImpl extends ConfiguredPresenter<AbstractRaceEndWithImagesTop3Place>
+public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<AbstractRaceEndWithImagesTop3Place>
         implements RaceEndWithBoatsView.NextRaceWithBoatsPresenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private RaceEndWithBoatsView view;
@@ -35,7 +35,7 @@ public class RaceEndWithBoatsPresenterImpl extends ConfiguredPresenter<AbstractR
     private Timer updater;
 
     public RaceEndWithBoatsPresenterImpl(AbstractRaceEndWithImagesTop3Place place,
-            AutoPlayClientFactorySixtyInch clientFactory,
+            AutoPlayClientFactory clientFactory,
             RaceEndWithBoatsView slide1ViewImpl) {
         super(place, clientFactory);
         this.view = slide1ViewImpl;

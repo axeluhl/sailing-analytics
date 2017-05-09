@@ -54,6 +54,7 @@ public class SixtyInchRootNode extends BaseCompositeNode {
 
     private void doCheck() {
         if (getCurrentNode() == afterLiveRaceLoop) {
+            checkTimer.schedule(5000);
             GWT.log("do change state while in afterrace");
             return;
         }
@@ -77,6 +78,7 @@ public class SixtyInchRootNode extends BaseCompositeNode {
         });
 
         if (cf.getSlideCtx().getEvent() == null) {
+            checkTimer.schedule(5000);
             GWT.log("Wait for event to load, before starting");
             return;
         }

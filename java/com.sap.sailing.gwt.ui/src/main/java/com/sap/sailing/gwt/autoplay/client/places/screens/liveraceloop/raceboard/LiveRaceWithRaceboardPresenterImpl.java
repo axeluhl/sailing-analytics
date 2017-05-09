@@ -4,17 +4,17 @@ import java.util.ArrayList;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayClientFactoryClassic;
-import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicConfiguredPresenter;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 
-public class LiveRaceWithRaceboardPresenterImpl extends ClassicConfiguredPresenter<LiveRaceWithRaceboardPlace>
+public class LiveRaceWithRaceboardPresenterImpl extends AutoPlayPresenterConfigured<LiveRaceWithRaceboardPlace>
         implements LiveRaceWithRaceboardView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private LiveRaceWithRaceboardView view;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
 
     public LiveRaceWithRaceboardPresenterImpl(LiveRaceWithRaceboardPlace place,
-            AutoPlayClientFactoryClassic clientFactory, LiveRaceWithRaceboardView LifeRaceWithRacemapViewImpl) {
+            AutoPlayClientFactory clientFactory, LiveRaceWithRaceboardView LifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
         this.view = LifeRaceWithRacemapViewImpl;
     }

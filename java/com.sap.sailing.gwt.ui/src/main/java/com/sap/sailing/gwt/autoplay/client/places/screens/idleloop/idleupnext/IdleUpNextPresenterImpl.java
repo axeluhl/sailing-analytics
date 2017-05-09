@@ -10,21 +10,21 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.autoplay.client.app.ConfiguredPresenter;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class IdleUpNextPresenterImpl extends ConfiguredPresenter<IdleUpNextPlace>
+public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpNextPlace>
         implements IdleUpNextView.IdleUpNextPresenter {
     private static final int SHOW_RACES_STARTED = 1000 * 60 * 30;
     private IdleUpNextView view;
     private Timer updateImage;
     private Timer updateData;
 
-    public IdleUpNextPresenterImpl(IdleUpNextPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+    public IdleUpNextPresenterImpl(IdleUpNextPlace place, AutoPlayClientFactory clientFactory,
             IdleUpNextView slide2ViewImpl) {
         super(place, clientFactory);
         this.view = slide2ViewImpl;

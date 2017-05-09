@@ -12,8 +12,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
-import com.sap.sailing.gwt.autoplay.client.app.ConfiguredPresenter;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -26,7 +26,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredPresenter<AbstractPreRaceLeaderBoardWithImagePlace>
+public class PreLeaderBoardWithImagePresenterImpl extends AutoPlayPresenterConfigured<AbstractPreRaceLeaderBoardWithImagePlace>
         implements PreLeaderboardWithImageView.Slide1Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private int selected = -1;
@@ -36,7 +36,7 @@ public class PreLeaderBoardWithImagePresenterImpl extends ConfiguredPresenter<Ab
     private CompetitorSelectionModel competitorSelectionProvider;
 
     public PreLeaderBoardWithImagePresenterImpl(AbstractPreRaceLeaderBoardWithImagePlace place,
-            AutoPlayClientFactorySixtyInch clientFactory, PreLeaderboardWithImageView slide1ViewImpl) {
+            AutoPlayClientFactory clientFactory, PreLeaderboardWithImageView slide1ViewImpl) {
         super(place, clientFactory);
         this.view = slide1ViewImpl;
         selectionTimer = new Timer() {

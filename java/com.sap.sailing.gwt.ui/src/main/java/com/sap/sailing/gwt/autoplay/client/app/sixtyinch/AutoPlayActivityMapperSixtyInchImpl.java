@@ -4,6 +4,7 @@ import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithBoatsPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithBoatsViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsTop3Place;
@@ -35,9 +36,9 @@ import com.sap.sailing.gwt.autoplay.client.utils.CompetitorImageProvider;
 import com.sap.sailing.gwt.autoplay.client.utils.FlagImageProvider;
 
 public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
-    private final AutoPlayClientFactorySixtyInch clientFactory;
+    private final AutoPlayClientFactory clientFactory;
 
-    public AutoPlayActivityMapperSixtyInchImpl(AutoPlayClientFactorySixtyInch clientFactory) {
+    public AutoPlayActivityMapperSixtyInchImpl(AutoPlayClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
     }
