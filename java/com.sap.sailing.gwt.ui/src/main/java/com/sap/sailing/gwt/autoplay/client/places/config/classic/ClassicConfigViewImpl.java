@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startup.classic;
+package com.sap.sailing.gwt.autoplay.client.places.config.classic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +23,8 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveOwnSettings;
+import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicSetting;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.common.client.SharedResources;

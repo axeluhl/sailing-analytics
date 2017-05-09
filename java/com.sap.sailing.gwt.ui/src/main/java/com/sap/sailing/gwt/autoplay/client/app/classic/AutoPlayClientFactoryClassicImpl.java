@@ -13,11 +13,11 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayContextImpl;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewImpl;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayNavigatorImpl;
+import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.ClassicStartupNode;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.DesktopPlayerView;
-import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.PlayerView;
-import com.sap.sailing.gwt.autoplay.client.places.startup.classic.ClassicConfigPlace;
+import com.sap.sailing.gwt.autoplay.client.places.config.classic.ClassicConfigPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
@@ -50,11 +50,6 @@ public class AutoPlayClientFactoryClassicImpl extends AutoPlayClientFactoryBase 
         super(new AutoPlayMainViewImpl(eventBus), eventBus, placeController, navigator);
     }
     
-
-    @Override
-    public PlayerView createPlayerView() {
-        return new DesktopPlayerView(getPlaceNavigator());
-    }
 
     @Override
     public ErrorView createErrorView(String errorMessage, Throwable errorReason) {

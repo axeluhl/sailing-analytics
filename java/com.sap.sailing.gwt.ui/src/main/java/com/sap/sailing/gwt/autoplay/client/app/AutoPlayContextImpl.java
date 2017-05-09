@@ -3,9 +3,6 @@ package com.sap.sailing.gwt.autoplay.client.app;
 import com.google.gwt.core.shared.GWT;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveOwnSettings;
-import com.sap.sailing.gwt.autoplay.client.events.EventChanged;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
@@ -70,7 +67,6 @@ public class AutoPlayContextImpl implements AutoPlayContext {
     @Override
     public void updateEvent(EventDTO event) {
         this.event = event;
-        eventBus.fireEvent(new EventChanged(event));
     }
 
     @Override

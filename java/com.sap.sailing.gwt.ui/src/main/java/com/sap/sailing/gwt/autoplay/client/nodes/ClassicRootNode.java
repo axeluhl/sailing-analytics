@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import java.util.UUID;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -112,7 +111,6 @@ public class ClassicRootNode extends BaseCompositeNode {
     }
 
     private void processFailure(FailureEvent event) {
-        GWT.log("Captured failure event: " + event);
         if (cf.getSlideCtx() == null || //
                 cf.getSlideCtx().getSettings() == null || //
                 cf.getSlideCtx().getEvent() == null //

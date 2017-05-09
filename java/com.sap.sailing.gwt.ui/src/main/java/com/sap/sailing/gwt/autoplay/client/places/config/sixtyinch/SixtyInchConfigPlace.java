@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config;
+package com.sap.sailing.gwt.autoplay.client.places.config.sixtyinch;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
