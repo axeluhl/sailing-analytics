@@ -72,7 +72,7 @@ public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
                 String formatedDate;
                 boolean today = DateUtil.isToday(race.getB());
                 if (today) {
-                    DateTimeFormat simpleFormat = DateTimeFormat.getFormat("HH:MM");
+                    DateTimeFormat simpleFormat = DateTimeFormat.getFormat("HH:mm");
                     formatedDate = simpleFormat.format(race.getB());
                 } else {
                     formatedDate = DateAndTimeFormatterUtil.formatDateAndTime(race.getB());
