@@ -510,10 +510,10 @@ public class SensorFixStoreAndLoadTest {
             @Override
             public <FixT extends Timed, TrackT extends DynamicTrack<FixT>> SensorFixMapper<FixT, TrackT, Competitor> createCompetitorMapper(
                     Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
-                if(bravoDataFixMapper.isResponsibleFor(eventType)) {
+                if (bravoDataFixMapper.isResponsibleFor(eventType)) {
                     return (SensorFixMapper) bravoDataFixMapper;
                 }
-                if(testDataFixMapper.isResponsibleFor(eventType)) {
+                if (testDataFixMapper.isResponsibleFor(eventType)) {
                     return (SensorFixMapper) testDataFixMapper;
                 }
                 throw new IllegalArgumentException("Unknown event type");
@@ -640,7 +640,6 @@ public class SensorFixStoreAndLoadTest {
         implements RegattaLogDeviceCompetitorSensorDataMappingEvent {
         private static final long serialVersionUID = -14940305448048753L;
         
-        
         public RegattaLogDeviceCompetitorTestMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
                 AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
                 TimePoint from, TimePoint to) {
@@ -688,15 +687,11 @@ public class SensorFixStoreAndLoadTest {
     public void testThatNoSensorFixesAreAddedToTrackOfCompetitorWhoIsntPartOfTheRace() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, compNotPartOfRace,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
-
         addBravoFixes();
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
-
         assertNull(trackedRace.getSensorTrack(compNotPartOfRace, BravoFixTrack.TRACK_NAME));
         fixLoaderAndTracker.stop(true);
     }
@@ -706,23 +701,17 @@ public class SensorFixStoreAndLoadTest {
     public void testThatNoSensorFixesAreLoadedAsLongAsStartOfTrackingIsNull() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
-        
         addBravoFixes();
-        
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-        
         // raceLog is intentionally not attached
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();
-        
         // No fixes are loaded because startOfTracking isn't set through the raceLog yet
         assertNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
-        
         // Loading of fixes is triggered by setting startOfTracking
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
-        
         fixLoaderAndTracker.stop(true);
     }
     
@@ -731,16 +720,11 @@ public class SensorFixStoreAndLoadTest {
     public void testThatNoSensorFixesAreRecordedAsWhenStartOfTrackingIsNull() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
-        
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-        
         // raceLog is intentionally not attached
         trackedRace.attachRegattaLog(regattaLog);
-        
         addBravoFixes();
-        
         assertNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
-        
         fixLoaderAndTracker.stop(true);
     }
 
@@ -749,27 +733,19 @@ public class SensorFixStoreAndLoadTest {
     public void testThatNoMoreSensorFixesAreLoadedWhenStartOfTrackingChangesToNull() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
-        
         addBravoFixes();
-        
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-        
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
-        
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
-
         raceLog.add(new RaceLogStartOfTrackingEventImpl(null, author, 0));
-        
         assertNull(trackedRace.getStartOfTracking());
         addMoreBravoFixes();
         trackedRace.waitForLoadingToFinish();
-        
         // only the initial 3 fixes are available
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 3);
-        
         fixLoaderAndTracker.stop(true);
     }
     
@@ -802,9 +778,7 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         addBravoFixes();
-        
         CyclicBarrier cb = new CyclicBarrier(2);
-        
         // This listener enforces the race to stay in loading state until a preemptive stop is triggered below
         trackedRace.addListener(new AbstractRaceChangeListener() {
             @Override
@@ -816,26 +790,22 @@ public class SensorFixStoreAndLoadTest {
                 }
             }
         });
-        
         final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        
         // This thread solves the loading state through the CyclicBarrier
         new Thread() {
             public void run() {
                 try {
-                    while(!fixLoaderAndTracker.isStopRequested()) {
+                    while (!fixLoaderAndTracker.isStopRequested()) {
                         sleep(100);
                     }
-                    
                     cb.await();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             };
         }.start();
-        
         // When the bug is triggered, this call would hang until the test timeout is reached
         fixLoaderAndTracker.stop(true);
     }
@@ -846,18 +816,13 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         addBravoFixes();
-        
         StatusTransitionListener statusTransitionListener = new StatusTransitionListener();
         trackedRace.addListener(statusTransitionListener);
-        
         final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        
         trackedRace.waitForLoadingToFinish();
-        
         fixLoaderAndTracker.stop(true);
-        
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
     
@@ -865,20 +830,15 @@ public class SensorFixStoreAndLoadTest {
     /** Test for bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
     public void testThatLoadingStateIsTriggeredWhenAddingMapping() throws InterruptedException {
         addBravoFixes();
-        
         StatusTransitionListener statusTransitionListener = new StatusTransitionListener();
         trackedRace.addListener(statusTransitionListener);
-        
         final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         trackedRace.waitForLoadingToFinish();
-        
         fixLoaderAndTracker.stop(true);
-        
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
     
@@ -888,19 +848,14 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         addBravoFixes();
-        
         StatusTransitionListener statusTransitionListener = new StatusTransitionListener();
         trackedRace.addListener(statusTransitionListener);
-        
         final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
         // raceLog is intentionally not attached
         trackedRace.attachRegattaLog(regattaLog);
-        
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
-        
         fixLoaderAndTracker.stop(true);
-        
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
     
@@ -910,20 +865,15 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         addBravoFixes();
-        
         StatusTransitionListener statusTransitionListener = new StatusTransitionListener();
         trackedRace.addListener(statusTransitionListener);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(END_OF_TRACKING));
-        
         final FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
         // raceLog is intentionally not attached
         trackedRace.attachRegattaLog(regattaLog);
-        
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(START_OF_TRACKING));
         trackedRace.waitForLoadingToFinish();
-        
         fixLoaderAndTracker.stop(true);
-        
         statusTransitionListener.assertTransitions(TrackedRaceStatusEnum.PREPARED, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.LOADING, TrackedRaceStatusEnum.TRACKING, TrackedRaceStatusEnum.FINISHED);
     }
 
@@ -934,7 +884,7 @@ public class SensorFixStoreAndLoadTest {
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             TrackedRaceStatusEnum oldStatusEnum = oldStatus.getStatus();
             TrackedRaceStatusEnum newStatusEnum = newStatus.getStatus();
-            if(oldStatusEnum != newStatusEnum) {
+            if (oldStatusEnum != newStatusEnum) {
                 transitions.add(new Pair<>(oldStatusEnum, newStatusEnum));
             }
         }
@@ -943,7 +893,7 @@ public class SensorFixStoreAndLoadTest {
             TrackedRaceStatusEnum oldValue = null;
             Iterator<Pair<TrackedRaceStatusEnum, TrackedRaceStatusEnum>> recordedTransitionsIterator = transitions.iterator();
             for (TrackedRaceStatusEnum newStatusEnum : expectedStates) {
-                if(oldValue != null) {
+                if (oldValue != null) {
                     Pair<TrackedRaceStatusEnum, TrackedRaceStatusEnum> recordedTransition = recordedTransitionsIterator.next();
                     assertEquals(oldValue, recordedTransition.getA());
                     assertEquals(newStatusEnum, recordedTransition.getB());

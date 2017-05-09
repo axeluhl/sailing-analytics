@@ -742,7 +742,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * values plus a progress for LOADING state.<br>
      * Due to the fact that multiple loaders can exist that load data into the {@link TrackedRace}, the returned status
      * is a composite of those loader statuses. When a loader is finished, its status isn't tracked anymore. This causes
-     * the overall progress to not be guaranteed to be monotonous (progress jump to a lower percentage when one loader
+     * the overall progress to not be guaranteed to be monotonic (progress may jump to a lower percentage when one loader
      * that had a progress of 100% is finished and thus removed).
      * 
      * @see TrackedRaceStatus
