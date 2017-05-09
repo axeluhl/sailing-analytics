@@ -230,12 +230,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 raceStatus = TrackedRaceStatusEnum.TRACKING;
                 for (TrackedRaceStatus status : loaderStatus.values()) {
                     if (status.getStatus() == TrackedRaceStatusEnum.ERROR) {
-                        raceStatus = TrackedRaceStatusEnum.ERROR; break;
-                    } 
-                    if (status.getStatus() == TrackedRaceStatusEnum.LOADING) {
-                        raceStatus = TrackedRaceStatusEnum.LOADING;
+                        raceStatus = TrackedRaceStatusEnum.ERROR;
+                    } else {
+                        if (status.getStatus() == TrackedRaceStatusEnum.LOADING) {
+                            raceStatus = TrackedRaceStatusEnum.LOADING;
+                        }
+                        sumOfLoaderProgresses += status.getLoadingProgress();
                     }
-                    sumOfLoaderProgresses += status.getLoadingProgress();
                 }
                 if (raceStatus == TrackedRaceStatusEnum.LOADING) {
                     totalProgress = sumOfLoaderProgresses / loaderStatus.size();
