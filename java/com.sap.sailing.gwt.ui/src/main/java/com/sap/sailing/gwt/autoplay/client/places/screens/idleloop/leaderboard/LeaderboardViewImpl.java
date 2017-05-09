@@ -32,6 +32,7 @@ public class LeaderboardViewImpl extends ResizeComposite implements LeaderboardV
     public void startingWith(Presenter p, AcceptsOneWidget panel,
             LeaderboardWithHeaderPerspective leaderboardWithHeaderPerspective) {
         holderUi.add(leaderboardWithHeaderPerspective);
+        panel.setWidget(this);
     }
 
 }
