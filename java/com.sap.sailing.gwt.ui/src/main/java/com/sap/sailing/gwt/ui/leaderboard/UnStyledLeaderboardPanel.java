@@ -2506,9 +2506,9 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
             setLeaderboard(leaderboard);
             adjustColumnLayout(leaderboard);
             updateRaceColumnDTOsToRaceColumns(leaderboard);
-            for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
-                columnToCollapseAndExpandAgain.changeExpansionState(/* expand */ true);
-            }
+            // for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
+            // columnToCollapseAndExpandAgain.changeExpansionState(/* expand */ true);
+            // }
             adjustDelayToLive();
             final Map<CompetitorDTO, LeaderboardRowDTO> rowsToDisplay = getRowsToDisplay();
             Set<LeaderboardRowDTO> rowsToAdd = new HashSet<>(rowsToDisplay.values());

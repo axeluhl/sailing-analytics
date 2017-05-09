@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -32,6 +33,7 @@ public class LeaderboardViewImpl extends ResizeComposite implements LeaderboardV
     public void startingWith(Presenter p, AcceptsOneWidget panel,
             LeaderboardWithHeaderPerspective leaderboardWithHeaderPerspective) {
         holderUi.add(leaderboardWithHeaderPerspective);
+        leaderboardWithHeaderPerspective.getElement().getStyle().setHeight(100, Unit.PCT);
         panel.setWidget(this);
     }
 

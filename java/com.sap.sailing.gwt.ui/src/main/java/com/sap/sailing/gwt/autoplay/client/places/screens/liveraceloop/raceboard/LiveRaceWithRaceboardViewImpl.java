@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.raceboard;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -36,5 +37,6 @@ public class LiveRaceWithRaceboardViewImpl extends ResizeComposite implements Li
     public void startingWith(Slide7Presenter p, AcceptsOneWidget panel, RaceBoardPanel raceMap) {
         panel.setWidget(this);
         racemap.add(raceMap);
+        raceMap.getElement().getStyle().setHeight(100, Unit.PCT);
     }
 }

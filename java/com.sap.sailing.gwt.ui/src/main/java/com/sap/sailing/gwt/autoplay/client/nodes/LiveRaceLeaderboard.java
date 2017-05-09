@@ -28,12 +28,11 @@ public class LiveRaceLeaderboard extends FiresPlaceNode {
         leaderboardTimer
                 .setLivePlayDelayInMillis(settings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart());
         leaderboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD);
-        leaderboardTimer.play();
     }
 
 
     public void onStart() {
-
+        leaderboardTimer.play();
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
         AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getSlideCtx().getAutoplayLifecycle();
         boolean withFullscreenButton = settings.getPerspectiveOwnSettings().isFullscreen();
