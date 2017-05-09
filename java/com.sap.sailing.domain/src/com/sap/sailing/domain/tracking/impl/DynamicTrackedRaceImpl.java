@@ -223,7 +223,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TrackedRaceStatusEnum raceStatus = TrackedRaceStatusEnum.FINISHED;
         double totalProgress = 1.0;
         synchronized (loaderStatus) {
-            // logger.info("Status changed: " + newStatus.getStatus() + " | " + source);
             this.updateLoaderStatus(source, newStatus);
             double sumOfLoaderProgresses = 0.0;
             if (!loaderStatus.isEmpty()) {
@@ -244,7 +243,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             }
         }
         this.setStatus(new TrackedRaceStatusImpl(raceStatus, totalProgress));
-        // logger.info("Global status: " + raceStatus + " | Progress: " + totalProgress);
     }
    
     private void updateLoaderStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
