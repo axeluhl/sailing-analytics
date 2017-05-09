@@ -505,14 +505,14 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     private void updateStatusAndProgressWithExistingLock() {
         final TrackedRaceStatusEnum status;
         final double progress;
-        if(!loadingJobs.isEmpty()) {
+        if (!loadingJobs.isEmpty()) {
             double progressSum = 0.0;
             boolean allFinished = true;
             for (AbstractLoadingJob loadingJob : loadingJobs) {
                 allFinished &= loadingJob.finished;
                 progressSum += loadingJob.progress;
             }
-            if(allFinished) {
+            if (allFinished) {
                 loadingJobs.clear();
                 status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
                 progress = 1.0;
