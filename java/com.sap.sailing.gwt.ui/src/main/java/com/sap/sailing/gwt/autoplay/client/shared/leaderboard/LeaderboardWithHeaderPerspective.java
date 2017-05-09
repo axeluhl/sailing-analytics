@@ -9,9 +9,6 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponent;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentSettings;
 import com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.common.client.CSS3Util;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
@@ -65,17 +62,13 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
                 }
             }
         });
-        SAPHeaderComponentLifecycle sapHeaderLifecycle = getPerspectiveLifecycle().getSapHeaderLifecycle();
-        SAPHeaderComponent sapHeader = createSAPHeader(sapHeaderLifecycle, userService,
-                settings.findSettingsByComponentId(sapHeaderLifecycle.getComponentId()),
-                stringMessages, startInFullScreenMode);
+
         leaderboardPanel = createLeaderboardPanel(lifecycle, settings, sailingService, asyncActionsExecutor,
                 competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages);
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        addChildComponent(sapHeader);
+
         addChildComponent(leaderboardPanel);
         dockPanel = new DockLayoutPanel(Unit.PX);
-        dockPanel.addNorth(sapHeader, SAP_HEADER_HEIGHT);
         OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel, stringMessages);
         leaderboardPanel.addLeaderboardUpdateListener(oldLeaderboard);
         currentContentWidget = oldLeaderboard.getContentWidget();
@@ -185,13 +178,6 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         leaderboardPanel.removeLeaderboardUpdateListener(listener);
     }
     
-    private SAPHeaderComponent createSAPHeader(SAPHeaderComponentLifecycle componentLifecycle, UserService userService, SAPHeaderComponentSettings settings, 
-            final StringMessages stringMessages, boolean withFullscreenButton) {
-        return new SAPHeaderComponent(this, getComponentContext(), componentLifecycle, userService, settings,
-                stringMessages,
-                withFullscreenButton);
-    }
-
     private LeaderboardPanel createLeaderboardPanel(LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -222,6 +208,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     public boolean hasPerspectiveOwnSettings() {
         return true;
     }
+
 
     @Override
     public String getId() {

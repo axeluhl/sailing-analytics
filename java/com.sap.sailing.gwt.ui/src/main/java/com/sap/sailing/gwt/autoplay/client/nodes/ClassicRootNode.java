@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
+import java.util.UUID;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -10,6 +12,7 @@ import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
 
 public class ClassicRootNode extends BaseCompositeNode {
@@ -32,7 +35,24 @@ public class ClassicRootNode extends BaseCompositeNode {
         this.live = live;
     }
 
+
     private void doCheck() {
+        final UUID eventUUID = cf.getSlideCtx().getSettings().getEventId();
+        cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
+            @Override
+            public void onSuccess(final EventDTO event) {
+                cf.getSlideCtx().updateEvent(event);
+                _doCheck();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                getBus().fireEvent(new AutoPlayFailureEvent(caught, "Error loading Event with id " + eventUUID));
+            }
+        });
+    }
+
+    private void _doCheck() {
         this.leaderBoardName = cf.getSlideCtx().getSettings().getLeaderboardName();
         AutoplayHelper.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getSlideCtx().getEvent(),
                 leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {

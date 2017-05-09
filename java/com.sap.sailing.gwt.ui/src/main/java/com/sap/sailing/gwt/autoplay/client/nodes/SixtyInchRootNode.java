@@ -63,12 +63,8 @@ public class SixtyInchRootNode extends BaseCompositeNode {
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override
             public void onSuccess(final EventDTO event) {
-                if (cf.getSlideCtx().getEvent() == null) {
-                    cf.getSlideCtx().updateEvent(event);
-                    transitionTo(idleLoop);
-                } else {
-                    cf.getSlideCtx().updateEvent(event);
-                }
+                cf.getSlideCtx().updateEvent(event);
+                _doCheck();
             }
 
             @Override
@@ -76,6 +72,9 @@ public class SixtyInchRootNode extends BaseCompositeNode {
                 getBus().fireEvent(new AutoPlayFailureEvent(caught, "Error loading Event with id " + eventUUID));
             }
         });
+    }
+
+    private void _doCheck() {
 
         if (cf.getSlideCtx().getEvent() == null) {
             checkTimer.schedule(5000);
