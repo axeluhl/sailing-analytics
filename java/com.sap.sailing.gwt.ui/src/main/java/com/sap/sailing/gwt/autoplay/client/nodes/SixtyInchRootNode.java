@@ -140,8 +140,8 @@ public class SixtyInchRootNode extends BaseCompositeNode {
         if (cf.getSlideCtx() == null || //
                 cf.getSlideCtx().getSettings() == null//
         ) {
-            // data not loaded yet
-            throw new RuntimeException("No Slidecontext or Settings loaded");
+            backToConfig();
+            return;
         }
         getBus().addHandler(AutoPlayFailureEvent.TYPE, new AutoPlayFailureEvent.Handler() {
             @Override
@@ -158,10 +158,20 @@ public class SixtyInchRootNode extends BaseCompositeNode {
     }
 
     private void processFailure(FailureEvent event) {
-        GWT.log("Captured failure event: " + event);
+        if (cf.getSlideCtx() == null || //
+                cf.getSlideCtx().getSettings() == null || //
+                cf.getSlideCtx().getEvent() == null //
+        ) {
+            backToConfig();
+            return;
+        }
         if (event.getCaught() != null) {
             event.getCaught().printStackTrace();
         }
         transitionTo(idleLoop);
+    }
+
+    private void backToConfig() {
+        cf.getPlaceController().goTo(cf.getDefaultPlace());
     }
 }

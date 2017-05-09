@@ -93,8 +93,8 @@ public class ClassicRootNode extends BaseCompositeNode {
                 cf.getSlideCtx().getSettings() == null || //
                 cf.getSlideCtx().getEvent() == null //
         ) {
-            // data not loaded yet
-            throw new RuntimeException("No event loaded");
+            backToConfig();
+            return;
         }
         getBus().addHandler(AutoPlayFailureEvent.TYPE, new AutoPlayFailureEvent.Handler() {
             @Override
@@ -113,9 +113,20 @@ public class ClassicRootNode extends BaseCompositeNode {
 
     private void processFailure(FailureEvent event) {
         GWT.log("Captured failure event: " + event);
+        if (cf.getSlideCtx() == null || //
+                cf.getSlideCtx().getSettings() == null || //
+                cf.getSlideCtx().getEvent() == null //
+        ) {
+            backToConfig();
+            return;
+        }
         if (event.getCaught() != null) {
             event.getCaught().printStackTrace();
         }
         transitionTo(idle);
+    }
+
+    private void backToConfig() {
+        cf.getPlaceController().goTo(cf.getDefaultPlace());
     }
 }

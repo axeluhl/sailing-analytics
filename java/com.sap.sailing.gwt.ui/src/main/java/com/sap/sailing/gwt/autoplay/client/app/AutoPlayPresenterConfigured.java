@@ -6,7 +6,6 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPlace;
 
 public abstract class AutoPlayPresenterConfigured<P extends Place> extends AutoPlayPresenterBase<P> {
     private EventBus eventBus;
@@ -41,7 +40,7 @@ public abstract class AutoPlayPresenterConfigured<P extends Place> extends AutoP
                 });
             } else {
                 GWT.log("Not configured, go back to start place");
-                getClientFactory().getPlaceController().goTo(new SixtyInchConfigPlace());
+                getClientFactory().getPlaceController().goTo(getClientFactory().getDefaultPlace());
             }
         } catch (Exception e) {
             getEventBus().fireEvent(new AutoPlayFailureEvent(e, "Pre-Init failed"));
