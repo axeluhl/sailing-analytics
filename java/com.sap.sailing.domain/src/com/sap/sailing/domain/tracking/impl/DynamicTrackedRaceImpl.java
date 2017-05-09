@@ -230,7 +230,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 for (TrackedRaceStatus status : loaderStatus.values()) {
                     if (status.getStatus() == TrackedRaceStatusEnum.ERROR) {
                         raceStatus = TrackedRaceStatusEnum.ERROR;
-                    } else {
+                    } else if (raceStatus != TrackedRaceStatusEnum.ERROR) {
                         if (status.getStatus() == TrackedRaceStatusEnum.LOADING) {
                             raceStatus = TrackedRaceStatusEnum.LOADING;
                         }
