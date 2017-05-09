@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
-import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
+import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -16,7 +16,7 @@ import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
-import com.sap.sse.security.ui.settings.StorageDefinitionId;
+import com.sap.sse.security.ui.settings.StorageDefinition;
 
 /**
  * An abstract series tabView with some shared functions between the overall leaderboard tab and competitors chart tab
@@ -63,10 +63,10 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
     protected ComponentContext<LeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken) {
         final LeaderboardPanelLifecycle lifecycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
-        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForSeriesOverallLeaderboard(leaderboardName);
+        final StorageDefinition storageDefinition = StorageDefinitionFactory.createStorageDefinitionForSeriesOverallLeaderboard(leaderboardName);
 
         final ComponentContext<LeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(
-                lifecycle, userService, storageDefinitionId, placeToken);
+                lifecycle, userService, storageDefinition, placeToken);
         return componentContext;
     }
 }

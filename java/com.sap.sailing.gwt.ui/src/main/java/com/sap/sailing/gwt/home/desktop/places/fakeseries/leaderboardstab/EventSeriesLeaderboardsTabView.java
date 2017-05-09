@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiLeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
+import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
@@ -31,7 +31,7 @@ import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
-import com.sap.sse.security.ui.settings.StorageDefinitionId;
+import com.sap.sse.security.ui.settings.StorageDefinition;
 
 public class EventSeriesLeaderboardsTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
         LeaderboardUpdateListener {
@@ -127,10 +127,10 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
     private ComponentContext<LeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken) {
         final MultiLeaderboardPanelLifecycle lifecycle = new MultiLeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
-        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForSeriesRegattaLeaderboards(leaderboardName);
+        final StorageDefinition storageDefinition = StorageDefinitionFactory.createStorageDefinitionForSeriesRegattaLeaderboards(leaderboardName);
 
         final ComponentContext<LeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(
-                lifecycle, userService, storageDefinitionId, placeToken);
+                lifecycle, userService, storageDefinition, placeToken);
         return componentContext;
     }
 

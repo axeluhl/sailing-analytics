@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.Ent
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
-import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
+import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionFactory;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -45,7 +45,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
-import com.sap.sse.security.ui.settings.StorageDefinitionId;
+import com.sap.sse.security.ui.settings.StorageDefinition;
 
 public class RegattaOverviewPanel extends SimplePanel {
     
@@ -151,10 +151,10 @@ public class RegattaOverviewPanel extends SimplePanel {
             
         });
         
-        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRegattaOverview(regattaOverviewContextDefinition);
+        final StorageDefinition storageDefinition = StorageDefinitionFactory.createStorageDefinitionForRegattaOverview(regattaOverviewContextDefinition);
         final RegattaRaceStatesComponentLifecycle lifecycle = new RegattaRaceStatesComponentLifecycle();
         final ComponentContext<RegattaRaceStatesSettings> componentContext = new ComponentContextWithSettingsStorage<>(
-                lifecycle, userService, storageDefinitionId);
+                lifecycle, userService, storageDefinition);
         
         regattaRaceStatesComponent = new RegattaRaceStatesComponent(null, componentContext, sailingService, errorReporter,
                 stringMessages,

@@ -14,7 +14,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndPatching;
 import com.sap.sse.security.ui.settings.SettingsPatch;
-import com.sap.sse.security.ui.settings.StorageDefinitionId;
+import com.sap.sse.security.ui.settings.StorageDefinition;
 
 /**
  * A specialization of {@link ComponentContextWithSettingsStorageAndPatching} which is specially designed for
@@ -35,13 +35,13 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
      *            The {@link ComponentLifecycle} of the root component/perspective
      * @param userService
      *            The service which is used for server-side settings storage
-     * @param storageDefinitionId
+     * @param storageDefinition
      *            The definition for User Settings and Document Settings storage keys
      */
     public RaceBoardComponentContext(
             RaceBoardPerspectiveLifecycle rootLifecycle,
-            UserService userService, StorageDefinitionId storageDefinitionId) {
-        super(rootLifecycle, userService, storageDefinitionId);
+            UserService userService, StorageDefinition storageDefinition) {
+        super(rootLifecycle, userService, storageDefinition);
     }
     
     /**

@@ -76,28 +76,28 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      *            The {@link ComponentLifecycle} of the root component/perspective
      * @param userService
      *            The service which is used for server-side settings storage
-     * @param storageDefinitionId
+     * @param storageDefinition
      *            The definition for User Settings and Document Settings storage keys
      */
     public ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StorageDefinitionId storageDefinitionId) {
-        this(rootLifecycle, userService, storageDefinitionId, new SettingsSerializationHelper());
+            StorageDefinition storageDefinition) {
+        this(rootLifecycle, userService, storageDefinition, new SettingsSerializationHelper());
     }
 
     protected ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StorageDefinitionId storageDefinitionId, SettingsSerializationHelper settingsSerializationHelper) {
-        this(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper,
+            StorageDefinition storageDefinition, SettingsSerializationHelper settingsSerializationHelper) {
+        this(rootLifecycle, userService, storageDefinition, settingsSerializationHelper,
                 new UserSettingsBuildingPipeline(settingsSerializationHelper));
     }
 
     protected ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StorageDefinitionId storageDefinitionId, SettingsSerializationHelper settingsSerializationHelper,
+            StorageDefinition storageDefinition, SettingsSerializationHelper settingsSerializationHelper,
             SettingsBuildingPipeline<JSONObject> settingsBuildingPipeline) {
         super(rootLifecycle, settingsSerializationHelper, settingsBuildingPipeline);
         if (IgnoreLocalSettings.getIgnoreLocalSettingsFromCurrentUrl().isIgnoreLocalSettings()) {
             this.settingsStorageManager = null;
         } else {
-            this.settingsStorageManager = new UserSettingsStorageManager(userService, storageDefinitionId);
+            this.settingsStorageManager = new UserSettingsStorageManager(userService, storageDefinition);
         }
     }
 

@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
-import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
+import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -33,7 +33,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
-import com.sap.sse.security.ui.settings.StorageDefinitionId;
+import com.sap.sse.security.ui.settings.StorageDefinition;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceWithCompetitorsDTO selectedRace;
@@ -100,9 +100,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 }
                 
                 final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
-                final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRaceBoard(raceboardContextDefinition);
+                final StorageDefinition storageDefinition = StorageDefinitionFactory.createStorageDefinitionForRaceBoard(raceboardContextDefinition);
                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(raceboardData.getRace().getRaceIdentifier(), StringMessages.INSTANCE);
-                RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(), storageDefinitionId);
+                RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(), storageDefinition);
                 
                 componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override

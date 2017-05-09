@@ -33,26 +33,26 @@ public class ComponentContextWithSettingsStorageAndPatching<S extends Settings>
      *            The {@link ComponentLifecycle} of the root component/perspective
      * @param userService
      *            The service which is used for server-side settings storage
-     * @param storageDefinitionId
+     * @param storageDefinition
      *            The definition for User Settings and Document Settings storage keys
      */
     public ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StorageDefinitionId storageDefinitionId) {
-        this(rootLifecycle, userService, storageDefinitionId, new SettingsSerializationHelper());
+            StorageDefinition storageDefinition) {
+        this(rootLifecycle, userService, storageDefinition, new SettingsSerializationHelper());
     }
 
     protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StorageDefinitionId storageDefinitionId,
+            UserService userService, StorageDefinition storageDefinition,
             SettingsSerializationHelper settingsSerializationHelper) {
-        this(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper,
+        this(rootLifecycle, userService, storageDefinition, settingsSerializationHelper,
                 new UserSettingsBuildingPipelineWithPatching(settingsSerializationHelper));
     }
 
     protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StorageDefinitionId storageDefinitionId,
+            UserService userService, StorageDefinition storageDefinition,
             SettingsSerializationHelper settingsSerializationHelper,
             UserSettingsBuildingPipelineWithPatching settingsBuildingPipeline) {
-        super(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper, settingsBuildingPipeline);
+        super(rootLifecycle, userService, storageDefinition, settingsSerializationHelper, settingsBuildingPipeline);
     }
 
     /**
