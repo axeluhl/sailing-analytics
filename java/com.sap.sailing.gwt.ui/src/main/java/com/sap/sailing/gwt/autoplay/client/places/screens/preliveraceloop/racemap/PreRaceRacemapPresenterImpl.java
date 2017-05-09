@@ -7,22 +7,22 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.gwt.autoplay.client.app.ConfiguredPresenter;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticAction;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
-public class PreRaceRacemapPresenterImpl extends ConfiguredPresenter<PreRaceRacemapPlace>
+public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<PreRaceRacemapPlace>
         implements PreRaceRacemapView.Slide7Presenter {
     private PreRaceRacemapView view;
     private Timer updateStatistics;
     private GetSixtyInchStatisticDTO lastStatisticResult;
     private Timer reloadStatistics;
 
-    public PreRaceRacemapPresenterImpl(PreRaceRacemapPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+    public PreRaceRacemapPresenterImpl(PreRaceRacemapPlace place, AutoPlayClientFactory clientFactory,
             PreRaceRacemapView slide7ViewImpl) {
         super(place, clientFactory);
         this.view = slide7ViewImpl;

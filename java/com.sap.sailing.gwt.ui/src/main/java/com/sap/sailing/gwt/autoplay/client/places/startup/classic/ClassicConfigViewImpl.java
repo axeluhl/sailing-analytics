@@ -21,8 +21,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoPlayClientFactoryClassic;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicSetting;
@@ -71,9 +71,9 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
 
     private AutoplayPerspectiveLifecycle autoplayLifecycle;
     protected PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings;
-    private AutoPlayClientFactoryClassic clientFactory;
+    private AutoPlayClientFactory clientFactory;
 
-    public ClassicConfigViewImpl(AutoPlayClientFactoryClassic clientFactory) {
+    public ClassicConfigViewImpl(AutoPlayClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
         this.navigator = clientFactory.getPlaceNavigator();

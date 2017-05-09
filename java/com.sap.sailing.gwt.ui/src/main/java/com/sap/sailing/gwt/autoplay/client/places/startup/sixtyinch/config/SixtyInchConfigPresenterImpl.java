@@ -8,20 +8,20 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.event.LocaleChangeEventHandler;
 
 public class SixtyInchConfigPresenterImpl extends AbstractActivity implements SixtyInchConfigView.Presenter {
-    private final AutoPlayClientFactorySixtyInch clientFactory;
+    private final AutoPlayClientFactory clientFactory;
 
     public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
 
     private SixtyInchConfigView view;
 
-    public SixtyInchConfigPresenterImpl(SixtyInchConfigPlace place, AutoPlayClientFactorySixtyInch clientFactory,
+    public SixtyInchConfigPresenterImpl(SixtyInchConfigPlace place, AutoPlayClientFactory clientFactory,
             SixtyInchConfigView view) {
         this.clientFactory = clientFactory;
         this.view = view;

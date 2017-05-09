@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.app.classic;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardViewImpl;
@@ -16,9 +17,9 @@ import com.sap.sailing.gwt.autoplay.client.places.startup.classic.ClassicConfigP
 import com.sap.sailing.gwt.autoplay.client.places.startup.classic.ClassicConfigViewImpl;
 
 public class AutoPlayAppActivityMapper implements ActivityMapper {
-    private final AutoPlayClientFactoryClassic clientFactory;
+    private final AutoPlayClientFactory clientFactory;
 
-    public AutoPlayAppActivityMapper(AutoPlayClientFactoryClassic clientFactory) {
+    public AutoPlayAppActivityMapper(AutoPlayClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
     }

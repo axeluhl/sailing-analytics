@@ -5,15 +5,13 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInch;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchPresenterBase;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPlace;
 
-public abstract class ConfiguredPresenter<P extends Place> extends SixtyInchPresenterBase<P> {
+public abstract class AutoPlayPresenterConfigured<P extends Place> extends AutoPlayPresenterBase<P> {
     private EventBus eventBus;
 
-    public ConfiguredPresenter(P place, AutoPlayClientFactorySixtyInch clientFactory) {
+    public AutoPlayPresenterConfigured(P place, AutoPlayClientFactory clientFactory) {
         super(place, clientFactory);
     }
 
@@ -50,7 +48,7 @@ public abstract class ConfiguredPresenter<P extends Place> extends SixtyInchPres
         }
     }
 
-    protected void init(AcceptsOneWidget panel, Command whenReady) {
+    private void init(AcceptsOneWidget panel, Command whenReady) {
         whenReady.execute();
     }
 
