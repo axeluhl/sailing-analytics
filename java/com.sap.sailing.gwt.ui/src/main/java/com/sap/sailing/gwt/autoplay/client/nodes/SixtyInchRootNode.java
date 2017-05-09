@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
+import java.util.UUID;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
@@ -12,6 +14,7 @@ import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
 
 public class SixtyInchRootNode extends BaseCompositeNode {
@@ -52,6 +55,29 @@ public class SixtyInchRootNode extends BaseCompositeNode {
     private void doCheck() {
         if (getCurrentNode() == afterLiveRaceLoop) {
             GWT.log("do change state while in afterrace");
+            return;
+        }
+
+        final UUID eventUUID = cf.getSlideCtx().getSettings().getEventId();
+        cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
+            @Override
+            public void onSuccess(final EventDTO event) {
+                if (cf.getSlideCtx().getEvent() == null) {
+                    cf.getSlideCtx().updateEvent(event);
+                    transitionTo(idleLoop);
+                } else {
+                    cf.getSlideCtx().updateEvent(event);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                getBus().fireEvent(new AutoPlayFailureEvent(caught, "Error loading Event with id " + eventUUID));
+            }
+        });
+
+        if (cf.getSlideCtx().getEvent() == null) {
+            GWT.log("Wait for event to load, before starting");
             return;
         }
 
@@ -111,11 +137,10 @@ public class SixtyInchRootNode extends BaseCompositeNode {
     @Override
     public void onStart() {
         if (cf.getSlideCtx() == null || //
-                cf.getSlideCtx().getSettings() == null || //
-                cf.getSlideCtx().getEvent() == null //
+                cf.getSlideCtx().getSettings() == null//
         ) {
             // data not loaded yet
-            throw new RuntimeException("No event loaded");
+            throw new RuntimeException("No Slidecontext or Settings loaded");
         }
         getBus().addHandler(AutoPlayFailureEvent.TYPE, new AutoPlayFailureEvent.Handler() {
             @Override
@@ -124,7 +149,6 @@ public class SixtyInchRootNode extends BaseCompositeNode {
             }
         });
         doCheck();
-        transitionTo(idleLoop);
     }
 
     @Override
