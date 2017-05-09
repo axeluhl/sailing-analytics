@@ -3014,7 +3014,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 // the wind is considered sufficiently stable to not allow for two successive tacks or two successive jibes)
                 // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has completed.
                 if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
-                    TimePointAndTotalCourseChangeInDegrees firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(courseBeforeManeuver, group, wind);
+                    TimePointAndTotalCourseChangeInDegrees firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(competitor, timePointBeforeManeuver, courseBeforeManeuver, group, wind);
                     maneuverType = ManeuverType.PENALTY_CIRCLE;
                     if (legBeforeManeuver != null) {
                         maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt.getTimePoint());
@@ -3093,12 +3093,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * completed and for which the total course change is as close as possible to 360°.
      */
     private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(
-            Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
+            Competitor competitor, TimePoint timePointBeforeManeuver, Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
         double totalCourseChangeInDegrees = 0;
         double bestTotalCourseChangeInDegrees = 0; // this should be as close as possible to 360° after one tack and one gybe
-        TimePoint timePoint = null;
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
         Bearing newCourse = courseBeforeManeuver;
+        TimePoint timePointOfPreviousCourseChange = timePointBeforeManeuver;
+        TimePointAndTotalCourseChangeInDegrees result = null;
         for (Pair<GPSFixMoving, CourseChange> fixAndCourseChange : approximatedFixesAndCourseChanges) {
             totalCourseChangeInDegrees += fixAndCourseChange.getB().getCourseChangeInDegrees();
             newCourse = newCourse.add(new DegreeBearingImpl(fixAndCourseChange.getB().getCourseChangeInDegrees()));
@@ -3106,15 +3107,79 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getFrom());
             if (numberOfJibes > 0 && numberOfTacks > 0) {
                 if (numberOfJibes > 1 || numberOfTacks > 1) {
+                    // It could be that one or both numbers increased to greater than 1 from 0. In this case
+                    // we want to find the point between the completion of the penalty and the next maneuver
+                    // which increases one of the counters to 2 and use that time point as the result:
+                    if (result == null) {
+                        result = findBestFixBetweenCourseChanges(competitor, courseBeforeManeuver, timePointOfPreviousCourseChange,
+                                fixAndCourseChange.getA().getTimePoint(), totalCourseChangeInDegrees<0?NauticalSide.PORT:NauticalSide.STARBOARD, wind);
+                    }
                     break; // don't continue into a subsequent tack/gybe sailed in conjunction with the penalty or starting the next circle
                 }
                 if (Math.abs(360-Math.abs(totalCourseChangeInDegrees)) < (Math.abs(360-Math.abs(bestTotalCourseChangeInDegrees)))) {
                     bestTotalCourseChangeInDegrees = totalCourseChangeInDegrees;
-                    timePoint = fixAndCourseChange.getA().getTimePoint();
+                    result = new TimePointAndTotalCourseChangeInDegrees(fixAndCourseChange.getA().getTimePoint(), bestTotalCourseChangeInDegrees);
                 } else {
                     break; // not getting closer but further away from 360°
                 }
             }
+        }
+        return result;
+    }
+
+    /**
+     * In {@code competitor}'s track between {@code from} and {@code to} (inclusive) find the fix where the competitor
+     * has completed one tack and one gybe and is coming closest to the course before the maneuver
+     * ({@code courseBeforeManeuver}). This is done by recursively splitting the interval and computing the resulting
+     * numbers of tacks and gybes starting at {@code from} and up to the point probed, and calculating the absolute
+     * difference to the target course which equals the {@code courseBeforeManeuver}.
+     * <p>
+     * 
+     * The implementation is similar to
+     * {@link #getTimePointOfCompletionOfFirstPenaltyCircle(Competitor, TimePoint, Bearing, Iterable, Wind)} but instead
+     * of following the course changes identified by the Douglas-Peucker algorithm, here we visit individual fixes and
+     * look at the resulting target course and course change.
+     * 
+     * @param maneuverDirection
+     *            the general direction in which the maneuver is sailed
+     */
+    private TimePointAndTotalCourseChangeInDegrees findBestFixBetweenCourseChanges(Competitor competitor,
+            Bearing courseBeforeManeuver, TimePoint from, TimePoint to, NauticalSide maneuverDirection, Wind wind) {
+        final GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+        BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
+        track.lockForRead();
+        TimePoint timePoint = null;
+        double bestTotalCourseChangeInDegrees = 0;
+        try {
+            GPSFixMoving fix;
+            double totalCourseChangeInDegrees = 0;
+            for (Iterator<GPSFixMoving> fixIter = track.getFixesIterator(from, /* inclusive */ true); fixIter.hasNext() && !(fix=fixIter.next()).getTimePoint().after(to); ) {
+                Bearing newCourse = fix.getSpeed().getBearing();
+                totalCourseChangeInDegrees = new CourseChangeCalculator().
+                        getTotalCourseChange(courseBeforeManeuver, fix.getSpeed().getBearing(), totalCourseChangeInDegrees, maneuverDirection);
+                int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getBearing());
+                int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getFrom());
+                if (numberOfJibes > 0 && numberOfTacks > 0) {
+                    if (numberOfJibes > 1 || numberOfTacks > 1) {
+                        // It could be that both numbers increased, and one was 1 before, so now we have 1 and 2. But
+                        // we can't split it up finer than two fixes, so we'll use the time point between the last two fixes
+                        // instead:
+                        if (timePoint == null) {
+                            final TimePoint timePointOfPreviousFix = track.getLastFixBefore(fix.getTimePoint()).getTimePoint();
+                            timePoint = timePointOfPreviousFix.plus(timePointOfPreviousFix.until(fix.getTimePoint()).divide(2));
+                        }
+                        break; // don't continue into a subsequent tack/gybe sailed in conjunction with the penalty or starting the next circle
+                    }
+                    if (Math.abs(360-Math.abs(totalCourseChangeInDegrees)) < (Math.abs(360-Math.abs(bestTotalCourseChangeInDegrees)))) {
+                        bestTotalCourseChangeInDegrees = totalCourseChangeInDegrees;
+                        timePoint = fix.getTimePoint();
+                    } else {
+                        break; // not getting closer but further away from 360°
+                    }
+                }
+            }
+        } finally {
+            track.unlockAfterRead();
         }
         return new TimePointAndTotalCourseChangeInDegrees(timePoint, bestTotalCourseChangeInDegrees);
     }

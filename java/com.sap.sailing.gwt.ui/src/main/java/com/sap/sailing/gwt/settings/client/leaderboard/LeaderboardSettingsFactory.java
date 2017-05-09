@@ -158,12 +158,10 @@ public class LeaderboardSettingsFactory {
     }
     
     public LeaderboardSettings overrideDefaultValuesForRaceDetails(LeaderboardSettings existingSettings, List<DetailType> newRaceDetailsDefaultValues) {
-        final List<DetailType> raceDetailsToShow = new ArrayList<>(existingSettings.getRaceDetailsToShow());
-        raceDetailsToShow.addAll(newRaceDetailsDefaultValues);
         LeaderboardSettings newSettings = new LeaderboardSettings(
                 Util.cloneListOrNull(existingSettings.getManeuverDetailsToShow()),
                 Util.cloneListOrNull(existingSettings.getLegDetailsToShow()),
-                raceDetailsToShow, Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
+                newRaceDetailsDefaultValues, Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
                 Util.cloneListOrNull(existingSettings.getNamesOfRaceColumnsToShow()),
                 Util.cloneListOrNull(existingSettings.getNamesOfRacesToShow()),
                 existingSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
@@ -177,13 +175,11 @@ public class LeaderboardSettingsFactory {
                 existingSettings.isShowCompetitorFullNameColumn());
         
         final LeaderboardSettings existingDefaultSettings = existingSettings.getDefaultSettings();
-        final List<DetailType> defaultRaceDetailsToShow = new ArrayList<>(existingDefaultSettings.getRaceDetailsToShow());
-        defaultRaceDetailsToShow.addAll(newRaceDetailsDefaultValues);
         
         LeaderboardSettings newDefaultSettings = new LeaderboardSettings(
                 Util.cloneListOrNull(existingDefaultSettings.getManeuverDetailsToShow()),
                 Util.cloneListOrNull(existingDefaultSettings.getLegDetailsToShow()),
-                defaultRaceDetailsToShow, Util.cloneListOrNull(existingDefaultSettings.getOverallDetailsToShow()),
+                newRaceDetailsDefaultValues, Util.cloneListOrNull(existingDefaultSettings.getOverallDetailsToShow()),
                 Util.cloneListOrNull(existingDefaultSettings.getNamesOfRaceColumnsToShow()),
                 Util.cloneListOrNull(existingDefaultSettings.getNamesOfRacesToShow()),
                 existingDefaultSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,

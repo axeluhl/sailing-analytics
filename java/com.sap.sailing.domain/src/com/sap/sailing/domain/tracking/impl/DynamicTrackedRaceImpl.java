@@ -274,8 +274,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if (!onlyWhenInTrackingTimeInterval || isWithinStartAndEndOfTracking(fixTimePoint)) {
             getOrCreateTrack(mark).addGPSFix(fix);
         } else {
-			logger.finer(() -> "Dropped fix " + fix + " because it is outside the tracking interval "
-					+ getStartOfTracking() + ".." + getEndOfTracking());
+            logger.finer(() -> "Dropped fix " + fix + " because it is outside the tracking interval "
+                    + getStartOfTracking() + ".." + getEndOfTracking());
         }
     }
 
@@ -755,49 +755,57 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             try {
                 clearMarkPassings(competitor);
                 for (MarkPassing markPassing : markPassings) {
-                    // try to find corresponding old start mark passing
-                    if (oldStartMarkPassing != null
-                            && markPassing.getWaypoint().equals(oldStartMarkPassing.getWaypoint())) {
-                        if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
-                                && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
-                            requiresStartTimeUpdate = false;
-                        }
-                    }
-                    if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
-                        StringBuilder courseWaypointsWithID = new StringBuilder();
-                        boolean first = true;
-                        for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                courseWaypointsWithID.append(" -> ");
+                    // Now since this caller of this update may not have held the course lock, mark passings
+                    // may already be obsolete and for waypoints that no longer exist. Check:
+                    if (getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()) >= 0) {
+                        // try to find corresponding old start mark passing
+                        if (oldStartMarkPassing != null
+                                && markPassing.getWaypoint().equals(oldStartMarkPassing.getWaypoint())) {
+                            if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
+                                    && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
+                                requiresStartTimeUpdate = false;
                             }
-                            courseWaypointsWithID.append(courseWaypoint.toString());
-                            courseWaypointsWithID.append(" (ID=");
-                            courseWaypointsWithID.append(courseWaypoint.getId());
-                            courseWaypointsWithID.append(")");
                         }
-                        logger.severe("Received mark passing " + markPassing + " for race " + getRace()
-                                + " for waypoint ID" + markPassing.getWaypoint().getId()
-                                + " but the waypoint does not exist in course " + courseWaypointsWithID);
+                        if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
+                            StringBuilder courseWaypointsWithID = new StringBuilder();
+                            boolean first = true;
+                            for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
+                                if (first) {
+                                    first = false;
+                                } else {
+                                    courseWaypointsWithID.append(" -> ");
+                                }
+                                courseWaypointsWithID.append(courseWaypoint.toString());
+                                courseWaypointsWithID.append(" (ID=");
+                                courseWaypointsWithID.append(courseWaypoint.getId());
+                                courseWaypointsWithID.append(")");
+                            }
+                            logger.severe("Received mark passing " + markPassing + " for race " + getRace()
+                                    + " for waypoint ID" + markPassing.getWaypoint().getId()
+                                    + " but the waypoint does not exist in course " + courseWaypointsWithID);
+                        } else {
+                            markPassingsForCompetitor.add(markPassing);
+                        }
+                        Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
+                                .getWaypoint());
+                        final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
+                        LockUtil.lockForWrite(markPassingsLock2);
+                        try {
+                            // The mark passings of competitor have been removed by the call to
+                            // clearMarkPassings(competitor) above
+                            // from both, the collection that holds the mark passings by waypoint and the one that holds the
+                            // mark passings per competitor; so we can simply add here:
+                            markPassingsInOrderForWaypoint.add(markPassing);
+                        } finally {
+                            LockUtil.unlockAfterWrite(markPassingsLock2);
+                        }
+                        if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
+                            timePointOfLatestEvent = markPassing.getTimePoint();
+                        }
                     } else {
-                        markPassingsForCompetitor.add(markPassing);
-                    }
-                    Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
-                            .getWaypoint());
-                    final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
-                    LockUtil.lockForWrite(markPassingsLock2);
-                    try {
-                        // The mark passings of competitor have been removed by the call to
-                        // clearMarkPassings(competitor) above
-                        // from both, the collection that holds the mark passings by waypoint and the one that holds the
-                        // mark passings per competitor; so we can simply add here:
-                        markPassingsInOrderForWaypoint.add(markPassing);
-                    } finally {
-                        LockUtil.unlockAfterWrite(markPassingsLock2);
-                    }
-                    if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
-                        timePointOfLatestEvent = markPassing.getTimePoint();
+                        logger.warning("Received mark passing "+markPassing+
+                                " for non-existing waypoint "+markPassing.getWaypoint()+
+                                " in race "+getRace().getName()+". Ignoring.");
                     }
                 }
             } finally {
