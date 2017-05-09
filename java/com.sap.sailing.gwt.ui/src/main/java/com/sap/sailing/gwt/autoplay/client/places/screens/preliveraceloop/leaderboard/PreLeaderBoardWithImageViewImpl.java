@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayMainViewSixtyInchImpl;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewImpl;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
@@ -62,7 +62,7 @@ public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements 
 
             @Override
             public void run() {
-                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewSixtyInchImpl.SAP_HEADER_IN_PX,
+                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX,
                         leaderboardPanel);
             }
         };

@@ -6,14 +6,19 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactoryBase;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayContext;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayContextImpl;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewImpl;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
+import com.sap.sailing.gwt.autoplay.client.app.AutoplayNavigatorImpl;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
+import com.sap.sailing.gwt.autoplay.client.nodes.SixtyInchStartupNode;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.DesktopPlayerView;
 import com.sap.sailing.gwt.autoplay.client.places.startclassic.old.PlayerView;
 import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPlace;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sse.gwt.client.mvp.ErrorView;
+import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 
 
 public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBase {
@@ -30,12 +35,12 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     }
 
     private AutoPlayClientFactorySixtyInchImpl(EventBus eventBus, PlaceController placeController) {
-        this(eventBus, placeController, new SixtyInchPlaceNavigatorImpl(placeController));
+        this(eventBus, placeController, new AutoplayNavigatorImpl(placeController));
     }
 
     private AutoPlayClientFactorySixtyInchImpl(EventBus eventBus, PlaceController placeController,
             AutoPlayPlaceNavigator navigator) {
-        super(new AutoPlayMainViewSixtyInchImpl(eventBus), eventBus, placeController, navigator);
+        super(new AutoPlayMainViewImpl(eventBus), eventBus, placeController, navigator);
 
     }
 
@@ -72,4 +77,13 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
         return dispatch;
     }
 
+    @Override
+    public void startRootNode(String serializedSettings) {
+        SixtyInchSetting settings = new SixtyInchSetting();
+        new SettingsToStringSerializer().fromString(serializedSettings, settings);
+        setSlideContext(new AutoPlayContextImpl(getEventBus(), settings));
+        // start sixty inch slide loop nodes...
+        SixtyInchStartupNode root = new SixtyInchStartupNode(this);
+        root.start(getEventBus());
+    }
 }

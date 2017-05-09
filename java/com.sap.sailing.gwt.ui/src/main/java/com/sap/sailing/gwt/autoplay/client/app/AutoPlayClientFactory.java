@@ -11,4 +11,6 @@ public interface AutoPlayClientFactory extends PlayerClientFactory {
     AutoPlayContext getSlideCtx();
 
     SailingDispatchSystem getDispatch();
+
+    void startRootNode(String serializedSettings);
 }

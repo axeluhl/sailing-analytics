@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
+package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -10,8 +10,6 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
-import com.sap.sailing.gwt.autoplay.client.app.ApplicationTopLevelView;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -19,7 +17,7 @@ import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.sapheader.SAPHeader;
 
-public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
+public class AutoPlayMainViewImpl extends ResizeComposite
         implements ApplicationTopLevelView, AcceptsOneWidget {
     public static final int SAP_HEADER_IN_PX = 75;
 
@@ -35,10 +33,10 @@ public class AutoPlayMainViewSixtyInchImpl extends ResizeComposite
 
     private static ErrorReporter errorReporter = new DefaultErrorReporter<StringMessages>(StringMessages.INSTANCE);
 
-    interface SixtyInchViewImplUiBinder extends UiBinder<Widget, AutoPlayMainViewSixtyInchImpl> {
+    interface SixtyInchViewImplUiBinder extends UiBinder<Widget, AutoPlayMainViewImpl> {
     }
 
-    public AutoPlayMainViewSixtyInchImpl(EventBus eventBus) {
+    public AutoPlayMainViewImpl(EventBus eventBus) {
         initWidget(uiBinder.createAndBindUi(this));
         sapHeader.setHeaderTitle("Initializing");
         mainPanel.add(sapHeader);

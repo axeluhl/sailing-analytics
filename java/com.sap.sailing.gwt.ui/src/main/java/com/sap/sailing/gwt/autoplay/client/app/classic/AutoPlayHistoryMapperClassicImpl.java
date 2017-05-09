@@ -9,5 +9,5 @@ import com.sap.sailing.gwt.autoplay.client.places.startup.classic.ClassicConfigP
 
 @WithTokenizers({ ClassicConfigPlace.Tokenizer.class, PlayerPlace.Tokenizer.class,
         LiveRaceWithRaceboardPlace.Tokenizer.class, LeaderboardPlace.Tokenizer.class })
-public interface AutoPlayHistoryMapperDesktopImpl extends PlaceHistoryMapper {
+public interface AutoPlayHistoryMapperClassicImpl extends PlaceHistoryMapper {
 }
