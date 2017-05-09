@@ -25,7 +25,7 @@ toolchains.xml      text eol=lf
 *.gradle            text eol=lf
 *.java              text eol=lf
 *.properties        text eol=lf
-*.launch            text eol=lf
+*.launch            text=auto
 MANIFEST.MF         text eol=lf
 .project            text eol=lf
 .classpath          text
