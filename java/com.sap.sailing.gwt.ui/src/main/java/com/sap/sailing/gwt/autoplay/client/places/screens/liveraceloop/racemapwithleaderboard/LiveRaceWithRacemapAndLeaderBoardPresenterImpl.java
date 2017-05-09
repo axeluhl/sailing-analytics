@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -18,7 +17,6 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceC
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -116,16 +114,14 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
         /* showAddedScores */ false, /* showOverallRacesCompleted */ false, false,
         true);
 
-        List<StrippedLeaderboardDTO> leaderboards = getSlideCtx().getEvent().getLeaderboardGroups().get(0)
-                .getLeaderboards();
-        StrippedLeaderboardDTO leaderboard = leaderboards.get(0);
 
         com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-                false, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null, leaderboard.name, errorReporter,
+                false, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
+                getSlideCtx().getSettings().getLeaderboardName(), errorReporter,
                 StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, false);
 
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
