@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoplayNavigatorImpl;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.nodes.ClassicStartupNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.RootNodeClassic;
 import com.sap.sailing.gwt.autoplay.client.places.config.classic.ClassicConfigPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -96,7 +96,7 @@ public class AutoPlayClientFactoryClassicImpl extends AutoPlayClientFactoryBase 
                 setSlideContext(
                         new AutoPlayContextImpl(getEventBus(), autoplayLifecycle, autoplaySettings, context));
                 // start sixty inch slide loop nodes...
-                ClassicStartupNode root = new ClassicStartupNode(AutoPlayClientFactoryClassicImpl.this);
+                RootNodeClassic root = new RootNodeClassic(AutoPlayClientFactoryClassicImpl.this);
                 root.start(getEventBus());
             }
 
