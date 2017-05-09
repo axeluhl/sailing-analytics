@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
@@ -38,5 +39,12 @@ public class LiveRaceWithRaceboardViewImpl extends ResizeComposite implements Li
         panel.setWidget(this);
         racemap.add(raceMap);
         raceMap.getElement().getStyle().setHeight(100, Unit.PCT);
+        new Timer() {
+            @Override
+            public void run() {
+                raceMap.onResize();
+            }
+        }.schedule(2000);
+        ;
     }
 }

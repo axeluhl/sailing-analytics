@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
-import com.google.gwt.core.client.GWT;
+import java.util.UUID;
+
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -10,9 +11,10 @@ import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
 
-public class ClassicRootNode extends BaseCompositeNode {
+public class RootNodeClassic extends BaseCompositeNode {
     protected static final long LIVE_SWITCH_DELAY = 1000;
     private final AutoPlayClientFactory cf;
     private String leaderBoardName;
@@ -23,16 +25,33 @@ public class ClassicRootNode extends BaseCompositeNode {
             doCheck();
         }
     };
-    private AutoPlayNode idle;
-    private AutoPlayNode live;
+    private final AutoPlayNode idle;
+    private final AutoPlayNode live;
 
-    public ClassicRootNode(AutoPlayClientFactory cf, LiveRaceLeaderboard idle, LiveRaceBoardNode live) {
+    public RootNodeClassic(AutoPlayClientFactory cf) {
         this.cf = cf;
-        this.idle = idle;
-        this.live = live;
+        this.idle = new LiveRaceLeaderboard(cf);
+        this.live = new LiveRaceBoardNode(cf);
     }
 
+
     private void doCheck() {
+        final UUID eventUUID = cf.getSlideCtx().getSettings().getEventId();
+        cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
+            @Override
+            public void onSuccess(final EventDTO event) {
+                cf.getSlideCtx().updateEvent(event);
+                _doCheck();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                getBus().fireEvent(new AutoPlayFailureEvent(caught, "Error loading Event with id " + eventUUID));
+            }
+        });
+    }
+
+    private void _doCheck() {
         this.leaderBoardName = cf.getSlideCtx().getSettings().getLeaderboardName();
         AutoplayHelper.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getSlideCtx().getEvent(),
                 leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
@@ -73,8 +92,8 @@ public class ClassicRootNode extends BaseCompositeNode {
                 cf.getSlideCtx().getSettings() == null || //
                 cf.getSlideCtx().getEvent() == null //
         ) {
-            // data not loaded yet
-            throw new RuntimeException("No event loaded");
+            backToConfig();
+            return;
         }
         getBus().addHandler(AutoPlayFailureEvent.TYPE, new AutoPlayFailureEvent.Handler() {
             @Override
@@ -92,10 +111,20 @@ public class ClassicRootNode extends BaseCompositeNode {
     }
 
     private void processFailure(FailureEvent event) {
-        GWT.log("Captured failure event: " + event);
+        if (cf.getSlideCtx() == null || //
+                cf.getSlideCtx().getSettings() == null || //
+                cf.getSlideCtx().getEvent() == null //
+        ) {
+            backToConfig();
+            return;
+        }
         if (event.getCaught() != null) {
             event.getCaught().printStackTrace();
         }
         transitionTo(idle);
+    }
+
+    private void backToConfig() {
+        cf.getPlaceController().goTo(cf.getDefaultPlace());
     }
 }

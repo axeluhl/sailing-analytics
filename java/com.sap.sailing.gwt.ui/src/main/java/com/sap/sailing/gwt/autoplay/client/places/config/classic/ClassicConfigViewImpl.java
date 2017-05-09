@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startup.classic;
+package com.sap.sailing.gwt.autoplay.client.places.config.classic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +23,10 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.app.classic.AutoplayPerspectiveOwnSettings;
+import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicSetting;
-import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
-import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -48,8 +47,6 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
     interface StartPageViewUiBinder extends UiBinder<Widget, ClassicConfigViewImpl> {
     }
 
-    @UiField(provided = true)
-    SAPSailingHeaderWithAuthentication sapHeader;
     @UiField(provided = true)
     ListBox localeSelectionBox;
     @UiField(provided = true)
@@ -80,9 +77,7 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
         this.eventBus = clientFactory.getEventBus();
         this.events = new ArrayList<EventDTO>();
 
-        sapHeader = new SAPSailingHeaderWithAuthentication(StringMessages.INSTANCE.autoplayConfiguration());
-        new FixedSailingAuthentication(clientFactory.getUserService(), sapHeader.getAuthenticationMenuView());
-
+        eventBus.fireEvent(new AutoPlayHeaderEvent(StringMessages.INSTANCE.autoplayConfiguration(), ""));
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
         leaderboardSelectionBox = new ListBox();

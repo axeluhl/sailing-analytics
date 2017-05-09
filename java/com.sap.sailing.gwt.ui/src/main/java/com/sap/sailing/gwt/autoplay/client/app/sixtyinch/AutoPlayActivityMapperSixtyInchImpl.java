@@ -5,6 +5,9 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.places.config.sixtyinch.SixtyInchConfigPlace;
+import com.sap.sailing.gwt.autoplay.client.places.config.sixtyinch.SixtyInchConfigPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.places.config.sixtyinch.SixtyInchConfigViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithBoatsPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithBoatsViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsTop3Place;
@@ -26,12 +29,6 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leader
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapViewImpl;
-import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPlace;
-import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigPresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.config.SixtyInchConfigViewImpl;
-import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial.SixtyInchInitialImpl;
-import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial.SixtyInchInitialPlace;
-import com.sap.sailing.gwt.autoplay.client.places.startup.sixtyinch.initial.SixtyInchInitialPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.utils.CompetitorImageProvider;
 import com.sap.sailing.gwt.autoplay.client.utils.FlagImageProvider;
 
@@ -48,9 +45,6 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
         if (place instanceof SixtyInchConfigPlace) {
             return new SixtyInchConfigPresenterImpl((SixtyInchConfigPlace) place, clientFactory,
                     new SixtyInchConfigViewImpl(clientFactory));
-        }
-        if (place instanceof SixtyInchInitialPlace) {
-            return new SixtyInchInitialPresenterImpl((SixtyInchInitialPlace) place, clientFactory, new SixtyInchInitialImpl());
         }
         if (place instanceof PreRaceLeaderBoardWithCompetitorPlace) {
             return new PreLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithCompetitorPlace) place,
@@ -88,6 +82,6 @@ public class AutoPlayActivityMapperSixtyInchImpl implements ActivityMapper {
         }
 
         GWT.log("unknown place! " + place);
-        return new SixtyInchInitialPresenterImpl(new SixtyInchInitialPlace(), clientFactory, new SixtyInchInitialImpl());
+        return null;
     }
 }

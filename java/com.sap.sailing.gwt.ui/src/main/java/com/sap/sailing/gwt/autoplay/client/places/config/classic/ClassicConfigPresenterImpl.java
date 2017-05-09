@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.startup.classic;
+package com.sap.sailing.gwt.autoplay.client.places.config.classic;
 
 import java.util.List;
 

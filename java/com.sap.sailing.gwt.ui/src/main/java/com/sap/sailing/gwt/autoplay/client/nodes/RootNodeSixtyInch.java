@@ -11,13 +11,12 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
-import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.BaseCompositeNode;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
 
-public class SixtyInchRootNode extends BaseCompositeNode {
+public class RootNodeSixtyInch extends BaseCompositeNode {
     protected static final long PRE_RACE_DELAY = 180000;
     protected static final long LIVE_SWITCH_DELAY = 1000;
     private final AutoPlayClientFactory cf;
@@ -31,18 +30,17 @@ public class SixtyInchRootNode extends BaseCompositeNode {
             doCheck();
         }
     };
-    private AutoPlayNode idleLoop;
-    private AutoPlayNode preLiveRaceLoop;
-    private AutoPlayNode liveRaceLoop;
-    private AutoPlayNode afterLiveRaceLoop;
+    private final AutoPlayLoopNode idleLoop;
+    private final AutoPlayLoopNode preLiveRaceLoop;
+    private final AutoPlayLoopNode liveRaceLoop;
+    private final AutoPlayLoopNode afterLiveRaceLoop;
 
-    public SixtyInchRootNode(AutoPlayClientFactory cf, AutoPlayNode idleLoop, AutoPlayNode preLiveRaceLoop,
-            AutoPlayNode liveRaceLoop, AutoPlayLoopNode afterLiveRaceLoop) {
+    public RootNodeSixtyInch(AutoPlayClientFactory cf) {
         this.cf = cf;
-        this.idleLoop = idleLoop;
-        this.preLiveRaceLoop = preLiveRaceLoop;
-        this.liveRaceLoop = liveRaceLoop;
-        this.afterLiveRaceLoop = afterLiveRaceLoop;
+        this.idleLoop = new AutoPlayLoopNode(30, new IdleUpNextNode(cf));
+        this.preLiveRaceLoop = new AutoPlayLoopNode(30, new PreRaceWithRacemapNode(cf));
+        this.liveRaceLoop = new AutoPlayLoopNode(30, new LiveRaceWithRacemapNode(cf));
+        this.afterLiveRaceLoop = new AutoPlayLoopNode(30, new RaceEndWithCompetitorsNode(cf), idleLoop);
 
         afterLiveRaceLoop.setOnLoopEnd(new Command() {
             @Override
@@ -63,12 +61,8 @@ public class SixtyInchRootNode extends BaseCompositeNode {
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override
             public void onSuccess(final EventDTO event) {
-                if (cf.getSlideCtx().getEvent() == null) {
-                    cf.getSlideCtx().updateEvent(event);
-                    transitionTo(idleLoop);
-                } else {
-                    cf.getSlideCtx().updateEvent(event);
-                }
+                cf.getSlideCtx().updateEvent(event);
+                _doCheck();
             }
 
             @Override
@@ -76,6 +70,9 @@ public class SixtyInchRootNode extends BaseCompositeNode {
                 getBus().fireEvent(new AutoPlayFailureEvent(caught, "Error loading Event with id " + eventUUID));
             }
         });
+    }
+
+    private void _doCheck() {
 
         if (cf.getSlideCtx().getEvent() == null) {
             checkTimer.schedule(5000);
@@ -141,8 +138,8 @@ public class SixtyInchRootNode extends BaseCompositeNode {
         if (cf.getSlideCtx() == null || //
                 cf.getSlideCtx().getSettings() == null//
         ) {
-            // data not loaded yet
-            throw new RuntimeException("No Slidecontext or Settings loaded");
+            backToConfig();
+            return;
         }
         getBus().addHandler(AutoPlayFailureEvent.TYPE, new AutoPlayFailureEvent.Handler() {
             @Override
@@ -159,10 +156,20 @@ public class SixtyInchRootNode extends BaseCompositeNode {
     }
 
     private void processFailure(FailureEvent event) {
-        GWT.log("Captured failure event: " + event);
+        if (cf.getSlideCtx() == null || //
+                cf.getSlideCtx().getSettings() == null || //
+                cf.getSlideCtx().getEvent() == null //
+        ) {
+            backToConfig();
+            return;
+        }
         if (event.getCaught() != null) {
             event.getCaught().printStackTrace();
         }
         transitionTo(idleLoop);
+    }
+
+    private void backToConfig() {
+        cf.getPlaceController().goTo(cf.getDefaultPlace());
     }
 }
