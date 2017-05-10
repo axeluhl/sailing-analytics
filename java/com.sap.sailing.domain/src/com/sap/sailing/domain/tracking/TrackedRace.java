@@ -746,6 +746,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * that had a progress of 100% is finished and thus removed).
      * 
      * @see TrackedRaceStatus
+     * @see DynamicTrackedRace#onStatusChanged(TrackingDataLoader, TrackedRaceStatus)
      */
     TrackedRaceStatus getStatus();
 

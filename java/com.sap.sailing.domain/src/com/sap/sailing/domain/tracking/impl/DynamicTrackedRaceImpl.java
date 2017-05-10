@@ -224,21 +224,25 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         double totalProgress = 1.0;
         synchronized (loaderStatus) {
             this.updateLoaderStatus(source, newStatus);
-            double sumOfLoaderProgresses = 0.0;
             if (!loaderStatus.isEmpty()) {
+                double sumOfLoaderProgresses = 0.0;
+                boolean anyError = false;
+                boolean anyLoading = false;
+                boolean allPrepared = true;
                 raceStatus = TrackedRaceStatusEnum.TRACKING;
                 for (TrackedRaceStatus status : loaderStatus.values()) {
-                    if (status.getStatus() == TrackedRaceStatusEnum.ERROR) {
-                        raceStatus = TrackedRaceStatusEnum.ERROR;
-                    } else if (raceStatus != TrackedRaceStatusEnum.ERROR) {
-                        if (status.getStatus() == TrackedRaceStatusEnum.LOADING) {
-                            raceStatus = TrackedRaceStatusEnum.LOADING;
-                        }
-                        sumOfLoaderProgresses += status.getLoadingProgress();
-                    }
+                    anyError |= (status.getStatus() == TrackedRaceStatusEnum.ERROR);
+                    anyLoading |= (status.getStatus() == TrackedRaceStatusEnum.LOADING);
+                    allPrepared &= (status.getStatus() == TrackedRaceStatusEnum.PREPARED);
+                    sumOfLoaderProgresses += status.getLoadingProgress();
                 }
-                if (raceStatus == TrackedRaceStatusEnum.LOADING) {
+                if (anyError) {
+                    raceStatus = TrackedRaceStatusEnum.ERROR;
+                } else if (anyLoading) {
+                    raceStatus = TrackedRaceStatusEnum.LOADING;
                     totalProgress = sumOfLoaderProgresses / loaderStatus.size();
+                } else {
+                    raceStatus = allPrepared ? TrackedRaceStatusEnum.PREPARED : TrackedRaceStatusEnum.TRACKING;
                 }
             }
         }
