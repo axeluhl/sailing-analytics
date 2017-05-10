@@ -1,12 +1,11 @@
 package com.sap.sse.security.ui.settings;
 
-import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
-import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
+import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
 import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -37,14 +36,14 @@ public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings>
      *            Contains URL parameters for serialization of URL Settings
      */
     public PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StorageDefinition storageDefinitionId, final String serializedSettings) {
-        this(rootLifecycle, userService, storageDefinitionId, new SettingsSerializationHelper() {
+            StoredSettingsLocator storageDefinitionId, final String serializedSettings) {
+        this(rootLifecycle, userService, storageDefinitionId, new SettingsRepresentationTransformer() {
 
             private final SettingsToStringSerializer settingsToStringSerializer = new SettingsToStringSerializer();
 
             @SuppressWarnings("unchecked")
             @Override
-            public <CS extends Settings> CS deserializeFromCurrentUrl(CS defaultSettings) {
+            public <CS extends Settings> CS mergeSettingsObjectWithUrlSettings(CS defaultSettings) {
                 final CS result;
                 if (defaultSettings instanceof SettingsMap) {
                     result = (CS) settingsToStringSerializer.fromString(serializedSettings,
@@ -62,16 +61,16 @@ public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings>
     }
 
     protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StorageDefinition storageDefinitionId,
-            SettingsSerializationHelper settingsSerializationHelper) {
+            UserService userService, StoredSettingsLocator storageDefinitionId,
+            SettingsRepresentationTransformer settingsSerializationHelper) {
         this(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper,
                 new UserSettingsBuildingPipeline(settingsSerializationHelper));
     }
 
     protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StorageDefinition storageDefinitionId,
-            SettingsSerializationHelper settingsSerializationHelper,
-            SettingsBuildingPipeline<JSONObject> settingsBuildingPipeline) {
+            UserService userService, StoredSettingsLocator storageDefinitionId,
+            SettingsRepresentationTransformer settingsSerializationHelper,
+            SettingsBuildingPipeline settingsBuildingPipeline) {
         super(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper, settingsBuildingPipeline);
     }
 

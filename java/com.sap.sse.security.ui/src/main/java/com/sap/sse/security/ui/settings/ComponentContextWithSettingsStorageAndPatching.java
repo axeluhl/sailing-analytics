@@ -4,7 +4,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
-import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
+import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -37,20 +37,20 @@ public class ComponentContextWithSettingsStorageAndPatching<S extends Settings>
      *            The definition for User Settings and Document Settings storage keys
      */
     public ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StorageDefinition storageDefinition) {
-        this(rootLifecycle, userService, storageDefinition, new SettingsSerializationHelper());
+            StoredSettingsLocator storageDefinition) {
+        this(rootLifecycle, userService, storageDefinition, new SettingsRepresentationTransformer());
     }
 
     protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StorageDefinition storageDefinition,
-            SettingsSerializationHelper settingsSerializationHelper) {
+            UserService userService, StoredSettingsLocator storageDefinition,
+            SettingsRepresentationTransformer settingsSerializationHelper) {
         this(rootLifecycle, userService, storageDefinition, settingsSerializationHelper,
                 new UserSettingsBuildingPipelineWithPatching(settingsSerializationHelper));
     }
 
     protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StorageDefinition storageDefinition,
-            SettingsSerializationHelper settingsSerializationHelper,
+            UserService userService, StoredSettingsLocator storageDefinition,
+            SettingsRepresentationTransformer settingsSerializationHelper,
             UserSettingsBuildingPipelineWithPatching settingsBuildingPipeline) {
         super(rootLifecycle, userService, storageDefinition, settingsSerializationHelper, settingsBuildingPipeline);
     }

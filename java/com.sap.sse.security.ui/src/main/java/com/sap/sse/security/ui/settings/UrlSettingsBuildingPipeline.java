@@ -2,31 +2,30 @@ package com.sap.sse.security.ui.settings;
 
 import java.util.List;
 
-import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.gwt.client.shared.settings.PersistableSettingsRepresentations;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
-import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
-import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
+import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
+import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
+import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
 
 /**
- * Settings building pipeline which is only capable of reading settings from URL. Conversion to JSON is not supported.
- * This implementation is supposed to be used by {@link SettingsStorageManager} which offers read-only functionality for
- * settings, and thus, does not provide persistence support.
+ * Settings building pipeline which is only capable of reading settings from URL. Conversion to stored settings
+ * representation is not supported. This implementation is supposed to be used by {@link ComponentContext} which offers
+ * read-only functionality for settings, and thus, does not provide persistence support.
  * 
  * 
  * @author Vladislav Chumak
  *
  */
-public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline<JSONObject> {
+public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
 
     /**
      * Conversion helper which is used by this instance for type conversion/serialization between settings objects and
      * JSON Strings.
      */
-    protected final SettingsSerializationHelper settingsSerializationHelper;
+    protected final SettingsRepresentationTransformer settingsSerializationHelper;
 
     /**
      * Constructs an instance with a custom conversion helper between settings objects and its JSON representation.
@@ -34,31 +33,31 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline<JSO
      * @param settingsSerializationHelper
      *            The custom conversion helper
      */
-    public UrlSettingsBuildingPipeline(SettingsSerializationHelper settingsSerializationHelper) {
+    public UrlSettingsBuildingPipeline(SettingsRepresentationTransformer settingsSerializationHelper) {
         this.settingsSerializationHelper = settingsSerializationHelper;
     }
 
     /**
-     * Constructs a settings object by means of provided defaultSettings and current URL.
+     * Constructs a settings object by means of provided {@code systemDefaultSettings} and current URL.
      * 
-     * @param defaultSettings
+     * @param systemDefaultSettings
      *            The basic settings to be used
-     * @param settingsRepresentations
-     *            The persisted representation of Settings, which is ignored by this implementation
+     * @param settingsRepresentation
+     *            The stored representation of Settings, which is ignored by this implementation
      * @return The constructed settings object
      */
     @Override
-    public <S extends Settings> S getSettingsObject(S defaultSettings,
-            PersistableSettingsRepresentations<JSONObject> settingsRepresentations) {
-        return settingsSerializationHelper.deserializeFromCurrentUrl(defaultSettings);
+    public <S extends Settings> S getSettingsObject(S systemDefaultSettings,
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
+        return settingsSerializationHelper.mergeSettingsObjectWithUrlSettings(systemDefaultSettings);
     }
 
     /**
-     * This implementation does not provide support for JSON conversion of settings objects, because it is supposed to
-     * be used by read-only {@link ComponentContext} implementations.
+     * This implementation does not provide support for conversion of settings objects to storable settings
+     * representation, because it is supposed to be used by read-only {@link ComponentContext} implementations.
      */
     @Override
-    public JSONObject getPersistableSettingsRepresentation(Settings settings, PipelineLevel pipelineLevel,
+    public StorableSettingsRepresentation getStorableSettingsRepresentation(Settings settings, PipelineLevel pipelineLevel,
             List<String> path) {
         throw new UnsupportedOperationException("This pipeline does not support JSON conversion");
     }

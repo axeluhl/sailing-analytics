@@ -47,7 +47,7 @@ public class LeaderboardPanelLifecycle
     }
 
     @Override
-    public LeaderboardSettings extractGlobalSettings(LeaderboardSettings currentLeaderboardSettings) {
+    public LeaderboardSettings extractUserSettings(LeaderboardSettings currentLeaderboardSettings) {
         LeaderboardSettings defaultLeaderboardSettings = SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), currentLeaderboardSettings);
         LeaderboardSettings globalLeaderboardSettings = new LeaderboardSettings(
                 currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
@@ -69,7 +69,7 @@ public class LeaderboardPanelLifecycle
     }
 
     @Override
-    public LeaderboardSettings extractContextSpecificSettings(LeaderboardSettings leaderboardSettings) {
+    public LeaderboardSettings extractDocumentSettings(LeaderboardSettings leaderboardSettings) {
         return leaderboardSettings;
     }
 

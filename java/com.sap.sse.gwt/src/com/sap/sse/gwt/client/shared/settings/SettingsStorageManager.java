@@ -11,31 +11,29 @@ import com.sap.sse.common.settings.generic.GenericSerializableSettings;
  * 
  * @author Vladislav Chumak
  *
- * @param <T>
- *            The type of settings representation inside a {@link PersistableSettingsRepresentations}
  * @see ComponentContextWithSettingsStorage
  * @see GenericSerializableSettings
  */
-public interface SettingsStorageManager<T> {
+public interface SettingsStorageManager {
 
     /**
      * Retrieves the stored representations of Document Settings and User Settings which get packed together in
-     * {@link PersistableSettingsRepresentations}.
+     * {@link StorableRepresentationOfDocumentAndUserSettings}.
      * 
      * @param callback
-     *            The callback which gets called when the persisted settings representations have been retrieved
+     *            The callback which gets called when the stored settings representations have been retrieved
      */
-    void retrieveSettingsRepresentation(OnSettingsLoadedCallback<PersistableSettingsRepresentations<T>> callback);
+    void retrieveSettingsRepresentation(OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> callback);
 
     /**
      * Stores provided settings representations.
      * 
      * @param settingsRepresentations
-     *            The persistable settings representations to store
+     *            The stored settings representations to store
      * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process gets finished
      */
-    void storeSettingsRepresentation(PersistableSettingsRepresentations<T> settingsRepresentations,
+    void storeSettingsRepresentations(StorableRepresentationOfDocumentAndUserSettings settingsRepresentations,
             OnSettingsStoredCallback onSettingsStoredCallback);
 
     /**

@@ -14,7 +14,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndPatching;
 import com.sap.sse.security.ui.settings.SettingsPatch;
-import com.sap.sse.security.ui.settings.StorageDefinition;
+import com.sap.sse.security.ui.settings.StoredSettingsLocator;
 
 /**
  * A specialization of {@link ComponentContextWithSettingsStorageAndPatching} which is specially designed for
@@ -40,7 +40,7 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
      */
     public RaceBoardComponentContext(
             RaceBoardPerspectiveLifecycle rootLifecycle,
-            UserService userService, StorageDefinition storageDefinition) {
+            UserService userService, StoredSettingsLocator storageDefinition) {
         super(rootLifecycle, userService, storageDefinition);
     }
     
@@ -68,7 +68,7 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
      *  <dd>A storing settings patch is applied on top of the Document Settings, when the settings are stored for a context (see
      *  {@link #storeSettingsForContext(Component, Settings, com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback)})
      *  The patch implementation patches the <b>default values</b> of the resulting settings to be stored in order to produce
-     *  a custom diff (see {@link GenericSerializableSettings Settings Framework} of the persisted settings representation.
+     *  a custom diff (see {@link GenericSerializableSettings Settings Framework} of the stored settings representation.
      *  That means, in RaceBoard the user settings are serialized and stored by diffing with <b>System Default Settings</b>,
      *  and Document Settings are serialized and stored by diffing with <b>Mode-Default Settings</b>. In order to achieve this,
      *  the <b>default values</b> of the resulting settings are patched in the following way:
@@ -89,8 +89,8 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
      * @param patchCallback The callback which gets called when the new settings has been reloaded and patched with all patches including the new patch
      */
     public<CS extends GenericSerializableSettings> void addModesPatching(Component<CS> component, CS additiveSettings, OnSettingsPatchedCallback<CS> patchCallback) {
-        addPatchForLoadingSettings(component, PipelineLevel.GLOBAL_DEFAULTS, new ModeLoadingSettingsPatch<>(additiveSettings));
-        addPatchForStoringSettings(component, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS, new ModeStoringSettingsPatch<>(additiveSettings));
+        addPatchForLoadingSettings(component, PipelineLevel.USER_DEFAULTS, new ModeLoadingSettingsPatch<>(additiveSettings));
+        addPatchForStoringSettings(component, PipelineLevel.DOCUMENT_DEFAULTS, new ModeStoringSettingsPatch<>(additiveSettings));
         getInitialSettingsForComponent(component, new OnSettingsLoadedCallback<CS>() {
 
             @Override

@@ -10,58 +10,59 @@ import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
  * @author Vladislav Chumak
  *
  */
-public class StorageDefinition {
+public class StoredSettingsLocator {
 
     private static final String PREFIX = "sailing.ui.usersettings.";
 
-    private final String globalId;
-    private final String contextSpecificId;
+    private final String userSettingsIdPart;
+    private final String documentSettingsIdPart;
 
     /**
      * Constructs the storage definition according to the provided identifications for User Settings and Document
      * Settings in the context of the currently opened entry point.
      * 
-     * @param globalId
-     *            The storage id (without "sailing.ui.usersettings" prefix) for User Settings, which is context
+     * @param userSettingsIdPart
+     *            The storage id part (without "sailing.ui.usersettings" prefix) for User Settings, which is context
      *            independent
-     * @param contextSpecificId
-     *            The storage id (without "sailing.ui.usersettings" prefix and {@code globalId} part) for Document
-     *            Settings, which is context dependent
+     * @param documentSettingsIdPart
+     *            The storage id part (without "sailing.ui.usersettings" prefix and {@code userSettingsIdPart} part) for
+     *            Document Settings, which is context dependent
      */
-    public StorageDefinition(String globalId, String contextSpecificId) {
-        this.globalId = globalId;
-        this.contextSpecificId = contextSpecificId;
+    public StoredSettingsLocator(String userSettingsIdPart, String documentSettingsIdPart) {
+        this.userSettingsIdPart = userSettingsIdPart;
+        this.documentSettingsIdPart = documentSettingsIdPart;
     }
 
     /**
      * Generates the "primary key"-like identification of User Settings for the currently opened entry point, or rather
-     * root perspective/component. {@code #PREFIX} and in the constructor provided {@link #globalId} are used.
+     * root perspective/component. {@code #PREFIX} and in the constructor provided {@link #userSettingsIdPart} are used.
      * 
      * @return Storage key for User Settings
      */
-    public String generateStorageGlobalKey() {
-        return PREFIX + globalId;
+    public String generateStorageKeyForUserSettings() {
+        return PREFIX + userSettingsIdPart;
     }
 
     /**
      * Generates the "primary key"-like identification of Document Settings for the currently opened entry point, or
      * rather root perspective/component, <b>AND</b> the context which is viewed by root perspective/component.
-     * {@code #PREFIX} and in the constructor provided {@link #globalId} and {@link #contextSpecificId} are used.
+     * {@code #PREFIX} and in the constructor provided {@link #userSettingsIdPart} and {@link #documentSettingsIdPart}
+     * are used.
      * 
      * @return Storage key for Document Settings
      */
-    public String generateStorageContextSpecificKey() {
-        return generateStorageGlobalKey() + "#" + contextSpecificId;
+    public String generateStorageKeyForDocumentSettings() {
+        return generateStorageKeyForUserSettings() + "#" + documentSettingsIdPart;
     }
 
     /**
-     * Utility method used to build a context specific id for {@link StorageDefinition} construction.
+     * Utility method used to build a context specific id for {@link StoredSettingsLocator} construction.
      * 
      * @param contextDefinitionParameters
      *            The parameters which shape the context
      * @return The generated context definition id from the provided parameters
      */
-    public static String buildContextDefinitionId(String... contextDefinitionParameters) {
+    public static String buildDocumentSettingsIdPart(String... contextDefinitionParameters) {
         StringBuilder str = new StringBuilder("");
         boolean first = true;
         for (String contextDefinitionParameter : contextDefinitionParameters) {

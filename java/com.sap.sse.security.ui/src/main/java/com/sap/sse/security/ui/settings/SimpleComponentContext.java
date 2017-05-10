@@ -2,7 +2,6 @@ package com.sap.sse.security.ui.settings;
 
 import java.util.ArrayList;
 
-import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
@@ -10,9 +9,9 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
-import com.sap.sse.gwt.client.shared.settings.PersistableSettingsRepresentations;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
-import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
+import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
+import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
 
 /**
  * Manages all default settings of perspectives and components. This simple implementation has no support for settings
@@ -29,12 +28,12 @@ import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
  */
 public class SimpleComponentContext<S extends Settings> implements ComponentContext<S> {
 
-    protected final SettingsSerializationHelper settingsSerializationHelper;
+    protected final SettingsRepresentationTransformer settingsSerializationHelper;
 
     /**
      * The pipeline used for the settings construction.
      */
-    protected final SettingsBuildingPipeline<JSONObject> settingsBuildingPipeline;
+    protected final SettingsBuildingPipeline settingsBuildingPipeline;
 
     /**
      * The {@link ComponentLifecycle} of the root component/perspective
@@ -47,17 +46,17 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
      *            The {@link ComponentLifecycle} of the root component/perspective
      */
     public SimpleComponentContext(ComponentLifecycle<S> rootLifecycle) {
-        this(rootLifecycle, new SettingsSerializationHelper());
+        this(rootLifecycle, new SettingsRepresentationTransformer());
     }
 
     protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle,
-            SettingsSerializationHelper settingsSerializationHelper) {
+            SettingsRepresentationTransformer settingsSerializationHelper) {
         this(rootLifecycle, settingsSerializationHelper, new UrlSettingsBuildingPipeline(settingsSerializationHelper));
     }
 
     protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle,
-            SettingsSerializationHelper settingsSerializationHelper,
-            SettingsBuildingPipeline<JSONObject> settingsBuildingPipeline) {
+            SettingsRepresentationTransformer settingsSerializationHelper,
+            SettingsBuildingPipeline settingsBuildingPipeline) {
         this.rootLifecycle = rootLifecycle;
         this.settingsSerializationHelper = settingsSerializationHelper;
         this.settingsBuildingPipeline = settingsBuildingPipeline;
@@ -102,7 +101,7 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     private S getDefaultSettings() {
         S defaultSettings = rootLifecycle.createDefaultSettings();
         return settingsBuildingPipeline.getSettingsObject(defaultSettings,
-                new PersistableSettingsRepresentations<JSONObject>(null, null));
+                new StorableRepresentationOfDocumentAndUserSettings(null, null));
     }
 
     /**

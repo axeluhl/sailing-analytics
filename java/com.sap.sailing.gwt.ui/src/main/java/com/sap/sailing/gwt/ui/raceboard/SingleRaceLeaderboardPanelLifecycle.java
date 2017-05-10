@@ -53,7 +53,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     }
     
     @Override
-    public LeaderboardSettings extractContextSpecificSettings(LeaderboardSettings currentLeaderboardSettings) {
+    public LeaderboardSettings extractDocumentSettings(LeaderboardSettings currentLeaderboardSettings) {
         LeaderboardSettings defaultLeaderboardSettings = SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), currentLeaderboardSettings);
         LeaderboardSettings contextSpecificLeaderboardSettings = new LeaderboardSettings(
                 currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),

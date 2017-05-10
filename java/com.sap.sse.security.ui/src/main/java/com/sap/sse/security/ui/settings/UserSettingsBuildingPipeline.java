@@ -2,14 +2,14 @@ package com.sap.sse.security.ui.settings;
 
 import java.util.List;
 
-import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.settings.PersistableSettingsRepresentations;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
-import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
+import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
+import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
+import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
 
 /**
- * Settings building pipeline which is capable of building settings considering System Default Settings, persisted
+ * Settings building pipeline which is capable of building settings considering System Default Settings, stored
  * representations of User Settings and Document Settings, and current URL. The precedence of settings is:
  * <ul>
  * <li>System Default Settings</li>
@@ -29,32 +29,33 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
      * @param settingsSerializationHelper
      *            The custom conversion helper
      */
-    public UserSettingsBuildingPipeline(SettingsSerializationHelper settingsStringConverter) {
+    public UserSettingsBuildingPipeline(SettingsRepresentationTransformer settingsStringConverter) {
         super(settingsStringConverter);
     }
 
     /**
-     * Constructs a settings object by means of provided defaultSettings, persisted representations of User Settings and
-     * Document Settings, and current URL.
+     * Constructs a settings object by means of provided {@code systemDefaultSettings}, stored representations of User
+     * Settings and Document Settings, and current URL.
      * 
-     * @param defaultSettings
+     * @param systemDefaultSettings
      *            The basic settings to be used
-     * @param settingsRepresentations
-     *            The persisted representation of User Settings and Document Settings
+     * @param settingsRepresentation
+     *            The stored representation of User Settings and Document Settings
      * @return The constructed settings object
      */
     @Override
-    public <CS extends Settings> CS getSettingsObject(CS defaultSettings,
-            PersistableSettingsRepresentations<JSONObject> settingsRepresentations) {
-        if (settingsRepresentations.getContextSpecificSettingsRepresentation() != null) {
-            defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
-                    settingsRepresentations.getContextSpecificSettingsRepresentation());
-        } else if (settingsRepresentations.getGlobalSettingsRepresentation() != null) {
-            defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
-                    settingsRepresentations.getGlobalSettingsRepresentation());
+    public <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
+        CS effectiveSettings = systemDefaultSettings;
+        if (settingsRepresentation.hasStoredDocumentSettings()) {
+            effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
+                    settingsRepresentation.getDocumentSettingsRepresentation());
+        } else if (settingsRepresentation.hasStoredUserSettings()) {
+            effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
+                    settingsRepresentation.getUserSettingsRepresentation());
         }
-        defaultSettings = settingsSerializationHelper.deserializeFromCurrentUrl(defaultSettings);
-        return defaultSettings;
+        effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithUrlSettings(effectiveSettings);
+        return effectiveSettings;
     }
 
     /**
@@ -67,12 +68,12 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
      *            The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
      * @param path
      *            The path of the settings in the settings tree
-     * @return The JSON representation of the provided settings
+     * @return The storable settings representation of the provided settings
      */
     @Override
-    public JSONObject getPersistableSettingsRepresentation(Settings newSettings, PipelineLevel pipelineLevel,
-            List<String> path) {
-        return settingsSerializationHelper.serializeFromSettingsObject(newSettings);
+    public StorableSettingsRepresentation getStorableSettingsRepresentation(Settings newSettings,
+            PipelineLevel pipelineLevel, List<String> path) {
+        return settingsSerializationHelper.convertToSettingsRepresentation(newSettings);
     }
 
 }

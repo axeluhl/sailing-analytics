@@ -38,13 +38,13 @@ public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<R
     }
 
     @Override
-    public RegattaRaceStatesSettings extractGlobalSettings(RegattaRaceStatesSettings settings) {
+    public RegattaRaceStatesSettings extractUserSettings(RegattaRaceStatesSettings settings) {
         return settings.createInstanceWithSettings(null, null, settings.isShowOnlyRacesOfSameDay(),
                 settings.isShowOnlyCurrentlyRunningRaces());
     }
 
     @Override
-    public RegattaRaceStatesSettings extractContextSpecificSettings(RegattaRaceStatesSettings settings) {
+    public RegattaRaceStatesSettings extractDocumentSettings(RegattaRaceStatesSettings settings) {
         return settings;
     }
 }

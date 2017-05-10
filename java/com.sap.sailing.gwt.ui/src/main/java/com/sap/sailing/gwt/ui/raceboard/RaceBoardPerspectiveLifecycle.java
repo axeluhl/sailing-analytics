@@ -103,12 +103,12 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     }
 
     @Override
-    protected RaceBoardPerspectiveOwnSettings extractOwnGlobalSettings(RaceBoardPerspectiveOwnSettings settings) {
+    protected RaceBoardPerspectiveOwnSettings extractOwnUserSettings(RaceBoardPerspectiveOwnSettings settings) {
         return settings;
     }
 
     @Override
-    protected RaceBoardPerspectiveOwnSettings extractOwnContextSettings(RaceBoardPerspectiveOwnSettings settings) {
+    protected RaceBoardPerspectiveOwnSettings extractOwnDocumentSettings(RaceBoardPerspectiveOwnSettings settings) {
         return settings;
     }
 }

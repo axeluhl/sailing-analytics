@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.gwt.json.client.JSONObject;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
-import com.sap.sse.gwt.client.shared.settings.PersistableSettingsRepresentations;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
-import com.sap.sse.gwt.client.shared.settings.SettingsSerializationHelper;
+import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
+import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
+import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
 
 /**
  * Specialization of {@link UserSettingsBuildingPipeline} which offers multiple hooks for settings patching throughout
@@ -37,56 +37,59 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
      * @param settingsSerializationHelper
      *            The custom conversion helper
      */
-    public UserSettingsBuildingPipelineWithPatching(SettingsSerializationHelper settingsStringConverter) {
+    public UserSettingsBuildingPipelineWithPatching(SettingsRepresentationTransformer settingsStringConverter) {
         super(settingsStringConverter);
     }
 
     /**
-     * Constructs a settings object by means of provided defaultSettings, persisted representations of User Settings and
-     * Document Settings, current URL, and loading patches, which have been added to this pipeline instance.
+     * Constructs a settings object by means of provided {@code systemDefaultSettings}, stored representations of User
+     * Settings and Document Settings, current URL, and loading patches, which have been added to this pipeline
+     * instance.
      * 
-     * @param defaultSettings
+     * @param systemDefaultSettings
      *            The basic settings to be used
      * @param settingsRepresentations
-     *            The persisted representation of User Settings and Document Settings
+     *            The stored representation of User Settings and Document Settings
      * @return The constructed settings object
      */
     @Override
-    public <CS extends Settings> CS getSettingsObject(CS defaultSettings,
-            PersistableSettingsRepresentations<JSONObject> settingsRepresentations) {
-        defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.SYSTEM_DEFAULTS);
-        if (settingsRepresentations.getContextSpecificSettingsRepresentation() != null) {
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
-            defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
-                    settingsRepresentations.getContextSpecificSettingsRepresentation());
-        } else if (settingsRepresentations.getGlobalSettingsRepresentation() != null) {
-            defaultSettings = settingsSerializationHelper.deserializeFromJson(defaultSettings,
-                    settingsRepresentations.getGlobalSettingsRepresentation());
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
+    public <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations) {
+        CS effectiveSettings = systemDefaultSettings;
+        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.SYSTEM_DEFAULTS);
+        if (settingsRepresentations.hasStoredDocumentSettings()) {
+            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS);
+            effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
+                    settingsRepresentations.getDocumentSettingsRepresentation());
+        } else if (settingsRepresentations.hasStoredUserSettings()) {
+            effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
+                    settingsRepresentations.getUserSettingsRepresentation());
+            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS);
         } else {
-            defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.GLOBAL_DEFAULTS);
+            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS);
         }
-        defaultSettings = applyPatchesForPipelineLevel(defaultSettings, PipelineLevel.CONTEXT_SPECIFIC_DEFAULTS);
-        defaultSettings = settingsSerializationHelper.deserializeFromCurrentUrl(defaultSettings);
-        return defaultSettings;
+        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.DOCUMENT_DEFAULTS);
+        effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithUrlSettings(effectiveSettings);
+        return effectiveSettings;
     }
 
-    private <CS extends Settings> CS applyPatchesForPipelineLevel(CS defaultSettings, PipelineLevel pipelineLevel) {
+    private <CS extends Settings> CS applyPatchesForPipelineLevel(CS currentSettings, PipelineLevel pipelineLevel) {
+        CS effectiveSettings = currentSettings;
         for (Entry<List<String>, List<SettingsPatch<? extends Settings>>> entry : patchesForLoadingSettings
                 .getSettingsPatches(pipelineLevel).entrySet()) {
             List<String> path = entry.getKey();
             List<SettingsPatch<? extends Settings>> settingsPatches = entry.getValue();
             if (!settingsPatches.isEmpty()) {
                 Settings patchedComponentSettings = ComponentUtils
-                        .determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(path), defaultSettings);
+                        .determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(path), effectiveSettings);
                 for (SettingsPatch<? extends Settings> settingsPatch : settingsPatches) {
                     patchedComponentSettings = patchSettings(patchedComponentSettings, settingsPatch);
                 }
-                defaultSettings = ComponentUtils.patchSettingsTree(new ArrayList<>(path), patchedComponentSettings,
-                        defaultSettings);
+                effectiveSettings = ComponentUtils.patchSettingsTree(new ArrayList<>(path), patchedComponentSettings,
+                        effectiveSettings);
             }
         }
-        return defaultSettings;
+        return effectiveSettings;
     }
 
     /**
@@ -99,10 +102,10 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
      *            The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
      * @param path
      *            The path of the settings in the settings tree
-     * @return The JSON representation of the provided settings
+     * @return The stored settings representation of the provided settings
      */
     @Override
-    public JSONObject getPersistableSettingsRepresentation(Settings settings, PipelineLevel pipelineLevel,
+    public StorableSettingsRepresentation getStorableSettingsRepresentation(Settings settings, PipelineLevel pipelineLevel,
             List<String> path) {
         for (PipelineLevel level : pipelineLevel.getSortedLevelsUntilCurrent()) {
             List<SettingsPatch<? extends Settings>> settingsPatches = patchesForStoringSettings.getSettingsPatches(path,
@@ -111,7 +114,7 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
                 settings = patchSettings(settings, settingsPatch);
             }
         }
-        return super.getPersistableSettingsRepresentation(settings, pipelineLevel, path);
+        return super.getStorableSettingsRepresentation(settings, pipelineLevel, path);
     }
 
     @SuppressWarnings("unchecked")
