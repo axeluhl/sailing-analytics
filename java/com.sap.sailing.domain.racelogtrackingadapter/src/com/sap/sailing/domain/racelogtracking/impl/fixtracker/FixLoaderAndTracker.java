@@ -512,11 +512,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * Updates the {@link FixLoaderAndTracker}'s overall state on the {@link TrackedRace} based on the progresses of
      * {@link #loadingJobs}.
      */
-    private void updateStatusAndProgress() {
+    private void updateStatusAndProgressWithErrorHandling() {
         try {
-            synchronized (loadingJobs) {
-                updateStatusAndProgressWithExistingLock();
-            }
+            updateStatusAndProgress();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error while updating status and progress for FixLoaderAndTracker", e);
         }
@@ -524,33 +522,35 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     /**
      * Updates the {@link FixLoaderAndTracker}'s overall state on the {@link TrackedRace} based on the progresses of
-     * {@link #loadingJobs}. Calls to this method need to be synchronized for {@link #loadingJobs}.
+     * {@link #loadingJobs}.
      */
-    private void updateStatusAndProgressWithExistingLock() {
-        final TrackedRaceStatusEnum status;
-        final double progress;
-        if (!loadingJobs.isEmpty()) {
-            double progressSum = 0.0;
-            boolean allFinished = true;
-            for (AbstractLoadingJob loadingJob : loadingJobs) {
-                allFinished &= loadingJob.finished;
-                progressSum += loadingJob.progress;
-            }
-            if (allFinished) {
-                loadingJobs.clear();
+    private void updateStatusAndProgress() {
+        synchronized (loadingJobs) {
+            final TrackedRaceStatusEnum status;
+            final double progress;
+            if (!loadingJobs.isEmpty()) {
+                double progressSum = 0.0;
+                boolean allFinished = true;
+                for (AbstractLoadingJob loadingJob : loadingJobs) {
+                    allFinished &= loadingJob.finished;
+                    progressSum += loadingJob.progress;
+                }
+                if (allFinished) {
+                    loadingJobs.clear();
+                    status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
+                    progress = 1.0;
+                } else {
+                    progress = progressSum / loadingJobs.size();
+                    status = TrackedRaceStatusEnum.LOADING;
+                }
+                
+            } else {
                 status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
                 progress = 1.0;
-            } else {
-                progress = progressSum / loadingJobs.size();
-                status = TrackedRaceStatusEnum.LOADING;
             }
-            
-        } else {
-            status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
-            progress = 1.0;
+            setStatusAndProgress(status, progress);
+            loadingJobs.notifyAll();
         }
-        setStatusAndProgress(status, progress);
-        loadingJobs.notifyAll();
     }
     
     /**
@@ -559,18 +559,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      */
     private void addLoadingJob(AbstractLoadingJob job) {
         synchronized (loadingJobs) {
-            addLoadingJobWithExistingLock(job);
-            updateStatusAndProgressWithExistingLock();
+            loadingJobs.add(job);
+            updateStatusAndProgress();
         }
         ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(job);
-    }
-    
-    /**
-     * Adds a {@link AbstractLoadingJob} to track its loading state. Calls to this method need to be synchronized for
-     * {@link #loadingJobs}.
-     */
-    private void addLoadingJobWithExistingLock(AbstractLoadingJob job) {
-        loadingJobs.add(job);
     }
     
     /**
@@ -613,14 +605,14 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         public final void run() {
             progress = 0.5;
-            updateStatusAndProgress();
+            updateStatusAndProgressWithErrorHandling();
             
             try {
                 load();
             } finally {
                 progress = 1.0;
                 finished = true;
-                updateStatusAndProgress();
+                updateStatusAndProgressWithErrorHandling();
             }
         }
         
