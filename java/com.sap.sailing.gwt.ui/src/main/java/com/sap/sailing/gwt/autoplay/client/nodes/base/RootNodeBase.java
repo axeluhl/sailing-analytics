@@ -83,7 +83,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                     @Override
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
-                        if (result == null) {
+                        if (result == null || !result.getB().equals(currentLifeRace)) {
                             cf.getSlideCtx().setCurrenLifeRace(null);
                             boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
                             setCurrentState(comingFromLiferace ? RootNodeState.IDLE : RootNodeState.AFTER_LIVE,
