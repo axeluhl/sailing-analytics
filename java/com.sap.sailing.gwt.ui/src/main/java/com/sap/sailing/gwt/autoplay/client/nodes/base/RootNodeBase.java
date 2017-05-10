@@ -16,6 +16,7 @@ import com.sap.sse.common.Util.Pair;
 public abstract class RootNodeBase extends BaseCompositeNode {
     protected static final long PRE_RACE_DELAY = 180000;
     protected static final long LIVE_SWITCH_DELAY = 1000;
+    private int UPDATE_STATE_TIMER = 5000;
 
     private final AutoPlayClientFactory cf;
     private String leaderBoardName;
@@ -56,11 +57,8 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     }
 
     private void doCheck() {
-        if (currentState == RootNodeState.AFTER_LIVE) {
-            checkTimer.schedule(5000);
-            GWT.log("do change state while in afterrace");
-            return;
-        }
+        // start next update, to ensure it is done no matter any error cases
+        checkTimer.schedule(UPDATE_STATE_TIMER);
         final UUID eventUUID = cf.getSlideCtx().getSettings().getEventId();
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override
@@ -83,10 +81,12 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                     @Override
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
-                        if (result == null || !result.getB().equals(currentLifeRace)) {
+                        // we have no race, or we have one, and had a different one in the past
+                        if (result == null || (currentLifeRace != null && !result.getB().equals(currentLifeRace))) {
                             cf.getSlideCtx().setCurrenLifeRace(null);
-                            boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
-                            setCurrentState(comingFromLiferace ? RootNodeState.IDLE : RootNodeState.AFTER_LIVE,
+                            boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null
+                                    || (result != null && !result.getB().equals(currentLifeRace));
+                            setCurrentState(comingFromLiferace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
                                     currentState);
                             currentLifeRace = null;
                             currentPreLifeRace = null;
@@ -97,27 +97,30 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                             if (loadedLiveRace == null || timeToRaceStartInMs > PRE_RACE_DELAY) {
                                 boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
                                 GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + comingFromLiferace);
-                                setCurrentState(comingFromLiferace ? RootNodeState.IDLE : RootNodeState.AFTER_LIVE,
+                                setCurrentState(comingFromLiferace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
                                         currentState);
                                 currentLifeRace = null;
                                 currentPreLifeRace = null;
                             } else if (/* is pre liverace */ timeToRaceStartInMs < PRE_RACE_DELAY
                                     && timeToRaceStartInMs > LIVE_SWITCH_DELAY) {
                                 if (/* is new pre live race */!loadedLiveRace.equals(currentPreLifeRace)) {
-                                    currentPreLifeRace = loadedLiveRace;
-                                    currentLifeRace = null;
-                                    GWT.log("UpcomingLiferaceDetectedEvent: " + loadedLiveRace.toString());
-                                    setCurrentState(RootNodeState.PRE_RACE, currentState);
+                                    boolean veto = setCurrentState(RootNodeState.PRE_RACE, currentState);
+                                    if (!veto) {
+                                        currentPreLifeRace = loadedLiveRace;
+                                        currentLifeRace = null;
+                                        GWT.log("UpcomingLiferaceDetectedEvent: " + loadedLiveRace.toString());
+                                    }
                                 }
                             } else /* is live race */ {
                                 currentPreLifeRace = null;
                                 if (/* is new live race */!loadedLiveRace.equals(currentLifeRace)) {
-                                    currentLifeRace = loadedLiveRace;
-                                    setCurrentState(RootNodeState.LIVE, currentState);
+                                    boolean veto = setCurrentState(RootNodeState.LIVE, currentState);
+                                    if (!veto) {
+                                        currentLifeRace = loadedLiveRace;
+                                    }
                                 }
                             }
                         }
-                        checkTimer.schedule(5000);
                     }
 
                     @Override
@@ -130,12 +133,20 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                 });
     }
 
-    private final void setCurrentState(RootNodeState goingTo, RootNodeState comingFrom) {
+    private final boolean setCurrentState(RootNodeState goingTo, RootNodeState comingFrom) {
         if (goingTo != comingFrom) {
-            this.currentState = goingTo;
-            processStateTransition(goingTo, comingFrom);
+            boolean veto = processStateTransition(goingTo, comingFrom);
+            if (veto) {
+                GWT.log("Vetoed switching to state " + goingTo + " coming from " + comingFrom);
+            } else {
+                // only update the state if it was not vetoed, to ensure that a futurs change comingFrom is clean
+                GWT.log("Switching to state " + goingTo + " coming from " + comingFrom);
+                this.currentState = goingTo;
+            }
+            return veto;
         } else {
             GWT.log("Transition to same autoplay state, skipping");
+            return true;
         }
     }
 
@@ -147,7 +158,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
         cf.getPlaceController().goTo(cf.getDefaultPlace());
     }
 
-    protected abstract void processStateTransition(RootNodeState goingTo, RootNodeState comingFrom);
+    protected abstract boolean processStateTransition(RootNodeState goingTo, RootNodeState comingFrom);
 
     protected abstract void processFailure(FailureEvent event);
 }

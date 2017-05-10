@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -41,12 +42,13 @@ public class IdleUpNextNode extends FiresPlaceNode {
         firePlaceChangeAndStartTimer();
 
         if (raceTimesInfoProvider == null) {
+
             raceTimesInfoProvider = new RaceTimesInfoProvider(cf.getSailingService(), AutoplayHelper.asyncActionsExecutor,
                     cf.getErrorReporter(), new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
             raceTimesInfoProvider.reset();
 
-            StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard(cf.getSlideCtx().getEvent(),
-                    cf.getSlideCtx().getSettings().getLeaderboardName());
+            StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(
+                    cf.getSlideCtx().getEvent(), cf.getSlideCtx().getSettings().getLeaderboardName());
             for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : race.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
@@ -99,6 +101,7 @@ public class IdleUpNextNode extends FiresPlaceNode {
     public static void checkForRaceStarts(AbstractLeaderboardDTO currentLeaderboard, Date serverTimeDuringRequest,
             RaceTimesInfoProvider raceTimesInfoProvider,
             ArrayList<Pair<RegattaAndRaceIdentifier, Date>> raceToStartOfRace) {
+        GWT.log("Checking race starts");
         Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceColumnDTO race : currentLeaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {

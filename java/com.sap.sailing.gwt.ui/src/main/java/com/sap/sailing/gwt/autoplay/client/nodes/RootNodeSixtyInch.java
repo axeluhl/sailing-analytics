@@ -30,7 +30,12 @@ public class RootNodeSixtyInch extends RootNodeBase {
         });
     }
 
-    protected void processStateTransition(RootNodeState goingTo, RootNodeState comingFrom) {
+    protected boolean processStateTransition(RootNodeState goingTo, RootNodeState comingFrom) {
+        // block transitions, until the afterLiveRaceLoop returns to the idleLoop, to ensure scoreboard is shown at
+        // least 30 seconds
+        if (comingFrom == RootNodeState.AFTER_LIVE && afterLiveRaceLoop.getCurrentNode() != idleLoop) {
+            return true;
+        }
         switch (goingTo) {
         case IDLE:
             transitionTo(idleLoop);
@@ -45,6 +50,7 @@ public class RootNodeSixtyInch extends RootNodeBase {
             transitionTo(afterLiveRaceLoop);
             break;
         }
+        return false;
     }
 
     protected void processFailure(FailureEvent event) {

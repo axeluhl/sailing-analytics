@@ -57,7 +57,7 @@ public class RaceMapHelper {
     public static void create(SailingServiceAsync sailingService, ErrorReporter errorReporter, String leaderBoardName,
             UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
             RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
-
+        GWT.log("Creating map for " + regattaAndRaceIdentifier);
         raceboardTimer.reset();
         raceboardTimer.setLivePlayDelayInMillis(1000);
         raceboardTimer.setRefreshInterval(1000);

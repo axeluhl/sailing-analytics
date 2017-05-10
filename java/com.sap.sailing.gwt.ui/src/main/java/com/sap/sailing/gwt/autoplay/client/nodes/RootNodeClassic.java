@@ -16,17 +16,18 @@ public class RootNodeClassic extends RootNodeBase {
         this.live = new LiveRaceBoardNode(cf);
     }
 
-    protected void processStateTransition(RootNodeState goingTo, RootNodeState comingFrom) {
+    protected boolean processStateTransition(RootNodeState goingTo, RootNodeState comingFrom) {
         switch (goingTo) {
         case IDLE:
-        case PRE_RACE:
         case AFTER_LIVE:
             transitionTo(idle);
             break;
+        case PRE_RACE:
         case LIVE:
             transitionTo(live);
             break;
         }
+        return false;
     }
 
     protected void processFailure(FailureEvent event) {

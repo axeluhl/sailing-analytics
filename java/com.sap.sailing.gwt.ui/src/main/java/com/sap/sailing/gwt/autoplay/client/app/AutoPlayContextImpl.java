@@ -53,7 +53,7 @@ public class AutoPlayContextImpl implements AutoPlayContext {
         if(this.lifeRace != null){
             if(!this.lifeRace.equals(lifeRace)){
                 this.lastRace = this.lifeRace;
-                GWT.log("lastrace is not " + lastRace);
+                GWT.log("lastrace is now " + lastRace + " liferace is " + lifeRace);
             }
         }
         this.lifeRace = lifeRace;
