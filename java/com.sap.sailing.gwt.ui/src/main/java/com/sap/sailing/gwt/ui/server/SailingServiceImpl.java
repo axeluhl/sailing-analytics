@@ -6011,10 +6011,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
         final FileStorageManagementService fileStorageManagementService = getService().getFileStorageManagementService();
         if (fileStorageManagementService != null) {
-			for (FileStorageService s : fileStorageManagementService.getAvailableFileStorageServices()) {
-				serviceDtos.add(FileStorageServiceDTOUtils.convert(s, getLocale(localeInfoName)));
-			}
-		}
+            for (FileStorageService s : fileStorageManagementService.getAvailableFileStorageServices()) {
+                serviceDtos.add(FileStorageServiceDTOUtils.convert(s, getLocale(localeInfoName)));
+            }
+        }
         return serviceDtos.toArray(new FileStorageServiceDTO[0]);
     }
 
