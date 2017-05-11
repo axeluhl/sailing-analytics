@@ -5,18 +5,14 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
@@ -54,11 +50,9 @@ public class ConfigViewImpl extends Composite implements ConfigView {
     @UiField
     Button startAutoPlayButton;
     @UiField
+    Button settingsButton;
+    @UiField
     DivElement leaderboardSelectionUi;
-    @UiField
-    DivElement screenConfigurationUi;
-    @UiField
-    FlowPanel leaderboardPerspectiveSettingsPanel;
     private final EventBus eventBus;
     private final List<EventDTO> events;
     private AutoPlayClientFactory clientFactory;
@@ -101,8 +95,7 @@ public class ConfigViewImpl extends Composite implements ConfigView {
         }
         initWidget(uiBinder.createAndBindUi(this));
         this.ensureDebugId("AutoPlayStartView");
-        leaderboardSelectionUi.getStyle().setVisibility(Visibility.HIDDEN);
-        screenConfigurationUi.getStyle().setVisibility(Visibility.HIDDEN);
+
         validate();
     }
 
@@ -135,50 +128,53 @@ public class ConfigViewImpl extends Composite implements ConfigView {
                 }
             }
         }
-        leaderboardSelectionUi.getStyle().setVisibility(selectedEvent != null ? Visibility.VISIBLE : Visibility.HIDDEN);
         validate();
     }
 
     @UiHandler("leaderboardSelectionBox")
     void onLeaderboardSelectionChange(ChangeEvent event) {
-        String selectedLeaderboardName = getSelectedLeaderboardName();
-        if (selectedLeaderboardName != null) {
-            this.selectedLeaderboard = getSelectedLeaderboard();
-            leaderboardPerspectiveSettingsPanel.clear();
-            Button perspectiveSettingsButton = new Button(StringMessages.INSTANCE.settings());
-            perspectiveSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
-            leaderboardPerspectiveSettingsPanel.add(perspectiveSettingsButton);
-            perspectiveSettingsButton.setEnabled(true);
-            perspectiveSettingsButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    selectedAutoPlayType.getConfig().loadSettings(selectedEvent, selectedLeaderboard, settingsHolder);
-                }
-            });
-        }
+        this.selectedLeaderboard = getSelectedLeaderboard();
         validate();
-        screenConfigurationUi.getStyle()
-                .setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
+    }
+
+    @UiHandler("settingsButton")
+    void onOpenSettings(ClickEvent event) {
+        selectedAutoPlayType.getConfig().loadSettings(selectedEvent, selectedLeaderboard, settingsHolder);
     }
 
     private boolean validate() {
         boolean readyToGo = true;
-        if (readyToGo && selectedAutoPlayType == null)
+        if (readyToGo && selectedAutoPlayType == null) {
             readyToGo = false;
+            eventSelectionBox.setEnabled(false);
+            eventSelectionBox.getElement().getStyle().setOpacity(0.2);
+        } else {
+            eventSelectionBox.setEnabled(true);
+            eventSelectionBox.getElement().getStyle().setOpacity(1);
+        }
 
         EventDTO selectedEvent = getSelectedEvent();
-        if (readyToGo && selectedEvent == null)
+        if (selectedEvent == null) {
             readyToGo = false;
+            leaderboardSelectionBox.setEnabled(false);
+            leaderboardSelectionBox.getElement().getStyle().setOpacity(0.2);
+        } else {
+            leaderboardSelectionBox.setEnabled(true);
+            leaderboardSelectionBox.getElement().getStyle().setOpacity(1);
+        }
 
         String selectedLeaderboardName = getSelectedLeaderboardName();
         if (readyToGo && selectedLeaderboardName == null)
             readyToGo = false;
 
         startAutoPlayButton.setEnabled(readyToGo);
-        if (readyToGo)
+        if (readyToGo) {
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
-        else
+            settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+        } else {
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+            settingsButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+        }
         return readyToGo;
     }
 

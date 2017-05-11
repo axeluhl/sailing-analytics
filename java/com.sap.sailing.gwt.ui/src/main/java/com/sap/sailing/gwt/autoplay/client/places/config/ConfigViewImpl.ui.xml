@@ -5,20 +5,22 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:style>
-		.row {
-			padding-bottom:1em;
-		}
-		.perspectiveConfigurationPanel {
-			width: 100%;
-		}
-		.headline {
-			background-color: #eeeeee;
-			margin-top: 1em;
-			margin-bottom: 1em;
-		}
+    .row {
+    	padding-bottom: 1em;
+    }
+    
+    .perspectiveConfigurationPanel {
+    	width: 100%;
+    }
+    
+    .headline {
+    	background-color: #eeeeee;
+    	margin-top: 1em;
+    	margin-bottom: 1em;
+    }
     </ui:style>
     <g:HTMLPanel>
-        <div style="height:1em;" />
+        <div style="height:6em;" />
         <div class="{res.mediaCss.grid} {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 			    <span><ui:text from='{i18n.chooseALanguage}' />:</span>
@@ -52,21 +54,20 @@
 	        </div>
 		</div>
         
-        <div ui:field="screenConfigurationUi">
-			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
-				<div class="{res.mediaCss.columns}"><ui:text from='{i18n.page}' />&nbsp;<ui:text from='{i18n.settings}' /></div>
-			</div>
+        <div>
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span><ui:text from='{i18n.leaderboard}' /> <ui:text from='{i18n.page}' />:</span>
+				   &nbsp; 
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:FlowPanel ui:field="leaderboardPerspectiveSettingsPanel" />
+                    <g:Button ui:field="settingsButton" text="{i18n.settings}" styleName="{res.mainCss.button}" />
 		        </div>
 			</div>
+             <div style="height:2em;" />
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.columns}"><hr/></div>
 			</div>			
+             <div style="height:2em;" />
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 				    &nbsp;
