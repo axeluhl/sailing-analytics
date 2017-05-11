@@ -73,6 +73,7 @@ class LocationManager: NSObject {
         if #available(iOS 9, *) {
             locationManager.allowsBackgroundLocationUpdates = true;
         }
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.delegate = self
     }
     
