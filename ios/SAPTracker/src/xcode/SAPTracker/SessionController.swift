@@ -78,7 +78,7 @@ class SessionController: NSObject {
         sendingBackgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Send GPS Fixes", expirationHandler: {
             self.endGPSFixSendingInBackgroundTask()
         })
-        DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default).async(execute: {
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async(execute: {
             self.gpsFixController.sendSlice(completion: { (withSuccess) in
                 self.endGPSFixSendingInBackgroundTask()
             })
