@@ -28,9 +28,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                         LiveRaceWithRacemapAndLeaderBoardPlace place = new LiveRaceWithRacemapAndLeaderBoardPlace();
                         place.setError(caught);
                         setPlaceToGo(place);
-                        firePlaceChangeAndStartTimer();
-                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),
-                                cf.getAutoPlayCtx().getLifeRace().getRaceName()));
+                        firePlaceChangeAndStartTimer();                       
+                        getBus().fireEvent(new AutoPlayHeaderEvent("", ""));
                     }
 
                     @Override

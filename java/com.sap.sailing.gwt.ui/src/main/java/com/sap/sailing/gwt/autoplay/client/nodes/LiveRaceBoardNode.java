@@ -75,7 +75,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         cf.getAutoPlayCtx().getLifeRace(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(),
                         /** leaderboardGroupName */
                         null, /** eventId */
-                        null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true);
+                        null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true, false);
                 setPlaceToGo(new LiveRaceWithRaceboardPlace(raceboardPerspective));
                 firePlaceChangeAndStartTimer();
 
@@ -86,6 +86,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
             @Override
             public void onFailure(Throwable caught) {
                 cf.getErrorReporter().reportError("Error while loading data for raceboard: " + caught.getMessage());
+                getBus().fireEvent(new AutoPlayHeaderEvent("", ""));
             }
         };
         sailingService.getRaceboardData(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),

@@ -32,6 +32,7 @@ public class PreRaceWithRacemapNode extends FiresPlaceNode {
                         place.setError(caught);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
+                        getBus().fireEvent(new AutoPlayHeaderEvent("", ""));
                     }
 
                     @Override
