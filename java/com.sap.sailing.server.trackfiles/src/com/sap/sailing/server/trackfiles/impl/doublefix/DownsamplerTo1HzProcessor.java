@@ -32,7 +32,7 @@ public final class DownsamplerTo1HzProcessor implements DoubleFixProcessor {
         fix.correctTimepointBy(currentOffsetInMs);
         if (fix.getFixSecond() < currentSecond) {
             currentOffsetInMs = (currentSecond - fix.getFixSecond() + 1) * 1000;
-            LOG.warning("Timepoint before last second, using offser of " + currentOffsetInMs + "ms from now on");
+            LOG.warning("Timepoint before last second, using offset of " + currentOffsetInMs + "ms from now on");
         }
         if (currentSecond != fix.getFixSecond()) {
             computeDownsampledFixForCurrentSecond();

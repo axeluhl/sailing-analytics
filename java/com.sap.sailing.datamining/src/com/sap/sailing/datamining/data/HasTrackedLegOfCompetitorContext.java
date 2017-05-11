@@ -37,7 +37,6 @@ public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     @Statistic(messageKey="TimeSpentInSeconds", resultDecimals=0, ordinal=4)
     public Long getTimeTakenInSeconds();
 
-    
     @Dimension(messageKey = "Tack")
     default Tack getTack() throws NoWindException {
         return getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getTack(
