@@ -13,23 +13,23 @@ import CoreData
 class CheckIn: NSManagedObject {
 
     func initialize() {
-        event = CoreDataManager.sharedManager.newEvent(self)
-        leaderboard = CoreDataManager.sharedManager.newLeaderboard(self)
+        event = CoreDataManager.sharedManager.newEvent(checkIn: self)
+        leaderboard = CoreDataManager.sharedManager.newLeaderboard(checkIn: self)
     }
 
     func updateWithCheckInData(checkInData: CheckInData) {
         serverURL = checkInData.serverURL
-        event.updateWithEventData(checkInData.eventData)
-        leaderboard.updateWithLeaderboardData(checkInData.leaderboardData)
+        event.updateWithEventData(eventData: checkInData.eventData)
+        leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
     }
 
-    func eventURL() -> NSURL? {
-        return NSURL(string: "\(serverURL)/gwt/Home.html?navigationTab=Regattas#EventPlace:eventId=\(event.eventID)")
+    func eventURL() -> URL? {
+        return URL(string: "\(serverURL)/gwt/Home.html?navigationTab=Regattas#EventPlace:eventId=\(event.eventID)")
     }
     
-    func leaderboardURL() -> NSURL? {
+    func leaderboardURL() -> URL? {
         guard let name = leaderboard.nameWithQueryAllowedCharacters() else { return nil }
-        return NSURL(string: "\(serverURL)/gwt/Leaderboard.html?name=\(name)&showRaceDetails=false&embedded=true&hideToolbar=true")
+        return URL(string: "\(serverURL)/gwt/Leaderboard.html?name=\(name)&showRaceDetails=false&embedded=true&hideToolbar=true")
     }
     
 }

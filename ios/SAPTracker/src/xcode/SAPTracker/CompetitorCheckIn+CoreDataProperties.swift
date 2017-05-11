@@ -16,7 +16,7 @@ extension CompetitorCheckIn {
 
     @NSManaged var teamImageURL: String?
     @NSManaged var teamImageRetry: Bool
-    @NSManaged var teamImageData: NSData?
+    @NSManaged var teamImageData: Data?
     @NSManaged var sailID: String
     @NSManaged var nationality: String
     @NSManaged var countryCode: String

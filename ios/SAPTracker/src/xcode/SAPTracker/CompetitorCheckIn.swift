@@ -12,9 +12,8 @@ import CoreData
 class CompetitorCheckIn: CheckIn {
 
     override func updateWithCheckInData(checkInData: CheckInData) {
-        super.updateWithCheckInData(checkInData)
+        super.updateWithCheckInData(checkInData: checkInData)
         teamImageURL = checkInData.teamImageURL
-        teamImageRetry = false
         boatClassName = checkInData.competitorData.boatClassName
         competitorID = checkInData.competitorData.competitorID
         countryCode = checkInData.competitorData.countryCode

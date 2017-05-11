@@ -21,30 +21,30 @@ class MarkViewController: SessionViewController {
         update()
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refresh()
     }
 
     // MARK: - Setup
 
-    private func setup() {
+    fileprivate func setup() {
         setupButtons()
         setupNavigationBar()
     }
     
-    private func setupButtons() {
-        startTrackingButton.setBackgroundImage(Images.GreenHighlighted, forState: .Highlighted)
+    fileprivate func setupButtons() {
+        startTrackingButton.setBackgroundImage(Images.GreenHighlighted, for: .highlighted)
     }
 
-    private func setupNavigationBar() {
+    fileprivate func setupNavigationBar() {
         navigationItem.titleView = TitleView(title: markCheckIn.event.name, subtitle: markCheckIn.leaderboard.name)
         navigationController?.navigationBar.setNeedsLayout()
     }
 
     // MARK: - Update
     
-    private func update() {
+    fileprivate func update() {
         SVProgressHUD.show()
         markSessionController.update {
             self.refresh()
@@ -54,43 +54,43 @@ class MarkViewController: SessionViewController {
     
     // MARK: - Refresh
     
-    private func refresh() {
+    fileprivate func refresh() {
         markNameLabel.text = markCheckIn.name
     }
 
     // MARK: - Actions
     
-    @IBAction func optionButtonTapped(sender: AnyObject) {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
+    @IBAction func optionButtonTapped(_ sender: AnyObject) {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .Default) { (action) in
-            self.performSegueWithIdentifier(Segue.Settings, sender: self)
+        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { (action) in
+            self.performSegue(withIdentifier: Segue.Settings, sender: self)
         }
-        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .Default) { (action) in
+        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { (action) in
             self.checkOut()
         }
-        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .Default) { (action) -> Void in
+        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { (action) -> Void in
             self.update()
         }
-        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .Default) { (action) -> Void in
-            self.performSegueWithIdentifier(Segue.About, sender: alertController)
+        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { (action) -> Void in
+            self.performSegue(withIdentifier: Segue.About, sender: alertController)
         }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(settingsAction)
         alertController.addAction(checkOutAction)
         alertController.addAction(updateAction)
         alertController.addAction(aboutAction)
         alertController.addAction(cancelAction)
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
     }
     
     // MARK: - Segues
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == Segue.Tracking) {
-            let trackingNC = segue.destinationViewController as! UINavigationController
+            let trackingNC = segue.destination as! UINavigationController
             let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
             trackingVC.checkIn = markCheckIn
             trackingVC.sessionController = markSessionController
@@ -99,7 +99,7 @@ class MarkViewController: SessionViewController {
     
     // MARK: - Properties
     
-    private lazy var markSessionController: MarkSessionController = {
+    fileprivate lazy var markSessionController: MarkSessionController = {
         return MarkSessionController(checkIn: self.markCheckIn)
     }()
 
@@ -111,14 +111,14 @@ extension MarkViewController: SessionViewControllerDelegate {
 
     func performCheckOut() {
         markSessionController.checkOut { (withSuccess) in
-            self.performCheckOutCompleted(withSuccess)
+            self.performCheckOutCompleted(withSuccess: withSuccess)
         }
     }
     
-    private func performCheckOutCompleted(withSuccess: Bool) {
-        CoreDataManager.sharedManager.deleteObject(markCheckIn)
+    fileprivate func performCheckOutCompleted(withSuccess: Bool) {
+        CoreDataManager.sharedManager.deleteObject(object: markCheckIn)
         CoreDataManager.sharedManager.saveContext()
-        self.navigationController!.popViewControllerAnimated(true)
+        self.navigationController!.popViewController(animated: true)
     }
 
     func startTracking() throws {

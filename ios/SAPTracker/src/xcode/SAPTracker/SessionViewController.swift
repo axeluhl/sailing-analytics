@@ -31,25 +31,25 @@ class SessionViewController: UIViewController {
     
     // MARK: - Actions
 
-    @IBAction func startTrackingButtonTapped(sender: AnyObject) {
+    @IBAction func startTrackingButtonTapped(_ sender: AnyObject) {
         // TODO: Add or add not WiFi Alert?
         //if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {
-        //    showStartTrackingWiFiAlert(sender)
+        //    showStartTrackingWiFiAlert()
         //} else {
-        startTracking(sender)
+        startTracking()
         //}
     }
 
     // MARK: - Tracking
 
-    private func startTracking(sender: AnyObject) {
+    fileprivate func startTracking() {
         do {
             try delegate.startTracking()
-            performSegueWithIdentifier(Segue.Tracking, sender: sender)
+            performSegue(withIdentifier: Segue.Tracking, sender: self)
         } catch let error as LocationManager.LocationManagerError {
-            showStartTrackingFailureAlert(error.description)
+            showStartTrackingFailureAlert(message: error.description)
         } catch {
-            logError("\(#function)", error: error)
+            logError(name: "\(#function)", error: error)
         }
     }
     
@@ -61,51 +61,57 @@ class SessionViewController: UIViewController {
     
     // MARK: - Alerts
     
-    private func showCheckOutAlert() {
+    fileprivate func showCheckOutAlert() {
         let alertController = UIAlertController(
             title: Translation.Common.Warning.String,
             message: Translation.CompetitorView.CheckOutAlert.Message.String,
-            preferredStyle: .Alert
+            preferredStyle: .alert
         )
-        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .Default) { (action) in
+        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .default) { (action) in
             self.delegate.performCheckOut()
         }
-        let noAction = UIAlertAction(title: Translation.Common.No.String, style: .Cancel, handler: nil)
+        let noAction = UIAlertAction(title: Translation.Common.No.String, style: .cancel, handler: nil)
         alertController.addAction(yesAction)
         alertController.addAction(noAction)
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
     }
 
-    private func showStartTrackingWiFiAlert(sender: AnyObject) {
-        let alertController = UIAlertController(title: "INFO",
-                                                message: "WIFI IS ON BUT NOT CONNECTED",
-                                                preferredStyle: .Alert
+    fileprivate func showStartTrackingWiFiAlert() {
+        let alertController = UIAlertController(
+            title: "INFO",
+            message: "WIFI IS ON BUT NOT CONNECTED",
+            preferredStyle: .alert
         )
-        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .Default) { (action) in
-            UIApplication.sharedApplication().openURL(NSURL(string: "prefs:root=WIFI") ?? NSURL())
+        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { (action) in
+            if let settingsURL = URL(string: "prefs:root=WIFI") {
+                UIApplication.shared.openURL(settingsURL)
+            }
         }
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
-            self.startTracking(sender)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { (action) in
+            self.startTracking()
         }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(settingsAction)
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
     }
     
-    private func showStartTrackingFailureAlert(message: String) {
-        let alertController = UIAlertController(title: Translation.Common.Warning.String,
-                                                message: message,
-                                                preferredStyle: .Alert
+    fileprivate func showStartTrackingFailureAlert(message: String) {
+        let alertController = UIAlertController(
+            title: Translation.Common.Warning.String,
+            message: message,
+            preferredStyle: .alert
         )
-        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .Default) { (action) in
-            UIApplication.sharedApplication().openURL(NSURL(string: "prefs:root=LOCATION_SERVICES") ?? NSURL())
+        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { (action) in
+            if let locationServiceURL = URL(string: "prefs:root=LOCATION_SERVICES") {
+                UIApplication.shared.openURL(locationServiceURL)
+            }
         }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Default, handler: nil)
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .default, handler: nil)
         alertController.addAction(settingsAction)
         alertController.addAction(cancelAction)
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
     }
 
 }

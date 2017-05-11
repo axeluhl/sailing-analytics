@@ -14,10 +14,10 @@ import CoreData
 
 extension Event {
 
-    @NSManaged var endDate: NSTimeInterval
+    @NSManaged var endDate: TimeInterval
     @NSManaged var eventID: String
     @NSManaged var name: String
-    @NSManaged var startDate: NSTimeInterval
+    @NSManaged var startDate: TimeInterval
     @NSManaged var checkIn: CheckIn
 
 }

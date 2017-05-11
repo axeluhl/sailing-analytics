@@ -8,18 +8,18 @@
 
 import Foundation
 
-public class CheckInData: NSObject {
+open class CheckInData: NSObject {
     
-    private struct ItemNames {
+    fileprivate struct ItemNames {
         static let EventID = "event_id"
         static let LeaderboardName = "leaderboard_name"
         static let CompetitorID = "competitor_id"
         static let MarkID = "mark_id"
     }
     
-    public enum Type {
-        case Competitor
-        case Mark
+    public enum CheckInDataType {
+        case competitor
+        case mark
     }
     
     let serverURL: String
@@ -27,7 +27,7 @@ public class CheckInData: NSObject {
     let leaderboardName: String
     let competitorID: String?
     let markID: String?
-    let type: Type
+    let type: CheckInDataType
 
     var eventData = EventData()
     var leaderboardData = LeaderboardData()
@@ -45,7 +45,7 @@ public class CheckInData: NSObject {
         self.leaderboardName = leaderboardName
         self.markID = nil
         self.serverURL = serverURL
-        self.type = Type.Competitor
+        self.type = CheckInDataType.competitor
         super.init()
     }
 
@@ -59,7 +59,7 @@ public class CheckInData: NSObject {
         self.leaderboardName = leaderboardName
         self.markID = markID
         self.serverURL = serverURL
-        type = Type.Mark
+        type = CheckInDataType.mark
         super.init()
     }
 
@@ -81,40 +81,42 @@ public class CheckInData: NSObject {
         )
     }
 
-    convenience init?(url: NSURL) {
+    convenience init?(url: URL) {
         guard let host = url.host else { return nil }
-        guard let components = NSURLComponents(string: url.absoluteString) else { return nil }
         
         // Set server URL
-        let serverURL = url.scheme + "://" + host + (url.port != nil ? ":" + url.port!.stringValue : "")
+        let serverURL = url.scheme! + "://" + host + (url.port != nil ? ":\(url.port!)" : "")
         
         // In query component replace '+' occurrences with '%20' as a workaround for bug 3664
-        components.percentEncodedQuery = components.percentEncodedQuery?.stringByReplacingOccurrencesOfString("+", withString: "%20")
-        let queryItems = components.queryItems
+        var components = URLComponents(string: url.absoluteString)
+        components?.percentEncodedQuery = components?.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%20")
+        guard let queryItems = components?.queryItems else { return nil }
         
         // Get check-in items
-        guard let eventID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.EventID) else { return nil }
-        guard let leaderboardName = CheckInData.queryItemValue(queryItems, itemName: ItemNames.LeaderboardName) else { return nil }
-        if let competitorID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.CompetitorID) {
-            self.init(serverURL: serverURL,
-                      eventID: eventID,
-                      leaderboardName: leaderboardName,
-                      competitorID: competitorID
+        guard let eventID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.EventID) else { return nil }
+        guard let leaderboardName = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.LeaderboardName) else { return nil }
+        if let competitorID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.CompetitorID) {
+            self.init(
+                serverURL: serverURL,
+                eventID: eventID,
+                leaderboardName: leaderboardName,
+                competitorID: competitorID
             )
-        } else if let markID = CheckInData.queryItemValue(queryItems, itemName: ItemNames.MarkID) {
-            self.init(serverURL: serverURL,
-                      eventID: eventID,
-                      leaderboardName: leaderboardName,
-                      markID: markID
+        } else if let markID = CheckInData.queryItemValue(queryItems: queryItems, itemName: ItemNames.MarkID) {
+            self.init(
+                serverURL: serverURL,
+                eventID: eventID,
+                leaderboardName: leaderboardName,
+                markID: markID
             )
         } else {
-            logError("\(#function)", error: "unknown check-in type")
+            logError(name: "\(#function)", error: "unknown check-in type")
             return nil
         }
     }
     
     convenience init?(urlString: String) {
-        guard let url = NSURL(string: urlString) else { return nil }
+        guard let url = URL(string: urlString) else { return nil }
         
         // Init with URL
         self.init(url: url)
@@ -126,14 +128,14 @@ public class CheckInData: NSObject {
         } else if let markCheckIn = checkIn as? MarkCheckIn {
             self.init(markCheckIn: markCheckIn)
         } else {
-            logError("\(#function)", error: "unknown check-in type")
+            logError(name: "\(#function)", error: "unknown check-in type")
             return nil
         }
     }
 
     // MARK: - Helper
     
-    class private func queryItemValue(queryItems: [NSURLQueryItem]?, itemName: String) -> String? {
+    class fileprivate func queryItemValue(queryItems: [URLQueryItem]?, itemName: String) -> String? {
         return queryItems?.filter({(item) -> Bool in item.name == itemName}).first?.value
     }
     

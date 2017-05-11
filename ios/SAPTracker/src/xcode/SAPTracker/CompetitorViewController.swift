@@ -32,7 +32,7 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     
     var competitorCheckIn: CompetitorCheckIn!
     
-    var countdownTimer: NSTimer?
+    var countdownTimer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,30 +41,30 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
         update()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refresh()
     }
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupButtons()
         setupCountdownTimer()
         setupLocalization()
         setupNavigationBar()
     }
     
-    private func setupButtons() {
-        eventButton.setBackgroundImage(Images.BlueHighlighted, forState: .Highlighted)
-        leaderboardButton.setBackgroundImage(Images.BlueHighlighted, forState: .Highlighted)
-        startTrackingButton.setBackgroundImage(Images.GreenHighlighted, forState: .Highlighted)
+    fileprivate func setupButtons() {
+        eventButton.setBackgroundImage(Images.BlueHighlighted, for: .highlighted)
+        leaderboardButton.setBackgroundImage(Images.BlueHighlighted, for: .highlighted)
+        startTrackingButton.setBackgroundImage(Images.GreenHighlighted, for: .highlighted)
     }
     
-    private func setupCountdownTimer() {
+    fileprivate func setupCountdownTimer() {
         countdownTimer?.invalidate()
-        countdownTimer = NSTimer.scheduledTimerWithTimeInterval(
-            1,
+        countdownTimer = Timer.scheduledTimer(
+            timeInterval: 1,
             target: self,
             selector: #selector(CompetitorViewController.countdownTimerTick),
             userInfo: nil,
@@ -73,24 +73,26 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
         countdownTimerTick()
     }
     
-    private func setupLocalization() {
+    fileprivate func setupLocalization() {
+        announcementLabel.text = Translation.CompetitorView.AnnouncementLabel.Text.String
         countdownDaysTitleLabel.text = Translation.CompetitorView.CountdownDaysTitleLabel.Text.String
         countdownHoursTitleLabel.text = Translation.CompetitorView.CountdownHoursTitleLabel.Text.String
         countdownMinutesTitleLabel.text = Translation.CompetitorView.CountdownMinutesTitleLabel.Text.String
-        eventButton.setTitle(Translation.CompetitorView.EventButton.Title.String, forState: .Normal)
-        leaderboardButton.setTitle(Translation.LeaderboardView.Title.String, forState: .Normal)
-        startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, forState: .Normal)
-        announcementLabel.text = Translation.CompetitorView.AnnouncementLabel.Text.String
+        eventButton.setTitle(Translation.CompetitorView.EventButton.Title.String, for: .normal)
+        leaderboardButton.setTitle(Translation.LeaderboardView.Title.String, for: .normal)
+        startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, for: .normal)
+        teamImageAddButton.setTitle(Translation.CompetitorView.TeamImageAddButton.Title.String, for: .normal)
+        teamImageRetryButton.setTitle(Translation.CompetitorView.TeamImageUploadRetryButton.Title.String, for: .normal)
     }
     
-    private func setupNavigationBar() {
+    fileprivate func setupNavigationBar() {
         navigationItem.titleView = TitleView(title: competitorCheckIn.event.name, subtitle: competitorCheckIn.leaderboard.name)
         navigationController?.navigationBar.setNeedsLayout()
     }
     
     // MARK: - Update
     
-    private func update() {
+    fileprivate func update() {
         SVProgressHUD.show()
         competitorSessionController.update {
             self.refresh()
@@ -100,63 +102,64 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     
     // MARK: - Refresh
     
-    private func refresh() {
+    fileprivate func refresh() {
         refreshCompetitor()
         refreshTeamImage()
     }
     
-    private func refreshCompetitor() {
+    fileprivate func refreshCompetitor() {
         competitorNameLabel.text = competitorCheckIn.name
         competitorFlagImageView.image = UIImage(named: competitorCheckIn.countryCode)
         competitorSailLabel.text = competitorCheckIn.sailID
     }
     
-    private func refreshTeamImage() {
+    fileprivate func refreshTeamImage() {
         if let imageData = competitorCheckIn.teamImageData {
-            teamImageView.image = UIImage(data: imageData)
+            teamImageView.image = UIImage(data: imageData as Data)
             if competitorCheckIn.teamImageRetry {
                 refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: true)
             } else {
-                self.refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
-                setTeamImageWithURLRequest(competitorCheckIn.teamImageURL, completion: { (withSuccess) in
+                refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
+                setTeamImageWithURLRequest(urlString: competitorCheckIn.teamImageURL, completion: { (withSuccess) in
                     self.refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
                 })
             }
         } else {
             self.refreshTeamImageButtons(showAddButton: true, showEditButton: false, showRetryButton: false)
-            setTeamImageWithURLRequest(competitorCheckIn.teamImageURL, completion: { (withSuccess) in
+            setTeamImageWithURLRequest(urlString: competitorCheckIn.teamImageURL, completion: { (withSuccess) in
                 self.refreshTeamImageButtons(showAddButton: !withSuccess, showEditButton: withSuccess, showRetryButton: false)
             })
         }
     }
     
-    private func refreshTeamImageButtons(showAddButton showAddButton: Bool, showEditButton: Bool, showRetryButton: Bool) {
-        teamImageAddButton.hidden = !showAddButton
-        teamImageEditButton.hidden = !showEditButton
-        teamImageRetryButton.hidden = !showRetryButton
+    fileprivate func refreshTeamImageButtons(showAddButton: Bool, showEditButton: Bool, showRetryButton: Bool) {
+        teamImageAddButton.isHidden = !showAddButton
+        teamImageEditButton.isHidden = !showEditButton
+        teamImageRetryButton.isHidden = !showRetryButton
     }
     
     // MARK: - TeamImage
 
-    private func setTeamImageWithURLRequest(urlString: String?, completion: (withSuccess: Bool) -> Void) {
-        setTeamImageWithURLRequest(urlString, success: { () in
-            completion(withSuccess: true)
+    fileprivate func setTeamImageWithURLRequest(urlString: String?, completion: @escaping (_ withSuccess: Bool) -> Void) {
+        setTeamImageWithURLRequest(urlString: urlString, success: { () in
+            completion(true)
         }) {
-            completion(withSuccess: false)
+            completion(false)
         }
     }
     
-    private func setTeamImageWithURLRequest(urlString: String?, success: () -> Void, failure: () -> Void) {
+    fileprivate func setTeamImageWithURLRequest(urlString: String?, success: @escaping () -> Void, failure: @escaping () -> Void) {
         guard let string = urlString else { failure(); return }
-        guard let url = NSURL(string: string) else { failure(); return }
-        teamImageView.setImageWithURLRequest(NSURLRequest(URL: url),
-                                             placeholderImage: nil,
-                                             success: { (request, response, image) in self.setTeamImageWithURLSuccess(image, success: success) },
-                                             failure: { (request, response, error) in self.setTeamImageWithURLFailure(failure) }
+        guard let url = URL(string: string) else { failure(); return }
+        teamImageView.setImageWith(
+            URLRequest(url: url),
+            placeholderImage: nil,
+            success: { (request, response, image) in self.setTeamImageWithURLSuccess(image: image, success: success) },
+            failure: { (request, response, error) in self.setTeamImageWithURLFailure(error: error, failure: failure) }
         )
     }
     
-    private func setTeamImageWithURLSuccess(image: UIImage, success: () -> Void) {
+    fileprivate func setTeamImageWithURLSuccess(image: UIImage, success: () -> Void) {
         teamImageView.image = image
         competitorCheckIn.teamImageRetry = false
         competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
@@ -164,115 +167,120 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
         success()
     }
     
-    private func setTeamImageWithURLFailure(failure: () -> Void) {
+    fileprivate func setTeamImageWithURLFailure(error: Error, failure: () -> Void) {
+        logError(name: "\(#function)", error: error)
         failure()
     }
     
     // MARK: - Timer
     
-    @objc private func countdownTimerTick() {
-        if competitorCheckIn.event.startDate - NSDate().timeIntervalSince1970 > 0 {
+    @objc fileprivate func countdownTimerTick() {
+        if competitorCheckIn.event.startDate - Date().timeIntervalSince1970 > 0 {
             regattaStartLabel.text = Translation.CompetitorView.RegattaStartLabel.Text.BeforeRegattaDidStart.String
-            let duration = competitorCheckIn.event.startDate - NSDate().timeIntervalSince1970
+            let duration = competitorCheckIn.event.startDate - Date().timeIntervalSince1970
             let days = Int(duration / (60 * 60 * 24))
             let hours = Int(duration / (60 * 60)) - (days * 24)
             let minutes = Int(duration / 60) - (days * 24 * 60) - (hours * 60)
             countdownDaysLabel.text = String(format: "%02d", days)
             countdownHoursLabel.text = String(format: "%02d", hours)
             countdownMinutesLabel.text = String(format: "%02d", minutes)
-            countdownView.hidden = false
+            countdownView.isHidden = false
             countdownViewHeight.constant = 60
         } else {
             regattaStartLabel.text = Translation.CompetitorView.RegattaStartLabel.Text.AfterRegattaDidStart.String
-            countdownView.hidden = true
+            countdownView.isHidden = true
             countdownViewHeight.constant = 0
         }
     }
     
     // MARK: - Actions
     
-    @IBAction func teamImageAddButtonTapped(sender: AnyObject) {
+    @IBAction func teamImageAddButtonTapped(_ sender: AnyObject) {
         showSelectImageAlert()
     }
     
-    @IBAction func teamImageEditButtonTapped(sender: AnyObject) {
+    @IBAction func teamImageEditButtonTapped(_ sender: AnyObject) {
         showSelectImageAlert()
     }
     
-    @IBAction func teamImageRetryButtonTapped(sender: AnyObject) {
-        uploadTeamImageData(competitorCheckIn.teamImageData)
+    @IBAction func teamImageRetryButtonTapped(_ sender: AnyObject) {
+        if let data = competitorCheckIn.teamImageData {
+            uploadTeamImageData(imageData: data)
+        }
     }
     
-    @IBAction func eventButtonTapped(sender: UIButton) {
-        UIApplication.sharedApplication().openURL(competitorCheckIn.eventURL() ?? NSURL())
+    @IBAction func eventButtonTapped(_ sender: UIButton) {
+        if let eventURL = competitorCheckIn.eventURL() {
+            UIApplication.shared.openURL(eventURL)
+        }
     }
     
-    @IBAction func optionButtonTapped(sender: AnyObject) {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
+    @IBAction func optionButtonTapped(_ sender: AnyObject) {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .Default) { (action) in
-            self.performSegueWithIdentifier(Segue.Settings, sender: self)
+        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { (action) in
+            self.performSegue(withIdentifier: Segue.Settings, sender: self)
         }
-        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .Default) { (action) in
+        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { (action) in
             self.checkOut()
         }
-        let replaceImageAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .Default) { (action) in
+        let replaceImageAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { (action) in
             self.showSelectImageAlert()
         }
-        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .Default) { (action) -> Void in
+        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { (action) -> Void in
             self.update()
         }
-        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .Default) { (action) -> Void in
-            self.performSegueWithIdentifier(Segue.About, sender: alertController)
+        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { (action) -> Void in
+            self.performSegue(withIdentifier: Segue.About, sender: alertController)
         }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(settingsAction)
         alertController.addAction(checkOutAction)
         alertController.addAction(replaceImageAction)
         alertController.addAction(updateAction)
         alertController.addAction(aboutAction)
         alertController.addAction(cancelAction)
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
     }
     
     // MARK: - Alerts
     
-    private func showSelectImageAlert() {
-        if UIImagePickerController.isSourceTypeAvailable(.Camera) && UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
+    fileprivate func showSelectImageAlert() {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) && UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
             let alertController = UIAlertController(title: Translation.CompetitorView.SelectImageAlert.Title.String,
                                                     message: Translation.CompetitorView.SelectImageAlert.Message.String,
-                                                    preferredStyle: .Alert
+                                                    preferredStyle: .alert
             )
-            let cameraAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.CameraAction.Title.String, style: .Default) { (action) in
-                self.showImagePicker(.Camera)
+            let cameraAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.CameraAction.Title.String, style: .default) { (action) in
+                self.showImagePicker(sourceType: .camera)
             }
-            let photoLibraryAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.PhotoLibraryAction.Title.String, style: .Default) { (action) in
-                self.showImagePicker(.PhotoLibrary)
+            let photoLibraryAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.PhotoLibraryAction.Title.String, style: .default) { (action) in
+                self.showImagePicker(sourceType: .photoLibrary)
             }
-            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
             alertController.addAction(cameraAction)
             alertController.addAction(photoLibraryAction)
             alertController.addAction(cancelAction)
-            presentViewController(alertController, animated: true, completion: nil)
-        } else if UIImagePickerController.isSourceTypeAvailable(.Camera) {
-            showImagePicker(.Camera)
-        } else if UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
-            showImagePicker(.PhotoLibrary)
+            present(alertController, animated: true, completion: nil)
+        } else if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            showImagePicker(sourceType: .camera)
+        } else if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+            showImagePicker(sourceType: .photoLibrary)
         }
     }
     
     // MARK: - Segues
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == Segue.Tracking) {
-            let trackingNC = segue.destinationViewController as! UINavigationController
+            let trackingNC = segue.destination as! UINavigationController
             let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
             trackingVC.checkIn = competitorCheckIn
             trackingVC.sessionController = competitorSessionController
         } else if (segue.identifier == Segue.Leaderboard) {
-            let leaderboardNC = segue.destinationViewController as! UINavigationController
+            let leaderboardNC = segue.destination as! UINavigationController
             let leaderboardVC = leaderboardNC.viewControllers[0] as! LeaderboardViewController
             leaderboardVC.checkIn = competitorCheckIn
         }
@@ -280,7 +288,7 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     
     // MARK: - Properties
     
-    private lazy var competitorSessionController: CompetitorSessionController = {
+    fileprivate lazy var competitorSessionController: CompetitorSessionController = {
         return CompetitorSessionController(checkIn: self.competitorCheckIn)
     }()
     
@@ -290,70 +298,73 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
 
 extension CompetitorViewController: UIImagePickerControllerDelegate {
     
-    private func showImagePicker(sourceType: UIImagePickerControllerSourceType) {
+    fileprivate func showImagePicker(sourceType: UIImagePickerControllerSourceType) {
         let imagePickerController = UIImagePickerController()
         imagePickerController.delegate = self
         imagePickerController.sourceType = sourceType;
         imagePickerController.mediaTypes = [kUTTypeImage as String];
         imagePickerController.allowsEditing = false
-        presentViewController(imagePickerController, animated: true, completion: nil)
+        present(imagePickerController, animated: true, completion: nil)
     }
     
-    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            dismissViewControllerAnimated(true) { self.pickedImage(image) }
+            dismiss(animated: true) { self.pickedImage(image: image) }
         } else {
-            dismissViewControllerAnimated(true, completion: nil)
+            dismiss(animated: true, completion: nil)
         }
     }
     
-    private func pickedImage(image: UIImage) {
+    fileprivate func pickedImage(image: UIImage) {
         teamImageView.image = image
         competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
         CoreDataManager.sharedManager.saveContext()
-        uploadTeamImageData(competitorCheckIn.teamImageData)
+        if let data = competitorCheckIn.teamImageData {
+            uploadTeamImageData(imageData: data)
+        }
     }
     
     // MARK: - Upload
     
-    private func uploadTeamImageData(imageData: NSData!) {
+    fileprivate func uploadTeamImageData(imageData: Data!) {
         SVProgressHUD.show()
-        competitorSessionController.postTeamImageData(imageData, competitorID: competitorCheckIn.competitorID,
+        competitorSessionController.postTeamImageData(imageData: imageData, competitorID: competitorCheckIn.competitorID,
                                             success: { (teamImageURL) in
                                                 SVProgressHUD.popActivity()
-                                                self.uploadTeamImageDataSuccess(teamImageURL)
+                                                self.uploadTeamImageDataSuccess(teamImageURL: teamImageURL)
             },
                                             failure: { (error) in
                                                 SVProgressHUD.popActivity()
-                                                self.uploadTeamImageDataFailure(error)
+                                                self.uploadTeamImageDataFailure(error: error)
             }
         )
     }
     
-    private func uploadTeamImageDataSuccess(teamImageURL: String) {
+    fileprivate func uploadTeamImageDataSuccess(teamImageURL: String) {
         competitorCheckIn.teamImageRetry = false
         competitorCheckIn.teamImageURL = teamImageURL
         CoreDataManager.sharedManager.saveContext()
         refreshTeamImage()
     }
     
-    private func uploadTeamImageDataFailure(error: RequestManager.Error) {
+    fileprivate func uploadTeamImageDataFailure(error: Error) {
         competitorCheckIn.teamImageRetry = true
         CoreDataManager.sharedManager.saveContext()
-        showUploadTeamImageFailureAlert(error)
+        showUploadTeamImageFailureAlert(error: error)
         refreshTeamImage()
     }
     
     // MARK: - Alerts
     
-    private func showUploadTeamImageFailureAlert(error: RequestManager.Error) {
-        let alertController = UIAlertController(title: error.title,
-                                                message: error.message,
-                                                preferredStyle: .Alert
+    fileprivate func showUploadTeamImageFailureAlert(error: Error) {
+        let alertController = UIAlertController(
+            title: Translation.CompetitorView.UploadTeamImageFailureAlert.Title.String,
+            message: error.localizedDescription,
+            preferredStyle: .alert
         )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default, handler: nil)
         alertController.addAction(okAction)
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
     }
     
 }
@@ -364,14 +375,14 @@ extension CompetitorViewController: SessionViewControllerDelegate {
 
     func performCheckOut() {
         competitorSessionController.checkOut { (withSuccess) in
-            self.performCheckOutCompleted(withSuccess)
+            self.performCheckOutCompleted(withSuccess: withSuccess)
         }
     }
     
-    private func performCheckOutCompleted(withSuccess: Bool) {
-        CoreDataManager.sharedManager.deleteObject(competitorCheckIn)
+    fileprivate func performCheckOutCompleted(withSuccess: Bool) {
+        CoreDataManager.sharedManager.deleteObject(object: competitorCheckIn)
         CoreDataManager.sharedManager.saveContext()
-        self.navigationController!.popViewControllerAnimated(true)
+        self.navigationController!.popViewController(animated: true)
     }
 
     func startTracking() throws {

@@ -98,43 +98,44 @@ class Translation: NSObject {
         }
     }
     
-    // MARK: - RequestManager
+    // MARK: - RequestManagerError
     
-    struct RequestManager { static let Key = "\(RequestManager.self)"
-        struct Failure { static let Key = "\(RequestManager.Key).\(Failure.self)"
-            struct Message { static let Key = "\(Failure.Key).\(Message.self)"
-                static let String = NSLocalizedString(Key, comment: "")
-            }
+    struct RequestManagerError { static let Key = "\(RequestManagerError.self)"
+        struct CommunicationFailed { static let Key = "\(RequestManagerError.Key).\(CommunicationFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
         }
-        struct EventLoadingFailure { static let Key = "\(RequestManager.Key).\(EventLoadingFailure.self)"
-            struct Message { static let Key = "\(EventLoadingFailure.Key).\(Message.self)"
-                static let String = NSLocalizedString(Key, comment: "")
-            }
+        struct CheckInDataIsIncomplete { static let Key = "\(RequestManagerError.Key).\(CheckInDataIsIncomplete.self)"
+            static let String = NSLocalizedString(Key, comment: "")
         }
-        struct LeaderboardLoadingFailure { static let Key = "\(RequestManager.Key).\(LeaderboardLoadingFailure.self)"
-            struct Message { static let Key = "\(LeaderboardLoadingFailure.Key).\(Message.self)"
-                static let String = NSLocalizedString(Key, comment: "")
-            }
+        struct GetCompetitorFailed { static let Key = "\(RequestManagerError.Key).\(GetCompetitorFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
         }
-        struct CompetitorLoadingFailure { static let Key = "\(RequestManager.Key).\(CompetitorLoadingFailure.self)"
-            struct Message { static let Key = "\(CompetitorLoadingFailure.Key).\(Message.self)"
-                static let String = NSLocalizedString(Key, comment: "")
-            }
+        struct GetEventFailed { static let Key = "\(RequestManagerError.Key).\(GetEventFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
         }
-        struct TeamImageUploadFailure { static let Key = "\(RequestManager.Key).\(TeamImageUploadFailure.self)"
-            struct Title { static let Key = "\(TeamImageUploadFailure.Key).\(Title.self)"
-                static let String = NSLocalizedString(Key, comment: "")
-            }
+        struct GetLeaderboardFailed { static let Key = "\(RequestManagerError.Key).\(GetLeaderboardFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
         }
-        struct MarkLoadingFailure { static let Key = "\(RequestManager.Key).\(MarkLoadingFailure.self)"
-            struct Message { static let Key = "\(MarkLoadingFailure.Key).\(Message.self)"
-                static let String = NSLocalizedString(Key, comment: "")
-            }
+        struct GetMarkFailed { static let Key = "\(RequestManagerError.Key).\(GetMarkFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
         }
-        struct NoDataFailure { static let Key = "\(RequestManager.Key).\(NoDataFailure.self)"
-            struct Message { static let Key = "\(NoDataFailure.Key).\(Message.self)"
-                static let String = NSLocalizedString(Key, comment: "")
-            }
+        struct GetTeamFailed { static let Key = "\(RequestManagerError.Key).\(GetTeamFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
+        struct PostCheckInFailed { static let Key = "\(RequestManagerError.Key).\(PostCheckInFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
+        struct PostCheckOutFailed { static let Key = "\(RequestManagerError.Key).\(PostCheckOutFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
+        struct PostGPSFixFailed { static let Key = "\(RequestManagerError.Key).\(PostGPSFixFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
+        struct PostTeamImageFailed { static let Key = "\(RequestManagerError.Key).\(PostTeamImageFailed.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
+        struct TeamImageURLIsInvalid { static let Key = "\(RequestManagerError.Key).\(TeamImageURLIsInvalid.self)"
+            static let String = NSLocalizedString(Key, comment: "")
         }
     }
     
@@ -276,6 +277,16 @@ class Translation: NSObject {
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
+        struct TeamImageAddButton { static let Key = "\(CompetitorView.Key).\(TeamImageAddButton.self)"
+            struct Title { static let Key = "\(TeamImageAddButton.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct TeamImageUploadRetryButton { static let Key = "\(CompetitorView.Key).\(TeamImageUploadRetryButton.self)"
+            struct Title { static let Key = "\(TeamImageUploadRetryButton.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
         struct StartTrackingButton { static let Key = "\(CompetitorView.Key).\(StartTrackingButton.self)"
             struct Title { static let Key = "\(StartTrackingButton.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
@@ -319,6 +330,11 @@ class Translation: NSObject {
                 struct Title { static let Key = "\(PhotoLibraryAction.Key).\(Title.self)"
                     static let String = NSLocalizedString(Key, comment: "")
                 }
+            }
+        }
+        struct UploadTeamImageFailureAlert { static let Key = "\(CompetitorView.Key).\(UploadTeamImageFailureAlert.self)"
+            struct Title { static let Key = "\(UploadTeamImageFailureAlert.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
             }
         }
     }

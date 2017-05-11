@@ -13,13 +13,13 @@ class CompetitorSessionController: SessionController {
     // MARK: - TeamImage
     
     func postTeamImageData(
-        imageData: NSData,
+        imageData: Data,
         competitorID: String,
-        success: (teamImageURL: String) -> Void,
-        failure: (error: RequestManager.Error) -> Void
+        success: @escaping (_ teamImageURL: String) -> Void,
+        failure: @escaping (_ error: Error) -> Void
     ) {
         requestManager.postTeamImageData(
-            imageData,
+            imageData: imageData,
             competitorID: competitorID,
             success: success,
             failure: failure

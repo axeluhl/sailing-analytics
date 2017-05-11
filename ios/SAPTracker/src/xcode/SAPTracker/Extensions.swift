@@ -16,12 +16,8 @@ func logInfo(name: String, info: String) {
     #endif
 }
 
-func logError(name: String, error: NSError) {
-    logError(name, error: error.description)
-}
-
-func logError(name: String, error: ErrorType) {
-    logError(name, error: error as? String ?? "")
+func logError(name: String, error: Error) {
+    logError(name: name, error: error as? String ?? "")
 }
 
 func logError(name: String, error: String) {
@@ -56,10 +52,10 @@ extension UIImage {
         UIGraphicsBeginImageContextWithOptions(rect.size, false, 0.0)
         color.setFill()
         UIRectFill(rect)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
+        guard let image = UIGraphicsGetImageFromCurrentImageContext() else { return nil }
         UIGraphicsEndImageContext()
-        guard let cgImage = image.CGImage else { return nil }
-        self.init(CGImage: cgImage)
+        guard let cgImage = image.cgImage else { return nil }
+        self.init(cgImage: cgImage)
     }
 
 }
@@ -70,8 +66,8 @@ extension UITableViewCell {
 
     func removeSeparatorInset() {
         preservesSuperviewLayoutMargins = false
-        layoutMargins = UIEdgeInsetsZero
-        separatorInset = UIEdgeInsetsZero
+        layoutMargins = UIEdgeInsets.zero
+        separatorInset = UIEdgeInsets.zero
     }
     
 }

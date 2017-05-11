@@ -13,9 +13,9 @@ class SessionController: NSObject {
     let checkIn: CheckIn
     
     var sendingBackgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
-    var sendingDate: NSDate = NSDate()
+    var sendingDate: Date = Date()
     
-    private (set) var isTracking: Bool = false
+    fileprivate (set) var isTracking: Bool = false
     
     init(checkIn: CheckIn) {
         self.checkIn = checkIn
@@ -29,82 +29,82 @@ class SessionController: NSObject {
     
     // MARK: - Notifications
     
-    private func subscribeForNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(
+    fileprivate func subscribeForNotifications() {
+        NotificationCenter.default.addObserver(
             self,
-            selector:#selector(locationManagerUpdated(_:)),
-            name: LocationManager.NotificationType.Updated,
+            selector: #selector(locationManagerUpdated(_:)),
+            name: NSNotification.Name(rawValue: LocationManager.NotificationType.Updated),
             object: nil
         )
-        NSNotificationCenter.defaultCenter().addObserver(
+        NotificationCenter.default.addObserver(
             self,
-            selector:#selector(batterySavingChanged(_:)),
-            name: Preferences.NotificationType.BatterySavingChanged,
+            selector: #selector(batterySavingChanged(_:)),
+            name: NSNotification.Name(rawValue: Preferences.NotificationType.BatterySavingChanged),
             object: nil
         )
     }
     
-    private func unsubscribeFromNotifications() {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+    fileprivate func unsubscribeFromNotifications() {
+        NotificationCenter.default.removeObserver(self)
     }
     
-    @objc private func locationManagerUpdated(notification: NSNotification) {
-        dispatch_async(dispatch_get_main_queue(), {
+    @objc fileprivate func locationManagerUpdated(_ notification: Notification) {
+        DispatchQueue.main.async(execute: {
             guard self.isTracking else { return }
             guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
             guard locationData.isValid else { return }
-            let gpsFix = CoreDataManager.sharedManager.newGPSFix(self.checkIn)
-            gpsFix.updateWithLocationData(locationData)
+            let gpsFix = CoreDataManager.sharedManager.newGPSFix(checkIn: self.checkIn)
+            gpsFix.updateWithLocationData(locationData: locationData)
             CoreDataManager.sharedManager.saveContext()
-            if self.sendingDate.compare(NSDate()) == .OrderedAscending {
-                self.sendingDate = NSDate().dateByAddingTimeInterval(BatteryManager.sharedManager.sendingPeriod)
+            if self.sendingDate.compare(Date()) == .orderedAscending {
+                self.sendingDate = Date().addingTimeInterval(BatteryManager.sharedManager.sendingPeriod)
                 self.beginGPSFixSendingInBackgroundTask()
             }
         })
     }
     
-    @objc private func batterySavingChanged(notification: NSNotification) {
-        dispatch_async(dispatch_get_main_queue(), {
+    @objc fileprivate func batterySavingChanged(_ notification: Notification) {
+        DispatchQueue.main.async(execute: {
             guard let batterySaving = notification.userInfo?[Preferences.UserInfo.BatterySaving] as? Bool else { return }
             if !batterySaving {
-                self.sendingDate = NSDate() // Send next GPS fixes soon as possible
+                self.sendingDate = Date() // Send next GPS fixes soon as possible
             }
         })
     }
     
     // MARK: - Background Task
     
-    private func beginGPSFixSendingInBackgroundTask() {
-        sendingBackgroundTask = UIApplication.sharedApplication().beginBackgroundTaskWithName("Send GPS Fixes", expirationHandler: {
+    fileprivate func beginGPSFixSendingInBackgroundTask() {
+        sendingBackgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Send GPS Fixes", expirationHandler: {
             self.endGPSFixSendingInBackgroundTask()
         })
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-            self.gpsFixController.sendSlice({ (withSuccess) in
+        DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default).async(execute: {
+            self.gpsFixController.sendSlice(completion: { (withSuccess) in
                 self.endGPSFixSendingInBackgroundTask()
             })
         })
     }
     
-    private func endGPSFixSendingInBackgroundTask() {
-        UIApplication.sharedApplication().endBackgroundTask(sendingBackgroundTask)
+    fileprivate func endGPSFixSendingInBackgroundTask() {
+        UIApplication.shared.endBackgroundTask(sendingBackgroundTask)
         sendingBackgroundTask = UIBackgroundTaskInvalid
     }
     
     // MARK: - Update
     
-    func update(completion: () -> Void) {
-        guard let checkInData = CheckInData(checkIn: checkIn) else { updateFailure(completion); return }
+    func update(completion: @escaping () -> Void) {
+        guard let checkInData = CheckInData(checkIn: checkIn) else { updateFailure(completion: completion); return }
         requestManager.getCheckInData(
-            checkInData,
-            success: { (checkInData) in self.updateSuccess(checkInData, completion: completion) },
-            failure: { (error) in self.updateFailure(completion) }
+            checkInData: checkInData,
+            success: { (checkInData) in self.updateSuccess(checkInData: checkInData, completion: completion) },
+            failure: { (error) in self.updateFailure(completion: completion) }
         )
     }
     
     func updateSuccess(checkInData: CheckInData, completion: () -> Void) {
-        checkIn.event.updateWithEventData(checkInData.eventData)
-        checkIn.leaderboard.updateWithLeaderboardData(checkInData.leaderboardData)
-        checkIn.updateWithCheckInData(checkInData)
+        checkIn.event.updateWithEventData(eventData: checkInData.eventData)
+        checkIn.leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
+        checkIn.updateWithCheckInData(checkInData: checkInData)
         CoreDataManager.sharedManager.saveContext()
         completion()
     }
@@ -128,11 +128,11 @@ class SessionController: NSObject {
     
     // MARK: - CheckOut
     
-    func checkOut(completion: (withSuccess: Bool) -> Void) {
+    func checkOut(completion: @escaping (_ withSuccess: Bool) -> Void) {
         requestManager.postCheckOut(
             checkIn,
-            success: { () in completion(withSuccess: true) },
-            failure: { (error) in completion(withSuccess: false) }
+            success: { () in completion(true) },
+            failure: { (error) in completion(false) }
         )
     }
     

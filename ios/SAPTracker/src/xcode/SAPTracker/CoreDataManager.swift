@@ -9,9 +9,9 @@
 import Foundation
 import CoreData
 
-public class CoreDataManager: NSObject {
+open class CoreDataManager: NSObject {
     
-    private enum Entities: String {
+    fileprivate enum Entities: String {
         case CheckIn
         case CompetitorCheckIn
         case Event
@@ -20,7 +20,7 @@ public class CoreDataManager: NSObject {
         case MarkCheckIn
     }
     
-    public class var sharedManager: CoreDataManager {
+    open class var sharedManager: CoreDataManager {
         struct Singleton {
             static let sharedManager = CoreDataManager()
         }
@@ -30,29 +30,29 @@ public class CoreDataManager: NSObject {
     // MARK: - Fetch
     
     func fetchCheckIns() -> [CheckIn]? {
-        let fetchRequest = NSFetchRequest()
-        fetchRequest.entity = NSEntityDescription.entityForName(Entities.CheckIn.rawValue, inManagedObjectContext: managedObjectContext)
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
+        fetchRequest.entity = NSEntityDescription.entity(forEntityName: Entities.CheckIn.rawValue, in: managedObjectContext)
         fetchRequest.includesSubentities = true
         var checkIns: [AnyObject]?
         do {
-            checkIns = try managedObjectContext.executeFetchRequest(fetchRequest)
+            checkIns = try managedObjectContext.fetch(fetchRequest)
         } catch {
-            logError("\(#function)", error: error)
+            logError(name: "\(#function)", error: error)
         }
         return checkIns as? [CheckIn]
     }
     
     func fetchCheckIn(checkInData: CheckInData) -> CheckIn? {
         switch checkInData.type {
-        case .Competitor:
+        case .competitor:
             return fetchCompetitorCheckIn(
-                checkInData.eventID,
+                eventID: checkInData.eventID,
                 leaderboardName: checkInData.leaderboardName,
                 competitorID: checkInData.competitorID!
             )
-        case .Mark:
+        case .mark:
             return fetchMarkCheckIn(
-                checkInData.eventID,
+                eventID: checkInData.eventID,
                 leaderboardName: checkInData.leaderboardName,
                 markID: checkInData.markID!
             )
@@ -60,10 +60,10 @@ public class CoreDataManager: NSObject {
     }
 
     func fetchCompetitorCheckIn(eventID: String, leaderboardName: String, competitorID: String) -> CompetitorCheckIn? {
-        let fetchRequest = NSFetchRequest()
-        fetchRequest.entity = NSEntityDescription.entityForName(
-            Entities.CompetitorCheckIn.rawValue,
-            inManagedObjectContext: managedObjectContext
+        let fetchRequest = NSFetchRequest<CompetitorCheckIn>()
+        fetchRequest.entity = NSEntityDescription.entity(
+            forEntityName: Entities.CompetitorCheckIn.rawValue,
+            in: managedObjectContext
         )
         fetchRequest.predicate = NSPredicate(
             format: "event.eventID = %@ AND leaderboard.name = %@ AND competitorID = %@",
@@ -72,23 +72,23 @@ public class CoreDataManager: NSObject {
             competitorID
         )
         do {
-            let checkIns = try managedObjectContext.executeFetchRequest(fetchRequest)
+            let checkIns = try managedObjectContext.fetch(fetchRequest)
             if checkIns.count == 0 {
                 return nil
             } else {
-                return checkIns[0] as? CompetitorCheckIn
+                return checkIns[0]
             }
         } catch {
-            logError("\(#function)", error: error)
+            logError(name: "\(#function)", error: error)
         }
         return nil
     }
 
     func fetchMarkCheckIn(eventID: String, leaderboardName: String, markID: String) -> MarkCheckIn? {
-        let fetchRequest = NSFetchRequest()
-        fetchRequest.entity = NSEntityDescription.entityForName(
-            Entities.MarkCheckIn.rawValue,
-            inManagedObjectContext: managedObjectContext
+        let fetchRequest = NSFetchRequest<MarkCheckIn>()
+        fetchRequest.entity = NSEntityDescription.entity(
+            forEntityName: Entities.MarkCheckIn.rawValue,
+            in: managedObjectContext
         )
         fetchRequest.predicate = NSPredicate(
             format: "event.eventID = %@ AND leaderboard.name = %@ AND markID = %@",
@@ -97,20 +97,20 @@ public class CoreDataManager: NSObject {
             markID
         )
         do {
-            let checkIns = try managedObjectContext.executeFetchRequest(fetchRequest)
+            let checkIns = try managedObjectContext.fetch(fetchRequest)
             if checkIns.count == 0 {
                 return nil
             } else {
-                return checkIns[0] as? MarkCheckIn
+                return checkIns[0]
             }
         } catch {
-            logError("\(#function)", error: error)
+            logError(name: "\(#function)", error: error)
         }
         return nil
     }
 
-    func checkInFetchedResultsController() -> NSFetchedResultsController {
-        let fetchRequest = NSFetchRequest(entityName: Entities.CheckIn.rawValue)
+    func checkInFetchedResultsController() -> NSFetchedResultsController<CheckIn> {
+        let fetchRequest = NSFetchRequest<CheckIn>(entityName: Entities.CheckIn.rawValue)
         fetchRequest.predicate = NSPredicate(format: "event != nil AND leaderboard != nil")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "leaderboard.name", ascending: true)]
         return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
@@ -119,31 +119,31 @@ public class CoreDataManager: NSObject {
     // MARK: - Insert
     
     func newCompetitorCheckIn() -> CompetitorCheckIn {
-        let checkIn = NSEntityDescription.insertNewObjectForEntityForName(Entities.CompetitorCheckIn.rawValue, inManagedObjectContext: managedObjectContext) as! CompetitorCheckIn
+        let checkIn = NSEntityDescription.insertNewObject(forEntityName: Entities.CompetitorCheckIn.rawValue, into: managedObjectContext) as! CompetitorCheckIn
         checkIn.initialize()
         return checkIn
     }
 
     func newMarkCheckIn() -> MarkCheckIn {
-        let checkIn = NSEntityDescription.insertNewObjectForEntityForName(Entities.MarkCheckIn.rawValue, inManagedObjectContext: managedObjectContext) as! MarkCheckIn
+        let checkIn = NSEntityDescription.insertNewObject(forEntityName: Entities.MarkCheckIn.rawValue, into: managedObjectContext) as! MarkCheckIn
         checkIn.initialize()
         return checkIn
     }
 
     func newEvent(checkIn: CheckIn) -> Event {
-        let event = NSEntityDescription.insertNewObjectForEntityForName(Entities.Event.rawValue, inManagedObjectContext: managedObjectContext) as! Event
+        let event = NSEntityDescription.insertNewObject(forEntityName: Entities.Event.rawValue, into: managedObjectContext) as! Event
         event.checkIn = checkIn
         return event
     }
     
     func newLeaderboard(checkIn: CheckIn) -> Leaderboard {
-        let leaderboard = NSEntityDescription.insertNewObjectForEntityForName(Entities.Leaderboard.rawValue, inManagedObjectContext: managedObjectContext) as! Leaderboard
+        let leaderboard = NSEntityDescription.insertNewObject(forEntityName: Entities.Leaderboard.rawValue, into: managedObjectContext) as! Leaderboard
         leaderboard.checkIn = checkIn
         return leaderboard
     }
 
     func newGPSFix(checkIn: CheckIn) -> GPSFix {
-        let gpsFix = NSEntityDescription.insertNewObjectForEntityForName(Entities.GPSFix.rawValue, inManagedObjectContext: managedObjectContext) as! GPSFix
+        let gpsFix = NSEntityDescription.insertNewObject(forEntityName: Entities.GPSFix.rawValue, into: managedObjectContext) as! GPSFix
         gpsFix.checkIn = checkIn
         return gpsFix
     }
@@ -152,52 +152,52 @@ public class CoreDataManager: NSObject {
     
     func deleteObject(object: AnyObject?) {
         guard let o = object as? NSManagedObject else { return }
-        managedObjectContext.deleteObject(o)
+        managedObjectContext.delete(o)
     }
     
     func deleteObjects(objects: Array<AnyObject>?) {
-        objects?.forEach { (o) in deleteObject(o) }
+        objects?.forEach { (o) in deleteObject(object: o) }
     }
     
     // MARK: - Core Data stack
     
-    lazy var applicationDocumentsDirectory: NSURL = {
-        let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
+    lazy var applicationDocumentsDirectory: URL = {
+        let urls = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return urls[urls.count-1]
     }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {
-        let modelURL = NSBundle.mainBundle().URLForResource("CoreData", withExtension: "momd")!
-        return NSManagedObjectModel(contentsOfURL: modelURL)!
+        let modelURL = Bundle.main.url(forResource: "CoreData", withExtension: "momd")!
+        return NSManagedObjectModel(contentsOf: modelURL)!
     }()
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("CoreData.sqlite")
+        let url = self.applicationDocumentsDirectory.appendingPathComponent("CoreData.sqlite")
         let options = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
         do {
-            logInfo("\(#function)", info: "Connecting to database...")
-            try coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: options)
-            logInfo("\(#function)", info: "Database connection established")
+            logInfo(name: "\(#function)", info: "Connecting to database...")
+            try coordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: url, options: options)
+            logInfo(name: "\(#function)", info: "Database connection established")
         } catch {
-            logInfo("\(#function)", info: "Connecting to database failed")
-            logError("\(#function)", error: error)
+            logInfo(name: "\(#function)", info: "Connecting to database failed")
+            logError(name: "\(#function)", error: error)
             do {
-                logInfo("\(#function)", info: "Removing corrupt database...")
-                try NSFileManager.defaultManager().removeItemAtURL(url)
-                logInfo("\(#function)", info: "Corrupt database removed")
+                logInfo(name: "\(#function)", info: "Removing corrupt database...")
+                try FileManager.default.removeItem(at: url)
+                logInfo(name: "\(#function)", info: "Corrupt database removed")
                 do {
-                    logInfo("\(#function)", info: "Connecting to new database...")
-                    try coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: options)
-                    logInfo("\(#function)", info: "Database connection established")
+                    logInfo(name: "\(#function)", info: "Connecting to new database...")
+                    try coordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: url, options: options)
+                    logInfo(name: "\(#function)", info: "Database connection established")
                 } catch {
-                    logInfo("\(#function)", info: "Connecting to new database failed")
-                    logError("\(#function)", error: error)
+                    logInfo(name: "\(#function)", info: "Connecting to new database failed")
+                    logError(name: "\(#function)", error: error)
                     abort()
                 }
             } catch {
-                logInfo("\(#function)", info: "Removing corrupt database failed")
-                logError("\(#function)", error: error)
+                logInfo(name: "\(#function)", info: "Removing corrupt database failed")
+                logError(name: "\(#function)", error: error)
                 abort()
             }
         }
@@ -206,7 +206,7 @@ public class CoreDataManager: NSObject {
     
     lazy var managedObjectContext: NSManagedObjectContext = {
         let coordinator = self.persistentStoreCoordinator
-        var managedObjectContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
+        var managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = coordinator
         return managedObjectContext
     }()
@@ -218,7 +218,7 @@ public class CoreDataManager: NSObject {
             do {
                 try managedObjectContext.save()
             } catch {
-                logError("\(#function)", error: error)
+                logError(name: "\(#function)", error: error)
                 abort()
             }
         }

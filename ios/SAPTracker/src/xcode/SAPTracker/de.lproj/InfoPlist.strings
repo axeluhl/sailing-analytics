@@ -7,3 +7,4 @@
 //
 
 "NSLocationAlwaysUsageDescription" = "Um das ganze Rennen mit Deinem Gerät zu tracken, muss das Tracking auch dann fortgesetzt werden, wenn der Bildschirm abgeschaltet oder gesperrt wird. Das hilft, die Batterielaufzeit zu verlängern und versehentlich das Tracking zu stoppen.";
+"NSCameraUsageDescription" = "";

@@ -10,7 +10,7 @@ import Foundation
 
 class MarkData: BaseData {
     
-    private enum Keys {
+    fileprivate enum Keys {
         static let ID = "id"
         static let Name = "name"
     }

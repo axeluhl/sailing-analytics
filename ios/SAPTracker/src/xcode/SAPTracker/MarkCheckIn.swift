@@ -12,7 +12,7 @@ import CoreData
 class MarkCheckIn: CheckIn {
 
     override func updateWithCheckInData(checkInData: CheckInData) {
-        super.updateWithCheckInData(checkInData)
+        super.updateWithCheckInData(checkInData: checkInData)
         markID = checkInData.markData.markID
         name = checkInData.markData.name
     }
