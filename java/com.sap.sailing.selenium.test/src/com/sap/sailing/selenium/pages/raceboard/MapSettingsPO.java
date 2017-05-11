@@ -59,17 +59,17 @@ public class MapSettingsPO extends DataEntryDialogPO {
     }
     
     public void setShowSimulationOverlay(boolean selected) {
-        WebElement element = findElementBySeleniumId("showSimulationOverlayCheckbox");
+        WebElement element = findElementBySeleniumId("showSimulationOverlayCheckBox");
         new CheckBoxPO(driver, element).setSelected(selected);
     }
     
     public boolean isShowSimulationOverlay() {
-        WebElement element = findElementBySeleniumId("showSimulationOverlayCheckbox");
+        WebElement element = findElementBySeleniumId("showSimulationOverlayCheckBox");
         return new CheckBoxPO(driver, element).isSelected();
     }
     
     public boolean isShowSimulationOverlayCheckBoxVisible() {
-        List<WebElement> foundElements = findElementsBySeleniumId(context, "showSimulationOverlayCheckbox");
+        List<WebElement> foundElements = findElementsBySeleniumId(context, "showSimulationOverlayCheckBox");
         return !foundElements.isEmpty();
     }
 }
