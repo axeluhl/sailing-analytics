@@ -65,6 +65,11 @@ public interface Speed extends Comparable<Speed>, Serializable {
         public Distance travel(Duration duration) {
             return Distance.NULL;
         }
+        
+        @Override
+        public double divide(Speed speed) {
+            return 0;
+        }
     };
     
     @Statistic(messageKey="speedInKnots", resultDecimals=2)
@@ -92,4 +97,12 @@ public interface Speed extends Comparable<Speed>, Serializable {
     Duration getDuration(Distance distance);
 
     Distance travel(Duration duration);
+    
+    /**
+     * Divides this speed by the other {@code speed}.
+     * 
+     * @param speed
+     *            must not be {@code null}, or a {@link NullPointerException} will result
+     */
+    double divide(Speed speed);
 }

@@ -1977,7 +1977,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         if (timePoint != null) {
             if (fillTotalPointsUncorrected) {
                 // explicitly filling the uncorrected total points requires uncached recalculation
-                result = computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, /* waitForLatestAnalyses */ true,
+                result = computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
+                        /* waitForLatestAnalyses=false because otherwise this may block, e.g., for background tasks
+                           such as maneuver and mark passing calculations */ false,
                         trackedRegattaRegistry, baseDomainFactory, fillTotalPointsUncorrected);
             } else {
                 // in replay we'd like up-to-date results; they are still cached
