@@ -1800,4 +1800,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String estimatedDistance();
     String estimatedTime();
     String nothingUpcoming();
+
+    String chooseAConfiguration();
 }

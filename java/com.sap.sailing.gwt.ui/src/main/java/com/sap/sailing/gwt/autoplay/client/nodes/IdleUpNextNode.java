@@ -51,7 +51,7 @@ public class IdleUpNextNode extends FiresPlaceNode {
             raceTimesInfoProvider.reset();
 
             StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(
-                    cf.getSlideCtx().getEvent(), cf.getSlideCtx().getSettings().getLeaderboardName());
+                    cf.getAutoPlayCtx().getEvent(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
             for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : race.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);

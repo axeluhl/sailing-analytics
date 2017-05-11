@@ -21,8 +21,8 @@ public class RaceEndWithCompetitorsNode extends FiresPlaceNode {
 
     public void onStart() {
 
-        UUID eventId = cf.getSlideCtx().getSettings().getEventId();
-        String leaderBoardName = cf.getSlideCtx().getSettings().getLeaderboardName();
+        UUID eventId = cf.getAutoPlayCtx().getContextDefinition().getEventId();
+        String leaderBoardName = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
 
         cf.getDispatch().execute(new GetMiniLeaderbordAction(eventId, leaderBoardName),
                 new AsyncCallback<ResultWithTTL<GetMiniLeaderboardDTO>>() {
@@ -36,12 +36,12 @@ public class RaceEndWithCompetitorsNode extends FiresPlaceNode {
                         GetMiniLeaderboardDTO dto = resultTTL.getDto();
                         RaceEndWithCompetitorsTop3Place place = new RaceEndWithCompetitorsTop3Place();
                         place.setLeaderBoardDTO(dto);
-                        place.setLifeRace(cf.getSlideCtx().getLastRace());
+                        place.setLifeRace(cf.getAutoPlayCtx().getLastRace());
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
-                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getSlideCtx().getLastRace().getRegattaName(),
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLastRace().getRegattaName(),
                                 StringMessages.INSTANCE.results() + " "
-                                        + cf.getSlideCtx().getLastRace().getRaceName()));
+                                        + cf.getAutoPlayCtx().getLastRace().getRaceName()));
                     }
                 });
     };

@@ -19,8 +19,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
 
     public void onStart() {
         RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),
-                cf.getSlideCtx().getSettings().getLeaderboardName(), cf.getSlideCtx().getSettings().getEventId(),
-                cf.getSlideCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getSlideCtx().getLifeRace(),
+                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtx().getContextDefinition().getEventId(),
+                cf.getAutoPlayCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtx().getLifeRace(),
                 new AsyncCallback<RVWrapper>() {
 
                     @Override
@@ -29,8 +29,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                         place.setError(caught);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
-                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getSlideCtx().getLifeRace().getRegattaName(),
-                                cf.getSlideCtx().getLifeRace().getRaceName()));
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),
+                                cf.getAutoPlayCtx().getLifeRace().getRaceName()));
                     }
 
                     @Override

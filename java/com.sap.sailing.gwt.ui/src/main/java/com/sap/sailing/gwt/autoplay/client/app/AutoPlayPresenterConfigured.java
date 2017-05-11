@@ -22,7 +22,7 @@ public abstract class AutoPlayPresenterConfigured<P extends Place> extends AutoP
     public final void start(AcceptsOneWidget panel, EventBus eventBus) {
         this.eventBus = eventBus;
         try {
-            if (getClientFactory().getSlideCtx() != null && getClientFactory().getSlideCtx().getEvent() != null) {
+            if (getClientFactory().getAutoPlayCtx() != null && getClientFactory().getAutoPlayCtx().getEvent() != null) {
                 init(panel, new Command() {
                     private boolean hasStarted = false;
                     @Override

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.config.classic;
+package com.sap.sailing.gwt.autoplay.client.places.config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,9 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
-import com.sap.sailing.gwt.autoplay.client.app.classic.ClassicSetting;
+import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
+import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinitionImpl;
+import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayType;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -39,18 +41,19 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 
-public class ClassicConfigViewImpl extends Composite implements ClassicConfigView {
+public class ConfigViewImpl extends Composite implements ConfigView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
 
-    interface StartPageViewUiBinder extends UiBinder<Widget, ClassicConfigViewImpl> {
+    interface StartPageViewUiBinder extends UiBinder<Widget, ConfigViewImpl> {
     }
 
     @UiField(provided = true)
     ListBox localeSelectionBox;
     @UiField(provided = true)
     ListBox eventSelectionBox;
+    @UiField(provided = true)
+    ListBox configurationSelectionBox;
     @UiField(provided = true)
     ListBox leaderboardSelectionBox;
     @UiField
@@ -61,22 +64,20 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
     DivElement screenConfigurationUi;
     @UiField
     FlowPanel leaderboardPerspectiveSettingsPanel;
-
     private final AutoPlayPlaceNavigator navigator;
     private final EventBus eventBus;
     private final List<EventDTO> events;
-
+    private AutoPlayType selectedAutoPlayType = null;
     private AutoplayPerspectiveLifecycle autoplayLifecycle;
     protected PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings;
     private AutoPlayClientFactory clientFactory;
 
-    public ClassicConfigViewImpl(AutoPlayClientFactory clientFactory) {
+    public ConfigViewImpl(AutoPlayClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
         this.navigator = clientFactory.getPlaceNavigator();
         this.eventBus = clientFactory.getEventBus();
         this.events = new ArrayList<EventDTO>();
-
         eventBus.fireEvent(new AutoPlayHeaderEvent(StringMessages.INSTANCE.autoplayConfiguration(), ""));
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
@@ -84,7 +85,14 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
         leaderboardSelectionBox.setMultipleSelect(false);
         localeSelectionBox = new ListBox();
         localeSelectionBox.setMultipleSelect(false);
+        configurationSelectionBox = new ListBox();
+        configurationSelectionBox.addItem("--", "");
 
+        for (AutoPlayType apt : AutoPlayType.values()) {
+            configurationSelectionBox.addItem(apt.getName(), apt.name());
+        }
+        configurationSelectionBox.addItem("", "");
+        configurationSelectionBox.addItem("", "");
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
         for (String localeName : GWTLocaleUtil.getAvailableLocales()) {
@@ -95,15 +103,11 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
             }
             i++;
         }
-
         initWidget(uiBinder.createAndBindUi(this));
         this.ensureDebugId("AutoPlayStartView");
-
         leaderboardSelectionUi.getStyle().setVisibility(Visibility.HIDDEN);
         screenConfigurationUi.getStyle().setVisibility(Visibility.HIDDEN);
-
-        startAutoPlayButton.setEnabled(false);
-        startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+        validate();
     }
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
@@ -121,6 +125,13 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
         }
     }
 
+    @UiHandler("configurationSelectionBox")
+    void onConfigChange(ChangeEvent event) {
+        String selectedConfigType = configurationSelectionBox.getSelectedValue();
+        this.selectedAutoPlayType = AutoPlayType.valueOf(selectedConfigType);
+        validate();
+    }
+
     @UiHandler("eventSelectionBox")
     void onEventSelectionChange(ChangeEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
@@ -134,18 +145,15 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
             }
         }
         leaderboardSelectionUi.getStyle().setVisibility(selectedEvent != null ? Visibility.VISIBLE : Visibility.HIDDEN);
+        validate();
     }
 
     @UiHandler("leaderboardSelectionBox")
     void onLeaderboardSelectionChange(ChangeEvent event) {
         String selectedLeaderboardName = getSelectedLeaderboardName();
         if (selectedLeaderboardName != null) {
-            startAutoPlayButton.setEnabled(true);
-            startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
-
             StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
             this.updatePerspectives(selectedLeaderboard);
-
             leaderboardPerspectiveSettingsPanel.clear();
             Button perspectiveSettingsButton = new Button(StringMessages.INSTANCE.settings());
             perspectiveSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
@@ -157,17 +165,35 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
                     openSettingsDialog();
                 }
             });
-        } else {
-            startAutoPlayButton.setEnabled(false);
-            startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
         }
+        validate();
         screenConfigurationUi.getStyle()
                 .setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
 
+    private boolean validate() {
+        boolean readyToGo = true;
+        if (readyToGo && selectedAutoPlayType == null)
+            readyToGo = false;
+
+        EventDTO selectedEvent = getSelectedEvent();
+        if (readyToGo && selectedEvent == null)
+            readyToGo = false;
+
+        String selectedLeaderboardName = getSelectedLeaderboardName();
+        if (readyToGo && selectedLeaderboardName == null)
+            readyToGo = false;
+
+        startAutoPlayButton.setEnabled(readyToGo);
+        if (readyToGo)
+            startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+        else
+            startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+        return readyToGo;
+    }
+
     protected void openSettingsDialog() {
         DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
-
             @Override
             public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
                 autoplayPerspectiveSettings = editedObject;
@@ -177,14 +203,11 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
             public void cancel() {
             }
         };
-
         if (autoplayPerspectiveSettings == null) {
             autoplayPerspectiveSettings = autoplayLifecycle.createDefaultSettings();
         }
-
         new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(null,
                 autoplayLifecycle, autoplayPerspectiveSettings, StringMessages.INSTANCE, true, callback).show();
-
     }
 
     @UiHandler("localeSelectionBox")
@@ -196,14 +219,12 @@ public class ClassicConfigViewImpl extends Composite implements ClassicConfigVie
 
     @UiHandler("startAutoPlayButton")
     void startAutoPlayClicked(ClickEvent event) {
-        EventDTO selectedEvent = getSelectedEvent();
-        String selectedLeaderboardName = getSelectedLeaderboardName();
-
-        if (selectedEvent != null && selectedLeaderboardName != null) {
-            // TODO generate place settings url, and directly start other place
-            String contextAndSettings = new SettingsToStringSerializer().fromSettings(
-                    new ClassicSetting(selectedEvent.id, selectedLeaderboardName), autoplayPerspectiveSettings);
-            navigator.goToPlayer(contextAndSettings, clientFactory);
+        if (validate()) {
+            EventDTO selectedEvent = getSelectedEvent();
+            String selectedLeaderboardName = getSelectedLeaderboardName();
+            AutoPlayContextDefinition apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
+            selectedAutoPlayType.getConfig().startRootNode(clientFactory, apcd, autoplayPerspectiveSettings);
+            
         }
     }
 

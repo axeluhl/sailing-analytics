@@ -10,9 +10,4 @@ public class AutoplayNavigatorImpl implements AutoPlayPlaceNavigator {
 
 
 
-    @Override
-    public void goToPlayer(String serializedSettings, AutoPlayClientFactory cf) {
-        cf.startRootNode(serializedSettings);
-    }
-
 }

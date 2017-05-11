@@ -32,9 +32,9 @@ public class RootNodeClassic extends RootNodeBase {
 
     protected void processFailure(FailureEvent event) {
         AutoPlayClientFactory cf = getClientFactory();
-        if (cf.getSlideCtx() == null || //
-                cf.getSlideCtx().getSettings() == null || //
-                cf.getSlideCtx().getEvent() == null //
+        if (cf.getAutoPlayCtx() == null || //
+                cf.getAutoPlayCtx().getContextDefinition() == null || //
+                cf.getAutoPlayCtx().getEvent() == null //
         ) {
             backToConfig();
             return;

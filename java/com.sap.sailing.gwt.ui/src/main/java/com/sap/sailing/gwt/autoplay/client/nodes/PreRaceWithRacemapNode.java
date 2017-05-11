@@ -23,8 +23,8 @@ public class PreRaceWithRacemapNode extends FiresPlaceNode {
 
     public void onStart() {
         RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),
-                cf.getSlideCtx().getSettings().getLeaderboardName(), cf.getSlideCtx().getSettings().getEventId(),
-                cf.getSlideCtx().getEvent(), cf.getEventBus(), cf.getDispatch(),cf.getSlideCtx().getLifeRace(), new AsyncCallback<RVWrapper>() {
+                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtx().getContextDefinition().getEventId(),
+                cf.getAutoPlayCtx().getEvent(), cf.getEventBus(), cf.getDispatch(),cf.getAutoPlayCtx().getLifeRace(), new AsyncCallback<RVWrapper>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -37,8 +37,8 @@ public class PreRaceWithRacemapNode extends FiresPlaceNode {
                     @Override
                     public void onSuccess(RVWrapper result) {
                         cf.getDispatch().execute(
-                                new GetMiniLeaderbordAction(cf.getSlideCtx().getEvent().id,
-                                        cf.getSlideCtx().getSettings().getLeaderboardName()),
+                                new GetMiniLeaderbordAction(cf.getAutoPlayCtx().getEvent().id,
+                                        cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()),
                                 new AsyncCallback<ResultWithTTL<GetMiniLeaderboardDTO>>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -53,11 +53,11 @@ public class PreRaceWithRacemapNode extends FiresPlaceNode {
                                         place.setLeaderBoardDTO(dto);
                                         place.setRaceMap(result.raceboardPerspective, result.csel);
                                         // add later with settings here
-                                        place.setURL(cf.getSlideCtx().getEvent().getOfficialWebsiteURL());
+                                        place.setURL(cf.getAutoPlayCtx().getEvent().getOfficialWebsiteURL());
                                         setPlaceToGo(place);
                                         getBus().fireEvent(
-                                                new AutoPlayHeaderEvent(cf.getSlideCtx().getLifeRace().getRegattaName(),
-                                                        cf.getSlideCtx().getLifeRace().getRaceName()));
+                                                new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),
+                                                        cf.getAutoPlayCtx().getLifeRace().getRaceName()));
                                         firePlaceChangeAndStartTimer();
 
                                     }

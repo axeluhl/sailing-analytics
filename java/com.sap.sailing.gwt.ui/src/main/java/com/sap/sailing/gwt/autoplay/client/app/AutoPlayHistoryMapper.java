@@ -1,11 +1,13 @@
-package com.sap.sailing.gwt.autoplay.client.app.sixtyinch;
+package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
-import com.sap.sailing.gwt.autoplay.client.places.config.sixtyinch.SixtyInchConfigPlace;
+import com.sap.sailing.gwt.autoplay.client.places.config.ConfigPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsTop3Place;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithFlagesTop3Place;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleUpNextPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.raceboard.LiveRaceWithRaceboardPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsFlagsPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsImagePlace;
@@ -14,8 +16,9 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leader
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPlace;
 
 @WithTokenizers({ //
-        SixtyInchConfigPlace.Tokenizer.class, //
-        // screens available to this history mapper
+        ConfigPlace.Tokenizer.class, //
+        LiveRaceWithRaceboardPlace.Tokenizer.class, //
+        LeaderboardPlace.Tokenizer.class, //
         PreRaceCompetitorsFlagsPlace.Tokenizer.class, //
         PreRaceCompetitorsImagePlace.Tokenizer.class, //
         IdleUpNextPlace.Tokenizer.class, //
@@ -26,5 +29,5 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racema
         RaceEndWithCompetitorsTop3Place.Tokenizer.class, //
         RaceEndWithFlagesTop3Place.Tokenizer.class //
 })
-public interface AutoPlayHistoryMapperSixtyInch extends PlaceHistoryMapper {
+public interface AutoPlayHistoryMapper extends PlaceHistoryMapper {
 }

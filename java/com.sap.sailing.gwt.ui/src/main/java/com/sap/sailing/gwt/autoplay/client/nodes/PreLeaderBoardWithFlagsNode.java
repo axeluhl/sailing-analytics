@@ -19,8 +19,8 @@ public class PreLeaderBoardWithFlagsNode extends FiresPlaceNode {
 
     public void onStart() {
 
-        UUID eventId = cf.getSlideCtx().getSettings().getEventId();
-        String leaderBoardName = cf.getSlideCtx().getSettings().getLeaderboardName();
+        UUID eventId = cf.getAutoPlayCtx().getContextDefinition().getEventId();
+        String leaderBoardName = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
         cf.getDispatch().execute(new GetMiniLeaderbordAction(eventId, leaderBoardName),
                 new AsyncCallback<ResultWithTTL<GetMiniLeaderboardDTO>>() {
                     @Override

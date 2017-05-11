@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.config.sixtyinch;
+package com.sap.sailing.gwt.autoplay.client.places.config;
 
 import java.util.List;
 
@@ -14,15 +14,14 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.event.LocaleChangeEventHandler;
 
-public class SixtyInchConfigPresenterImpl extends AbstractActivity implements SixtyInchConfigView.Presenter {
+public class ConfigPresenterImpl extends AbstractActivity implements ConfigView.Presenter {
+    public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
     private final AutoPlayClientFactory clientFactory;
 
-    public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
+    private ConfigView view;
 
-    private SixtyInchConfigView view;
-
-    public SixtyInchConfigPresenterImpl(SixtyInchConfigPlace place, AutoPlayClientFactory clientFactory,
-            SixtyInchConfigView view) {
+    public ConfigPresenterImpl(ConfigPlace place, AutoPlayClientFactory clientFactory,
+            ConfigView view) {
         this.clientFactory = clientFactory;
         this.view = view;
     }

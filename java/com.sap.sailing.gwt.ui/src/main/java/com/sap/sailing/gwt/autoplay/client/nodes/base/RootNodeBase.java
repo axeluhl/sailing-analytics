@@ -36,8 +36,8 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
     @Override
     public final void onStart() {
-        if (cf.getSlideCtx() == null || //
-                cf.getSlideCtx().getSettings() == null//
+        if (cf.getAutoPlayCtx() == null || //
+                cf.getAutoPlayCtx().getContextDefinition() == null//
         ) {
             backToConfig();
             return;
@@ -59,11 +59,11 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     private void doCheck() {
         // start next update, to ensure it is done no matter any error cases
         checkTimer.schedule(UPDATE_STATE_TIMER);
-        final UUID eventUUID = cf.getSlideCtx().getSettings().getEventId();
+        final UUID eventUUID = cf.getAutoPlayCtx().getContextDefinition().getEventId();
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override
             public void onSuccess(final EventDTO event) {
-                cf.getSlideCtx().updateEvent(event);
+                cf.getAutoPlayCtx().updateEvent(event);
                 _doCheck();
             }
 
@@ -75,15 +75,15 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     }
 
     private void _doCheck() {
-        this.leaderBoardName = cf.getSlideCtx().getSettings().getLeaderboardName();
-        AutoplayHelper.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getSlideCtx().getEvent(),
+        this.leaderBoardName = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
+        AutoplayHelper.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtx().getEvent(),
                 leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
                     @Override
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
                         // we have no race, or we have one, and had a different one in the past
                         if (result == null || (currentLifeRace != null && !result.getB().equals(currentLifeRace))) {
-                            cf.getSlideCtx().setCurrenLifeRace(null);
+                            cf.getAutoPlayCtx().setCurrenLifeRace(null);
                             boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null
                                     || (result != null && !result.getB().equals(currentLifeRace));
                             setCurrentState(comingFromLiferace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
@@ -91,7 +91,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                             currentLifeRace = null;
                             currentPreLifeRace = null;
                         } else {
-                            cf.getSlideCtx().setCurrenLifeRace(result.getB());
+                            cf.getAutoPlayCtx().setCurrenLifeRace(result.getB());
                             final Long timeToRaceStartInMs = result.getA();
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
                             if (loadedLiveRace == null || timeToRaceStartInMs > PRE_RACE_DELAY) {

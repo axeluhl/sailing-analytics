@@ -41,7 +41,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
         this.cf = cf;
         SailingServiceAsync sailingService = cf.getSailingService();
 
-        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx().getAutoplaySettings();
         raceboardTimer = new Timer(PlayModes.Live, TIMER_ADVANCE_STEPSIZE);
         raceboardTimer.setLivePlayDelayInMillis(settings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart());
         raceboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_RACEBOARD);
@@ -54,10 +54,10 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
     }
 
     public void onStart() {
-        raceTimesInfoProvider.addRaceIdentifier(cf.getSlideCtx().getLifeRace(), true);
+        raceTimesInfoProvider.addRaceIdentifier(cf.getAutoPlayCtx().getLifeRace(), true);
 
-        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
-        AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getSlideCtx().getAutoplayLifecycle();
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx().getAutoplaySettings();
+        AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getAutoPlayCtx().getAutoplayLifecycle();
         UserService userService = cf.getUserService();
         SailingServiceAsync sailingService = cf.getSailingService();
         MediaServiceAsync mediaService = cf.getMediaService();
@@ -72,15 +72,15 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         autoplayLifecycle.getRaceboardLifecycle(), raceboardSettings, sailingService, mediaService,
                         userService, AutoplayHelper.asyncActionsExecutor, result.getCompetitorAndTheirBoats(),
                         raceboardTimer,
-                        cf.getSlideCtx().getLifeRace(), cf.getSlideCtx().getSettings().getLeaderboardName(),
+                        cf.getAutoPlayCtx().getLifeRace(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(),
                         /** leaderboardGroupName */
                         null, /** eventId */
                         null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true);
                 setPlaceToGo(new LiveRaceWithRaceboardPlace(raceboardPerspective));
                 firePlaceChangeAndStartTimer();
 
-                getBus().fireEvent(new AutoPlayHeaderEvent(cf.getSlideCtx().getLifeRace().getRegattaName(),
-                        cf.getSlideCtx().getLifeRace().getRaceName()));
+                getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),
+                        cf.getAutoPlayCtx().getLifeRace().getRaceName()));
             }
 
             @Override
@@ -88,8 +88,8 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                 cf.getErrorReporter().reportError("Error while loading data for raceboard: " + caught.getMessage());
             }
         };
-        sailingService.getRaceboardData(cf.getSlideCtx().getLifeRace().getRegattaName(),
-                cf.getSlideCtx().getLifeRace().getRaceName(), cf.getSlideCtx().getSettings().getLeaderboardName(), null,
+        sailingService.getRaceboardData(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),
+                cf.getAutoPlayCtx().getLifeRace().getRaceName(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), null,
                 null, raceBoardDataCallback);
     };
 

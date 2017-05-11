@@ -121,7 +121,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 false, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
-                getSlideCtx().getSettings().getLeaderboardName(), errorReporter,
+                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter,
                 StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, false);
 
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);

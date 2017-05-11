@@ -2,41 +2,48 @@ package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.core.shared.GWT;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration;
+import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class AutoPlayContextImpl implements AutoPlayContext {
-    private AutoPlaySettings settings;
+    private AutoPlayConfiguration configuration;
+    private AutoPlayContextDefinition contextDefinition;
     private EventDTO event;
     private RegattaAndRaceIdentifier lifeRace;
     private RegattaAndRaceIdentifier lastRace;
     private AutoplayPerspectiveLifecycle autoplayLifecycle;
     private PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplaySettings;
 
-
     public AutoPlayContextImpl(AutoplayPerspectiveLifecycle autoplayLifecycle,
-            PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplaySettings, AutoPlaySettings settings) {
-       if (autoplayLifecycle == null) {
+            PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplaySettings,
+            AutoPlayConfiguration configuration, AutoPlayContextDefinition contextDefinition) {
+        this(configuration, contextDefinition);
+        if (autoplayLifecycle == null) {
             throw new IllegalStateException("No autoplayLifecycle in creation");
         }
         if (autoplaySettings == null) {
             throw new IllegalStateException("No autoplaySettings in creation");
         }
-        if (settings == null) {
-            throw new IllegalStateException("No settings in creation");
-        }
-        this.settings = settings;
         this.autoplayLifecycle = autoplayLifecycle;
         this.autoplaySettings = autoplaySettings;
     }
 
-    public AutoPlayContextImpl(AutoPlaySettings settings) {
-        this.settings = settings;
+    public AutoPlayContextImpl(AutoPlayConfiguration configuration, AutoPlayContextDefinition contextDefinition) {
+        if (configuration == null) {
+            throw new IllegalStateException("No configuration in creation");
+        }
+        if (contextDefinition == null) {
+            throw new IllegalStateException("No settings in creation");
+        }
+        this.configuration = configuration;
+        this.contextDefinition = contextDefinition;
     }
 
     @Override
-    public AutoPlaySettings getSettings() {
-        return settings;
+    public AutoPlayContextDefinition getContextDefinition() {
+        return contextDefinition;
     }
 
     @Override
@@ -46,13 +53,18 @@ public class AutoPlayContextImpl implements AutoPlayContext {
 
     @Override
     public void setCurrenLifeRace(RegattaAndRaceIdentifier lifeRace) {
-        if(this.lifeRace != null){
-            if(!this.lifeRace.equals(lifeRace)){
+        if (this.lifeRace != null) {
+            if (!this.lifeRace.equals(lifeRace)) {
                 this.lastRace = this.lifeRace;
                 GWT.log("lastrace is now " + lastRace + " liferace is " + lifeRace);
             }
         }
         this.lifeRace = lifeRace;
+    }
+
+    @Override
+    public AutoPlayConfiguration getAutoPlayConfiguration() {
+        return configuration;
     }
 
     @Override

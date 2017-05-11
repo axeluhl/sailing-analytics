@@ -6,11 +6,10 @@ import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 public interface AutoPlayClientFactory extends SailingClientFactory {
     AutoPlayPlaceNavigator getPlaceNavigator();
 
-    void setSlideContext(AutoPlayContext configurationSixtyInch);
+    void setAutoPlayContext(AutoPlayContext configurationSixtyInch);
 
-    AutoPlayContext getSlideCtx();
+    AutoPlayContext getAutoPlayCtx();
 
     SailingDispatchSystem getDispatch();
 
-    void startRootNode(String serializedSettings);
 }

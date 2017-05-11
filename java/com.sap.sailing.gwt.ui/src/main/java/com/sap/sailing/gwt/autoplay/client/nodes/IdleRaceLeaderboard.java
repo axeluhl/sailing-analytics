@@ -24,7 +24,7 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
 
     public IdleRaceLeaderboard(AutoPlayClientFactory cf) {
         this.cf = cf;
-        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx().getAutoplaySettings();
         leaderboardTimer = new Timer(PlayModes.Live,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardTimer
@@ -35,8 +35,8 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
 
     public void onStart() {
         leaderboardTimer.play();
-        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
-        AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getSlideCtx().getAutoplayLifecycle();
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx().getAutoplaySettings();
+        AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getAutoPlayCtx().getAutoplayLifecycle();
         boolean withFullscreenButton = settings.getPerspectiveOwnSettings().isFullscreen();
         PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings = settings
                 .findSettingsByComponentId(autoplayLifecycle.getLeaderboardLifecycle().getComponentId());
@@ -48,13 +48,13 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
                 autoplayLifecycle.getLeaderboardLifecycle(), leaderboardSettings, cf.getSailingService(),
                 cf.getUserService(),
                 AutoplayHelper.asyncActionsExecutor, new CompetitorSelectionModel(/* hasMultiSelection */ true),
-                leaderboardTimer, cf.getSlideCtx().getSettings().getLeaderboardName(), cf.getErrorReporter(),
+                leaderboardTimer, cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getErrorReporter(),
                 stringMessages,
                 withFullscreenButton);
         setPlaceToGo(new LeaderboardPlace(leaderboardPerspective));
         
-        StrippedLeaderboardDTO leaderboard = AutoplayHelper.getSelectedLeaderboard(cf.getSlideCtx().getEvent(),
-                cf.getSlideCtx().getSettings().getLeaderboardName());
+        StrippedLeaderboardDTO leaderboard = AutoplayHelper.getSelectedLeaderboard(cf.getAutoPlayCtx().getEvent(),
+                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
         String title = stringMessages.leaderboard() + ": "
                 + (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName());
         
