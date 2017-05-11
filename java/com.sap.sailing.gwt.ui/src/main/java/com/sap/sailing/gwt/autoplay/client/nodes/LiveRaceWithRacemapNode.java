@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper;
@@ -28,6 +29,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                         place.setError(caught);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getSlideCtx().getLifeRace().getRegattaName(),
+                                cf.getSlideCtx().getLifeRace().getRaceName()));
                     }
 
                     @Override

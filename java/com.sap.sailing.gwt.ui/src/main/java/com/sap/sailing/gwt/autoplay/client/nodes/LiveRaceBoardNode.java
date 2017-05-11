@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.raceboard.LiveRaceWithRaceboardPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
@@ -27,9 +28,9 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.ui.client.UserService;
 
 public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoProviderListener {
-    private static final int EFRESH_INTERVAL_IN_MILLIS_LEADERBOARD = 10000;
+    private static final long RACETIME_UPDATE_INTERVAL = 3000l;
+    private static final long TIMER_ADVANCE_STEPSIZE = /* delayBetweenAutoAdvancesInMilliseconds */1000l;
     private static final long REFRESH_INTERVAL_IN_MILLIS_RACEBOARD = 1000;
-    private static final long LIS = 60 * 1000; // 1 min
     private final AutoPlayClientFactory cf;
     private final Timer raceboardTimer;
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -41,13 +42,13 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
         SailingServiceAsync sailingService = cf.getSailingService();
 
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
-        raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
+        raceboardTimer = new Timer(PlayModes.Live, TIMER_ADVANCE_STEPSIZE);
         raceboardTimer.setLivePlayDelayInMillis(settings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart());
         raceboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_RACEBOARD);
         raceboardTimer.play();
         raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, AutoplayHelper.asyncActionsExecutor,
                 cf.getErrorReporter(),
-                new ArrayList<RegattaAndRaceIdentifier>(), 3000l);
+                new ArrayList<RegattaAndRaceIdentifier>(), RACETIME_UPDATE_INTERVAL);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
 
     }
@@ -77,6 +78,9 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true);
                 setPlaceToGo(new LiveRaceWithRaceboardPlace(raceboardPerspective));
                 firePlaceChangeAndStartTimer();
+
+                getBus().fireEvent(new AutoPlayHeaderEvent(cf.getSlideCtx().getLifeRace().getRegattaName(),
+                        cf.getSlideCtx().getLifeRace().getRaceName()));
             }
 
             @Override

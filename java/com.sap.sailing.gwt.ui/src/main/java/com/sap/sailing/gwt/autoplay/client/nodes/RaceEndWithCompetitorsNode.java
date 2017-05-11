@@ -4,10 +4,12 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsTop3Place;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 public class RaceEndWithCompetitorsNode extends FiresPlaceNode {
@@ -37,6 +39,9 @@ public class RaceEndWithCompetitorsNode extends FiresPlaceNode {
                         place.setLifeRace(cf.getSlideCtx().getLastRace());
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getSlideCtx().getLastRace().getRegattaName(),
+                                StringMessages.INSTANCE.results() + " "
+                                        + cf.getSlideCtx().getLastRace().getRaceName()));
                     }
                 });
     };

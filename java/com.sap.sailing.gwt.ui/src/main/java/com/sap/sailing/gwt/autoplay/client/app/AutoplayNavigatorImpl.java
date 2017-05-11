@@ -4,11 +4,8 @@ import com.google.gwt.place.shared.PlaceController;
 
 public class AutoplayNavigatorImpl implements AutoPlayPlaceNavigator {
 
-    private PlaceController placeController;
-
     public AutoplayNavigatorImpl(PlaceController placeController) {
         super();
-        this.placeController = placeController;
     }
 
 

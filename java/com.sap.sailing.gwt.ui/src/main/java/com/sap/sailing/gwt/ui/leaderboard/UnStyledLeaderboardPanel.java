@@ -1225,9 +1225,9 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
             }
         }
 
-        // @Override
+        @Override
         protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-                LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
+                UnStyledLeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
             result.put(DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL,

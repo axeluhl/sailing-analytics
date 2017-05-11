@@ -12,7 +12,7 @@ public class RootNodeClassic extends RootNodeBase {
 
     public RootNodeClassic(AutoPlayClientFactory cf) {
         super(cf);
-        this.idle = new LiveRaceLeaderboard(cf);
+        this.idle = new IdleRaceLeaderboard(cf);
         this.live = new LiveRaceBoardNode(cf);
     }
 

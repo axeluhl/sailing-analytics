@@ -7,7 +7,6 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayActivityMapperSixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayClientFactorySixtyInchImpl;
 import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.AutoPlayHistoryMapperSixtyInch;
-import com.sap.sailing.gwt.autoplay.client.app.sixtyinch.SixtyInchSetting;
 import com.sap.sailing.gwt.autoplay.client.resources.SixtyInchBundle;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -32,9 +31,6 @@ public class AutoPlaySixtyInchEntryPoint
         SharedResources.INSTANCE.mainCss().ensureInjected();
 
         Document.get().getBody().addClassName(SharedResources.INSTANCE.mainCss().desktop());
-        
-        // loadPlace CTX if exists here! waiting for settings merge before
-        SixtyInchSetting fromPlace = null;
     }
     
     @Override

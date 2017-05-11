@@ -17,12 +17,12 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
-public class LiveRaceLeaderboard extends FiresPlaceNode {
+public class IdleRaceLeaderboard extends FiresPlaceNode {
     private static final int REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD = 10000;
     private final AutoPlayClientFactory cf;
     private final Timer leaderboardTimer;
 
-    public LiveRaceLeaderboard(AutoPlayClientFactory cf) {
+    public IdleRaceLeaderboard(AutoPlayClientFactory cf) {
         this.cf = cf;
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getSlideCtx().getAutoplaySettings();
         leaderboardTimer = new Timer(PlayModes.Live,

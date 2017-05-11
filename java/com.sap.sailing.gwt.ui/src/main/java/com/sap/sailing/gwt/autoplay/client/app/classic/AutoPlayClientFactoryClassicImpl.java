@@ -94,7 +94,7 @@ public class AutoPlayClientFactoryClassicImpl extends AutoPlayClientFactoryBase 
                 PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplaySettings = stringSerializer
                         .fromString(serializedSettings, autoplayLifecycle.createDefaultSettings());
                 setSlideContext(
-                        new AutoPlayContextImpl(getEventBus(), autoplayLifecycle, autoplaySettings, context));
+                        new AutoPlayContextImpl(autoplayLifecycle, autoplaySettings, context));
                 // start sixty inch slide loop nodes...
                 RootNodeClassic root = new RootNodeClassic(AutoPlayClientFactoryClassicImpl.this);
                 root.start(getEventBus());

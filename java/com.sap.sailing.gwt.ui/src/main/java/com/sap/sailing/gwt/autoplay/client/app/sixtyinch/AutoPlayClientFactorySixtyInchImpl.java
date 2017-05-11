@@ -75,7 +75,7 @@ public class AutoPlayClientFactorySixtyInchImpl extends AutoPlayClientFactoryBas
     public void startRootNode(String serializedSettings) {
         SixtyInchSetting settings = new SixtyInchSetting();
         new SettingsToStringSerializer().fromString(serializedSettings, settings);
-        setSlideContext(new AutoPlayContextImpl(getEventBus(), settings));
+        setSlideContext(new AutoPlayContextImpl(settings));
         // start sixty inch slide loop nodes...
         RootNodeSixtyInch root = new RootNodeSixtyInch(this);
         root.start(getEventBus());
