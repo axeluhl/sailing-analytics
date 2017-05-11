@@ -29,8 +29,7 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                         place.setError(caught);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
-                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getSlideCtx().getLifeRace().getRegattaName(),
-                                cf.getSlideCtx().getLifeRace().getRaceName()));
+                        getBus().fireEvent(new AutoPlayHeaderEvent("", ""));
                     }
 
                     @Override
@@ -39,6 +38,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                         place.setRaceMap(result.raceboardPerspective, result.csel);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getSlideCtx().getLifeRace().getRegattaName(),
+                                cf.getSlideCtx().getLifeRace().getRaceName()));
                     }
                 });
     };

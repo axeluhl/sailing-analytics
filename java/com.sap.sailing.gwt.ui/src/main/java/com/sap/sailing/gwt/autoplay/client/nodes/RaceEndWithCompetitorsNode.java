@@ -29,6 +29,7 @@ public class RaceEndWithCompetitorsNode extends FiresPlaceNode {
                     @Override
                     public void onFailure(Throwable caught) {
                         firePlaceChangeAndStartTimer();
+                        getBus().fireEvent(new AutoPlayHeaderEvent("", ""));
                     }
 
                     @Override

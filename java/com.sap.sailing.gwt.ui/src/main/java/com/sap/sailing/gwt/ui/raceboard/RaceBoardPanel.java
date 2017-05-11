@@ -168,11 +168,13 @@ public class RaceBoardPanel
      * @param isScreenLargeEnoughToOfferChartSupport
      *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
-     *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
+     *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint}
+     *            class.
      * @param showChartMarkEditMediaButtonsAndVideo
-     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark 
-     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that
-     *            aligns its right border with that of the chart. Otherwise those components will be hidden.
+     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark
+     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that aligns
+     *            its right border with that of the chart. Otherwise those components will be hidden.
+     * @param showHeaderPanel
      */
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
@@ -183,7 +185,7 @@ public class RaceBoardPanel
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
-            boolean showChartMarkEditMediaButtonsAndVideo) {
+            boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -221,7 +223,7 @@ public class RaceBoardPanel
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
-                /* showHeaderPanel */ true) {
+                /* showHeaderPanel */ showHeaderPanel) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
