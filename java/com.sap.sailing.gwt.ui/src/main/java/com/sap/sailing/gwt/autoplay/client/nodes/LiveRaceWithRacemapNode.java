@@ -38,6 +38,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                         place.setRaceMap(result.raceboardPerspective, result.csel);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),
+                                cf.getAutoPlayCtx().getLifeRace().getRaceName()));
                     }
                 });
     };
