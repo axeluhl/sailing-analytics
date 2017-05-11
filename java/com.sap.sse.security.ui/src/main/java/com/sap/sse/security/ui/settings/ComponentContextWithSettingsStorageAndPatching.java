@@ -43,16 +43,16 @@ public class ComponentContextWithSettingsStorageAndPatching<S extends Settings>
 
     protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
             UserService userService, StoredSettingsLocator storageDefinition,
-            SettingsRepresentationTransformer settingsSerializationHelper) {
-        this(rootLifecycle, userService, storageDefinition, settingsSerializationHelper,
-                new UserSettingsBuildingPipelineWithPatching(settingsSerializationHelper));
+            SettingsRepresentationTransformer settingsRepresentationTransformer) {
+        this(rootLifecycle, userService, storageDefinition, settingsRepresentationTransformer,
+                new UserSettingsBuildingPipelineWithPatching(settingsRepresentationTransformer));
     }
 
     protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
             UserService userService, StoredSettingsLocator storageDefinition,
-            SettingsRepresentationTransformer settingsSerializationHelper,
+            SettingsRepresentationTransformer settingsRepresentationTransformer,
             UserSettingsBuildingPipelineWithPatching settingsBuildingPipeline) {
-        super(rootLifecycle, userService, storageDefinition, settingsSerializationHelper, settingsBuildingPipeline);
+        super(rootLifecycle, userService, storageDefinition, settingsRepresentationTransformer, settingsBuildingPipeline);
     }
 
     /**

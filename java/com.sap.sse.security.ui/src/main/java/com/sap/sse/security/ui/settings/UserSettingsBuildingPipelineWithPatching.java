@@ -32,13 +32,13 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
     private SettingsPatches patchesForLoadingSettings = new SettingsPatches();
 
     /**
-     * Constructs an instance with a custom conversion helper between settings objects and its JSON representation.
+     * Constructs an instance with a custom conversion helper between settings objects and its storable representation.
      * 
-     * @param settingsSerializationHelper
+     * @param settingsRepresentationTransformer
      *            The custom conversion helper
      */
-    public UserSettingsBuildingPipelineWithPatching(SettingsRepresentationTransformer settingsStringConverter) {
-        super(settingsStringConverter);
+    public UserSettingsBuildingPipelineWithPatching(SettingsRepresentationTransformer settingsRepresentationTransformer) {
+        super(settingsRepresentationTransformer);
     }
 
     /**
@@ -59,17 +59,17 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
         effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.SYSTEM_DEFAULTS);
         if (settingsRepresentations.hasStoredDocumentSettings()) {
             effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS);
-            effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
+            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
                     settingsRepresentations.getDocumentSettingsRepresentation());
         } else if (settingsRepresentations.hasStoredUserSettings()) {
-            effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
+            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
                     settingsRepresentations.getUserSettingsRepresentation());
             effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS);
         } else {
             effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS);
         }
         effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.DOCUMENT_DEFAULTS);
-        effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithUrlSettings(effectiveSettings);
+        effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithUrlSettings(effectiveSettings);
         return effectiveSettings;
     }
 

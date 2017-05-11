@@ -62,16 +62,16 @@ public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings>
 
     protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
             UserService userService, StoredSettingsLocator storageDefinitionId,
-            SettingsRepresentationTransformer settingsSerializationHelper) {
-        this(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper,
-                new UserSettingsBuildingPipeline(settingsSerializationHelper));
+            SettingsRepresentationTransformer settingsRepresentationTransformer) {
+        this(rootLifecycle, userService, storageDefinitionId, settingsRepresentationTransformer,
+                new UserSettingsBuildingPipeline(settingsRepresentationTransformer));
     }
 
     protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
             UserService userService, StoredSettingsLocator storageDefinitionId,
-            SettingsRepresentationTransformer settingsSerializationHelper,
+            SettingsRepresentationTransformer settingsRepresentationTransformer,
             SettingsBuildingPipeline settingsBuildingPipeline) {
-        super(rootLifecycle, userService, storageDefinitionId, settingsSerializationHelper, settingsBuildingPipeline);
+        super(rootLifecycle, userService, storageDefinitionId, settingsRepresentationTransformer, settingsBuildingPipeline);
     }
 
 }

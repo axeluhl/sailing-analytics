@@ -23,18 +23,18 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
 
     /**
      * Conversion helper which is used by this instance for type conversion/serialization between settings objects and
-     * JSON Strings.
+     * storable settings representation.
      */
-    protected final SettingsRepresentationTransformer settingsSerializationHelper;
+    protected final SettingsRepresentationTransformer settingsRepresentationTransformer;
 
     /**
-     * Constructs an instance with a custom conversion helper between settings objects and its JSON representation.
+     * Constructs an instance with a custom conversion helper between settings objects and its storable settings representation.
      * 
-     * @param settingsSerializationHelper
+     * @param settingsRepresentationTransformer
      *            The custom conversion helper
      */
-    public UrlSettingsBuildingPipeline(SettingsRepresentationTransformer settingsSerializationHelper) {
-        this.settingsSerializationHelper = settingsSerializationHelper;
+    public UrlSettingsBuildingPipeline(SettingsRepresentationTransformer settingsRepresentationTransformer) {
+        this.settingsRepresentationTransformer = settingsRepresentationTransformer;
     }
 
     /**
@@ -49,7 +49,7 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
     @Override
     public <S extends Settings> S getSettingsObject(S systemDefaultSettings,
             StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
-        return settingsSerializationHelper.mergeSettingsObjectWithUrlSettings(systemDefaultSettings);
+        return settingsRepresentationTransformer.mergeSettingsObjectWithUrlSettings(systemDefaultSettings);
     }
 
     /**

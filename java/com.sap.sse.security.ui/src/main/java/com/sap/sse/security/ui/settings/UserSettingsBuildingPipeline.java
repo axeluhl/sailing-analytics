@@ -24,13 +24,13 @@ import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
 public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
 
     /**
-     * Constructs an instance with a custom conversion helper between settings objects and its JSON representation.
+     * Constructs an instance with a custom conversion helper between settings objects and its storable representation.
      * 
-     * @param settingsSerializationHelper
+     * @param settingsRepresentationTransformer
      *            The custom conversion helper
      */
-    public UserSettingsBuildingPipeline(SettingsRepresentationTransformer settingsStringConverter) {
-        super(settingsStringConverter);
+    public UserSettingsBuildingPipeline(SettingsRepresentationTransformer settingsRepresentationTransformer) {
+        super(settingsRepresentationTransformer);
     }
 
     /**
@@ -48,13 +48,13 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
             StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
         CS effectiveSettings = systemDefaultSettings;
         if (settingsRepresentation.hasStoredDocumentSettings()) {
-            effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
+            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
                     settingsRepresentation.getDocumentSettingsRepresentation());
         } else if (settingsRepresentation.hasStoredUserSettings()) {
-            effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
+            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
                     settingsRepresentation.getUserSettingsRepresentation());
         }
-        effectiveSettings = settingsSerializationHelper.mergeSettingsObjectWithUrlSettings(effectiveSettings);
+        effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithUrlSettings(effectiveSettings);
         return effectiveSettings;
     }
 
@@ -73,7 +73,7 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
     @Override
     public StorableSettingsRepresentation getStorableSettingsRepresentation(Settings newSettings,
             PipelineLevel pipelineLevel, List<String> path) {
-        return settingsSerializationHelper.convertToSettingsRepresentation(newSettings);
+        return settingsRepresentationTransformer.convertToSettingsRepresentation(newSettings);
     }
 
 }

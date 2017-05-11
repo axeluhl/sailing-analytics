@@ -86,15 +86,15 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     protected ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StoredSettingsLocator storageDefinition, SettingsRepresentationTransformer settingsSerializationHelper) {
-        this(rootLifecycle, userService, storageDefinition, settingsSerializationHelper,
-                new UserSettingsBuildingPipeline(settingsSerializationHelper));
+            StoredSettingsLocator storageDefinition, SettingsRepresentationTransformer settingsRepresentationTransformer) {
+        this(rootLifecycle, userService, storageDefinition, settingsRepresentationTransformer,
+                new UserSettingsBuildingPipeline(settingsRepresentationTransformer));
     }
 
     protected ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StoredSettingsLocator storageDefinition, SettingsRepresentationTransformer settingsSerializationHelper,
+            StoredSettingsLocator storageDefinition, SettingsRepresentationTransformer settingsRepresentationTransformer,
             SettingsBuildingPipeline settingsBuildingPipeline) {
-        super(rootLifecycle, settingsSerializationHelper, settingsBuildingPipeline);
+        super(rootLifecycle, settingsRepresentationTransformer, settingsBuildingPipeline);
         if (IgnoreLocalSettings.getIgnoreLocalSettingsFromCurrentUrl().isIgnoreLocalSettings()) {
             this.settingsStorageManager = null;
         } else {

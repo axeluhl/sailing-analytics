@@ -28,7 +28,7 @@ import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAn
  */
 public class SimpleComponentContext<S extends Settings> implements ComponentContext<S> {
 
-    protected final SettingsRepresentationTransformer settingsSerializationHelper;
+    protected final SettingsRepresentationTransformer settingsRepresentationTransformer;
 
     /**
      * The pipeline used for the settings construction.
@@ -50,15 +50,15 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     }
 
     protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle,
-            SettingsRepresentationTransformer settingsSerializationHelper) {
-        this(rootLifecycle, settingsSerializationHelper, new UrlSettingsBuildingPipeline(settingsSerializationHelper));
+            SettingsRepresentationTransformer settingsRepresentationTransformer) {
+        this(rootLifecycle, settingsRepresentationTransformer, new UrlSettingsBuildingPipeline(settingsRepresentationTransformer));
     }
 
     protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle,
-            SettingsRepresentationTransformer settingsSerializationHelper,
+            SettingsRepresentationTransformer settingsRepresentationTransformer,
             SettingsBuildingPipeline settingsBuildingPipeline) {
         this.rootLifecycle = rootLifecycle;
-        this.settingsSerializationHelper = settingsSerializationHelper;
+        this.settingsRepresentationTransformer = settingsRepresentationTransformer;
         this.settingsBuildingPipeline = settingsBuildingPipeline;
     }
 
