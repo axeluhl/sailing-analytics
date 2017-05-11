@@ -5,7 +5,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
-import com.sap.sailing.gwt.autoplay.client.places.config.ConfigPlace;
+import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartPlace;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sse.gwt.client.mvp.ErrorView;
@@ -41,7 +41,7 @@ public class AutoPlayClientFactoryImpl extends AutoPlayClientFactoryBase {
 
     @Override
     public Place getDefaultPlace() {
-        return new ConfigPlace();
+        return new AutoPlayStartPlace();
     }
 
     @Override

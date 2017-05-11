@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.places.config;
+package com.sap.sailing.gwt.autoplay.client.places.autoplaystart;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +15,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinitionImpl;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayType;
-import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -30,13 +27,12 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
-import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
-public class ConfigViewImpl extends Composite implements ConfigView {
+public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
 
-    interface StartPageViewUiBinder extends UiBinder<Widget, ConfigViewImpl> {
+    interface StartPageViewUiBinder extends UiBinder<Widget, AutoPlayStartViewImpl> {
     }
 
     @UiField(provided = true)
@@ -53,22 +49,18 @@ public class ConfigViewImpl extends Composite implements ConfigView {
     Button settingsButton;
     @UiField
     DivElement leaderboardSelectionUi;
-    private final EventBus eventBus;
     private final List<EventDTO> events;
-    private AutoPlayClientFactory clientFactory;
 
     private AutoPlayConfiguration.Holder settingsHolder = new AutoPlayConfiguration.Holder();
     private AutoPlayType selectedAutoPlayType = null;
     private EventDTO selectedEvent;
     private StrippedLeaderboardDTO selectedLeaderboard;
+    private Presenter currentPresenter;
 
 
-    public ConfigViewImpl(AutoPlayClientFactory clientFactory) {
+    public AutoPlayStartViewImpl() {
         super();
-        this.clientFactory = clientFactory;
-        this.eventBus = clientFactory.getEventBus();
         this.events = new ArrayList<EventDTO>();
-        eventBus.fireEvent(new AutoPlayHeaderEvent(StringMessages.INSTANCE.autoplayConfiguration(), ""));
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
         leaderboardSelectionBox = new ListBox();
@@ -97,6 +89,11 @@ public class ConfigViewImpl extends Composite implements ConfigView {
         this.ensureDebugId("AutoPlayStartView");
 
         validate();
+    }
+
+    @Override
+    public void setCurrentPresenter(Presenter currentPresenter) {
+        this.currentPresenter = currentPresenter;
     }
 
     @Override
@@ -168,6 +165,7 @@ public class ConfigViewImpl extends Composite implements ConfigView {
             readyToGo = false;
 
         startAutoPlayButton.setEnabled(readyToGo);
+        settingsButton.setEnabled(readyToGo);
         if (readyToGo) {
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
@@ -180,19 +178,22 @@ public class ConfigViewImpl extends Composite implements ConfigView {
 
     @UiHandler("localeSelectionBox")
     void onLocaleSelectionChange(ChangeEvent event) {
-        String selectedLocale = getSelectedLocale();
-        LocaleChangeEvent localeChangeEvent = new LocaleChangeEvent(selectedLocale);
-        eventBus.fireEvent(localeChangeEvent);
+        currentPresenter.handleLocaleChange(getSelectedLocale());
     }
 
     @UiHandler("startAutoPlayButton")
     void startAutoPlayClicked(ClickEvent event) {
         if (validate()) {
+
             EventDTO selectedEvent = getSelectedEvent();
             String selectedLeaderboardName = getSelectedLeaderboardName();
+
             AutoPlayContextDefinition apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
-            selectedAutoPlayType.getConfig().startRootNode(clientFactory, apcd, settingsHolder.getSettings());
-            
+            PerspectiveCompositeSettings<?> settings = settingsHolder.getSettings();
+            currentPresenter.startRootNode(selectedAutoPlayType, apcd, settings);
+            settingsButton.setEnabled(false);
+            startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+            settingsButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
         }
     }
 

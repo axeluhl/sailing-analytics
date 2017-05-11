@@ -2,11 +2,10 @@ package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.autoplay.client.places.config.ConfigPlace;
-import com.sap.sailing.gwt.autoplay.client.places.config.ConfigPresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.config.ConfigViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartPlace;
+import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithBoatsPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithBoatsViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsTop3Place;
@@ -47,9 +46,9 @@ public class AutoPlayActivityMapperImpl implements ActivityMapper {
 
     @Override
     public Activity getActivity(Place place) {
-        if (place instanceof ConfigPlace) {
-            return new ConfigPresenterImpl((ConfigPlace) place, clientFactory,
-                    new ConfigViewImpl(clientFactory));
+        if (place instanceof AutoPlayStartPlace) {
+            return new AutoPlayStartPresenterImpl((AutoPlayStartPlace) place, clientFactory,
+                    new AutoPlayStartViewImpl());
         } else if (place instanceof LiveRaceWithRaceboardPlace) {
             return new LiveRaceWithRaceboardPresenterImpl((LiveRaceWithRaceboardPlace) place, clientFactory,
                     new LiveRaceWithRaceboardViewImpl());
@@ -91,7 +90,7 @@ public class AutoPlayActivityMapperImpl implements ActivityMapper {
             return new RaceEndWithBoatsPresenterImpl((RaceEndWithFlagesTop3Place) place, clientFactory,
                     new RaceEndWithBoatsViewImpl(new FlagImageProvider()));
         }
-        GWT.log("unknown place! " + place);
+
         return null;
     }
 }
