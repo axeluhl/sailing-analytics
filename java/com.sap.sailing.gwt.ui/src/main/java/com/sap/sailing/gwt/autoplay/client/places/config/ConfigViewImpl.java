@@ -20,11 +20,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
+import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinitionImpl;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayType;
@@ -37,9 +34,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class ConfigViewImpl extends Composite implements ConfigView {
@@ -64,18 +59,19 @@ public class ConfigViewImpl extends Composite implements ConfigView {
     DivElement screenConfigurationUi;
     @UiField
     FlowPanel leaderboardPerspectiveSettingsPanel;
-    private final AutoPlayPlaceNavigator navigator;
     private final EventBus eventBus;
     private final List<EventDTO> events;
-    private AutoPlayType selectedAutoPlayType = null;
-    private AutoplayPerspectiveLifecycle autoplayLifecycle;
-    protected PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings;
     private AutoPlayClientFactory clientFactory;
+
+    private AutoPlayConfiguration.Holder settingsHolder = new AutoPlayConfiguration.Holder();
+    private AutoPlayType selectedAutoPlayType = null;
+    private EventDTO selectedEvent;
+    private StrippedLeaderboardDTO selectedLeaderboard;
+
 
     public ConfigViewImpl(AutoPlayClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
-        this.navigator = clientFactory.getPlaceNavigator();
         this.eventBus = clientFactory.getEventBus();
         this.events = new ArrayList<EventDTO>();
         eventBus.fireEvent(new AutoPlayHeaderEvent(StringMessages.INSTANCE.autoplayConfiguration(), ""));
@@ -110,11 +106,6 @@ public class ConfigViewImpl extends Composite implements ConfigView {
         validate();
     }
 
-    private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
-        autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard);
-        autoplayPerspectiveSettings = autoplayLifecycle.createDefaultSettings();
-    }
-
     @Override
     public void setEvents(List<EventDTO> events) {
         this.events.clear();
@@ -134,8 +125,8 @@ public class ConfigViewImpl extends Composite implements ConfigView {
 
     @UiHandler("eventSelectionBox")
     void onEventSelectionChange(ChangeEvent event) {
-        EventDTO selectedEvent = getSelectedEvent();
-        if (selectedEvent != null) {
+        this.selectedEvent = getSelectedEvent();
+        if (this.selectedEvent != null) {
             leaderboardSelectionBox.clear();
             leaderboardSelectionBox.addItem(StringMessages.INSTANCE.selectALeaderboard());
             for (LeaderboardGroupDTO leaderboardGroup : selectedEvent.getLeaderboardGroups()) {
@@ -152,8 +143,7 @@ public class ConfigViewImpl extends Composite implements ConfigView {
     void onLeaderboardSelectionChange(ChangeEvent event) {
         String selectedLeaderboardName = getSelectedLeaderboardName();
         if (selectedLeaderboardName != null) {
-            StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
-            this.updatePerspectives(selectedLeaderboard);
+            this.selectedLeaderboard = getSelectedLeaderboard();
             leaderboardPerspectiveSettingsPanel.clear();
             Button perspectiveSettingsButton = new Button(StringMessages.INSTANCE.settings());
             perspectiveSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
@@ -162,7 +152,7 @@ public class ConfigViewImpl extends Composite implements ConfigView {
             perspectiveSettingsButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    openSettingsDialog();
+                    selectedAutoPlayType.getConfig().loadSettings(selectedEvent, selectedLeaderboard, settingsHolder);
                 }
             });
         }
@@ -192,24 +182,6 @@ public class ConfigViewImpl extends Composite implements ConfigView {
         return readyToGo;
     }
 
-    protected void openSettingsDialog() {
-        DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
-            @Override
-            public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
-                autoplayPerspectiveSettings = editedObject;
-            }
-
-            @Override
-            public void cancel() {
-            }
-        };
-        if (autoplayPerspectiveSettings == null) {
-            autoplayPerspectiveSettings = autoplayLifecycle.createDefaultSettings();
-        }
-        new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(null,
-                autoplayLifecycle, autoplayPerspectiveSettings, StringMessages.INSTANCE, true, callback).show();
-    }
-
     @UiHandler("localeSelectionBox")
     void onLocaleSelectionChange(ChangeEvent event) {
         String selectedLocale = getSelectedLocale();
@@ -223,7 +195,7 @@ public class ConfigViewImpl extends Composite implements ConfigView {
             EventDTO selectedEvent = getSelectedEvent();
             String selectedLeaderboardName = getSelectedLeaderboardName();
             AutoPlayContextDefinition apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
-            selectedAutoPlayType.getConfig().startRootNode(clientFactory, apcd, autoplayPerspectiveSettings);
+            selectedAutoPlayType.getConfig().startRootNode(clientFactory, apcd, settingsHolder.getSettings());
             
         }
     }
@@ -283,4 +255,6 @@ public class ConfigViewImpl extends Composite implements ConfigView {
     interface OnSettingsCallback<PSS extends Settings> {
         void newSettings(PerspectiveCompositeSettings<PSS> newSettings);
     }
+
+
 }
