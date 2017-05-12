@@ -30,11 +30,16 @@ class MarkViewController: SessionViewController {
 
     fileprivate func setup() {
         setupButtons()
+        setupLocalization()
         setupNavigationBar()
     }
     
     fileprivate func setupButtons() {
         startTrackingButton.setBackgroundImage(Images.GreenHighlighted, for: .highlighted)
+    }
+
+    fileprivate func setupLocalization() {
+        startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, for: .normal)
     }
 
     fileprivate func setupNavigationBar() {
