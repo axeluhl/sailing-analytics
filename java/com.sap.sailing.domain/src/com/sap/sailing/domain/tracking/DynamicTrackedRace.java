@@ -194,6 +194,18 @@ public interface DynamicTrackedRace extends TrackedRace {
     
     void setStatus(TrackedRaceStatus newStatus);
     
+    /**
+     * Updates the status of one {@link TrackingDataLoader}. This influences the overall status of the TrackedRace with the following rules:
+     * <ul>
+     * <li>The {@link TrackedRace} is initially in the state PREPARED</li>
+     * <li>If any loader's state is ERROR, this will also be the case for the {@link TrackedRace}</li>
+     * <li>Otherwise: If any loader's state is LOADING, the {@link TrackedRace} will also be in loading state with the progress being the average progress of all loaders (including those not being in loading state)</li>
+     * <li>Otherwise: If all laoders are in PREPARED state, this will also be the case for the {@link TrackedRace}</li>
+     * <li>Otherwise: The {@link TrackedRace} is in TRACKING state</li>
+     * </ul>
+     * 
+     * @see TrackedRace#getStatus()
+     */
     void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus status);
 
     /**

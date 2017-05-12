@@ -223,27 +223,30 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TrackedRaceStatusEnum raceStatus = TrackedRaceStatusEnum.FINISHED;
         double totalProgress = 1.0;
         synchronized (loaderStatus) {
-            // logger.info("Status changed: " + newStatus.getStatus() + " | " + source);
             this.updateLoaderStatus(source, newStatus);
-            double sumOfLoaderProgresses = 0.0;
             if (!loaderStatus.isEmpty()) {
+                double sumOfLoaderProgresses = 0.0;
+                boolean anyError = false;
+                boolean anyLoading = false;
+                boolean allPrepared = true;
                 raceStatus = TrackedRaceStatusEnum.TRACKING;
                 for (TrackedRaceStatus status : loaderStatus.values()) {
-                    if (status.getStatus() == TrackedRaceStatusEnum.ERROR) {
-                        raceStatus = TrackedRaceStatusEnum.ERROR; break;
-                    } 
-                    if (status.getStatus() == TrackedRaceStatusEnum.LOADING) {
-                        raceStatus = TrackedRaceStatusEnum.LOADING;
-                    }
+                    anyError |= (status.getStatus() == TrackedRaceStatusEnum.ERROR);
+                    anyLoading |= (status.getStatus() == TrackedRaceStatusEnum.LOADING);
+                    allPrepared &= (status.getStatus() == TrackedRaceStatusEnum.PREPARED);
                     sumOfLoaderProgresses += status.getLoadingProgress();
                 }
-                if (raceStatus == TrackedRaceStatusEnum.LOADING) {
+                if (anyError) {
+                    raceStatus = TrackedRaceStatusEnum.ERROR;
+                } else if (anyLoading) {
+                    raceStatus = TrackedRaceStatusEnum.LOADING;
                     totalProgress = sumOfLoaderProgresses / loaderStatus.size();
+                } else {
+                    raceStatus = allPrepared ? TrackedRaceStatusEnum.PREPARED : TrackedRaceStatusEnum.TRACKING;
                 }
             }
         }
         this.setStatus(new TrackedRaceStatusImpl(raceStatus, totalProgress));
-        // logger.info("Global status: " + raceStatus + " | Progress: " + totalProgress);
     }
    
     private void updateLoaderStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
@@ -274,8 +277,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if (!onlyWhenInTrackingTimeInterval || isWithinStartAndEndOfTracking(fixTimePoint)) {
             getOrCreateTrack(mark).addGPSFix(fix);
         } else {
-			logger.finer(() -> "Dropped fix " + fix + " because it is outside the tracking interval "
-					+ getStartOfTracking() + ".." + getEndOfTracking());
+            logger.finer(() -> "Dropped fix " + fix + " because it is outside the tracking interval "
+                    + getStartOfTracking() + ".." + getEndOfTracking());
         }
     }
 

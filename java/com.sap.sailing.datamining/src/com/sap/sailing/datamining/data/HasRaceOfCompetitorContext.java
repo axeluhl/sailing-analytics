@@ -70,4 +70,7 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=0, ordinal=13)
     public int getNumberOfPenaltyCircles();
     
+    @Statistic(messageKey="DistanceTraveled", resultDecimals=1)
+    public Distance getDistanceTraveled();
+    
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sse.common.Duration;
@@ -25,7 +26,23 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
      *         where we have fixes for.
      */
     Distance getRideHeight(TimePoint timePoint);
-    
+
+    /**
+     * Calculates the heel for a specific {@link TimePoint}
+     * 
+     * @param timePoint
+     * @return
+     */
+    Bearing getHeel(TimePoint timePoint);
+
+    /**
+     * Calculates the pitch for a specific {@link TimePoint}
+     * 
+     * @param timePoint
+     * @return
+     */
+    Bearing getPitch(TimePoint timePoint);
+
     /**
      * Tells if the competitor to which this track belongs is considered to be foiling at the time point
      * given. This depends on the {@link #getRideHeight} and a threshold above which a boat is considered
