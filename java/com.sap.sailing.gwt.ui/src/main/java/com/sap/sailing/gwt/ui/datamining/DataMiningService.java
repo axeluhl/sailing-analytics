@@ -26,8 +26,8 @@ public interface DataMiningService extends RemoteService {
     HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName);
 
     HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName);
-    
-    HashSet<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
+
+    HashSet<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
     HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getDimensionsMappedByLevelFor(
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
     HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getReducedDimensionsMappedByLevelFor(
@@ -40,10 +40,13 @@ public interface DataMiningService extends RemoteService {
             HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings,
             HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO, String localeInfoName);
     
-    <ResultType> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition);
+    <ResultType extends Serializable> QueryResultDTO<ResultType> runQuery(DataMiningSession session,
+            StatisticQueryDefinitionDTO queryDefinition);
 
     HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
-    <ResultType> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session, PredefinedQueryIdentifier identifier, String localeInfoName);
+
+    <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,
+            PredefinedQueryIdentifier identifier, String localeInfoName);
 
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
 

@@ -131,11 +131,12 @@ public class CandidateFinderImpl implements CandidateFinder {
     private final DynamicTrackedRace race;
     
     /**
-     * Fixes are not considered eligible as candidates if a non-inferred start time is known for the race and the fix is
+     * Fixes are not considered eligible as candidates if this field is {@code null} (meaning a start time is not known
+     * and won't be inferred from start mark passings) or a non-inferred start time is known for the race and the fix is
      * {@link #EARLIEST_START_MARK_PASSING_THIS_MUCH_BEFORE_START reasonably} earlier than this start time point. They
      * are also ignored if a non-inferred finished time for the race is known and the fix is
-     * {@link #LATEST_FINISH_MARK_PASSING_THIS_MUCH_AFTER_RACE_FINISHED reasonably} after that time point. Always
-     * holds a non-{@code null} object after the constructor has terminated.
+     * {@link #LATEST_FINISH_MARK_PASSING_THIS_MUCH_AFTER_RACE_FINISHED reasonably} after that time point. Always holds
+     * a non-{@code null} object after the constructor has terminated.
      */
     private TimeRange timeRangeForValidCandidates;
     
@@ -155,7 +156,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     public CandidateFinderImpl(DynamicTrackedRace race, ExecutorService executor) {
         this.race = race;
         this.executor = executor;
-        this.timeRangeForValidCandidates = new TimeRangeImpl(
+        this.timeRangeForValidCandidates = getTimeRangeOrNull(
                 getTimePointWhenToStartConsideringCandidates(race.getStartOfRace(/* inferred */ false)),
                 getTimePointWhenToFinishConsideringCandidates(race.getFinishedTime()));
         final RaceDefinition raceDefinition = race.getRace();
@@ -521,16 +522,18 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     private Set<GPSFix> getAllFixes(Competitor c) {
         Set<GPSFix> fixes = new TreeSet<GPSFix>(comp);
-        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-        track.lockForRead();
-        try {
-            for (GPSFix fix : track.getFixes(
-                    timeRangeForValidCandidates.from(), /* fromInclusive */ true,
-                    timeRangeForValidCandidates.to(),   /*  toInclusive  */ true)) {
-                fixes.add(fix);
+        if (timeRangeForValidCandidates != null) {
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+            track.lockForRead();
+            try {
+                for (GPSFix fix : track.getFixes(
+                        timeRangeForValidCandidates.from(), /* fromInclusive */ true,
+                        timeRangeForValidCandidates.to(),   /*  toInclusive  */ true)) {
+                    fixes.add(fix);
+                }
+            } finally {
+                track.unlockAfterRead();
             }
-        } finally {
-            track.unlockAfterRead();
         }
         return fixes;
     }
@@ -547,7 +550,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         for (GPSFix fix : fixes) {
-            if (timeRangeForValidCandidates.includes(fix.getTimePoint())) {
+            if (timeRangeForValidCandidates != null && timeRangeForValidCandidates.includes(fix.getTimePoint())) {
                 affectedFixes.add(fix);
                 GPSFix fixBefore;
                 GPSFix fixAfter;
@@ -704,7 +707,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         for (GPSFix fix : fixes) {
-            if (timeRangeForValidCandidates.includes(fix.getTimePoint())) {
+            if (timeRangeForValidCandidates  != null && timeRangeForValidCandidates.includes(fix.getTimePoint())) {
                 TimePoint t = fix.getTimePoint();
                 GPSFix fixBefore;
                 GPSFix fixAfter;
@@ -816,6 +819,12 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
+    /**
+     * @return if for a waypoint the mark positions are known, the resulting map will contain a non-empty list that for
+     *         each way of passing the waypoint (e.g., for a gate the competitor can round the left or the right mark) the
+     *         cross track error of the {@code fix} to the virtual line that must be crossed is contained; if the mark
+     *         positions are not known, that waypoint's value will be an empty list.
+     */
     private Map<Waypoint, List<Distance>> getXTE(Competitor c, GPSFix fix) {
         Map<Waypoint, List<Distance>> result = xteCache.get(c).get(fix);
         if (result == null) {
@@ -1429,6 +1438,23 @@ public class CandidateFinderImpl implements CandidateFinder {
         return new Util.Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
     }
 
+    /**
+     * If the {@link #race}'s regatta is configured to infer the start times from start mark passings
+     * then {@code null} must be tolerated as a value for {@code from}, leading to an open interval
+     * starting at the beginning of time. However, if the start time is expected to be set and not
+     * inferred, mark passings need to be detected only from the start minus some tolerance interval.
+     * In this case, {@code null} will be returned in case {@code from} is {@code null}.
+     */
+    private TimeRange getTimeRangeOrNull(TimePoint from, TimePoint to) {
+        final TimeRange result;
+        if (from == null && !race.getTrackedRegatta().getRegatta().useStartTimeInference()) {
+            result = null;
+        } else {
+            result = new TimeRangeImpl(from, to);
+        }
+        return result;
+    }
+    
     @Override
     public Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterRaceStartTimeChange() {
         final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result;
@@ -1436,7 +1462,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         final TimePoint newTimePointWhenToStartConsideringCandidates = getTimePointWhenToStartConsideringCandidates(newNonInferredStartTime);
         if (!Util.equalsWithNull(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.from())) {
             final TimePoint oldTimePointWhenToStartConsideringCandidates = timeRangeForValidCandidates.from();
-            timeRangeForValidCandidates = new TimeRangeImpl(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.to());
+            timeRangeForValidCandidates = getTimeRangeOrNull(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.to());
             result = updateCandiatesAfterRaceTimeRangeChanged(newTimePointWhenToStartConsideringCandidates, oldTimePointWhenToStartConsideringCandidates);
         } else {
             result = Collections.emptyMap();
@@ -1451,7 +1477,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         final TimePoint newTimePointWhenToFinishConsideringCandidates = getTimePointWhenToFinishConsideringCandidates(newFinishedTime);
         if (!Util.equalsWithNull(timeRangeForValidCandidates.to(), newTimePointWhenToFinishConsideringCandidates)) {
             final TimePoint oldTimePointWhenToFinishConsideringCandidates = timeRangeForValidCandidates.to();
-            timeRangeForValidCandidates = new TimeRangeImpl(timeRangeForValidCandidates.from(), newTimePointWhenToFinishConsideringCandidates);
+            timeRangeForValidCandidates = getTimeRangeOrNull(timeRangeForValidCandidates.from(), newTimePointWhenToFinishConsideringCandidates);
             result = updateCandiatesAfterRaceTimeRangeChanged(oldTimePointWhenToFinishConsideringCandidates, newTimePointWhenToFinishConsideringCandidates);
         } else {
             result = Collections.emptyMap();

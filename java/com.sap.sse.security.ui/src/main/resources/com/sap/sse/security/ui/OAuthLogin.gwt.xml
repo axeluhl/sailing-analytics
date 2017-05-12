@@ -9,6 +9,7 @@
 
   <!-- Other module inherits                                      -->
   <inherits name="com.sap.sse.gwt.Settings" />
+  <inherits name="com.sap.sse.security.ui.SecurityLocalesAllPermutations" />
   
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sse.security.ui.oauth.client.OAuthLoginEntryPoint'/>
@@ -22,6 +23,5 @@
   <set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
   <!-- Specify the paths for translatable code                    -->
-  <extend-property name="locale" values="de"/>
   <source path='login'/>
 </module>

@@ -6,7 +6,7 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
-public interface GroupingProvider extends DataMiningComponentProvider<SerializableSettings>, StatisticChangedListener{
+public interface GroupingProvider extends DataMiningComponentProvider<SerializableSettings>, DataRetrieverChainDefinitionChangedListener {
     
     public Collection<FunctionDTO> getDimensionsToGroupBy();
     public String getCustomGrouperScriptText();

@@ -7,6 +7,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.OverallLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -15,50 +19,70 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 /**
  * A viewer for a single leaderboard and a leaderboard chart.
  * @author Frank Mittag (c163874)
  *
  */
-public class LeaderboardViewer extends AbstractLeaderboardViewer {
+public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPerspectiveLifecycle> {
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
     private LeaderboardPanel overallLeaderboardPanel;
     
-    public LeaderboardViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
+    public LeaderboardViewer(Component<?> parent,
+            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
+            LeaderboardPerspectiveLifecycle lifecycle,
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
+            final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
+            final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, 
-            boolean autoExpandLastRaceColumn, boolean showCharts, DetailType chartDetailType, boolean showOverallLeaderboard) {
-        this(new CompetitorSelectionModel(/* hasMultiSelection */true), sailingService, asyncActionsExecutor, timer,
-                leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, userAgent, showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts,
-                chartDetailType, showOverallLeaderboard);
+            final StringMessages stringMessages, DetailType chartDetailType) {
+        this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
+                sailingService, asyncActionsExecutor, timer,
+                preselectedRace, leaderboardGroupName, leaderboardName, errorReporter,
+                stringMessages, chartDetailType);
     }
 
-    private LeaderboardViewer(CompetitorSelectionModel competitorSelectionModel,
+    private LeaderboardViewer(Component<?> parent,
+            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
+            LeaderboardPerspectiveLifecycle lifecycle,
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
+            CompetitorSelectionModel competitorSelectionModel,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
+            final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails,
-            boolean hideToolbar, boolean autoExpandLastRaceColumn, boolean showCharts, DetailType chartDetailType,
-            boolean showOverallLeaderboard) {
-        super(competitorSelectionModel, asyncActionsExecutor, timer, stringMessages, hideToolbar, new LeaderboardPanel(
-                sailingService, asyncActionsExecutor, leaderboardSettings, preselectedRace != null, preselectedRace,
-                competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* adjustTimerDelay */
-                /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, true, /*autoApplyTopNFilter*/ false, false));
+            final StringMessages stringMessages, DetailType chartDetailType) {
+        super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
+                stringMessages);
+        // FIXME: Cleanup with java8 using supplier
+        init(new LeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
+                settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), preselectedRace != null,
+                preselectedRace, competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
+                stringMessages, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
+                /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null,
+                settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
+                /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
+                /* enableSyncScroller */ false));
+
+        final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
+        final boolean showCharts = perspectiveSettings.isShowCharts();
+        
         final FlowPanel mainPanel = createViewerPanel();
-        setWidget(mainPanel);
-        multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, leaderboardName, chartDetailType,
-                competitorSelectionProvider, timer, stringMessages, errorReporter);
+        initWidget(mainPanel);
+        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, getComponentContext(), sailingService,
+                asyncActionsExecutor,
+                leaderboardName, chartDetailType,
+                competitorSelectionProvider, timer, stringMessages, false, errorReporter);
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
 
         mainPanel.add(getLeaderboardPanel());
         mainPanel.add(multiCompetitorChart);
+        addChildComponent(multiCompetitorChart);
 
         addComponentToNavigationMenu(getLeaderboardPanel(), false, null, /* hasSettingsWhenComponentIsInvisible*/ true);
         addComponentToNavigationMenu(multiCompetitorChart, true, null,  /* hasSettingsWhenComponentIsInvisible*/ true);
@@ -68,19 +92,24 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
             multiCompetitorChart.timeChanged(timer.getTime(), null);
         }
         overallLeaderboardPanel = null;
-        if(showOverallLeaderboard) {
+        if(perspectiveSettings.isShowOverallLeaderboard()) {
             sailingService.getOverallLeaderboardNamesContaining(leaderboardName, new MarkedAsyncCallback<List<String>>(
                     new AsyncCallback<List<String>>() {
                         @Override
                         public void onSuccess(List<String> result) {
                             if(result.size() == 1) {
                                 String overallLeaderboardName = result.get(0);
-                                overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                                        leaderboardSettings, preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,
-                                        leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
+                                overallLeaderboardPanel = new OverallLeaderboardPanel(LeaderboardViewer.this,
+                                        getComponentContext(), sailingService,
+                                        asyncActionsExecutor,
+                                        settings.findSettingsByComponentId(OverallLeaderboardPanelLifecycle.ID),
+                                        preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,
+                                        leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
-                                        false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false);
+                                        false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
+                                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
                                 mainPanel.add(overallLeaderboardPanel);
+                                addChildComponent(overallLeaderboardPanel);
                                 addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
                                         /* hasSettingsWhenComponentIsInvisible*/ true);
                             }

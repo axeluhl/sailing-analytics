@@ -2,7 +2,6 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasManeuverContext;
@@ -26,7 +25,7 @@ public class ManeuverRetrievalProcessor extends AbstractRetrievalProcessor<HasTr
         TimePoint finishTime = element.getTrackedLegOfCompetitor().getFinishTime();
         if (finishTime != null) {
             try {
-                List<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
+                Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
                 for (Maneuver maneuver : maneuvers) {
                     maneuversWithContext.add(new ManeuverWithContext(element, maneuver));
                 }

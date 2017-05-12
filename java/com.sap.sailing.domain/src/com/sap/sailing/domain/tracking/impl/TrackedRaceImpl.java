@@ -82,6 +82,8 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TargetTimeInfo;
+import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
@@ -101,6 +103,7 @@ import com.sap.sailing.domain.common.impl.CourseChangeImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.TargetTimeInfoImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -787,7 +790,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             boolean startOfTrackingFound = false;
             boolean endOfTrackingFound = false;
             // check race log
-            if (trackingTimesFromRaceLog != null){
+            if (trackingTimesFromRaceLog != null) {
                 if (trackingTimesFromRaceLog.getA() != null) {
                     startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
                     startOfTrackingFound = true;
@@ -913,22 +916,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             TimePoint newStartTime = null;
             TimePoint newStartTimeWithoutInferenceFromStartMarkPassings = null;
             for (RaceLog raceLog : attachedRaceLogs.values()) {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
-                }
+                logger.finest(()->"Analyzing race log "+raceLog+" for race "+this.getRace().getName());
                 newStartTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
                 if (newStartTime != null) {
                     newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Found start time "+newStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
-                    }
+                    final TimePoint finalNewStartTime = newStartTime;
+                    logger.finest(()->"Found start time "+finalNewStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
                     break;
                 }
             }
             if (newStartTime == null) {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("No start time found in race logs for race "+getRace().getName());
-                }
+                logger.finest(()->"No start time found in race logs for race "+getRace().getName());
                 newStartTime = getStartTimeReceived();
                 if (newStartTime != null) {
                     newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
@@ -951,14 +949,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
                                 newStartTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
                                         - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+newStartTime);
-                                }
+                                final TimePoint finalNewStartTime = newStartTime;
+                                logger.finest(()->"Using start mark passings for start time of race "+this.getRace().getName()+": "+finalNewStartTime);
                             } else {
                                 newStartTime = startTimeReceived;
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark received for race "+this.getRace().getName()+": "+newStartTime);
-                                }
+                                final TimePoint finalNewStartTime = newStartTime;
+                                logger.finest(()->"Using start mark received for race "+this.getRace().getName()+": "+finalNewStartTime);
                             }
                         }
                     } else {
@@ -975,8 +971,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             startTime = newStartTime;
             startTimeWithoutInferenceFromStartMarkPassings = newStartTimeWithoutInferenceFromStartMarkPassings;
-            }
         }
+    }
 
     /**
      * Calculates the end time of the race from the mark passings of the last course waypoint
@@ -2844,7 +2840,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            <code>competitor</code>, reduced to the interval requested, will be returned.
      */
     @Override
-    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
+    public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> allManeuvers = maneuverCache.get(competitor, waitForLatest);
         List<Maneuver> result;
         if (allManeuvers == null) {
@@ -2856,8 +2852,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private <T extends Timed> List<T> extractInterval(TimePoint from, TimePoint to, List<T> listOfTimed) {
-        List<T> result;
-        result = new LinkedList<T>();
+        List<T> result = new LinkedList<T>();
         for (T timed : listOfTimed) {
             if (timed.getTimePoint().compareTo(from) >= 0 && timed.getTimePoint().compareTo(to) <= 0) {
                 result.add(timed);
@@ -3015,11 +3010,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 result.addAll(detectManeuvers(competitor, markPassingTimePoint.plus(1), timePointAfterManeuver, /* ignoreMarkPassings */ true));
             } else {
                 // Either there was no mark passing, or the mark passing was not accompanied by a tack or a jibe.
-                // For the first tack/jibe combination (they must alternate because course changes to in the same direction and
+                // For the first tack/jibe combination (they must alternate because the course changes in the same direction and
                 // the wind is considered sufficiently stable to not allow for two successive tacks or two successive jibes)
                 // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has completed.
                 if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
-                    TimePointAndTotalCourseChangeInDegrees firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(courseBeforeManeuver, group, wind);
+                    TimePointAndTotalCourseChangeInDegrees firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(competitor, timePointBeforeManeuver, courseBeforeManeuver, group, wind);
                     maneuverType = ManeuverType.PENALTY_CIRCLE;
                     if (legBeforeManeuver != null) {
                         maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt.getTimePoint());
@@ -3094,25 +3089,99 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     /**
      * Starting at <code>timePointBeforeManeuver</code>, and assuming that the group of <code>approximatedFixesAndCourseChanges</code>
-     * contains at least a tack and a jibe, finds the earliest approximated fix's time point at which a tack and a jibe have been
-     * completed.
+     * contains at least a tack and a jibe, finds the approximated fix's time point at which one tack and one jibe have been
+     * completed and for which the total course change is as close as possible to 360°.
      */
-    private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
+    private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(
+            Competitor competitor, TimePoint timePointBeforeManeuver, Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
         double totalCourseChangeInDegrees = 0;
-        TimePoint timePoint = null;
+        double bestTotalCourseChangeInDegrees = 0; // this should be as close as possible to 360° after one tack and one gybe
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
         Bearing newCourse = courseBeforeManeuver;
+        TimePoint timePointOfPreviousCourseChange = timePointBeforeManeuver;
+        TimePointAndTotalCourseChangeInDegrees result = null;
         for (Pair<GPSFixMoving, CourseChange> fixAndCourseChange : approximatedFixesAndCourseChanges) {
             totalCourseChangeInDegrees += fixAndCourseChange.getB().getCourseChangeInDegrees();
             newCourse = newCourse.add(new DegreeBearingImpl(fixAndCourseChange.getB().getCourseChangeInDegrees()));
             int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getBearing());
             int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getFrom());
             if (numberOfJibes > 0 && numberOfTacks > 0) {
-                timePoint = fixAndCourseChange.getA().getTimePoint();
-                break;
+                if (numberOfJibes > 1 || numberOfTacks > 1) {
+                    // It could be that one or both numbers increased to greater than 1 from 0. In this case
+                    // we want to find the point between the completion of the penalty and the next maneuver
+                    // which increases one of the counters to 2 and use that time point as the result:
+                    if (result == null) {
+                        result = findBestFixBetweenCourseChanges(competitor, courseBeforeManeuver, timePointOfPreviousCourseChange,
+                                fixAndCourseChange.getA().getTimePoint(), totalCourseChangeInDegrees<0?NauticalSide.PORT:NauticalSide.STARBOARD, wind);
+                    }
+                    break; // don't continue into a subsequent tack/gybe sailed in conjunction with the penalty or starting the next circle
+                }
+                if (Math.abs(360-Math.abs(totalCourseChangeInDegrees)) < (Math.abs(360-Math.abs(bestTotalCourseChangeInDegrees)))) {
+                    bestTotalCourseChangeInDegrees = totalCourseChangeInDegrees;
+                    result = new TimePointAndTotalCourseChangeInDegrees(fixAndCourseChange.getA().getTimePoint(), bestTotalCourseChangeInDegrees);
+                } else {
+                    break; // not getting closer but further away from 360°
+                }
             }
         }
-        return new TimePointAndTotalCourseChangeInDegrees(timePoint, totalCourseChangeInDegrees);
+        return result;
+    }
+
+    /**
+     * In {@code competitor}'s track between {@code from} and {@code to} (inclusive) find the fix where the competitor
+     * has completed one tack and one gybe and is coming closest to the course before the maneuver
+     * ({@code courseBeforeManeuver}). This is done by recursively splitting the interval and computing the resulting
+     * numbers of tacks and gybes starting at {@code from} and up to the point probed, and calculating the absolute
+     * difference to the target course which equals the {@code courseBeforeManeuver}.
+     * <p>
+     * 
+     * The implementation is similar to
+     * {@link #getTimePointOfCompletionOfFirstPenaltyCircle(Competitor, TimePoint, Bearing, Iterable, Wind)} but instead
+     * of following the course changes identified by the Douglas-Peucker algorithm, here we visit individual fixes and
+     * look at the resulting target course and course change.
+     * 
+     * @param maneuverDirection
+     *            the general direction in which the maneuver is sailed
+     */
+    private TimePointAndTotalCourseChangeInDegrees findBestFixBetweenCourseChanges(Competitor competitor,
+            Bearing courseBeforeManeuver, TimePoint from, TimePoint to, NauticalSide maneuverDirection, Wind wind) {
+        final GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+        BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
+        track.lockForRead();
+        TimePoint timePoint = null;
+        double bestTotalCourseChangeInDegrees = 0;
+        try {
+            GPSFixMoving fix;
+            double totalCourseChangeInDegrees = 0;
+            for (Iterator<GPSFixMoving> fixIter = track.getFixesIterator(from, /* inclusive */ true); fixIter.hasNext() && !(fix=fixIter.next()).getTimePoint().after(to); ) {
+                Bearing newCourse = fix.getSpeed().getBearing();
+                totalCourseChangeInDegrees = new CourseChangeCalculator().
+                        getTotalCourseChange(courseBeforeManeuver, fix.getSpeed().getBearing(), totalCourseChangeInDegrees, maneuverDirection);
+                int numberOfJibes = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getBearing());
+                int numberOfTacks = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, newCourse, wind.getFrom());
+                if (numberOfJibes > 0 && numberOfTacks > 0) {
+                    if (numberOfJibes > 1 || numberOfTacks > 1) {
+                        // It could be that both numbers increased, and one was 1 before, so now we have 1 and 2. But
+                        // we can't split it up finer than two fixes, so we'll use the time point between the last two fixes
+                        // instead:
+                        if (timePoint == null) {
+                            final TimePoint timePointOfPreviousFix = track.getLastFixBefore(fix.getTimePoint()).getTimePoint();
+                            timePoint = timePointOfPreviousFix.plus(timePointOfPreviousFix.until(fix.getTimePoint()).divide(2));
+                        }
+                        break; // don't continue into a subsequent tack/gybe sailed in conjunction with the penalty or starting the next circle
+                    }
+                    if (Math.abs(360-Math.abs(totalCourseChangeInDegrees)) < (Math.abs(360-Math.abs(bestTotalCourseChangeInDegrees)))) {
+                        bestTotalCourseChangeInDegrees = totalCourseChangeInDegrees;
+                        timePoint = fix.getTimePoint();
+                    } else {
+                        break; // not getting closer but further away from 360°
+                    }
+                }
+            }
+        } finally {
+            track.unlockAfterRead();
+        }
+        return new TimePointAndTotalCourseChangeInDegrees(timePoint, bestTotalCourseChangeInDegrees);
     }
 
     /**
@@ -3455,29 +3524,46 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (startWaypoint == null) {
             result = null;
         } else {
-            Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false);
+            Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ false);
             if (competitorPosition == null) {
                 result = null;
             } else {
                 Iterable<Mark> marks = startWaypoint.getControlPoint().getMarks();
                 Iterator<Mark> marksIterator = marks.iterator();
                 Mark first = marksIterator.next();
-                Position firstPosition = getOrCreateTrack(first).getEstimatedPosition(timePoint, /* extrapolate */false);
+                Position firstPosition = getOrCreateTrack(first).getEstimatedPosition(timePoint, /* extrapolate */ false);
                 if (firstPosition == null) {
                     result = null;
                 } else {
                     if (marksIterator.hasNext()) {
                         // it's a line / gate
                         Mark second = marksIterator.next();
-                        Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */
-                                false);
-                        final Bearing bearingGreatCircle = firstPosition.getBearingGreatCircle(secondPosition);
-                        if (bearingGreatCircle == null) {
+                        Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */ false);
+                        if (secondPosition == null) {
                             result = null;
                         } else {
-                            Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
-                                    firstPosition, bearingGreatCircle);
-                            result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                            final Bearing lineBearingGreatCircleFromFirstToSecond = firstPosition.getBearingGreatCircle(secondPosition);
+                            // if the competitor is outside of the line when projected orthogonally, compute the distance to
+                            // the nearest of the line's marks (see also bug 1952):
+                            final Bearing bearingFromFirstToCompetitor = firstPosition.getBearingGreatCircle(competitorPosition);
+                            final Bearing angleBetweenFromFirstToCompetitorAndLine = lineBearingGreatCircleFromFirstToSecond.getDifferenceTo(bearingFromFirstToCompetitor);
+                            if (angleBetweenFromFirstToCompetitorAndLine.getDegrees() < -90 || angleBetweenFromFirstToCompetitorAndLine.getDegrees() > 90) {
+                                // competitor's orthogonal projection onto the line's extension is outside of the line's ends on the side
+                                // of the first mark; use distance between competitor and first mark:
+                                result = competitorPosition.getDistance(firstPosition);
+                            } else {
+                                final Bearing bearingFromSecondToCompetitor = secondPosition.getBearingGreatCircle(competitorPosition);
+                                final Bearing angleBetweenFromSecondToCompetitorAndReversedLine = lineBearingGreatCircleFromFirstToSecond.reverse().getDifferenceTo(bearingFromSecondToCompetitor);
+                                if (angleBetweenFromSecondToCompetitorAndReversedLine.getDegrees() < -90 || angleBetweenFromSecondToCompetitorAndReversedLine.getDegrees() > 90) {
+                                    // competitor's orthogonal projection onto the line's extension is outside of the line's ends on the side
+                                    // of the first mark; use distance between competitor and first mark:
+                                    result = competitorPosition.getDistance(secondPosition);
+                                } else {
+                                    Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
+                                            firstPosition, lineBearingGreatCircleFromFirstToSecond);
+                                    result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                                }
+                            }
                         }
                     } else {
                         result = competitorPosition.getDistance(firstPosition);
@@ -3838,8 +3924,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Position getCenterOfCourse(TimePoint at) {
         int count = 0;
         ScalablePosition sum = null;
+        final MarkPositionAtTimePointCache cache = new MarkPositionAtTimePointCacheImpl(this, at);
         for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
-            final Position waypointPosition = getApproximatePosition(waypoint, at);
+            final Position waypointPosition = getApproximatePosition(waypoint, at, cache);
             if (waypointPosition != null) {
                 ScalablePosition p = new ScalablePosition(waypointPosition);
                 if (sum == null) {
@@ -3920,18 +4007,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
+    public TargetTimeInfo getEstimatedTimeToComplete(final TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
             NoWindException {
        if (polarDataService == null) {
             throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
         }
         Duration durationOfAllLegs = Duration.NULL;
-        final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, timepoint);
+        TimePoint current = timepoint;
+        final List<LegTargetTimeInfo> legTargetTimes = new ArrayList<>();
         for (TrackedLeg leg : trackedLegs.values()) {
-            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint, markPositionCache);
-            durationOfAllLegs = durationOfAllLegs.plus(durationOfLeg);
+            final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, current);
+            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeToComplete(polarDataService, current, markPositionCache);
+            legTargetTimes.add(legTargetTime);
+            durationOfAllLegs = durationOfAllLegs.plus(legTargetTime.getExpectedDuration());
+            current = current.plus(legTargetTime.getExpectedDuration()); // simulate the next leg with the wind as of the projected finishing time of the previous leg
         }
-        return durationOfAllLegs;
+        return new TargetTimeInfoImpl(legTargetTimes);
     }
     
     @Override
@@ -3987,7 +4078,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         LockUtil.lockForWrite(sensorTracksLock);
         try {
             TrackT result = getTrackInternal(key);
-            if (result == null) {
+            if (result == null && tracks.containsKey(competitor)) {
+                // A track is only added if the given Competitor is known to participate in this race
                 result = newTrackFactory.get();
                 addSensorTrackInternal(key, result);
             }

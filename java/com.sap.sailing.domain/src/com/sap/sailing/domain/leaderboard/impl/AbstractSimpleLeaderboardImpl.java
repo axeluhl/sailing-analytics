@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -35,11 +36,13 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
@@ -150,6 +153,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     private transient Set<CacheInvalidationListener> cacheInvalidationListeners;
 
+    private transient Set<LeaderboardChangeListener> leaderboardChangeListeners;
+    
     private static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
     
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
@@ -248,6 +253,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     public class NumberOfCompetitorsFetcherImpl implements NumberOfCompetitorsInLeaderboardFetcher {
         private int numberOfCompetitors = -1;
+        private int numberOfCompetitorsWithoutMaxPointReason = -1;
         
         @Override
         public int getNumberOfCompetitorsInLeaderboard() {
@@ -255,6 +261,18 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 numberOfCompetitors = Util.size(getCompetitors());
             }
             return numberOfCompetitors;
+        }
+        
+        @Override
+        public int getNumberOfCompetitorsWithoutMaxPointReason(RaceColumn column, TimePoint timePoint) {
+        	if (numberOfCompetitorsWithoutMaxPointReason == -1) {
+        		numberOfCompetitorsWithoutMaxPointReason = 0;
+				for (Competitor competitor : getCompetitors()) {
+					MaxPointsReason maxPointReason = getScoreCorrection().getMaxPointsReason(competitor, column, timePoint);
+					numberOfCompetitorsWithoutMaxPointReason += maxPointReason == MaxPointsReason.NONE ? 1 : 0;
+				}
+        	}
+        	return numberOfCompetitorsWithoutMaxPointReason;
         }
     }
 
@@ -331,7 +349,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     private void initTransientFields() {
         this.raceDetailsAtEndOfTrackingCache = new HashMap<>();
-        this.cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
+        this.cacheInvalidationListeners = new HashSet<>();
+        this.leaderboardChangeListeners = new HashSet<>();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
@@ -361,7 +380,27 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public void setDisplayName(String displayName) {
+        final String oldDisplayName = this.displayName;
         this.displayName = displayName;
+        notifyLeaderboardChangeListeners(listener->{
+            try {
+                listener.displayNameChanged(oldDisplayName, displayName);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Exception trying to notify listener "+listener+" about the display name of leaderboard "+
+                        getName()+" changing from "+oldDisplayName+" to "+displayName, e);
+            }
+        });
+    }
+    
+    protected void notifyLeaderboardChangeListeners(Consumer<LeaderboardChangeListener> notifier) {
+        for (final LeaderboardChangeListener listener : leaderboardChangeListeners) {
+            try {
+                notifier.accept(listener);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Exception trying to notify listener "+listener+" about a change in leaderboard "+
+                        getName(), e);
+            }
+        }
     }
 
     @Override
@@ -661,6 +700,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
         getRaceColumnListeners().removeRaceColumnListener(listener);
+    }
+
+    @Override
+    public void addLeaderboardChangeListener(LeaderboardChangeListener listener) {
+        leaderboardChangeListeners.add(listener);
+    }
+
+    @Override
+    public void removeLeaderboardChangeListener(LeaderboardChangeListener listener) {
+        leaderboardChangeListeners.remove(listener);
     }
 
     @Override
@@ -1165,6 +1214,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     @Override
     public void setSuppressed(Competitor competitor, boolean suppressed) {
+    	if (competitor == null) {
+    		throw new IllegalArgumentException("Cannot change suppression for a null competitor");
+    	}
         LockUtil.lockForWrite(suppressedCompetitorsLock);
         try {
             if (suppressed) {
@@ -1219,6 +1271,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         result.type = getLeaderboardType();
         result.competitors = new ArrayList<CompetitorDTO>();
         result.name = this.getName();
+        result.displayName = this.getDisplayName();
         result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
             result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
@@ -1731,6 +1784,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 final Distance rideHeight = trackedLeg.getRideHeight(timePoint);
                 result.currentRideHeightInMeters = rideHeight == null ? null : rideHeight.getMeters();
             }
+            Bearing heel = trackedLeg.getHeel(timePoint);
+            result.currentHeelInDegrees = heel == null ? null : heel.getDegrees();
+            Bearing pitch = trackedLeg.getPitch(timePoint);
+            result.currentPitchInDegrees = pitch == null ? null : pitch.getDegrees();
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
@@ -1778,7 +1835,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (startOfRace != null && trackedLeg.hasStartedLeg(timePoint)) {
                 // not using trackedLeg.getManeuvers(...) because it may not catch the mark passing maneuver starting this leg
                 // because that may have been detected as slightly before the mark passing time, hence associated with the previous leg
-                List<Maneuver> maneuvers = trackedLeg.getTrackedLeg().getTrackedRace()
+                Iterable<Maneuver> maneuvers = trackedLeg.getTrackedLeg().getTrackedRace()
                         .getManeuvers(trackedLeg.getCompetitor(), startOfRace, timePoint, waitForLatestAnalyses);
                 if (maneuvers != null) {
                     result.numberOfManeuvers = new HashMap<ManeuverType, Integer>();
@@ -1920,7 +1977,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         if (timePoint != null) {
             if (fillTotalPointsUncorrected) {
                 // explicitly filling the uncorrected total points requires uncached recalculation
-                result = computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, /* waitForLatestAnalyses */ true,
+                result = computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
+                        /* waitForLatestAnalyses=false because otherwise this may block, e.g., for background tasks
+                           such as maneuver and mark passing calculations */ false,
                         trackedRegattaRegistry, baseDomainFactory, fillTotalPointsUncorrected);
             } else {
                 // in replay we'd like up-to-date results; they are still cached

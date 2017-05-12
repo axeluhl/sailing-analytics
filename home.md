@@ -58,6 +58,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Data consumption of mobile apps|wiki/info/mobile/data-consumption]]
 * [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
 * [[Push Notifications|wiki/info/mobile/push-notifications]]
+* [[NMEA|wiki/info/mobile/nmea]]
 
 ### API
 

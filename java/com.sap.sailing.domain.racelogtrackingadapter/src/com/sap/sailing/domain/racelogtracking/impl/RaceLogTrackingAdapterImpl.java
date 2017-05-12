@@ -96,7 +96,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet) throws NotDenotedForRaceLogTrackingException, Exception {
+            Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
+            throws NotDenotedForRaceLogTrackingException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
         if (!raceLogTrackingState.isForTracking()) {
@@ -110,7 +111,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         }
         final RaceHandle result;
         if (!isRaceLogRaceTrackerAttached(service, raceLog)) {
-            result = addTracker(service, regatta, leaderboard, raceColumn, fleet, -1);
+            result = addTracker(service, regatta, leaderboard, raceColumn, fleet, -1, trackWind, correctWindDirectionByMagneticDeclination);
         } else {
             result = null;
         }
@@ -123,21 +124,20 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
      * and tracking begins. Otherwise, the {@code RaceLogRaceTracker} waits until a {@code StartTrackingEvent} is added
      * to perform these actions. The race first has to be denoted for racelog tracking.
      */
-    private RaceHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo,
-            Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds)
-            throws RaceLogRaceTrackerExistsException, Exception {
+    private RaceHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
+            RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds, boolean trackWind,
+            boolean correctWindDirectionByMagneticDeclination) throws RaceLogRaceTrackerExistsException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         assert !isRaceLogRaceTrackerAttached(service, raceLog) : new RaceLogRaceTrackerExistsException(
                 leaderboard.getName() + " - " + raceColumn.getName() + " - " + fleet.getName());
-
         Regatta regatta = regattaToAddTo == null ? null : service.getRegatta(regattaToAddTo);
         RaceLogConnectivityParams params = new RaceLogConnectivityParams(service, regatta, raceColumn, fleet,
-                leaderboard, delayToLiveInMillis, domainFactory);
+                leaderboard, delayToLiveInMillis, domainFactory, trackWind, correctWindDirectionByMagneticDeclination);
         return service.addRace(regattaToAddTo, params, timeoutInMilliseconds);
     }
 
     @Override
-    public void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard,
+    public boolean denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException {
         final BoatClass boatClass;
         if (leaderboard instanceof RegattaLeaderboard) {
@@ -154,17 +154,23 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
             }
         }
+        final boolean result;
         if (raceName == null) {
             raceName = leaderboard.getName() + " " + raceColumn.getName() + " " + fleet.getName();
         }
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        assert raceLog != null : new NotDenotableForRaceLogTrackingException("No RaceLog found in place");
-        if (new RaceLogTrackingStateAnalyzer(raceLog).analyze().isForTracking()) {
-            throw new NotDenotableForRaceLogTrackingException("Already denoted for tracking");
+        if (raceLog == null) {
+            throw new NotDenotableForRaceLogTrackingException("No RaceLog found in place");
         }
-        RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(MillisecondsTimePoint.now(),
-                service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
-        raceLog.add(event);
+        if (new RaceLogTrackingStateAnalyzer(raceLog).analyze().isForTracking()) {
+            result = false;
+        } else {
+            RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(MillisecondsTimePoint.now(),
+                    service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
+            raceLog.add(event);
+            result = true;
+        }
+        return result;
     }
     
     private BoatClass findDominatingBoatClass(Iterable<Competitor> allCompetitors) {

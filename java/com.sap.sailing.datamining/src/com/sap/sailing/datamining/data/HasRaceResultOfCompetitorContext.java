@@ -4,22 +4,23 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public interface HasRaceResultOfCompetitorContext {
     
     @Connector(scanForStatistics=false)
     public HasLeaderboardContext getLeaderboardContext();
 
-    @Connector(messageKey="Competitor")
+    @Connector(messageKey="Competitor", ordinal=2)
     public Competitor getCompetitor();
 
-    @Dimension(messageKey="Regatta")
+    @Dimension(messageKey="Regatta", ordinal=4)
     String getRegattaName();
     
-    @Dimension(messageKey="CompetitorSearchTag", ordinal=11) // TODO Clean me: Move Dimension to Competitor when possible
-    public String getCompetitorSearchTag();
+    @Dimension(messageKey="RelativeScoreInPercent", ordinal=6)
+    public ClusterDTO getPercentageClusterForRelativeScore();
 
-    @Dimension(messageKey="WindSpeedInBeaufort")
+    @Dimension(messageKey="WindSpeedInBeaufort", ordinal=7)
     int getAverageWindSpeedInRoundedBeaufort();
     
     /**

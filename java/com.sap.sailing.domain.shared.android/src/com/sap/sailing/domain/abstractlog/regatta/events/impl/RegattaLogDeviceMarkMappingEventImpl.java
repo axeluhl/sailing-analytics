@@ -17,13 +17,13 @@ public class RegattaLogDeviceMarkMappingEventImpl extends RegattaLogDeviceMappin
 
     public RegattaLogDeviceMarkMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, Mark mappedTo, DeviceIdentifier device, TimePoint from,
-            TimePoint to) {
-        super(createdAt, logicalTimePoint, author, pId, mappedTo, device, from, to);
+            TimePoint toInclusive) {
+        super(createdAt, logicalTimePoint, author, pId, mappedTo, device, from, toInclusive);
     }
 
     public RegattaLogDeviceMarkMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
-            Mark mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
-        super(logicalTimePoint, author, mappedTo, device, from, to);
+            Mark mappedTo, DeviceIdentifier device, TimePoint from, TimePoint toInclusive) {
+        super(logicalTimePoint, author, mappedTo, device, from, toInclusive);
     }
 
     @Override

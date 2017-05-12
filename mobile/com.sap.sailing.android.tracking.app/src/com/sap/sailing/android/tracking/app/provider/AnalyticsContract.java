@@ -4,6 +4,8 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase.Tables;
+
 public class AnalyticsContract {
 
     interface CompetitorColumns {
@@ -17,6 +19,7 @@ public class AnalyticsContract {
 
     interface LeaderboardColumns {
         String LEADERBOARD_NAME = "leaderboard_name";
+        String LEADERBOARD_DISPLAY_NAME = "leaderboard_display_name";
         String LEADERBOARD_CHECKIN_DIGEST = "leaderboard_checkin_digest";
     }
 
@@ -46,12 +49,6 @@ public class AnalyticsContract {
 
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    public static final String PATH_COMPETITOR = "competitors";
-    public static final String PATH_EVENT = "events";
-    public static final String PATH_LEADERBOARD = "leaderboards";
-    public static final String PATH_CHECKIN = "checkin_uris";
-    public static final String PATH_MARK = "marks";
-
     public static class LeaderboardsEventsCompetitorsMarksJoined {
         public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("leaderboards_events_competitors_marks_joined")
                 .build();
@@ -68,100 +65,47 @@ public class AnalyticsContract {
     }
 
     public static class Competitor implements CompetitorColumns, BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_COMPETITOR).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(Tables.COMPETITORS).build();
 
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.competitor";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.competitor";
-        public static final String DEFAULT_SORT = CompetitorColumns.COMPETITOR_ID + " COLLATE NOCASE ASC";
-
-        public static Uri buildCompetitorUri(String competitorId) {
-            return CONTENT_URI.buildUpon().appendPath(competitorId).build();
-        }
-
-        public static Uri buildEventsDirUri(String competitorId) {
-            return CONTENT_URI.buildUpon().appendPath(competitorId).appendPath(PATH_EVENT).build();
-        }
-
-        public static String getCompetitorId(Uri uri) {
-            return uri.getPathSegments().get(1);
-        }
     }
 
     public static class Event implements EventColumns, BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_EVENT).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(Tables.EVENTS).build();
 
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.event";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.event";
-        public static final String DEFAULT_SORT = EventColumns.EVENT_NAME + " COLLATE NOCASE ASC ";
-
-        public static Uri buildEventUri(String eventId) {
-            return CONTENT_URI.buildUpon().appendPath(eventId).build();
-        }
-
-        public static Uri buildCompetitorsDirUri(String evevntId) {
-            return CONTENT_URI.buildUpon().appendPath(evevntId).appendPath(PATH_COMPETITOR).build();
-        }
-
-        public static String getEventId(Uri uri) {
-            return uri.getPathSegments().get(1);
-        }
     }
 
     public static class Leaderboard implements LeaderboardColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LEADERBOARD).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(Tables.LEADERBOARDS).build();
 
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.leaderboard";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.leaderboard";
-        public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
-
-        public static Uri buildLeaderboardUri(String leaderboardId) {
-            return CONTENT_URI.buildUpon().appendPath(leaderboardId).build();
-        }
-
-        public static String getLeaderboardId(Uri uri) {
-            return uri.getPathSegments().get(1);
-        }
     }
 
     public static class Checkin implements CheckinColumns, BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHECKIN).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(Tables.CHECKIN_URIS).build();
 
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.uri";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.uri";
-        public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
-
-        public static Uri builCheckInUri(String checkinUriId) {
-            return CONTENT_URI.buildUpon().appendPath(checkinUriId).build();
-        }
-
-        public static String getCheckinUriId(Uri uri) {
-            return uri.getPathSegments().get(1);
-        }
     }
 
     public static class Mark implements markColums, BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MARK).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(Tables.MARKS).build();
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
             + "/vnd.sap_sailing_analytics.Mark";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
             + "/vnd.sap_sailing_analytics.Mark";
-        public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
-
-        public static Uri buildMarkUri(String leaderboardId) {
-            return CONTENT_URI.buildUpon().appendPath(leaderboardId).build();
-        }
-
-        public static String getMarkId(Uri uri) {
-            return uri.getPathSegments().get(1);
-        }
     }
 
     private AnalyticsContract() {

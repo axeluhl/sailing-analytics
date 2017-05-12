@@ -19,12 +19,12 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -59,7 +59,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     private SimpleRaceLogIdentifier mRaceId;
     private TimePoint mStartTime;
     private Duration mStartTimeDiff;
-    private RacingProcedureType mRacingProcedureType;
+    private RacingProcedure mRacingProcedure;
     private TimePoint lastTick;
 
     private Calendar mCalendar;
@@ -146,29 +146,27 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private void initStartMode() {
-        mRacingProcedureType = getRaceState().getRacingProcedure().getType();
-        if (mRacingProcedureType != null) {
+        mRacingProcedure = getRaceState().getRacingProcedure();
+        if (mRacingProcedure != null) {
             Runnable runnableProcedure = new Runnable() {
                 @Override
                 public void run() {
                     openFragment(StartProcedureFragment.newInstance(START_MODE_PRESETUP));
                 }
             };
-            mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedureType.toString(), null, false, false, runnableProcedure));
-            if (RacingProcedureType.RRS26.equals(mRacingProcedureType)) {
-                // LineStart
-                RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+            mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedure.getType().toString(), null, false, false, runnableProcedure));
+            if (mRacingProcedure instanceof ConfigurableStartModeFlagRacingProcedure) {
+                final ConfigurableStartModeFlagRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 Flags flag = procedure.getStartModeFlag();
                 Runnable runnableMode = new Runnable() {
                     @Override
                     public void run() {
-                        openFragment(LineStartModeFragment.newInstance(START_MODE_PRESETUP));
+                        openFragment(StartModeFragment.newInstance(START_MODE_PRESETUP));
                     }
                 };
                 Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize);
                 mItems.add(new SelectionItem(getString(R.string.start_mode), flag.name(), drawable, false, false, runnableMode));
-            } else if (RacingProcedureType.GateStart.equals(mRacingProcedureType)) {
-                // GateStart
+            } else if (mRacingProcedure instanceof GateStartRacingProcedure) {
                 GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 if (procedure != null) {
                     Runnable runnablePathfinder = new Runnable() {
@@ -187,8 +185,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     };
                     mItems.add(new SelectionItem(getString(R.string.gate_start_timing), RaceHelper.getGateTiming(getActivity(), procedure, getRace().getRaceGroup()), null, false, false, runnableTiming));
                 }
-            } else if (RacingProcedureType.ESS.equals(mRacingProcedureType)) {
-                // Extreme Sailing Series
+            } else if (mRacingProcedure instanceof ESSRacingProcedure) {
                 ESSRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 if (procedure != null) {
                     boolean checked = getArguments().getBoolean(RACE_GROUP, getRaceState().isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
@@ -253,16 +250,16 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private void startRace() {
-        RRS26RacingProcedure rrs26Procedure = null;
+        ConfigurableStartModeFlagRacingProcedure lineStartRacingProcedure = null;
 
         Flags flag = null;
-        if (RacingProcedureType.RRS26.equals(getRaceState().getRacingProcedure().getType())) {
-            rrs26Procedure = getRaceState().getTypedRacingProcedure();
-            flag = rrs26Procedure.getStartModeFlag();
+        if (getRaceState().getRacingProcedure() instanceof ConfigurableStartModeFlagRacingProcedure) {
+            lineStartRacingProcedure = getRaceState().getTypedRacingProcedure();
+            flag = lineStartRacingProcedure.getStartModeFlag();
         }
         TimePoint now = MillisecondsTimePoint.now();
-        getRaceState().setRacingProcedure(now, mRacingProcedureType);
-        if (RacingProcedureType.ESS.equals(mRacingProcedureType) && mItemRaceGroup != null) {
+        getRaceState().setRacingProcedure(now, mRacingProcedure.getType());
+        if (mRacingProcedure instanceof ESSRacingProcedure && mItemRaceGroup != null) {
             getRaceState().setAdditionalScoringInformationEnabled(MillisecondsTimePoint.now(), /*enable*/ mItemRaceGroup.isChecked(),
                     AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         }
@@ -271,8 +268,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         } else {
             getRaceState().forceNewDependentStartTime(now, mStartTimeDiff, mRaceId);
         }
-        if (rrs26Procedure != null) {
-            rrs26Procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
+        if (lineStartRacingProcedure != null) {
+            lineStartRacingProcedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
         }
     }
 

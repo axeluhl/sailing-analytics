@@ -9,6 +9,8 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
@@ -30,7 +32,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
         SafeHtml raceviewerLaunchPad(String styleNames, String iconStyleNames, String text);
         
         @Template("<a href=\"{4}\" target=\"_blank\" class=\"{0}\"><div>{2}</div><div class=\"{1}\"><img src=\"images/home/{3}.svg\"/></div></a> ")
-        SafeHtml standaloneButton(String styleNames, String iconStyleNames, String text, String icon, String link);
+        SafeHtml standaloneButton(String styleNames, String iconStyleNames, String text, String icon, SafeUri safeUri);
     }
     
     private static final CellTemplates TEMPLATE = GWT.create(CellTemplates.class);
@@ -45,9 +47,11 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
 
     private final EventView.Presenter presenter;
     private final PopupPanel panel = new PopupPanel(true, false);
+    private final boolean showNotTracked;
 
-    public RaceviewerLaunchPadCell(Presenter presenter) {
+    public RaceviewerLaunchPadCell(Presenter presenter, boolean showNotTracked) {
         super(BrowserEvents.CLICK);
+        this.showNotTracked = showNotTracked;
         local_res.css().ensureInjected();
         this.presenter = presenter;
     }
@@ -79,13 +83,16 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
         if (data.hasValidTrackingData()) {
             if (renderAsDirectLinkButton(data)) {
                 sb.append(TEMPLATE.standaloneButton(plannedStyleNames, iconStyleNames, I18N.watchLive(), 
-                        "launch-play", presenter.getRaceViewerURL(data, RaceBoardModes.PLAYER.name())));
+                        "launch-play",
+                        UriUtils.fromString(presenter.getRaceViewerURL(data, RaceBoardModes.PLAYER.name()))));
             } else {
                 String styleNames = data.isFinished() ? analyzeStyleNames : liveStyleNames;
                 sb.append(TEMPLATE.raceviewerLaunchPad(styleNames, iconStyleNames, I18N.raceDetailsToShow()));
             }
-        } else {
+        } else if (showNotTracked) {
             sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, I18N.eventRegattaRaceNotTracked()));
+        } else {
+            sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, ""));
         }
     }
     

@@ -5,20 +5,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -26,13 +21,15 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
-import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
+import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor;
+import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleVectorFixData;
+import com.sap.sailing.server.trackfiles.impl.doublefix.DownsamplerTo1HzProcessor;
+import com.sap.sailing.server.trackfiles.impl.doublefix.LearningBatchProcessor;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -42,10 +39,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private final Logger LOG = Logger.getLogger(DoubleVectorFixImporter.class.getName());
-    private final static DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss.SSSSSS");
-    private final BravoSensorDataMetadata metadata = BravoSensorDataMetadata.INSTANCE;
     private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
-    private static final int BATCH_SIZE = 5000;
+    private int trackColumnCount = BravoSensorDataMetadata.getTrackColumnCount();
 
     public void importFixes(InputStream inputStream, Callback callback, final String filename, String sourceName)
             throws FormatNotSupportedException, IOException {
@@ -79,22 +74,15 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
                 }
                 LOG.fine("Validate and parse header columns");
                 final Map<String, Integer> colIndices = validateAndParseHeader(headerLine);
-                LOG.fine("Parse and store data in batches of " + BATCH_SIZE + " items");
-                final ArrayList<DoubleVectorFix> collectedFixes = new ArrayList<>(BATCH_SIZE);
+
+                DoubleFixProcessor downsampler = createProcessor(callback, trackIdentifier);
+
                 buffer.lines().forEach(line -> {
                     lineNr.incrementAndGet();
-                    DoubleVectorFixImpl vectorFix = parseLine(lineNr.get(), filename, line, colIndices);
-                    if (vectorFix != null) {
-                        collectedFixes.add(vectorFix);
-                        if (collectedFixes.size() == BATCH_SIZE) {
-                            callback.addFixes(collectedFixes, trackIdentifier);
-                            collectedFixes.clear();
-                        }
-                    }
+                    downsampler.accept(parseLine(lineNr.get(), filename, line, colIndices));
                 });
-                if (!collectedFixes.isEmpty()) {
-                    callback.addFixes(collectedFixes, trackIdentifier);
-                }
+
+                downsampler.finish();
                 buffer.close();
             }
         } catch (Exception e) {
@@ -103,43 +91,47 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     }
 
     /**
-     * Parses the CSV line and reads the double data values in the order defined by the col enums.
+     * This method creates the double fix processor chain used to downsample and batch the stream of fixes parsed by the
+     * importer.
      * 
-     * @param line
-     * @param colIndices
+     * This method is protected so it can be overridden by the test case.
+     * 
+     * @param metadata
+     * @param callback
+     * @param trackIdentifier
      * @return
      */
-    private DoubleVectorFixImpl parseLine(long lineNr, String filename, String line, Map<String, Integer> colIndices) {
+    protected DoubleFixProcessor createProcessor(Callback callback,
+            final TrackFileImportDeviceIdentifier trackIdentifier) {
+        LearningBatchProcessor batchProcessor = new LearningBatchProcessor(5000, 5000, callback, trackIdentifier);
+        DoubleFixProcessor downsampler = new DownsamplerTo1HzProcessor(trackColumnCount,
+                batchProcessor);
+
+        return downsampler;
+    }
+
+    /**
+     * Parses the CSV line and reads the double data values in the order defined by the col enums.
+     */
+    private DoubleVectorFixData parseLine(long lineNr, String filename, String line, Map<String, Integer> columnsInFile) {
         try {
-            String[] contentTokens = split(line);
-            TimePoint fixTp;
-            String epochColValue = contentTokens[2];
+            String[] fileContentTokens = split(line);
+            String epochColValue = fileContentTokens[2];
+            long epoch;
             if (epochColValue != null && epochColValue.length() > 0) {
                 epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
-                long epoch = Long.parseLong(epochColValue);
-                fixTp = new MillisecondsTimePoint(epoch);
+                epoch = Long.parseLong(epochColValue);
             } else {
-                String jjLDATE = contentTokens[0].substring(0, 9);
-                StringBuilder dtb = new StringBuilder(jjLDATE);
-                String jjlTIME = contentTokens[1];
-                int offset = 6 - jjlTIME.indexOf(".");
-                IntStream.range(0, offset).forEach(n -> dtb.append("0"));
-                dtb.append(jjlTIME);
-                LocalDateTime day = DATE_FMT.parse(dtb.toString(), LocalDateTime::from);
-                Instant instant = day.toInstant(ZoneOffset.UTC);
-                fixTp = new MillisecondsTimePoint(Date.from(instant));
+                // we don't have epoch, skip the line
+                return null;
             }
-            // code for time adjustment for foiling test data
-            // long r16TP = ZonedDateTime.of(LocalDateTime.of(2016, 3, 19, 11, 55), ZoneId.of("Europe/Berlin"))
-            // .toEpochSecond() * 1000;
-            // fixTp = fixTp.plus(r16TP - 1461828459589l);
-            double[] fixData = new double[metadata.columnCount];
-            for (int columnIndexInFix = 0; columnIndexInFix < fixData.length; columnIndexInFix++) {
-                String columnName = metadata.getColumns().get(columnIndexInFix);
-                Integer columnIndexInFile = colIndices.get(columnName);
-                fixData[columnIndexInFix] = Double.parseDouble(contentTokens[columnIndexInFile]);
+            double[] trackFixData = new double[trackColumnCount];
+            for (int trackColumnIdx = 0; trackColumnIdx < trackColumnCount; trackColumnIdx++) {
+                String columnNameToSearchForInFile = BravoSensorDataMetadata.values()[trackColumnIdx].getColumnName();
+                Integer columnsInFileIdx = columnsInFile.get(columnNameToSearchForInFile);
+                trackFixData[trackColumnIdx] = Double.parseDouble(fileContentTokens[columnsInFileIdx]);
             }
-            return new DoubleVectorFixImpl(fixTp, fixData);
+            return new DoubleVectorFixData(epoch, trackFixData);
         } catch (Exception e) {
             LOG.warning(
                     "Error parsing line nr " + lineNr + " in file " + filename + "with exception: " + e.getMessage());
@@ -150,14 +142,16 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private Map<String, Integer> validateAndParseHeader(String headerLine) {
         final String[] headerTokens = split(headerLine);
         Map<String, Integer> colIndicesInFile = new HashMap<>();
-        for (int j = metadata.getHeaderColumnOffset(); j < headerTokens.length; j++) {
+        for (int j = BravoSensorDataMetadata.HEADER_COLUMN_OFFSET; j < headerTokens.length; j++) {
             String header = headerTokens[j];
             colIndicesInFile.put(header, j);
         }
-        List<String> columnsInFix = metadata.getColumns();
-        if (colIndicesInFile.size() != columnsInFix.size() || !colIndicesInFile.keySet().containsAll(columnsInFix)) {
-            LOG.log(Level.SEVERE, "Missing headers");
-            throw new RuntimeException("Missing headers in import files");
+        List<String> requiredColumnsInFix = BravoSensorDataMetadata.getTrackColumnNames();
+        if (!colIndicesInFile.keySet().containsAll(requiredColumnsInFix)) {
+            final Set<String> missingColumns = new HashSet<>(requiredColumnsInFix);
+            missingColumns.removeAll(colIndicesInFile.keySet());
+            LOG.log(Level.SEVERE, "Missing headers: "+missingColumns);
+            throw new RuntimeException("Missing headers "+missingColumns+" in import files");
         }
         return colIndicesInFile;
     }

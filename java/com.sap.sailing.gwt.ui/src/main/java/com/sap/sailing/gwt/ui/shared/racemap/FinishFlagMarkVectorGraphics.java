@@ -2,10 +2,11 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sse.common.Color;
 
 public class FinishFlagMarkVectorGraphics extends AbstractMarkVectorGraphics implements MarkVectorGraphics {
 
-    public FinishFlagMarkVectorGraphics(MarkType type, String color, String shape, String pattern) {
+    public FinishFlagMarkVectorGraphics(MarkType type, Color color, String shape, String pattern) {
         super(type, color, shape, pattern);
     }
 

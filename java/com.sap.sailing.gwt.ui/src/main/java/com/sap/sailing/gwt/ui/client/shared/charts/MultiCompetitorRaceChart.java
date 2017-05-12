@@ -15,6 +15,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 /**
  * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
@@ -32,17 +33,21 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private boolean hasOverallLeaderboard;
     
-    private final MultiCompetitorRaceChartLifecycle lifeycycle;
+    private final MultiCompetitorRaceChartLifecycle lifecycle;
     
-    public MultiCompetitorRaceChart(MultiCompetitorRaceChartLifecycle lifeycycle, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public MultiCompetitorRaceChart(Component<?> parent, ComponentContext<?> context,
+            MultiCompetitorRaceChartLifecycle lifecycle,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
             final String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
+        super(parent, context, sailingService, asyncActionsExecutor, competitorSelectionProvider,
+                selectedRaceIdentifier, timer,
+                timeRangeWithZoomProvider, stringMessages, errorReporter,
                 /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);
-        this.lifeycycle = lifeycycle;
+        this.lifecycle = lifecycle;
         if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupName, false,
                     new AsyncCallback<LeaderboardGroupDTO>() {
@@ -97,12 +102,17 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
 
     @Override
     public String getLocalizedShortName() {
-        return lifeycycle.getLocalizedShortName();
+        return lifecycle.getLocalizedShortName();
     }
 
     @Override
     public String getDependentCssClassName() {
         return "multiCompetitorRaceChart";
+    }
+
+    @Override
+    public String getId() {
+        return lifecycle.getComponentId();
     }
 
 }

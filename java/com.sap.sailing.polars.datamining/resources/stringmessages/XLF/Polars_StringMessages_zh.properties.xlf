@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file datatype="javapropertyresourcebundle" date="2017-03-03T15:28:09Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.polars.datamining/resources/stringmessages/Polars_StringMessages.properties" source-language="en" target-language="zh-CN">
+		<header>
+			<skl>
+				<internal-file crc="99b784fd6920a22f02e85034e5d2ef70" form="base64">H4sIAAAAAAAAAF2PTQrCQAyF93OKXEH32TiiFBSGunAdOrEObTPQaaHHd/6s4Cbv4yW8JMaPNOs3OTmgSRyU2a0jnqgbWCzUVksdaz+uk+AP1Y37RixvGAEylYwzLVRCIWExw3fN1TwubsMoEFU9ndiWpGdMBBmz2QTt5eUsy4I7QR66M4V15ika8TQZMBVVb67b/j74ALSew+fwAAAA</internal-file>
+			</skl>
+			<phase-group>
+				<phase company-name="SAP AG" date="2016-11-04T21:01:35Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+			</phase-group>
+			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
+		</header>
+		<body>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="PolarChain1" resname="PolarChain1">
+				<source>Polars</source>
+				<target>极坐标图</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="PolarChain2" resname="PolarChain2">
+				<source>Backend Polars</source>
+				<target>后端极坐标图</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RaceColumn" resname="RaceColumn">
+				<source>RaceColumn</source>
+				<target>比赛轮次列</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LegIndex" resname="LegIndex">
+				<source>Leg Index</source>
+				<target>航段索引</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="PolarData" resname="PolarData">
+				<source>Polar Data</source>
+				<target>极坐标数据</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Polars" resname="Polars">
+				<source>Polars</source>
+				<target>极坐标图</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="GPSFix" resname="GPSFix">
+				<source>GPS Fix</source>
+				<target>GPS 修复</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindRange" resname="WindRange">
+				<source>Wind Range</source>
+				<target>风力范围</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindIsConfident" resname="WindIsConfident">
+				<source>Confident Wind Measurement</source>
+				<target>风力测量置信度</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Rank" resname="Rank">
+				<source>Rank</source>
+				<target state="translated">名次</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="BackendPolars" resname="BackendPolars">
+				<source>Backend Polars</source>
+				<target>后端极坐标图</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

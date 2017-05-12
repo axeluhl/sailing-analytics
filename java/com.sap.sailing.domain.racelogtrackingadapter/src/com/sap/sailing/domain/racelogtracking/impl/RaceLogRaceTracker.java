@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,7 +73,7 @@ import difflib.PatchFailedException;
  * Track a race using the data defined in the {@link RaceLog} and possibly the Leaderboards
  * {@link IsRegattaLike#getRegattaLog RegattaLog}. If the events suggest that the race is already in the
  * {@link RaceLogTrackingState#TRACKING} state, tracking commences immediately and existing fixes are loaded immediately
- * from the database.Thinkpad
+ * from the database.
  * <p>
  * Otherwise, the tracker waits until a {@link RaceLogStartTrackingEvent} is received to perform these tasks.
  * 
@@ -93,12 +92,13 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceLogResolver raceLogResolver;
 
-    private DynamicTrackedRace trackedRace;
+    private volatile DynamicTrackedRace trackedRace;
     private StartOfTrackingController startOfTrackingController;
     private EndOfTrackingController endOfTrackingController;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            RaceLogResolver raceLogResolver) {
+            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams) {
+        super(connectivityParams);
         this.params = params;
         this.windStore = windStore;
         this.trackedRegatta = regatta;
@@ -194,17 +194,17 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces() {
-        return trackedRace == null ? null : Collections.singleton(trackedRace.getRace());
+    public RaceDefinition getRace() {
+        return trackedRace == null ? null : trackedRace.getRace();
     }
 
     @Override
-    public Set<RegattaAndRaceIdentifier> getRaceIdentifiers() {
-        return trackedRace == null ? null : Collections.singleton(trackedRace.getRaceIdentifier());
+    public RegattaAndRaceIdentifier getRaceIdentifier() {
+        return trackedRace == null ? null : trackedRace.getRaceIdentifier();
     }
 
     @Override
-    public RaceHandle getRacesHandle() {
+    public RaceHandle getRaceHandle() {
         return new RaceLogRacesHandle(this);
     }
 
@@ -312,6 +312,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         trackedRace.addStartTimeChangedListener(startOfTrackingController);
         endOfTrackingController = new EndOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
         trackedRace.addListener(endOfTrackingController);
+        notifyRaceCreationListeners();
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
         synchronized (this) {

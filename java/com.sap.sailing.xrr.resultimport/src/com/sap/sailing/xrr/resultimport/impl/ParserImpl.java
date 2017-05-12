@@ -12,7 +12,9 @@ import javax.xml.bind.Unmarshaller;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Division;
+import com.sap.sailing.xrr.schema.Event;
 import com.sap.sailing.xrr.schema.Person;
+import com.sap.sailing.xrr.schema.Race;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.schema.TRResult;
 import com.sap.sailing.xrr.schema.Team;
@@ -22,6 +24,7 @@ public class ParserImpl implements Parser {
     private final Map<String, Person> personByID;
     private final Map<String, Team> teamByID;
     private final Map<String, Boat> boatByID;
+    private final Map<String, Race> raceByID;
     private final InputStream inputStream;
     private final String name;
     
@@ -30,6 +33,7 @@ public class ParserImpl implements Parser {
         this.personByID = new HashMap<>();
         this.teamByID = new HashMap<>();
         this.boatByID = new HashMap<>();
+        this.raceByID = new HashMap<>();
         this.inputStream = inputStream;
         this.name = name;
     }
@@ -50,6 +54,14 @@ public class ParserImpl implements Parser {
             } else if (o instanceof Team) {
                 Team team = (Team) o;
                 teamByID.put(team.getTeamID(), team);
+            } else if (o instanceof Event) {
+                Event event = (Event) o;
+                for (Object o2 : event.getRaceOrDivisionOrRegattaSeriesResult()) {
+                    if (o2 instanceof Race) {
+                        Race race = (Race) o2;
+                        raceByID.put(race.getRaceID(), race);
+                    }
+                }
             }
         }
         return regattaResults;
@@ -76,7 +88,13 @@ public class ParserImpl implements Parser {
     }
     
     @Override
+    public Race getRace(String raceID) {
+        return raceByID.get(raceID);
+    }
+    
+    @Override
     public String toString() {
         return name==null?"":name;
     }
+    
 }
