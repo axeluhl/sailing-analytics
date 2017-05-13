@@ -3434,8 +3434,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (TrackedRaceImpl.this) {
             attachedRaceLogs.put(raceLog.getId(), raceLog);
             notifyAll();
-            updateStartOfRaceCacheFields();
-            updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+            invalidateStartTime();
         }
         notifyListenersWhenAttachingRaceLog(raceLog);
     }

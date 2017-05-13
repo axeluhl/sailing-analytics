@@ -1472,6 +1472,12 @@ public class CandidateFinderImpl implements CandidateFinder {
         if (!Util.equalsWithNull(newTimeRange, timeRangeForValidCandidates)) {
             if (newTimeRange.getTimeRangeOrNull() == null) {
                 result = clearAllCandidates();
+            } else if (timeRangeForValidCandidates.getTimeRangeOrNull() == null) {
+                // so far no valid time range; now we have a valid one; use candidate
+                // from new start or range to new end of range
+                result = updateCandiatesAfterRaceTimeRangeChanged(
+                        newTimeRange.getTimeRangeOrNull().from(),
+                        newTimeRange.getTimeRangeOrNull().to());
             } else {
                 final TimePoint oldTimePointWhenToStartConsideringCandidates = timeRangeForValidCandidates.getTimeRangeOrNull().from();
                 result = updateCandiatesAfterRaceTimeRangeChanged(newTimePointWhenToStartConsideringCandidates, oldTimePointWhenToStartConsideringCandidates);
