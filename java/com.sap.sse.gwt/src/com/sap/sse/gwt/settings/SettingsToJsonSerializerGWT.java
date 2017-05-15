@@ -115,4 +115,9 @@ public class SettingsToJsonSerializerGWT extends AbstractSettingsToJsonSerialize
         }
         return result;
     }
+
+    @Override
+    public boolean isArray(Object jsonValue) {
+        return jsonValue instanceof JSONArray;
+    }
 }
