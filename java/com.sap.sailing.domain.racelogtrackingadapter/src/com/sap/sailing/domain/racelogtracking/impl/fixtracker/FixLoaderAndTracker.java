@@ -590,7 +590,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void newTimeRangesCovered(WithID item,
             Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
-            addLoadingJob(new LoadFixesForNewlyCoveredTimeRangesJob(item, newlyCoveredTimeRanges));
+            if (trackedRace.getStartOfTracking() != null) {
+                addLoadingJob(new LoadFixesForNewlyCoveredTimeRangesJob(item, newlyCoveredTimeRanges));
+            }
         }
     }
     
