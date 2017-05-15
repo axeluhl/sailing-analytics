@@ -37,7 +37,7 @@ public interface DoubleVectorFixImporter {
      * @throws IOException
      *             if there is a problem while reading the file
      */
-    void importFixes(InputStream inputStream, Callback callback, String sourceName)
+    void importFixes(InputStream inputStream, Callback callback, String filename, String sourceName)
             throws FormatNotSupportedException, IOException;
 
     /**

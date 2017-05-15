@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -97,7 +96,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * <code>timePoint</code>. If the competitor already completed the leg at <code>timePoint</code> and the respective
      * mark passing event was already received, the average ride height for the entire leg (and no further) is computed.
      */
-    Double getAverageRideHeight(TimePoint timePoint);
+    Distance getAverageRideHeight(TimePoint timePoint);
 
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was
@@ -117,7 +116,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * may be part of the respective adjacent leg, depending on the maneuver's time point which may be slightly before, at, or
      * after the corresponding mark passing event.
      */
-    List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
+    Iterable<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
      * @param waitForLatest TODO
@@ -237,7 +236,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * <code>timePoint</code>, returns the current ride height for this time point. If the competitor has already
      * finished the leg, the ride height at the time the competitor finished the leg is returned.
      */
-    Double getRideHeight(TimePoint at);
+    Distance getRideHeight(TimePoint at);
 
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader

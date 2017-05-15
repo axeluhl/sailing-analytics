@@ -15,6 +15,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
@@ -192,21 +193,26 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
-                    sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
-                            leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
-                            leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
-                                    waypointSelectionModel.getSelectedObject().getA(), timer.getTime(), competitor,
-                                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(stringMessages.errorSettingFixedPassing(caught.getMessage()));
-                        }
-    
-                        @Override
-                        public void onSuccess(Void result) {
-                            refillList();
-                        }
-                    });
+                    final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
+                    if (isSettingFixedTimePossible(timer, stringMessages)) {
+                        final Date time = timer.getTime();
+                        sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                                leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
+                                leaderboardNameRaceColumnNameAndFleetName.getFleetName(), waypoint, time, competitor,
+                                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorSettingFixedPassing(caught.getMessage()));
+                            }
+        
+                            @Override
+                            public void onSuccess(Void result) {
+                                refillList();
+                            }
+                        });
+                    } else {
+                        Window.alert(stringMessages.warningSettingFixedPassing(currentWaypoints.get(waypoint).getName()));
+                    }
                 }
             }
         });
@@ -281,6 +287,24 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         enableButtons();
     }
     
+    /**
+     * Checks the possibility of setting a new fixed time for selected waypoint
+     * 
+     * @return false if new fixed time for waypoint is after the fixed time of any of the following waypoints or before
+     *         any of the previous ones
+     */
+    private boolean isSettingFixedTimePossible(Timer timer, StringMessages stringMessages) {
+        Integer selectedWaypointIndex = waypointSelectionModel.getSelectedObject().getA();
+        for (Integer waypointIndex : currentCompetitorEdits.keySet()) {
+            Date waypointDate = currentCompetitorEdits.get(waypointIndex);
+            if ((waypointIndex < selectedWaypointIndex && waypointDate.after(timer.getTime()))
+                    || (waypointIndex > selectedWaypointIndex && waypointDate.before(timer.getTime()))) {
+                return false;
+            }
+        }
+        return true;
+    }
+   
     @Override
     public void setVisible(boolean visible) {
         processCompetitorSelectionChange(visible);
@@ -314,11 +338,17 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         clearInfo();
     }
     
+    /**
+     * Overloaded version of refill list which accepts new mark passing created on UI.
+     * Implemented due to TrackedRace inaccessibility at GWT 
+     * 
+     * @param markPassing - pair of waypoint (integer) and datetime of passing
+     */
     private void refillList() {
         clearInfo();
         competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         // Get current mark passings
-        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, new AsyncCallback<Map<Integer, Date>>() {
+        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, true, new AsyncCallback<Map<Integer, Date>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToObtainMarkPassing(caught.getMessage()));

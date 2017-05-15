@@ -4,11 +4,69 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
     <div class="innerContent">
+        <h5 class="articleSubheadline">April 2017</h5>
+        <ul class="bulletList">
+           <li>The advantage line display has been fixed for legs changing their type (upwind/downwind/reach)
+               while the race is going on. It now uses the leg type at the same current time point that the
+               leaderboard uses for calculating the competitor ranking.
+           </li>
+           <li>Images in the overall image gallery ("Photographers love Sailing") are now linked with the
+               events to which they belong. Clicking the image navigates to the event page.
+           </li>
+        </ul>
+
+        <h5 class="articleSubheadline">March 2017</h5>
+        <ul class="bulletList">
+           <li>The SAP Sailing Analytics are now also available in French, Portugese, as well as Spanish.
+               Find the language chooser in the lower right corner of the footer, or when signed in, go to your user
+               profile and set your preferred language.
+           </li>
+           <li>The application's locale now switches based on the client's "Accept-Language" HTTP header field.
+               This means that the application in all its parts will show in the user's default language if
+               supported, defaulting to English otherwise.
+           </li>
+        </ul>
+
+        <h5 class="articleSubheadline">February 2017</h5>
+        <ul class="bulletList">
+           <li>The definition of "ride height" for foiling sensors has been changed. Instead of showing
+               the ride height calculated by the sensor we are now showing the minimum of the port and
+               starboard ride heights. Therefore, this new definition of ride height can be seen as the
+               distance of lowest hull part from the water.
+           </li>
+        </ul>
+
+        <h5 class="articleSubheadline">January 2017</h5>
+        <ul class="bulletList">
+           <li>An issue with wind-up map rotation which sometimes left the map centered over the African continent has been fixed.
+           </li>
+        </ul>
+
+        <h5 class="articleSubheadline">October 2016</h5>
+        <ul class="bulletList">
+           <li>An issue with live re-calculation of the maximum speed over ground (SOG) values has been fixed.
+               In some circumstances it was possible that new live data did not properly update the MaxSOG figures.
+               Since this depended on the timing of read and write access it could have led to different values
+               for different server instances, giving confusing results. The fix provided now ensures that
+               the MaxSOG values are properly evaluated when new data has arrived.  
+           </li>
+           <li>The buoy zone radius is now determined by a configurable regatta property. By default, it is
+               set to two hull lengths, and a regatta administrator may choose to change it to any other factor
+               such as 3 or 2.5. This determines the default used in the race viewer (RaceBoard.html). Users can
+               still change the radius in the map settings to any arbitrary number, deviating from what has
+               "officially" been set for the regatta.
+           </li>
+        </ul>
+        
         <h5 class="articleSubheadline">August 2016</h5>
         <ul class="bulletList">
-           <li>In order to prepare user-specific configuration support in the <tt>/gwt/Simulator.html</tt>, this
-               module now requires a user account to be used. Please sign up and log in to use the full-featured
-               simulator as usual.  
+           <li>In order to prepare user-specific configuration support in additional parts of the application,
+               various modules now require a user account to be accessed. Please sign up and log in to use their
+               full functionality as usual. The following modules are affected:
+               <ul>
+                    <li><tt>/gwt/Simulator.html</tt></li>
+                    <li><tt>/gwt/DataMining.html</tt></li>
+               </ul>  
            </li>
         </ul>
         

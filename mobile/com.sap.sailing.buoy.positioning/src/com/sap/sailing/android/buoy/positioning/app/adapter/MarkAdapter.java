@@ -13,6 +13,7 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
+import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 
 public class MarkAdapter extends ResourceCursorAdapter {
 
@@ -33,8 +34,14 @@ public class MarkAdapter extends ResourceCursorAdapter {
         } else {
             final DecimalFormat df = new DecimalFormat("#.##");
             final double accuracy = markPings.get(0).getAccuracy();
-            final String accuracyString = String.format(context.getString(R.string.mark_list_accuracy), df.format(accuracy));
-            setText = context.getString(R.string.set) + " " + accuracyString;
+            final String accuracyString;
+            // accuracy-values that are stored as -1 (meaning unknown) will simply be displayed as "set" without an accuracy
+            if (accuracy == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER) {
+                accuracyString = context.getString(R.string.set);
+            } else {
+                accuracyString = context.getString(R.string.set) + " " + context.getString(R.string.mark_list_accuracy, df.format(accuracy));
+            }
+            setText = accuracyString;
         }
         markName.setText(name);
         markSet.setText(setText);

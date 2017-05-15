@@ -1,4 +1,4 @@
-# Welcome to the SAP Sailing Wiki
+﻿# Welcome to the SAP Sailing Wiki
 
 This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
@@ -54,8 +54,11 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Administrator|wiki/info/mobile/racecommittee-app-administrator]]
   * [[User|wiki/info/mobile/racecommittee-app-user]]
 * [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
+* [[Energy consumption of mobile apps|wiki/info/mobile/energy-consumption]]
+* [[Data consumption of mobile apps|wiki/info/mobile/data-consumption]]
 * [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
 * [[Push Notifications|wiki/info/mobile/push-notifications]]
+* [[NMEA|wiki/info/mobile/nmea]]
 
 ### API
 

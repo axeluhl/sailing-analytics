@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file datatype="javapropertyresourcebundle" original="/usr/sap/ljs/app/Converter_5483050776164983/java/com.sap.sse.datamining/resources/stringmessages/StringMessages.properties" source-language="en">
+  <file datatype="javapropertyresourcebundle" original="/usr/sap/ljs/app/Converter_8942097082529348960/java/com.sap.sse.datamining/resources/stringmessages/StringMessages.properties" source-language="en">
     <header>
       <skl>
-        <internal-file crc="299055c6be272a85a07b907e3c6ce40a" form="base64">H4sIAAAAAAAAAD2MQQoCMQxF9znFLHWnB8hicCXSjYMHKBpLsE2hTQdhmLsbpuoieT958MeZig+EYyc4erAX7ICpJbQB59+cLH8JjqXfnXDKTRS3bQ1KpWKCi2St+BKzMdJdWQL+Yha4Um1RJw7CT6aCy2Eddstx3cP/d5absG6GZTAHH6Y6WeOvAAAA</internal-file>
+        <internal-file crc="f7dde89d81cbbd5ecbf2e3b6c9500184" form="base64">H4sIAAAAAAAAAD2MzQrCMAzH73mKHvWmD5DD0ItILw4foMxYgm0KazuEsXc3rJuH5Pf/COkmGp0n7BrB0oudYAP0NaIOWPflqHojWJbmG+GSqhRcd9NXzoVl2DKzW31faMwY4S6pZPyInodAg7Yed5kEHpRrKD174TfTiPNpMYf5vBzhn93kKVzWhsVoBz9+8w8UzAAAAA==</internal-file>
       </skl>
       <phase-group>
-        <phase company-name="SAP AG" date="2016-05-11T12:28:06Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+        <phase company-name="SAP AG" date="2017-01-26T16:57:14Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
       </phase-group>
       <tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
     </header>
@@ -28,6 +28,9 @@
       </trans-unit>
       <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Count" resname="Count">
         <source>Count</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CountDistinct" resname="CountDistinct">
+        <source>Count Distinct</source>
       </trans-unit>
       <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Meters" resname="Meters">
         <source>m</source>

@@ -1,5 +1,7 @@
 package com.sap.sailing.android.tracking.app.services;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,13 +14,31 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.hardware.GeomagneticField;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Binder;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
@@ -30,50 +50,39 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
+import com.sap.sse.common.Duration;
 
-import android.annotation.TargetApi;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
-import android.hardware.GeomagneticField;
-import android.location.Location;
-import android.os.BatteryManager;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
+public class TrackingService extends Service implements LocationListener {
 
-public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+    private static final String TAG = TrackingService.class.getName();
+    private static final String THREAD_NAME = "Location WatchDog";
 
-    private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
+    private static final int NO_LOCATION = 0;
+    private static final long NO_LOCATION_CHECK = Duration.ONE_SECOND.times(5).asMillis();
+
+    private static final int POOR_DISTANCE = 48;
+    private static final int GREAT_DISTANCE = 10;
+    private static final int NO_DISTANCE = 0;
+
     private NotificationManager notificationManager;
-    private boolean locationUpdateRequested = false;
     private AppPreferences prefs;
 
     private GPSQualityListener gpsQualityListener;
     private final IBinder trackingBinder = new TrackingBinder();
-
-    private static final String TAG = TrackingService.class.getName();
 
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION_ID = R.string.tracker_started;
 
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
-    private final static int UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE = 30000;
-    private final static float BATTERY_POWER_SAVE_THRESHOLD = 0.2f;
-    private boolean initialLocation;
+    public final static String GPS_DISABLED_MESSAGE = "gpsDisabled";
+    private float minLocationUpdateDistanceInMeters = 0f;
 
     private String checkinDigest;
     private EventInfo event;
+
+    private LocationManager locationManager;
+    private LocationWatchDog locationWatchDog;
 
     /**
      * Must be synchronized upon while modifying the {@link #timerForDelayingSendingMessages} field
@@ -86,7 +95,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
      * {@link #locationsQueuedBasedOnSendingInterval} after the send interval, and the next message sending intent
      * arriving can be forwarded to the sending service immediately, with the timer being started immediately afterwards
      * to delay the sending of messages arriving later until the resend interval has expired. If not {@code null},
-     * messages that arrive in {@link #enqueueForSending(String, JSONObject)} will be appended to
+     * messages that arrive in {@link #enqueueForSending(String, Location)} will be appended to
      * {@link #locationsQueuedBasedOnSendingInterval}.
      * <p>
      *
@@ -107,19 +116,19 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     @Override
     public void onCreate() {
         super.onCreate();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            /**
+             * prior to JellyBean, the minimum time for location updates parameter MIGHT be ignored,
+             * so providing a minimum distance value greater than 0 is recommended
+             */
+            minLocationUpdateDistanceInMeters = .5f;
+        }
+
         locationsQueuedBasedOnSendingInterval = new LinkedHashMap<>();
         prefs = new AppPreferences(this);
 
-        initialLocation = true;
-        // http://developer.android.com/training/location/receive-location-updates.html
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(prefs.getGPSFixInterval());
-        locationRequest.setFastestInterval(prefs.getGPSFixFastestInterval());
-
-        googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this).build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
 
     @Override
@@ -155,45 +164,41 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     }
 
     private void startTracking() {
-        googleApiClient.connect();
-        locationUpdateRequested = true;
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, prefs.getGPSFixInterval(), minLocationUpdateDistanceInMeters, this);
 
         ExLog.i(this, TAG, "Started Tracking");
         showNotification();
 
         prefs.setTrackerIsTracking(true);
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
+
+        if (locationWatchDog == null) {
+            // create new Location WatchDog
+            HandlerThread thread = new HandlerThread(THREAD_NAME, THREAD_PRIORITY_BACKGROUND);
+            thread.start();
+            locationWatchDog = new LocationWatchDog(thread.getLooper());
+
+            // start WatchDog
+            Message msg = locationWatchDog.obtainMessage(NO_LOCATION);
+            msg.obj = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            locationWatchDog.sendMessageDelayed(msg, NO_LOCATION_CHECK);
+        }
     }
 
     private void stopTracking() {
-        if (googleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
-        }
-        googleApiClient.disconnect();
-        locationUpdateRequested = false;
+        locationManager.removeUpdates(this);
 
         prefs.setTrackerIsTracking(false);
         prefs.setTrackerIsTrackingCheckinDigest(null);
 
+        if (locationWatchDog != null) {
+            // stop the Location WatchDog
+            locationWatchDog.getLooper().quit();
+            locationWatchDog = null;
+        }
+
         stopSelf();
         ExLog.i(this, TAG, "Stopped Tracking");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult arg0) {
-        ExLog.e(this, TAG, "Failed to connect to Google Play Services for location updates");
-    }
-
-    @Override
-    public void onConnected(Bundle arg0) {
-        if (locationUpdateRequested) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        // no-op
     }
 
     private void reportGPSQualityBearingAndSpeed(float gpsAccuracy, float bearing, float speed, double latitude,
@@ -215,31 +220,20 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
             bearingImpl.add(new DegreeBearingImpl(- geomagneticField.getDeclination()));
         }
 
-        GPSQuality quality = GPSQuality.noSignal;
         if (gpsQualityListener != null) {
-            if (gpsAccuracy > 48) {
+            GPSQuality quality = GPSQuality.noSignal;
+            if (gpsAccuracy <= NO_DISTANCE) {
+                quality = GPSQuality.noSignal;
+            } else if (gpsAccuracy > POOR_DISTANCE) {
                 quality = GPSQuality.poor;
-            } else if (gpsAccuracy > 10) {
+            } else if (gpsAccuracy > GREAT_DISTANCE) {
                 quality = GPSQuality.good;
-            } else if (gpsAccuracy <= 10) {
+            } else if (gpsAccuracy <= GREAT_DISTANCE) {
                 quality = GPSQuality.great;
             }
 
             gpsQualityListener.gpsQualityAndAccuracyUpdated(quality, gpsAccuracy, bearingImpl, speedImpl);
         }
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    @Override
-    public void onLocationChanged(Location location) {
-        if (initialLocation) {
-            storeInitialTrackingTimestamp();
-        }
-        updateResendIntervalSetting();
-        reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
-                location.getLatitude(), location.getLongitude(), location.getAltitude());
-        final String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
-        enqueueForSending(postUrlStr, location);
     }
 
     private JSONObject createJsonLocationFix(Location location) throws JSONException {
@@ -251,7 +245,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
         return fixJson;
     }
-    
+
     private JSONArray createJsonLocationFixes(Iterable<Location> locations) throws JSONException {
         final JSONArray fixesAsJson = new JSONArray();
         for (final Location location : locations) {
@@ -339,55 +333,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
             }
         };
     }
-
-    private void storeInitialTrackingTimestamp() {
-        if (prefs.getTrackingTimerStarted() == 0) {
-            prefs.setTrackingTimerStarted(System.currentTimeMillis());
-        }
-        initialLocation = false;
-    }
-
-    /**
-     * Update whether message sending service should retry every 3 seconds or every 30.
-     */
-    private void updateResendIntervalSetting() {
-        float batteryPct = getBatteryPercentage();
-        boolean batteryIsCharging = prefs.getBatteryIsCharging();
-        int updateInterval = UPDATE_INTERVAL_IN_MILLIS_DEFAULT;
-        if (prefs.getEnergySavingEnabledByUser() || (batteryPct < BATTERY_POWER_SAVE_THRESHOLD && !batteryIsCharging)) {
-            if (BuildConfig.DEBUG) {
-                ExLog.i(this, "POWER-LEVELS", "in power saving mode");
-            }
-            updateInterval = UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE;
-        } else {
-            if (BuildConfig.DEBUG) {
-                ExLog.i(this, "POWER-LEVELS", "in default power mode");
-            }
-        }
-        prefs.setMessageResendIntervalInMillis(updateInterval);
-    }
-
-    /**
-     * Get battery charging level
-     *
-     * @return battery charging level in interval [0,1]
-     */
-    private float getBatteryPercentage() {
-        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = this.registerReceiver(null, ifilter);
-
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
-        float batteryPct = level / (float) scale;
-
-        if (BuildConfig.DEBUG) {
-            ExLog.i(this, TAG, "Battery: " + (batteryPct * 100) + "%");
-        }
-
-        return batteryPct;
-    }
-
+    
     @Override
     public IBinder onBind(Intent intent) {
         return trackingBinder;
@@ -400,19 +346,55 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
     }
 
-    // Useful code for Bug 3048. Will stay commented for now.
+    /**
+     * Methods implemented through LocationManager
+     */ 
+    @Override
+    public void onLocationChanged(Location location) {
+        reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
+                location.getLatitude(), location.getLongitude(), location.getAltitude());
+        final String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
+        enqueueForSending(postUrlStr, location);
+
+        // clear message queue
+        locationWatchDog.removeMessages(NO_LOCATION);
+
+        // add new message with last location
+        Message msg = locationWatchDog.obtainMessage(NO_LOCATION);
+        msg.obj = location;
+        locationWatchDog.sendMessageDelayed(msg, NO_LOCATION_CHECK);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        //Status Update by the provider (GPS)
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        //provider (GPS) disabled by the user while tracking
+        Intent local = new Intent();
+        local.setAction(GPS_DISABLED_MESSAGE);
+        this.sendBroadcast(local);
+    }
+    
+    @Override
+    public void onProviderEnabled(String provider) {
+        //provider (GPS) (re)enabled by the user while tracking
+    }
 
      private void showNotification() {
-     Intent intent = new Intent(this, TrackingActivity.class);
-     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-     PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
-     Notification notification = new NotificationCompat.Builder(this)
-     .setContentTitle(getText(R.string.app_name))
-     .setContentText(getString(R.string.tracking_notification_text, event.name)).setContentIntent(pi)
-         .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-         .setSmallIcon(R.drawable.ic_directions_boat)
-         .setOngoing(true).build();
+         Intent intent = new Intent(this, TrackingActivity.class);
+         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+         PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+         Notification notification = new NotificationCompat.Builder(this)
+             .setContentTitle(getText(R.string.app_name))
+             .setContentText(getString(R.string.tracking_notification_text, event.name))
+             .setContentIntent(pi)
+             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+             .setSmallIcon(R.drawable.ic_directions_boat)
+             .setOngoing(true)
+             .build();
          notificationManager.notify(NOTIFICATION_ID, notification);
      }
 
@@ -430,23 +412,32 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         }
     }
 
-    public enum GPSQuality {
-        noSignal(0), poor(2), good(3), great(4);
-
-        private final int gpsQuality;
-
-        GPSQuality(int quality) {
-            this.gpsQuality = quality;
-        }
-
-        public int toInt() {
-            return this.gpsQuality;
-        }
-    }
-
     public interface GPSQualityListener {
-        void gpsQualityAndAccuracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing gpsBearing,
-            Speed gpsSpeed);
+        void gpsQualityAndAccuracyUpdated(GPSQuality quality, float accuracy, Bearing bearing, Speed speed);
     }
 
+    private class LocationWatchDog extends Handler {
+
+        LocationWatchDog(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case NO_LOCATION:
+                    ExLog.i(getApplicationContext(), TAG, "No Location");
+                    Location location = (Location) msg.obj;
+                    if (location == null) {
+                        location = new Location(LocationManager.GPS_PROVIDER);
+                    }
+                    reportGPSQualityBearingAndSpeed(NO_DISTANCE, location.getBearing(), location.getSpeed(),
+                        location.getLatitude(), location.getLongitude(), location.getAltitude());
+                    break;
+
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
 }

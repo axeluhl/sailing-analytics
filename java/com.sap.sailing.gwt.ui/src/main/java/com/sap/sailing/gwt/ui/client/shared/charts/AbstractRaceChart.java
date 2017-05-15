@@ -27,12 +27,15 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator;
+import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeChangeListener;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
@@ -66,6 +69,8 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     
     /** the tick count must be the same as TimeSlider.TICKCOUNT, otherwise the time ticks will be not synchronized */  
     private final int TICKCOUNT = 10;
+    
+    public static final long MINUTE_IN_MILLIS = 60 * 1000;
 
     private boolean ignoreNextClickEvent;
     
@@ -133,20 +138,16 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     }
 
     protected void showLoading(String message) {
-        if (timer.getPlayMode() != PlayModes.Live) {
-            if (chart.isRendered()) {
-                chart.showLoading(message);
-            } else {
-                add(busyIndicator);
-            }
+        if (chart.isRendered()) {
+            chart.showLoading(message);
+        } else {
+            add(busyIndicator);
         }
         isLoading = true;
     }
 
     protected void hideLoading() {
-        if (timer.getPlayMode() != PlayModes.Live) {
-            chart.hideLoading();
-        }
+        chart.hideLoading();
         isLoading = false;
         remove(busyIndicator);
     }
@@ -158,7 +159,12 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
             if (!isZoomed) {
                 isZoomed = true;
             }
-            timeRangeWithZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
+            //Set a minute as max time zoom just as for chart
+            if (xAxisMax - xAxisMin > MINUTE_IN_MILLIS) {
+                timeRangeWithZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
+            } else {
+                return false;
+            }
         } catch (Exception e) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
@@ -193,7 +199,9 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
             if (minTimepoint != null && maxTimepoint != null) {
                 xAxis.setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), /* redraw */ false, false);
                 long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
-                xAxis.setTickInterval(tickInterval);
+                TimeTicksCalculator calculator = new TimeTicksCalculator();
+                NormalizedInterval normalizedInterval = calculator.normalizeTimeTickInterval(tickInterval);
+                xAxis.setTickInterval(normalizedInterval.count * normalizedInterval.unitRange);
             }
             if (minTimepoint != null) {
                 xAxis.setMin(minTimepoint.getTime());
@@ -249,5 +257,15 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     @Override
     public String getId() {
         return getLocalizedShortName();
+    }
+
+    /**
+     * Determines if a standard loading message is allowed to appear over the chart or not.
+     * 
+     * @return <code>true</code> if the message is allowed, <code>false</code> otherwise.
+     */
+    protected boolean shouldShowLoading(Long timestamp) {
+        return timestamp == null
+                || (timer.getPlayState() != PlayStates.Playing && timer.getPlayMode() != PlayModes.Live);
     }
 }

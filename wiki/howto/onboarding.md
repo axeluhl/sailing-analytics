@@ -8,9 +8,9 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.5.2 "Mars SR2"), http://www.eclipse.org
+1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.5.2 "Neon SR2"), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install GWT Eclipse plugin for Eclipse (http://gwt-plugins.github.io/documentation/gwt-eclipse-plugin/Download.html)
+  * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin/tree/gpe-fork using http://storage.googleapis.com/gwt-eclipse-plugin/release as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
 3. Git (e.g. msysGit for Windows v2.9.2), http://git-scm.com
 4. MongoDB (e.g. Production Release 2.6.7), download: http://www.mongodb.org/
@@ -18,14 +18,14 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 6. JDK 1.7 (Java SE 7), http://jdk7.java.net
 7. JDK 1.8 (Java SE 8), http://jdk8.java.net
 8. Maven 3.1.1 (or higher), http://maven.apache.org
-9. GWT SDK 2.7.0 (http://www.gwtproject.org/download.html)
+9. GWT SDK 2.8.0 (http://www.gwtproject.org/download.html)
 10. Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/)
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.5.2 "Mars SR2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers-452/mars2) by using the script "configuration/installPluginsForEclipseMars.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.6.2 "Neon.2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neon2) by using the script "configuration/installPluginsForEclipseNeon.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipseMars.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipseNeon.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -34,9 +34,6 @@ On Windows you need a Git Bash or Cygwin shell to run the script. In addition yo
 On Mac OS, it's not sufficient to provide the path to the app, instead you need to get the path to the directory inside of the app package hosting the "eclipse" binary (.../Eclipse.app/Contents/MacOS).
 
 Be aware hat the installation may take several minutes depending on your Internet connection. When the script finished running, please check that no errors occurred (the installation process only logs errors but doesn't fail).
-
-__NOTE:__
-Beside the installation script for Eclipse Mars, there is also one for the new Eclipse Neon release (4.6.0). Due to a ECJ/JDT regression, this version will brake project functionality. If you've already installed Eclipse Neon, you can easily downgrade to Mars SR2, reusing your existing workspace. You just have to accept the warning you'll get during first startup and perform a workspace cleanup (`Project > Clean... > Clean all projects`). In rare cases, the target platform must be set again.
 
 #### Further optional but recommended installations
 
@@ -66,11 +63,14 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`  User "trac" has all public ssh keys.
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 3. Setup and configure Eclipse
-  * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)
+  * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
   * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
   * Install the Google Android SDK from the same Google Plugin for Eclipse update site
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
+  * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
+  * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
+  * In "Window->Preferences->General->Content Types" select on the right side CSS, now add in the lower file association list *.gss to get limited syntax highlighting and content assist in GSS files
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
   * Check that JDK 1.8 is available and has been set for compilation in Eclipse
@@ -78,13 +78,13 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
   * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
-  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import as a git project in eclipse)
+  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import as a git project in eclipse) (make sure to scan for nested projects)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
   * Rebuild all projects
 4. Run the Race Analysis Suite
-  * Start the MongoDB
+  * Start the MongoDB (cd /somePathto MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)
   * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the debug dropdown
   * Run "Security UI sdm" in the debug dropdown
   * Run "SailingGWT" in the debug dropdown

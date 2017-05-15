@@ -41,6 +41,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     private final String messagingHostname;
     private final int messagingPort;
     private final String queueName;
+    private final Iterable<Replicable<?, ?>> replicables;
 
     private QueueingConsumer consumer;
 
@@ -61,9 +62,15 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
      *            replica with the master
      * @param servletPort
      *            port for HTTP requests to the master
+     * @param replicables
+     *            the {@link Replicable} objects to replicate from the master described by this object; the master will
+     *            send operations only for those replicables that at least one replica is registered for; this, however,
+     *            may mean that the master also sends operations for replicables that a particular replica hasn't
+     *            registered for. Replicas shall silently drop operations for such replicables that they haven't
+     *            requested replication for.
      */
     public ReplicationMasterDescriptorImpl(String messagingHostname, String exchangeName, int messagingPort,
-            String queueName, String masterServletHostname, int servletPort) {
+            String queueName, String masterServletHostname, int servletPort, Iterable<Replicable<?, ?>> replicables) {
         this.masterServletHostname = masterServletHostname;
         this.messagingHostname = messagingHostname;
         this.servletPort = servletPort;
@@ -71,16 +78,20 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         this.exchangeName = exchangeName;
         this.queueName = queueName;
         this.consumer = null;
+        this.replicables = replicables;
     }
 
     @Override
     public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException,
             UnsupportedEncodingException {
+        final String[] replicableIdsAsString = StreamSupport.stream(replicables.spliterator(), /* parallel */ false).map(r->r.getId()).toArray(i->new String[i]);
         return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.REGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
                 + java.net.URLEncoder.encode(uuid.toString(), "UTF-8") + "&"
                 + ReplicationServlet.ADDITIONAL_INFORMATION + "="
-                + java.net.URLEncoder.encode(ServerInfo.getBuildVersion(), "UTF-8"));
+                + java.net.URLEncoder.encode(ServerInfo.getBuildVersion(), "UTF-8") + "&"
+                + ReplicationServlet.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED + "="
+                + java.net.URLEncoder.encode(String.join(",", replicableIdsAsString), "UTF-8"));
     }
 
     @Override
@@ -88,6 +99,11 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.DEREGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
                 + uuid.toString());
+    }
+
+    @Override
+    public Iterable<Replicable<?, ?>> getReplicables() {
+        return replicables;
     }
 
     @Override
@@ -209,12 +225,15 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public synchronized void stopConnection() {
+    public synchronized void stopConnection(boolean deleteExchange) {
         try {
             if (consumer != null) {
                 // make sure to remove queue in order to avoid any exchanges filling it with messages
                 consumer.getChannel().queueUnbind(queueName, exchangeName, "");
                 consumer.getChannel().queueDelete(queueName);
+                if (deleteExchange) {
+                    consumer.getChannel().exchangeDelete(exchangeName);
+                }
                 consumer.getChannel().getConnection().close(/* timeout in millis */ 1000);
             }
         } catch (Exception ex) {
@@ -223,7 +242,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
             logger.log(Level.SEVERE, "Exception while closing replication channel consumer", ex);
         }
     }
-
+    
     /**
      * @return 0 means use default port
      */

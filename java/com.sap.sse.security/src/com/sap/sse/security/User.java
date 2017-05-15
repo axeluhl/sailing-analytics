@@ -108,10 +108,6 @@ public class User implements NamedWithID {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getFullName() {
         return fullName;
     }

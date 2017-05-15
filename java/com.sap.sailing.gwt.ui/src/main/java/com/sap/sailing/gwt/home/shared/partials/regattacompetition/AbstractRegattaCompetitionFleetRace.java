@@ -17,10 +17,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPad;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 
 public abstract class AbstractRegattaCompetitionFleetRace extends Widget implements RegattaCompetitionRaceView {
     
@@ -35,7 +35,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
         this.race = race;
         this.presenter = presenter;
         this.mainElement = getMainUiElement();
-        setupRaceState(race.getTrackingState(), race.getViewState());
+        setupRaceState(race);
         getRaceNameUiElement().setInnerText(race.getRaceName());
         setupRaceStart(race.getStart());
         setElement(mainElement);
@@ -46,42 +46,55 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
     
     @Override
     public void onBrowserEvent(Event event) {
-        if (race.hasValidTrackingData() && event.getTypeInt() == Event.ONCLICK) {
-            this.getElement().scrollIntoView();
-            panel.setWidget(new RaceviewerLaunchPad(race, panel) {
-                @Override
-                protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
-                    return presenter.getRaceViewerURL(data, mode);
-                }
-            });
-            panel.setVisible(false);
-            panel.show();
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                @Override
-                public void execute() {
-                    Widget button = AbstractRegattaCompetitionFleetRace.this, panelContent = panel.getWidget();
-                    int alignRight = button.getAbsoluteLeft() + button.getOffsetWidth() - panelContent.getOffsetWidth();
-                    int left = (alignRight - Window.getScrollLeft() < 0 ? button.getAbsoluteLeft() - 1 : alignRight + 1);
-                    int alignBottom = button.getAbsoluteTop() + button.getOffsetHeight() - panelContent.getOffsetHeight();
-                    int top = (alignBottom - Window.getScrollTop() < 0 ? button.getAbsoluteTop() - 1 : alignBottom + 1);
-                    panel.setPopupPosition(left, top);
-                    panel.setVisible(true);
-                }
-            });
+        // Only handle click events if valid tracking data is available
+        if (!race.hasValidTrackingData() || event.getTypeInt() != Event.ONCLICK) {
+            return; 
         }
+
+        // If rendered as direct link button, open link in new tab directly instead of showing the menu popup
+        if (!race.isFinished() && !race.isRunning()) {
+            Window.open(presenter.getRaceViewerURL(race, RaceBoardModes.PLAYER.name()), "_blank", "");
+            return;
+        }
+        
+        // Show menu popup relative to button by ensuring it stays with the viewport
+        this.getElement().scrollIntoView();
+        panel.setWidget(new RaceviewerLaunchPad(race, panel) {
+            @Override
+            protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
+                return presenter.getRaceViewerURL(data, mode);
+            }
+        });
+        panel.setVisible(false);
+        panel.show();
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                Widget button = AbstractRegattaCompetitionFleetRace.this, panelContent = panel.getWidget();
+                int alignRight = button.getAbsoluteLeft() + button.getOffsetWidth() - panelContent.getOffsetWidth();
+                int left = (alignRight - Window.getScrollLeft() < 0 ? button.getAbsoluteLeft() - 1 : alignRight + 1);
+                int alignBottom = button.getAbsoluteTop() + button.getOffsetHeight() - panelContent.getOffsetHeight();
+                int top = (alignBottom - Window.getScrollTop() < 0 ? button.getAbsoluteTop() - 1 : alignBottom + 1);
+                panel.setPopupPosition(left, top);
+                panel.setVisible(true);
+            }
+        });
     }
     
-    private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
-        boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
-        if (viewState == RaceViewState.RUNNING) {
+    private void setupRaceState(SimpleRaceMetadataDTO race) {
+        boolean isUntrackedRace = race.getTrackingState() != RaceTrackingState.TRACKED_VALID_DATA;
+        if (race.isRunning()) {
             mainElement.addClassName(getRaceLiveStyleName());
             getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.live() : I18N.actionWatch());
-        } else if (viewState == RaceViewState.FINISHED) {
+        } else if (race.isFinished()) {
             getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.actionAnalyze());
         } else {
             mainElement.addClassName(getRacePlannedStyleName());
-            if (viewState == RaceViewState.SCHEDULED) getRaceStateUiElement().setInnerText(I18N.raceIsPlanned());
-            else getRaceStateUiElement().setInnerText(viewState.getLabel());
+            if (race.isScheduled()) {
+                getRaceStateUiElement().setInnerText(I18N.raceIsPlanned());
+            } else {
+                getRaceStateUiElement().setInnerText(race.getViewState().getLabel());
+            }
         }
         setStyleName(mainElement, getRaceUntrackedStyleName(), isUntrackedRace);
     }

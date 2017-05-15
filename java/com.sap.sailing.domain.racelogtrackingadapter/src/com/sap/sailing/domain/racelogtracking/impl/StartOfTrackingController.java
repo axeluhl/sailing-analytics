@@ -46,7 +46,6 @@ public class StartOfTrackingController implements StartTimeChangedListener {
             if (!Util.equalsWithNull(trackedRace.getStartOfTracking(), newStartOfTracking)) {
                 raceLog.add(new RaceLogStartOfTrackingEventImpl(newStartOfTracking,
                         raceLogEventAuthor, raceLog.getCurrentPassId()));
-                trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
             }
         }
     }

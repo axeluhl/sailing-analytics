@@ -205,7 +205,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String mark();
     String otherManeuver();
     String douglasPeuckerPoints();
-    String filterRacesByName();
+    String filterRaces();
+    String filterByNameOrBoatClass();
+    String filterByRegatta();
     String filterMediaByName();
     String actionEdit();
     String actionEditScores();
@@ -300,6 +302,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String details();
     String noGroupSelected();
     String combinedWindSourceTypeName();
+    String legMiddleWindSourceTypeName();
     String courseBasedWindSourceTypeName();
     String trackBasedEstimationWindSourceTypeName();
     String windSensorWindSourceTypeName();
@@ -332,7 +335,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
-    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName, String replicableIdsAsString);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
     String fleet();
@@ -432,6 +435,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeHighPointEssOverall12Description();
     String scoringSchemeHighPointFirstGetsTwelveOrEight();
     String scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
+    String scoringSchemeHighPointFirstGetsTwelveOrEight2017();
+    String scoringSchemeHighPointFirstGetsTwelveOrEight2017Description();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -769,7 +774,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaDefinesResultDiscardingRules();
     String startsWithZeroScore();
     String masterDataImportPanel();
-    String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas);
+    String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas, int mediaTracksImported);
     String importSuccessOverwriteInfo();
     String regattaOverviewConfiguration();
     String firstRaceIsNonDiscardableCarryForward();
@@ -810,6 +815,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showingDetailsOfRace(String raceName);
     String startAt();
     String finishAt();
+    String protestStartsAt();
     String protestEndsAt();
     String unknown();
     String raceLog();
@@ -923,6 +929,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showWindSpeedSeriesTooltip();
     String showWindDirectionSeriesTooltip();
     String combinedWindSourceTypeTooltip();
+    String legMiddleWindSourceTypeTooltip();
     String courseBasedWindSourceTypeTooltip();
     String trackBasedEstimationWindSourceTypeTooltip();
     String windSensorWindSourceTypeTooltip();
@@ -986,6 +993,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String activateIndividualRecall();
     String activateResultEntry();
     String rrs26Start();
+    String sailingWorldCupStart();
     String setConfiguration();
     String classFlag();
     String classFlagHelpText(String procedure);
@@ -1182,6 +1190,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
+    String windChartLoading();
     String mediaNoVideosCaption();
     String mediaShowVideoCaption();
     String mediaShowVideoTooltip(String title);
@@ -1332,6 +1341,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     
     String fixedMarkPassing();
     String suppressedMarkPassing();
+    String warningSettingFixedPassing(String waypoint);
     String windUp();
     String currentFilterSelection();
     String notCapableOfGeneratingACodeForIdentifier();
@@ -1440,7 +1450,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String shownDecimals();
     String openFullscreenView();
     String closeFullscreenView();
-    String progress();
     String videosCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String photosCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsHaveTakenPlace(@PluralCount(DefaultRule_1_0n.class) int eventCount);
@@ -1497,6 +1506,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String warningDirectCompetitorRegistration();
     String warningRegattaCompetitorRegistration();
     String competitorRegistrationsOnRaceDisabled();
+    String warningForDisabledCompetitors(String competitorsSet);
+    String competitorToolTipMessage(String competitorName, String currentFleetName, String assignedToFleet, String raceName);
     String addMarkToRegatta();
     String selectALeaderboardGroup();
     @Override
@@ -1551,7 +1562,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
 
     String playstoreBadge();
     String appstoreSapSailInsight();
-    String appstoreStgTrainingstagebuch();
     String appstoreBadgeSuffix();
     
     String markFixes();
@@ -1571,6 +1581,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String mapControls();
     String manage2SailEvent();
     String noEventsYet();
+    String selectCompetitorImportProvider();
     String selectResultImportProvider();
     String buildVersion();
     String serverInformation();
@@ -1702,7 +1713,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String solutionsInSightHeadline();
     String solutionsBuoyPingerHeadline();
     String solutionsPostHeadline();
-    String solutionsTrainingHeadline();
     String solutionsSimulatorHeadline();
     String sapInSailing();
     String contentSapInSailing1();
@@ -1733,10 +1743,58 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String postRaceAnalytics();
     String contentPostRaceAnalytics1();
     String contentPostRaceAnalytics2();
-    String i18nDeSolutionsTrainingHeadline();
-    String i18nDeSolutionsTrainingText();
     String strategySimulator();
     String contentStrategySimulator();
     String strategySimulatorReadMore();
     String impressum();
+    String lastFix();
+    String filterDeviceMappings();
+    String raceStartAnalysis();
+    String urlForLanguage(String language);
+    String urlForAllLanguages();
+    String externalLinks();
+    String buoyZoneRadiusInHullLengths();
+    String incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
+    String importCompetitors();
+    String chooseWhichCompetitorsShouldBeImported();
+    String existingCompetitors();
+    String importedCompetitors();
+    String hasMatches();
+    String filterImportedCompetitorsByNameSailRaceFleet();
+    String errorLoadingCompetitorImportProviders(String message);
+    String errorLoadingCompetitorImportDescriptors(String message);
+    String couldNotSaveCompetitorRegistrations(String message);
+    String searchTagForImportedCompetitorPlaceholder();
+    String version(String version);
+    String replicables();
+    String eventRegattaRacesLegendWind();
+    String eventRegattaRacesLegendVideo();
+    String eventRegattaRacesLegendAudio();
+    String eventRegattaHeaderLegendGps();
+    String eventRegattaHeaderLegendGpsNo();
+    String eventRegattaHeaderLegendWind();
+    String eventRegattaHeaderLegendWindNo();
+    String eventRegattaHeaderLegendVideo();
+    String eventRegattaHeaderLegendVideoNo();
+    String eventRegattaHeaderLegendAudio();
+    String eventRegattaHeaderLegendAudioNo();
+    String set();
+    String gribWindImport_Title();
+    String angleInDegree();
+    String angleInRadian();
+    String centralAngleInRadian();
+    String centralAngleInDegree();
+    String kilometers();
+    String meters();
+    String nauticalMiles();
+    String seaMiles();
+    String geographicalMiles();
+    String days();
+    String hours();
+    String minutes();
+    String seconds();
+    String milliseconds();
+    String floatNumber();
+    String integer();
+    String sampleColor();
 }

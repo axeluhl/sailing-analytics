@@ -1,10 +1,14 @@
 package com.sap.sailing.gwt.ui.datamining.execution;
 
+import java.io.Serializable;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.ManagedDataMiningQueriesCounter;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
@@ -21,12 +25,29 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> implements QueryRunner {
 
+    /**
+     * The delay before a query is sent to the {@link DataMiningService}.
+     * 
+     * @see #queryReleaseTimer
+     */
+    private static final int queryBufferTimeInMillis = 200;
+
     private final DataMiningSession session;
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final ManagedDataMiningQueriesCounter counter;
-
+    
+    /**
+     * Timer to prevent the execution of unnecessary queries, when they're run
+     * automatically (see {@link QueryRunnerSettings}). This can be caused by
+     * a change of the used data type, that then causes a change of the
+     * dimension to group by and the data retriever chain. Or caused by quick
+     * changes of the filter selection.
+     * 
+     * @see #queryBufferTimeInMillis
+     */
+    private final Timer queryReleaseTimer;
     private QueryRunnerSettings settings;
     private final QueryDefinitionProvider<?> queryDefinitionProvider;
     private final ResultsPresenter<?> resultsPresenter;
@@ -52,7 +73,13 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
                 run(SimpleQueryRunner.this.queryDefinitionProvider.getQueryDefinition());
             }
         });
-        
+
+        queryReleaseTimer = new Timer() {
+            @Override
+            public void run() {
+                SimpleQueryRunner.this.run(queryDefinitionProvider.getQueryDefinition());
+            }
+        };
         if (this.settings.isRunAutomatically()) {
             queryDefinitionProvider.addQueryDefinitionChangedListener(this);
         }
@@ -64,14 +91,15 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator();
-            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Object>(counter) {
+            dataMiningService.runQuery(session, queryDefinition,
+                    new ManagedDataMiningQueryCallback<Serializable>(counter) {
                 @Override
                 protected void handleFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
                     resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
                 @Override
-                protected void handleSuccess(QueryResultDTO<Object> result) {
+                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
                     resultsPresenter.showResult(result);
                 }
             });
@@ -94,7 +122,8 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
 
     @Override
     public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
-        run(newQueryDefinition);
+        // See javadoc of queryReleaseTimer
+        queryReleaseTimer.schedule(queryBufferTimeInMillis);
     }
 
     @Override

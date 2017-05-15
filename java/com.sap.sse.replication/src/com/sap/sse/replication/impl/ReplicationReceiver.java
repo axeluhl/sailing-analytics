@@ -31,6 +31,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
@@ -65,7 +66,11 @@ public class ReplicationReceiver implements Runnable {
     private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
     private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
     
+    /**
+     * descriptor of the master server from which this replicator receives messages
+     */
     private final ReplicationMasterDescriptor master;
+    
     private final ReplicablesProvider replicableProvider;
     
     /**
@@ -93,13 +98,15 @@ public class ReplicationReceiver implements Runnable {
      * providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
      * core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
      */
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
+    private static final int THREAD_POOL_SIZE = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
 
     /**
      * If permitted by the security manager, this is the <code>_queue</code> field accessor for the {@link QueueingConsumer}
      * class, enabling an inspection of the message queueing system's queue size of unprocessed messages.
      */
     private Field _queue;
+    
+    private int operationCounter;
 
     /**
      * Used for the parallel execution of operations that don't
@@ -137,12 +144,14 @@ public class ReplicationReceiver implements Runnable {
     }
     
     /**
-     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's an
-     * {@link Iterable} of serialized {@link RacingEventServiceOperation} objects, and applies it to the
-     * {@link RacingEventService} which is obtained from the service tracker passed to this replicator at construction
-     * time.
+     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's a
+     * {@link ReplicationServiceImpl#createUncompressingInputStream(InputStream) compressed} stream that first
+     * {@link DataInputStream#readUTF() encodes a UTF string} representing the {@link Replicable#getId() replicable ID},
+     * followed by a sequence of serialized {@code byte[]} objects which each can be {@link Replicable#readOperation(InputStream) de-serialized}
+     * by the receiving {@link Replicable} identified by the ID received as a prefix. This method then applies these operations to the
+     * {@link Replicable} identified by the ID, retrieved through the {@link #replicableProvider}.
      * 
-     * @see ReplicationServiceImpl#executed(RacingEventServiceOperation)
+     * @see ReplicationServiceExecutionListener#executed(OperationWithResult)
      */
     @Override
     public void run() {
@@ -169,12 +178,13 @@ public class ReplicationReceiver implements Runnable {
                         }
                     }
                 }
-                byte[] bytesFromMessage = delivery.getBody();
+                final byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
                 // Set the replicable's class's class loader as context for deserialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
                 final InputStream uncompressingInputStream = ReplicationServiceImpl.createUncompressingInputStream(new ByteArrayInputStream(bytesFromMessage));
-                String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
+                final String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
+                // TODO bug 2465: decide based on the master descriptor whether we want to process this message; if it's for a Replicable we're not replicating from that master, drop the message
                 Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
                     ObjectInputStream ois = new ObjectInputStream(uncompressingInputStream); // no special stream required; only reading a generic byte[]
@@ -182,11 +192,15 @@ public class ReplicationReceiver implements Runnable {
                     try {
                         while (true) {
                             byte[] serializedOperation = (byte[]) ois.readObject();
-                            readOperationAndApplyOrQueueIt(replicable, serializedOperation);
-                            operationCount++;
-                            operationsInMessage++;
-                            if (operationCount % 10000l == 0) {
-                                logger.info("Received " + operationCount + " operations so far");
+                            if (Util.contains(master.getReplicables(), replicable)) {
+                                readOperationAndApplyOrQueueIt(replicable, serializedOperation);
+                                operationCount++;
+                                operationsInMessage++;
+                                if (operationCount % 10000l == 0) {
+                                    logger.info("Received " + operationCount + " operations so far");
+                                }
+                            } else {
+                                logger.fine("Dropping operation for non-replicated replicable "+replicable.getId());
                             }
                         }
                     } catch (EOFException eof) {
@@ -296,12 +310,15 @@ public class ReplicationReceiver implements Runnable {
     }
 
     private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
+        final int operationCount = ++operationCounter;
+        logger.fine(()->""+operationCount+": Applying "+operation);
         Runnable runnable = () -> replicable.applyReceivedReplicated(operation);
         if (operation.requiresSynchronousExecution()) {
             runnable.run();
         } else {
             executor.execute(runnable);
         }
+        logger.fine(()->""+operationCount+": Done applying "+operation);
     }
     
     private void queue(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
@@ -383,7 +400,7 @@ public class ReplicationReceiver implements Runnable {
         }
         logger.info("Signaled Replicator thread to stop asap.");
         stopped = true;
-        master.stopConnection();
+        master.stopConnection(/* deleteExchange */ false);
         notifyAll(); // notify those waiting for stopped
     }
     

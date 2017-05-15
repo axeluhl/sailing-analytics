@@ -23,14 +23,7 @@ public interface EventHeaderResources extends ClientBundle {
         String dropdown_content_link();
         String dropdown_content_link_title();
         String dropdown_content_link_subtitle();
-        String dropdownregattas();
-        String dropdownregattas_head();
-        String dropdownregattas_head_title();
-        String dropdownregattas_head_title_button();
-        String dropdownregattas_content();
-        String dropdownregattas_content_link();
-        String dropdownregattas_content_linkactive();
-        String dropdownregattas_content_link_title();
+        String dropdown_content_linkactive();
         String leaderboardquickaccess();
         String eventheader();
         String eventheader_breadcrumb();

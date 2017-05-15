@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
@@ -31,7 +31,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     public RegattaOverviewImpl(EventViewBase.Presenter presenter) {
         super(presenter, presenter.isMultiRegattaEvent(), presenter.isMultiRegattaEvent());
         FlowPanel container = new FlowPanel();
-        if(presenter.getRegatta() != null) {
+        if (presenter.getRegatta() != null) {
             this.setupProgress(container);
             this.setupLiveRaces(container);
         }
@@ -49,7 +49,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupProgress(Panel container) {
-        eventStepsUi = new EventSteps();
+        eventStepsUi = new EventSteps(currentPresenter.getRegatta());
         refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
         container.add(eventStepsUi);
     }
@@ -63,7 +63,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     private void setupMiniLeaderboard(Panel container) {
         MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
         miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
-        if(currentPresenter.getRegatta() != null) {
+        if (currentPresenter.getRegatta() != null) {
             refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
         } else {
             // This forces the "There are no results available yet" message to show
@@ -78,7 +78,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     @Override
-    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
+    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceWithStateDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesEventOverview(quickfinder, seriesName, currentPresenter, eventsOfSeries);
     }
 

@@ -66,7 +66,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                 existingMapSettings.getHoverlineStrokeWeight(),
                 existingMapSettings.getTailLengthInMilliseconds(),
                 /* existingMapSettings.isWindUp() */ true,
-                existingMapSettings.getBuoyZoneRadiusInMeters(),
+                existingMapSettings.getBuoyZoneRadius(),
                 existingMapSettings.isShowOnlySelectedCompetitors(),
                 existingMapSettings.isShowSelectedCompetitorsInfo(),
                 existingMapSettings.isShowWindStreamletColors(),

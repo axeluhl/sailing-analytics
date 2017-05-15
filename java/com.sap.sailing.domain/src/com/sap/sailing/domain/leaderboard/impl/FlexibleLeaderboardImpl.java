@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -140,7 +141,16 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         if (newName == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
+        final String oldName = this.name;
         this.name = newName;
+        notifyLeaderboardChangeListeners(listener->{
+            try {
+                listener.nameChanged(oldName, newName);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Exception trying to notify listener "+listener+" about the name of leaderboard "+
+                        getName()+" changing from "+oldName+" to "+newName, e);
+            }
+        });
     }
 
     @Override
@@ -355,5 +365,20 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     protected LeaderboardType getLeaderboardType() {
         return LeaderboardType.FlexibleLeaderboard;
+    }
+
+    /**
+     * In addition to invoking the superclass implementation, a flexible leaderboard also
+     * detaches all race logs from any tracked race currently linked to any of the race columns
+     * of this leaderboard.
+     */
+    @Override
+    public void destroy() {
+        super.destroy();
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            for (final Fleet fleet : raceColumn.getFleets()) {
+                raceColumn.setTrackedRace(fleet, null); // this will in particular detach the race log
+            }
+        }
     }
 }

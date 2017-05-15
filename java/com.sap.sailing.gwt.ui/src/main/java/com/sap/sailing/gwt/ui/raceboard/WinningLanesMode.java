@@ -72,7 +72,7 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 existingMapSettings.getHoverlineStrokeWeight(),
                 tailLength.asMillis(),
                 /* existingMapSettings.isWindUp() */ true,
-                existingMapSettings.getBuoyZoneRadiusInMeters(),
+                existingMapSettings.getBuoyZoneRadius(),
                 /* existingMapSettings.isShowOnlySelectedCompetitors() */ true, // show the top n competitors and their tails quickly
                 existingMapSettings.isShowSelectedCompetitorsInfo(),
                 existingMapSettings.isShowWindStreamletColors(),

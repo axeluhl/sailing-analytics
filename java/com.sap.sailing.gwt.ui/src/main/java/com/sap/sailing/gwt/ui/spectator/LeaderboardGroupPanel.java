@@ -8,9 +8,13 @@ import java.util.Map;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.safecss.shared.SafeStyles;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -54,10 +58,10 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a class=\"{2}\" href=\"{0}\">{1}</a>")
-        SafeHtml anchor(String url, String displayName, String styleClass);
+        SafeHtml anchor(SafeUri url, String displayName, String styleClass);
 
         @SafeHtmlTemplates.Template("<a target=\"{3}\" class=\"{2}\" href=\"{0}\">{1}</a>")
-        SafeHtml anchorWithTarget(String url, String displayName, String styleClass, String target);
+        SafeHtml anchorWithTarget(SafeUri url, String displayName, String styleClass, String target);
     }
     
     interface TextWithClassTemplate extends SafeHtmlTemplates {
@@ -69,8 +73,8 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     }
 
     interface ColorBoxTemplate extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<div class=\"{1}\" style=\"background:{0};\">&nbsp;</div>")
-        SafeHtml colorBox(String htmlColor, String styleClass);
+        @SafeHtmlTemplates.Template("<div class=\"{1}\" style=\"{0}\">&nbsp;</div>")
+        SafeHtml colorBox(SafeStyles htmlColor, String styleClass);
 
         @SafeHtmlTemplates.Template("<div class=\"{0}\">&nbsp;</div>")
         SafeHtml nocolorBox(String styleClass);
@@ -232,7 +236,8 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 String link = EntryPointLinkFactory.createLeaderboardLink(createLeaderboardLinkParameters(leaderboard));
-                return getAnchor(link, stringMessages.leaderboard(), STYLE_ACTIVE_LEADERBOARD);
+                return getAnchor(link, stringMessages.leaderboard(),
+                        STYLE_ACTIVE_LEADERBOARD);
             }
         };
         
@@ -331,7 +336,8 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 for (SeriesDTO series : regatta.series) {
                     // render the series name
                     if (!LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(series.getName())) {
-                        seriesGrid.setHTML(seriesRow, 0, TEXTTEMPLATE.textWithClass(series.getName(), 50, STYLE_TABLE_TEXT));
+                        seriesGrid.setHTML(seriesRow, 0, TEXTTEMPLATE.textWithClass(series.getName(), 50,
+                                STYLE_TABLE_TEXT));
                     }
                     seriesGridFormatter.setVerticalAlignment(seriesRow, 0, HasVerticalAlignment.ALIGN_MIDDLE);
                     int numberOfFleets = series.getFleets().size();
@@ -343,10 +349,12 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                         for(FleetDTO fleet: series.getFleets()) {
                             Color color = fleet.getColor();
                             if(color != null) {
-                                fleetsGrid.setHTML(fleetRow, 0, COLORBOXTEMPLATE.colorBox(color.getAsHtml(), STYLE_COLORBOX));
+                                SafeStyles bgStyle = new SafeStylesBuilder().trustedBackgroundColor(color.getAsHtml()).toSafeStyles();
+                                fleetsGrid.setHTML(fleetRow, 0, COLORBOXTEMPLATE.colorBox(bgStyle, STYLE_COLORBOX));
                                 fleetGridsFormatter.setVerticalAlignment(fleetRow, 0, HasVerticalAlignment.ALIGN_MIDDLE);
                             }
-                            fleetsGrid.setHTML(fleetRow, 1, TEXTTEMPLATE.textWithClass(fleet.getName(), 50, STYLE_TABLE_TEXT));
+                            fleetsGrid.setHTML(fleetRow, 1, TEXTTEMPLATE.textWithClass(fleet.getName(), 50,
+                                    STYLE_TABLE_TEXT));
                             fleetGridsFormatter.setVerticalAlignment(fleetRow, 1, HasVerticalAlignment.ALIGN_MIDDLE);
                             List<RaceColumnDTO> raceColumnsOfSeries = getRacesOfFleet(leaderboard, series, fleet);
                             fleetsGrid.setHTML(fleetRow, 2, renderRacesToHTml(leaderboard.name, raceColumnsOfSeries, fleet));
@@ -361,7 +369,8 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                         if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())) {
                             Grid fleetsGrid = new Grid(1, 2);
                             CellFormatter fleetGridsFormatter = fleetsGrid.getCellFormatter();
-                            fleetsGrid.setHTML(0, 0, TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_TABLE_TEXT));
+                            fleetsGrid.setHTML(0, 0, TEXTTEMPLATE.textWithClass(displayName, 50,
+                                    STYLE_TABLE_TEXT));
                             fleetGridsFormatter.setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
                             fleetsGrid.setHTML(0, 1, renderRacesToHTml(leaderboard.name, raceColumnsOfSeries, fleet));
                             seriesGrid.setWidget(seriesRow, 1, fleetsGrid);
@@ -413,10 +422,12 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             } else if (race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
                 b.append(getAnchor(link, raceColumnName, STYLE_ACTIVE_RACE));
             } else {
-                b.append(TEXTTEMPLATE.textWithClass(raceColumnName, STYLE_INACTIVE_RACE));
+                b.append(TEXTTEMPLATE.textWithClass(raceColumnName,
+                        STYLE_INACTIVE_RACE));
             }
         } else {
-            b.append(TEXTTEMPLATE.textWithClass(raceColumnName, STYLE_INACTIVE_RACE));
+            b.append(
+                    TEXTTEMPLATE.textWithClass(raceColumnName, STYLE_INACTIVE_RACE));
         }
     }
 
@@ -439,12 +450,12 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         }
         return linkParams;
     }
-    
+
     private SafeHtml getAnchor(String link, String linkText, String style) {
         if (isEmbedded) {
-            return ANCHORTEMPLATE.anchorWithTarget(link, linkText, style, "_blank");
+            return ANCHORTEMPLATE.anchorWithTarget(UriUtils.fromString(link), linkText, style, "_blank");
         } else {
-            return ANCHORTEMPLATE.anchor(link, linkText, style);
+            return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), linkText, style);
         }
     }
 

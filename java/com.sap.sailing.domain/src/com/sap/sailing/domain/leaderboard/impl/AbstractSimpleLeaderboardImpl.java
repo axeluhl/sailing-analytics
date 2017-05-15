@@ -19,13 +19,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -39,6 +36,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -99,7 +97,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.ThreadPoolUtil;
+import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
 /**
  * Base implementation for various types of leaderboards. The {@link RaceColumnListener} implementation forwards events
@@ -153,24 +152,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     private transient Set<CacheInvalidationListener> cacheInvalidationListeners;
 
-    private final static int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-            /* maximumPoolSize */ THREAD_POOL_SIZE,
-            /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
-    /**
-     * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
-     * can depend on the results of the tasks run by {@link #raceDetailsExecutor}, and an {@link Executor} doesn't
-     * move a task that is blocked by waiting for another {@link FutureTask} to the side but blocks permanently,
-     * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either).
-     */
-    private final static Executor raceDetailsExecutor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-            /* maximumPoolSize */ THREAD_POOL_SIZE,
-            /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
-
-
-
+    private transient Set<LeaderboardChangeListener> leaderboardChangeListeners;
+    
+    private static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
+    
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
 
     private transient LeaderboardDTOCache leaderboardDTOCache;
@@ -267,6 +252,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     public class NumberOfCompetitorsFetcherImpl implements NumberOfCompetitorsInLeaderboardFetcher {
         private int numberOfCompetitors = -1;
+        private int numberOfCompetitorsWithoutMaxPointReason = -1;
         
         @Override
         public int getNumberOfCompetitorsInLeaderboard() {
@@ -274,6 +260,18 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 numberOfCompetitors = Util.size(getCompetitors());
             }
             return numberOfCompetitors;
+        }
+        
+        @Override
+        public int getNumberOfCompetitorsWithoutMaxPointReason(RaceColumn column, TimePoint timePoint) {
+        	if (numberOfCompetitorsWithoutMaxPointReason == -1) {
+        		numberOfCompetitorsWithoutMaxPointReason = 0;
+				for (Competitor competitor : getCompetitors()) {
+					MaxPointsReason maxPointReason = getScoreCorrection().getMaxPointsReason(competitor, column, timePoint);
+					numberOfCompetitorsWithoutMaxPointReason += maxPointReason == MaxPointsReason.NONE ? 1 : 0;
+				}
+        	}
+        	return numberOfCompetitorsWithoutMaxPointReason;
         }
     }
 
@@ -330,7 +328,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.suppressedCompetitors = new HashSet<Competitor>();
         this.suppressedCompetitorsLock = new NamedReentrantReadWriteLock("suppressedCompetitorsLock", /* fair */ false);
         this.raceColumnListeners = new RaceColumnListeners();
-        this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.Util.Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
+        this.raceDetailsAtEndOfTrackingCache = new HashMap<>();
         initTransientFields();
     }
     
@@ -349,8 +347,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     private void initTransientFields() {
-        this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.Util.Pair<TrackedRace,Competitor>, RunnableFuture<RaceDetails>>();
-        this.cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
+        this.raceDetailsAtEndOfTrackingCache = new HashMap<>();
+        this.cacheInvalidationListeners = new HashSet<>();
+        this.leaderboardChangeListeners = new HashSet<>();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
@@ -380,7 +379,27 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public void setDisplayName(String displayName) {
+        final String oldDisplayName = this.displayName;
         this.displayName = displayName;
+        notifyLeaderboardChangeListeners(listener->{
+            try {
+                listener.displayNameChanged(oldDisplayName, displayName);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Exception trying to notify listener "+listener+" about the display name of leaderboard "+
+                        getName()+" changing from "+oldDisplayName+" to "+displayName, e);
+            }
+        });
+    }
+    
+    protected void notifyLeaderboardChangeListeners(Consumer<LeaderboardChangeListener> notifier) {
+        for (final LeaderboardChangeListener listener : leaderboardChangeListeners) {
+            try {
+                notifier.accept(listener);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Exception trying to notify listener "+listener+" about a change in leaderboard "+
+                        getName(), e);
+            }
+        }
     }
 
     @Override
@@ -680,6 +699,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
         getRaceColumnListeners().removeRaceColumnListener(listener);
+    }
+
+    @Override
+    public void addLeaderboardChangeListener(LeaderboardChangeListener listener) {
+        leaderboardChangeListeners.add(listener);
+    }
+
+    @Override
+    public void removeLeaderboardChangeListener(LeaderboardChangeListener listener) {
+        leaderboardChangeListeners.remove(listener);
     }
 
     @Override
@@ -1184,6 +1213,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     @Override
     public void setSuppressed(Competitor competitor, boolean suppressed) {
+    	if (competitor == null) {
+    		throw new IllegalArgumentException("Cannot change suppression for a null competitor");
+    	}
         LockUtil.lockForWrite(suppressedCompetitorsLock);
         try {
             if (suppressed) {
@@ -1238,13 +1270,14 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         result.type = getLeaderboardType();
         result.competitors = new ArrayList<CompetitorDTO>();
         result.name = this.getName();
+        result.displayName = this.getDisplayName();
         result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
             result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
         }
         // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
         // futures to finish:
-        Map<RaceColumn, FutureTask<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
+        Map<RaceColumn, Future<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
             boolean isMetaLeaderboardColumn = raceColumn instanceof MetaLeaderboardColumn;
             RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
@@ -1272,13 +1305,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
             }
-            FutureTask<List<CompetitorDTO>> task = new FutureTask<List<CompetitorDTO>>(
+            Future<List<CompetitorDTO>> task = executor.submit(
                     () -> baseDomainFactory.getCompetitorDTOList(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
-            executor.execute(task);
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
-        for (Map.Entry<RaceColumn, FutureTask<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
+        for (Map.Entry<RaceColumn, Future<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
             try {
                 result.setCompetitorsFromBestToWorst(raceColumnAndTaskToJoin.getKey().getName(), raceColumnAndTaskToJoin.getValue().get());
             } catch (InterruptedException e) {
@@ -1342,7 +1374,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
             final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
-                RunnableFuture<LeaderboardEntryDTO> future = new FutureTask<LeaderboardEntryDTO>(() -> {
+                Future<LeaderboardEntryDTO> future = executor.submit(() -> {
                         Entry entry = AbstractSimpleLeaderboardImpl.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
                         return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
                                 namesOfRaceColumnsForWhichToLoadLegDetails != null
@@ -1350,7 +1382,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                                 .getName()), waitForLatestAnalyses, legRanksCache, baseDomainFactory,
                                                 fillTotalPointsUncorrected, cache);
                     });
-                executor.execute(future);
                 futuresForColumnName.put(raceColumn.getName(), future);
             }
             for (Map.Entry<String, Future<LeaderboardEntryDTO>> raceColumnNameAndFuture : futuresForColumnName.entrySet()) {
@@ -1458,6 +1489,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             } else {
                 entryDTO.timeSinceLastPositionFixInSeconds = null;  
             }
+            final Distance averageRideHeight = trackedRace.getAverageRideHeight(competitor, timePoint);
+            entryDTO.averageRideHeightInMeters = averageRideHeight == null ? null : averageRideHeight.getMeters();
         }
         if (addLegDetails && trackedRace != null) {
             try {
@@ -1625,10 +1658,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             RankingInfo rankingInfo, final WindLegTypeAndLegBearingCache cache) throws InterruptedException, ExecutionException {
         final com.sap.sse.common.Util.Pair<TrackedRace, Competitor> key = new com.sap.sse.common.Util.Pair<TrackedRace, Competitor>(trackedRace, competitor);
         RunnableFuture<RaceDetails> raceDetails;
+        final boolean needToRunRaceDetails; // when found in cache, another call to this method is already running it; else, it needs to be run here
         synchronized (raceDetailsAtEndOfTrackingCache) {
             raceDetails = raceDetailsAtEndOfTrackingCache.get(key);
             if (raceDetails == null) {
-                raceDetails = new FutureTask<RaceDetails>(new Callable<RaceDetails>() {
+                needToRunRaceDetails = true;
+                raceDetails = new FutureTaskWithTracingGet<RaceDetails>("RaceDetails for "+trackedRace, new Callable<RaceDetails>() {
                     @Override
                     public RaceDetails call() throws Exception {
                         TimePoint end = trackedRace.getEndOfRace();
@@ -1642,12 +1677,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 legRanksCache, cache, rankingInfo);
                     }
                 });
-                raceDetailsExecutor.execute(raceDetails);
-                raceDetailsAtEndOfTrackingCache.put(key, raceDetails);
+                raceDetailsAtEndOfTrackingCache.put(key, raceDetails); // this way, 
                 final CacheInvalidationListener cacheInvalidationListener = new CacheInvalidationListener(trackedRace, competitor);
                 trackedRace.addListener(cacheInvalidationListener);
                 cacheInvalidationListeners.add(cacheInvalidationListener);
+            } else {
+                needToRunRaceDetails = false;
             }
+        }
+        // now, outside the synchronized block, run task if needed:
+        if (needToRunRaceDetails) {
+            raceDetails.run();
         }
         return raceDetails.get();
     }
@@ -1735,11 +1775,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Double speedOverGroundInKnots;
             if (trackedLeg.hasFinishedLeg(timePoint))  {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
-                result.currentRideHeightInMeters = trackedLeg.getAverageRideHeight(timePoint);
+                final Distance averageRideHeight = trackedLeg.getAverageRideHeight(timePoint);
+                result.currentRideHeightInMeters = averageRideHeight == null ? null : averageRideHeight.getMeters();
             } else {
                 final SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(timePoint);
                 speedOverGroundInKnots = speedOverGround == null ? null : speedOverGround.getKnots();
-                result.currentRideHeightInMeters = trackedLeg.getRideHeight(timePoint);
+                final Distance rideHeight = trackedLeg.getRideHeight(timePoint);
+                result.currentRideHeightInMeters = rideHeight == null ? null : rideHeight.getMeters();
             }
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
@@ -1788,7 +1830,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (startOfRace != null && trackedLeg.hasStartedLeg(timePoint)) {
                 // not using trackedLeg.getManeuvers(...) because it may not catch the mark passing maneuver starting this leg
                 // because that may have been detected as slightly before the mark passing time, hence associated with the previous leg
-                List<Maneuver> maneuvers = trackedLeg.getTrackedLeg().getTrackedRace()
+                Iterable<Maneuver> maneuvers = trackedLeg.getTrackedLeg().getTrackedRace()
                         .getManeuvers(trackedLeg.getCompetitor(), startOfRace, timePoint, waitForLatestAnalyses);
                 if (maneuvers != null) {
                     result.numberOfManeuvers = new HashMap<ManeuverType, Integer>();

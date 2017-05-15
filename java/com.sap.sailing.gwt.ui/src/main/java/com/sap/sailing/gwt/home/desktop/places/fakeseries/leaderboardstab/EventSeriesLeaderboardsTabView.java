@@ -19,7 +19,6 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDa
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.utils.EventParamUtils;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
@@ -60,7 +59,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
 
     @Override
     public void start(final EventSeriesLeaderboardsPlace myPlace, final AcceptsOneWidget contentArea) {
-        contentArea.setWidget(new Placeholder());
+        contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         
         if (leaderboardName != null && !leaderboardName.isEmpty()) {          
@@ -84,7 +83,8 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             if (currentPresenter.getSeriesDTO().getState() != EventSeriesState.RUNNING) {
                 // TODO: this.leaderboard.hideRefresh();
             } else {
-                // TODO: start autorefresh?
+                // Turn on auto refresh button at parent leaderboard
+                leaderboard.turnOnAutoPlay();
             }
             regattaAnalyticsManager.hideCompetitorChart();
             leaderboardPanel.setVisible(true);

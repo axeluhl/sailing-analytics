@@ -11,7 +11,10 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
+import com.sap.sailing.domain.tracking.impl.LegMiddleWindTrackImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -23,7 +26,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     private static final Logger logger = Logger.getLogger(TrackedRaceWithWindEssentials.class.getName());
     
     /**
-     * Serializing an instance of this class has to serialized the various data structures holding the tracked race's
+     * Serializing an instance of this class has to serialize the various data structures holding the tracked race's
      * state. When a race is currently on, these structures change very frequently, and
      * {@link ConcurrentModificationException}s during serialization will be the norm rather than the exception. To
      * avoid this, all modifications to any data structure that is not in itself synchronized obtains this lock's
@@ -75,6 +78,9 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
      * @param delayForWindEstimationCacheInvalidation
      *            if <code>-1</code> and the parameter is accessed, it will be replaced by
      *            {@link #getMillisecondsOverWhichToAverageWind()}/2
+     * 
+     * @return {@code null} in case the {@link WindSourceType#LEG_MIDDLE} type is requested for an
+     *         {@link WindSourceWithAdditionalID#getId() ID} that doesn't identify an existing leg
      */
     @Override
     public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
@@ -84,6 +90,8 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
                 combinedWindTrack = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
             }
             result = combinedWindTrack;
+        } else if (windSource.getType() == WindSourceType.LEG_MIDDLE && windSource instanceof WindSourceWithAdditionalID) {
+            result = getLegMiddleWindTrack((WindSourceWithAdditionalID) windSource);
         } else {
             synchronized (windTracks) {
                 result = windTracks.get(windSource);
@@ -121,12 +129,36 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
         return result;
     }
     
+    private WindSource getLegMiddleWindSource(TrackedLeg trackedLeg) {
+        return new WindSourceWithAdditionalID(WindSourceType.LEG_MIDDLE, getWindSourceIdForLegMiddle(trackedLeg));
+    }
+    
+    private String getWindSourceIdForLegMiddle(TrackedLeg trackedLeg) {
+        return Integer.toString(getRace().getCourse().getIndexOfWaypoint(trackedLeg.getLeg().getFrom()));
+    }
+    
+    private WindTrack getLegMiddleWindTrack(WindSourceWithAdditionalID windSource) {
+        assert windSource.getType() == WindSourceType.LEG_MIDDLE;
+        final String id = windSource.getId();
+        final Integer zeroBasedLegIndex = Integer.valueOf(id);
+        final TrackedLeg trackedLeg = getTrackedLeg(getRace().getCourse().getLeg(zeroBasedLegIndex));
+        return new LegMiddleWindTrackImpl(this, trackedLeg, WindSourceType.LEG_MIDDLE.getBaseConfidence());
+    }
+    
     @Override
     public Set<WindSource> getWindSources(WindSourceType type) {
         Set<WindSource> result = new HashSet<WindSource>();
-        for (WindSource windSource : getWindSources()) {
-            if (windSource.getType() == type) {
-                result.add(windSource);
+        if (type == WindSourceType.COMBINED) {
+            result.add(new WindSourceImpl(WindSourceType.COMBINED));
+        } else if (type == WindSourceType.LEG_MIDDLE) {
+            for (final TrackedLeg trackedLeg : getTrackedLegs()) {
+                result.add(getLegMiddleWindSource(trackedLeg));
+            }
+        } else {
+            for (WindSource windSource : getWindSources()) {
+                if (windSource.getType() == type) {
+                    result.add(windSource);
+                }
             }
         }
         return result;
@@ -146,7 +178,4 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     protected NamedReentrantReadWriteLock getSerializationLock() {
         return serializationLock;
     }
-
-    
-
 }

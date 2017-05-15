@@ -23,7 +23,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.mongodb,
  com.sap.sailing.domain.racelogtrackingadapter,
  org.mongodb.mongo-java-driver;bundle-version="2.13.0",
- javax.servlet;bundle-version="2.6.0",
+ javax.servlet;bundle-version="3.1.0",
  com.sap.sailing.domain.common,
  com.sap.sailing.udpconnector,
  org.jdom;bundle-version="1.0.0",
@@ -58,7 +58,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.datamining;bundle-version="1.0.0",
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sailing.datamining,
- com.sap.sailing.server
+ com.sap.sailing.server,
+ com.sap.sailing.grib
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,

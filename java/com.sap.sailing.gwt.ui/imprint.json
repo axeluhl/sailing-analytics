@@ -635,6 +635,16 @@
             "key": "ASL2.0"
         },
         {
+            "name": "netcdfAll",
+            "version": "4.6.8",
+            "owner": "Unidata",
+            "homepage": "http://www.unidata.ucar.edu/",
+            "acknowledgements": [
+                "Copyright 1993-2015 University Corporation for Atmospheric Research/Unidata"
+            ],
+            "key": "UNIDATA"
+        },
+        {
             "name": "Pull API for parsing MIME messages - MIMEpull",
             "version": "1.9.4",
             "owner": "Oracle and/or its affiliates",
@@ -746,6 +756,10 @@
         {
             "key": "JDOML",
             "file": "jdoml.txt"
+        },
+        {
+            "key": "UNIDATA",
+            "file": "unidata.txt"
         }
     ]
 }

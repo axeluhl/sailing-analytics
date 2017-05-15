@@ -41,7 +41,7 @@ public class TrackFileImportDeviceIdentifierJsonHandler implements DeviceIdentif
         String fileName = (String) json.get(Fields.FILE_NAME.name());
         String trackName = (String) json.get(Fields.TRACK_NAME.name());
         TimePoint uploaded = loadTimePoint(json.get(Fields.UPLOADED_MILLIS.name()));
-        return new TrackFileImportDeviceIdentifierImpl(uuid, fileName, trackName, uploaded);
+        return new TrackFileImportDeviceIdentifierImpl(uuid, stringRepresentation, fileName, trackName, uploaded);
     }
 
     @Override

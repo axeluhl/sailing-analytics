@@ -13,7 +13,6 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -23,6 +22,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -86,7 +86,18 @@ public class CandidateChooserImpl implements CandidateChooser {
     private static final Logger logger = Logger.getLogger(CandidateChooserImpl.class.getName());
 
     private Map<Competitor, Map<Waypoint, MarkPassing>> currentMarkPasses = new HashMap<>();
+    
+    /**
+     * Methods operating on this collection and the collections embedded in it must be {@code synchronized} in order to
+     * avoid overlapping operations. This will generally not limit concurrency further than usual, except for the
+     * start-up phase where a background thread may be spawned by the constructor in case the
+     * {@link MarkPassingCalculator#MarkPassingCalculator(DynamicTrackedRace, boolean, boolean)} constructor is
+     * invoked with the {@code waitForInitialMarkPassingCalculation} parameter set to {@code false}. In this
+     * case, mark passing calculation will be launched in the background and will not be waited for. This then
+     * needs to be synchronized with the dynamic (re-)calculations triggered by fixes and other data popping in.
+     */
     private Map<Competitor, Map<Candidate, Set<Edge>>> allEdges = new HashMap<>();
+    
     private Map<Competitor, Set<Candidate>> candidates = new HashMap<>();
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private Map<Competitor, Integer> suppressedPassings = new HashMap<>();
@@ -156,7 +167,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     @Override
-    public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
+    public synchronized void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
        final TimePoint startOfRace = race.getStartOfRace(/* inference */ false);
         if (startOfRace != null) {
             if (raceStartTime == null || !startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME).equals(raceStartTime)) {
@@ -235,7 +246,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         findShortestPath(c);
     }
 
-    private void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
+    private synchronized void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
         final Boolean isGateStart = race.isGateStart();
         Map<Candidate, Set<Edge>> edges = allEdges.get(c);
         for (Candidate newCan : newCandidates) {
@@ -332,7 +343,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * candidates are the only fixed elements. If more fixed elements are provided, the algorithm solves the
      * optimization problem separately for each segment and concatenates the solutions.
      */
-    private void findShortestPath(Competitor c) {
+    private synchronized void findShortestPath(Competitor c) {
         Map<Candidate, Set<Edge>> allCompetitorEdges = allEdges.get(c);
         SortedSet<Candidate> mostLikelyCandidates = new TreeSet<>();
         NavigableSet<Candidate> fixedPasses = fixedPassings.get(c);
@@ -370,9 +381,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                         // The most likely edge taking us to currentMostLikelyEdge.getEnd() is found. Remember it.
                         candidateWithParentAndHighestTotalProbability.put(currentMostLikelyEdge.getEnd(), new Util.Pair<Candidate, Double>(
                                 currentMostLikelyEdge.getStart(), currentHighestProbability));
-                        if (logger.isLoggable(Level.FINEST)) {
-                            logger.finest("Added "+ currentMostLikelyEdge + " as most likely edge for " + c);
-                        }
+                        logger.finest(()->"Added "+ currentMostLikelyEdge + " as most likely edge for " + c);
                         endFound = currentMostLikelyEdge.getEnd() == endOfFixedInterval;
                         if (!endFound) {
                             // the end of the segment was not yet found; add edges leading away from
@@ -426,9 +435,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                     newMarkPassings.add(newMarkPassing);
                 }
             }
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Updating MarkPasses for " + c + " in case "+race.getRace().getName());
-            }
+            logger.fine(()->"Updating MarkPasses for " + c + " in case "+race.getRace().getName());
             race.updateMarkPassings(c, newMarkPassings);
         }
     }
@@ -540,11 +547,9 @@ public class CandidateChooserImpl implements CandidateChooser {
         createNewEdges(c, newCandidates);
     }
 
-    private void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
+    private synchronized void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
         for (Candidate can : wrongCandidates) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Removing all edges containing " + can + "of "+ c);
-            }
+            logger.finest(()->"Removing all edges containing " + can + "of "+ c);
             candidates.get(c).remove(can);
             Map<Candidate, Set<Edge>> edges = allEdges.get(c);
             edges.remove(can);

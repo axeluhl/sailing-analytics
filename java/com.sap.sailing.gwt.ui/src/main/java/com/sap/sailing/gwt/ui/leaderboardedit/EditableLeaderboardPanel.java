@@ -109,17 +109,6 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
 
-    private class EditableCompetitorColumn extends CompetitorNameColumn {
-        public EditableCompetitorColumn(List<HasCell<LeaderboardRowDTO, ?>> cells, CompetitorColumnBase<LeaderboardRowDTO> base) {
-            super(new CompositeCell<LeaderboardRowDTO>(cells), base);
-        }
-
-        @Override
-        public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            super.defaultRender(context, object, sb);
-        }
-    }
-
     /**
      * Shows the country flag and sail ID, if present
      * 
@@ -750,17 +739,6 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     @Override
     protected CarryColumn createCarryColumn() {
         return new EditableCarryColumn();
-    }
-
-    @Override
-    protected CompetitorNameColumn createCompetitorNameColumn() {
-        return new EditableCompetitorColumn(getCellListForEditableCompetitorColumn(),
-                new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(), new CompetitorFetcher<LeaderboardRowDTO>() {
-                    @Override
-                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                        return t.competitor;
-                    }
-                }));
     }
 
     private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCompetitorColumn() {

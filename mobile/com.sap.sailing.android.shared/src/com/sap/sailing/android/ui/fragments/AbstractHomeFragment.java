@@ -2,6 +2,13 @@ package com.sap.sailing.android.ui.fragments;
 
 import java.util.List;
 
+import com.sap.sailing.android.shared.R;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
+import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
+import com.sap.sailing.android.shared.util.BaseAppPreferences;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -17,13 +24,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.data.BaseCheckinData;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
-import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
-import com.sap.sailing.android.shared.util.BaseAppPreferences;
 
 public abstract class AbstractHomeFragment extends BaseFragment {
     private final static String TAG = AbstractHomeFragment.class.getName();
@@ -53,31 +53,35 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     }
 
     private void showNoQRCodeMessage() {
-        ((AbstractStartActivity) getActivity()).showErrorPopup(R.string.no_qr_code_popup_title,
+        ((AbstractStartActivity<?>) getActivity()).showErrorPopup(R.string.no_qr_code_popup_title,
                 R.string.no_qr_code_popup_message);
     }
 
     private boolean requestQRCodeScan() {
+        boolean result;
+        PackageManager manager = getActivity().getPackageManager();
         Intent intent = new Intent("com.google.zxing.client.android.SCAN");
         intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-
-        PackageManager manager = getActivity().getPackageManager();
         List<ResolveInfo> infos = manager.queryIntentActivities(intent, 0);
         if (infos.size() != 0) {
-            startActivityForResult(intent, requestCodeQRCode);
-            return true;
-        } else {
-            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            infos = manager.queryIntentActivities(marketIntent, 0);
-            if (infos.size() != 0) {
-                startActivity(marketIntent);
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.error_play_store_and_scanning_not_available),
-                        Toast.LENGTH_LONG).show();
+            try {
+                startActivityForResult(intent, requestCodeQRCode);
+                result = true;
+            } catch (Exception ex) {
+                requestQRCodeScannerInstallation();
+                result = false;
             }
-            return false;
+        } else {
+            requestQRCodeScannerInstallation();
+            result = false;
         }
+        return result;
+    }
+
+    private void requestQRCodeScannerInstallation() {
+        Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+        Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
+        startActivity(marketIntent);
     }
 
     @Override

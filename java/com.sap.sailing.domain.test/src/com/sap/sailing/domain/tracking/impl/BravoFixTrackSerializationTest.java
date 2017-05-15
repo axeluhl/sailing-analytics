@@ -82,8 +82,8 @@ public class BravoFixTrackSerializationTest {
         assertRideHeight(track, testFixData.timePoint, testFixData.rideHeight);
     }
     
-    private void assertRideHeight(BravoFixTrack<Competitor> track, TimePoint timePoint, double expected) {
-        assertEquals(expected, track.getRideHeight(timePoint), 0.0);
+    private void assertRideHeight(BravoFixTrack<Competitor> track, TimePoint timePoint, double expectedRideHeightInMeters) {
+        assertEquals(expectedRideHeightInMeters, track.getRideHeight(timePoint).getMeters(), 0.0);
     }
     
     @SuppressWarnings("unchecked")
@@ -116,8 +116,10 @@ public class BravoFixTrackSerializationTest {
         }
         
         private void addOrReplaceBravoFixToTrack(boolean replace) {
-            double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.getColumns().size()];
-            fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeight;
+            double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.trackColumnCount];
+            // fill the port/starboard columns as well because their minimum defines the true ride height
+            fixData[BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn] = rideHeight;
+            fixData[BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn] = rideHeight;
             track.add(new BravoFixImpl(new DoubleVectorFixImpl(timePoint, fixData)), replace);
         }
     }

@@ -263,7 +263,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, LeaderboardDTO leaderboard,
             ResultStates resultState, TimePoint resultTimePoint, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.name);
-
+        final String displayName = leaderboard.getDisplayName();
+        jsonLeaderboard.put("displayName", displayName == null ? leaderboard.name : displayName);
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
@@ -282,7 +283,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard,
             ResultStates resultState, TimePoint resultTimePoint, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.getName());
-
+        final String displayName = leaderboard.getDisplayName();
+        jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
@@ -482,8 +484,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
         String markId = (String) requestObject.get(DeviceMappingConstants.JSON_MARK_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
-        TimePoint closingTimePoint = new MillisecondsTimePoint(toMillis);
-        if (toMillis == null || deviceUuid == null || closingTimePoint == null ||
+        TimePoint closingTimePointInclusive = new MillisecondsTimePoint(toMillis);
+        if (toMillis == null || deviceUuid == null || closingTimePointInclusive == null ||
                 (competitorId == null && markId == null)) {
             logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
@@ -513,13 +515,13 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo, deviceUuid);
         Serializable deviceMappingEventId = finder.analyze();
         if (deviceMappingEventId == null) {
-            logger.warning("No corresponding open mark to device mapping has been found");
+            logger.warning("No corresponding open "+((markId!=null)?"mark":"competitor")+" to device mapping has been found");
             return Response.status(Status.BAD_REQUEST)
-                    .entity("No corresponding open mark to device mapping has been found")
+                    .entity("No corresponding open "+((markId!=null)?"mark":"competitor")+" to device mapping has been found")
                     .type(MediaType.TEXT_PLAIN).build();
         }
         RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
-                author, deviceMappingEventId, closingTimePoint);
+                author, deviceMappingEventId, closingTimePointInclusive);
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked out "+((markId!=null)?"mark ":"competitor ") + mappedTo.getName());
         return Response.status(Status.OK).build();

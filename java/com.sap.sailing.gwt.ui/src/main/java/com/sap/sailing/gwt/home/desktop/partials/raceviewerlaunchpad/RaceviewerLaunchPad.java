@@ -55,7 +55,7 @@ public abstract class RaceviewerLaunchPad extends Composite {
     }
     
     private enum RaceviewerLaunchPadMenuItem {
-        REPLAY(StringMessages.INSTANCE.replay(), "launch-replay", RaceBoardModes.PLAYER.name()),
+        REPLAY(StringMessages.INSTANCE.replay(), "launch-play", RaceBoardModes.PLAYER.name()),
         WATCH_LIVE(StringMessages.INSTANCE.watchLive(), "launch-play", RaceBoardModes.PLAYER.name()),
         RACE_ANALYSIS(StringMessages.INSTANCE.raceAnalysis(), "launch-loupe", RaceBoardModes.FULL_ANALYSIS.name()),
         START_ANALYSIS(StringMessages.INSTANCE.startAnalysis(), "launch-start", RaceBoardModes.START_ANALYSIS.name()),

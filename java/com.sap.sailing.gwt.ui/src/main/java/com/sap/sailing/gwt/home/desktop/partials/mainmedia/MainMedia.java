@@ -12,8 +12,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.partials.media.SailingFullscreenViewer;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 
 public class MainMedia extends Composite {
@@ -28,10 +28,10 @@ public class MainMedia extends Composite {
 
     private static MainMediaUiBinder uiBinder = GWT.create(MainMediaUiBinder.class);
 
-    public MainMedia(PlaceNavigator navigator) {
+    public MainMedia(DesktopPlacesNavigator navigator) {
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        imageCarousel.registerFullscreenViewer(new SailingFullscreenViewer());
+        imageCarousel.registerFullscreenViewer(new SailingFullscreenViewer(navigator));
     }
 
     public void setData(Collection<SailingVideoDTO> videos, ArrayList<SailingImageDTO> photos) {

@@ -2,8 +2,11 @@ package com.sap.sailing.gwt.home.desktop.partials.solutions;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -20,6 +23,7 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNa
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class Solutions extends Composite {
     interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
@@ -29,12 +33,12 @@ public class Solutions extends Composite {
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
+    @UiField StringMessages i18n;
     @UiField Anchor sailingAnalyticsAnchor;
     @UiField Anchor raceAnchor;
     @UiField Anchor inSightAnchor;
     @UiField Anchor buoyPingerAnchor;
     @UiField Anchor postRaceAnchor;
-    @UiField Anchor trainingDiaryAnchor;
     @UiField Anchor simulatorAnchor;
 
     @UiField DivElement sapInSailingDiv;
@@ -43,16 +47,25 @@ public class Solutions extends Composite {
     @UiField DivElement inSightDiv;
     @UiField DivElement buoyPingerDiv;
     @UiField DivElement postRaceDiv;
-    @UiField DivElement trainingDiaryDiv;
     @UiField DivElement simulatorDiv;
 
-    @UiField
-    Anchor sapInSailingAnchor;
+    @UiField Anchor sapInSailingAnchor;
     @UiField Anchor sailingAnalyticsDetailsAnchor;
     @UiField Anchor raceCommitteeAppDetailsAnchor;
     @UiField Anchor inSightAppDetailsAnchor;
     @UiField Anchor buoyPingerAppDetailsAnchor;
     @UiField Anchor simulatorAppDetailsAnchor;
+    
+    @UiField AnchorElement raceManagerPlayStoreLinkUi;
+    @UiField AnchorElement inSightAppStoreLinkUi;
+    @UiField AnchorElement buoyPingerPlayStoreLinkUi;
+    @UiField
+    AnchorElement inSightPlayStoreLinkUi;
+    
+    @UiField ImageElement raceManagerPlayStoreImgUi;
+    @UiField ImageElement inSightPlayStoreImgUi;
+    @UiField ImageElement buoyPingerPlayStoreImgUi;
+    @UiField ImageElement inSightAppStoreImgUi;
 
     private final PlaceNavigation<SolutionsPlace> sapInSailingNavigation;
     private final PlaceNavigation<SolutionsPlace> sailingAnalyticsNavigation; 
@@ -60,7 +73,6 @@ public class Solutions extends Composite {
     private final PlaceNavigation<SolutionsPlace> inSightAppNavigation;
     private final PlaceNavigation<SolutionsPlace> buoyPingerAppNavigation;
     private final PlaceNavigation<SolutionsPlace> postRaceAnalyticsNavigation;
-    private final PlaceNavigation<SolutionsPlace> trainingDiaryNavigation; 
     private final PlaceNavigation<SolutionsPlace> sailingSimulatorNavigation; 
     
     private final SolutionsNavigationTabs navigationTab;
@@ -80,6 +92,20 @@ public class Solutions extends Composite {
 
         initWidget(uiBinder.createAndBindUi(this));
         
+        String playstorebadgeSrc = UriUtils.fromString(i18n.playstoreBadge()).asString();
+        String insightAppstoreSrc = UriUtils.fromString("images/home/appstore" + i18n.appstoreBadgeSuffix() + ".svg")
+                .asString();
+
+
+        raceManagerPlayStoreLinkUi.setHref(UriUtils.fromString(i18n.playstoreRacecommitteeApp()));
+        inSightAppStoreLinkUi.setHref(UriUtils.fromString(i18n.appstoreSapSailInsight()));
+        buoyPingerPlayStoreLinkUi.setHref(UriUtils.fromString(i18n.playStoreBuoyPingerApp()));
+        inSightPlayStoreLinkUi.setHref(UriUtils.fromString(i18n.playstoreInsightApp()));
+        raceManagerPlayStoreImgUi.setSrc(playstorebadgeSrc);
+        inSightPlayStoreImgUi.setSrc(playstorebadgeSrc);
+        buoyPingerPlayStoreImgUi.setSrc(playstorebadgeSrc);
+        inSightAppStoreImgUi.setSrc(insightAppstoreSrc);
+
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);
         inSightAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.InSightApp);
@@ -98,7 +124,6 @@ public class Solutions extends Composite {
         inSightAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.InSightApp);
         buoyPingerAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.BuoyPingerApp);
         postRaceAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.PostRaceAnalytics);
-        trainingDiaryNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.TrainingDiary);
         sailingSimulatorNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingSimulator);
 
         sapInSailingAnchor.setHref(sapInSailingNavigation.getTargetUrl());
@@ -107,7 +132,6 @@ public class Solutions extends Composite {
         inSightAnchor.setHref(inSightAppNavigation.getTargetUrl());
         buoyPingerAnchor.setHref(buoyPingerAppNavigation.getTargetUrl());
         postRaceAnchor.setHref(postRaceAnalyticsNavigation.getTargetUrl());
-        trainingDiaryAnchor.setHref(trainingDiaryNavigation.getTargetUrl());
         simulatorAnchor.setHref(sailingSimulatorNavigation.getTargetUrl());
     }
 
@@ -155,12 +179,6 @@ public class Solutions extends Composite {
         handleClickEventWithLocalNavigation(e, postRaceAnalyticsNavigation);
     }
 
-    @UiHandler("trainingDiaryAnchor")
-    public void scrollToTrainingDiary(ClickEvent e) {
-        scrollToView(SolutionsNavigationTabs.TrainingDiary);
-        handleClickEventWithLocalNavigation(e, trainingDiaryNavigation);
-    }
-
     @UiHandler("simulatorAnchor")
     public void scrollToSimulator(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.SailingSimulator);
@@ -199,9 +217,6 @@ public class Solutions extends Composite {
                 break;
             case PostRaceAnalytics:
                 postRaceDiv.scrollIntoView();
-                break;
-            case TrainingDiary:
-                trainingDiaryDiv.scrollIntoView();
                 break;
             case SailingSimulator:
                 simulatorDiv.scrollIntoView();

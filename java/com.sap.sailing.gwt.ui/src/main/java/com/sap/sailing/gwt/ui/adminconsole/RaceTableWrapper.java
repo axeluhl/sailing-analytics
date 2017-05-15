@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -56,7 +57,8 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                     params.put("raceName", raceIdentifier.getRaceName());
                     params.put("canReplayDuringLiveRaces", "true");
                     String link = EntryPointLinkFactory.createRaceBoardLink(params);
-                    return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
+                            return ANCHORTEMPLATE.cell(UriUtils.fromString(link),
+                                    raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
                 } else {
                     return SafeHtmlUtils.fromString(raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
                 }

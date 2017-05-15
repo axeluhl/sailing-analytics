@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
@@ -45,10 +46,13 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
@@ -316,8 +320,22 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
-    Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
+    default Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
+        return getApproximatePosition(waypoint, timePoint, new NonCachingMarkPositionAtTimePointCache(this, timePoint));
+    }
     
+    /**
+     * Same as {@link #getApproximatePosition(Waypoint, TimePoint)}, but giving the caller the possibility to pass a
+     * cache of mark positions and related information that can help speed up compound operations requiring frequent
+     * access to the same marks in the same race for the same time point.
+     * 
+     * @param markPositionCache
+     *            a cache for this {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
+     *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     */
+    Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint,
+            MarkPositionAtTimePointCache markPositionCache);
+
     /**
      * Checks whether the {@link Wind#getTimePoint()} is in range of start and end {@link TimePoint}s plus extra time
      * for wind recording. If, based on a {@link RaceExecutionOrderProvider}, there is no previous race that takes the
@@ -358,15 +376,17 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     /**
      * Retrieves the wind sources used so far by this race that have the specified <code>type</code> as their
      * {@link WindSource#getType() type}. Always returns a non-<code>null</code> iterable which may be empty in case the
-     * race does not use any wind source of the specified type (yet). Additional sources may be returned after
+     * race does not use any wind source of the specified type (yet).<p>
      * 
+     * It is possible to ask for the {@link WindSourceType#COMBINED} and {@link WindSourceType#LEG_MIDDLE} types and
+     * get a non-empty result although those sources are never returned by {@link #getWindSources()}.
      */
     Set<WindSource> getWindSources(WindSourceType type);
 
     /**
      * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
      * Callers can freely iterate because a copied collection is returned. The {@link WindSourceType#COMBINED} wind source
-     * is never part of the result.
+     * as well as the {@link WindSourceType#LEG_MIDDLE} sources are never part of the result.
      */
     Set<WindSource> getWindSources();
 
@@ -419,6 +439,17 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *         lock.
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
+    
+    /**
+     * Returns competitor's mark passings.
+     * 
+     * @param waitForLatestUpdates
+     *            if any mark passing updates are pending because some calculations are currently going on and updates
+     *            haven't all been processed yet then the call will block until these updates have been processed in
+     *            case this parameter is set to {@code true}. For this the method uses a lock on the
+     *            {@link MarkPassingCalculator }to block the thread until all calculations will be finished.
+     */
+    NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates);
 
     /**
      * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.
@@ -533,7 +564,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *         result is taken from the cache straight away (<code>waitForLatest==false</code>) or, if a re-calculation
      *         for the <code>key</code> is still ongoing, the result of that ongoing re-calculation is returned.
      */
-    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest);
+    Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest);
 
     /**
      * @return <code>true</code> if this race is known to start with an {@link LegType#UPWIND upwind} leg. If this is
@@ -669,6 +700,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalysis) throws NoWindException;
+
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint);
 
     WindStore getWindStore();
 
@@ -893,13 +926,13 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *            Used for positions of marks and wind information; note that sometimes the marks are not in place yet
      *            when the race starts and that a windward mark may be collected already before the race finishes.
      * 
-     * @return estimated time it takes to complete the race
+     * @return estimated time it takes to complete the race, plus more useful information about how this result came about
      * 
      * @throws NotEnoughDataHasBeenAddedException
      *             thrown if not enough polar data has been added or polar data service is not available
      * @throws NoWindException
      */
-    Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
+    TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     void setPolarDataService(PolarDataService polarDataService);
 
@@ -946,4 +979,5 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * @return all currently attached {@link RaceLog}s or an empty Iterable if there aren't any
      */
     Iterable<RaceLog> getAttachedRaceLogs();
+
 }

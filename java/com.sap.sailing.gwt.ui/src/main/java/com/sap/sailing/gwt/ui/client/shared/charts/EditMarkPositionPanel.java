@@ -528,7 +528,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     public void resetPointColor(int index) {
         Point[] points = markSeries.getPoints();
         if (points.length > index) {
-            points[index].setMarker(new Marker().setFillColor(selectedMark.color));
+            points[index].setMarker(new Marker().setFillColor(selectedMark.color==null?null:selectedMark.color.getAsHtml()));
             setSeriesPoints(markSeries, points);
         }
     }
@@ -548,7 +548,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = marks.get(mark);
         
         for (final GPSFixDTO fix : track) {
-            final FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
+            final FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY,
+                    mark.color==null?null:mark.color.getAsHtml(), raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
             fixOverlayMap.put(fix, overlay);
             overlay.setVisible(false);
             overlayClickHandlers.add(new OverlayClickHandler(mark, fix, overlay).register());
@@ -563,8 +564,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         onResize();
     }
     
-    private void loadData(final Date from, final Date to) {
-        if (selectedRaceIdentifier != null && from != null && to != null && marks == null) {
+    private void loadData() {
+        if (selectedRaceIdentifier != null && marks == null) {
             setWidget(chart);
             showLoading(stringMessages.loadingMarkFixes());
             markPositionService.getMarksInTrackedRace(raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier), 
@@ -609,7 +610,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
 
                     @Override
                     public void onSuccess(Void result) {
-                        FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
+                        FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY,
+                                mark.color==null?null:mark.color.getAsHtml(),
+                                raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
                         overlayClickHandlers.add(new OverlayClickHandler(mark, fix, overlay).register());
                         marks.get(mark).put(fix, overlay);
                         updatePolylinePoints(mark);
@@ -814,7 +817,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         if (isVisible()) {
-            loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime());
+            loadData();
             updateTimePlotLine(newTime);
         }
     }
@@ -837,7 +840,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             setWidget(chart);
             markSeries.remove();
             markSeries.setPlotOptions(markSeriesPlotOptions.setMarker(
-                    new Marker().setFillColor(selectedMark.color != null ? selectedMark.color : "#efab00")
+                    new Marker().setFillColor(selectedMark.color != null ? selectedMark.color.getAsHtml() : "#efab00")
                     .setLineColor("#fff").setLineWidth(2)));
             chart.addSeries(markSeries);
             setSeriesPoints(selectedMark);

@@ -16,7 +16,7 @@ public enum BoatClassMasterdata {
     _49ER ("49er", true, 4.88, 1.93, BoatHullType.MONOHULL, true),
     _49ERFX ("49erFX", true, 4.88, 1.93, BoatHullType.MONOHULL, true, "49FX"),
     _420 ("420", true, 4.20, 1.65, BoatHullType.MONOHULL, true, "420er", "420M", "420W"),
-    _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL, true, "470er", "470M", "470W"),
+    _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL, true, "470er", "470M", "470W", "470 - M", "470 - W"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, true, "505", "5o5", "505er", "5o5er"),
     _5_5MR ("5.5mR", true, 9.50, 1.92, BoatHullType.MONOHULL, true, "5.5 Meter", "5.5 Metre", "5.5", "5.5M", "5.5-metre", "5.5 metre"),
     A_CAT ("A-Catamaran", true, 5.49, 2.30, BoatHullType.CATAMARAN, false, "A-Cat", "ACat", "A-Class Catamaran"),
@@ -65,6 +65,7 @@ public enum BoatClassMasterdata {
     LASER_INT ("Laser Int.", true, 4.19, 1.39, BoatHullType.MONOHULL, false, "Laser", "LSR"),
     LASER_SB3 ("Laser SB3", true, 6.15, 2.15, BoatHullType.MONOHULL, false, "LSB3", "SB20"),
     LAGO_26 ("Lago 26", true, 7.95, 2.50, BoatHullType.MONOHULL, true, "Lago26"),
+    LONGTZE ("Longtze", true, 6.85, 2.57, BoatHullType.MONOHULL, true, "Swiss Longtze Class"),
     M32 ("M32", false, 9.70, 5.50, BoatHullType.CATAMARAN, true, "M/32", "M32 Catamaran", "M/32 Catamaran"),
     MELGES_20 ("Melges 20", true, 6.10, 2.13, BoatHullType.MONOHULL, true, "Melges-20", "M20"),
     MELGES_24 ("Melges 24", true, 7.32, 2.50, BoatHullType.MONOHULL, true, "Melges-24", "M24"),
@@ -85,7 +86,7 @@ public enum BoatClassMasterdata {
     RS500 ("RS 500", true, 4.34, 1.58, BoatHullType.MONOHULL, true, "RS500", "RS_500"),
     RS800 ("RS 800", true, 4.80, 1.88, BoatHullType.MONOHULL, true, "RS800", "RS_800"),
     RS_AERO ("RS Aero", true, 4.00, 1.40, BoatHullType.MONOHULL, false, "RSAERO", "RS_Aero"),
-    RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X"),
+    RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X", "RS:X Men", "RS:X Woman"),
     RS_FEVA ("RS Feva", true, 3.64, 1.42, BoatHullType.MONOHULL, true, "RSFeva"),
     SONAR ("Sonar", true, 7.01, 2.39, BoatHullType.MONOHULL, true),
     SOLING ("Soling", true, 8.15, 1.91, BoatHullType.MONOHULL, true),
@@ -100,6 +101,7 @@ public enum BoatClassMasterdata {
     TORNADO ("Tornado Catamaran", true, 6.10, 3.02, BoatHullType.CATAMARAN, true, "Tornado", "Tornado Cat"),
     TRIAS ("Trias", true, 9.20, 2.12, BoatHullType.MONOHULL, true),
     VIPER_640 ("Viper 640", true, 6.43, 2.49, BoatHullType.MONOHULL, true),
+    VO60 ("VO60", true, 19.5, 5.25, BoatHullType.MONOHULL, true, "Volvo Ocean 60", "VolvoOcean60", "W60", "Whitbread60", "Whitbread 60"),
     VX_ONE ("VX ONE", true, 5.79, 2.19, BoatHullType.MONOHULL, true, "VX-ONE"),
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, true, "X99"),
     
@@ -113,20 +115,20 @@ public enum BoatClassMasterdata {
 
     private final String displayName;
     private final String[] alternativeNames;
-    private final double hullLengthInMeter;
-    private final double hullBeamInMeter;
+    private final double hullLengthInMeters;
+    private final double hullBeamInMeters;
     private final BoatHullType hullType;
     private final boolean typicallyStartsUpwind;
     private final boolean hasAdditionalDownwindSail;
 
     private static Map<String, BoatClassMasterdata> fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata; 
 
-    private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter,
-            double hullBeamInMeter, BoatHullType hullType, boolean hasAdditionalDownwindSail, String... alternativeNames) {
+    private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeters,
+            double hullBeamInMeters, BoatHullType hullType, boolean hasAdditionalDownwindSail, String... alternativeNames) {
         this.displayName = displayName;
         this.typicallyStartsUpwind = typicallyStartsUpwind;
-        this.hullLengthInMeter = hullLengthInMeter;
-        this.hullBeamInMeter = hullBeamInMeter;
+        this.hullLengthInMeters = hullLengthInMeters;
+        this.hullBeamInMeters = hullBeamInMeters;
         this.hullType = hullType;
         this.hasAdditionalDownwindSail = hasAdditionalDownwindSail;
         this.alternativeNames = alternativeNames;
@@ -147,8 +149,8 @@ public enum BoatClassMasterdata {
             double hullBeamInMeter, BoatHullType hullType, boolean hasAdditionalDownwindSail) {
         this.displayName = displayName;
         this.typicallyStartsUpwind = typicallyStartsUpwind;
-        this.hullLengthInMeter = hullLengthInMeter;
-        this.hullBeamInMeter = hullBeamInMeter;
+        this.hullLengthInMeters = hullLengthInMeter;
+        this.hullBeamInMeters = hullBeamInMeter;
         this.hullType = hullType;
         this.hasAdditionalDownwindSail = hasAdditionalDownwindSail;
         this.alternativeNames = null;
@@ -192,7 +194,7 @@ public enum BoatClassMasterdata {
     }
     
     public Distance getHullLength() {
-        return new MeterDistance(hullLengthInMeter);
+        return new MeterDistance(hullLengthInMeters);
     }
 
     public String getDisplayName() {
@@ -204,7 +206,7 @@ public enum BoatClassMasterdata {
     }
 
     public Distance getHullBeam() {
-        return new MeterDistance(hullBeamInMeter);
+        return new MeterDistance(hullBeamInMeters);
     }
 
     public BoatHullType getHullType() {
