@@ -2,14 +2,16 @@ package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
@@ -33,6 +35,7 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
@@ -103,7 +106,15 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     protected final DynamicTrackedRace trackedRace;
     private final SensorFixStore sensorFixStore;
     private RegattaLogDeviceMappings<WithID> deviceMappings;
-    private final AtomicInteger activeLoaders = new AtomicInteger();
+    /**
+     * Loading fixes into tracks is done one a per item base using jobs that are being run on an executor. These jobs
+     * are recognized to be able to calculate an overall progress. To ensure a consistent progress, no job is removed
+     * when finished. The set is cleared instead, when all jobs are finished.<br>
+     * The alternative would be to use a {@link TrackingDataLoader} per loading job. This would make things more
+     * complicated to ensure a consistent progress and not leak loader instances. In addition we would need to implement
+     * one more {@link TrackingDataLoader} that ensures the loading state of the associated {@link TrackedRace}.
+     */
+    private final Set<AbstractLoadingJob> loadingJobs = ConcurrentHashMap.newKeySet();
     private final SensorFixMapperFactory sensorFixMapperFactory;
     private AtomicBoolean preemptiveStopRequested = new AtomicBoolean(false);
     private AtomicBoolean stopRequested = new AtomicBoolean(false);
@@ -445,13 +456,21 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 endOfTracking == null ? TimePoint.EndOfTime : endOfTracking);
     }
 
+    /**
+     * Stops this {@link FixLoaderAndTracker}. No more fixes are loaded on model changes and no new fixes are being
+     * tracked.<br>
+     * If stopping non-preemtively, all already started loading jobs are finished. When GPS fixes are being loaded from
+     * TracTrac for archived races, loading is automatically stopped. Finishing already started loading jobs ensures,
+     * that e.g. bravo fixes are completely loaded even if loading from TracTrac is faster.<br>
+     * If stopping preemptively, the call will block until all already started loading jobs are aborted or finished.
+     */
     public void stop(boolean preemptive) {
         preemptiveStopRequested.set(preemptive);
         stopRequested.set(true);
         trackedRace.removeListener(raceChangeListener);
         deviceMappings.stop();
-        synchronized (this) {
-            if (activeLoaders.get() == 0) {
+        synchronized (loadingJobs) {
+            if (loadingJobs.isEmpty()) {
                 setStatusAndProgress(TrackedRaceStatusEnum.FINISHED, 1.0);
             }
         }
@@ -462,82 +481,100 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     private void startTracking() {
+        setStatusAndProgress(TrackedRaceStatusEnum.TRACKING, 0.0);
         trackedRace.addListener(raceChangeListener);
         this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs(),
                 trackedRace.getRace().getName());
     }
 
-    private synchronized void waitForLoadingToFinishRunning() {
-        try {
-            while (activeLoaders.get() > 0) {
-                wait();
+    private void waitForLoadingToFinishRunning() {
+        synchronized (loadingJobs) {
+            try {
+                while (!loadingJobs.isEmpty()) {
+                    loadingJobs.wait();
+                }
+            } catch (InterruptedException e) {
+                logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
             }
-        } catch (InterruptedException e) {
-            logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
         }
     }
 
     private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {
-        deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> loadFixesInTrackingTimeRange(mappingsAndCoveredTimeRanges, extendedTimeRange));
-    }
-
-    /**
-     * This method runs the given update callback in a separate {@link Thread} by handling technical concurrency aspects
-     * and potential {@link #preemptiveStopRequested preemptive stop requests} internally. Thus, it separates the
-     * functional updating process from technical aspects.
-     * 
-     * @param updateCallback
-     *            the {@link Runnable} callback used to run the update
-     */
-    private void updateAsyncInternal(final Runnable updateCallback) {
-        synchronized (FixLoaderAndTracker.this) {
-            activeLoaders.incrementAndGet();
-            setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
-        }
-        ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                trackedRace.lockForSerializationRead();
-                try {
-                    if (!preemptiveStopRequested.get()) {
-                        setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
-                        synchronized (FixLoaderAndTracker.this) {
-                            FixLoaderAndTracker.this.notifyAll();
-                        }
-                        updateCallback.run();
-                    }
-                } catch(Throwable t) {
-                    logger.log(Level.SEVERE, "Error while updating device mappings and loading fixes for race: " + trackedRace.getRaceIdentifier(), t);
-                } finally {
-                    try {
-                        synchronized (FixLoaderAndTracker.this) {
-                            int currentActiveLoaders = activeLoaders.decrementAndGet();
-                            FixLoaderAndTracker.this.notifyAll();
-                            if (currentActiveLoaders == 0) {
-                                setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
-                                        : TrackedRaceStatusEnum.TRACKING, 1.0);
-                            }
-                        }
-                    } finally {
-                        trackedRace.unlockAfterSerializationRead();
-                    }
-                }
-            }
-        });
+        deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> addLoadingJob(
+                new LoadFixesInTrackingTimeRangeJob(mappingsAndCoveredTimeRanges, extendedTimeRange)));
     }
 
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
         trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(status, progress));
     }
     
+    /**
+     * Updates the {@link FixLoaderAndTracker}'s overall state on the {@link TrackedRace} based on the progresses of
+     * {@link #loadingJobs}.
+     */
+    private void updateStatusAndProgressWithErrorHandling() {
+        try {
+            updateStatusAndProgress();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error while updating status and progress for FixLoaderAndTracker", e);
+        }
+    }
+
+    /**
+     * Updates the {@link FixLoaderAndTracker}'s overall state on the {@link TrackedRace} based on the progresses of
+     * {@link #loadingJobs}.
+     */
+    private void updateStatusAndProgress() {
+        synchronized (loadingJobs) {
+            final TrackedRaceStatusEnum status;
+            final double progress;
+            if (!loadingJobs.isEmpty()) {
+                double progressSum = 0.0;
+                boolean allFinished = true;
+                for (AbstractLoadingJob loadingJob : loadingJobs) {
+                    allFinished &= loadingJob.finished;
+                    progressSum += loadingJob.progress;
+                }
+                if (allFinished) {
+                    loadingJobs.clear();
+                    status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
+                    progress = 1.0;
+                } else {
+                    progress = progressSum / loadingJobs.size();
+                    status = TrackedRaceStatusEnum.LOADING;
+                }
+                
+            } else {
+                status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
+                progress = 1.0;
+            }
+            setStatusAndProgress(status, progress);
+            loadingJobs.notifyAll();
+        }
+    }
+    
+    /**
+     * Adds a {@link AbstractLoadingJob} to track its loading state and updates the {@link FixLoaderAndTracker}'s
+     * overall state on the {@link TrackedRace}.
+     */
+    private void addLoadingJob(AbstractLoadingJob job) {
+        synchronized (loadingJobs) {
+            loadingJobs.add(job);
+            updateStatusAndProgress();
+        }
+        ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(job);
+    }
+    
+    /**
+     * Used for testing purposes only. 
+     */
+    public boolean isStopRequested() {
+        return stopRequested.get();
+    }
+    
     private class FixLoaderDeviceMappings extends RegattaLogDeviceMappings<WithID> {
         public FixLoaderDeviceMappings(Iterable<RegattaLog> initialRegattaLogs, String raceNameForLock) {
             super(initialRegattaLogs, raceNameForLock);
-        }
-        
-        @Override
-        protected void updateMappings() {
-            updateAsyncInternal(FixLoaderDeviceMappings.super::updateMappings);
         }
         
         @Override
@@ -553,6 +590,76 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void newTimeRangesCovered(WithID item,
             Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
+            if (trackedRace.getStartOfTracking() != null) {
+                addLoadingJob(new LoadFixesForNewlyCoveredTimeRangesJob(item, newlyCoveredTimeRanges));
+            }
+        }
+    }
+    
+    /**
+     * Abstract implementation of a job to load fixes into tracks that supports tracking the loading progress.
+     * Subclasses are intended to be run using an executor.
+     */
+    private abstract class AbstractLoadingJob implements Runnable {
+        double progress = 0;
+        boolean finished = false;
+
+        @Override
+        public final void run() {
+            progress = 0.5;
+            updateStatusAndProgressWithErrorHandling();
+            
+            try {
+                load();
+            } finally {
+                progress = 1.0;
+                finished = true;
+                updateStatusAndProgressWithErrorHandling();
+            }
+        }
+        
+        protected abstract void load();
+    }
+    
+    /**
+     * Loads fixes for an item's mappings in a defined tracking {@link TimeRange}. This is used when:
+     * <ul>
+     * <li>Initially loading fixes into tracks</li>
+     * <li>The tracking {@link TimeRange} changes</li>
+     * </ul>
+     */
+    private class LoadFixesInTrackingTimeRangeJob extends AbstractLoadingJob {
+
+        private final Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges;
+        private final TimeRange trackingTimeRange;
+
+        public LoadFixesInTrackingTimeRangeJob(Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges,
+                TimeRange trackingTimeRange) {
+            this.newlyCoveredTimeRanges = newlyCoveredTimeRanges;
+            this.trackingTimeRange = trackingTimeRange;
+        }
+        
+        @Override
+        protected void load() {
+            loadFixesInTrackingTimeRange(newlyCoveredTimeRanges, trackingTimeRange);
+        }
+    }
+    
+    /**
+     * This is used when device mappings for an item changed so that fixes in a new {@link TimeRange} are covered.
+     */
+    private class LoadFixesForNewlyCoveredTimeRangesJob extends AbstractLoadingJob {
+        private final WithID item;
+        private final Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges;
+
+        public LoadFixesForNewlyCoveredTimeRangesJob(WithID item,
+                Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
+            this.item = item;
+            this.newlyCoveredTimeRanges = newlyCoveredTimeRanges;
+        }
+        
+        @Override
+        protected void load() {
             loadFixesForNewlyCoveredTimeRanges(item, newlyCoveredTimeRanges);
         }
     }
