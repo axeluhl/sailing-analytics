@@ -36,7 +36,7 @@ public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings>
      *            Contains URL parameters for serialization of URL Settings
      */
     public PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StoredSettingsLocator storageDefinitionId, final String serializedSettings) {
+            StoredSettingsLocation storageDefinitionId, final String serializedSettings) {
         this(rootLifecycle, userService, storageDefinitionId, new SettingsRepresentationTransformer() {
 
             private final SettingsToStringSerializer settingsToStringSerializer = new SettingsToStringSerializer();
@@ -61,14 +61,14 @@ public class PlaceBasedComponentContextWithSettingsStorage<S extends Settings>
     }
 
     protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StoredSettingsLocator storageDefinitionId,
+            UserService userService, StoredSettingsLocation storageDefinitionId,
             SettingsRepresentationTransformer settingsRepresentationTransformer) {
         this(rootLifecycle, userService, storageDefinitionId, settingsRepresentationTransformer,
                 new UserSettingsBuildingPipeline(settingsRepresentationTransformer));
     }
 
     protected PlaceBasedComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StoredSettingsLocator storageDefinitionId,
+            UserService userService, StoredSettingsLocation storageDefinitionId,
             SettingsRepresentationTransformer settingsRepresentationTransformer,
             SettingsBuildingPipeline settingsBuildingPipeline) {
         super(rootLifecycle, userService, storageDefinitionId, settingsRepresentationTransformer, settingsBuildingPipeline);

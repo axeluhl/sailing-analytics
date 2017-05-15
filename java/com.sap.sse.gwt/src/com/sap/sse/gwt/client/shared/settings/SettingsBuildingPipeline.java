@@ -29,7 +29,7 @@ public interface SettingsBuildingPipeline {
      * @return The constructed settings object
      */
     <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation);
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation, List<String> absolutePathOfComponentWithSettings);
 
     /**
      * Converts the provided settings according to the storage scope and the settings tree path of provided settings.
@@ -44,6 +44,6 @@ public interface SettingsBuildingPipeline {
      *            The settings tree path of provided settings
      * @return The storable settings representation of provided settings
      */
-    StorableSettingsRepresentation getStorableSettingsRepresentation(Settings settings, PipelineLevel pipelineLevel, List<String> path);
+    public <CS extends Settings> StorableRepresentationOfDocumentAndUserSettings getStorableSettingsRepresentation(CS newSettings, CS systemDefaultSettings, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path);
 
 }

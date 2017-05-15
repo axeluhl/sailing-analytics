@@ -37,7 +37,8 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
      * @param settingsRepresentationTransformer
      *            The custom conversion helper
      */
-    public UserSettingsBuildingPipelineWithPatching(SettingsRepresentationTransformer settingsRepresentationTransformer) {
+    public UserSettingsBuildingPipelineWithPatching(
+            SettingsRepresentationTransformer settingsRepresentationTransformer) {
         super(settingsRepresentationTransformer);
     }
 
@@ -54,39 +55,64 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
      */
     @Override
     public <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations) {
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations,
+            List<String> absolutePathOfComponentWithSettings) {
         CS effectiveSettings = systemDefaultSettings;
-        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.SYSTEM_DEFAULTS);
+        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.SYSTEM_DEFAULTS,
+                absolutePathOfComponentWithSettings, patchesForLoadingSettings);
+        //TODO use the outcommented code to implement the pipeline according to Axel's requirement
+        // if (settingsRepresentations.hasStoredUserSettings()) {
+        // effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
+        // effectiveSettings, settingsRepresentations.getUserSettingsRepresentation());
+        // }
+        // effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
+        // absolutePathOfComponentWithSettings, patchesForLoadingSettings);
+        // if (settingsRepresentations.hasStoredDocumentSettings()) {
+        // effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
+        // effectiveSettings, settingsRepresentations.getDocumentSettingsRepresentation());
+        // }
         if (settingsRepresentations.hasStoredDocumentSettings()) {
-            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS);
-            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
-                    settingsRepresentations.getDocumentSettingsRepresentation());
+            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
+                    absolutePathOfComponentWithSettings, patchesForLoadingSettings);
+            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
+                    effectiveSettings, settingsRepresentations.getDocumentSettingsRepresentation());
         } else if (settingsRepresentations.hasStoredUserSettings()) {
-            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
-                    settingsRepresentations.getUserSettingsRepresentation());
-            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS);
+            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
+                    effectiveSettings, settingsRepresentations.getUserSettingsRepresentation());
+            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
+                    absolutePathOfComponentWithSettings, patchesForLoadingSettings);
         } else {
-            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS);
+            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
+                    absolutePathOfComponentWithSettings, patchesForLoadingSettings);
         }
-        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.DOCUMENT_DEFAULTS);
+        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.DOCUMENT_DEFAULTS,
+                absolutePathOfComponentWithSettings, patchesForLoadingSettings);
         effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithUrlSettings(effectiveSettings);
         return effectiveSettings;
     }
 
-    private <CS extends Settings> CS applyPatchesForPipelineLevel(CS currentSettings, PipelineLevel pipelineLevel) {
+    private static <CS extends Settings> CS applyPatchesForPipelineLevel(CS currentSettings,
+            PipelineLevel pipelineLevel, List<String> absolutePathOfComponentWithSettings,
+            SettingsPatches settingsPatchesToConsider) {
         CS effectiveSettings = currentSettings;
-        for (Entry<List<String>, List<SettingsPatch<? extends Settings>>> entry : patchesForLoadingSettings
+        for (Entry<List<String>, List<SettingsPatch<? extends Settings>>> entry : settingsPatchesToConsider
                 .getSettingsPatches(pipelineLevel).entrySet()) {
-            List<String> path = entry.getKey();
-            List<SettingsPatch<? extends Settings>> settingsPatches = entry.getValue();
-            if (!settingsPatches.isEmpty()) {
-                Settings patchedComponentSettings = ComponentUtils
-                        .determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(path), effectiveSettings);
-                for (SettingsPatch<? extends Settings> settingsPatch : settingsPatches) {
-                    patchedComponentSettings = patchSettings(patchedComponentSettings, settingsPatch);
+            List<String> path = new ArrayList<>(entry.getKey());
+            if (path.size() >= absolutePathOfComponentWithSettings.size()
+                    && path.subList(path.size() - absolutePathOfComponentWithSettings.size(), path.size())
+                            .equals(absolutePathOfComponentWithSettings)) {
+                path = path.subList(0, path.size() - absolutePathOfComponentWithSettings.size());
+                List<SettingsPatch<? extends Settings>> settingsPatches = entry.getValue();
+                if (!settingsPatches.isEmpty()) {
+                    Settings patchedComponentSettings = ComponentUtils
+                            .determineComponentSettingsFromPerspectiveSettings(new ArrayList<>(path),
+                                    effectiveSettings);
+                    for (SettingsPatch<? extends Settings> settingsPatch : settingsPatches) {
+                        patchedComponentSettings = patchSettings(patchedComponentSettings, settingsPatch);
+                    }
+                    effectiveSettings = ComponentUtils.patchSettingsTree(new ArrayList<>(path),
+                            patchedComponentSettings, effectiveSettings);
                 }
-                effectiveSettings = ComponentUtils.patchSettingsTree(new ArrayList<>(path), patchedComponentSettings,
-                        effectiveSettings);
             }
         }
         return effectiveSettings;
@@ -100,25 +126,57 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
      *            The settings to convert to JSON representation
      * @param pipelineLevel
      *            The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
-     * @param path
-     *            The path of the settings in the settings tree
+     * @param absolutePathOfComponentWithSettings
+     *            The path of the provided settings in the settings tree
      * @return The stored settings representation of the provided settings
      */
     @Override
-    public StorableSettingsRepresentation getStorableSettingsRepresentation(Settings settings, PipelineLevel pipelineLevel,
-            List<String> path) {
-        for (PipelineLevel level : pipelineLevel.getSortedLevelsUntilCurrent()) {
-            List<SettingsPatch<? extends Settings>> settingsPatches = patchesForStoringSettings.getSettingsPatches(path,
-                    level);
-            for (SettingsPatch<? extends Settings> settingsPatch : settingsPatches) {
-                settings = patchSettings(settings, settingsPatch);
-            }
-        }
-        return super.getStorableSettingsRepresentation(settings, pipelineLevel, path);
+    public <CS extends Settings> StorableRepresentationOfDocumentAndUserSettings getStorableSettingsRepresentation(
+            CS newSettings, CS systemDefaultSettings,
+            StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation,
+            List<String> absolutePathOfComponentWithSettings) {
+
+      //TODO use the outcommented code to implement the pipeline according to Axel's requirement
+//        systemDefaultSettings = applyPatchesForPipelineLevel(systemDefaultSettings, PipelineLevel.SYSTEM_DEFAULTS,
+//                absolutePathOfComponentWithSettings, patchesForStoringSettings);
+//
+//        CS pipelinedSettings = newSettings;
+//        SettingsDefaultValuesUtils.setDefaults(pipelinedSettings, systemDefaultSettings);
+//        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS,
+//                absolutePathOfComponentWithSettings, patchesForStoringSettings);
+//        StorableSettingsRepresentation userSettingsRepresentation = settingsRepresentationTransformer
+//                .convertToSettingsRepresentation(pipelinedSettings);
+//
+//        if (previousSettingsRepresentation.hasStoredUserSettings()) {
+//            CS previousUserSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
+//                    systemDefaultSettings, previousSettingsRepresentation.getUserSettingsRepresentation());
+//            SettingsDefaultValuesUtils.setDefaults(previousUserSettings, pipelinedSettings);
+//        }
+//        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.DOCUMENT_DEFAULTS,
+//                absolutePathOfComponentWithSettings, patchesForStoringSettings);
+//        StorableSettingsRepresentation documentSettingsRepresentation = settingsRepresentationTransformer
+//                .convertToSettingsRepresentation(pipelinedSettings);
+//        return new StorableRepresentationOfDocumentAndUserSettings(userSettingsRepresentation,
+//                documentSettingsRepresentation);
+        
+        CS pipelinedSettings = newSettings;
+        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.SYSTEM_DEFAULTS,
+              absolutePathOfComponentWithSettings, patchesForStoringSettings);
+        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS,
+              absolutePathOfComponentWithSettings, patchesForStoringSettings);
+        
+        StorableSettingsRepresentation userSettingsRepresentation = settingsRepresentationTransformer
+              .convertToSettingsRepresentation(pipelinedSettings);
+        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.DOCUMENT_DEFAULTS,
+              absolutePathOfComponentWithSettings, patchesForStoringSettings);
+        StorableSettingsRepresentation documentSettingsRepresentation = settingsRepresentationTransformer
+              .convertToSettingsRepresentation(pipelinedSettings);
+        return new StorableRepresentationOfDocumentAndUserSettings(userSettingsRepresentation,
+              documentSettingsRepresentation);
     }
 
     @SuppressWarnings("unchecked")
-    private <CS extends Settings> CS patchSettings(Settings settings, SettingsPatch<CS> settingsPatch) {
+    private static <CS extends Settings> CS patchSettings(Settings settings, SettingsPatch<CS> settingsPatch) {
         return settingsPatch.patchSettings((CS) settings);
     }
 
@@ -177,20 +235,6 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
                 pipelinePatches.put(path, componentPatches);
             }
             componentPatches.add(settingsPatch);
-        }
-
-        public List<SettingsPatch<? extends Settings>> getSettingsPatches(List<String> path,
-                PipelineLevel pipelineLevel) {
-            Map<List<String>, List<SettingsPatch<? extends Settings>>> pipelinePatches = patchesForSettings
-                    .get(pipelineLevel);
-            if (pipelinePatches == null) {
-                return Collections.emptyList();
-            }
-            List<SettingsPatch<? extends Settings>> componentPatches = pipelinePatches.get(path);
-            if (componentPatches == null) {
-                return Collections.emptyList();
-            }
-            return componentPatches;
         }
 
         public Map<List<String>, List<SettingsPatch<? extends Settings>>> getSettingsPatches(

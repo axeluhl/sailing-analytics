@@ -37,19 +37,19 @@ public class ComponentContextWithSettingsStorageAndPatching<S extends Settings>
      *            The definition for User Settings and Document Settings storage keys
      */
     public ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StoredSettingsLocator storageDefinition) {
+            StoredSettingsLocation storageDefinition) {
         this(rootLifecycle, userService, storageDefinition, new SettingsRepresentationTransformer());
     }
 
     protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StoredSettingsLocator storageDefinition,
+            UserService userService, StoredSettingsLocation storageDefinition,
             SettingsRepresentationTransformer settingsRepresentationTransformer) {
         this(rootLifecycle, userService, storageDefinition, settingsRepresentationTransformer,
                 new UserSettingsBuildingPipelineWithPatching(settingsRepresentationTransformer));
     }
 
     protected ComponentContextWithSettingsStorageAndPatching(ComponentLifecycle<S> rootLifecycle,
-            UserService userService, StoredSettingsLocator storageDefinition,
+            UserService userService, StoredSettingsLocation storageDefinition,
             SettingsRepresentationTransformer settingsRepresentationTransformer,
             UserSettingsBuildingPipelineWithPatching settingsBuildingPipeline) {
         super(rootLifecycle, userService, storageDefinition, settingsRepresentationTransformer, settingsBuildingPipeline);

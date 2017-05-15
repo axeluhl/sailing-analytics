@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
-import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocatorFactory;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -16,7 +16,7 @@ import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
-import com.sap.sse.security.ui.settings.StoredSettingsLocator;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 /**
  * An abstract series tabView with some shared functions between the overall leaderboard tab and competitors chart tab
@@ -63,7 +63,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
     protected ComponentContext<LeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken) {
         final LeaderboardPanelLifecycle lifecycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
-        final StoredSettingsLocator storageDefinition = StoredSettingsLocatorFactory.createStoredSettingsLocatorForSeriesOverallLeaderboard(leaderboardName);
+        final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesOverallLeaderboard(leaderboardName);
 
         final ComponentContext<LeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(
                 lifecycle, userService, storageDefinition, placeToken);

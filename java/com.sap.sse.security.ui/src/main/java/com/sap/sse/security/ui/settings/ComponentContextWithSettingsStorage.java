@@ -1,12 +1,8 @@
 package com.sap.sse.security.ui.settings;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
@@ -19,7 +15,6 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
-import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
 import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
 import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
@@ -81,18 +76,18 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      *            The definition for User Settings and Document Settings storage keys
      */
     public ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StoredSettingsLocator storageDefinition) {
+            StoredSettingsLocation storageDefinition) {
         this(rootLifecycle, userService, storageDefinition, new SettingsRepresentationTransformer());
     }
 
     protected ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StoredSettingsLocator storageDefinition, SettingsRepresentationTransformer settingsRepresentationTransformer) {
+            StoredSettingsLocation storageDefinition, SettingsRepresentationTransformer settingsRepresentationTransformer) {
         this(rootLifecycle, userService, storageDefinition, settingsRepresentationTransformer,
                 new UserSettingsBuildingPipeline(settingsRepresentationTransformer));
     }
 
     protected ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StoredSettingsLocator storageDefinition, SettingsRepresentationTransformer settingsRepresentationTransformer,
+            StoredSettingsLocation storageDefinition, SettingsRepresentationTransformer settingsRepresentationTransformer,
             SettingsBuildingPipeline settingsBuildingPipeline) {
         super(rootLifecycle, settingsRepresentationTransformer, settingsBuildingPipeline);
         if (IgnoreLocalSettings.getIgnoreLocalSettingsFromCurrentUrl().isIgnoreLocalSettings()) {
@@ -159,7 +154,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
         } else {
             S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(systemDefaultSettings,
-                    cachedSettingsRepresentation);
+                    cachedSettingsRepresentation, new ArrayList<>());
             callback.onSuccess(newDefaultSettings);
         }
     }
@@ -168,7 +163,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             S systemDefaultSettings) {
         cachedSettingsRepresentation = settingsRepresentation;
         S settingsObject = settingsBuildingPipeline.getSettingsObject(systemDefaultSettings,
-                cachedSettingsRepresentation);
+                cachedSettingsRepresentation, new ArrayList<>());
         return settingsObject;
     }
 
@@ -190,7 +185,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             return false;
         }
         Settings settings = component.getSettings();
-        if (settings instanceof SettingsMap || settings instanceof GenericSerializableSettings) {
+        if (settings instanceof GenericSerializableSettings) {
             return true;
         }
         return false;
@@ -211,10 +206,11 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     @Override
     public <CS extends Settings> void makeSettingsDefault(Component<CS> component, CS newDefaultSettings,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
-        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()),
+        List<String> path = component.getPath();
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(path),
                 rootLifecycle);
-        CS userSettings = targetLifecycle.extractUserSettings(newDefaultSettings);
-        updateUserSettings(component.getPath(), userSettings, onSettingsStoredCallback);
+        CS userSettings = cloneStorableSettings(targetLifecycle.extractUserSettings(newDefaultSettings), path);
+        updateUserSettings(path, userSettings, targetLifecycle.createDefaultSettings(), onSettingsStoredCallback);
     }
 
     /**
@@ -232,32 +228,11 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     @Override
     public <CS extends Settings> void storeSettingsForContext(Component<CS> component, CS newSettings,
             OnSettingsStoredCallback onSettingsStoredCallback) {
-        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(component.getPath()),
+        List<String> path = component.getPath();
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(path),
                 rootLifecycle);
-        CS documentSettings = targetLifecycle.extractDocumentSettings(newSettings);
-        updateDocumentSettings(component.getPath(), documentSettings, onSettingsStoredCallback);
-    }
-
-    /**
-     * Patches the settings tree with the new settings provided. The settings node with the provided path is going to be
-     * created/replaced with the new settings.
-     * 
-     * @param root
-     *            The root node of the settings tree
-     * @param path
-     *            The path of the node to create/update
-     * @param newSettings
-     *            The new settings with that the target node in the settings tree is going to be updated
-     * @param pipelineLevel
-     *            The scope of settings used for settings storage (e.g. User Settings, or Document Settings)
-     * @return The patched storable settings representation
-     */
-    private StorableSettingsRepresentation patchSettingsRepresentation(StorableSettingsRepresentation root,
-            List<String> path, Settings newSettings, PipelineLevel pipelineLevel) {
-        newSettings = cloneStorableSettings(newSettings, path);
-        JSONObject patchedSettingsJsonRepresentation = patchJsonObject(root == null ? null : root.asJson(), path,
-                Collections.unmodifiableList(new ArrayList<>(path)), newSettings, pipelineLevel);
-        return new StorableSettingsRepresentation(patchedSettingsJsonRepresentation);
+        CS documentSettings = cloneStorableSettings(targetLifecycle.extractDocumentSettings(newSettings), path);
+        updateDocumentSettings(component.getPath(), documentSettings, targetLifecycle.createDefaultSettings(), onSettingsStoredCallback);
     }
 
     @SuppressWarnings("unchecked")
@@ -276,48 +251,6 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     /**
-     * Internal helper method for
-     * {@link #patchSettingsRepresentation(StorableSettingsRepresentation, List, Settings, PipelineLevel)}
-     * 
-     * @param root
-     * @param path
-     * @param originalPath
-     * @param newSettings
-     * @param pipelineLevel
-     * @return
-     */
-    private JSONObject patchJsonObject(JSONObject root, List<String> path, List<String> originalPath,
-            Settings newSettings, PipelineLevel pipelineLevel) {
-        if (path.isEmpty()) {
-            return settingsBuildingPipeline.getStorableSettingsRepresentation(newSettings, pipelineLevel, originalPath)
-                    .asJson();
-        }
-        if (root == null) {
-            root = new JSONObject();
-        }
-        String current = path.remove(path.size() - 1);
-        // we need to go further
-        if (!path.isEmpty()) {
-            JSONValue child = root.get(current);
-            boolean haskey = root.containsKey(current);
-            if (child == null || child.isObject() == null) {
-                if (haskey) {
-                    GWT.log("Warning: replacing some subtree element that is wrong type!");
-                }
-                child = new JSONObject();
-                root.put(current, child);
-            }
-            return patchJsonObject(child.isObject(), path, originalPath, newSettings, pipelineLevel);
-        } else {
-            JSONObject json = settingsBuildingPipeline
-                    .getStorableSettingsRepresentation(newSettings, pipelineLevel, originalPath)
-                    .asJson();
-            root.put(current, json);
-        }
-        return root;
-    }
-
-    /**
      * Updates the User Settings' tree with the new settings provided. The settings node with the provided path is going
      * to be created/replaced with the new settings. This method may produce a server round-trip if the user is logged
      * in.
@@ -329,7 +262,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process finishes
      */
-    private void updateUserSettings(final ArrayList<String> path, final Settings newUserSettings,
+    private<CS extends Settings> void updateUserSettings(final List<String> path, final Settings newUserSettings, final CS systemDefaultSettings,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
         settingsStorageManager.retrieveSettingsRepresentation(
                 new OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>() {
@@ -342,15 +275,17 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
                     @Override
                     public void onSuccess(StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
-                        final StorableSettingsRepresentation patchedUserSettingsRepresentation = patchSettingsRepresentation(
-                                settingsRepresentation.getUserSettingsRepresentation(), new ArrayList<>(path),
-                                newUserSettings, PipelineLevel.USER_DEFAULTS);
-                        settingsRepresentation = new StorableRepresentationOfDocumentAndUserSettings(
-                                patchedUserSettingsRepresentation, null);
+                        StorableSettingsRepresentation userSettingsRepresentationRoot = settingsRepresentation.getUserSettingsRepresentation();
+                        StorableSettingsRepresentation newUserSettingsRepresentationOfComponent = settingsBuildingPipeline.getStorableSettingsRepresentation(newUserSettings, systemDefaultSettings, cachedSettingsRepresentation, path).getUserSettingsRepresentation();
+                        userSettingsRepresentationRoot = StorableSettingsRepresentation.patchSettingsRepresentation(
+                                userSettingsRepresentationRoot, new ArrayList<>(path),
+                                newUserSettingsRepresentationOfComponent);
+                        StorableRepresentationOfDocumentAndUserSettings settingsRepresentationToStore = new StorableRepresentationOfDocumentAndUserSettings(userSettingsRepresentationRoot,
+                                null);
                         cachedSettingsRepresentation = new StorableRepresentationOfDocumentAndUserSettings(
-                                patchedUserSettingsRepresentation,
+                                userSettingsRepresentationRoot,
                                 cachedSettingsRepresentation.getDocumentSettingsRepresentation());
-                        settingsStorageManager.storeSettingsRepresentations(settingsRepresentation,
+                        settingsStorageManager.storeSettingsRepresentations(settingsRepresentationToStore,
                                 onSettingsStoredCallback);
                     }
 
@@ -369,7 +304,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process finishes
      */
-    private void updateDocumentSettings(final ArrayList<String> path, final Settings newDocumentSettings,
+    private<CS extends Settings> void updateDocumentSettings(final ArrayList<String> path, final CS newDocumentSettings, final CS systemDefaultSettings,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
         settingsStorageManager.retrieveSettingsRepresentation(
                 new OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>() {
@@ -382,15 +317,17 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
                     @Override
                     public void onSuccess(StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
-                        final StorableSettingsRepresentation patchedDocumentSettingsRepresentation = patchSettingsRepresentation(
-                                settingsRepresentation.getDocumentSettingsRepresentation(), new ArrayList<>(path),
-                                newDocumentSettings, PipelineLevel.DOCUMENT_DEFAULTS);
-                        settingsRepresentation = new StorableRepresentationOfDocumentAndUserSettings(null,
-                                patchedDocumentSettingsRepresentation);
+                        StorableSettingsRepresentation documentSettingsRepresentationRoot = settingsRepresentation.getDocumentSettingsRepresentation();
+                        StorableSettingsRepresentation newDocumentSettingsRepresentationOfComponent = settingsBuildingPipeline.getStorableSettingsRepresentation(newDocumentSettings, systemDefaultSettings, cachedSettingsRepresentation, path).getDocumentSettingsRepresentation();
+                        documentSettingsRepresentationRoot = StorableSettingsRepresentation.patchSettingsRepresentation(
+                                documentSettingsRepresentationRoot, new ArrayList<>(path),
+                                newDocumentSettingsRepresentationOfComponent);
+                        StorableRepresentationOfDocumentAndUserSettings settingsRepresentationToStore = new StorableRepresentationOfDocumentAndUserSettings(null,
+                                documentSettingsRepresentationRoot);
                         cachedSettingsRepresentation = new StorableRepresentationOfDocumentAndUserSettings(
                                 cachedSettingsRepresentation.getUserSettingsRepresentation(),
-                                patchedDocumentSettingsRepresentation);
-                        settingsStorageManager.storeSettingsRepresentations(settingsRepresentation,
+                                documentSettingsRepresentationRoot);
+                        settingsStorageManager.storeSettingsRepresentations(settingsRepresentationToStore,
                                 onSettingsStoredCallback);
                     }
                 });
@@ -406,5 +343,5 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             settingsStorageManager.dispose();
         }
     }
-
+    
 }

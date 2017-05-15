@@ -4,11 +4,9 @@ import java.util.List;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
 import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
 import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
-import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
 
 /**
  * Settings building pipeline which is only capable of reading settings from URL. Conversion to stored settings
@@ -48,7 +46,7 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
      */
     @Override
     public <S extends Settings> S getSettingsObject(S systemDefaultSettings,
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation, List<String> absolutePathOfComponentWithSettings) {
         return settingsRepresentationTransformer.mergeSettingsObjectWithUrlSettings(systemDefaultSettings);
     }
 
@@ -57,8 +55,7 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
      * representation, because it is supposed to be used by read-only {@link ComponentContext} implementations.
      */
     @Override
-    public StorableSettingsRepresentation getStorableSettingsRepresentation(Settings settings, PipelineLevel pipelineLevel,
-            List<String> path) {
+    public <CS extends Settings> StorableRepresentationOfDocumentAndUserSettings getStorableSettingsRepresentation(CS newSettings, CS systemDefaultSettings, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
         throw new UnsupportedOperationException("This pipeline does not support JSON conversion");
     }
 

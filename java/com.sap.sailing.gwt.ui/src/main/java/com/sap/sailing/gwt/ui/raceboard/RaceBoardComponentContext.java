@@ -14,7 +14,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndPatching;
 import com.sap.sse.security.ui.settings.SettingsPatch;
-import com.sap.sse.security.ui.settings.StoredSettingsLocator;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 /**
  * A specialization of {@link ComponentContextWithSettingsStorageAndPatching} which is specially designed for
@@ -40,7 +40,7 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
      */
     public RaceBoardComponentContext(
             RaceBoardPerspectiveLifecycle rootLifecycle,
-            UserService userService, StoredSettingsLocator storageDefinition) {
+            UserService userService, StoredSettingsLocation storageDefinition) {
         super(rootLifecycle, userService, storageDefinition);
     }
     

@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwn
 import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
-import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocatorFactory;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -36,7 +36,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
-import com.sap.sse.security.ui.settings.StoredSettingsLocator;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
@@ -115,7 +115,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         
         // make a single live request as the default but don't continue to play by default
 
-        final StoredSettingsLocator storageDefinition = StoredSettingsLocatorFactory.createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);
+        final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);
         if (leaderboardType.isMetaLeaderboard()) {
             // overall
 

@@ -3,7 +3,6 @@ package com.sap.sse.security.ui.settings;
 import java.util.List;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
 import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
 import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
@@ -45,7 +44,7 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
      */
     @Override
     public <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation, List<String> absolutePathOfComponentWithSettings) {
         CS effectiveSettings = systemDefaultSettings;
         if (settingsRepresentation.hasStoredDocumentSettings()) {
             effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
@@ -59,11 +58,11 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
     }
 
     /**
-     * Converts the provided settings object into a JSON representation without considering provided pipeline level and
+     * Converts the provided settings object into a storable settings representation without considering provided pipeline level and
      * settings tree path.
      * 
      * @param settings
-     *            The settings to convert to JSON representation
+     *            The settings to convert to storable settings representation
      * @param pipelineLevel
      *            The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
      * @param path
@@ -71,9 +70,20 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
      * @return The storable settings representation of the provided settings
      */
     @Override
-    public StorableSettingsRepresentation getStorableSettingsRepresentation(Settings newSettings,
-            PipelineLevel pipelineLevel, List<String> path) {
-        return settingsRepresentationTransformer.convertToSettingsRepresentation(newSettings);
+    public <CS extends Settings> StorableRepresentationOfDocumentAndUserSettings getStorableSettingsRepresentation(CS newSettings, CS systemDefaultSettings, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
+        CS pipelinedSettings = newSettings;
+      //TODO use the outcommented code to implement the pipeline according to Axel's requirement
+//        SettingsDefaultValuesUtils.setDefaults(pipelinedSettings, systemDefaultSettings);
+//        StorableSettingsRepresentation userSettingsRepresentation = settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);
+//        if(previousSettingsRepresentation.hasStoredUserSettings()) {
+//            CS previousUserSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(systemDefaultSettings, previousSettingsRepresentation.getUserSettingsRepresentation());
+//            SettingsDefaultValuesUtils.setDefaults(previousUserSettings, pipelinedSettings);
+//        }
+//        StorableSettingsRepresentation documentSettingsRepresentation = settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);
+//        return new StorableRepresentationOfDocumentAndUserSettings(userSettingsRepresentation, documentSettingsRepresentation);
+        
+        StorableSettingsRepresentation settingsRepresentation = settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);
+        return new StorableRepresentationOfDocumentAndUserSettings(settingsRepresentation, settingsRepresentation);
     }
 
 }

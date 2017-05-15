@@ -72,7 +72,7 @@ public class UserSettingsStorageManager implements SettingsStorageManager {
      * @param storageDefinitionId
      *            The definition for User Settings and Document Settings storage keys
      */
-    public UserSettingsStorageManager(UserService userService, StoredSettingsLocator storageDefinitionId) {
+    public UserSettingsStorageManager(UserService userService, StoredSettingsLocation storageDefinitionId) {
         this.userService = userService;
         this.storageKeyForUserSettings = storageDefinitionId.generateStorageKeyForUserSettings();
         this.storageKeyForDocumentSettings = storageDefinitionId.generateStorageKeyForDocumentSettings();

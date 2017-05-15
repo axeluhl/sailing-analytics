@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.Ent
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
-import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocatorFactory;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -45,7 +45,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
-import com.sap.sse.security.ui.settings.StoredSettingsLocator;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 public class RegattaOverviewPanel extends SimplePanel {
     
@@ -151,7 +151,7 @@ public class RegattaOverviewPanel extends SimplePanel {
             
         });
         
-        final StoredSettingsLocator storageDefinition = StoredSettingsLocatorFactory.createStoredSettingsLocatorForRegattaOverview(regattaOverviewContextDefinition);
+        final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForRegattaOverview(regattaOverviewContextDefinition);
         final RegattaRaceStatesComponentLifecycle lifecycle = new RegattaRaceStatesComponentLifecycle();
         final ComponentContext<RegattaRaceStatesSettings> componentContext = new ComponentContextWithSettingsStorage<>(
                 lifecycle, userService, storageDefinition);
