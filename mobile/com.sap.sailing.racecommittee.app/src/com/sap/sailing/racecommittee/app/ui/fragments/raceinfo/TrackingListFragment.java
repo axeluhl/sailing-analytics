@@ -77,6 +77,9 @@ public class TrackingListFragment extends BaseFragment
     private static final int START_ORDER_LOADER = 1;
     private static final int LEADERBOARD_ORDER_LOADER = 2;
 
+    private static final int SORT_SAIL_NUMBER = 0;
+    private static final int SORT_NAME = 1;
+
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
     private RecyclerViewTouchActionGuardManager mGuardManager;
@@ -213,9 +216,9 @@ public class TrackingListFragment extends BaseFragment
         super.onActivityCreated(savedInstanceState);
 
         mComparators = new ArrayList<>();
-        mComparators.add(new CompetitorSailIdComparator());
-        mComparators.add(new NaturalNamedComparator<Competitor>());
-        mComparator = mComparators.get(0);
+        mComparators.add(SORT_SAIL_NUMBER, new CompetitorSailIdComparator());
+        mComparators.add(SORT_NAME, new NaturalNamedComparator<Competitor>());
+        mComparator = mComparators.get(SORT_SAIL_NUMBER);
 
         mFinishedData = initializeFinishList();
         loadCompetitors();
@@ -342,12 +345,8 @@ public class TrackingListFragment extends BaseFragment
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.by_boat:
-                mComparator = mComparators.get(0);
-                break;
-
             case R.id.by_name:
-                mComparator = mComparators.get(1);
+                mComparator = mComparators.get(SORT_NAME);
                 break;
 
             case R.id.by_start:
@@ -358,7 +357,7 @@ public class TrackingListFragment extends BaseFragment
                 break;
 
             default:
-                mComparator = mComparators.get(0);
+                mComparator = mComparators.get(SORT_SAIL_NUMBER);
 
         }
         sortCompetitors();
