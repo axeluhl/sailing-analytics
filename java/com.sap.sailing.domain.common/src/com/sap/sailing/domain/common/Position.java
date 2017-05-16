@@ -20,7 +20,7 @@ public interface Position extends Serializable {
     Distance getDistance(Position p);
     
     /**
-     * The bearing from this position towards <code>p</code> on a great circle.
+     * The bearing from this position towards <code>p</code> on a great circle, using the shortest path.
      * 
      * @return {@code null} if {@code p} is {@code null}, otherwise the bearing from {@code this} {@link Position} to
      *         {@code p} along a great circle

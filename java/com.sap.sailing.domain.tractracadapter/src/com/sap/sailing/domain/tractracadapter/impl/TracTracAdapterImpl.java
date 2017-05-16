@@ -49,14 +49,15 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     public RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination) throws Exception {
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis) throws Exception {
         return trackerManager.addRace(
                 /* regattaToAddTo */null,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI,
                         /* startOfTracking */null,
                         /* endOfTracking */null, delayToLiveInMillis, /* offsetToStartTimeOfSimulatedRace */null, /* ignoreTracTracMarkPassings */ false,
-                        raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination),
+                        raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination,
+                        /* preferReplayIfAvailable */ false, timeoutInMillis),
                 timeoutInMilliseconds);
     }
 
@@ -72,7 +73,8 @@ public class TracTracAdapterImpl implements TracTracAdapter {
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword,
-                        raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination), timeoutInMilliseconds);
+                        raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination, /* preferReplayIfAvailable */ false,
+                        (int) timeoutInMilliseconds), timeoutInMilliseconds);
     }
 
     @Override

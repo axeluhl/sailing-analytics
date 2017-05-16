@@ -40,6 +40,11 @@ public class DataMiningSettingsInfoManager {
         public String getLocalizedName(StringMessages stringMessages) {
             return stringMessages.polars();
         }
+
+        @Override
+        public String getId() {
+            return "PolarDataMiningSettingsInfo";
+        }
         
     }
 

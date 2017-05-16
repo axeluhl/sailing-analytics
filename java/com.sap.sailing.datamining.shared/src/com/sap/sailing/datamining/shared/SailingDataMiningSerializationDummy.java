@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.shared;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -16,6 +17,7 @@ public final class SailingDataMiningSerializationDummy implements SerializationD
     
     private LegType legType;
     private Distance distance;
+    private Bearing bearing;
     private CentralAngleDistance centralAngleDistance;
     private MeterDistance meterDistance;
     private NauticalMileDistance nauticalMileDistance;

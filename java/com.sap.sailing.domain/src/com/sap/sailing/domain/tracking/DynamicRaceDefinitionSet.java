@@ -18,4 +18,11 @@ import com.sap.sailing.domain.base.RaceDefinition;
 @FunctionalInterface
 public interface DynamicRaceDefinitionSet {
     void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace);
+    
+    /**
+     * Called when the race has not or can not be loaded. A {@code reason} may be provided or may be left {@code null}.
+     * This default implementation does nothing. Implementing classes may choose, e.g., to stop all further efforts
+     * trying to track the race.
+     */
+    default void raceNotLoaded(String reason) throws Exception {}
 }

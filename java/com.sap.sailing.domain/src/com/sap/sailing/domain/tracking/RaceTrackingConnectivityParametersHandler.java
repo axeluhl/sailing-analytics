@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.tracking;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,8 +34,11 @@ public interface RaceTrackingConnectivityParametersHandler {
      * finding} this service instance in the first place. The object returned is equivalent to one that has
      * produced {@code map} by passing it to this service's {@link #mapFrom(RaceTrackingConnectivityParameters)}
      * method.
+     * 
+     * @return {@code null} in case the object cannot be produced, e.g., because the leaderboard to which a
+     * race log-tracked race belonged has been deleted in the meantime.
      */
-    RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws MalformedURLException, URISyntaxException;
+    RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws Exception;
 
     /**
      * @return a map that contains the {@link TypeBasedServiceFinder#TYPE} identifier as taken from

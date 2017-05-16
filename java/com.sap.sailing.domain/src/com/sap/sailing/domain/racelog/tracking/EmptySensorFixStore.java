@@ -58,4 +58,16 @@ public enum EmptySensorFixStore implements SensorFixStore {
     public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) {
         return null;
     }
+
+    @Override
+    public <FixT extends Timed> boolean loadOldestFix(Consumer<FixT> consumer, DeviceIdentifier device,
+            TimeRange timeRangetoLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return false;
+    }
+
+    @Override
+    public <FixT extends Timed> boolean loadYoungestFix(Consumer<FixT> consumer, DeviceIdentifier device,
+            TimeRange timeRangetoLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return false;
+    }
 }

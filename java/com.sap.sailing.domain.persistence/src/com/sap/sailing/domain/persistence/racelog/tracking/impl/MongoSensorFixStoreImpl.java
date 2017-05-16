@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,8 +59,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     /**
      * Lock object to be used when accessing {@link #listeners}.
      */
-    private final NamedReentrantReadWriteLock listenersLock = new NamedReentrantReadWriteLock(
-            "Listeners collection lock of " + MongoSensorFixStoreImpl.class.getName(), false);
+    private final NamedReentrantReadWriteLock listenersLock = new NamedReentrantReadWriteLock("Listeners collection lock of " + MongoSensorFixStoreImpl.class.getName(), false);
     private final Map<DeviceIdentifier, Set<FixReceivedListener<? extends Timed>>> listeners = new HashMap<>();
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
@@ -91,15 +91,31 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     }
 
     @Override
+    public <FixT extends Timed> boolean loadOldestFix(Consumer<FixT> consumer, DeviceIdentifier device, TimeRange timeRangeToLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, (d) -> {}, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* ascending */ 1)).limit(1));
+    }
+    
+    @Override
+    public <FixT extends Timed> boolean loadYoungestFix(Consumer<FixT> consumer, DeviceIdentifier device, TimeRange timeRangeToLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, (d) -> {}, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* descending */ -1)).limit(1));
+    }
+    
+    @Override
     public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
             TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException, TransformationException {
         loadFixes(consumer, device, from, to, inclusive, (d) -> {
         });
     }
-
+    
     @Override
     public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
             TimePoint to, boolean inclusive, ProgressCallback progressConsumer)
+                    throws NoCorrespondingServiceRegisteredException, TransformationException {
+        loadFixes(consumer, device, from, to, inclusive, progressConsumer, UnaryOperator.identity());
+    }
+
+    private <FixT extends Timed> boolean loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
+            TimePoint to, boolean inclusive, ProgressCallback progressConsumer, UnaryOperator<DBCursor> dbCursorCallback)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         progressConsumer.progressChange(0);
 
@@ -113,11 +129,12 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name())
                     .lessThanEquals(loadFixesTo.asMillis());
         } else {
-            queryBuilder.greaterThan(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name())
+            queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name())
                     .lessThan(loadFixesTo.asMillis());
         }
         DBObject query = queryBuilder.get();
-        DBCursor result = fixesCollection.find(query);
+        DBCursor result = dbCursorCallback.apply(fixesCollection.find(query));
+        boolean fixLoaded = false;
         double max = result.size();
         // update roughly every percent, but at not more often than every 100th entry
         int reportIncrement = (int) Math.max(max / 100, 100);
@@ -132,6 +149,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                 @SuppressWarnings("unchecked")
                 FixT fix = (FixT) loadFix(fixObject);
                 consumer.accept(fix);
+                fixLoaded = true;
             } catch (TransformationException e) {
                 logger.log(Level.WARNING, "Could not read fix from MongoDB: " + fixObject);
             } catch (ClassCastException e) {
@@ -142,6 +160,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         }
 
         progressConsumer.progressChange(1);
+        return fixLoaded;
     }
 
     /**

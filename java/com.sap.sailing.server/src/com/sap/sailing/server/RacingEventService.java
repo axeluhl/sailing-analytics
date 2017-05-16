@@ -42,6 +42,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
+import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -317,13 +318,19 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
     /**
-     * @param series the series must not have any {@link RaceColumn}s yet
-     * @param controlTrackingFromStartAndFinishTimes TODO
+     * @param series
+     *            the series must not have any {@link RaceColumn}s yet
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
      */
     Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
-    
+
+    /**
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
+     */
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
@@ -447,11 +454,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * In contrast to mediaTracksAdded, this method takes mediaTracks with a given dbId.
      * Checks if the track already exists in the library and the database and adds/stores it
      * accordingly. If a track already exists and override, its properties are checked for changes 
-     * @param mediaTrack
      * @param override If true, track properties (title, url, start time, duration, not mime type!) will be 
      * overwritten with the values from the track to be imported.
+     * @param mediaTrack
      */
-    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, boolean override);
+    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCount creatingCount, boolean override) throws Exception;
     
     Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
     

@@ -85,7 +85,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private FlushableCellTable<TracTracRaceRecordDTO> racesTable;
     
-    public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public TracTracEventManagementPanel(final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;

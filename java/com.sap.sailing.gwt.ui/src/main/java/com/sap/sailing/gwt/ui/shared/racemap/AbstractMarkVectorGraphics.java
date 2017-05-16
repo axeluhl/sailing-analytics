@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
+import com.sap.sse.common.Color;
 
 /**
  * A class for course mark graphics based on SVG graphics drawn to a HTML5 canvas
@@ -32,9 +33,9 @@ public abstract class AbstractMarkVectorGraphics implements MarkVectorGraphics {
     protected final static String DEFAULT_MARK_COLOR = "#f9ac00";
     protected final static String DEFAULT_MARK_BG_COLOR = "#f0f0f0";
 
-    public AbstractMarkVectorGraphics(MarkType type, String color, String shape, String pattern) {
+    public AbstractMarkVectorGraphics(MarkType type, Color color, String shape, String pattern) {
         this.type = type;
-        this.color = color;
+        this.color = color == null ? null : color.getAsHtml();
         this.shape = shape;
         this.pattern = pattern;
         this.markHeightInMeters = new MeterDistance(2.1);

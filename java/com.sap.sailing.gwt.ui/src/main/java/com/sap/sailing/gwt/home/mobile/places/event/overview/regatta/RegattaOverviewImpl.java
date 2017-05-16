@@ -31,7 +31,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     public RegattaOverviewImpl(EventViewBase.Presenter presenter) {
         super(presenter, presenter.isMultiRegattaEvent(), presenter.isMultiRegattaEvent());
         FlowPanel container = new FlowPanel();
-        if(presenter.getRegatta() != null) {
+        if (presenter.getRegatta() != null) {
             this.setupProgress(container);
             this.setupLiveRaces(container);
         }
@@ -49,7 +49,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupProgress(Panel container) {
-        eventStepsUi = new EventSteps();
+        eventStepsUi = new EventSteps(currentPresenter.getRegatta());
         refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
         container.add(eventStepsUi);
     }
@@ -63,7 +63,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     private void setupMiniLeaderboard(Panel container) {
         MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
         miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
-        if(currentPresenter.getRegatta() != null) {
+        if (currentPresenter.getRegatta() != null) {
             refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
         } else {
             // This forces the "There are no results available yet" message to show

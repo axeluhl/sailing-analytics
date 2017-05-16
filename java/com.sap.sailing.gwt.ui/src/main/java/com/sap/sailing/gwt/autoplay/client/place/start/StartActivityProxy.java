@@ -6,10 +6,8 @@ import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 public class StartActivityProxy extends AbstractActivityProxy {
 
     private final StartClientFactory clientFactory;
-    private final StartPlace place;
 
     public StartActivityProxy(StartPlace place, StartClientFactory clientFactory) {
-        this.place = place;
         this.clientFactory = clientFactory;
     }
 
@@ -18,7 +16,7 @@ public class StartActivityProxy extends AbstractActivityProxy {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                super.onSuccess(new StartActivity(place, clientFactory));
+                super.onSuccess(new StartActivity(clientFactory));
             }
         });
     }

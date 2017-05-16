@@ -88,7 +88,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
      * Starts out as <code>null</code> and is set when the race definition has been created. When this happens, this object is
      * {@link Object#notifyAll() notified}.
      */
-    private RaceDefinition race;
+    private volatile RaceDefinition race;
     
     private Course course;
     private StartList startList;

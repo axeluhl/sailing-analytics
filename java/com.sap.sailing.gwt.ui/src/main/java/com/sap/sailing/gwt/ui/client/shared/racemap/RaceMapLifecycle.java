@@ -1,11 +1,15 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.io.Serializable;
-
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings, RaceMapSettingsDialogComponent> {
+/**
+ * This lifecycle corresponds with the RaceMap
+ *
+ */
+public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
+    public static final String ID = "rm";
+
     private final StringMessages stringMessages;
     
     public RaceMapLifecycle(StringMessages stringMessages) {
@@ -26,22 +30,28 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings, Rac
     }
 
     @Override
-    public RaceMapSettings cloneSettings(RaceMapSettings settings) {
-        return new RaceMapSettings(settings);
-    }
-
-    @Override
     public String getLocalizedShortName() {
         return stringMessages.map();
     }
 
     @Override
-    public Serializable getComponentId() {
-        return getLocalizedShortName();
+    public String getComponentId() {
+        return ID;
     }
 
     @Override
     public boolean hasSettings() {
         return true;
+    }
+
+    @Override
+    public RaceMapSettings extractGlobalSettings(RaceMapSettings settings) {
+        RaceMapSettings defaultSettings = createDefaultSettings();
+        return RaceMapSettings.createSettingsWithNewDefaultBuoyZoneRadius(settings, defaultSettings.getBuoyZoneRadius());
+    }
+
+    @Override
+    public RaceMapSettings extractContextSpecificSettings(RaceMapSettings settings) {
+        return settings;
     }
 }

@@ -29,10 +29,11 @@
    <features>
       <feature id="com.sap.sailing.feature" version="1.0.0.qualifier"/>
       <feature id="com.sap.sailing.feature.runtime" version="1.0.0.qualifier"/>
+      <feature id="com.sap.sse.feature" version="1.0.0.qualifier"/>
+      <feature id="com.sap.sse.feature.runtime" version="1.0.0.qualifier"/>
    </features>
 
    <configurations>
-      <plugin id="com.sap.sailing.autoload" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sailing.barbados.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.dashboards.gwt" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.datamining" autoStart="true" startLevel="4" />
@@ -40,14 +41,15 @@
       <plugin id="com.sap.sailing.domain.igtimiadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.racelogtrackingadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.swisstimingadapter" autoStart="false" startLevel="4" />
-      <plugin id="com.sap.sailing.domain.swisstimingreplayadapter" autoStart="false" startLevel="4" />
+      <plugin id="com.sap.sailing.domain.swisstimingadapter.persistence" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.domain.swisstimingreplayadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.tractracadapter" autoStart="false" startLevel="4" />
+      <plugin id="com.sap.sailing.domain.tractracadapter.persistence" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.ess40.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.freg.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.kiworesultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.manage2sail.resultimport" autoStart="true" startLevel="3" />
-      <plugin id="com.sap.sailing.yachtscoring.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.monitoring" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sailing.news" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.polars" autoStart="true" startLevel="4" />
@@ -60,6 +62,7 @@
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xmlexport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xrr.resultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.yachtscoring.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sse.filestorage" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sse.mail" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sse.replication" autoStart="true" startLevel="5" />

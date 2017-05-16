@@ -146,6 +146,19 @@ public class Util {
         }
     }
     
+    /**
+     * To be replaced with java.util.function.Supplier when we can consistently use Java 8.
+     */
+    public interface Provider<T> {
+        T get();
+    }
+    
+    /**
+     * To be replaced with java.util.function.Function when we can consistently use Java 8.
+     */
+    public interface Function<I, O> {
+        O get(I in);
+    }
 
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
@@ -297,6 +310,15 @@ public class Util {
         }
         return list;
     }
+    
+    public static <T> Set<T> createSet(Iterable<T> iterable) {
+        Set<T> set = new HashSet<>();
+        Iterator<T> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            set.add(iterator.next());
+        }
+        return set;
+    }
 
     /**
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method
@@ -384,9 +406,27 @@ public class Util {
      * made. This is the caller's obligation.
      */
     public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
+        addToValueSet(map, key, value, new ValueSetConstructor<V>() {
+            @Override
+            public Set<V> createSet() {
+                return new HashSet<V>();
+            }
+        });
+    }
+
+    public static interface ValueSetConstructor<T> {
+        Set<T> createSet();
+    }
+    
+    /**
+     * Ensures that a {@link Set Set&lt;V&gt;} is contained in {@code map} for {@code key} and
+     * then adds {@code value} to that set. No synchronization / concurrency control effort is
+     * made. This is the caller's obligation.
+     */
+    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value, ValueSetConstructor<V> setConstructor) {
         Set<V> set = map.get(key);
         if (set == null) {
-            set = new HashSet<V>();
+            set = setConstructor.createSet();
             map.put(key, set);
         }
         set.add(value);
@@ -657,5 +697,41 @@ public class Util {
             }
         });
         return sortedCollection;
+    }
+    
+    /**
+     * Groups the given values by a key. The key is being extracted from the values by using the given {@link Function}. Inner
+     * Collections of the resulting Map are created using the given {@link Provider} instance.
+     * <br>
+     * Can be replaced with Java 8 Stream API in the future.
+     * 
+     * @param values the values to group
+     * @param mappingFunction function that extracts the group key from a value
+     * @param newCollectionProvider factory to create new instances of the inner collections
+     * @return a map containing all given values in inner collections grouped by a specific criteria
+     */
+    public static <K, V> Map<K, Iterable<V>> group(Iterable<V> values, Function<V, K> mappingFunction,
+            Provider<? extends Collection<V>> newCollectionProvider) {
+        final Map<K, Iterable<V>> result = new HashMap<>();
+        for (V value : values) {
+            final K key = mappingFunction.get(value);
+            Collection<V> groupValues = (Collection<V>) result.get(key);
+            if (groupValues == null) {
+                groupValues = newCollectionProvider.get();
+                result.put(key, groupValues);
+            }
+            groupValues.add(value);
+        }
+        return result;
+    }
+    
+    @SafeVarargs
+    public static <T extends Comparable<T>> T min(T... elements) {
+        return Collections.min(Arrays.asList(elements));
+    }
+
+    @SafeVarargs
+    public static <T extends Comparable<T>> T max(T... elements) {
+        return Collections.max(Arrays.asList(elements));
     }
 }

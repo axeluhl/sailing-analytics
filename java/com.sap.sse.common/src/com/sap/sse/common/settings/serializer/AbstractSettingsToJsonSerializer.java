@@ -9,6 +9,7 @@ import com.sap.sse.common.settings.generic.CollectionSetting;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.Setting;
 import com.sap.sse.common.settings.generic.SettingsListSetting;
+import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.common.settings.generic.ValueCollectionSetting;
 import com.sap.sse.common.settings.generic.ValueConverter;
 import com.sap.sse.common.settings.generic.ValueSetting;
@@ -36,16 +37,92 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     protected abstract ARRAY ToJsonArray(Iterable<Object> values);
 
     protected abstract Iterable<Object> fromJsonArray(ARRAY jsonArray);
+    
+    protected abstract OBJECT parseStringToJsonObject(String jsonString) throws Exception;
+    
+    public abstract String jsonObjectToString(OBJECT jsonObject);
+    
+    protected OBJECT parseStringToJsonObjectWithExceptionHandling(String jsonString) {
+        try {
+            return parseStringToJsonObject(jsonString);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not parse settings as JSON: " + jsonString, e);
+        }
+    }
+    
+    public String serializeToString(SettingsMap settings) {
+        return jsonObjectToString(serialize(settings));
+    }
+    
+    public <T extends SettingsMap> T deserialize(T settings, String jsonString) {
+        if (jsonString != null && !jsonString.isEmpty()) {
+            OBJECT jsonObject = parseStringToJsonObjectWithExceptionHandling(jsonString);
+            if(jsonObject != null) {
+                deserialize(settings, jsonObject);
+            }
+        }
+        return settings;
+    }
+    
+    public String serializeToString(GenericSerializableSettings settings) {
+        return jsonObjectToString(serialize(settings));
+    }
+
+    public <T extends GenericSerializableSettings> T deserialize(T settings, String jsonString) {
+        if (jsonString != null && !jsonString.isEmpty()) {
+            OBJECT jsonObject = parseStringToJsonObjectWithExceptionHandling(jsonString);
+            if(jsonObject != null) {
+                deserialize(settings, jsonObject);
+            }
+        }
+        return settings;
+    }
+    
+    public OBJECT serialize(SettingsMap settingsMap) {
+        final OBJECT jsonObject = newOBJECT();
+        serializeToObject(settingsMap, jsonObject);
+        return jsonObject;
+    }
+
+    private void serializeToObject(SettingsMap settingsMap, final OBJECT jsonObject) {
+        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsPerComponentId().entrySet()) {
+            String key = entry.getKey();
+            Settings settings = entry.getValue();
+            if(key == null) {
+                if(settings instanceof SettingsMap) {
+                    serializeToObject((SettingsMap)settings, jsonObject);
+                } else if(settings instanceof GenericSerializableSettings) {
+                    serializeToObject((GenericSerializableSettings)settings, jsonObject);
+                }
+            } else {
+                final OBJECT serializedObject;
+                if(settings instanceof SettingsMap) {
+                    serializedObject = serialize((SettingsMap)settings);
+                } else if(settings instanceof GenericSerializableSettings) {
+                    serializedObject = serialize((GenericSerializableSettings)settings);
+                } else {
+                    serializedObject = null;
+                }
+                if(serializedObject != null) {
+                    set(jsonObject, key.toString(), serializedObject);
+                }
+            }
+        }
+    }
 
     public OBJECT serialize(GenericSerializableSettings settings) {
         final OBJECT jsonObject = newOBJECT();
+        serializeToObject(settings, jsonObject);
+        return jsonObject;
+    }
+
+    private void serializeToObject(GenericSerializableSettings settings, final OBJECT jsonObject) {
         for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
             Setting setting = entry.getValue();
             if (!setting.isDefaultValue()) {
                 set(jsonObject, entry.getKey(), serialize(setting));
             }
         }
-        return jsonObject;
     }
 
     private Object serialize(Setting setting) {
@@ -81,6 +158,32 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
             throw new IllegalStateException("Unknown ListSetting type");
         }
         return ToJsonArray(jsonValues);
+    }
+    
+    public <T extends SettingsMap> T deserialize(T settingsMap, OBJECT json) {
+        if (json != null) {
+            for (Map.Entry<String, Settings> entry : settingsMap.getSettingsPerComponentId().entrySet()) {
+                String key = entry.getKey();
+                Settings settings = entry.getValue();
+                if(key == null) {
+                    if(settings instanceof SettingsMap) {
+                        deserialize((SettingsMap)settings, json);
+                    } else if(settings instanceof GenericSerializableSettings) {
+                        deserializeObject((GenericSerializableSettings)settings, json);
+                    }
+                } else if(hasProperty(json, key)) {
+                    Object serializedObject = get(json, key);
+                    if(settings instanceof SettingsMap) {
+                        @SuppressWarnings("unchecked")
+                        OBJECT serializedChildObject = (OBJECT) serializedObject;
+                        deserialize((SettingsMap)settings, serializedChildObject);
+                    } else if(settings instanceof GenericSerializableSettings) {
+                        deserializeObject((GenericSerializableSettings)settings, serializedObject);
+                    }
+                }
+            }
+        }
+        return settingsMap;
     }
 
     public <T extends GenericSerializableSettings> T deserialize(T settings, OBJECT json) {

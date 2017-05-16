@@ -51,8 +51,8 @@ public abstract class BaseRegattaLogDeviceMappingFinder<ItemT extends WithID>
         for (final RegattaLogDeviceMappingEvent<ItemT> event : events.get(item)) {
             final TimePoint from = event.getFrom();
             final RegattaLogCloseOpenEndedDeviceMappingEvent closingEvent = closingEvents.get(event.getId());
-            final TimePoint to = closingEvent != null ? closingEvent.getClosingTimePoint() : event.getTo();
-            final TimeRange mappingTimeRange = new TimeRangeImpl(from, to);
+            final TimePoint toInclusive = closingEvent != null ? closingEvent.getClosingTimePointInclusive() : event.getToInclusive();
+            final TimeRange mappingTimeRange = new TimeRangeImpl(from, toInclusive, /* inclusive */ true);
             if (mappingTimeRange.includes(fixTimePoint)) {
                 if (closingEvent != null) {
                     log.revokeEvent(closingEvent.getAuthor(), closingEvent,
@@ -65,8 +65,8 @@ public abstract class BaseRegattaLogDeviceMappingFinder<ItemT extends WithID>
                 if (!endOfFirstHalf.before(from)) {
                     log.add(createDeviceMappingEvent(item, event.getAuthor(), from, endOfFirstHalf, event.getDevice()));
                 }
-                if (to == null || !to.before(startOfSecondHalf)) {
-                    log.add(createDeviceMappingEvent(item, event.getAuthor(), startOfSecondHalf, to,
+                if (toInclusive == null || !toInclusive.before(startOfSecondHalf)) {
+                    log.add(createDeviceMappingEvent(item, event.getAuthor(), startOfSecondHalf, toInclusive,
                             event.getDevice()));
                 }
             }
@@ -74,6 +74,6 @@ public abstract class BaseRegattaLogDeviceMappingFinder<ItemT extends WithID>
     }
 
     protected abstract RegattaLogDeviceMappingEvent<ItemT> createDeviceMappingEvent(ItemT item,
-            AbstractLogEventAuthor author, TimePoint plus, TimePoint to, DeviceIdentifier deviceId);
+            AbstractLogEventAuthor author, TimePoint plus, TimePoint toInclusive, DeviceIdentifier deviceId);
 
 }

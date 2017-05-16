@@ -34,7 +34,7 @@ public abstract class DataEntryDialogWithBootstrap<T> extends DataEntryDialog<T>
         result.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                validate();
+                validateAndUpdate();
             }
         });
         result.addAttachHandler(new Handler() {

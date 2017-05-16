@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.event;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -35,15 +34,18 @@ import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
-import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 /**
  * Base Activity for all desktop event pages. This includes the event page itself for multi-regatta events as well as
@@ -146,41 +148,34 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
-        return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
-                    raceMetadata.getRegattaAndRaceIdentifier());
-    }
-    
-    @Override
     public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
         RaceIdentifier raceIdentifier = raceMetadata.getRegattaAndRaceIdentifier();
-        Map<String, String> params = createRaceBoardLinkParameters(raceMetadata.getLeaderboardName(),
-                raceMetadata.getLeaderboardGroupName(), raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
-        params.put("mode", mode);
-        return EntryPointLinkFactory.createRaceBoardLink(params);
+        RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
+                raceIdentifier.getRaceName(), raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
+                null, mode);
+        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
+                .createDefaultWithCanReplayDuringLiveRaces(true);
+        ;
+        HashMap<String, Settings> innerSettings = new HashMap<>();
+        innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
+        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                perspectiveOwnSettings, innerSettings);
+        
+        return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
     }
     
     @Override
     public String getRaceViewerURL(String leaderboardName, String leaderboardGroupName, RegattaAndRaceIdentifier raceIdentifier) {
-        return EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName, 
-                leaderboardGroupName, raceIdentifier.getRegattaName(), raceIdentifier.getRaceName()));
-    }
-
-    private Map<String, String> createRaceBoardLinkParameters(String leaderboardName, String leaderboardGroupName,
-            String regattaName, String trackedRaceName) {
-        Map<String, String> linkParams = new HashMap<String, String>();
-        linkParams.put("eventId", ctx.getEventId());
-        linkParams.put("leaderboardName", leaderboardName);
-        if (leaderboardGroupName != null) {
-            linkParams.put("leaderboardGroupName", leaderboardGroupName);
-        }
-        linkParams.put("raceName", trackedRaceName);
-        // TODO this must only be forwarded if there is a logged-on user
-        // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
-        linkParams.put(RaceMapSettings.PARAM_SHOW_MAPCONTROLS, "true");
-        linkParams.put(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
-        linkParams.put("regattaName", regattaName);
-        return linkParams;
+        RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
+                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, null, null);
+        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
+                .createDefaultWithCanReplayDuringLiveRaces(true);
+        ;
+        HashMap<String, Settings> innerSettings = new HashMap<>();
+        innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
+        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                perspectiveOwnSettings, innerSettings);
+        return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
     }
 
     @Override
@@ -246,7 +241,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                 regattaRaceStatesSettings.getVisibleRegattaSettings().addValue(getRegattaId());
             }
         }
-        return EntryPointWithSettingsLinkFactory.createRegattaOverviewLink(new RegattaOverviewBaseSettings(getCtx().getEventId()), regattaRaceStatesSettings);
+        return EntryPointWithSettingsLinkFactory.createRegattaOverviewLink(new RegattaOverviewContextDefinition(getCtx().getEventId()), regattaRaceStatesSettings);
     }
     
     @Override

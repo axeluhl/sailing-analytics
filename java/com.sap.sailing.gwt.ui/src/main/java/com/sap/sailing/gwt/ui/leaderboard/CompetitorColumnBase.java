@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 
 public class CompetitorColumnBase<T> {
     private final LeaderboardFetcher leaderboardFetcher;
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
     private final CompetitorFetcher<T> competitorFetcher;
     
     public CompetitorColumnBase(LeaderboardFetcher leaderboardFetcher, StringMessages stringMessages, CompetitorFetcher<T> competitorFetcher) {
@@ -27,10 +27,6 @@ public class CompetitorColumnBase<T> {
 
     private LeaderboardDTO getLeaderboard() {
         return leaderboardFetcher.getLeaderboard();
-    }
-
-    private StringMessages getStringMessages() {
-        return stringMessages;
     }
 
     public AbstractSafeHtmlCell<T> getCell(final LeaderboardDTO leaderboard) {
@@ -59,7 +55,8 @@ public class CompetitorColumnBase<T> {
     }
     
     public SafeHtmlHeader getHeader() {
-        return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(getStringMessages().name()), getStringMessages().competitorColumnTooltip());
+        return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.name()),
+                stringMessages.competitorColumnTooltip());
     }
 
     public void render(T t, String competitorColorBarStyle, SafeHtmlBuilder sb) {

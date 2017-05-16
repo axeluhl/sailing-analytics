@@ -42,6 +42,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
@@ -252,6 +253,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     public class NumberOfCompetitorsFetcherImpl implements NumberOfCompetitorsInLeaderboardFetcher {
         private int numberOfCompetitors = -1;
+        private int numberOfCompetitorsWithoutMaxPointReason = -1;
         
         @Override
         public int getNumberOfCompetitorsInLeaderboard() {
@@ -259,6 +261,18 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 numberOfCompetitors = Util.size(getCompetitors());
             }
             return numberOfCompetitors;
+        }
+        
+        @Override
+        public int getNumberOfCompetitorsWithoutMaxPointReason(RaceColumn column, TimePoint timePoint) {
+        	if (numberOfCompetitorsWithoutMaxPointReason == -1) {
+        		numberOfCompetitorsWithoutMaxPointReason = 0;
+				for (Competitor competitor : getCompetitors()) {
+					MaxPointsReason maxPointReason = getScoreCorrection().getMaxPointsReason(competitor, column, timePoint);
+					numberOfCompetitorsWithoutMaxPointReason += maxPointReason == MaxPointsReason.NONE ? 1 : 0;
+				}
+        	}
+        	return numberOfCompetitorsWithoutMaxPointReason;
         }
     }
 
@@ -1200,6 +1214,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     @Override
     public void setSuppressed(Competitor competitor, boolean suppressed) {
+    	if (competitor == null) {
+    		throw new IllegalArgumentException("Cannot change suppression for a null competitor");
+    	}
         LockUtil.lockForWrite(suppressedCompetitorsLock);
         try {
             if (suppressed) {
@@ -1767,6 +1784,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 final Distance rideHeight = trackedLeg.getRideHeight(timePoint);
                 result.currentRideHeightInMeters = rideHeight == null ? null : rideHeight.getMeters();
             }
+            Bearing heel = trackedLeg.getHeel(timePoint);
+            result.currentHeelInDegrees = heel == null ? null : heel.getDegrees();
+            Bearing pitch = trackedLeg.getPitch(timePoint);
+            result.currentPitchInDegrees = pitch == null ? null : pitch.getDegrees();
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
@@ -1814,7 +1835,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (startOfRace != null && trackedLeg.hasStartedLeg(timePoint)) {
                 // not using trackedLeg.getManeuvers(...) because it may not catch the mark passing maneuver starting this leg
                 // because that may have been detected as slightly before the mark passing time, hence associated with the previous leg
-                List<Maneuver> maneuvers = trackedLeg.getTrackedLeg().getTrackedRace()
+                Iterable<Maneuver> maneuvers = trackedLeg.getTrackedLeg().getTrackedRace()
                         .getManeuvers(trackedLeg.getCompetitor(), startOfRace, timePoint, waitForLatestAnalyses);
                 if (maneuvers != null) {
                     result.numberOfManeuvers = new HashMap<ManeuverType, Integer>();
@@ -1956,7 +1977,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         if (timePoint != null) {
             if (fillTotalPointsUncorrected) {
                 // explicitly filling the uncorrected total points requires uncached recalculation
-                result = computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, /* waitForLatestAnalyses */ true,
+                result = computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
+                        /* waitForLatestAnalyses=false because otherwise this may block, e.g., for background tasks
+                           such as maneuver and mark passing calculations */ false,
                         trackedRegattaRegistry, baseDomainFactory, fillTotalPointsUncorrected);
             } else {
                 // in replay we'd like up-to-date results; they are still cached
