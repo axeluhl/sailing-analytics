@@ -32,13 +32,13 @@ public class DependentStartTimeResolver {
 
         final StartTimeFinderResult result;
         if (raceLog == null) {
-            result = new StartTimeFinderResult(dependingOnRaces, startTimeDifference, ResolutionFailed.RACE_LOG_UNRESOLVED, event.getAuthor());
+            result = new StartTimeFinderResult(dependingOnRaces, startTimeDifference, ResolutionFailed.RACE_LOG_UNRESOLVED);
         } else {
             List<SimpleRaceLogIdentifier> extendedDependingOnRaces = new ArrayList<>();
             Util.addAll(dependingOnRaces, extendedDependingOnRaces);
             extendedDependingOnRaces.add(identifier);
             if (containsCycle(extendedDependingOnRaces)) {
-                result = new StartTimeFinderResult(extendedDependingOnRaces, null, ResolutionFailed.CYCLIC_DEPENDENCY, event.getAuthor());
+                result = new StartTimeFinderResult(extendedDependingOnRaces, null, ResolutionFailed.CYCLIC_DEPENDENCY);
             } else {
                 StartTimeFinder dependentStartTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
                 StartTimeFinderResult resultOfDependentRace = dependentStartTimeFinder.analyze(extendedDependingOnRaces);
@@ -47,7 +47,7 @@ public class DependentStartTimeResolver {
                     result = resultOfDependentRace;
                 } else {
                     result = new StartTimeFinderResult(resultOfDependentRace.getDependingOnRaces(),
-                            resultOfDependentRace.getStartTime().plus(startTimeDifference), startTimeDifference, event.getAuthor());
+                            resultOfDependentRace.getStartTime().plus(startTimeDifference), startTimeDifference);
                 }
             }
         }
