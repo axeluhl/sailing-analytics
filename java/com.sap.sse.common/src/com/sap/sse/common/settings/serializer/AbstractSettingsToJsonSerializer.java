@@ -267,7 +267,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
             @SuppressWarnings("unchecked")
             final ARRAY addedValuesArray = (ARRAY) get(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN);
             @SuppressWarnings("unchecked")
-            final ARRAY removedValuesArray = (ARRAY) get(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN);
+            final ARRAY removedValuesArray = (ARRAY) get(diffDataObject, AbstractGenericSerializableSettings.REMOVED_TOKEN);
             final List<T> addedValues = deserializeMultipleValues(addedValuesArray, converter);
             final List<T> removedValues = deserializeMultipleValues(removedValuesArray, converter);
             valueListSetting.setDiff(removedValues, addedValues);

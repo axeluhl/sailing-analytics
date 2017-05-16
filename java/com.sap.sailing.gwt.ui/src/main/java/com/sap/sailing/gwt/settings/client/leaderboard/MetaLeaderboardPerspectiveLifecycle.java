@@ -9,10 +9,6 @@ public class MetaLeaderboardPerspectiveLifecycle extends AbstractLeaderboardPers
     
     private final MultiLeaderboardPanelLifecycle multiLeaderboardPanelLifecycle;
     
-    public MetaLeaderboardPerspectiveLifecycle(StringMessages stringMessages) {
-        this(stringMessages, null);
-    }
-    
     public MetaLeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
         super(stringMessages, leaderboard, true);
         multiLeaderboardPanelLifecycle = new MultiLeaderboardPanelLifecycle(null, stringMessages);

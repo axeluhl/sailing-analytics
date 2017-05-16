@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.LeaderboardType;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sse.common.Util;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
@@ -44,8 +44,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     private StringMessages stringmessages = StringMessages.INSTANCE;
     private String leaderboardName;
     private String leaderboardGroupName;
-    private LeaderboardType leaderboardType;
-    private EventDTO event;
+    private AbstractLeaderboardDTO leaderboardDTO;
 
     @Override
     protected void doOnModuleLoad() {
@@ -63,17 +62,16 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             final Runnable checkLeaderboardNameAndCreateUI = new Runnable() {
                 @Override
                 public void run() {
-                    sailingService.checkLeaderboardName(leaderboardName,
-                            new MarkedAsyncCallback<Util.Pair<String, LeaderboardType>>(
-                                    new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
+                    if(leaderboardDTO == null) {
+                        sailingService.getLeaderboard(leaderboardName, new MarkedAsyncCallback<StrippedLeaderboardDTO>(
+                                    new AsyncCallback<StrippedLeaderboardDTO>() {
                                         @Override
                                         public void onSuccess(
-                                                Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
-                                            if (leaderboardNameAndType != null
-                                                    && leaderboardName.equals(leaderboardNameAndType.getA())) {
+                                                StrippedLeaderboardDTO leaderboardDTO) {
+                                            if (leaderboardDTO != null) {
+                                                LeaderboardEntryPoint.this.leaderboardDTO = leaderboardDTO;
                                                 Window.setTitle(leaderboardName);
-                                                leaderboardType = leaderboardNameAndType.getB();
-                                                loadSettingsAndCreateUI(leaderboardContextDefinition, event);
+                                                loadSettingsAndCreateUI(leaderboardContextDefinition, leaderboardDTO);
                                             } else {
                                                 RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                                             }
@@ -85,6 +83,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                                     + t.getMessage());
                                         }
                                     }));
+                    }
                 }
             };
             if (eventId == null) {
@@ -99,7 +98,9 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
 
                             @Override
                             public void onSuccess(EventDTO result) {
-                                event = result;
+                                if(result != null) {
+                                    leaderboardDTO = result.getLeaderboardByName(leaderboardName);
+                                }
                                 checkLeaderboardNameAndCreateUI.run();
                             }
                         }));
@@ -109,18 +110,18 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
     }
 
-    private void loadSettingsAndCreateUI(LeaderboardContextDefinition leaderboardContextDefinition, EventDTO event) {
+    private void loadSettingsAndCreateUI(LeaderboardContextDefinition leaderboardContextDefinition, AbstractLeaderboardDTO leaderboardDTO) {
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         
         // make a single live request as the default but don't continue to play by default
 
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);
-        if (leaderboardType.isMetaLeaderboard()) {
+        if (leaderboardDTO.type.isMetaLeaderboard()) {
             // overall
 
             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
-                    stringmessages);
+                    stringmessages, leaderboardDTO);
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
                     rootComponentLifeCycle, getUserService(), storageDefinition);
             context.getInitialSettings(
@@ -148,7 +149,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         } else {
 
             LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
-                    StringMessages.INSTANCE);
+                    StringMessages.INSTANCE, leaderboardDTO);
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
                     rootComponentLifeCycle, getUserService(), storageDefinition);
             context.getInitialSettings(
@@ -183,7 +184,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         if (chartDetailType == DetailType.REGATTA_NET_POINTS_SUM) {
             return chartDetailType;
         }
-        return MultiCompetitorLeaderboardChartSettings.getDefaultDetailType(leaderboardType.isMetaLeaderboard());
+        return MultiCompetitorLeaderboardChartSettings.getDefaultDetailType(leaderboardDTO.type.isMetaLeaderboard());
     }
     
     private void createUi(Widget leaderboardViewer, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer, LeaderboardContextDefinition leaderboardContextSettings) {
