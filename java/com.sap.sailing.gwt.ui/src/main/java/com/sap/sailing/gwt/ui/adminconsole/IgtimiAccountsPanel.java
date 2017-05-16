@@ -141,6 +141,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         allAccounts.addColumn(accountActionColumn, stringMessages.actions());
         updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
         Button addAccountButton = new Button(stringMessages.addIgtimiAccount());
+        addAccountButton.ensureDebugId("addIgtimiAccount");
         addAccountButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -236,6 +237,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                         }
 
                     });
+            ensureDebugId("AddIgtimiAccountDialog");
         }
 
         @Override
@@ -243,9 +245,11 @@ public class IgtimiAccountsPanel extends FlowPanel {
             Grid grid = new Grid(2, 2);
             grid.setWidget(0, 0, new Label(stringMessages.emailAddress()));
             eMail = createTextBox("");
+            eMail.ensureDebugId("igtimiAccountEmail");
             grid.setWidget(0, 1, eMail);
             grid.setWidget(1, 0, new Label(stringMessages.password()));
             password = createPasswordTextBox("");
+            password.ensureDebugId("igtimiAccountPassword");
             grid.setWidget(1, 1, password);
             return grid;
         }

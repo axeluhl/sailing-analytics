@@ -34,6 +34,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -79,9 +80,11 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
         // now extend the tracking interval of the tracked race and assert that the additional fixes are loaded
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2500), /* wait for fixes to load */ true);
+        trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(trackedRace.getTrack(comp), 2);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(0), /* wait for fixes to load */ true);
+        trackedRace.waitForLoadingToFinish();
         testNumberOfRawFixes(trackedRace.getTrack(comp), 3);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 3);
     }
@@ -113,6 +116,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         new FixLoaderAndTracker(trackedRace, store, null);
         
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(TimePoint.BeginningOfTime, author, 0));
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingToFinish();

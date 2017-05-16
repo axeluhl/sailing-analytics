@@ -228,7 +228,10 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
      * Check if the browser provides the mutation observer API.
      */
     private native boolean weCanObserve() /*-{
-	return (MutationObserver);
+	if (MutationObserver) {
+	    return true;
+	}
+	return false;
     }-*/;
 
     /**

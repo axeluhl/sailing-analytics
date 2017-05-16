@@ -6,8 +6,9 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -44,23 +45,7 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_TIME_TRAVELED);
         raceDetailsToShow.remove(DetailType.DISPLAY_LEGS);
-        final LeaderboardSettings newSettings = new LeaderboardSettings(
-                Util.cloneListOrNull(existingSettings.getManeuverDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getLegDetailsToShow()),
-                raceDetailsToShow,
-                Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRaceColumnsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRacesToShow()),
-                existingSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
-                existingSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                existingSettings.getNameOfRaceToSort(), existingSettings.isSortAscending(),
-                existingSettings.isUpdateUponPlayStateChange(),
-                existingSettings.getActiveRaceColumnSelectionStrategy(),
-                existingSettings.isShowAddedScores(),
-                existingSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                existingSettings.isShowCompetitorSailIdColumn(),
-                existingSettings.isShowCompetitorFullNameColumn(),
-                existingSettings.isShowCompetitorNationalityColumn());
+        final LeaderboardSettings newSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesForRaceDetails(existingSettings, raceDetailsToShow);
         getLeaderboardPanel().updateSettings(newSettings);
     }
 
@@ -80,7 +65,7 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 existingMapSettings.isShowSimulationOverlay(),
                 existingMapSettings.isShowMapControls(),
                 existingMapSettings.getManeuverTypesToShow(),
-                existingMapSettings.isShowDouglasPeuckerPoints());
+                existingMapSettings.isShowDouglasPeuckerPoints()).keepDefaults(existingMapSettings);
         getRaceBoardPanel().getMap().updateSettings(newMapSettings);
     }
 

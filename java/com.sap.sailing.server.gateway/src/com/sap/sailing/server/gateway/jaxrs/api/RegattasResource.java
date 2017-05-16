@@ -876,7 +876,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     /**
      * @return the actual or anticipated start order for the race identified by {@coode regattaName} and {@code raceName}.
      * Those competitors for which a start mark passing is already known are sorted by those start mark passings. All other
-     * boats are ordered by their geometrical distance from the start line or the windward distance from the start mark
+     * boats are ordered by their geometric distance from the start line or the windward distance from the start mark
      * if the start for some reason is defined by a single mark. See {@link #compareDistanceFromStartLine(Competitor, Competitor)}.
      */
     @GET

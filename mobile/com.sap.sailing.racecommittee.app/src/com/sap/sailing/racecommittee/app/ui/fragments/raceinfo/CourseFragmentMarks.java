@@ -75,7 +75,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
     public CourseFragmentMarks() {
         super();
-
         mId = 0;
         mHistory = new ArrayList<>();
         mElements = new ArrayList<>();
@@ -568,10 +567,10 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                 if (courseElement.getRightMark() != null) {
                     String cpwtmName =
                             "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / " + courseElement.getRightMark().getName();
+                    // Not providing a UUID for the new control point; instead, the name will be used as a (temporary?) ID.
                     ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(), courseElement
                             .getRightMark(), cpwtmName);
                     Waypoint waypoint = new WaypointImpl(cpwtm, courseElement.getPassingInstructions());
-
                     waypoints.add(waypoint);
                 } else {
                     throw new IllegalStateException(MISSING_SECOND_MARK);

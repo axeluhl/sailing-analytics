@@ -15,24 +15,18 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
+import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerContextDefinition;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -41,10 +35,9 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTabbedSettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
+import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 import com.sap.sse.security.ui.client.UserService;
 
 public class DesktopStartView extends Composite implements StartView {
@@ -53,29 +46,30 @@ public class DesktopStartView extends Composite implements StartView {
     interface StartPageViewUiBinder extends UiBinder<Widget, DesktopStartView> {
     }
 
-    @UiField(provided=true) SAPSailingHeaderWithAuthentication sapHeader;
-    @UiField(provided=true) ListBox localeSelectionBox;
-    @UiField(provided=true) ListBox eventSelectionBox;
-    @UiField(provided=true) ListBox leaderboardSelectionBox;
-    @UiField CheckBox startInFullscreenModeBox;
-    @UiField Button startAutoPlayButton;
-    @UiField DivElement leaderboardSelectionUi;
-    @UiField DivElement screenConfigurationUi;
-    @UiField FlowPanel leaderboardPerspectiveSettingsPanel;
-    @UiField FlowPanel raceboardPerspectiveSettingsPanel;
-    
-    @UiField CheckBox autoSwitchToRaceboard;
-    @UiField IntegerBox timeToRaceStartInSeconds;
-    
+    @UiField(provided = true)
+    SAPSailingHeaderWithAuthentication sapHeader;
+    @UiField(provided = true)
+    ListBox localeSelectionBox;
+    @UiField(provided = true)
+    ListBox eventSelectionBox;
+    @UiField(provided = true)
+    ListBox leaderboardSelectionBox;
+    @UiField
+    Button startAutoPlayButton;
+    @UiField
+    DivElement leaderboardSelectionUi;
+    @UiField
+    DivElement screenConfigurationUi;
+    @UiField
+    FlowPanel leaderboardPerspectiveSettingsPanel;
+
     private final PlaceNavigator navigator;
     private final EventBus eventBus;
     private final List<EventDTO> events;
-    
-    private PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecyclesAndSettings;
-    private PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings;
-    
-    private final int defaultTimeToRaceStartTimeInSeconds = 180;
-    
+
+    private AutoplayPerspectiveLifecycle autoplayLifecycle;
+    protected PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings;
+
     public DesktopStartView(PlaceNavigator navigator, EventBus eventBus, UserService userService) {
         super();
         this.navigator = navigator;
@@ -84,14 +78,14 @@ public class DesktopStartView extends Composite implements StartView {
 
         sapHeader = new SAPSailingHeaderWithAuthentication(StringMessages.INSTANCE.autoplayConfiguration());
         new FixedSailingAuthentication(userService, sapHeader.getAuthenticationMenuView());
-        
+
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
         leaderboardSelectionBox = new ListBox();
         leaderboardSelectionBox.setMultipleSelect(false);
         localeSelectionBox = new ListBox();
         localeSelectionBox.setMultipleSelect(false);
-        
+
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
         for (String localeName : GWTLocaleUtil.getAvailableLocales()) {
@@ -106,39 +100,18 @@ public class DesktopStartView extends Composite implements StartView {
         initWidget(uiBinder.createAndBindUi(this));
         this.ensureDebugId("AutoPlayStartView");
 
-        startInFullscreenModeBox.setValue(true);
-        autoSwitchToRaceboard.setValue(true);
-        timeToRaceStartInSeconds.setValue(defaultTimeToRaceStartTimeInSeconds);
-
         leaderboardSelectionUi.getStyle().setVisibility(Visibility.HIDDEN);
         screenConfigurationUi.getStyle().setVisibility(Visibility.HIDDEN);
-        
+
         startAutoPlayButton.setEnabled(false);
         startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
     }
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
-        LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        leaderboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardPerspectiveLifecycle, leaderboardPerspectiveLifecycle.createDefaultSettings());
-        RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle, raceboardPerspectiveLifecycle.createDefaultSettings());
+        autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard);
+        autoplayPerspectiveSettings = autoplayLifecycle.createDefaultSettings();
     }
 
-    private <PL extends PerspectiveLifecycle<PS>, PS extends Settings> void openPerspectiveSettingsDialog(final PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleAndSettings) {
-        PerspectiveCompositeLifecycleTabbedSettingsDialog<PL,PS> dialog = new PerspectiveCompositeLifecycleTabbedSettingsDialog<>(StringMessages.INSTANCE,
-                perspectiveLifecycleAndSettings, perspectiveLifecycleAndSettings.getPerspectiveLifecycle().getLocalizedShortName(), new DialogCallback<PerspectiveCompositeSettings<PS>>() {
-            @Override
-            public void ok(PerspectiveCompositeSettings<PS> newSettings) {
-                perspectiveLifecycleAndSettings.setAllSettings(newSettings);
-            };
-
-            @Override
-            public void cancel() {
-            }
-        });
-        dialog.show();
-    }
-    
     @Override
     public void setEvents(List<EventDTO> events) {
         this.events.clear();
@@ -152,11 +125,11 @@ public class DesktopStartView extends Composite implements StartView {
     @UiHandler("eventSelectionBox")
     void onEventSelectionChange(ChangeEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
-        if(selectedEvent != null) {
+        if (selectedEvent != null) {
             leaderboardSelectionBox.clear();
             leaderboardSelectionBox.addItem(StringMessages.INSTANCE.selectALeaderboard());
-            for(LeaderboardGroupDTO leaderboardGroup: selectedEvent.getLeaderboardGroups()) {
-                for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
+            for (LeaderboardGroupDTO leaderboardGroup : selectedEvent.getLeaderboardGroups()) {
+                for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
                     leaderboardSelectionBox.addItem(leaderboard.name);
                 }
             }
@@ -167,55 +140,71 @@ public class DesktopStartView extends Composite implements StartView {
     @UiHandler("leaderboardSelectionBox")
     void onLeaderboardSelectionChange(ChangeEvent event) {
         String selectedLeaderboardName = getSelectedLeaderboardName();
-        if(selectedLeaderboardName != null) {
+        if (selectedLeaderboardName != null) {
             startAutoPlayButton.setEnabled(true);
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
 
             StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
             this.updatePerspectives(selectedLeaderboard);
 
-            createPerspectiveSettingsUI(leaderboardPerspectiveLifecyclesAndSettings, leaderboardPerspectiveSettingsPanel);
-            createPerspectiveSettingsUI(raceboardPerspectiveLifecyclesAndSettings, raceboardPerspectiveSettingsPanel);
+            leaderboardPerspectiveSettingsPanel.clear();
+            Button perspectiveSettingsButton = new Button(StringMessages.INSTANCE.settings());
+            perspectiveSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
+            leaderboardPerspectiveSettingsPanel.add(perspectiveSettingsButton);
+            perspectiveSettingsButton.setEnabled(true);
+            perspectiveSettingsButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    openSettingsDialog();
+                }
+            });
         } else {
             startAutoPlayButton.setEnabled(false);
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
         }
-        screenConfigurationUi.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
+        screenConfigurationUi.getStyle()
+                .setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
 
-    private <PL extends PerspectiveLifecycle<PS>, PS extends Settings> void createPerspectiveSettingsUI(
-            final PerspectiveLifecycleWithAllSettings<PL,PS> perspectiveLifecycleWithAllSettings,
-            FlowPanel perspectiveSettingsPanel) { 
-        perspectiveSettingsPanel.clear();
+    protected void openSettingsDialog() {
+        DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
 
-        Button perspectiveSettingsButton = new Button(StringMessages.INSTANCE.settings());
-        perspectiveSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
-        perspectiveSettingsPanel.add(perspectiveSettingsButton);
-        perspectiveSettingsButton.setEnabled(perspectiveLifecycleWithAllSettings.getAllSettings().hasSettings());
-        perspectiveSettingsButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent event) {
-                openPerspectiveSettingsDialog(perspectiveLifecycleWithAllSettings);
+            public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
+                autoplayPerspectiveSettings = editedObject;
             }
-        });
+
+            @Override
+            public void cancel() {
+            }
+        };
+
+        if (autoplayPerspectiveSettings == null) {
+            autoplayPerspectiveSettings = autoplayLifecycle.createDefaultSettings();
+        }
+
+        new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(null,
+                autoplayLifecycle, autoplayPerspectiveSettings, StringMessages.INSTANCE, true, callback).show();
+
     }
-    
-    @UiHandler("localeSelectionBox") 
+
+    @UiHandler("localeSelectionBox")
     void onLocaleSelectionChange(ChangeEvent event) {
         String selectedLocale = getSelectedLocale();
         LocaleChangeEvent localeChangeEvent = new LocaleChangeEvent(selectedLocale);
         eventBus.fireEvent(localeChangeEvent);
     }
-    
+
     @UiHandler("startAutoPlayButton")
     void startAutoPlayClicked(ClickEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
-        
-        if(selectedEvent != null && selectedLeaderboardName != null) {
-            navigator.goToPlayer(new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
-                    startInFullscreenModeBox.getValue(), timeToRaceStartInSeconds.getValue()), 
-                    leaderboardPerspectiveLifecyclesAndSettings, raceboardPerspectiveLifecyclesAndSettings);
+
+        if (selectedEvent != null && selectedLeaderboardName != null) {
+            // TODO generate place settings url, and directly start other place
+            String contextAndSettings = new SettingsToStringSerializer().fromSettings(
+                    new AutoPlayerContextDefinition(selectedEvent.id, selectedLeaderboardName), autoplayPerspectiveSettings);
+            navigator.goToPlayer(contextAndSettings);
         }
     }
 
@@ -259,15 +248,19 @@ public class DesktopStartView extends Composite implements StartView {
     private EventDTO getSelectedEvent() {
         EventDTO result = null;
         int selectedIndex = eventSelectionBox.getSelectedIndex();
-        if(events != null && selectedIndex > 0) {
+        if (events != null && selectedIndex > 0) {
             String selectedItemText = eventSelectionBox.getItemText(selectedIndex);
-            for(EventDTO event: events) {
-                if(event.getName().equals(selectedItemText)) {
+            for (EventDTO event : events) {
+                if (event.getName().equals(selectedItemText)) {
                     result = event;
                     break;
                 }
             }
         }
         return result;
+    }
+
+    interface OnSettingsCallback<PSS extends Settings> {
+        void newSettings(PerspectiveCompositeSettings<PSS> newSettings);
     }
 }

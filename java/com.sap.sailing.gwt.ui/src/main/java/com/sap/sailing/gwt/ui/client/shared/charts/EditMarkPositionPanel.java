@@ -100,8 +100,10 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> implements RequiresResize, SelectionChangeEvent.Handler {
     protected static final int FIX_OVERLAY_Z_ORDER = 230;
@@ -131,18 +133,20 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
 
-    public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel,
+    public EditMarkPositionPanel(Component<?> parent, ComponentContext<?> context, final RaceMap raceMap,
+            final LeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
-        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
+                asyncActionsExecutor, errorReporter);
         this.markPositionService = new MarkPositionServiceForSailingService(sailingService);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
         this.polylines = new HashMap<>();
         this.markDataProvider = new ListDataProvider<>();
-        this.marksPanel = new MarksPanel(this, markDataProvider, stringMessages);
+        this.marksPanel = new MarksPanel(this, context, markDataProvider, stringMessages);
         this.noMarkSelectedLabel = new Label(stringMessages.pleaseSelectAMark());
         this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.courseMarkClickHandlers = new ArrayList<>();
@@ -221,10 +225,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         }
         
         private native int getX() /*-{
-            return this.x;
+			return this.x;
         }-*/;
         private native int getY() /*-{
-            return this.y;
+			return this.y;
         }-*/;
     }
     
@@ -1007,5 +1011,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     @Override
     public AbstractSettings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "EditMarkPositionPanel";
     }
 }

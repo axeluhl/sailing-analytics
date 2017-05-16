@@ -811,9 +811,12 @@ body ::-webkit-scrollbar-track {
 	float: right;
 }
 
-.gwt-DialogBox .additionalWidgets {
+.gwt-DialogBox .additionalWidgetsRight {
 	padding: 5px 0 0 0;
 	text-align: right;
+}
+.gwt-DialogBox .additionalWidgetsLeft {
+    padding: 5px 0 0 0;
 }
 
 .gwt-DialogBox .gwt-Label {
