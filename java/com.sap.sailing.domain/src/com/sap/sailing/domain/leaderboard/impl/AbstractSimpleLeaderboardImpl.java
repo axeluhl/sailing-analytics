@@ -44,6 +44,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
@@ -1785,6 +1786,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 final Distance rideHeight = trackedLeg.getRideHeight(timePoint);
                 result.currentRideHeightInMeters = rideHeight == null ? null : rideHeight.getMeters();
             }
+            Bearing heel = trackedLeg.getHeel(timePoint);
+            result.currentHeelInDegrees = heel == null ? null : heel.getDegrees();
+            Bearing pitch = trackedLeg.getPitch(timePoint);
+            result.currentPitchInDegrees = pitch == null ? null : pitch.getDegrees();
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
@@ -1974,7 +1979,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         if (timePoint != null) {
             if (fillTotalPointsUncorrected) {
                 // explicitly filling the uncorrected total points requires uncached recalculation
-                result = computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, /* waitForLatestAnalyses */ true,
+                result = computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
+                        /* waitForLatestAnalyses=false because otherwise this may block, e.g., for background tasks
+                           such as maneuver and mark passing calculations */ false,
                         trackedRegattaRegistry, baseDomainFactory, fillTotalPointsUncorrected);
             } else {
                 // in replay we'd like up-to-date results; they are still cached

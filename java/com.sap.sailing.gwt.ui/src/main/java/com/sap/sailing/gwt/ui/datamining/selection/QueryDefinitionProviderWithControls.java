@@ -46,7 +46,9 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings> implements WithControls {
 
@@ -69,10 +71,11 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
 
-    public QueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages,
+    public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
+            DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
             ResultsPresenter<?> resultsPresenter) {
-        super(stringMessages, dataMiningService, errorReporter);
+        super(parent, context, stringMessages, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
         
         // Creating the header panel, that contains the retriever chain provider and the controls
@@ -90,9 +93,10 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !queryDefinitionViewerToggleButton.getValue());
             }
         });
-        queryDefinitionViewer = new QueryDefinitionViewer(getStringMessages());
+        queryDefinitionViewer = new QueryDefinitionViewer(parent, context, getStringMessages());
         addQueryDefinitionChangedListener(queryDefinitionViewer);
-        predefinedQueryRunner = new PredefinedQueryRunner(session, getStringMessages(), dataMiningService, errorReporter, resultsPresenter);
+        predefinedQueryRunner = new PredefinedQueryRunner(parent, context, session, getStringMessages(),
+                dataMiningService, errorReporter, resultsPresenter);
         
         Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
@@ -117,7 +121,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             addControl(predefinedQueryRunner.getEntryWidget());
         }
 
-        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), settingsControl);
+        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(parent, context, getStringMessages(),
+                getDataMiningService(), getErrorReporter(), settingsControl);
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
         
         SplitLayoutPanel headerPanel = new SplitLayoutPanel(15);
@@ -125,10 +130,12 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         headerPanel.add(controlsPanel);
         
         // Creating the footer panel, that contains the statistic provider and the grouping provider
-        statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
+        statisticProvider = new SimpleStatisticProvider(parent, context, getStringMessages(), getDataMiningService(),
+                getErrorReporter(), retrieverChainProvider);
         statisticProvider.addStatisticChangedListener(providerListener);
 
-        groupingProvider = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
+        groupingProvider = new MultiDimensionalGroupingProvider(parent, context, getStringMessages(),
+                getDataMiningService(), getErrorReporter(), retrieverChainProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
         
         SplitLayoutPanel footerPanel = new SplitLayoutPanel(15);
@@ -140,7 +147,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         filterSplitPanel.addSouth(footerPanel, footerPanelHeight);
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
-        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(parent, context, session,
+                stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
         
@@ -324,6 +332,11 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             }
         }
         
+    }
+
+    @Override
+    public String getId() {
+        return "QueryDefinitionProviderWithControls";
     }
 
 }

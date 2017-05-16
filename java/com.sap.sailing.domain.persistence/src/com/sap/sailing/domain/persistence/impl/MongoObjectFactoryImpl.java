@@ -1231,7 +1231,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storeMark(Mark mark) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.MARK_ID.name(), mark.getId());
-        result.put(FieldNames.MARK_COLOR.name(), mark.getColor());
+        result.put(FieldNames.MARK_COLOR.name(), mark.getColor()==null?null:mark.getColor().getAsHtml());
         result.put(FieldNames.MARK_NAME.name(), mark.getName());
         result.put(FieldNames.MARK_PATTERN.name(), mark.getPattern());
         result.put(FieldNames.MARK_SHAPE.name(), mark.getShape());

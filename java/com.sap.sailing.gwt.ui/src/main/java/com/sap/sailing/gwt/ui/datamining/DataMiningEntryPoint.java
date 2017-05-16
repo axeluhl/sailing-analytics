@@ -53,17 +53,19 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             @Override
             public Widget get() {
-                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(getStringMessages());
-                ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(getStringMessages());
+                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null,
+                        getStringMessages());
+                ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(null, null, getStringMessages());
                 
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
                 QueryDefinitionProviderWithControls queryDefinitionProviderWithControls =
-                        new QueryDefinitionProviderWithControls(session, getStringMessages(),
+                        new QueryDefinitionProviderWithControls(null, null, session, getStringMessages(),
                                 dataMiningService, DataMiningEntryPoint.this, settingsControl, resultsPresenter);
                 queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
                 
-                QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService,
+                QueryRunner queryRunner = new SimpleQueryRunner(null, null, session, getStringMessages(),
+                        dataMiningService,
                         DataMiningEntryPoint.this, queryDefinitionProviderWithControls, resultsPresenter);
                 queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
                 /* Running queries automatically when they've been changed is currently unnecessary, if not even counterproductive.

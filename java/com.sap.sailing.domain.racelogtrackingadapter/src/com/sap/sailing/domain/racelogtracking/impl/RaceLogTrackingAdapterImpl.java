@@ -138,7 +138,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     @Override
-    public void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard,
+    public boolean denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException {
         final BoatClass boatClass;
         if (leaderboard instanceof RegattaLeaderboard) {
@@ -155,17 +155,23 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
             }
         }
+        final boolean result;
         if (raceName == null) {
             raceName = leaderboard.getName() + " " + raceColumn.getName() + " " + fleet.getName();
         }
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        assert raceLog != null : new NotDenotableForRaceLogTrackingException("No RaceLog found in place");
-        if (new RaceLogTrackingStateAnalyzer(raceLog).analyze().isForTracking()) {
-            throw new NotDenotableForRaceLogTrackingException("Already denoted for tracking");
+        if (raceLog == null) {
+            throw new NotDenotableForRaceLogTrackingException("No RaceLog found in place");
         }
-        RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(MillisecondsTimePoint.now(),
-                service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
-        raceLog.add(event);
+        if (new RaceLogTrackingStateAnalyzer(raceLog).analyze().isForTracking()) {
+            result = false;
+        } else {
+            RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(MillisecondsTimePoint.now(),
+                    service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
+            raceLog.add(event);
+            result = true;
+        }
+        return result;
     }
     
     private BoatClass findDominatingBoatClass(Iterable<Boat> allBoats) {

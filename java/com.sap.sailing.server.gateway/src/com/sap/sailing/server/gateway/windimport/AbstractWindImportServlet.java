@@ -186,6 +186,7 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
                             raceEntry.update(wind);
                         }
                     }
+                    getService().getPolarDataService().insertExistingFixes(trackedRace);
                 }
             }
             // Use text/html to prevent browsers from wrapping the response body,

@@ -59,7 +59,7 @@ public class ManeuversJsonSerializer extends AbstractTrackedRaceDataJsonSerializ
                 endTime = endOfTracking;
             }
         }
-        return trackedRace.getManeuvers(competitor, startTime, endTime, /* waitForLatest */ true);
+        return trackedRace.getManeuvers(competitor, startTime, endTime, /* waitForLatest */ false);
     }
 
 }

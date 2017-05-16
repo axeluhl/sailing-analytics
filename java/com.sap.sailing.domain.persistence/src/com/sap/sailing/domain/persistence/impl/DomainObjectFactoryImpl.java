@@ -227,6 +227,7 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
@@ -2026,7 +2027,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Mark loadMark(DBObject dbObject) {
         Serializable markId = (Serializable) dbObject.get(FieldNames.MARK_ID.name());
-        String markColor = (String) dbObject.get(FieldNames.MARK_COLOR.name());
+        String markColorAsString = (String) dbObject.get(FieldNames.MARK_COLOR.name());
+        Color markColor = AbstractColor.getCssColor(markColorAsString);
         String markName = (String) dbObject.get(FieldNames.MARK_NAME.name());
         String markPattern = (String) dbObject.get(FieldNames.MARK_PATTERN.name());
         String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());

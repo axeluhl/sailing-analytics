@@ -17,15 +17,17 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Settings> {
     
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
 
-    public PlainResultsPresenter(StringMessages stringMessages) {
-        super(stringMessages);
+    public PlainResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         
         resultsLabel = new HTML();
         scrollPanel = new ScrollPanel(resultsLabel);
@@ -149,5 +151,10 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     @Override
     public Settings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "prp";
     }
 }

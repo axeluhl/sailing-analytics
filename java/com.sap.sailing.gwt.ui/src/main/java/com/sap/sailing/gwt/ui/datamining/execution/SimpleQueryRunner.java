@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.execution;
 
+import java.io.Serializable;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -19,7 +21,9 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> implements QueryRunner {
 
@@ -51,9 +55,11 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
     private final ResultsPresenter<?> resultsPresenter;
     private final Button runButton;
 
-    public SimpleQueryRunner(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
+    public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
+            StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider<?> queryDefinitionProvider,
             ResultsPresenter<?> resultsPresenter) {
+        super(parent, context);
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -89,14 +95,15 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator();
-            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Object>(counter) {
+            dataMiningService.runQuery(session, queryDefinition,
+                    new ManagedDataMiningQueryCallback<Serializable>(counter) {
                 @Override
                 protected void handleFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
                     resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
                 @Override
-                protected void handleSuccess(QueryResultDTO<Object> result) {
+                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
                     resultsPresenter.showResult(result);
                 }
             });
@@ -161,6 +168,11 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
     @Override
     public String getDependentCssClassName() {
         return "simpleQueryRunner";
+    }
+
+    @Override
+    public String getId() {
+        return "SimpleQueryRunner";
     }
 
 }

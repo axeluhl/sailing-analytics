@@ -23,6 +23,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public abstract class AbstractNumericResultsPresenter<SettingsType extends Settings> extends AbstractResultsPresenter<Settings> {
     
@@ -31,8 +33,9 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
     private final ValueListBox<String> dataSelectionListBox;
     private AbstractNumericDataProvider<? extends Object> currentDataProvider;
 
-    public AbstractNumericResultsPresenter(StringMessages stringMessages) {
-        super(stringMessages);
+    public AbstractNumericResultsPresenter(Component<?> parent, ComponentContext<?> context,
+            StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         
         numberDataProvider = new NumberDataProvider();
         dataProviders = new HashMap<>();

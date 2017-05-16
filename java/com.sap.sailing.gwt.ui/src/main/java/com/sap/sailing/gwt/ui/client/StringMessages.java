@@ -1596,6 +1596,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFixes();
     String twoXMark();
     String pagerStateInfo(int start , int end, int size, @Select boolean exact);
+    String currentHeelInDegree();
+    String currentHeelInDegreeTooltip();
+    String currentPitchInDegree();
+    String currentPitchDegreeTooltip();
     String currentRideHeightInMeters();
     String currentRideHeightInMetersTooltip();
     String currentOrAverageRideHeightInMeters();
@@ -1798,4 +1802,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String milliseconds();
     String floatNumber();
     String integer();
+    String sampleColor();
+    String leaderboardPage();
+    String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
 }

@@ -13,14 +13,17 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboardDelegateFullscreenViewer;
+import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -57,6 +60,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         return currentPresenter.getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void start(final RegattaLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
         if(currentPresenter.getRegattaMetadata() == null) {
@@ -69,21 +73,36 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel(); 
+            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
+            final Consumer<LeaderboardPanel> leaderboardConsumer = new Consumer<LeaderboardPanel>() {
+                @Override
+                public void consume(LeaderboardPanel leaderboardPanel) {
+                    leaderboardUpdateProvider = leaderboardPanel;
+                    leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaLeaderboardTabView.this);
+                    initWidget(ourUiBinder.createAndBindUi(RegattaLeaderboardTabView.this));
+                    leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
+                    if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
+                        // TODO: start autorefresh?
+                    }
+                    regattaAnalyticsManager.hideCompetitorChart();
+                    contentArea.setWidget(RegattaLeaderboardTabView.this);
+                    if(leaderboardPanel.getLeaderboard() != null) {
+                        leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
+                    }
+                }
+            };
             if(leaderboardPanel == null) {
-                leaderboardPanel = createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
-            }
-            leaderboardUpdateProvider = leaderboardPanel;
-            leaderboardUpdateProvider.addLeaderboardUpdateListener(this);
-            initWidget(ourUiBinder.createAndBindUi(this));
-            leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
-            if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
-                // TODO: start autorefresh?
-            }
-            regattaAnalyticsManager.hideCompetitorChart();
-            contentArea.setWidget(this);
-            if(leaderboardPanel.getLeaderboard() != null) {
-                leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
+                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager, currentPresenter.getUserService(), /*FIXME placeToken */ null, leaderboardConsumer);
+            } else if( /*FIXME placeToken not empty */ false) {
+                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null).initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+                    @Override
+                    public void onSuccess(LeaderboardSettings settings) {
+                        leaderboardPanel.updateSettings(settings);
+                        leaderboardConsumer.consume(leaderboardPanel);
+                    }
+                });
+            } else {
+                leaderboardConsumer.consume(leaderboardPanel);
             }
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));

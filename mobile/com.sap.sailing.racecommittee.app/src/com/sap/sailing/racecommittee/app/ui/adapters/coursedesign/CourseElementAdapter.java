@@ -73,33 +73,27 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemViewHolder) {
             CourseListDataElement element = mElements.get(position);
-
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
             itemHolder.dragHandle.setVisibility((mEditable) ? View.VISIBLE : View.GONE);
-
             itemHolder.leftText.setVisibility(View.GONE);
             itemHolder.leftImage.setVisibility(View.GONE);
             if (element.getLeftMark() != null) {
                 itemHolder.leftText.setText(element.getLeftMark().getName());
                 itemHolder.leftText.setVisibility(View.VISIBLE);
-
                 itemHolder.leftImage.setImageDrawable(mImageHelper.resolveMarkImage(mContext, element.getLeftMark()));
                 itemHolder.leftImage.setVisibility(View.VISIBLE);
             }
-
             itemHolder.roundingDirection.setVisibility(View.GONE);
             if (element.getPassingInstructions() != null) {
                 itemHolder.roundingDirection.setText(getDisplayValueForRounding(element.getPassingInstructions()));
                 itemHolder.roundingDirection.setVisibility(View.VISIBLE);
             }
-
             itemHolder.rightText.setVisibility(View.GONE);
             itemHolder.rightImage.setVisibility(View.GONE);
             itemHolder.addItem.setVisibility(View.GONE);
             if (element.getRightMark() != null) {
                 itemHolder.rightText.setText(element.getRightMark().getName());
                 itemHolder.rightText.setVisibility(View.VISIBLE);
-
                 itemHolder.rightImage.setImageDrawable(mImageHelper.resolveMarkImage(mContext, element.getRightMark()));
                 itemHolder.rightImage.setVisibility(View.VISIBLE);
             } else {
@@ -110,9 +104,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
                     }
                 }
             }
-
             int dragState = itemHolder.getDragStateFlags();
-
             if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0) {
                 int bgColor;
                 if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {

@@ -740,6 +740,17 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     void waitForLoadingToFinish() throws InterruptedException;
     
+    /**
+     * Returns the current status of the {@link TrackedRace}. This consists of one of the {@link TrackedRaceStatusEnum}
+     * values plus a progress for LOADING state.<br>
+     * Due to the fact that multiple loaders can exist that load data into the {@link TrackedRace}, the returned status
+     * is a composite of those loader statuses. When a loader is finished, its status isn't tracked anymore. This causes
+     * the overall progress to not be guaranteed to be monotonic (progress may jump to a lower percentage when one loader
+     * that had a progress of 100% is finished and thus removed).
+     * 
+     * @see TrackedRaceStatus
+     * @see DynamicTrackedRace#onStatusChanged(TrackingDataLoader, TrackedRaceStatus)
+     */
     TrackedRaceStatus getStatus();
 
     /**
