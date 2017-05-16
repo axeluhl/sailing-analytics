@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -397,7 +396,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 /*showOverallColumnWithNumberOfRacesSailedPerCompetitor*/ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.getValue().booleanValue(),
                 showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
                 isCompetitorNationalityColumnVisible.getValue());
-        GWT.log("Nationailty is enabled " + isCompetitorNationalityColumnVisible.getValue());
         return LeaderboardSettingsFactory.getInstance().keepDefaults(initialSettings, newSettings);
     }
 
