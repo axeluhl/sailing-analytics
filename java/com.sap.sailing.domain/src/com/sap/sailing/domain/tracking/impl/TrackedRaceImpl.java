@@ -3090,12 +3090,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Starting at <code>timePointBeforeManeuver</code>, and assuming that the group of <code>approximatedFixesAndCourseChanges</code>
      * contains at least a tack and a jibe, finds the approximated fix's time point at which one tack and one jibe have been
-     * completed and for which the total course change is as close as possible to 360°.
+     * completed and for which the total course change is as close as possible to 360Â°.
      */
     private TimePointAndTotalCourseChangeInDegrees getTimePointOfCompletionOfFirstPenaltyCircle(
             Competitor competitor, TimePoint timePointBeforeManeuver, Bearing courseBeforeManeuver, Iterable<Pair<GPSFixMoving, CourseChange>> approximatedFixesAndCourseChanges, Wind wind) {
         double totalCourseChangeInDegrees = 0;
-        double bestTotalCourseChangeInDegrees = 0; // this should be as close as possible to 360° after one tack and one gybe
+        double bestTotalCourseChangeInDegrees = 0; // this should be as close as possible to 360ï¿½ after one tack and one gybe
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
         Bearing newCourse = courseBeforeManeuver;
         TimePoint timePointOfPreviousCourseChange = timePointBeforeManeuver;
@@ -3113,6 +3113,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     if (result == null) {
                         result = findBestFixBetweenCourseChanges(competitor, courseBeforeManeuver, timePointOfPreviousCourseChange,
                                 fixAndCourseChange.getA().getTimePoint(), totalCourseChangeInDegrees<0?NauticalSide.PORT:NauticalSide.STARBOARD, wind);
+                        if (result.getTimePoint() == null) { // nothing appropriate found; group all Douglas-Peucker points into one maneuver
+                            result = new TimePointAndTotalCourseChangeInDegrees(
+                                    Util.last(approximatedFixesAndCourseChanges).getA().getTimePoint(),
+                                    totalCourseChangeInDegrees);
+                        }
                     }
                     break; // don't continue into a subsequent tack/gybe sailed in conjunction with the penalty or starting the next circle
                 }
@@ -3120,7 +3125,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     bestTotalCourseChangeInDegrees = totalCourseChangeInDegrees;
                     result = new TimePointAndTotalCourseChangeInDegrees(fixAndCourseChange.getA().getTimePoint(), bestTotalCourseChangeInDegrees);
                 } else {
-                    break; // not getting closer but further away from 360°
+                    break; // not getting closer but further away from 360ï¿½
                 }
             }
         }
@@ -3142,6 +3147,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * 
      * @param maneuverDirection
      *            the general direction in which the maneuver is sailed
+     * 
+     * @return the result could have a {@code null} time point in case no appropriate fix was found; this would mean
+     *         that the individual fixes don't correspond very well with the Douglas-Peucker points, for example,
+     *         because the boat was swerving around between the fixes, with unclear COG values coming from the sensor.
      */
     private TimePointAndTotalCourseChangeInDegrees findBestFixBetweenCourseChanges(Competitor competitor,
             Bearing courseBeforeManeuver, TimePoint from, TimePoint to, NauticalSide maneuverDirection, Wind wind) {
@@ -3174,7 +3183,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         bestTotalCourseChangeInDegrees = totalCourseChangeInDegrees;
                         timePoint = fix.getTimePoint();
                     } else {
-                        break; // not getting closer but further away from 360°
+                        break; // not getting closer but further away from 360Â°
                     }
                 }
             }
@@ -3425,8 +3434,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (TrackedRaceImpl.this) {
             attachedRaceLogs.put(raceLog.getId(), raceLog);
             notifyAll();
-            updateStartOfRaceCacheFields();
-            updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+            invalidateStartTime();
         }
         notifyListenersWhenAttachingRaceLog(raceLog);
     }

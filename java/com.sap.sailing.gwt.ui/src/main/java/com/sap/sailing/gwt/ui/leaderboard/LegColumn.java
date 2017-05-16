@@ -103,6 +103,20 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
+    private class CurrentHeelInDegrees extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
+            return entry.currentHeelInDegrees;
+        }
+    }
+
+    private class CurrentPitchInDegrees extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
+            return entry.currentPitchInDegrees;
+        }
+    }
+
     private class CurrentRideHeightInMeters extends AbstractLegDetailField<Double> {
         @Override
         protected Double getFromNonNullEntry(LegEntryDTO entry) {
@@ -259,7 +273,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         return new DetailType[] { DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, DetailType.DISTANCE_TRAVELED,
                 DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START, DetailType.GAP_TO_LEADER_IN_SECONDS,
                 DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS, DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, 
-                DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.CURRENT_RIDE_HEIGHT_IN_METERS,
+                DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.CURRENT_HEEL_IN_DEGREES,
+                DetailType.CURRENT_PITCH_IN_DEGREES, DetailType.CURRENT_RIDE_HEIGHT_IN_METERS,
                 DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
                 DetailType.TIME_TRAVELED, DetailType.CORRECTED_TIME_TRAVELED, DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
@@ -279,6 +294,12 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new AverageSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, 
                 new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new CurrentSpeedOverGroundInKnots(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+
+        result.put(DetailType.CURRENT_HEEL_IN_DEGREES, new HeelColumn(DetailType.CURRENT_HEEL_IN_DEGREES,
+                new CurrentHeelInDegrees(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.CURRENT_PITCH_IN_DEGREES, new PitchColumn(DetailType.CURRENT_PITCH_IN_DEGREES,
+                new CurrentPitchInDegrees(),
+                        detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.CURRENT_RIDE_HEIGHT_IN_METERS, new RideHeightColumn(DetailType.CURRENT_RIDE_HEIGHT_IN_METERS,
                 new CurrentRideHeightInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,

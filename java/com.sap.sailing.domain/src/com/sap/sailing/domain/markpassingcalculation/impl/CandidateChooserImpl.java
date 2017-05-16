@@ -27,6 +27,7 @@ import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -98,8 +99,10 @@ public class CandidateChooserImpl implements CandidateChooser {
      * With the current selection of 1kt and a skip probability of 0.1 any speed estimated below 0.1kt will
      * lead to the edge being discarded.
      */
-    private static final Speed MINIMUM_REASONABLE_SPEED = new KnotSpeedImpl(1);
-    
+    private static final Speed MINIMUM_REASONABLE_SPEED = new KnotSpeedImpl(3);
+
+    private static final Speed MAXIMUM_REASONABLE_SPEED = GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING;
+
     private static final double MINIMUM_PROBABILITY = Edge.getPenaltyForSkipping();
 
     private static final Logger logger = Logger.getLogger(CandidateChooserImpl.class.getName());
@@ -527,9 +530,11 @@ public class CandidateChooserImpl implements CandidateChooser {
             // get an upper bound for a reasonable distance sailed between the waypoints and therefore an estimation
             // for the maximum speed at which the competitor would have had to sail:
             Speed estimatedMaxSpeed = totalGreatCircleDistance.scale(2).inTime(c1.getTimePoint().until(c2.getTimePoint()));
-            final double estimatedSpeedBasedProbability = estimatedMaxSpeed.divide(MINIMUM_REASONABLE_SPEED);
-            if (estimatedSpeedBasedProbability < MINIMUM_PROBABILITY) {
-                result = estimatedSpeedBasedProbability;
+            final double estimatedMinSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MINIMUM_REASONABLE_SPEED));
+            final double estimatedMaxSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MAXIMUM_REASONABLE_SPEED));
+            final double estimatedSpeedBasedProbabilityMinimum = Math.min(estimatedMaxSpeedBasedProbability, estimatedMinSpeedBasedProbability);
+            if (estimatedSpeedBasedProbabilityMinimum < MINIMUM_PROBABILITY) {
+                result = estimatedSpeedBasedProbabilityMinimum;
             } else {
                 final Distance actualDistanceTraveled = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
                 final double probabilityForMaxReasonableRatioBetweenDistanceTraveledAndLegLength =
