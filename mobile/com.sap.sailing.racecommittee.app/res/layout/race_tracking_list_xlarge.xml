@@ -29,7 +29,6 @@
         android:layout_above="@id/bottom_bar"
         android:layout_below="@id/header_bar"
         android:layout_marginBottom="@dimen/default_margin_half"
-        android:layout_marginLeft="@dimen/side_padding"
         android:layout_marginRight="@dimen/side_padding"
         android:gravity="center"
         android:orientation="horizontal">
@@ -47,7 +46,8 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/list_positioning_all"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/side_padding" />
         </LinearLayout>
 
         <Space
