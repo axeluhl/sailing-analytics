@@ -52,6 +52,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private CheckBox showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox;
     private CheckBox showCompetitorSailIdColumnheckBox;
     private CheckBox showCompetitorFullNameColumnCheckBox;
+    private CheckBox showRaceRankColumnCheckBox;
     private LeaderboardSettings initialSettings;
 
     public LeaderboardSettingsDialogComponent(LeaderboardSettings initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages) {
@@ -150,6 +151,10 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         dialog.addTooltip(showAddedScoresCheckBox, stringMessages.showAddedScores());
         showAddedScoresCheckBox.setValue(initialSettings.isShowAddedScores());
         addedScoresFlowPanel.add(showAddedScoresCheckBox);
+        showRaceRankColumnCheckBox = dialog.createCheckbox(stringMessages.showRacePlaceColumn());
+        showRaceRankColumnCheckBox.setValue(initialSettings.isShowRaceRankColumn());
+        addedScoresFlowPanel.add(showRaceRankColumnCheckBox);
+        
         raceDetailDialog.add(addedScoresFlowPanel);
         return raceDetailDialog;
     }
@@ -389,7 +394,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
                 /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue(),
                 /*showOverallColumnWithNumberOfRacesSailedPerCompetitor*/ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.getValue().booleanValue(),
-                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue());
+                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),showRaceRankColumnCheckBox.getValue());
         return LeaderboardSettingsFactory.getInstance().keepDefaults(initialSettings, newSettings);
     }
 
