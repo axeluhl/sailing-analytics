@@ -21,9 +21,8 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.SerializablePosition;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.PlacemarkImpl;
-import com.sap.sailing.domain.common.impl.SerializablePositionImpl;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.Util;
@@ -172,10 +171,8 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         } else if (jsonLng instanceof Number) {
             lngDeg = ((Number) jsonLng).doubleValue();
         }
-        SerializablePosition position = new SerializablePositionImpl(latDeg, lngDeg);
-
+        Position position = new DegreePosition(latDeg, lngDeg);
         long population = (Long) json.get("population");
-
         if (name != null && lngDeg != null && latDeg != null) {
             return new PlacemarkImpl(name, countryCode, position, population);
         } else {
