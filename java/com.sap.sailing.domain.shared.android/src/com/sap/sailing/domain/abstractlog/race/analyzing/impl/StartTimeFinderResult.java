@@ -2,6 +2,7 @@ package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
 import java.util.Collections;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -27,27 +28,45 @@ public class StartTimeFinderResult {
     private final ResolutionFailed resolutionFailed;
     
     private Duration startTimeDiff;
+    
+    /**
+     * When a race log event provides the start time described by this result object then this field tells
+     * the event's author. In particular, clients can see the priority from this. This may come in handy
+     * when deriving other events from the "set start time" event, such as a tracking time event.
+     */
+    private AbstractLogEventAuthor startTimeEventAuthor;
 
-    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff) {
-        this(racesDependingOn, startTime, startTimeDiff, /* resolutionFailed */ null);
+    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff, AbstractLogEventAuthor raceLogEventAuthor) {
+        this(racesDependingOn, startTime, startTimeDiff, /* resolutionFailed */ null, raceLogEventAuthor);
     }
     
-    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, Duration startTimeDiff, ResolutionFailed resolutionFailed) {
-        this(racesDependingOn, /* startTime */ null, startTimeDiff, resolutionFailed);
+    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, Duration startTimeDiff, ResolutionFailed resolutionFailed, AbstractLogEventAuthor raceLogEventAuthor) {
+        this(racesDependingOn, /* startTime */ null, startTimeDiff, resolutionFailed, raceLogEventAuthor);
     }
     
     public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> dependingOnRaces, TimePoint startTime, Duration startTimeDiff,
-            ResolutionFailed resolutionFailed) {
+            ResolutionFailed resolutionFailed, AbstractLogEventAuthor raceLogEventAuthor) {
         this.startTime = startTime;
         this.startTimeDiff = startTimeDiff;
         this.dependingOnRaces = dependingOnRaces;
         this.resolutionFailed = resolutionFailed;
     }
 
-    public StartTimeFinderResult(TimePoint startTime, Duration startTimeDiff) {
-        this(/* racesDependingOn */ Collections.<SimpleRaceLogIdentifier>emptyList(), startTime, startTimeDiff);
+    public StartTimeFinderResult(TimePoint startTime, Duration startTimeDiff, AbstractLogEventAuthor raceLogEventAuthor) {
+        this(/* racesDependingOn */ Collections.<SimpleRaceLogIdentifier>emptyList(), startTime, startTimeDiff, raceLogEventAuthor);
     }
 
+    /**
+     * When a race log event provides the start time described by this result object then this field tells
+     * the event's author. In particular, clients can see the priority from this. This may come in handy
+     * when deriving other events from the "set start time" event, such as a tracking time event.
+     * 
+     * @return {@code null} in case no author is known, e.g., if no start time was set in the race log
+     */
+    public AbstractLogEventAuthor geStartTimeEventAuthor() {
+        return startTimeEventAuthor;
+    }
+    
     /**
      * @return {@code null} if the start time was resolved; a reason for failure to resolve otherwise
      */

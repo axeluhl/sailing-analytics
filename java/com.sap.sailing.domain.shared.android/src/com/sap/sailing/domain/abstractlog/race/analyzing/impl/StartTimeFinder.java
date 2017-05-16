@@ -30,13 +30,13 @@ public class StartTimeFinder extends RaceLogAnalyzer<StartTimeFinderResult> {
             for (RaceLogEvent event : getPassEventsDescending()) {
                 if (event instanceof RaceLogStartTimeEvent) {
                     TimePoint startTime = ((RaceLogStartTimeEvent) event).getStartTime();
-                    return new StartTimeFinderResult(dependingOnRaces, startTime, null);
+                    return new StartTimeFinderResult(dependingOnRaces, startTime, null, event.getAuthor());
                 } else if (event instanceof RaceLogDependentStartTimeEvent) {
                     DependentStartTimeResolver dependentStartTimeResolver = new DependentStartTimeResolver(resolver);
                     return dependentStartTimeResolver.internalResolve((RaceLogDependentStartTimeEvent) event, dependingOnRaces);
                 }
             }
-            return new StartTimeFinderResult(dependingOnRaces, null, null, ResolutionFailed.NO_START_TIME_SET);
+            return new StartTimeFinderResult(dependingOnRaces, null, null, ResolutionFailed.NO_START_TIME_SET, /* raceLogEventAuthor */ null);
         } finally {
             log.unlockAfterRead();
         }
