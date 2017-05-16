@@ -268,10 +268,16 @@ public class MarkPassingCalculator {
                                     finished = true;
                                     break;
                                 } else {
-                                    fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
-                                            smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
-                                            suppressedMarkPassings, unsuppressedMarkPassings, finder, chooser);
-                                    hasUnprocessedUpdates = true;
+                                    try {
+                                        fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
+                                                smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
+                                                suppressedMarkPassings, unsuppressedMarkPassings, finder, chooser);
+                                        hasUnprocessedUpdates = true;
+                                    } catch (Exception e) {
+                                        logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+
+                                                " while applying update " +fixInsertion+": "+ e.getMessage()+
+                                                ". Continuing with further updates...", e);
+                                    }
                                 }
                             }
                         }
