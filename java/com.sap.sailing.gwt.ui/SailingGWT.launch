@@ -14,10 +14,10 @@
 <listEntry value="com.sap.sailing.gwt.ui.Leaderboard"/>
 <listEntry value="com.sap.sailing.gwt.ui.Simulator"/>
 <listEntry value="com.sap.sailing.gwt.ui.YoutubePopup"/>
-<listEntry value="com.sap.sailing.gwt.AutoPlay"/>
+<listEntry value="com.sap.sailing.gwt.autoplay.AutoPlay"/>
 <listEntry value="com.sap.sailing.gwt.ui.AdminConsole"/>
 <listEntry value="com.sap.sailing.gwt.home.Home"/>
-<listEntry value="com.sap.sailing.gwt.AutoPlay"/>
+<listEntry value="com.sap.sailing.gwt.autoplay.AutoPlay"/>
 </listAttribute>
 <stringAttribute key="com.google.gwt.eclipse.core.URL" value="/gwt/Home.html"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
