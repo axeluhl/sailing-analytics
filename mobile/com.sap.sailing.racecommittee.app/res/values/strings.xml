@@ -554,6 +554,7 @@
 
     <string name="publish_button_empty">Publish</string>
     <string name="publish_button_other">Publish (%d)</string>
+    <string name="publish_clicked">Results will be send</string>
     <string name="competitor_count">%d</string>
 
 </resources>
