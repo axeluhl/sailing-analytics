@@ -113,11 +113,15 @@ public class FoilingData {
                 			BravoFix bravoFixAtTimepoint = sensorTrack.getFirstFixAtOrAfter(timePointToConsider);
                 			if (bravoFixAtTimepoint != null) {
                 				SpeedWithBearing speedOfCompetitor = trackedRace.getTrack(competitor).getEstimatedSpeed(timePointToConsider);
-                				double rideHeight = bravoFixAtTimepoint.get(BravoSensorDataMetadata.RIDE_HEIGHT);
-                				double rideHeightPort = bravoFixAtTimepoint.get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL);
-                				double rideHeightStarboard = bravoFixAtTimepoint.get(BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL);
-                				double heel = bravoFixAtTimepoint.get(BravoSensorDataMetadata.HEEL);
-                				double pitch = bravoFixAtTimepoint.get(BravoSensorDataMetadata.PITCH);
+                                    double rideHeight = bravoFixAtTimepoint
+                                            .get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnName());
+                                    double rideHeightPort = bravoFixAtTimepoint
+                                            .get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnName());
+                                    double rideHeightStarboard = bravoFixAtTimepoint
+                                            .get(BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnName());
+                                    double heel = bravoFixAtTimepoint.get(BravoSensorDataMetadata.HEEL.getColumnName());
+                                    double pitch = bravoFixAtTimepoint
+                                            .get(BravoSensorDataMetadata.PITCH.getColumnName());
                 				WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> windFix = windTrack.getAveragedWindWithConfidence(null, timePointToConsider);
                 				SpeedWithConfidence<TimePoint> windFixSpeed = new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(windFix.getObject().getKnots()), windFix.getConfidence(), timePointToConsider);
                 				Bearing windFixBearing = windFix.getObject().getBearing();
