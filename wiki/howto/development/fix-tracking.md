@@ -32,7 +32,7 @@ The concrete MongoDB-based implementation of `SensorFixStore` is `MongoSensorFix
 
 The persistence and domain model fixes build upon on different type of Fixes: 
 while we persist a certain sensor data in the persistence layer, the domain model can define a typed view on top of the underlying sensor datatype.
- 
+ lass 
 There are different ways to implement extensions to handle new types of fixes.
 
 The persistence defined by `SensorFixStore` implementations can be extended to store custom fix implementations.
@@ -95,3 +95,27 @@ Further `DoubleVectorFixImporter` implementations can be registered to the OSGi 
 
 The importer to be used to process the file is defined by the user by choosing the appropriate importer in the admin console upload formular. 
 The list available importer types is retrieved dynamically in the administration console. Therefore, simply registering an importer as a service in the OSGi registry makes it available in the admin ui.
+
+## Bringing sensor data to the frontend
+
+Usually, the imported fixes also should be displayed in the leaderboard and eventually in the competitor chart.
+
+Further reading can be found [here](../../info/landscape/typical-development-scenarios.html) in the sections:
+
+* Adding a Column to the Leaderboard
+* Adding new available information to the competitor chart
+
+The currently implemented bravo fixes showcase how this information can be brought to the frontend, in short:
+
+* add information to DetailType and DetailTypeFormatter and to the StringMessages accordingly
+* add information to BravoFix and BravoFixImpl
+* add information to BravoFixTrack and BravoFixTrackImpl
+* add information to LegEntryDTO 
+* add information to LeaderboardPanel
+* add information to AbstractSimpleLeaderboardImpl
+* create column classes in LegColumn for the new DetailTypes, eventually create new column classes and renderers if required
+* add information to TrackedLegOfCompetitorImpl
+* add information to the list of available types in MultiCompetitorRaceChartSettingsComponent
+* make SailingServiceImpl.getCompetitorRaceDataEntry provide the data for the requested detailtype
+
+
