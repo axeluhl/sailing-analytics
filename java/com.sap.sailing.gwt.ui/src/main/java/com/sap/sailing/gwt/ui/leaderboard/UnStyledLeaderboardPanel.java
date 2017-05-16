@@ -218,6 +218,8 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
     private LeaderboardDTO leaderboard;
 
     private final TotalRankColumn totalRankColumn;
+    
+    private RaceRankColumn raceRankColumn;
 
     private final SelectionCheckboxColumn<LeaderboardRowDTO> selectionCheckboxColumn;
 
@@ -393,6 +395,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
      * of the viewport. See {@link OverlayAssistantScrollPanel}.
      */
     private final boolean enableSyncedScroller;
+    private boolean showRaceRankColumn = true;
 
     public UnStyledLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
@@ -485,6 +488,9 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
         case LAST_N:
             setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
             break;
+        }
+        if(preSelectedRace != null){
+            raceRankColumn = new RaceRankColumn(preSelectedRace);
         }
         totalRankColumn = new TotalRankColumn();
         leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
@@ -2021,6 +2027,51 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
         public void updateMinMax() {
         }
     }
+    
+    private class RaceRankColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
+        public RaceRankColumn(RegattaAndRaceIdentifier preSelectedRace) {
+            super(new TextCell(), SortingOrder.ASCENDING, UnStyledLeaderboardPanel.this);
+            setHorizontalAlignment(ALIGN_CENTER);
+            setSortable(true);
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            int raceRank = getRacePlace(object);
+            return "" + (raceRank == 0 ? "-" : raceRank);
+        }
+
+        private int getRacePlace(LeaderboardRowDTO object) {
+            RaceColumn<?> raceColumn = getRaceColumnByRaceName(preSelectedRace.getRaceName());
+            List<CompetitorDTO> competitorsSorted = getLeaderboard().getCompetitorsFromBestToWorst(raceColumn.race);
+            int raceRank = -1; 
+            for(int i = 0;i<competitorsSorted.size();i++){
+                if(object.competitor.equals(competitorsSorted.get(i))){
+                    raceRank = i+1;
+                    break;
+                }
+            }
+            return raceRank;
+        }
+
+        @Override
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
+                @Override
+                public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
+                    int racePlace1 = getRacePlace(o1);
+                    int racePlace2 = getRacePlace(o2);
+                    return racePlace1 == 0 ? racePlace2 == 0 ? 0 : 1 : racePlace2 == 0 ? -1 : racePlace1 - racePlace2;
+                }
+            };
+        }
+
+        @Override
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.raceRankShort()),
+                    stringMessages.raceRank());
+        }
+    }
 
     private class TotalRankColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
         public TotalRankColumn() {
@@ -2762,6 +2813,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
 
     private void adjustColumnLayout(LeaderboardDTO leaderboard) {
         int columnIndex = 0;
+        columnIndex = ensureRaceRankColumn(columnIndex);
         columnIndex = ensureSelectionCheckboxColumn(columnIndex);
         columnIndex = ensureRankColumn(columnIndex);
         columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
@@ -3052,6 +3104,35 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
             }
         }
         return indexOfNextColumn;
+    }
+    
+    private int ensureRaceRankColumn(int rankColumnIndex) {
+        boolean required = isShowRaceRankColumn() && preSelectedRace != null;
+        final int indexOfNextColumn = required ? 1 : 0;
+        if (getLeaderboardTable().getColumnCount() > rankColumnIndex) {
+            if(required){
+                if (getLeaderboardTable().getColumn(rankColumnIndex) != getRaceRankColumn()) {
+                    insertColumn(rankColumnIndex, getRaceRankColumn());
+                }
+            }else {
+                if (getLeaderboardTable().getColumn(rankColumnIndex) == getRaceRankColumn()) {
+                    removeColumn(rankColumnIndex);
+                }
+            }
+        }else{
+            if(required){
+                insertColumn(rankColumnIndex, getRaceRankColumn());
+            }
+        }
+        return indexOfNextColumn;
+    }
+
+    private AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> getRaceRankColumn() {
+        return raceRankColumn;
+    }
+
+    private boolean isShowRaceRankColumn() {
+        return showRaceRankColumn;
     }
 
     /**

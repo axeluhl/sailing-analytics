@@ -1806,4 +1806,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String nothingUpcoming();
 
     String chooseAConfiguration();
+    String raceRankShort();
 }
