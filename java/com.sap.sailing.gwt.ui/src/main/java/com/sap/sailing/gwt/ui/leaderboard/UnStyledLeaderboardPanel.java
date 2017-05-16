@@ -49,7 +49,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -331,7 +330,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
      */
     private final RegattaAndRaceIdentifier preSelectedRace;
 
-    private final FlowPanel contentPanel = new FlowPanel();
+    protected final FlowPanel contentPanel = new FlowPanel();
 
     private HorizontalPanel refreshAndSettingsPanel;
     private Label scoreCorrectionLastUpdateTimeLabel;
@@ -395,7 +394,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
      * of the viewport. See {@link OverlayAssistantScrollPanel}.
      */
     private final boolean enableSyncedScroller;
-    private boolean showRaceRankColumn = true;
+    private boolean showRaceRankColumn = false;
 
     public UnStyledLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
@@ -576,7 +575,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
         leaderboardTable.getRowElement(selected).scrollIntoView();
     }
 
-    private Widget createToolbarPanel() {
+    protected Widget createToolbarPanel() {
         FlowPanel informationPanel = new FlowPanel();
         informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");
@@ -673,6 +672,9 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
     public void updateSettings(final LeaderboardSettings newSettings) {
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
+        
+        showRaceRankColumn = newSettings.isShowRaceRankColumn();
+        
         if (newSettings.getOverallDetailsToShow() != null) {
             selectedOverallDetailColumns.clear();
             selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
@@ -961,7 +963,6 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
 
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
-            ImageResourceRenderer renderer = new ImageResourceRenderer();
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
             final String flagImageURL = competitor.getFlagImageURL();
@@ -977,10 +978,11 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
             }
 
             if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\""
+                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\""+(18*getFlagScale())+"px\" height=\""+(12*getFlagScale())+"px\" title=\""
                         + competitor.getName() + "\"/>");
                 sb.appendHtmlConstant("&nbsp;");
             } else {
+                GWT.log("Flag here?");
                 final ImageResource flagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
                     flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
@@ -988,7 +990,8 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
                     flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (flagImageResource != null) {
-                    sb.append(renderer.render(flagImageResource));
+                    sb.appendHtmlConstant("<img src=\"" + flagImageResource.getSafeUri().asString() + "\" width=\""+(18*getFlagScale())+"px\" height=\""+(12*getFlagScale())+"px\" title=\""
+                            + competitor.getName() + "\"/>");
                     sb.appendHtmlConstant("&nbsp;");
                 }
             }
@@ -1185,6 +1188,10 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
                 DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL };
+    }
+
+    public int getFlagScale() {
+        return 1;
     }
 
     public static DetailType[] getAvailableRaceStartAnalysisColumnTypes() {
@@ -3377,7 +3384,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
                 autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
                 /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                isShowCompetitorSailId(), isShowCompetitorFullName());
+                isShowCompetitorSailId(), isShowCompetitorFullName(),isShowRaceRankColumn());
         return LeaderboardSettingsFactory.getInstance().keepDefaults(currentSettings, leaderboardSettings);
     }
 

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.shared;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.resources.LeaderboardTableResourcesSixty;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
@@ -37,6 +38,13 @@ public class SixtyInchLeaderBoard extends UnStyledLeaderboardPanel {
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
                 adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, resources,
                 componentResources, tableResources);
+        
+        Widget toolbarPanel = createToolbarPanel();
+        contentPanel.add(toolbarPanel);
     }
-
+    
+@Override
+public int getFlagScale() {
+    return 2;
+}
 }
