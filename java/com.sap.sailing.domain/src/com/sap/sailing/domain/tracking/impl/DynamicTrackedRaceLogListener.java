@@ -268,7 +268,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-        analyzeStartTime(event.getStartTime());
+        analyzeStartTime(event.getStartTime()); // TODO bug 4114: probably pass on the event's author with priority to ensure we can produce StartOfTracking event with same author
     }
 
     @Override

@@ -36,7 +36,6 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
@@ -85,7 +84,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         
         // test inference via race start/end time in racelog
         TimePoint expectedStartOfTracking = startOfRaceInRaceLog.minus(TrackedRace.START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
-        TimePoint expectedEndOfTracking = endOfRaceInRaceLog.plus(TrackedRace   .STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
+        TimePoint expectedEndOfTracking = endOfRaceInRaceLog.plus(TrackedRace.STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
         assertEquals(expectedStartOfTracking, trackedRace.getStartOfTracking());
         assertEquals(expectedEndOfTracking, trackedRace.getEndOfTracking());
         
@@ -115,6 +114,14 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         
         // shouldn't change when setting start/end of tracking
         setManualTrackingTimesOnTrackedRace(trackedRace, new MillisecondsTimePoint(500000), new MillisecondsTimePoint(600000));
+        assertEquals(startOfTrackingInRacelog, trackedRace.getStartOfTracking());
+        assertEquals(endOfTrackingInRacelog, trackedRace.getEndOfTracking());
+        
+        // bug 4114: now detach the race log and attach it again; this is expected to set the
+        // start of race from the race log which now is no longer expected to update the race log
+        // with new start/end of tracking times when there are already such explicit events:
+        trackedRace.detachRaceLog(raceLog.getId());
+        trackedRace.attachRaceLog(raceLog);
         assertEquals(startOfTrackingInRacelog, trackedRace.getStartOfTracking());
         assertEquals(endOfTrackingInRacelog, trackedRace.getEndOfTracking());
     }    
@@ -345,25 +352,4 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         assertEquals(newStartOfRace, oldAndNewStartTimeNotifiedByRace[1]);
         assertEquals(newStartOfRace, trackedRace.getStartOfRace());
     }    
-    
-
-    
-    
-    
-    
-    
-    public void setStartAndEndOfTrackingInRaceLog(TimePoint startOfTrackingInRacelog, TimePoint endOfTrackingInRacelog) {
-        raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTrackingInRacelog, author, 0));
-        raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTrackingInRacelog, author, 0));
-    }
-    
-    public void setStartAndEndOfRaceInRaceLog(TimePoint startTimeInRaceLog, TimePoint endTimeInRaceLog) {
-        raceLog.add(new RaceLogStartTimeEventImpl(startTimeInRaceLog, author, 0, startTimeInRaceLog));
-        raceLog.add(new RaceLogRaceStatusEventImpl(endTimeInRaceLog, endTimeInRaceLog, author, UUID.randomUUID(), 0, RaceLogRaceStatus.FINISHED));
-    }
-    
-    public void setManualTrackingTimesOnTrackedRace(DynamicTrackedRace trackedRace, TimePoint startTime, TimePoint endTime) {
-        trackedRace.setStartOfTrackingReceived(startTime);
-        trackedRace.setEndOfTrackingReceived(endTime);
-    }
 }
