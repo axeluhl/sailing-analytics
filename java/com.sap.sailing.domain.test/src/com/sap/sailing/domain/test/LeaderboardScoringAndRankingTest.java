@@ -65,7 +65,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBre
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie2017;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardCountingButNotRankingSuppressedImpl;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
@@ -90,9 +90,10 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         return new RegattaLeaderboardImpl(regatta, discardingRules);
     }
     
-    protected Leaderboard createRegattaLeaderboardCountingButNotRankingSuppressed(Regatta regatta, String leaderboardName, int[] discardingThresholds) {
+    protected DelegatingRegattaLeaderboardWithCompetitorElimination createDelegatingRegattaLeaderboardWithCompetitorElimination(
+            Regatta regatta, String leaderboardName, int[] discardingThresholds) {
         final RegattaLeaderboard fullLeaderboard = createLeaderboard(regatta, discardingThresholds);
-        return new RegattaLeaderboardCountingButNotRankingSuppressedImpl(fullLeaderboard, leaderboardName);
+        return new DelegatingRegattaLeaderboardWithCompetitorElimination(fullLeaderboard, leaderboardName);
     }
 
     @Test
@@ -693,7 +694,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
                 /* medal */ false, /* medal */ 0, "testTotalTimeNotCountedForRacesStartedLaterThanTimePointReqeusted",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
-        Leaderboard leaderboard = createRegattaLeaderboardCountingButNotRankingSuppressed(regatta, "Test not counting suppressed", /* discarding thresholds */ new int[0]);
+        DelegatingRegattaLeaderboardWithCompetitorElimination leaderboard = createDelegatingRegattaLeaderboardWithCompetitorElimination(regatta, "Test not counting suppressed", /* discarding thresholds */ new int[0]);
         @SuppressWarnings("unchecked")
         Map<Competitor, TimePoint>[] lastMarkPassingTimesForCompetitors = (Map<Competitor, TimePoint>[]) new HashMap<?, ?>[3];
         lastMarkPassingTimesForCompetitors[0] = new HashMap<>();
@@ -710,7 +711,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         lastMarkPassingTimesForCompetitors[2].put(c[2], finish);
         createAndAttachTrackedRacesWithStartTimeAndLastMarkPassingTimes(series.get(1), "Default",
                 new Competitor[][] { f1 }, new TimePoint[] { earlier, now, later }, lastMarkPassingTimesForCompetitors);
-        leaderboard.setSuppressed(c[1], true);
+        leaderboard.setEliminated(c[1], true);
         assertEquals(1.0, leaderboard.getTotalPoints(c[0], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);
         assertEquals(2.0, leaderboard.getTotalPoints(c[1], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);
         assertEquals(3.0, leaderboard.getTotalPoints(c[2], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);

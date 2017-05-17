@@ -1,30 +1,25 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -34,13 +29,11 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
-public class RegattaLeaderboardCountingButNotRankingSuppressedImpl implements RegattaLeaderboard {
+public class DelegatingRegattaLeaderboardWithCompetitorElimination extends AbstractLeaderboardWithCache implements RegattaLeaderboard {
     private static final long serialVersionUID = 8331154893189722924L;
     private final String name;
     private final RegattaLeaderboard fullLeaderboard;
@@ -56,7 +49,7 @@ public class RegattaLeaderboardCountingButNotRankingSuppressedImpl implements Re
      */
     private final ConcurrentHashMap<Competitor, Boolean> eliminatedCompetitors;
 
-    public RegattaLeaderboardCountingButNotRankingSuppressedImpl(RegattaLeaderboard fullLeaderboard, String name) {
+    public DelegatingRegattaLeaderboardWithCompetitorElimination(RegattaLeaderboard fullLeaderboard, String name) {
         this.name = name;
         this.fullLeaderboard = fullLeaderboard;
         this.eliminatedCompetitors = new ConcurrentHashMap<>();
@@ -119,13 +112,6 @@ public class RegattaLeaderboardCountingButNotRankingSuppressedImpl implements Re
         fullLeaderboard.deregisterCompetitors(competitor);
     }
 
-    public LeaderboardDTO computeDTO(TimePoint timePoint, Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            boolean addOverallDetails, boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry,
-            DomainFactory baseDomainFactory, boolean fillTotalPointsUncorrected) throws NoWindException {
-        return fullLeaderboard.computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, fillTotalPointsUncorrected);
-    }
-
     public Iterable<Competitor> getCompetitors() {
         return new ObscuringIterable<>(fullLeaderboard.getCompetitors(), eliminatedCompetitors.keySet());
     }
@@ -139,7 +125,7 @@ public class RegattaLeaderboardCountingButNotRankingSuppressedImpl implements Re
     }
     
     public boolean isEliminated(Competitor competitor) {
-        return eliminatedCompetitors.contains(competitor);
+        return eliminatedCompetitors.containsKey(competitor);
     }
 
     public Iterable<Competitor> getAllCompetitors() {
@@ -244,7 +230,7 @@ public class RegattaLeaderboardCountingButNotRankingSuppressedImpl implements Re
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         final List<Competitor> result = new ArrayList<>();
         for (final Competitor c : fullLeaderboard.getCompetitorsFromBestToWorst(timePoint)) {
-            if (!isSuppressed(c)) {
+            if (!isEliminated(c)) {
                 result.add(c);
             }
         }
@@ -358,19 +344,6 @@ public class RegattaLeaderboardCountingButNotRankingSuppressedImpl implements Re
         return fullLeaderboard.getAverageSpeedOverGround(competitor, timePoint);
     }
 
-    public Duration getTotalTimeSailedInLegType(Competitor competitor, LegType legType, TimePoint timePoint)
-            throws NoWindException {
-        return fullLeaderboard.getTotalTimeSailedInLegType(competitor, legType, timePoint);
-    }
-
-    public Duration getTotalTimeSailed(Competitor competitor, TimePoint timePoint) {
-        return fullLeaderboard.getTotalTimeSailed(competitor, timePoint);
-    }
-
-    public Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint) {
-        return fullLeaderboard.getTotalDistanceTraveled(competitor, timePoint);
-    }
-
     public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider,
             TimePoint timePoint) throws NoWindException {
         return fullLeaderboard.getNetPoints(competitor, raceColumn, raceColumnsToConsider, timePoint);
@@ -389,18 +362,6 @@ public class RegattaLeaderboardCountingButNotRankingSuppressedImpl implements Re
         return fullLeaderboard.getDefaultCourseArea();
     }
 
-    public void destroy() {
-        fullLeaderboard.destroy();
-    }
-
-    public LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
-            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
-            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory,
-            boolean fillTotalPointsUncorrected) throws NoWindException, InterruptedException, ExecutionException {
-        return fullLeaderboard.getLeaderboardDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
-                addOverallDetails, trackedRegattaRegistry, baseDomainFactory, fillTotalPointsUncorrected);
-    }
-
     public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {
         return fullLeaderboard.getNumberOfCompetitorsInLeaderboardFetcher();
     }
@@ -411,5 +372,10 @@ public class RegattaLeaderboardCountingButNotRankingSuppressedImpl implements Re
 
     public BoatClass getBoatClass() {
         return fullLeaderboard.getBoatClass();
+    }
+
+    @Override
+    protected LeaderboardType getLeaderboardType() {
+        return LeaderboardType.RegattaLeaderboard;
     }
 }

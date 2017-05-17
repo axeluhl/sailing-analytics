@@ -308,7 +308,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
     
     /**
-     * Returns the total rank of the given competitor.
+     * Returns the total rank of the given competitor or {@code 0} if no rank can be determined for
+     * the {@code competitor} in this leaderboard.
      */
     int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
