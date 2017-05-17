@@ -16,15 +16,16 @@
     
     .newsBox {
     	position: absolute;
-    	width: 400px;
+    	width: 600px;
     	right: 100px;
     	top: 100px;
     	bottom: 100px;
-    	background-color: white;
+    	background-color: rgba(255,255,255,0.9);
     	border-radius: 10px;
-    	padding: 20px;
-
-        font-size: 30px;
+    	padding: 50px;
+	    font-size: 40px !important;
+	    font-family: 'Open Sans', sans-serif !important;
+        
     }
     </ui:style>
     <g:SimplePanel styleName="{res.style.slideBackground}"
