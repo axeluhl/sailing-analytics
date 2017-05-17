@@ -475,12 +475,12 @@ public class RaceContext {
         // TODO do not calculate the winner if the blue flag is currently shown.
         try {
             TimePoint finishTime = getLiveTimePoint();
-            List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
-            if (competitors == null || competitors.isEmpty()) {
+            Iterable<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
+            if (competitors == null || Util.isEmpty(competitors)) {
                 return null;
             }
             if (Util.size(raceColumn.getFleets()) == 1) {
-                return new SimpleCompetitorDTO(competitors.get(0));
+                return new SimpleCompetitorDTO(competitors.iterator().next());
             }
             for (Competitor competitor : competitors) {
                 if (isCompetitorInFleet(competitor)) {
