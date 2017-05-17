@@ -82,6 +82,7 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch ; public class Snipp
 	border-left: 1px solid #d6d6d6;
 	padding: 7px;
 	white-space: nowrap;
+	padding-top: 40px;
 }
 
 .cellTableCheckboxColumnCell {

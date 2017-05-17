@@ -38,7 +38,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
         selectionTimer = new Timer() {
             @Override
             public void run() {
-                selectNext();
+//                selectNext();
             }
         };
     }
@@ -109,10 +109,10 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
         }
 
         final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, null, null,
-        null, racesToShow, null, false, null, null,
+        null, racesToShow, null, false, null, lifeRace.getRaceName(),
         /* ascending */ true, /* updateUponPlayStateChange */ true, RaceColumnSelectionStrategies.EXPLICIT,
-        /* showAddedScores */ false, /* showOverallRacesCompleted */ false, false,
-        true);
+        /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true,
+        false,true);
 
 
         com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(
@@ -120,10 +120,10 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-                false, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
+                true, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter,
                 StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, false);
-
+        
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
     }
