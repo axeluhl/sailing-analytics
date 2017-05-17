@@ -11,12 +11,12 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactor
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardComponentContext.OnSettingsPatchedCallback;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
  * Puts the race viewer in a mode where the user can see what may be called the "Winning Lanes." For this,
@@ -48,10 +48,10 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_TIME_TRAVELED);
         final LeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
-        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsPatchedCallback<LeaderboardSettings>() {
+        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<LeaderboardSettings>() {
 
             @Override
-            public void settingsPatched(LeaderboardSettings patchedSettings) {
+            public void onSettingsReloaded(LeaderboardSettings patchedSettings) {
                 leaderboardPanel.updateSettings(patchedSettings);
             }
             
@@ -77,10 +77,10 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.getManeuverTypesToShow(),
                 defaultSettings.isShowDouglasPeuckerPoints());
         
-        ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsPatchedCallback<RaceMapSettings>() {
+        ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
 
             @Override
-            public void settingsPatched(RaceMapSettings patchedSettings) {
+            public void onSettingsReloaded(RaceMapSettings patchedSettings) {
                 raceMap.updateSettings(patchedSettings);
             }
             

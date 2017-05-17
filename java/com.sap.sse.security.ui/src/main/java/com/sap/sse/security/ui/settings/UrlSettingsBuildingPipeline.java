@@ -7,6 +7,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
 import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
 import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
+import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
 
 /**
  * Settings building pipeline which is only capable of reading settings from URL. Conversion to stored settings
@@ -55,7 +56,16 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
      * representation, because it is supposed to be used by read-only {@link ComponentContext} implementations.
      */
     @Override
-    public <CS extends Settings> StorableRepresentationOfDocumentAndUserSettings getStorableSettingsRepresentation(CS newSettings, CS systemDefaultSettings, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
+    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings, CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
+        throw new UnsupportedOperationException("This pipeline does not support JSON conversion");
+    }
+    
+    /**
+     * This implementation does not provide support for conversion of settings objects to storable settings
+     * representation, because it is supposed to be used by read-only {@link ComponentContext} implementations.
+     */
+    @Override
+    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(CS newSettings, CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
         throw new UnsupportedOperationException("This pipeline does not support JSON conversion");
     }
 

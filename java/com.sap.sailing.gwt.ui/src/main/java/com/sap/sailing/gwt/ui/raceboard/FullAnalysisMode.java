@@ -7,9 +7,9 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardComponentContext.OnSettingsPatchedCallback;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
  * This mode best applies to non-live "replay" races. It sets the time to the "end of race" time point and makes sure
@@ -53,10 +53,10 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
         final LeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
-        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsPatchedCallback<LeaderboardSettings>() {
+        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<LeaderboardSettings>() {
 
             @Override
-            public void settingsPatched(LeaderboardSettings patchedSettings) {
+            public void onSettingsReloaded(LeaderboardSettings patchedSettings) {
                 leaderboardPanel.updateSettings(patchedSettings);
             }
             

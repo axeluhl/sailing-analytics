@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentUtils;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
@@ -57,41 +58,26 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
     public <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
             StorableRepresentationOfDocumentAndUserSettings settingsRepresentations,
             List<String> absolutePathOfComponentWithSettings) {
-        CS effectiveSettings = systemDefaultSettings;
-        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.SYSTEM_DEFAULTS,
+        CS effectiveSettings = applyPatchesForPipelineLevel(systemDefaultSettings, PipelineLevel.SYSTEM_DEFAULTS,
                 absolutePathOfComponentWithSettings, patchesForLoadingSettings);
-        //TODO use the outcommented code to implement the pipeline according to Axel's requirement
-        // if (settingsRepresentations.hasStoredUserSettings()) {
-        // effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
-        // effectiveSettings, settingsRepresentations.getUserSettingsRepresentation());
-        // }
-        // effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
-        // absolutePathOfComponentWithSettings, patchesForLoadingSettings);
-        // if (settingsRepresentations.hasStoredDocumentSettings()) {
-        // effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
-        // effectiveSettings, settingsRepresentations.getDocumentSettingsRepresentation());
-        // }
-        if (settingsRepresentations.hasStoredDocumentSettings()) {
-            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
-                    absolutePathOfComponentWithSettings, patchesForLoadingSettings);
-            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
-                    effectiveSettings, settingsRepresentations.getDocumentSettingsRepresentation());
-        } else if (settingsRepresentations.hasStoredUserSettings()) {
+        if (settingsRepresentations.hasStoredUserSettings()) {
             effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
                     effectiveSettings, settingsRepresentations.getUserSettingsRepresentation());
-            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
-                    absolutePathOfComponentWithSettings, patchesForLoadingSettings);
-        } else {
-            effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
-                    absolutePathOfComponentWithSettings, patchesForLoadingSettings);
         }
+        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
+                absolutePathOfComponentWithSettings, patchesForLoadingSettings);
+        if (settingsRepresentations.hasStoredDocumentSettings()) {
+            effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
+                    effectiveSettings, settingsRepresentations.getDocumentSettingsRepresentation());
+        }
+
         effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.DOCUMENT_DEFAULTS,
                 absolutePathOfComponentWithSettings, patchesForLoadingSettings);
         effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithUrlSettings(effectiveSettings);
         return effectiveSettings;
     }
 
-    private static <CS extends Settings> CS applyPatchesForPipelineLevel(CS currentSettings,
+    protected static <CS extends Settings> CS applyPatchesForPipelineLevel(CS currentSettings,
             PipelineLevel pipelineLevel, List<String> absolutePathOfComponentWithSettings,
             SettingsPatches settingsPatchesToConsider) {
         CS effectiveSettings = currentSettings;
@@ -119,60 +105,76 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
     }
 
     /**
-     * Converts the provided settings object into a JSON representation considering storing patches, which have been
-     * added to this pipeline instance.
+     * Converts the provided settings object into a storable settings representation without considering provided
+     * pipeline level and settings tree path.
      * 
      * @param settings
-     *            The settings to convert to JSON representation
+     *            The settings to convert to storable settings representation
      * @param pipelineLevel
      *            The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
-     * @param absolutePathOfComponentWithSettings
-     *            The path of the provided settings in the settings tree
-     * @return The stored settings representation of the provided settings
+     * @param path
+     *            The path of the settings in the settings tree
+     * @return The storable settings representation of the provided settings
      */
     @Override
-    public <CS extends Settings> StorableRepresentationOfDocumentAndUserSettings getStorableSettingsRepresentation(
-            CS newSettings, CS systemDefaultSettings,
-            StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation,
-            List<String> absolutePathOfComponentWithSettings) {
+    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings,
+            CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation,
+            List<String> path) {
+        CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);
+        pipelinedSettings = SettingsUtil.copyDefaults(newSettings, newInstance); // overrides values which are set to
+                                                                                 // default values
+        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.SYSTEM_DEFAULTS, path,
+                patchesForStoringSettings);
+        pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
 
-      //TODO use the outcommented code to implement the pipeline according to Axel's requirement
-//        systemDefaultSettings = applyPatchesForPipelineLevel(systemDefaultSettings, PipelineLevel.SYSTEM_DEFAULTS,
-//                absolutePathOfComponentWithSettings, patchesForStoringSettings);
-//
-//        CS pipelinedSettings = newSettings;
-//        SettingsDefaultValuesUtils.setDefaults(pipelinedSettings, systemDefaultSettings);
-//        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS,
-//                absolutePathOfComponentWithSettings, patchesForStoringSettings);
-//        StorableSettingsRepresentation userSettingsRepresentation = settingsRepresentationTransformer
-//                .convertToSettingsRepresentation(pipelinedSettings);
-//
-//        if (previousSettingsRepresentation.hasStoredUserSettings()) {
-//            CS previousUserSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
-//                    systemDefaultSettings, previousSettingsRepresentation.getUserSettingsRepresentation());
-//            SettingsDefaultValuesUtils.setDefaults(previousUserSettings, pipelinedSettings);
-//        }
-//        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.DOCUMENT_DEFAULTS,
-//                absolutePathOfComponentWithSettings, patchesForStoringSettings);
-//        StorableSettingsRepresentation documentSettingsRepresentation = settingsRepresentationTransformer
-//                .convertToSettingsRepresentation(pipelinedSettings);
-//        return new StorableRepresentationOfDocumentAndUserSettings(userSettingsRepresentation,
-//                documentSettingsRepresentation);
-        
-        CS pipelinedSettings = newSettings;
-        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.SYSTEM_DEFAULTS,
-              absolutePathOfComponentWithSettings, patchesForStoringSettings);
-        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS,
-              absolutePathOfComponentWithSettings, patchesForStoringSettings);
-        
-        StorableSettingsRepresentation userSettingsRepresentation = settingsRepresentationTransformer
-              .convertToSettingsRepresentation(pipelinedSettings);
-        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.DOCUMENT_DEFAULTS,
-              absolutePathOfComponentWithSettings, patchesForStoringSettings);
-        StorableSettingsRepresentation documentSettingsRepresentation = settingsRepresentationTransformer
-              .convertToSettingsRepresentation(pipelinedSettings);
-        return new StorableRepresentationOfDocumentAndUserSettings(userSettingsRepresentation,
-              documentSettingsRepresentation);
+        SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
+        SettingsUtil.copyValues(newSettings, pipelinedSettings);
+
+        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS, path,
+                patchesForStoringSettings);
+
+        return settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);
+    }
+
+    /**
+     * Converts the provided settings object into a storable settings representation without considering provided
+     * pipeline level and settings tree path.
+     * 
+     * @param settings
+     *            The settings to convert to storable settings representation
+     * @param pipelineLevel
+     *            The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
+     * @param path
+     *            The path of the settings in the settings tree
+     * @return The storable settings representation of the provided settings
+     */
+    @Override
+    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(
+            CS newSettings, CS newInstance,
+            StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
+        CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);
+        pipelinedSettings = SettingsUtil.copyDefaults(newSettings, newInstance); // overrides values which are set to
+                                                                                 // default values
+        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.SYSTEM_DEFAULTS, path,
+                patchesForStoringSettings);
+        pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
+
+        if (previousSettingsRepresentation.hasStoredUserSettings()) {
+            CS previousUserSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
+                    pipelinedSettings, previousSettingsRepresentation.getUserSettingsRepresentation());
+            previousUserSettings = applyPatchesForPipelineLevel(previousUserSettings, PipelineLevel.USER_DEFAULTS, path,
+                    patchesForStoringSettings);
+
+            pipelinedSettings = SettingsUtil.copyDefaultsFromValues(previousUserSettings, pipelinedSettings);
+        } else {
+            pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS, path,
+                    patchesForStoringSettings);
+            pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
+        }
+        pipelinedSettings = SettingsUtil.copyValues(newSettings, pipelinedSettings);
+        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.DOCUMENT_DEFAULTS, path,
+                patchesForStoringSettings);
+        return settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);
     }
 
     @SuppressWarnings("unchecked")
@@ -217,7 +219,7 @@ public class UserSettingsBuildingPipelineWithPatching extends UserSettingsBuildi
      * @author Vladislav Chumak
      *
      */
-    private static class SettingsPatches {
+    protected static class SettingsPatches {
 
         private Map<PipelineLevel, Map<List<String>, List<SettingsPatch<? extends Settings>>>> patchesForSettings = new HashMap<>();
 

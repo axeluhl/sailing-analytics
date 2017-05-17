@@ -2,7 +2,6 @@ package com.sap.sse.security.ui.settings;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
-import com.sap.sse.common.settings.util.SettingsMergeUtils;
 
 /**
  * Interface for a settings patch which may be applied to settings during its construction in

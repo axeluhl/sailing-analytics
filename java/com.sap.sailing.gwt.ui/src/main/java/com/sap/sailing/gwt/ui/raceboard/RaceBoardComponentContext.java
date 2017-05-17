@@ -3,17 +3,14 @@ package com.sap.sailing.gwt.ui.raceboard;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
-import com.sap.sse.common.settings.util.SettingsMergeUtils;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndPatching;
-import com.sap.sse.security.ui.settings.SettingsPatch;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 /**
@@ -28,7 +25,7 @@ import com.sap.sse.security.ui.settings.StoredSettingsLocation;
  * @see ComponentContextWithSettingsStorage
  *
  */
-public class RaceBoardComponentContext extends ComponentContextWithSettingsStorageAndPatching<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> {
+public class RaceBoardComponentContext extends ComponentContextWithSettingsStorageAndAdditionalSettingsLayers<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> {
 
     /**
      * @param rootLifecycle
@@ -85,88 +82,11 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
      *  </dd>
      * 
      * @param component The component which maintains the target settings for the provided settings patch
-     * @param additiveSettings The additiveSettings for settings patches (see description above)
+     * @param modeSettings The additiveSettings for settings patches (see description above)
      * @param patchCallback The callback which gets called when the new settings has been reloaded and patched with all patches including the new patch
      */
-    public<CS extends GenericSerializableSettings> void addModesPatching(Component<CS> component, CS additiveSettings, OnSettingsPatchedCallback<CS> patchCallback) {
-        addPatchForLoadingSettings(component, PipelineLevel.USER_DEFAULTS, new ModeLoadingSettingsPatch<>(additiveSettings));
-        addPatchForStoringSettings(component, PipelineLevel.DOCUMENT_DEFAULTS, new ModeStoringSettingsPatch<>(additiveSettings));
-        getInitialSettingsForComponent(component, new OnSettingsLoadedCallback<CS>() {
-
-            @Override
-            public void onError(Throwable caught, CS fallbackDefaultSettings) {
-                onSuccess(fallbackDefaultSettings);
-            }
-
-            @Override
-            public void onSuccess(CS settings) {
-                SettingsDefaultValuesUtils.keepDefaults(component.getSettings(), settings);
-                patchCallback.settingsPatched(settings);
-            }
-        });
-    }
-    
-    /**
-     * The callback interface used to accept the reloaded and patched settings.
-     * 
-     * @author Vladislav Chumak
-     *
-     * @param <CS> The type of the patched settings
-     */
-    public interface OnSettingsPatchedCallback<CS extends Settings> {
-        
-        /**
-         * Gets called, when the new patched settings are available.
-         * 
-         * @param patchedSettings The new patched settings
-         */
-        void settingsPatched(CS patchedSettings);
-    }
-    
-    /**
-     * Patch for Loading Settings pipeline
-     * 
-     * @author Vladislav Chumak
-     *
-     * @param <CS> The type of the settings to patch
-     */
-    private static class ModeLoadingSettingsPatch<CS extends GenericSerializableSettings> implements SettingsPatch<CS> {
-        
-        private final CS additiveSettings;
-
-        public ModeLoadingSettingsPatch(CS additiveSettings) {
-            this.additiveSettings = additiveSettings;
-        }
-
-        @Override
-        public CS patchSettings(CS settingsToPatch) {
-            SettingsMergeUtils.mergeSettings(additiveSettings, settingsToPatch);
-            return settingsToPatch;
-        }
-        
-    }
-    
-    /**
-     * Patch for Storing Settings pipeline
-     * 
-     * @author Vladislav Chumak
-     *
-     * @param <CS> The type of the settings to patch
-     */
-    private static class ModeStoringSettingsPatch<CS extends GenericSerializableSettings> implements SettingsPatch<CS> {
-        
-        private final CS contextSpecificDefaults;
-
-        public ModeStoringSettingsPatch(CS contextSpecificDefaults) {
-            this.contextSpecificDefaults = contextSpecificDefaults;
-        }
-
-        @Override
-        public CS patchSettings(CS settingsToPatch) {
-            SettingsMergeUtils.mergeDefaults(contextSpecificDefaults, settingsToPatch);
-            return settingsToPatch;
-        }
-        
+    public<CS extends GenericSerializableSettings> void addModesPatching(Component<CS> component, CS modeSettings, OnSettingsReloadedCallback<CS> patchCallback) {
+        super.addAdditionalSettingsLayerForComponent(component, PipelineLevel.USER_DEFAULTS, modeSettings, patchCallback);
     }
 
 }

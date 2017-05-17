@@ -44,6 +44,21 @@ public interface SettingsBuildingPipeline {
      *            The settings tree path of provided settings
      * @return The storable settings representation of provided settings
      */
-    public <CS extends Settings> StorableRepresentationOfDocumentAndUserSettings getStorableSettingsRepresentation(CS newSettings, CS systemDefaultSettings, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path);
+    <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings, CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path);
+    
+    /**
+     * Converts the provided settings according to the storage scope and the settings tree path of provided settings.
+     * This method implements the storable settings representation building pipeline which is used for settings storing
+     * operations.
+     * 
+     * @param settings
+     *            The settings to convert to storable representation
+     * @param pipelineLevel
+     *            The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
+     * @param path
+     *            The settings tree path of provided settings
+     * @return The storable settings representation of provided settings
+     */
+    <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(CS newSettings, CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path);
 
 }

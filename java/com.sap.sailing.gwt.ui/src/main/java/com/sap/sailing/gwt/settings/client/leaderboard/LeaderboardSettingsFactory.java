@@ -6,6 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 
 /**
@@ -23,7 +24,7 @@ public class LeaderboardSettingsFactory {
     
     public LeaderboardSettings createNewDefaultSettingsWithRaceColumns(List<String> namesOfRaceColumns) {
         LeaderboardSettings leaderboardSettings = new LeaderboardSettings(namesOfRaceColumns);
-        SettingsDefaultValuesUtils.setDefaults(leaderboardSettings, leaderboardSettings);
+        SettingsUtil.copyDefaults(leaderboardSettings, leaderboardSettings);
         return leaderboardSettings;
     }
  

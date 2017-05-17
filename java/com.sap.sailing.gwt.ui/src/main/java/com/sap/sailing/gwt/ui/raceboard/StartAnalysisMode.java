@@ -21,12 +21,12 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardComponentContext.OnSettingsPatchedCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
  * The start analysis mode makes the competitor chart visible and sets it to speed over ground; the
@@ -82,10 +82,10 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.getManeuverTypesToShow(),
                 defaultSettings.isShowDouglasPeuckerPoints());
         
-        ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsPatchedCallback<RaceMapSettings>() {
+        ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
 
             @Override
-            public void settingsPatched(RaceMapSettings patchedSettings) {
+            public void onSettingsReloaded(RaceMapSettings patchedSettings) {
              // try to update the settings once; the problem is the "wind up" display; it changes pan/zoom
                 // which is a major source of instability for the map. Going twice in the map idle event handler
                 // to ensure the settings are really applied.
@@ -140,10 +140,10 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                                 final MultiCompetitorRaceChartSettings additiveSettings = new MultiCompetitorRaceChartSettings(
                                         new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                                         /* no second series */ null);
-                                ((RaceBoardComponentContext) competitorChart.getComponentContext()).addModesPatching(competitorChart, additiveSettings, new OnSettingsPatchedCallback<MultiCompetitorRaceChartSettings>() {
+                                ((RaceBoardComponentContext) competitorChart.getComponentContext()).addModesPatching(competitorChart, additiveSettings, new OnSettingsReloadedCallback<MultiCompetitorRaceChartSettings>() {
 
                                     @Override
-                                    public void settingsPatched(MultiCompetitorRaceChartSettings patchedSettings) {
+                                    public void onSettingsReloaded(MultiCompetitorRaceChartSettings patchedSettings) {
                                         SettingsDefaultValuesUtils.keepDefaults(competitorChart.getSettings(), patchedSettings);
                                         competitorChart.updateSettings(patchedSettings);
                                     }
@@ -190,10 +190,10 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.START_TACK);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
         final LeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
-        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsPatchedCallback<LeaderboardSettings>() {
+        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<LeaderboardSettings>() {
 
             @Override
-            public void settingsPatched(LeaderboardSettings patchedSettings) {
+            public void onSettingsReloaded(LeaderboardSettings patchedSettings) {
                 leaderboardPanel.updateSettings(patchedSettings);
             }
             

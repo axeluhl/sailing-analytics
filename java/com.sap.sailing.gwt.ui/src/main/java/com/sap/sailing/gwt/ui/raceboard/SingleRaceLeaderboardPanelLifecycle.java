@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 
 public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
@@ -43,7 +44,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 /*showCompetitorSailIdColumn*/ true,
                 /* don't showCompetitorFullNameColumn in case screen is so small that we don't
                  * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard);
-        SettingsDefaultValuesUtils.setDefaults(settings, settings);
+        SettingsUtil.copyDefaultsFromValues(settings, settings);
         
         return settings;
     }

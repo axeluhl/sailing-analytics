@@ -45,34 +45,4 @@ public class SettingsDefaultValuesUtils {
         newSettings.setValue(originalValue);
     }
 
-    public static void setDefaults(GenericSerializableSettings defaultSettings, GenericSerializableSettings settingsToPatch) {
-        for (Map.Entry<String, Setting> entry : defaultSettings.getChildSettings().entrySet()) {
-            Setting defaultSetting = entry.getValue();
-            Setting settingToPatch = settingsToPatch.getChildSettings().get(entry.getKey());
-            if (defaultSetting instanceof ValueSetting) {
-                setDefaults((ValueSetting<?>) defaultSetting, (ValueSetting<?>) settingToPatch);
-            } else if (defaultSetting instanceof ValueCollectionSetting) {
-                setDefaults((ValueCollectionSetting<?>) defaultSetting, (ValueCollectionSetting<?>) settingToPatch);
-            } else if (defaultSetting instanceof GenericSerializableSettings) {
-                setDefaults((GenericSerializableSettings) defaultSetting, (GenericSerializableSettings) settingToPatch);
-            } else {
-                throw new IllegalStateException("Unknown Setting type");
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static<T> void setDefaults(ValueCollectionSetting<?> defaultSetting, ValueCollectionSetting<T> settingToPatch) {
-        Iterable<T> originalValues = settingToPatch.getValues();
-        settingToPatch.setDefaultValues((Iterable<T>) defaultSetting.getValues());
-        settingToPatch.setValues(originalValues);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static<T> void setDefaults(ValueSetting<?> defaultSetting, ValueSetting<T> settingToPatch) {
-        T originalValue = settingToPatch.getValue();
-        settingToPatch.setDefaultValue((T) defaultSetting.getValue());
-        settingToPatch.setValue(originalValue);
-    }
-    
 }
