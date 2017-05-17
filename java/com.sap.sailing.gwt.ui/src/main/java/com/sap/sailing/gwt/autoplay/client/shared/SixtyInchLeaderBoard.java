@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.shared;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -40,6 +42,7 @@ public class SixtyInchLeaderBoard extends UnStyledLeaderboardPanel {
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
                 showCompetitorFilterStatus, enableSyncScroller, resources, componentResources, tableResources);
 
+        getLeaderboardTable().getElement().getStyle().setMarginTop(0, Unit.PX);
         Widget toolbarPanel = createToolbarPanel();
         contentPanel.add(toolbarPanel);
         playPause.setVisible(false);
@@ -74,4 +77,16 @@ public class SixtyInchLeaderBoard extends UnStyledLeaderboardPanel {
         updateToolbar(leaderboard);
     }
 
+    protected void processStyleForRaceColumnWithoutReasonForMaxPoints(boolean isDiscarded, SafeStylesBuilder ssb) {
+        if (isDiscarded) {
+            ssb.opacity(0.5d);
+        } else {
+            // we don't bold...
+            ssb.appendTrustedString("font-weight:300;");
+        }
+    }
+
+    protected void processStyleForTotalNetPointsColumn(String textColor, SafeStylesBuilder ssb) {
+        ssb.trustedColor(textColor);
+    }
 }
