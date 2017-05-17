@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
@@ -34,6 +35,7 @@ import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
+import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -45,7 +47,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
-public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTrackImpl<ItemType, FixType>
+public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTrackImpl<ItemType, FixType>
         implements GPSFixTrack<ItemType, FixType> {
     private static final Logger logger = Logger.getLogger(GPSFixTrackImpl.class.getName());
     private static final long serialVersionUID = 2115321069242514378L;
@@ -121,8 +123,25 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
     private int estimatedSpeedCacheHits;
     private int estimatedSpeedCacheMisses;
     
-    public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
-        this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
+    /**
+     * If {@code true}, {@link Wind} fixes will be compacted in a way that they remain precisely
+     * equal to their original, without rounding or range limitations different from those of the
+     * original {@link Wind} fix. Lossy compaction, in contrast, may use a more compact form that,
+     * however, has stricter limits on ranges and precisions. See {@link CompactPositionHelper} for
+     * details on lossy compaction.
+     */
+    private final boolean losslessCompaction;
+    
+    /**
+     * @param losslessCompaction
+     *            If {@code true}, {@link Wind} fixes will be compacted in a way that they remain precisely equal to
+     *            their original, without rounding or range limitations different from those of the original
+     *            {@link Wind} fix. Lossy compaction, in contrast, may use a more compact form that, however, has
+     *            stricter limits on ranges and precisions. See {@link CompactPositionHelper} for details on lossy
+     *            compaction.
+     */
+    protected GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, boolean losslessCompaction) {
+        this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING, losslessCompaction);
     }
     
     /**
@@ -130,7 +149,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
      *            if <code>null</code>, any fix speed will be accepted as long as fix-provided speed (if any) and
      *            inferred speed can be matched.
      */
-    public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
+    protected GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening, boolean losslessCompaction) {
         super(trackedItem, /* nameForReadWriteLock */ GPSFixTrackImpl.class.getSimpleName()
                 + (trackedItem == null ? "" : (" for " + trackedItem.toString())));
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
@@ -139,8 +158,13 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
         this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
         this.maxSpeedCache = createMaxSpeedCache();
         this.validityCachingSuspended = false;
+        this.losslessCompaction = losslessCompaction;
     }
-    
+
+    protected boolean isLosslessCompaction() {
+        return losslessCompaction;
+    }
+
     @Override
     public void suspendValidityCaching() {
         validityCachingSuspended = true;
@@ -738,7 +762,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
             }
             if (intervalStart == null) {
                 if (beforeFixIter.hasNext()) {
-                    // No before fix within half averaging interval, but there is one further away; is its next neighbour even further away?
+                    // No before fix within half averaging interval, but there is one further away; is its next neighbor even further away?
                     // If so, or no more neighbours are found, it's affected and marks the invalidation interval start; otherwise, fix'
                     // time point is the invalidation interval start
                     TimePoint intervalStartCandidate = beforeFixIter.next().getTimePoint();
@@ -783,7 +807,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
         } finally {
             unlockAfterRead();
         }
-        return new TimeRangeImpl(intervalStart, intervalEnd);
+        return new TimeRangeImpl(intervalStart, intervalEnd, /* inclusive */ true);
     }
     
     protected FixType createDummyGPSFix(TimePoint at) {
@@ -1062,15 +1086,13 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
             FixType last;
             lockForRead();
             try {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("GPS fix "+fix+" for "+getTrackedItem()+", isValid="+isValid(getInternalRawFixes(), fix)+
-                            ", time/distance/speed from last: "+
-                            ((last=getInternalRawFixes().lower(fix))==null
-                            ? "null"
-                                    : (fix.getTimePoint().asMillis()-last.getTimePoint().asMillis()+"ms/"+
-                                            fix.getPosition().getDistance(last.getPosition())) + "/"+
-                                            fix.getPosition().getDistance(last.getPosition()).inTime(fix.getTimePoint().asMillis()-last.getTimePoint().asMillis())));
-                }
+                logger.finest("GPS fix "+fix+" for "+getTrackedItem()+", isValid="+isValid(getInternalRawFixes(), fix)+
+                        ", time/distance/speed from last: "+
+                        ((last=getInternalRawFixes().lower(fix))==null
+                        ? "null"
+                                : (fix.getTimePoint().asMillis()-last.getTimePoint().asMillis()+"ms/"+
+                                        fix.getPosition().getDistance(last.getPosition())) + "/"+
+                                        fix.getPosition().getDistance(last.getPosition()).inTime(fix.getTimePoint().asMillis()-last.getTimePoint().asMillis())));
             } finally {
                 unlockAfterRead();
             }

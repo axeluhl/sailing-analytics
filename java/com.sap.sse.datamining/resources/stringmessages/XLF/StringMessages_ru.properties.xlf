@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-11-23T14:54:06Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sse.datamining/resources/stringmessages/StringMessages.properties" source-language="en" target-language="ru">
+	<file datatype="javapropertyresourcebundle" date="2017-03-03T15:28:33Z" original="/usr/sap/ljs/app/Converter_8942097082529348960/java/com.sap.sse.datamining/resources/stringmessages/StringMessages.properties" source-language="en" target-language="ru">
 		<header>
 			<skl>
-				<internal-file crc="299055c6be272a85a07b907e3c6ce40a" form="base64">H4sIAAAAAAAAAD2MQQoCMQxF9znFLHWnB8hicCXSjYMHKBpLsE2hTQdhmLsbpuoieT958MeZig+EYyc4erAX7ICpJbQB59+cLH8JjqXfnXDKTRS3bQ1KpWKCi2St+BKzMdJdWQL+Yha4Um1RJw7CT6aCy2Eddstx3cP/d5absG6GZTAHH6Y6WeOvAAAA</internal-file>
+				<internal-file crc="f7dde89d81cbbd5ecbf2e3b6c9500184" form="base64">H4sIAAAAAAAAAD2MzQrCMAzH73mKHvWmD5DD0ItILw4foMxYgm0KazuEsXc3rJuH5Pf/COkmGp0n7BrB0oudYAP0NaIOWPflqHojWJbmG+GSqhRcd9NXzoVl2DKzW31faMwY4S6pZPyInodAg7Yed5kEHpRrKD174TfTiPNpMYf5vBzhn93kKVzWhsVoBz9+8w8UzAAAAA==</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-11-04T21:01:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2017-01-26T16:57:14Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
@@ -35,6 +35,10 @@
 				<source>Count</source>
 				<target state="signed-off">Количество</target>
 			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CountDistinct" resname="CountDistinct">
+				<source>Count Distinct</source>
+				<target>Уникальных</target>
+			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Meters" resname="Meters">
 				<source>m</source>
 				<target state="signed-off">м</target>
@@ -49,11 +53,11 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ResultSignifier" resname="ResultSignifier">
 				<source><ph id="1">{0}</ph> (<ph id="2">{1}</ph>)</source>
-				<target state="translated"><ph id="1">{0}</ph> (<ph id="2">{1}</ph>)</target>
+				<target state="signed-off"><ph id="1">{0}</ph> (<ph id="2">{1}</ph>)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SignifierInUnit" resname="SignifierInUnit">
 				<source><ph id="1">{0}</ph> in <ph id="2">{1}</ph></source>
-				<target state="translated"><ph id="1">{0}</ph> в <ph id="2">{1}</ph></target>
+				<target state="signed-off"><ph id="1">{0}</ph> в <ph id="2">{1}</ph></target>
 			</trans-unit>
 		</body>
 	</file>

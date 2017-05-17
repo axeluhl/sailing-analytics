@@ -40,6 +40,7 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -94,7 +95,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 },
                 /* delayToLiveInMillis */0l, /* millisecondsOverWhichToAverageWind */30000, /* simulator */null, /* courseDesignUpdateURI */
                 null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(),
-                /*ignoreTracTracMarkPassings*/false, mock(RaceLogResolver.class)) {
+                /*ignoreTracTracMarkPassings*/false, mock(RaceLogResolver.class), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS) {
             @Override
             protected void handleEvent(Triple<IControlRoute, Long, Void> event) {
                 super.handleEvent(event);

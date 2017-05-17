@@ -413,7 +413,7 @@ public class CurrentRaceFilterImplTest {
         for (int i=0; i < numberOfRaces; i++) {
             _505RaceCells.add(new RaceCellImpl(raceColumnNamePrefix+(i+firstRaceColumnNumber),
                     /* race log */ null, /* factor */ firstRaceColumnNumber, /* explicitFactor */ null,
-                    /* zeroBasedIndexInFleet */ i));
+                    /* zeroBasedIndexInFleet */ i, /* targetTime */ null));
         }
         final RaceRowImpl _505RaceRow = new RaceRowImpl(new FleetImpl(fleetName), _505RaceCells);
         return _505RaceRow;

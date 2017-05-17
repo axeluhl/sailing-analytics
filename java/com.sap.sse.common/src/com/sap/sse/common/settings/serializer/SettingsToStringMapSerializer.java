@@ -7,12 +7,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.HasValueSetting;
 import com.sap.sse.common.settings.generic.Setting;
 import com.sap.sse.common.settings.generic.SettingsListSetting;
+import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.common.settings.generic.ValueCollectionSetting;
 import com.sap.sse.common.settings.generic.ValueConverter;
 import com.sap.sse.common.settings.generic.ValueSetting;
@@ -24,8 +28,27 @@ import com.sap.sse.common.settings.generic.ValueSetting;
  *
  */
 public class SettingsToStringMapSerializer {
+    
+    public final Map<String, Iterable<String>> serialize(SettingsMap settingsMap) {
+        final Map<String, Iterable<String>> result = new HashMap<>();
+        serialize("", settingsMap, result);
+        return result;
+    }
+    
+    private void serialize(String prefix, SettingsMap settingsMap, Map<String, Iterable<String>> serialized) {
+        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsPerComponentId().entrySet()) {
+            String key = entry.getKey();
+            String childPrefix = key == null ? prefix : prefix + key + GenericSerializableSettings.PATH_SEPARATOR;
+            Settings settings = entry.getValue();
+            if(settings instanceof SettingsMap) {
+                serialize(childPrefix, (SettingsMap) settings, serialized);
+            } else if (settings instanceof GenericSerializableSettings) {
+                serialize(childPrefix, (GenericSerializableSettings) settings, serialized);
+            }
+        }
+    }
 
-    public Map<String, Iterable<String>> serialize(GenericSerializableSettings settings) {
+    public final Map<String, Iterable<String>> serialize(GenericSerializableSettings settings) {
         final Map<String, Iterable<String>> result = new HashMap<>();
         serialize("", settings, result);
         return result;
@@ -80,8 +103,26 @@ public class SettingsToStringMapSerializer {
         }
         return result;
     }
+    
+    public final <T extends SettingsMap> T deserializeSettingsMap(T settingsMap, Map<String, Iterable<String>> values) {
+        final Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
+        final Set<Entry<String, Settings>> childSettings = settingsMap.getSettingsPerComponentId().entrySet();
+        for (Map.Entry<String, Settings> entry : childSettings) {
+            final String key = entry.getKey();
+            final Settings settings = entry.getValue();
+            final Map<String, Iterable<String>> innerValues = key == null ? values : mappedInnerValues.get(key.toString());
+            if(innerValues != null) {
+                if(settings instanceof SettingsMap) {
+                    deserializeSettingsMap((SettingsMap) settings, innerValues);
+                } else if(settings instanceof GenericSerializableSettings) {
+                    deserialize((GenericSerializableSettings)settings, innerValues);
+                }
+            }
+        }
+        return settingsMap;
+    }
 
-    public <T extends GenericSerializableSettings> T deserialize(T settings, Map<String, Iterable<String>> values) {
+    public final <T extends GenericSerializableSettings> T deserialize(T settings, Map<String, Iterable<String>> values) {
         Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
         for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
             final String key = entry.getKey();

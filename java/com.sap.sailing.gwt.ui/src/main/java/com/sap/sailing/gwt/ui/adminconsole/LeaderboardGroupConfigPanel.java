@@ -15,6 +15,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -31,6 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
@@ -44,7 +47,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -62,7 +64,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
-        SafeHtml cell(String url, String displayName);
+        SafeHtml cell(SafeUri url, String displayName);
     }
 
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
@@ -506,9 +508,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.getName()
-                        + "&showRaceDetails=true&"+RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
+                        + "&showRaceDetails=true&"+RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.cell(link, group.getName());
+                return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
             }
         };
         groupNameColumn.setSortable(true);

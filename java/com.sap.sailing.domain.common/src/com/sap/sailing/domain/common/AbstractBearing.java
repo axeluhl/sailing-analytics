@@ -6,6 +6,11 @@ public abstract class AbstractBearing implements Bearing {
     private static final long serialVersionUID = 1968420344627864784L;
 
     @Override
+    public int compareTo(Bearing o) {
+        return this==o?0:getDegrees() > o.getDegrees() ? 1 : getDegrees()==o.getDegrees()?0:-1;
+    }
+
+    @Override
     public Bearing reverse() {
         if (getDegrees() >= 180) {
             return new DegreeBearingImpl(getDegrees()-180);
@@ -57,7 +62,11 @@ public abstract class AbstractBearing implements Bearing {
     
     @Override
     public boolean equals(Object object) {
-        return object != null && object instanceof Bearing && getDegrees() == ((Bearing) object).getDegrees();
+        if (this == object) {
+            return true;
+        } else {
+            return object != null && object instanceof Bearing && getDegrees() == ((Bearing) object).getDegrees();
+        }
     }
 
     @Override
@@ -65,5 +74,8 @@ public abstract class AbstractBearing implements Bearing {
         return getDegrees() / 180. * Math.PI;
     }
 
-    
+    @Override
+    public Bearing abs() {
+        return getDegrees()>=0?this:new DegreeBearingImpl(-getDegrees());
+    }
 }

@@ -27,7 +27,8 @@
 	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
 	<inherits name="com.sap.sailing.polars.datamining.DataMiningPolars" />
 	
-        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 
 	<!-- Disable logging -->
 	<set-property name="gwt.logging.enabled" value="FALSE"/>
@@ -44,5 +45,6 @@
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
 	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint" />
+	
 	
 </module>

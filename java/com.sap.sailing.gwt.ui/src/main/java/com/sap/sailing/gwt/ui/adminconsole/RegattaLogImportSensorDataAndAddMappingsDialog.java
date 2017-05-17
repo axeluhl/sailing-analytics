@@ -60,7 +60,7 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 deviceIdTable.didSelectCompetitorForMapping(competitorTable.getSelectionModel().getSelectedObject());
-                validate();
+                validateAndUpdate();
             }
         });
 

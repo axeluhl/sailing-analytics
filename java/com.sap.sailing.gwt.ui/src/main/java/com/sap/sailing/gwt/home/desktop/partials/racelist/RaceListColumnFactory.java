@@ -476,8 +476,9 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(final EventView.Presenter presenter) {
-        final RaceviewerLaunchPadCell<T> raceviewerLaunchPadCell = new RaceviewerLaunchPadCell<T>(presenter);
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(
+            final EventView.Presenter presenter, final boolean showNotTracked) {
+        final RaceviewerLaunchPadCell<T> raceviewerLaunchPadCell = new RaceviewerLaunchPadCell<T>(presenter, showNotTracked);
         DefaultRaceListColumnComparator<T> comparator = new DefaultRaceListColumnComparator<T>() {
             @Override
             public int compare(T o1, T o2) {

@@ -220,7 +220,8 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<CourseBase>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, "Creating Course-OnlineDataLoader " + id);
-                JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
+                JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(new WaypointDeserializer(
+                        new ControlPointDeserializer(new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
                 DataParser<CourseBase> parser = new CourseBaseParser(courseBaseDeserializer);
                 DataHandler<CourseBase> handler = new CourseBaseHandler(OnlineDataManager.this, managedRace);
 

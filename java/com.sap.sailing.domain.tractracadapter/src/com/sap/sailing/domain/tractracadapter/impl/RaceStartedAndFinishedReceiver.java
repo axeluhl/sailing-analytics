@@ -34,8 +34,8 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<IR
 
     public RaceStartedAndFinishedReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber,
-            IRaceSubscriber raceSubscriber) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+            IRaceSubscriber raceSubscriber, long timeoutInMilliseconds) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         listener = new IRaceStartStopTimesChangeListener() {
             @Override
             public void gotTrackingStartStopTime(IRace race, IStartStopData startStopData) {

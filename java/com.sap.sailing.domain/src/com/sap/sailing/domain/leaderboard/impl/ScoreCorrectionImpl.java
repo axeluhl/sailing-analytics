@@ -99,7 +99,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     protected void notifyListeners(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
         for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
-            listener.correctedScoreChanced(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
+            listener.correctedScoreChanged(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
         }
     }
 
@@ -330,7 +330,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         }
     }
     
-    private AnnotatedMaxPointsReason getAnnotatedMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+    protected AnnotatedMaxPointsReason getAnnotatedMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         MaxPointsReason maxPointsReason = maxPointsReasons.get(raceColumn.getKey(competitor));
         boolean maxPointsReasonExistsButIsNotApplicableForTimePoint;
         if (maxPointsReason == null) {
@@ -390,7 +390,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             if (correctedNonMaxedScore == null) {
                 result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason.getMaxPointsReason(),
                         getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher),
-                        numberOfCompetitorsInLeaderboardFetcher);
+                        numberOfCompetitorsInLeaderboardFetcher, timePoint);
             } else {
                 result = correctedNonMaxedScore;
             }

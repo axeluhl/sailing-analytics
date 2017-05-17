@@ -18,6 +18,9 @@ import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TargetTimeInfoDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceGroupJsonSerializer;
@@ -33,7 +36,8 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
             JsonDeserializer<RegattaConfiguration> proceduresDeserializer) {
         return new RaceGroupDeserializer(new BoatClassJsonDeserializer(domainFactory), new SeriesWithRowsDeserializer(
                 new RaceRowDeserializer(new FleetDeserializer(new ColorDeserializer()), new RaceCellDeserializer(
-                        new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory))))),
+                        new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)),
+                        new TargetTimeInfoDeserializer(new WindJsonDeserializer(new PositionJsonDeserializer()))))),
                 proceduresDeserializer);
     }
 

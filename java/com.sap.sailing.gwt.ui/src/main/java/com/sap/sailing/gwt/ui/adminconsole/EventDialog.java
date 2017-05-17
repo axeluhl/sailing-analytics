@@ -134,13 +134,13 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                validate();
+                validateAndUpdate();
             }
         };
         final ValueChangeHandler<Iterable<CourseAreaDTO>> courseAreaValueChangeHandler = new ValueChangeHandler<Iterable<CourseAreaDTO>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<CourseAreaDTO>> event) {
-                validate();
+                validateAndUpdate();
             }
         };
 

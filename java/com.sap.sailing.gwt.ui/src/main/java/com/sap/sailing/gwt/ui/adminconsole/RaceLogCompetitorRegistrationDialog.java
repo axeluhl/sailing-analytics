@@ -130,21 +130,24 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                 });
             }
         }
-        new ParallelExecutionHolder(callbacksForFleetNames.values().toArray(new ParallelExecutionCallback<?>[0])) {
-            @Override
-            protected void handleSuccess() {
-                // if the data was gained completely then gray out specific rows
-                grayOutRows();
-            }
+        if (!callbacksForFleetNames.isEmpty()) {
+            new ParallelExecutionHolder(callbacksForFleetNames.values().toArray(new ParallelExecutionCallback<?>[0])) {
+                @Override
+                protected void handleSuccess() {
+                    // if the data was gained completely then gray out specific rows
+                    grayOutRows();
+                }
 
-            @Override
-            protected void handleFailure(Throwable t) {
-                errorReporter.reportError(
-                        "Could not load already registered competitors: " + t.getMessage());
+                @Override
+                protected void handleFailure(Throwable t) {
+                    errorReporter.reportError("Could not load already registered competitors: " + t.getMessage());
+                }
+            };
+            for (final Entry<String, ParallelExecutionCallback<Collection<CompetitorDTO>>> fleetNameAndCallback : callbacksForFleetNames
+                    .entrySet()) {
+                sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName,
+                        fleetNameAndCallback.getKey(), fleetNameAndCallback.getValue());
             }
-        };
-        for (final Entry<String, ParallelExecutionCallback<Collection<CompetitorDTO>>> fleetNameAndCallback : callbacksForFleetNames.entrySet()) {
-            sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetNameAndCallback.getKey(), fleetNameAndCallback.getValue());
         }
         return result;
     }
@@ -174,7 +177,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
                             move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
-                            validate();
+                            validateAndUpdate();
                         }
 
                         @Override
@@ -189,7 +192,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
                             move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
-                            validate();
+                            validateAndUpdate();
                         }
 
                         @Override

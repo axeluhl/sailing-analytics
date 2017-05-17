@@ -25,6 +25,8 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public abstract class AbstractQueryDefinitionProvider<SettingsType extends Settings> extends AbstractComponent<SettingsType> implements QueryDefinitionProvider<SettingsType> {
 
@@ -40,7 +42,9 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
     private boolean blockChangeNotification;
     private final Set<QueryDefinitionChangedListener> listeners;
 
-    public AbstractQueryDefinitionProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+    public AbstractQueryDefinitionProvider(Component<?> parent, ComponentContext<?> context,
+            StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;

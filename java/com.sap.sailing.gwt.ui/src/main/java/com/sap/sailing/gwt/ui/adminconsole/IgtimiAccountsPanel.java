@@ -141,6 +141,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         allAccounts.addColumn(accountActionColumn, stringMessages.actions());
         updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
         Button addAccountButton = new Button(stringMessages.addIgtimiAccount());
+        addAccountButton.ensureDebugId("addIgtimiAccount");
         addAccountButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -156,7 +157,12 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         });
         add(refreshButton);
-        this.sailingService.getIgtimiAuthorizationUrl(new AsyncCallback<String>() {
+        final String protocol = Window.Location.getProtocol().endsWith(":") ?
+                    Window.Location.getProtocol().substring(0, Window.Location.getProtocol().length()-1) :
+                    Window.Location.getProtocol();
+        final String hostname = Window.Location.getHostName();
+        final String port = Window.Location.getPort();
+        this.sailingService.getIgtimiAuthorizationUrl(protocol, hostname, port, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(IgtimiAccountsPanel.this.stringMessages.errorGettingIgtimiAuthorizationUrl(caught.getMessage()),
@@ -231,6 +237,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                         }
 
                     });
+            ensureDebugId("AddIgtimiAccountDialog");
         }
 
         @Override
@@ -238,9 +245,11 @@ public class IgtimiAccountsPanel extends FlowPanel {
             Grid grid = new Grid(2, 2);
             grid.setWidget(0, 0, new Label(stringMessages.emailAddress()));
             eMail = createTextBox("");
+            eMail.ensureDebugId("igtimiAccountEmail");
             grid.setWidget(0, 1, eMail);
             grid.setWidget(1, 0, new Label(stringMessages.password()));
             password = createPasswordTextBox("");
+            password.ensureDebugId("igtimiAccountPassword");
             grid.setWidget(1, 1, password);
             return grid;
         }
