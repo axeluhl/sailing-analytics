@@ -11,6 +11,8 @@ import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
 
 public class SettingsDialog<SettingsType extends Settings> extends AbstractSettingsDialog<SettingsType> {
+    
+    private Button makeDefaultButton;
 
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages) {
         this(component, stringMessages, /* animationEnabled */ true, null);
@@ -67,7 +69,7 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
     }
 
     private void initMakeDefaultButtons(final Component<SettingsType> component, final StringMessages stringMessages) {
-        final Button makeDefaultButton = new Button(stringMessages.makeDefault());
+        makeDefaultButton = new Button(stringMessages.makeDefault());
         makeDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
         makeDefaultButton.ensureDebugId("MakeDefaultButton");
         getLeftButtonPannel().add(makeDefaultButton);
@@ -102,6 +104,14 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
                 }
             }
         });
+    }
+    
+    @Override
+    protected void onInvalidStateChanged(boolean invalidState) {
+        super.onInvalidStateChanged(invalidState);
+        if(makeDefaultButton != null) {
+            makeDefaultButton.setEnabled(!invalidState);
+        }
     }
     
     private static class SettingsDialogCallback<SettingsType extends Settings> implements DialogCallback<SettingsType> {

@@ -155,6 +155,7 @@ public class RegattaOverviewPanel extends SimplePanel {
             
         });
         
+        //FIXME The chained calls from here are independent from each other and should be implemented with Dispatching Framework
         sailingService.getEventById(regattaOverviewContextDefinition.getEvent(), false, new MarkedAsyncCallback<EventDTO>(
                 new AsyncCallback<EventDTO>() {
                     @Override
