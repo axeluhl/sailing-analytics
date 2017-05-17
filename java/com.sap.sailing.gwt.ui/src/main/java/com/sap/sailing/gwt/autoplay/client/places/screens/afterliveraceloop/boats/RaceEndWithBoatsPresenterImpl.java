@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -17,6 +16,7 @@ import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -57,15 +57,11 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getContextDefinition().getLeaderboardName(),
                 getPlace().getLastRace().getRaceName()));
 
-        LeaderboardSettings leaderboardSettings = new LeaderboardSettings( //
-                /* raceColumsToShow */ null, //
-                /* racesToShow */ Arrays.asList(liveRace.getRaceName()), //
-                /* overAllDetailsToShow */ null, //
-                /* nameOfRaceToSort */ null, //
-                /* autoExpandPreselectedRace */ false, //
-                /* showCompetitorSailIdColumn */ false, //
-                /* showCompetitorFullNameColumn */ true //
-                );
+        final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, null, null,
+        null, null, null, false, null, liveRace.getRaceName(),
+        /* ascending */ true, /* updateUponPlayStateChange */ true, RaceColumnSelectionStrategies.EXPLICIT,
+        /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true,
+        false,true);
         
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
 
@@ -76,6 +72,8 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 false, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, null, false,
                 null, false, null, false, true, false, false, false);
+        
+        
         view.setLeaderBoard(leaderboardPanel);
 
         GetMiniLeaderboardDTO miniLeaderBoard = getPlace().getLeaderBoardDTO();

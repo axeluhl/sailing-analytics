@@ -24,7 +24,9 @@
 	.image {
 		display: inline-block;
 		height: auto;
-		width: 33.3%;
+        margin-left: 5%;
+        margin-right: 5%;
+		width: 20%;
 		height: 90%;
 		border-radius: 4px;
 	}
