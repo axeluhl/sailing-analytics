@@ -272,9 +272,36 @@ public class SettingsTest extends AbstractSeleniumTest {
         LeaderboardUrlConfigurationDialogPO urlConfigurationDialog = leaderboardEntry
                 .getLeaderboardPageUrlConfigurationDialog();
         LeaderboardSettingsPanelPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
-
-        leaderboardSettingsPanel.setCheckboxValue("R2CheckBox", false);
+        
         DetailCheckboxInfo[] detailsToSelect = {
+                DetailCheckboxInfo.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED
+        };
+
+        leaderboardSettingsPanel.selectDetailsAndDeselectOther(detailsToSelect);
+        leaderboardSettingsPanel.setCheckboxValue("R2CheckBox", false);
+        leaderboardSettingsPanel.setRefreshInterval(2);
+
+        // open settings dialog of configurated leaderboard and match the set values with forwarded values
+        LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
+        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();
+
+        DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+
+        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R1CheckBox"));
+        Assert.assertTrue(!leaderboardSettingsPanel.getCheckboxValue("R2CheckBox"));
+        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R3CheckBox"));
+        Assert.assertEquals(2, leaderboardSettingsPanel.getRefreshInterval());
+
+        // set different custom leaderboard settings
+
+        adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
+        urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
+        leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
+        
+        detailsToSelect = new DetailCheckboxInfo[] {
                 // Overall details
                 DetailCheckboxInfo.REGATTA_RANK, DetailCheckboxInfo.TOTAL_DISTANCE,
                 DetailCheckboxInfo.TOTAL_AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.TIME_ON_TIME_FACTOR,
@@ -314,34 +341,9 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.AVERAGE_JIBE_LOSS, DetailCheckboxInfo.PENALTY_CIRCLE
 
         };
+
         leaderboardSettingsPanel.selectDetailsAndDeselectOther(detailsToSelect);
-
-        leaderboardSettingsPanel.setRefreshInterval(2);
-
-        // open settings dialog of configurated leaderboard and match the set values with forwarded values
-        LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
-        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();
-
-        DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
-
-        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-
-        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R1CheckBox"));
-        Assert.assertTrue(!leaderboardSettingsPanel.getCheckboxValue("R2CheckBox"));
-        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R3CheckBox"));
-        Assert.assertEquals(2, leaderboardSettingsPanel.getRefreshInterval());
-
-        // set different custom leaderboard settings
-
-        adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
-        leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
-        urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
-        leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
-
         leaderboardSettingsPanel.setNumberOfRacesToDisplay(2);
-        leaderboardSettingsPanel.selectDetailsAndDeselectOther();
-        // FIXME: Settings Dialog is in Error state here
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         leaderboardPage = urlConfigurationDialog.openLeaderboard();
@@ -349,9 +351,8 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertTrue(leaderboardSettingsPanel.isNumberOfRacesToDisplaySelected());
         Assert.assertEquals(2, leaderboardSettingsPanel.getNumberOfRacesToDisplaySelected());
         Assert.assertEquals(3, leaderboardSettingsPanel.getRefreshInterval());
-        // selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
-        // TODO fix leaderboard default values
-        // Assert.assertEquals(0, selectedDetails.length);
+        selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
 
     }
 
