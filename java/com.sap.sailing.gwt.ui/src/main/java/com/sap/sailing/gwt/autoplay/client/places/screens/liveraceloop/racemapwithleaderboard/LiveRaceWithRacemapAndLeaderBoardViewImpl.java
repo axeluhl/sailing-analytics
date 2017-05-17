@@ -61,6 +61,7 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
             SixtyInchLeaderBoard leaderboardPanel) {
         panel.setWidget(this);
         rawRaceMap = raceMap;
+
         racemap.add(raceMap);
         resizeMapOnceInitially();
 

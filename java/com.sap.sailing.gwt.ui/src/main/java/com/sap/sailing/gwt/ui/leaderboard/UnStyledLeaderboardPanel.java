@@ -1011,6 +1011,23 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
         return "border-bottom: 2px solid " + competitorColor + ";";
     }
 
+    protected void processStyleForRaceColumnWithoutReasonForMaxPoints(boolean isDiscarded, SafeStylesBuilder ssb) {
+        if (isDiscarded) {
+            ssb.opacity(0.5d);
+        } else {
+            ssb.fontWeight(FontWeight.BOLD);
+        }
+    }
+
+    protected void processStyleForRaceColumnWithReasonForMaxPoints(boolean isDiscarded, SafeStylesBuilder ssb) {
+        ssb.opacity(0.5d);
+    }
+
+    protected void processStyleForTotalNetPointsColumn(String textColor, SafeStylesBuilder ssb) {
+        ssb.fontWeight(FontWeight.BOLD);
+        ssb.trustedColor(textColor);
+    }
+
     /**
      * Displays net/total points and possible max-points reasons based on a {@link LeaderboardRowDTO} and a race name
      * and makes the column sortable by the total points.
@@ -1109,18 +1126,27 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
                 }
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
+                    SafeStylesBuilder ssb = new SafeStylesBuilder();
+                    processStyleForRaceColumnWithoutReasonForMaxPoints(entry.discarded, ssb);
+                    html.appendHtmlConstant("<span style='");
+                    html.appendHtmlConstant(ssb.toSafeStyles().asString());
+                    html.appendHtmlConstant("'>");
                     if (!entry.discarded) {
-                        html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
                         html.appendHtmlConstant(netOrAddedPointsAsText);
-                        html.appendHtmlConstant("</span>");
                     } else {
-                        html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
+                        html.appendHtmlConstant("<del>");
                         html.appendHtmlConstant(totalOrAddedPointsAsText);
-                        html.appendHtmlConstant("</del></span>");
+                        html.appendHtmlConstant("</del>");
                     }
+                    html.appendHtmlConstant("</span>");
+
                 } else {
-                    html.appendHtmlConstant(" <span title=\"" + totalOrAddedPointsAsText + "/" + netOrAddedPointsAsText
-                            + "\" style=\"opacity: 0.5;\">");
+                    SafeStylesBuilder ssb = new SafeStylesBuilder();
+                    processStyleForRaceColumnWithReasonForMaxPoints(entry.discarded, ssb);
+                    html.appendHtmlConstant(
+                            "<span title=\"" + totalOrAddedPointsAsText + "/" + netOrAddedPointsAsText + "\" style='");
+                    html.appendHtmlConstant(ssb.toSafeStyles().asString());
+                    html.appendHtmlConstant("'>");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
@@ -1891,7 +1917,11 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
             String textColor = getLeaderboard().hasLiveRace(timer.getLiveTimePointInMillis()) ? IS_LIVE_TEXT_COLOR
                     : DEFAULT_TEXT_COLOR;
 
-            sb.appendHtmlConstant("<span style=\"font-weight: bold; color:" + textColor + "\">");
+            SafeStylesBuilder ssb = new SafeStylesBuilder();
+            processStyleForTotalNetPointsColumn(textColor, ssb);
+            sb.appendHtmlConstant("<span style='");
+            sb.appendHtmlConstant(ssb.toSafeStyles().asString());
+            sb.appendHtmlConstant("'>");
             sb.appendEscaped(getValue(object));
             sb.appendHtmlConstant("</span>");
         }
