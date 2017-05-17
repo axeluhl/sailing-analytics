@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -40,6 +38,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -57,11 +56,9 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardWithCache implements Leaderboard {
+public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardWithCache implements Leaderboard, RaceColumnListener {
     private static final long serialVersionUID = 330156778603279333L;
     
-    private static final Logger logger = Logger.getLogger(AbstractSimpleLeaderboardImpl.class.getName());
-
     static final Double DOUBLE_0 = new Double(0);
 
     private final SettableScoreCorrection scoreCorrection;
@@ -73,9 +70,6 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      * competitor names for display in a leaderboard.
      */
     private final Map<Competitor, String> displayNames;
-
-    /** the display name of the leaderboard */
-    private String displayName;
 
     /**
      * Backs the {@link #getCarriedPoints(Competitor)} API with data. Can be used to prime this leaderboard
@@ -90,6 +84,8 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
      */
     private final Set<Competitor> suppressedCompetitors;
     private final NamedReentrantReadWriteLock suppressedCompetitorsLock;
+
+    private final RaceColumnListeners raceColumnListeners;
 
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -208,6 +204,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     public AbstractSimpleLeaderboardImpl(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         this.carriedPoints = new HashMap<Competitor, Double>();
+        this.raceColumnListeners = new RaceColumnListeners();
         this.scoreCorrection = createScoreCorrection();
         this.displayNames = new HashMap<Competitor, String>();
         this.crossLeaderboardResultDiscardingRule = resultDiscardingRule;
@@ -215,6 +212,81 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         this.suppressedCompetitorsLock = new NamedReentrantReadWriteLock("suppressedCompetitorsLock", /* fair */ false);
     }
     
+    protected RaceColumnListeners getRaceColumnListeners() {
+        return raceColumnListeners;
+    }
+    
+    @Override
+    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        super.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    }
+    
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+    }
+
+    @Override
+    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+        getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+    
+    @Override
+    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        getRaceColumnListeners().notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
+    }
+
+    @Override
+    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+        getRaceColumnListeners().notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
+    }
+
+    @Override
+    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
+        getRaceColumnListeners().notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
+    }
+
+    @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+        getRaceColumnListeners().notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+    }
+
+    @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        getRaceColumnListeners().notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
+    }
+
+    @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+        getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+    }
+
+    @Override
+    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
+        getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
     /**
      * Produces the score correction object to use in this leaderboard. Used by the constructor. Subclasses may override
      * this method to create a more specific type of score correction. This implementation produces an object of type
@@ -234,25 +306,6 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         return displayNames.get(competitor);
     }
 
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public void setDisplayName(String displayName) {
-        final String oldDisplayName = this.displayName;
-        this.displayName = displayName;
-        notifyLeaderboardChangeListeners(listener->{
-            try {
-                listener.displayNameChanged(oldDisplayName, displayName);
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Exception trying to notify listener "+listener+" about the display name of leaderboard "+
-                        getName()+" changing from "+oldDisplayName+" to "+displayName, e);
-            }
-        });
-    }
-    
     @Override
     public ResultDiscardingRule getResultDiscardingRule() {
         return crossLeaderboardResultDiscardingRule;

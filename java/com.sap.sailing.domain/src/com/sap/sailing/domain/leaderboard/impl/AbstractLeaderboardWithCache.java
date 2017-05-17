@@ -33,7 +33,6 @@ import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
-import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -57,7 +56,6 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
@@ -78,24 +76,25 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
-public abstract class AbstractLeaderboardWithCache implements Leaderboard, RaceColumnListener {
+public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     private static final long serialVersionUID = -5651389357061229100L;
     private static final Logger logger = Logger.getLogger(AbstractLeaderboardWithCache.class.getName());
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
     protected static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
     private transient LeaderboardDTOCache leaderboardDTOCache;
     private transient Map<com.sap.sse.common.Util.Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>> raceDetailsAtEndOfTrackingCache;
+
+    /** the display name of the leaderboard */
+    private String displayName;
+
     private transient Set<LeaderboardChangeListener> leaderboardChangeListeners;
     
-    private final RaceColumnListeners raceColumnListeners;
-
     /**
      * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
      */
@@ -193,7 +192,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard, RaceC
     
     protected AbstractLeaderboardWithCache() {
         this.raceDetailsAtEndOfTrackingCache = new HashMap<>();
-        this.raceColumnListeners = new RaceColumnListeners();
         initTransientFields();
     }
     
@@ -212,8 +210,25 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard, RaceC
     }
 
     @Override
-    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        final String oldDisplayName = this.displayName;
+        this.displayName = displayName;
+        notifyLeaderboardChangeListeners(listener->{
+            try {
+                listener.displayNameChanged(oldDisplayName, displayName);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Exception trying to notify listener "+listener+" about the display name of leaderboard "+
+                        getName()+" changing from "+oldDisplayName+" to "+displayName, e);
+            }
+        });
+    }
+    
+   protected void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         // It's generally possible that a leaderboard links to the same tracked race in multiple columns / fleets;
         // only if it no longer references the trackedRace currently unlinked from one column/fleet, also unlink
         // all cache invalidation listeners for said trackedRace
@@ -231,71 +246,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard, RaceC
         }
     }
     
-    @Override
-    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
-    }
-
-    @Override
-    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-        getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
-    }
-    
-    @Override
-    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
-        getRaceColumnListeners().notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
-    }
-
-    @Override
-    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
-        getRaceColumnListeners().notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
-    }
-
-    @Override
-    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
-        getRaceColumnListeners().notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
-    }
-
-    @Override
-    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
-        getRaceColumnListeners().notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
-    }
-
-    @Override
-    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
-        getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
-    }
-
-    @Override
-    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
-        getRaceColumnListeners().notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
-    }
-
-    @Override
-    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-        getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
-    }
-
-    @Override
-    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-        getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
-    }
-
-    @Override
-    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
-        getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
-    }
-
-    @Override
-    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
-        getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
-    }
-
-    @Override
-    public boolean isTransient() {
-        return false;
-    }
-
     protected void notifyLeaderboardChangeListeners(Consumer<LeaderboardChangeListener> notifier) {
         for (final LeaderboardChangeListener listener : leaderboardChangeListeners) {
             try {
@@ -317,10 +267,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard, RaceC
         leaderboardChangeListeners.remove(listener);
     }
 
-    protected RaceColumnListeners getRaceColumnListeners() {
-        return raceColumnListeners;
-    }
-    
     @Override
     public LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,

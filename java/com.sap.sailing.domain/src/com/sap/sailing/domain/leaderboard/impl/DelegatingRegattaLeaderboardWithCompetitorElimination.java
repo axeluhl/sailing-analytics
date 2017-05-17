@@ -12,7 +12,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
@@ -76,16 +75,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return fullLeaderboard.getRegatta();
     }
 
-    public void addLeaderboardChangeListener(LeaderboardChangeListener listener) {
-        fullLeaderboard.addLeaderboardChangeListener(listener);
-    }
-
     public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
         return fullLeaderboard.getCompetitorsRegisteredInRegattaLog();
-    }
-
-    public void removeLeaderboardChangeListener(LeaderboardChangeListener listener) {
-        fullLeaderboard.removeLeaderboardChangeListener(listener);
     }
 
     public IsRegattaLike getRegattaLike() {
