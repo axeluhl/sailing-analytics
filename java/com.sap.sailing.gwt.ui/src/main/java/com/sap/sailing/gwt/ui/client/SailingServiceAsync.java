@@ -250,6 +250,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName,
             int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
+    void createRegattaLeaderboardWithEliminations(String name, String displayName, String regattaName,
+            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 
     void removeLeaderboards(Collection<String> leaderboardNames, AsyncCallback<Void> asyncCallback);

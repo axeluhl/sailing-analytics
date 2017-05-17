@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -48,8 +49,10 @@ import com.sap.sse.common.Util.Pair;
  * {@link #getCompetitorsFromBestToWorst(TimePoint)} which also leads the implementation of
  * {@link #getTotalRankOfCompetitor(Competitor, TimePoint)} to calculate the ranks based on the competitor list without
  * those eliminated.
+ * 
+ * @author Axel Uhl (d043530)
  */
-public class DelegatingRegattaLeaderboardWithCompetitorElimination extends AbstractLeaderboardWithCache implements RegattaLeaderboard {
+public class DelegatingRegattaLeaderboardWithCompetitorElimination extends AbstractLeaderboardWithCache implements RegattaLeaderboardWithEliminations {
     private static final long serialVersionUID = 8331154893189722924L;
     private final String name;
     private final RegattaLeaderboard fullLeaderboard;
@@ -80,10 +83,12 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         fullLeaderboard.setName(newName);
     }
 
+    @Override
     public Iterable<Competitor> getCompetitors() {
         return new ObscuringIterable<>(fullLeaderboard.getCompetitors(), eliminatedCompetitors.keySet());
     }
     
+    @Override
     public void setEliminated(Competitor competitor, boolean eliminated) {
         if (eliminated) {
             eliminatedCompetitors.put(competitor, true);
@@ -92,6 +97,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         }
     }
     
+    @Override
     public boolean isEliminated(Competitor competitor) {
         return eliminatedCompetitors.containsKey(competitor);
     }

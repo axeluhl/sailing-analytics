@@ -221,6 +221,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
 
+    RegattaLeaderboard addRegattaLeaderboardWithEliminations(String leaderboardName, String leaderboardDisplayName, String fullRegattaLeaderboardName);
+
     void removeLeaderboard(String leaderboardName);
 
     /**

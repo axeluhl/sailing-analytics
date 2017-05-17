@@ -123,6 +123,16 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             }
         });
         
+        Button createRegattaLeaderboardWithEliminationsBtn = new Button(stringMessages.createRegattaLeaderboardWithEliminations() + "...");
+        createRegattaLeaderboardWithEliminationsBtn.ensureDebugId("CreateRegattaLeaderboardWithEliminationsButton");
+        controlsPanel.add(createRegattaLeaderboardWithEliminationsBtn);
+        createRegattaLeaderboardWithEliminationsBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                createRegattaLeaderboardWithEliminations();
+            }
+        });
+        
         leaderboardRemoveButton = new Button(stringMessages.remove());
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
         leaderboardRemoveButton.setEnabled(false);
@@ -801,6 +811,34 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         dialog.show();
     }
 
+    private void createRegattaLeaderboardWithEliminations() {
+        RegattaLeaderboardWithEliminationsCreateDialog dialog = new RegattaLeaderboardWithEliminationsCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
+                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter, new DialogCallback<LeaderboardDescriptor>() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(final LeaderboardDescriptor newLeaderboard) {
+                sailingService.createRegattaLeaderboardWithEliminations(newLeaderboard.getName(), newLeaderboard.getDisplayName(),
+                        newLeaderboard.getRegattaName(), new AsyncCallback<StrippedLeaderboardDTO>() {
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError("Error trying to create the new regatta leaderboard " + newLeaderboard.getName()
+                                + ": " + t.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(StrippedLeaderboardDTO result) {
+                        addLeaderboard(result);
+                    }
+                });
+            }
+        });
+        dialog.ensureDebugId("RegattaLeaderboardCreateDialog");
+        dialog.show();
+    }
+    
     private void addLeaderboard(StrippedLeaderboardDTO result) {
         filteredLeaderboardList.getList().add(result);
         availableLeaderboardList.add(result);

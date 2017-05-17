@@ -200,6 +200,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
 
+    StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName, String regattaName);
+
     void removeLeaderboard(String leaderboardName);
 
     void removeLeaderboards(Collection<String> leaderboardNames);
