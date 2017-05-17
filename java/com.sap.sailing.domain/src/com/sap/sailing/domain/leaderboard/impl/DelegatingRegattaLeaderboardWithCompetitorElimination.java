@@ -32,6 +32,23 @@ import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * A regatta leaderboard that is derived from another regatta leaderboard by eliminating a subset of the competitors and
+ * that provides its own, unique name and optionally its own display name. The class generally implements a "delegate"
+ * pattern for a {@link RegattaLeaderboard}. It therefore does not maintain its own score corrections or set of
+ * suppressed competitors. Note: "suppressed" is different from "eliminated" in that suppressed competitors do not show
+ * in any race and are not assigned any rank in any race, but eliminated competitors are; they only don't receive a
+ * regatta ("total") rank, and all competitors advance by as many ranks compared to the original leaderboard as there
+ * are eliminated competitors ranking better in the original leaderboard.
+ * <p>
+ * 
+ * This behavior is achieved by overriding any method returning a collection of {@link Competitor}s, such as
+ * {@link #getCompetitors()}, such that the eliminated competitors are removed from the result which should let any
+ * leaderboard panel displaying the contents of this leaderboard list only the non-eliminated competitors. This includes
+ * {@link #getCompetitorsFromBestToWorst(TimePoint)} which also leads the implementation of
+ * {@link #getTotalRankOfCompetitor(Competitor, TimePoint)} to calculate the ranks based on the competitor list without
+ * those eliminated.
+ */
 public class DelegatingRegattaLeaderboardWithCompetitorElimination extends AbstractLeaderboardWithCache implements RegattaLeaderboard {
     private static final long serialVersionUID = 8331154893189722924L;
     private final String name;
@@ -63,10 +80,72 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         fullLeaderboard.setName(newName);
     }
 
-    public String getDisplayName() {
-        return fullLeaderboard.getDisplayName();
+    public Iterable<Competitor> getCompetitors() {
+        return new ObscuringIterable<>(fullLeaderboard.getCompetitors(), eliminatedCompetitors.keySet());
+    }
+    
+    public void setEliminated(Competitor competitor, boolean eliminated) {
+        if (eliminated) {
+            eliminatedCompetitors.put(competitor, true);
+        } else {
+            eliminatedCompetitors.remove(competitor);
+        }
+    }
+    
+    public boolean isEliminated(Competitor competitor) {
+        return eliminatedCompetitors.containsKey(competitor);
     }
 
+    public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint)
+            throws NoWindException {
+        Map<RaceColumn, List<Competitor>> preResult = fullLeaderboard.getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint);
+        for (final List<Competitor> e : preResult.values()) {
+            e.removeAll(eliminatedCompetitors.keySet());
+        }
+        return preResult;
+    }
+
+    public Map<Competitor, Double> getCompetitorsForWhichThereAreCarriedPoints() {
+        final Map<Competitor, Double> result = new HashMap<>();
+        for (final java.util.Map.Entry<Competitor, Double> e : fullLeaderboard.getCompetitorsForWhichThereAreCarriedPoints().entrySet()) {
+            if (!isEliminated(e.getKey())) {
+                result.put(e.getKey(), e.getValue());
+            }
+        }
+        return result;
+    }
+
+    public Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint)
+            throws NoWindException {
+        return new ObscuringIterable<>(fullLeaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint), eliminatedCompetitors.keySet());
+    }
+
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        final List<Competitor> result = new ArrayList<>();
+        for (final Competitor c : fullLeaderboard.getCompetitorsFromBestToWorst(timePoint)) {
+            if (!isEliminated(c)) {
+                result.add(c);
+            }
+        }
+        return result;
+    }
+
+    public Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException {
+        final Map<Pair<Competitor, RaceColumn>, Entry> result = new HashMap<>();
+        for (final java.util.Map.Entry<Pair<Competitor, RaceColumn>, Entry> e : fullLeaderboard.getContent(timePoint).entrySet()) {
+            if (!isEliminated(e.getKey().getA())) {
+                result.put(e.getKey(), e.getValue());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    protected LeaderboardType getLeaderboardType() {
+        return LeaderboardType.RegattaLeaderboard;
+    }
+
+    // --------------------- Delegate Pattern Implementation ----------------------
     public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
         return fullLeaderboard.getOrCreateCompetitorsProvider();
     }
@@ -101,22 +180,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     public void deregisterCompetitors(Iterable<Competitor> competitor) {
         fullLeaderboard.deregisterCompetitors(competitor);
-    }
-
-    public Iterable<Competitor> getCompetitors() {
-        return new ObscuringIterable<>(fullLeaderboard.getCompetitors(), eliminatedCompetitors.keySet());
-    }
-    
-    public void setEliminated(Competitor competitor, boolean eliminated) {
-        if (eliminated) {
-            eliminatedCompetitors.put(competitor, true);
-        } else {
-            eliminatedCompetitors.remove(competitor);
-        }
-    }
-    
-    public boolean isEliminated(Competitor competitor) {
-        return eliminatedCompetitors.containsKey(competitor);
     }
 
     public Iterable<Competitor> getAllCompetitors() {
@@ -156,15 +219,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return fullLeaderboard.getEntry(competitor, race, timePoint, discardedRaceColumns);
     }
 
-    public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint)
-            throws NoWindException {
-        Map<RaceColumn, List<Competitor>> preResult = fullLeaderboard.getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint);
-        for (final List<Competitor> e : preResult.values()) {
-            e.removeAll(eliminatedCompetitors.keySet());
-        }
-        return preResult;
-    }
-
     public Map<RaceColumn, Map<Competitor, Double>> getNetPointsSumAfterRaceColumn(TimePoint timePoint)
             throws NoWindException {
         return fullLeaderboard.getNetPointsSumAfterRaceColumn(timePoint);
@@ -172,16 +226,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     public double getCarriedPoints(Competitor competitor) {
         return fullLeaderboard.getCarriedPoints(competitor);
-    }
-
-    public Map<Competitor, Double> getCompetitorsForWhichThereAreCarriedPoints() {
-        final Map<Competitor, Double> result = new HashMap<>();
-        for (final java.util.Map.Entry<Competitor, Double> e : fullLeaderboard.getCompetitorsForWhichThereAreCarriedPoints().entrySet()) {
-            if (!isEliminated(e.getKey())) {
-                result.put(e.getKey(), e.getValue());
-            }
-        }
-        return result;
     }
 
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
@@ -211,35 +255,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     public Double getNetPoints(Competitor competitor, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint)
             throws NoWindException {
         return fullLeaderboard.getNetPoints(competitor, raceColumnsToConsider, timePoint);
-    }
-
-    public Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint)
-            throws NoWindException {
-        return new ObscuringIterable<>(fullLeaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint), eliminatedCompetitors.keySet());
-    }
-
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
-        final List<Competitor> result = new ArrayList<>();
-        for (final Competitor c : fullLeaderboard.getCompetitorsFromBestToWorst(timePoint)) {
-            if (!isEliminated(c)) {
-                result.add(c);
-            }
-        }
-        return result;
-    }
-
-    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        return getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
-    }
-
-    public Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException {
-        final Map<Pair<Competitor, RaceColumn>, Entry> result = new HashMap<>();
-        for (final java.util.Map.Entry<Pair<Competitor, RaceColumn>, Entry> e : fullLeaderboard.getContent(timePoint).entrySet()) {
-            if (!isEliminated(e.getKey().getA())) {
-                result.put(e.getKey(), e.getValue());
-            }
-        }
-        return result;
     }
 
     public Iterable<RaceColumn> getRaceColumns() {
@@ -276,10 +291,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     public void setDisplayName(Competitor competitor, String displayName) {
         fullLeaderboard.setDisplayName(competitor, displayName);
-    }
-
-    public void setDisplayName(String displayName) {
-        fullLeaderboard.setDisplayName(displayName);
     }
 
     public String getDisplayName(Competitor competitor) {
@@ -363,10 +374,5 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     public BoatClass getBoatClass() {
         return fullLeaderboard.getBoatClass();
-    }
-
-    @Override
-    protected LeaderboardType getLeaderboardType() {
-        return LeaderboardType.RegattaLeaderboard;
     }
 }

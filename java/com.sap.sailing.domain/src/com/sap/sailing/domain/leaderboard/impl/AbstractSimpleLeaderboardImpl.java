@@ -553,12 +553,6 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         return result;
     }
     
-    @Override
-    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        List<Competitor> competitorsFromBestToWorst = getCompetitorsFromBestToWorst(timePoint);
-        return competitorsFromBestToWorst.indexOf(competitor) + 1;
-    }
-
     protected Comparator<? super Competitor> getTotalRankComparator(Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
         return new LeaderboardTotalRankComparator(this, timePoint, getScoringScheme(), /* nullScoresAreBetter */ false, raceColumnsToConsider);
     }

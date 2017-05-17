@@ -939,6 +939,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     protected abstract LeaderboardType getLeaderboardType();
 
+    @Override
+    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        return getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+    }
+
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         if (event instanceof InvalidatesLeaderboardCache) {
             // make sure to invalidate the cache as this event indicates that
