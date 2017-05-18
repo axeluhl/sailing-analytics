@@ -190,7 +190,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     /**
-     * Stores the provided {@link Settings} of the provided {@link Component} as "User Settings" globally. Make sure to
+     * Stores the provided {@link Settings} of the provided {@link Component} as User Settings which are context-independent. Make sure to
      * call this method only when {@link #isStorageSupported(Component)} method returns {@code true} for the provided
      * {@link Component}.
      * 
@@ -212,7 +212,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     /**
-     * Stores the provided {@link Settings} of the provided {@link Component} as "Document Settings" for the current
+     * Stores the provided {@link Settings} of the provided {@link Component} as Document Settings for the current
      * context. Make sure to call this method only when {@link #isStorageSupported(Component)} method returns
      * {@code true} for the provided {@link Component}.
      * 
@@ -242,6 +242,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      *            The path of the settings' node to create/update
      * @param newUserSettings
      *            User Settings which corresponds to the provided path
+     * @param newInstance
+     *            A fresh dummy instance of the settings type which will be used as temporary helper (defaultValues and
+     *            values of the instance are completely ignored)
      * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process finishes
      */
@@ -285,6 +288,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      *            The path of the settings' node to create/update
      * @param newDocumentSettings
      *            Document Settings which corresponds to the provided path
+     * @param newInstance
+     *            A fresh dummy instance of the settings type which will be used as temporary helper (defaultValues and
+     *            values of the instance are completely ignored)
      * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process finishes
      */

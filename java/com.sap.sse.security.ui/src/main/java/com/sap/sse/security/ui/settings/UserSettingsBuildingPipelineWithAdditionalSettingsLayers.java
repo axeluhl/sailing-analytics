@@ -18,18 +18,15 @@ import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAn
 import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
 
 /**
- * Specialization of {@link UserSettingsBuildingPipeline} which offers multiple hooks for settings patching throughout
- * the pipeline. These hooks may be used to patch the settings at different pipeline levels during its construction.
- * This implementation provides additional methods for attachment of {@link SettingsPatch}s. After each
- * {@link PipelineLevel} a custom {@link SettingsPatch} may be applied. The patch may partially or completely modify the
- * resulting settings object in order to provide the desired behavior of default settings for a dynamic environment,
- * e.g. RaceBoard which determines its default settings regarding to RaceModes, PlayModes and etc.
+ * Specialization of {@link UserSettingsBuildingPipeline} which offers multiple hooks for adding of additional settings
+ * layers.
+ * 
  * 
  * @author Vladislav Chumak
  *
  */
 public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends UserSettingsBuildingPipeline {
-    
+
     private SettingsPatches layersSettingsPatches = new SettingsPatches();
 
     /**
@@ -42,7 +39,27 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
             SettingsRepresentationTransformer settingsRepresentationTransformer) {
         super(settingsRepresentationTransformer);
     }
-    
+
+    /**
+     * Constructs the settings object of the root perspective/component by means of provided
+     * {@code systemDefaultSettings} and stored representation of all settings. This method implements the settings
+     * construction pipeline for a settings object which is used for settings loading operations. The settings object is
+     * constructed on top of provided systemdDefaultSettings considering settings layers in the following order:
+     * <ul>
+     * <li>Additional settings layers hooked in {@link PipelineLevel PipelineLevel.SYSTEM_DEFAULTS}</li>
+     * <li>User Settings</li>
+     * <li>Additional settings layers hooked in {@link PipelineLevel PipelineLevel.USER_DEFAULTS}</li>
+     * <li>Document Settings</li>
+     * <li>Additional settings layers hooked in {@link PipelineLevel PipelineLevel.DOCUMENT_DEFAULTS}</li>
+     * <li>URL Settings</li>
+     * </ul>
+     * 
+     * @param systemDefaultSettings
+     *            The basic settings to be used
+     * @param settingsRepresentation
+     *            The stored representations of User Settings and Document Settings
+     * @return The constructed settings object
+     */
     @Override
     public <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
             StorableRepresentationOfDocumentAndUserSettings settingsRepresentations) {
@@ -53,15 +70,15 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
             effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
                     effectiveSettings, settingsRepresentations.getUserSettingsRepresentation());
         }
-        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
-                rootPath, layersSettingsPatches);
+        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS, rootPath,
+                layersSettingsPatches);
         if (settingsRepresentations.hasStoredDocumentSettings()) {
             effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
                     effectiveSettings, settingsRepresentations.getDocumentSettingsRepresentation());
         }
 
-        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.DOCUMENT_DEFAULTS,
-                rootPath, layersSettingsPatches);
+        effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.DOCUMENT_DEFAULTS, rootPath,
+                layersSettingsPatches);
         effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithUrlSettings(effectiveSettings);
         return effectiveSettings;
     }
@@ -92,23 +109,30 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
         }
         return effectiveSettings;
     }
-    
+
     @SuppressWarnings("unchecked")
     private static <CS extends Settings> CS patchSettings(Settings settings, SettingsPatch<CS> settingsPatch) {
         return settingsPatch.patchSettings((CS) settings);
     }
 
     /**
-     * Converts the provided settings object into a storable settings representation without considering provided
-     * pipeline level and settings tree path.
+     * Converts the provided settings according to storable settings representation for User Settings. This method
+     * implements the storable settings representation building pipeline which is used for settings storing operations.
+     * The diff patch inside the returned settings representation is generated by diff between {@code values} of
+     * effective settings after additional settings layers at {@code PipelineLevel.SYSTEM_DEFAULTS} and {@code values}
+     * inside the provided {@code newSettings} object.
      * 
-     * @param settings
-     *            The settings to convert to storable settings representation
-     * @param pipelineLevel
-     *            The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
+     * @param newSettings
+     *            The settings to convert to storable representation
+     * @param newInstance
+     *            A fresh dummy instance of the settings type which will be used as temporary helper (defaultValues and
+     *            values of the instance are completely ignored)
+     * @param previousSettingsRepresentation
+     *            The representation of settings which have been already stored (the whole settings tree)
      * @param path
-     *            The path of the settings in the settings tree
-     * @return The storable settings representation of the provided settings
+     *            The settings tree path of provided settings (empty lists means the provided settings belong to the
+     *            root component/perspective)
+     * @return The storable settings representation of provided settings as User Settings
      */
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings,
@@ -125,18 +149,27 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
 
         return settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);
     }
-    
+
     /**
-     * Converts the provided settings object into a storable settings representation without considering provided
-     * pipeline level and settings tree path.
+     * Converts the provided settings according to storable settings representation for Document Settings. This method
+     * implements the storable settings representation building pipeline which is used for settings storing operations.
+     * The diff patch inside the returned settings representation is generated by diff between {@code values} of User
+     * Settings from provided {@code previousSettingsRepresentation} and {@code values} inside the provided
+     * {@code newSettings} object. The diff patch inside the returned settings representation is generated by diff
+     * between {@code values} of effective settings after additional settings layers at
+     * {@code PipelineLevel.USER_DEFAULTS} and {@code values} inside the provided {@code newSettings} object.
      * 
-     * @param settings
-     *            The settings to convert to storable settings representation
-     * @param pipelineLevel
-     *            The pipeline level which indicates the storage scope, e.g. User Settings or Document Settings.
+     * @param newSettings
+     *            The settings to convert to storable representation
+     * @param newInstance
+     *            A fresh dummy instance of the settings type which will be used as temporary helper (defaultValues and
+     *            values of the instance are completely ignored)
+     * @param previousSettingsRepresentation
+     *            The representation of settings which have been already stored (the whole settings tree)
      * @param path
-     *            The path of the settings in the settings tree
-     * @return The storable settings representation of the provided settings
+     *            The settings tree path of provided settings (empty lists means the provided settings belong to the
+     *            root component/perspective)
+     * @return The storable settings representation of provided settings as Document Settings
      */
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(
@@ -151,10 +184,11 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
 
         if (previousSettingsRepresentation.hasStoredUserSettings()) {
             pipelinedSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
-                    pipelinedSettings, previousSettingsRepresentation.getUserSettingsRepresentation().getSubSettingsRepresentation(path));
-            
+                    pipelinedSettings,
+                    previousSettingsRepresentation.getUserSettingsRepresentation().getSubSettingsRepresentation(path));
+
             pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
-            
+
             pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS, path,
                     layersSettingsPatches);
 
@@ -167,22 +201,40 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
         return settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);
     }
 
-
     /**
-     * Adds a settings patch for transforming settings before storing them.
+     * Adds an additional settings layer with provided layer settings to the corresponding component. A component may have
+     * multiple layer settings. The effective settings are patched by the additional settings layer in the following
+     * way: All settings values of provided {@code additionalLayerSettings} parameter, which are set to a non-default
+     * value will override the resulting settings values. When the settings value type is a collection, the values of
+     * {@code additionalLayerSettings} and the resulting settings will be merged as following (read carefully):
+     * <ul>
+     * <li>If {@code additionalLayerSettings} <b>default values</b> contain a <i>value</i>, which is not contained in the
+     * <b>values</b> of {@code additiveSettings}, the not contained <i>value</i> gets removed from the <i>resulting
+     * settings values</i></li>
+     * <li>If {@code additionalLayerSettings} <b>values</b> contain a <i>value</i>, which is not contained in the <b>values</b>
+     * of the resulting settings, the not contained value gets added to the <i>resulting settings values</i>
+     * </ul>
+     * The additional settings layer shows its effect by further calls of:
+     * <ul>
+     * <li>{@link #getSettingsObject(Settings, StorableRepresentationOfDocumentAndUserSettings)}</li>
+     * <li>{@link #getStorableRepresentationOfDocumentSettings(Settings, Settings, StorableRepresentationOfDocumentAndUserSettings, List)}</li>
+     * <li>{@link #getStorableRepresentationOfUserSettings(Settings, Settings, StorableRepresentationOfDocumentAndUserSettings, List)}</li>
+     * </ul>
      * 
      * @param component
-     *            The component which the targeted settings for patching belong to
-     * @param afterLevel
-     *            The pipeline level <b>AFTER</b> that the patch should be applied on settings
+     *            The targeted component which the provided layer settings belong to
+     * @param afterSettingsLayer
+     *            The pipeline level <b>AFTER</b> that the provided layer is going to apply
      * @param additionalLayerSettings
-     *            The settings patch to apply on settings
+     *            The layer settings to apply on top the effective settings after the settings layer at provided level
      */
-    public <CS extends GenericSerializableSettings> void addAdditionalSettingsLayer(Component<CS> component, PipelineLevel afterLevel,
-            CS additionalLayerSettings) {
-        layersSettingsPatches.addSettingsPatch(component.getPath(), new AdditionalSettingsLayer<Settings>(additionalLayerSettings, settingsRepresentationTransformer), afterLevel);
+    public <CS extends GenericSerializableSettings> void addAdditionalSettingsLayer(Component<CS> component,
+            PipelineLevel afterSettingsLayer, CS additionalLayerSettings) {
+        layersSettingsPatches.addSettingsPatch(component.getPath(),
+                new AdditionalSettingsLayer<Settings>(additionalLayerSettings, settingsRepresentationTransformer),
+                afterSettingsLayer);
     }
-    
+
     /**
      * Internal helper class for management of provided settings patches in relation to its pipeline levels and
      * components that provided patches belong to.

@@ -51,7 +51,8 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
 
     protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle,
             SettingsRepresentationTransformer settingsRepresentationTransformer) {
-        this(rootLifecycle, settingsRepresentationTransformer, new UrlSettingsBuildingPipeline(settingsRepresentationTransformer));
+        this(rootLifecycle, settingsRepresentationTransformer,
+                new UrlSettingsBuildingPipeline(settingsRepresentationTransformer));
     }
 
     protected SimpleComponentContext(ComponentLifecycle<S> rootLifecycle,
@@ -113,8 +114,8 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     }
 
     /**
-     * Retrieves the "System Default" {@link Settings} of the root component managed by this {@link ComponentContext}
-     * and passes them to the provided callback.
+     * Retrieves the System Default {@link Settings} of the root component managed by this {@link ComponentContext} and
+     * passes them to the provided callback.
      * 
      * @see #getDefaultSettings()
      */
@@ -131,7 +132,13 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     }
 
     /**
-     * {@inheritDoc}
+     * Retrieves the System Default {@link Settings} of the provided component managed by this {@link ComponentContext}
+     * and passes them to the provided callback.
+     * 
+     * @param component
+     *            The component of which the settings should be retrieved
+     * @param settingsReceiverCallback
+     *            The callback which supplies the caller with initial settings
      */
     @Override
     public <CS extends Settings> void getInitialSettingsForComponent(final Component<CS> component,

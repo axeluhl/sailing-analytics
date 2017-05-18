@@ -6,6 +6,7 @@ import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
@@ -13,10 +14,11 @@ import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAd
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 /**
- * A specialization of {@link ComponentContextWithSettingsStorageAndAdditionalSettingsLayers} which is specially designed for
- * handling of RaceModes dependent default settings. This implementation offers convenience methods that can
- * be used by RaceModes to add Mode-specific default settings and inject them in the underlying settings building
- * pipeline.
+ * A specialization of {@link ComponentContextWithSettingsStorageAndAdditionalSettingsLayers} which is specially
+ * designed for handling of RaceModes dependent default settings. This implementation offers convenience methods that
+ * can be used by RaceModes to add Mode-specific default settings. Mode-specific default settings are treated as an
+ * additional settings layer - mode settings layer. The layer is located between User Settings and Document Settings
+ * layers.
  * 
  * 
  * @author Vladislav Chumak
@@ -24,7 +26,8 @@ import com.sap.sse.security.ui.settings.StoredSettingsLocation;
  * @see ComponentContextWithSettingsStorage
  *
  */
-public class RaceBoardComponentContext extends ComponentContextWithSettingsStorageAndAdditionalSettingsLayers<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> {
+public class RaceBoardComponentContext extends
+        ComponentContextWithSettingsStorageAndAdditionalSettingsLayers<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> {
 
     /**
      * @param rootLifecycle
@@ -34,58 +37,43 @@ public class RaceBoardComponentContext extends ComponentContextWithSettingsStora
      * @param storageDefinition
      *            The definition for User Settings and Document Settings storage keys
      */
-    public RaceBoardComponentContext(
-            RaceBoardPerspectiveLifecycle rootLifecycle,
-            UserService userService, StoredSettingsLocation storageDefinition) {
+    public RaceBoardComponentContext(RaceBoardPerspectiveLifecycle rootLifecycle, UserService userService,
+            StoredSettingsLocation storageDefinition) {
         super(rootLifecycle, userService, storageDefinition);
     }
-    
+
     /**
-     * Adds new settings patches in order to customize default settings construction according to the current race mode.
-     * There are two settings patches which are constructed and added to the underlying settings building pipeline - 
-     * a patch for settings object construction (loading settings), and a patch for settings storing.
+     * Adds a mode settings layer with provided layer settings to the corresponding component. A component may have
+     * multiple mode layer settings. The effective settings are patched by the mode settings layer in the following way:
+     * All settings values of provided {@code additionalLayerSettings} parameter, which are set to a non-default value
+     * will override the resulting settings values. When the settings value type is a collection, the values of
+     * {@code modeSettings} and the resulting settings will be merged as following (read carefully):
+     * <ul>
+     * <li>If {@code modeSettings} <b>default values</b> contain a <i>value</i>, which is not contained in the
+     * <b>values</b> of {@code modeSettings}, the not contained <i>value</i> gets removed from the <i>resulting settings
+     * values</i></li>
+     * <li>If {@code additiveSettings} <b>values</b> contain a <i>value</i>, which is not contained in the <b>values</b>
+     * of the resulting settings, the not contained value gets added to the <i>resulting settings values</i>
+     * </ul>
+     * The additional settings layer shows its effect by further calls of:
+     * <ul>
+     * <li>{@link #getInitialSettings(OnSettingsLoadedCallback)}</li>
+     * <li>{@link #getInitialSettingsForComponent(Component, OnSettingsLoadedCallback)}</li>
+     * <li>{@link #makeSettingsDefault(Component, Settings, com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback)}</li>
+     * <li>{@link #storeSettingsForContext(Component, Settings, com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback)}</li>
+     * </ul>
      * 
-     * <dl>
-     *  <dt>Loading settings patch</dt>
-     *  <dd>A loading settings patch is applied on top of the User Settings, when the settings object is constructed. 
-     *  The settings are patched in the following way:
-     *  All settings values of provided {@code additiveSettings} parameter, which are set to a non-default value
-     *  will override the resulting settings values. When the settings value type is a collection, the values of
-     *  {@code additiveSettings} and the resulting settings will be merged as following (read carefully):
-     *  <ul>
-     *   <li>If {@code additiveSettings} <b>default values</b> contain a <i>value</i>, which is not contained in the <b>values</b> of
-     *   {@code additiveSettings}, the not contained <i>value</i> gets removed from the <i>resulting settings values</i></li>
-     *   <li>If {@code additiveSettings} <b>values</b> contain a <i>value</i>, which is not contained in the <b>values</b> of
-     *   the resulting settings, the not contained value gets added to the <i>resulting settings values</i>
-     *  </ul>
-     *  </dd>
-     *  
-     *  <dt>Storing settings patch</dt>
-     *  <dd>A storing settings patch is applied on top of the Document Settings, when the settings are stored for a context (see
-     *  {@link #storeSettingsForContext(Component, Settings, com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback)})
-     *  The patch implementation patches the <b>default values</b> of the resulting settings to be stored in order to produce
-     *  a custom diff (see {@link GenericSerializableSettings Settings Framework} of the stored settings representation.
-     *  That means, in RaceBoard the user settings are serialized and stored by diffing with <b>System Default Settings</b>,
-     *  and Document Settings are serialized and stored by diffing with <b>Mode-Default Settings</b>. In order to achieve this,
-     *  the <b>default values</b> of the resulting settings are patched in the following way:
-     *  
-     *  All settings values of provided {@code additiveSettings} parameter, which are set to a non-default value
-     *  will override the <b>default values</b> of the resulting settings. When the settings value type is a collection, the values of
-     *  {@code additiveSettings} and the <b>default values</b> of the resulting settings will be merged as following (read carefully):
-     *  <ul>
-     *   <li>If {@code additiveSettings} <b>default values</b> contain a <i>value</i>, which is not contained in the <b>values</b> of
-     *   {@code additiveSettings}, the not contained <i>value</i> gets removed from the <i>resulting settings default values</i></li>
-     *   <li>If {@code additiveSettings} <b>values</b> contain a <i>value</i>, which is not contained in the <b>values</b> of
-     *   the resulting settings, the not contained value gets added to the <i>resulting settings default values</i>
-     *  </ul>
-     *  </dd>
-     * 
-     * @param component The component which maintains the target settings for the provided settings patch
-     * @param modeSettings The additiveSettings for settings patches (see description above)
-     * @param patchCallback The callback which gets called when the new settings has been reloaded and patched with all patches including the new patch
+     * @param component
+     *            The targeted component which the provided layer settings belong to
+     * @param modeSettings
+     *            The mode layer settings to apply
+     * @param reloadedCallback
+     *            The callback used to accept the reloaded settings after adding the mode settings layer
      */
-    public<CS extends GenericSerializableSettings> void addModesPatching(Component<CS> component, CS modeSettings, OnSettingsReloadedCallback<CS> patchCallback) {
-        super.addAdditionalSettingsLayerForComponent(component, PipelineLevel.USER_DEFAULTS, modeSettings, patchCallback);
+    public <CS extends GenericSerializableSettings> void addModesPatching(Component<CS> component, CS modeSettings,
+            OnSettingsReloadedCallback<CS> patchCallback) {
+        super.addAdditionalSettingsLayerForComponent(component, PipelineLevel.USER_DEFAULTS, modeSettings,
+                patchCallback);
     }
 
 }

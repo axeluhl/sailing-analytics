@@ -44,9 +44,9 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 public interface ComponentContext<S extends Settings> {
 
     /**
-     * Stores the provided {@link Settings} of the provided {@link Component} as "User Settings" globally. Make sure to
-     * call this method only when {@link #isStorageSupported(Component)} method returns {@code true} for the provided
-     * {@link Component}.
+     * Stores the provided {@link Settings} of the provided {@link Component} as User Settings which are
+     * context-independent. Make sure to call this method only when {@link #isStorageSupported(Component)} method
+     * returns {@code true} for the provided {@link Component}.
      * 
      * @param component
      *            The component which corresponds to the provided {@link Settings}
@@ -59,9 +59,9 @@ public interface ComponentContext<S extends Settings> {
             OnSettingsStoredCallback onSettingsStoredCallback);
 
     /**
-     * Stores the provided {@link Settings} of the provided {@link Component} as "Document Settings" (old term "Context
-     * specific Settings") for the current context. Make sure to call this method only when
-     * {@link #isStorageSupported(Component)} method returns {@code true} for the provided {@link Component}.
+     * Stores the provided {@link Settings} of the provided {@link Component} as Document Settings for the current
+     * context. Make sure to call this method only when {@link #isStorageSupported(Component)} method returns
+     * {@code true} for the provided {@link Component}.
      * 
      * @param component
      *            The component which corresponds to the provided {@link Settings}
@@ -109,6 +109,8 @@ public interface ComponentContext<S extends Settings> {
      * implementation does not query information from server. This method produces no side-effects if it gets called
      * multiple times.
      * 
+     * @param component
+     *            The component of which the settings should be retrieved
      * @param settingsReceiverCallback
      *            The callback which supplies the caller with initial settings
      */
