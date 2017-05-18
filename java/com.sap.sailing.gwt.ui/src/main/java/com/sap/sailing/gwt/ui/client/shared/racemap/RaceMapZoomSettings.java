@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.settings.client.settingtypes.converter.ZoomTypesStrin
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
-import com.sap.sse.common.settings.generic.EnumListSetting;
+import com.sap.sse.common.settings.generic.EnumSetSetting;
 
 /**
  * @author Lennart Hensler (D054527)
@@ -35,12 +35,12 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
         }
     };
 
-    private EnumListSetting<ZoomTypes> typesToConsiderOnZoom;
+    private EnumSetSetting<ZoomTypes> typesToConsiderOnZoom;
     private BooleanSetting zoomToSelectedCompetitors;
     
     @Override
     protected void addChildSettings() {
-        typesToConsiderOnZoom = new EnumListSetting<>("typesToConsiderOnZoom", this, Collections.singleton(ZoomTypes.BUOYS), new ZoomTypesStringToEnumConverter());
+        typesToConsiderOnZoom = new EnumSetSetting<>("typesToConsiderOnZoom", this, Collections.singleton(ZoomTypes.BUOYS), new ZoomTypesStringToEnumConverter());
         zoomToSelectedCompetitors = new BooleanSetting("zoomToSelectedCompetitors", this, false);
     }
     

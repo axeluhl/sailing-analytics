@@ -101,7 +101,7 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
     private S getDefaultSettings() {
         S defaultSettings = rootLifecycle.createDefaultSettings();
         return settingsBuildingPipeline.getSettingsObject(defaultSettings,
-                new StorableRepresentationOfDocumentAndUserSettings(null, null), new ArrayList<>());
+                new StorableRepresentationOfDocumentAndUserSettings(null, null));
     }
 
     /**

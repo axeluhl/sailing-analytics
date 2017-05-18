@@ -183,7 +183,6 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START);
         raceDetailsToShow.add(DetailType.DISTANCE_TO_START_AT_RACE_START);
-        raceDetailsToShow.add(DetailType.DISTANCE_TO_START_LINE);
         raceDetailsToShow.add(DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS);
         raceDetailsToShow.add(DetailType.SPEED_OVER_GROUND_AT_RACE_START);
         raceDetailsToShow.add(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START);

@@ -45,7 +45,7 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
      */
     @Override
     public <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation, List<String> absolutePathOfComponentWithSettings) {
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
         CS effectiveSettings = systemDefaultSettings;
         if (settingsRepresentation.hasStoredUserSettings()) {
             effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(effectiveSettings,
@@ -94,7 +94,7 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
         if(previousSettingsRepresentation.hasStoredUserSettings()) {
             CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);
             pipelinedSettings = SettingsUtil.copyDefaults(newSettings, newInstance); //overrides values which are set to default values
-            CS previousUserSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(newInstance, previousSettingsRepresentation.getUserSettingsRepresentation());
+            CS previousUserSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(newInstance, previousSettingsRepresentation.getUserSettingsRepresentation().getSubSettingsRepresentation(path));
             pipelinedSettings = SettingsUtil.copyDefaultsFromValues(previousUserSettings, pipelinedSettings);
             documentSettingsWithUserSettingsDiff = SettingsUtil.copyValues(newSettings, pipelinedSettings);
         } else {

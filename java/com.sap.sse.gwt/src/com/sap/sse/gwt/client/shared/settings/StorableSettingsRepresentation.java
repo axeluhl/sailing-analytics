@@ -115,5 +115,27 @@ public class StorableSettingsRepresentation {
         }
         return root;
     }
+    
+    public StorableSettingsRepresentation getSubSettingsRepresentation(List<String> subPath) {
+        return new StorableSettingsRepresentation(getSubSettingsRepresentation(internalSettingsRepresentation, new ArrayList<>(subPath)));
+    }
+    
+    public static JSONObject getSubSettingsRepresentation(JSONObject root, List<String> subPath) {
+        if (subPath.isEmpty()) {
+            return root;
+        } else {
+            String current = subPath.remove(subPath.size() - 1);
+            // we need to go further
+            JSONValue child = root.get(current);
+            boolean haskey = root.containsKey(current);
+            if (child == null || child.isObject() == null) {
+                if (haskey) {
+                    GWT.log("Warning: replacing some subtree element that is wrong type!");
+                }
+                child = new JSONObject();
+            }
+            return getSubSettingsRepresentation(child.isObject(), subPath);
+        }
+    }
 
 }

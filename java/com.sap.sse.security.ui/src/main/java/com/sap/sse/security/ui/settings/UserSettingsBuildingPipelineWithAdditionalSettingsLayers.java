@@ -45,23 +45,23 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
     
     @Override
     public <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations,
-            List<String> absolutePathOfComponentWithSettings) {
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations) {
+        List<String> rootPath = new ArrayList<>();
         CS effectiveSettings = applyPatchesForPipelineLevel(systemDefaultSettings, PipelineLevel.SYSTEM_DEFAULTS,
-                absolutePathOfComponentWithSettings, layersSettingsPatches);
+                rootPath, layersSettingsPatches);
         if (settingsRepresentations.hasStoredUserSettings()) {
             effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
                     effectiveSettings, settingsRepresentations.getUserSettingsRepresentation());
         }
         effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.USER_DEFAULTS,
-                absolutePathOfComponentWithSettings, layersSettingsPatches);
+                rootPath, layersSettingsPatches);
         if (settingsRepresentations.hasStoredDocumentSettings()) {
             effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
                     effectiveSettings, settingsRepresentations.getDocumentSettingsRepresentation());
         }
 
         effectiveSettings = applyPatchesForPipelineLevel(effectiveSettings, PipelineLevel.DOCUMENT_DEFAULTS,
-                absolutePathOfComponentWithSettings, layersSettingsPatches);
+                rootPath, layersSettingsPatches);
         effectiveSettings = settingsRepresentationTransformer.mergeSettingsObjectWithUrlSettings(effectiveSettings);
         return effectiveSettings;
     }
@@ -150,17 +150,19 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
         pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
 
         if (previousSettingsRepresentation.hasStoredUserSettings()) {
-            CS previousUserSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
-                    pipelinedSettings, previousSettingsRepresentation.getUserSettingsRepresentation());
-            previousUserSettings = applyPatchesForPipelineLevel(previousUserSettings, PipelineLevel.USER_DEFAULTS, path,
+            pipelinedSettings = settingsRepresentationTransformer.mergeSettingsObjectWithStorableRepresentation(
+                    pipelinedSettings, previousSettingsRepresentation.getUserSettingsRepresentation().getSubSettingsRepresentation(path));
+            
+            pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
+            
+            pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS, path,
                     layersSettingsPatches);
 
-            pipelinedSettings = SettingsUtil.copyDefaultsFromValues(previousUserSettings, pipelinedSettings);
         } else {
             pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS, path,
                     layersSettingsPatches);
-            pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
         }
+        pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
         pipelinedSettings = SettingsUtil.copyValues(newSettings, pipelinedSettings);
         return settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);
     }

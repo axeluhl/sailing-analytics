@@ -152,7 +152,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
         } else {
             S newDefaultSettings = settingsBuildingPipeline.getSettingsObject(systemDefaultSettings,
-                    cachedSettingsRepresentation, new ArrayList<>());
+                    cachedSettingsRepresentation);
             callback.onSuccess(newDefaultSettings);
         }
     }
@@ -161,7 +161,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             S systemDefaultSettings) {
         cachedSettingsRepresentation = settingsRepresentation;
         S settingsObject = settingsBuildingPipeline.getSettingsObject(systemDefaultSettings,
-                cachedSettingsRepresentation, new ArrayList<>());
+                cachedSettingsRepresentation);
         return settingsObject;
     }
 

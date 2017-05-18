@@ -47,7 +47,7 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
      */
     @Override
     public <S extends Settings> S getSettingsObject(S systemDefaultSettings,
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation, List<String> absolutePathOfComponentWithSettings) {
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
         return settingsRepresentationTransformer.mergeSettingsObjectWithUrlSettings(systemDefaultSettings);
     }
 

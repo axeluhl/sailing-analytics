@@ -29,7 +29,7 @@ public interface SettingsBuildingPipeline {
      * @return The constructed settings object
      */
     <CS extends Settings> CS getSettingsObject(CS systemDefaultSettings,
-            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation, List<String> absolutePathOfComponentWithSettings);
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentation);
 
     /**
      * Converts the provided settings according to the storage scope and the settings tree path of provided settings.
