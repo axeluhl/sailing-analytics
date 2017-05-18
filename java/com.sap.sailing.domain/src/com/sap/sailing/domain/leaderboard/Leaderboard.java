@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -553,4 +554,6 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * the boat class will be determined based on the most frequently occurring boat class when iterating across the competitors.
      */
     BoatClass getBoatClass();
+    
+    LeaderboardType getLeaderboardType();
 }

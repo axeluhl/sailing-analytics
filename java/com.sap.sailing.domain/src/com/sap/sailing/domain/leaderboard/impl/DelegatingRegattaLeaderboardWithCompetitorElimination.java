@@ -147,7 +147,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     }
 
     @Override
-    protected LeaderboardType getLeaderboardType() {
+    public LeaderboardType getLeaderboardType() {
         return LeaderboardType.RegattaLeaderboard;
     }
 

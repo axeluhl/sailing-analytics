@@ -295,37 +295,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                         removeLeaderboard(leaderboardDTO);
                     }
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    final String oldLeaderboardName = leaderboardDTO.name;
-                    List<StrippedLeaderboardDTO> otherExistingLeaderboard = new ArrayList<StrippedLeaderboardDTO>();
-                    otherExistingLeaderboard.addAll(availableLeaderboardList);
-                    otherExistingLeaderboard.remove(leaderboardDTO);
-                    if (leaderboardDTO.type.isMetaLeaderboard()) {
-                        Window.alert(stringMessages.metaLeaderboardCannotBeChanged());
-                    } else {
-                        if (leaderboardDTO.type.isRegattaLeaderboard()) {
-                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name,
-                                    leaderboardDTO.displayName, /* scoring scheme provided by regatta */ null,
-                                    leaderboardDTO.discardThresholds, leaderboardDTO.regattaName,
-                                    leaderboardDTO.defaultCourseAreaId);
-                            AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
-                                    .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
-                                    descriptor, stringMessages, errorReporter,
-                                    new DialogCallback<LeaderboardDescriptor>() {
-                                @Override
-                                public void cancel() {
-                                }
-
-                                @Override
-                                public void ok(LeaderboardDescriptor result) {
-                                    updateLeaderboard(oldLeaderboardName, result);
-                                }
-                            });
-                            dialog.show();
-                        } else {
-                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.defaultCourseAreaId);
-                            openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, leaderboardDTO.name, descriptor);
-                        }
-                    }
+                    editLeaderboard(leaderboardDTO);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_SCORES.equals(value)) {
                     String leaderboardEditingUrl = EntryPointWithSettingsLinkFactory.createLeaderboardEditingLink(leaderboardDTO.name);
                     Window.open(leaderboardEditingUrl, "_blank", null);
@@ -367,6 +337,40 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
     }
     
+    private void editLeaderboard(StrippedLeaderboardDTO leaderboardDTO) {
+        final String oldLeaderboardName = leaderboardDTO.name;
+        List<StrippedLeaderboardDTO> otherExistingLeaderboard = new ArrayList<StrippedLeaderboardDTO>();
+        otherExistingLeaderboard.addAll(availableLeaderboardList);
+        otherExistingLeaderboard.remove(leaderboardDTO);
+        if (leaderboardDTO.type.isMetaLeaderboard()) {
+            Window.alert(stringMessages.metaLeaderboardCannotBeChanged());
+        } else {
+            if (leaderboardDTO.type.isRegattaLeaderboard()) {
+                LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name,
+                        leaderboardDTO.displayName, /* scoring scheme provided by regatta */ null,
+                        leaderboardDTO.discardThresholds, leaderboardDTO.regattaName,
+                        leaderboardDTO.defaultCourseAreaId);
+                AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
+                        .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
+                        descriptor, stringMessages, errorReporter,
+                        new DialogCallback<LeaderboardDescriptor>() {
+                    @Override
+                    public void cancel() {
+                    }
+
+                    @Override
+                    public void ok(LeaderboardDescriptor result) {
+                        updateLeaderboard(oldLeaderboardName, result);
+                    }
+                });
+                dialog.show();
+            } else {
+                LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.defaultCourseAreaId);
+                openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, leaderboardDTO.name, descriptor);
+            }
+        }
+    }
+
     @Override
     protected void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable) {
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> explicitFactorColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {

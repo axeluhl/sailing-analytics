@@ -36,7 +36,6 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -936,8 +935,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         result = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getLegGapToLegLeaderInOwnTime(tloc, timePoint, rankingInfo, cache);
         return result;
     }
-
-    protected abstract LeaderboardType getLeaderboardType();
 
     @Override
     public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException {

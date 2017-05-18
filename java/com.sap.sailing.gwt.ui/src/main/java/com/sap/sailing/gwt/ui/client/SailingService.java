@@ -404,7 +404,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName);
 
-    Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
+    LeaderboardType getLeaderboardType(String leaderboardName);
 
         /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);

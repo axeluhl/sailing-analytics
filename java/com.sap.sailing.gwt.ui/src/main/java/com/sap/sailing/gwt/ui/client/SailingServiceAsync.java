@@ -555,7 +555,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName,
             AsyncCallback<List<Util.Pair<String, String>>> callback);
 
-    void checkLeaderboardName(String leaderboardName, AsyncCallback<Util.Pair<String, LeaderboardType>> callback);
+    void getLeaderboardType(String leaderboardName, AsyncCallback<LeaderboardType> callback);
 
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
     

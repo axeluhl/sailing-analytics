@@ -2332,22 +2332,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public com.sap.sse.common.Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName) {
-        com.sap.sse.common.Util.Pair<String, LeaderboardType> result = null;
-
-        if(getService().getLeaderboards().containsKey(leaderboardName)) {
-            Leaderboard leaderboard = getService().getLeaderboards().get(leaderboardName);
-            boolean isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
-            boolean isRegattaLeaderboard = leaderboard instanceof RegattaLeaderboard ? true : false;
-            LeaderboardType type;
-            if(isMetaLeaderboard) {
-                type = isRegattaLeaderboard ? LeaderboardType.RegattaMetaLeaderboard : LeaderboardType.FlexibleMetaLeaderboard;
-            } else {
-                type = isRegattaLeaderboard ? LeaderboardType.RegattaLeaderboard : LeaderboardType.FlexibleLeaderboard;
-            }
-            result = new com.sap.sse.common.Util.Pair<String, LeaderboardType>(leaderboard.getName(), type);
+    public LeaderboardType getLeaderboardType(String leaderboardName) {
+        final LeaderboardType result;
+        final Leaderboard leaderboard = getService().getLeaderboards().get(leaderboardName);
+        if (leaderboard != null) {
+            result = leaderboard.getLeaderboardType();
+        } else {
+            result = null;
         }
-        
         return result;
     }
 
