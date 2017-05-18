@@ -10,19 +10,46 @@
 <body>
 	<div class="logoAndTitlePanel">
     	<a class="sapLogo" href="http://www.sap.com">
-        	<img class="sapLogoImage" src="/images/logo-small@2x.png" alt="SAP Website"/>
+            <img class="sapLogoImage" src="/images/logo-small@2x.png" alt="SAP Website"/>
     	</a>
-		<div class="sailingAnalyticsLabelPanel">
-	    	<div class="sailingAnalyticsLabel">Sailing Analytics</div>
-	      </div>
+	<div class="sailingAnalyticsLabelPanel">
+	<div class="sailingAnalyticsLabel">Sailing Analytics</div>
+	</div>
     </div>
-
 	<div class="yield_content">
 		<div class="contentWrapper">
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
     
+                    <h2 class="articleSubheadline">May 2017</h2>
+                    <ul class="bulletList">
+                        <li>The logic of the "Control tracking from start and finish times" check box now behaves slightly
+                            differently. As before, a default start of tracking time is derived from the race start time
+                            (currently five minutes before race start). Likewise, a default end of tracking time is derived
+                            from the race finish time (the time when the blue flag was lowered, or more technically,
+                            when a FINISHED race state was set in the race log) which is currently two minutes after
+                            the race has finished. However, previously, when deviating start of tracking or end of tracking times
+                            were set through other channels, such as received from TracTrac or set explicitly through
+                            the administration console, new events would have been written to the race log, fixing the
+                            start of tracking / end of tracking times according to the derivation rules.<p>
+                            This logic has caused undesired effects and has therefore been removed. For example, when
+                            an end of tracking time has been set explicitly through the administration console then
+                            it may have been overwritten by a new end-of-tracking-time event appended to the race log
+                            when the race is loaded again. Similarly, when a new start time was provided, an explicitly
+                            set start of tracking time would have been canceled. With the new behavior, explicit settings
+                            of start/end of tracking will remain untouched.<p>
+                            For "Smartphone Tracking" the check box therefore now mainly controls whether or not a start/end
+                            of tracking time is written to the race log when the user starts/stops tracking for the first time
+                            through the administration console: when the tracking times are to be controlled by the race's
+                            start and finish times, simply starting / stopping to track a race with the smartphone connector won't
+                            set the start / end of tracking times.<p>
+                            For the TracTrac connector, when the check box is set, as before messages will go out to TracTrac
+                            when the race start / finish times have changed. The feedback from TracTrac will adjust the
+                            tracking times as received by the connector, but no race log entries for the tracking times
+                            will be created anymore.</li>
+                    </ul>
+
                     <h2 class="articleSubheadline">April 2017</h2>
                     <ul class="bulletList">
                         <li><code>/gwt/AutoPlay.html</code> can be fully parameterized. Previously, only few of the
