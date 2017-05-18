@@ -38,7 +38,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
         selectionTimer = new Timer() {
             @Override
             public void run() {
-                // selectNext();
+                 selectNext();
             }
         };
     }
