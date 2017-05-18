@@ -61,9 +61,8 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
             SixtyInchLeaderBoard leaderboardPanel) {
         panel.setWidget(this);
         rawRaceMap = raceMap;
-
         racemap.add(raceMap);
-        resizeMapOnceInitially();
+        resizeMapOnceInitially(raceMap);
 
         leaderBoardHolder.add(leaderboardPanel);
         resizer = new Timer() {
@@ -78,11 +77,16 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
     }
 
 
-    private void resizeMapOnceInitially() {
+    private void resizeMapOnceInitially(RaceMap raceMap2) {
         new Timer() {
             @Override
             public void run() {
+                GWT.log("reinit fallback");
+                raceMap2.redraw();
                 racemap.onResize();
+                if(racemap.isAttached()){
+                    this.schedule(50);
+                }
             }
         }.schedule(50);
     }

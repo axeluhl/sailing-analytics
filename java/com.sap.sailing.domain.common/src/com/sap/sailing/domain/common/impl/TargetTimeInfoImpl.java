@@ -31,7 +31,6 @@ public class TargetTimeInfoImpl implements TargetTimeInfo {
             this.expectedDuration = expectedDuration;
             this.expectedStartTimePoint = expectedStartTimePoint;
             this.legType = legType;
-            this.expectedDistance = expectedDistance;
         }
 
         @Override

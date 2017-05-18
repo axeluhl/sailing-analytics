@@ -10,23 +10,23 @@
 		width: 40%;
 		height: 100%;
 		overflow-y: auto;
-		bottom: 60px;
 	}
 	
 	.right {
 		position: absolute;
 		display: inline-block;
 		right: 0px;
-		height: 100%;
 		width: 60%;
+		height: 93%;
+		border-left: 1px solid #d6d6d6;
 	}
 	
 	.image {
 		display: inline-block;
 		height: auto;
-        margin-left: 5%;
-        margin-right: 5%;
-		width: 20%;
+		margin-left: 1%;
+		margin-right: 1%;
+		width: 31.3%;
 		height: 90%;
 		border-radius: 4px;
 	}
@@ -81,13 +81,46 @@
 		right: 0%;
 	}
 	
-	.bottom {
-		font-size: 20px;
-		text-align: center;
+	.statistics {
+		position: absolute;
+		background-color: black;
+		width: 60%;
+		right: 0px;
+		bottom: 0px;
+		height: 7%;
+		font-size: 1rem;
+		display: flex;
+		-webkit-align-items: center;
+		-moz-box-align: center;
+		-ms-flex-align: center;
+		align-items: center;
+		-webkit-justify-content: space-around;
+		-ms-flex-pack: distribute;
+		justify-content: space-around;
+		background: #333;
+		border-top: .3125em solid #f0ab00;
+		padding: .9375em 0;
 	}
 	
-	.bottomLine {
-		
+	.info-overlay__item {
+		text-align: center;
+		color: #fff;
+		-webkit-box-flex: 1;
+		-webkit-flex: 1 0 auto;
+		-moz-box-flex: 1;
+		-ms-flex: 1 0 auto;
+		flex: 1 0 auto;
+		border-right: 1px solid #999;
+	}
+	
+	.info-overlay__item__value {
+		font-size: 1.5em;
+	}
+	
+	.info-overlay__item__property {
+		font-size: 1em;
+		font-weight: 700;
+		text-transform: uppercase;
 	}
 	</ui:style>
 	<rf:ResizableFlowPanel styleName="{res.style.slideBackground}">
@@ -96,20 +129,32 @@
 		<rf:ResizableFlowPanel ui:field="infoHolder"
 			styleName="{style.right}">
 			<rf:ResizableFlowPanel styleName="{style.image}">
-				<g:Image ui:field="image1" />
+				<g:FlowPanel ui:field="image2" />
 			</rf:ResizableFlowPanel>
 			<rf:ResizableFlowPanel styleName="{style.image}">
-				<g:Image ui:field="image2" />
+				<g:FlowPanel ui:field="image1" />
 			</rf:ResizableFlowPanel>
 			<rf:ResizableFlowPanel styleName="{style.image}">
-				<g:Image ui:field="image3" />
+				<g:FlowPanel ui:field="image3" />
 			</rf:ResizableFlowPanel>
 			<g:Label ui:field="subline1" styleName="{style.subline1}" />
 			<g:Label ui:field="subline2" styleName="{style.subline2}" />
 			<g:Label ui:field="subline3" styleName="{style.subline3}" />
 		</rf:ResizableFlowPanel>
-		<rf:ResizableFlowPanel styleName="{res.style.bottom">
-			<g:Label ui:field="bottomText" styleName="{style.bottomLine" />
+		<rf:ResizableFlowPanel styleName="{style.statistics}"
+			ui:field="statistics">
+			<rf:ResizableFlowPanel styleName="{style.info-overlay__item}">
+				<g:Label styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
+				<g:Label styleName="{style.info-overlay__item__property}">Wind</g:Label>
+			</rf:ResizableFlowPanel>
+			<rf:ResizableFlowPanel styleName="{style.info-overlay__item}">
+				<g:Label styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
+				<g:Label styleName="{style.info-overlay__item__property}">Wind</g:Label>
+			</rf:ResizableFlowPanel>
+			<rf:ResizableFlowPanel styleName="{style.info-overlay__item}">
+				<g:Label styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
+				<g:Label styleName="{style.info-overlay__item__property}">Wind</g:Label>
+			</rf:ResizableFlowPanel>
 		</rf:ResizableFlowPanel>
 	</rf:ResizableFlowPanel>
 </ui:UiBinder> 

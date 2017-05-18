@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.home.communication.event.sixtyinch;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
@@ -13,6 +15,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
@@ -51,29 +54,44 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
         DynamicTrackedRace trace = context.getRacingEventService().getTrackedRace(identifier);
 
         Duration duration = null;
-        try {
-            TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(MillisecondsTimePoint.now());
-            duration = timeToComplete.getExpectedDuration();
-
-            trace.getEstimatedDistanceToComplete(MillisecondsTimePoint.now());
-        } catch (NotEnoughDataHasBeenAddedException e) {
-            e.printStackTrace();
-        } catch (NoWindException e) {
-            e.printStackTrace();
-        }
-
         Distance distance = null;
-        try {
-            TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(MillisecondsTimePoint.now());
-            distance = timeToComplete.getExpectedDistance();
-
-            trace.getEstimatedDistanceToComplete(MillisecondsTimePoint.now());
-        } catch (NotEnoughDataHasBeenAddedException e) {
-            e.printStackTrace();
-        } catch (NoWindException e) {
-            e.printStackTrace();
+        TimePoint timePoint;
+        if(trace.getEndOfRace() == null){
+            timePoint = MillisecondsTimePoint.now();
+            duration = estimateDuration(trace, duration,timePoint);
+            distance = estimateDistance(trace, distance,timePoint);
+        }else{
+            List<Competitor> competitorOrder = trace.getCompetitorsFromBestToWorst(trace.getEndOfRace());
+            if(!competitorOrder.isEmpty()){
+                distance = trace.getDistanceTraveled(competitorOrder.get(0), trace.getEndOfRace());
+                duration = trace.getStartOfRace().until(trace.getEndOfRace());
+            }
         }
 
         return new GetSixtyInchStatisticDTO(competitors, legs, duration, distance);
+    }
+
+    private Distance estimateDistance(DynamicTrackedRace trace, Distance distance,TimePoint timePoint) {
+        try {
+            TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(timePoint);
+            distance = timeToComplete.getExpectedDistance();
+        } catch (NotEnoughDataHasBeenAddedException e) {
+            e.printStackTrace();
+        } catch (NoWindException e) {
+            e.printStackTrace();
+        }
+        return distance;
+    }
+
+    private Duration estimateDuration(DynamicTrackedRace trace, Duration duration, TimePoint timePoint) {
+        try {
+            TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(timePoint);
+            duration = timeToComplete.getExpectedDuration();
+        } catch (NotEnoughDataHasBeenAddedException e) {
+            e.printStackTrace();
+        } catch (NoWindException e) {
+            e.printStackTrace();
+        }
+        return duration;
     }
 }

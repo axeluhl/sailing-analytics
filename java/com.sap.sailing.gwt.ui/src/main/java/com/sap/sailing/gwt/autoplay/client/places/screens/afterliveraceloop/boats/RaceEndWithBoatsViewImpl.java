@@ -1,11 +1,12 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
@@ -29,11 +30,11 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     ResizableFlowPanel infoHolder;
 
     @UiField
-    Image image1;
+    FlowPanel image1;
     @UiField
-    Image image2;
+    FlowPanel image2;
     @UiField
-    Image image3;
+    FlowPanel image3;
     @UiField
     Label subline1;
     @UiField
@@ -41,7 +42,7 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     @UiField
     Label subline3;
     @UiField
-    Label bottomText;
+    ResizableFlowPanel statistics;
 
     private Timer resizer;
 
@@ -64,8 +65,7 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
 
             @Override
             public void run() {
-                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX,
-                        leaderboardPanel);
+                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX, leaderboardPanel);
             }
         };
         resizer.scheduleRepeating(100);
@@ -79,19 +79,28 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     @Override
     public void setFirst(CompetitorDTO c) {
         subline1.setText("1. " + c.getName());
-        image1.setUrl(provider.getImageUrl(c));
+        setImage(image1, provider.getImageUrl(c), true);
     }
 
     @Override
     public void setSecond(CompetitorDTO c) {
         subline2.setText("2. " + c.getName());
-        image2.setUrl(provider.getImageUrl(c));
+        setImage(image2, provider.getImageUrl(c), false);
     }
 
     @Override
     public void setThird(CompetitorDTO c) {
         subline3.setText("3. " + c.getName());
-        image3.setUrl(provider.getImageUrl(c));
+        setImage(image3, provider.getImageUrl(c), false);
+    }
+
+    private void setImage(FlowPanel image, String imageUrl, boolean slightlyLarger) {
+        image.getElement().getStyle().setBackgroundImage("url(" + imageUrl + ")");
+        image.getElement().getStyle().setHeight(90, Unit.PCT);
+        image.getElement().getStyle().setWidth(slightlyLarger ? 100 : 90, Unit.PCT);
+        image.getElement().getStyle().setProperty("backgroundPosition", "center bottom");
+        image.getElement().getStyle().setProperty("backgroundSize", "contain");
+        image.getElement().getStyle().setProperty("backgroundRepeat", "no-repeat");
     }
 
 }

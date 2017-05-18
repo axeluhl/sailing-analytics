@@ -19,7 +19,7 @@ public interface AutoPlayContext {
 
     public RegattaAndRaceIdentifier getLastRace();
 
-    public void setCurrenLifeRace(RegattaAndRaceIdentifier lifeRace);
+    public void setCurrentLifeRace(RegattaAndRaceIdentifier lifeRace);
 
     PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> getAutoplaySettings();
 
