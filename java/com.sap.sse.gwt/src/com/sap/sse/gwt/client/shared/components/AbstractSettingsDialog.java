@@ -65,7 +65,7 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
                     }
                  });
                 
-            } else if(disablingAnchorHandlerRegistration != null) {
+            } else if(!invalidState && disablingAnchorHandlerRegistration != null) {
                 disablingAnchorHandlerRegistration.removeHandler();
                 disablingAnchorHandlerRegistration = null;
             }

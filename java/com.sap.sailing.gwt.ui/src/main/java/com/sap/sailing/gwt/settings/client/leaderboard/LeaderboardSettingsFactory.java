@@ -24,7 +24,7 @@ public class LeaderboardSettingsFactory {
     
     public LeaderboardSettings createNewDefaultSettingsWithRaceColumns(List<String> namesOfRaceColumns) {
         LeaderboardSettings leaderboardSettings = new LeaderboardSettings(namesOfRaceColumns);
-        SettingsUtil.copyDefaults(leaderboardSettings, leaderboardSettings);
+        SettingsUtil.copyDefaultsFromValues(leaderboardSettings, leaderboardSettings);
         return leaderboardSettings;
     }
  

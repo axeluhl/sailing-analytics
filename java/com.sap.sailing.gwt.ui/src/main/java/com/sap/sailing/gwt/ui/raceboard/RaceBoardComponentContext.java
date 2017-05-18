@@ -10,18 +10,17 @@ import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers;
-import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndPatching;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 /**
- * A specialization of {@link ComponentContextWithSettingsStorageAndPatching} which is specially designed for
+ * A specialization of {@link ComponentContextWithSettingsStorageAndAdditionalSettingsLayers} which is specially designed for
  * handling of RaceModes dependent default settings. This implementation offers convenience methods that can
  * be used by RaceModes to add Mode-specific default settings and inject them in the underlying settings building
  * pipeline.
  * 
  * 
  * @author Vladislav Chumak
- * @see ComponentContextWithSettingsStorageAndPatching
+ * @see ComponentContextWithSettingsStorageAndAdditionalSettingsLayers
  * @see ComponentContextWithSettingsStorage
  *
  */

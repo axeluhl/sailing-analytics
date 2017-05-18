@@ -54,7 +54,7 @@ public class ComponentContextWithSettingsStorageAndAdditionalSettingsLayers<S ex
     protected ComponentContextWithSettingsStorageAndAdditionalSettingsLayers(ComponentLifecycle<S> rootLifecycle,
             UserService userService, StoredSettingsLocation storageDefinition,
             SettingsRepresentationTransformer settingsRepresentationTransformer,
-            UserSettingsBuildingPipelineWithPatching settingsBuildingPipeline) {
+            UserSettingsBuildingPipelineWithAdditionalSettingsLayers settingsBuildingPipeline) {
         super(rootLifecycle, userService, storageDefinition, settingsRepresentationTransformer, settingsBuildingPipeline);
     }
 

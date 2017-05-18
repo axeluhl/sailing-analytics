@@ -174,15 +174,13 @@ public abstract class DataEntryDialog<T> {
         }
         if (!invalidState) {
             getStatusLabel().setText("");
-            invalidState = false;
             onChange(result);
         } else {
             getStatusLabel().setText(errorMessage);
             getStatusLabel().setStyleName("errorLabel");
-            invalidState = true;
         }
         
-        return errorMessage == null;
+        return !invalidState;
     }
 
     /**
