@@ -30,6 +30,15 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
+/**
+ * Shows two competitor tables next to each other; the table on the left is that of the "registered" competitors, the table
+ * on the right is the "pool" of all competitors with those already "registered" removed. Between the tables are buttons
+ * to move competitors left and right, thereby assigning them to the "registered" set or moving them back to the pool.
+ * The {@link #getResult result} consists of all {@link CompetitorDTO competitors} in the table of "registered" competitors.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDialog<Set<CompetitorDTO>> implements BusyDisplay {
     protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
     protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;

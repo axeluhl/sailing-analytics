@@ -148,7 +148,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     @Override
     public LeaderboardType getLeaderboardType() {
-        return LeaderboardType.RegattaLeaderboard;
+        return LeaderboardType.RegattaLeaderboardWithEliminations;
     }
 
     // --------------------- Delegate Pattern Implementation ----------------------

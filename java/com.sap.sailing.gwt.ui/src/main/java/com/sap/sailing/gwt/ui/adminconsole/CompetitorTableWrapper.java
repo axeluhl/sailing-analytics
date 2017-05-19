@@ -34,6 +34,18 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
+/**
+ * A filterable competitor table. The data model is managed by the {@link #getFilterField() filter field}. In
+ * order to set an initial set of competitors to display by this table, use {@link #refreshCompetitorList(Iterable)}.
+ * The selected competitors can be obtained from the {@link #getSelectionModel() selection model}. The competitor
+ * set can also be updated to that of a leaderboard by using {@link #refreshCompetitorList(String)}, providing the
+ * leaderboard name as parameter. The competitors currently in the table (regardless of the current filter settings)
+ * are returned by {@link #getAllCompetitors()}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <S>
+ */
 public class CompetitorTableWrapper<S extends RefreshableSelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     

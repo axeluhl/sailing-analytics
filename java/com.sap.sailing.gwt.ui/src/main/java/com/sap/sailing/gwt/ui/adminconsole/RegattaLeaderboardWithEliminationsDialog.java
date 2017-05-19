@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -75,7 +74,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         result.addItem(stringMessages.pleaseSelectARegatta());
         int i=1;
         for (StrippedLeaderboardDTO leaderboard : sortedRegattaLeaderboards) {
-            if (leaderboard.type == LeaderboardType.RegattaLeaderboard) {
+            if (leaderboard.type.isRegattaLeaderboard()) {
                 result.addItem(leaderboard.name, leaderboard.name);
                 if (preSelectedRegattaName != null && leaderboard.name.equals(preSelectedRegattaName)) {
                     result.setSelectedIndex(i);
