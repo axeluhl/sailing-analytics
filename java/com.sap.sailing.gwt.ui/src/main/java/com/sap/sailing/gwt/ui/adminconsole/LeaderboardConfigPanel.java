@@ -237,11 +237,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         TextColumn<StrippedLeaderboardDTO> leaderboardTypeColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
-                String result = leaderboard.type.isRegattaLeaderboard() ? "Regatta" : "Flexible";
-                if (leaderboard.type.isMetaLeaderboard()) {
-                    result += " , Meta";
-                }
-                return result;
+                return leaderboard.type.toString();
             }
         };
         leaderboardTypeColumn.setSortable(true);

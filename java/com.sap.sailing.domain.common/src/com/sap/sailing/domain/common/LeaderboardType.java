@@ -27,10 +27,10 @@ public enum LeaderboardType {
 
     public String toString() {
         String result = "";
-        if(isMetaLeaderboard) {
+        if (isMetaLeaderboard) {
             result += "Meta, ";
         }
-        result += isRegattaLeaderboard ? "Regatta" : "Flexible";
+        result += isRegattaLeaderboard ? "Regatta" + (this==RegattaLeaderboardWithEliminations?" w/ Elimination":"") : "Flexible";
         return result;
     }
 }
