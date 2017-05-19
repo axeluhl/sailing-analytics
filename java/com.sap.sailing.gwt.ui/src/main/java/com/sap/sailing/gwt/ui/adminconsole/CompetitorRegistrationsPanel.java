@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,6 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -28,60 +32,65 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * Shows two competitor tables next to each other; the table on the left is that of the "registered" competitors, the table
  * on the right is the "pool" of all competitors with those already "registered" removed. Between the tables are buttons
  * to move competitors left and right, thereby assigning them to the "registered" set or moving them back to the pool.
- * The {@link #getResult result} consists of all {@link CompetitorDTO competitors} in the table of "registered" competitors.
+ * The {@link #getResult result} consists of all {@link CompetitorDTO competitors} in the table of "registered" competitors.<p>
  * 
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDialog<Set<CompetitorDTO>> implements BusyDisplay {
+public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDisplay {
     protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
     protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
     protected final boolean filterByLeaderBoardInitially = false;
     final StringMessages stringMessages;
     protected final SailingServiceAsync sailingService;
     final ErrorReporter errorReporter;
-    private boolean editable;
     private Button registerBtn;
     private Button unregisterBtn;
     private Button addCompetitorButton;
     private CheckBox showOnlyCompetitorsOfLogCheckBox;
-
-    private String boatClass;
-    
     protected String leaderboardName;
     private final BusyIndicator busyIndicator;
     private final ImportCompetitorCallback importCompetitorCallback;
+    private final Runnable validator;
+    private final Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever;
+    private final boolean restrictPoolToLeaderboard;
 
     /**
      * @param boatClass
      *            The <code>boatClass</code> parameter describes the default shown boat class for new competitors. The
      *            <code>boatClass</code> parameter is <code>null</code>, if you want to edit a competitor or there is no
      *            boat class for the new competitor.
+     * @param validator
+     *            when this panel is used to modify the resulting competitor set, this callback's {@link Runnable#run}
+     *            method is invoked if a non-{@code null} value is passed here.
+     * @param registeredCompetitorsRetriever
+     *            although declared as a consumer, this is a provider of the set of competitors to be shown in the
+     *            "registered" competitors table. Technically, it "consumes" a callback to which to pass the competitors
+     *            retrieved as the "registered" ones.
+     * @param restrictPoolToLeaderboard
+     *            whether the pool of "all" competitors is to be restricted to those obtained from the leaderboard, or
+     *            to all competitors in the server's competitor store
+     * @param additionalWidgetsBeforeTables widgets to be inserted above / before the competitor tables; may be {@code null} or empty
      */
-    protected AbstractCompetitorRegistrationsDialog(final SailingServiceAsync sailingService,
+    protected CompetitorRegistrationsPanel(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
-            DialogCallback<Set<CompetitorDTO>> callback, String leaderboardName, String boatClass,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<Set<CompetitorDTO>> validator) {
-        super(stringMessages.registerCompetitors(), /* messsage */null, stringMessages.save(), stringMessages.cancel(), validator, callback);
+            String leaderboardName, final String boatClass, Runnable validator,
+            Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever,
+            boolean restrictPoolToLeaderboard, Widget... additionalWidgetsBeforeTables) {
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.editable = editable;
+        this.restrictPoolToLeaderboard = restrictPoolToLeaderboard;
+        this.validator = validator;
         this.leaderboardName = leaderboardName;
-        this.boatClass = boatClass;
         this.busyIndicator = new SimpleBusyIndicator();
+        this.registeredCompetitorsRetriever = registeredCompetitorsRetriever;
         this.importCompetitorCallback = new RaceOrRegattaImportCompetitorCallback(this, sailingService, errorReporter, stringMessages);
-    }
-
-    @Override
-    protected Widget getAdditionalWidget() {
-        final FlowPanel mainPanel = new FlowPanel();
         final HorizontalPanel buttonPanel = new HorizontalPanel();
         addCompetitorButton = new Button(stringMessages.add(stringMessages.competitor()));
         addCompetitorButton.addClickHandler(new ClickHandler() {
@@ -111,7 +120,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                         MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
                                 sailingService, stringMessages, errorReporter);
                         CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
-                                matchCompetitorsDialogFactory, AbstractCompetitorRegistrationsDialog.this, providerNames, sailingService,
+                                matchCompetitorsDialogFactory, CompetitorRegistrationsPanel.this, providerNames, sailingService,
                                 stringMessages, errorReporter);
                         dialog.show();
                     }
@@ -160,7 +169,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         buttonPanel.add(inviteCompetitorsButton);
         buttonPanel.add(competitorImportButton);
         buttonPanel.add(busyIndicator);
-        mainPanel.add(buttonPanel);
+        this.add(buttonPanel);
         showOnlyCompetitorsOfLogCheckBox = new CheckBox(stringMessages.showOnlyCompetitorsOfLog());
         showOnlyCompetitorsOfLogCheckBox.setValue(false);
         showOnlyCompetitorsOfLogCheckBox.addClickHandler(new ClickHandler() {
@@ -173,11 +182,14 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                 }
             }
         });
-        mainPanel.add(showOnlyCompetitorsOfLogCheckBox);
-        addAdditionalWidgets(mainPanel);
-        mainPanel.add(competitorRegistrationPanel);
+        this.add(showOnlyCompetitorsOfLogCheckBox);
+        if (additionalWidgetsBeforeTables != null) {
+            for (final Widget additionalWidget : additionalWidgetsBeforeTables) {
+                add(additionalWidget);
+            }
+        }
+        this.add(competitorRegistrationPanel);
         refreshCompetitors();
-        return mainPanel;
     }
     
     private MatchImportedCompetitorsDialogFactory getMatchCompetitorsDialogFactory(
@@ -198,8 +210,6 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     public void setBusy(boolean isBusy) {
         busyIndicator.setBusy(isBusy);
     }
-
-    public abstract void addAdditionalWidgets(FlowPanel mainPanel);
 
     protected void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Iterable<CompetitorDTO> toMove) {
         from.getFilterField().removeAll(toMove);
@@ -227,17 +237,27 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         setRegisterableCompetitorsAndRegisteredCompetitors();
     }
 
-    protected abstract void setRegisteredCompetitors();
-    
     private void setRegisterableCompetitorsAndRegisteredCompetitors() {
-        allCompetitorsTable.refreshCompetitorList(null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
+        allCompetitorsTable.refreshCompetitorList(this.restrictPoolToLeaderboard ? leaderboardName : null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
-                setRegisteredCompetitors();
+                registeredCompetitorsRetriever.accept(new AsyncCallback<Collection<CompetitorDTO>>() {
+                    @Override
+                    public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
+                        moveFromPoolToRegistered(registeredCompetitors);
+                        validateAndUpdate();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable reason) {
+                        errorReporter.reportError("Could not load already registered competitors: " + reason.getMessage());
+                    }
+                });
             }
     
             @Override
             public void onFailure(Throwable reason) {
+                errorReporter.reportError("Could not load pool of competitors: " + reason.getMessage());
             }
         });
     }
@@ -252,6 +272,12 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         validateAndUpdate();
     }
     
+    private void validateAndUpdate() {
+        if (validator != null) {
+            validator.run();
+        }
+    }
+    
     public void activateRegistrationButtons(){
         registerBtn.setEnabled(true);
         unregisterBtn.setEnabled(true);
@@ -262,10 +288,21 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         validateAndUpdate();
     }
 
-    @Override
-    protected Set<CompetitorDTO> getResult() {
+    public Set<CompetitorDTO> getResult() {
         final Set<CompetitorDTO> registeredCompetitors = new HashSet<>();
         Util.addAll(registeredCompetitorsTable.getAllCompetitors(), registeredCompetitors);
         return registeredCompetitors;
+    }
+
+    public void grayOutCompetitorsFromRegistered(List<CompetitorWithToolTipDTO> competitors) {
+        registeredCompetitorsTable.grayOutCompetitors(competitors);
+    }
+
+    public void grayOutCompetitorsFromPool(List<CompetitorWithToolTipDTO> competitors) {
+        allCompetitorsTable.grayOutCompetitors(competitors);
+    }
+
+    public void moveFromPoolToRegistered(Collection<CompetitorDTO> registeredCompetitors) {
+        move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
     }
 }

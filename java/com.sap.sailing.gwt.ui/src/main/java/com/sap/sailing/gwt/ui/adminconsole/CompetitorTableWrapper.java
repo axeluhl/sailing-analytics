@@ -297,43 +297,28 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
      */
     public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>,
             Throwable> callback) {
+        final AsyncCallback<Iterable<CompetitorDTO>> myCallback = new AsyncCallback<Iterable<CompetitorDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
+                if (callback != null) {
+                    callback.onFailure(caught);
+                }
+            }
+
+            @Override
+            public void onSuccess(Iterable<CompetitorDTO> result) {
+                getFilteredCompetitors(result);
+                refreshCompetitorList(result);
+                if (callback != null) {
+                    callback.onSuccess(result);
+                }
+            }
+        };
         if (leaderboardName != null) {
-            sailingService.getCompetitorsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                    if (callback != null) {
-                        callback.onFailure(caught);
-                    }
-                }
-
-                @Override
-                public void onSuccess(Iterable<CompetitorDTO> result) {
-                    refreshCompetitorList(result);
-                    if (callback != null) {
-                        callback.onSuccess(result);
-                    }
-                }
-            });
+            sailingService.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
-            sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                    if (callback != null) {
-                        callback.onFailure(caught);
-                    }
-                }
-
-                @Override
-                public void onSuccess(Iterable<CompetitorDTO> result) {
-                    getFilteredCompetitors(result);
-                    refreshCompetitorList(result);
-                    if (callback != null) {
-                        callback.onSuccess(result);
-                    }
-                }
-            });
+            sailingService.getCompetitors(myCallback);
         }
     }
 
