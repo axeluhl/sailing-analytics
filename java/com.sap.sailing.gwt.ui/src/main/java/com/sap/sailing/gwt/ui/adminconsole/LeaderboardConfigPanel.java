@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -341,14 +342,13 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         if (leaderboardDTO.type.isMetaLeaderboard()) {
             Window.alert(stringMessages.metaLeaderboardCannotBeChanged());
         } else {
-            if (leaderboardDTO.type.isRegattaLeaderboard()) {
-                LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name,
-                        leaderboardDTO.displayName, /* scoring scheme provided by regatta */ null,
-                        leaderboardDTO.discardThresholds, leaderboardDTO.regattaName,
-                        leaderboardDTO.defaultCourseAreaId);
-                AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
+            AbstractLeaderboardDialog dialog;
+            switch (leaderboardDTO.type) {
+            case RegattaLeaderboard:
+                dialog = new RegattaLeaderboardEditDialog(Collections
                         .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
-                        descriptor, stringMessages, errorReporter,
+                        createLeaderboardDescriptor(leaderboardDTO, /* scoring scheme is provided by regatta, not leaderboard */ null),
+                        stringMessages, errorReporter,
                         new DialogCallback<LeaderboardDescriptor>() {
                     @Override
                     public void cancel() {
@@ -360,11 +360,39 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     }
                 });
                 dialog.show();
-            } else {
-                LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.defaultCourseAreaId);
-                openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, leaderboardDTO.name, descriptor);
+                break;
+            case RegattaLeaderboardWithEliminations:
+                dialog = new RegattaLeaderboardWithEliminationsEditDialog(Collections
+                        .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
+                        createLeaderboardDescriptor(leaderboardDTO, /* scoring scheme is provided by regatta, not leaderboard */ null),
+                        stringMessages, errorReporter,
+                        new DialogCallback<LeaderboardDescriptor>() {
+                    @Override
+                    public void cancel() {
+                    }
+
+                    @Override
+                    public void ok(LeaderboardDescriptor result) {
+                        updateLeaderboard(oldLeaderboardName, result);
+                    }
+                });
+                dialog.show();
+                break;
+            case FlexibleLeaderboard:
+                openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, leaderboardDTO.name, createLeaderboardDescriptor(leaderboardDTO,
+                        leaderboardDTO.scoringScheme));
+                break;
+            default:
+                Window.alert(stringMessages.unknownLeaderboardType(leaderboardDTO.type.name()));
             }
         }
+    }
+
+    private LeaderboardDescriptor createLeaderboardDescriptor(StrippedLeaderboardDTO leaderboardDTO, ScoringSchemeType scoringScheme) {
+        return new LeaderboardDescriptor(leaderboardDTO.name,
+                leaderboardDTO.displayName, scoringScheme,
+                leaderboardDTO.discardThresholds, leaderboardDTO.regattaName,
+                leaderboardDTO.defaultCourseAreaId);
     }
 
     @Override

@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -57,10 +59,30 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
     }
 
     public RegattaLeaderboardWithEliminationsDialog(String title, LeaderboardDescriptor leaderboardDTO,
-            Collection<RegattaDTO> existingRegattas, StringMessages stringMessages, ErrorReporter errorReporter,
-            LeaderboardParameterValidator validator, DialogCallback<LeaderboardDescriptor> callback) {
+            Collection<RegattaDTO> existingRegattas, Collection<StrippedLeaderboardDTO> existingLeaderboards,
+            StringMessages stringMessages, ErrorReporter errorReporter, LeaderboardParameterValidator validator,
+            DialogCallback<LeaderboardDescriptor> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
         this.existingRegattas = existingRegattas;
+        nameTextBox = createTextBox(null);
+        nameTextBox.ensureDebugId("NameTextBox");
+        nameTextBox.setVisibleLength(50);
+
+        displayNameTextBox = createTextBox(null);
+        displayNameTextBox.ensureDebugId("DisplayNameTextBox");
+        displayNameTextBox.setVisibleLength(50);
+
+        regattaLeaderboardsListBox = createSortedRegattaLeaderboardsListBox(existingLeaderboards, null);
+        regattaLeaderboardsListBox.ensureDebugId("RegattaListBox");
+        regattaLeaderboardsListBox.addChangeHandler(new ChangeHandler() {
+            public void onChange(ChangeEvent event) {
+                int selectedIndex = regattaLeaderboardsListBox.getSelectedIndex();
+                if (selectedIndex > 0) {
+                    nameTextBox.setText(regattaLeaderboardsListBox.getValue(selectedIndex)/*+" (2)"*/);
+                    validateAndUpdate();
+                }
+            }
+        });
     }
 
     protected ListBox createSortedRegattaLeaderboardsListBox(Collection<StrippedLeaderboardDTO> existingLeaderboards, String preSelectedRegattaName) {

@@ -1803,4 +1803,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sampleColor();
     String leaderboardPage();
     String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
+    String unknownLeaderboardType(String name);
 }
