@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -126,7 +124,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             if (newStartOfTracking != null) {
                 if (oldStartOfTracking == null) {
                     // Fixes wheren't loaded while startOfTracking was null. So we need to load all fixes in the tracking interval now.
-                    loadFixesForExtendedTimeRange(getTrackingTimeRange());
+                    loadFixesWhenStartOfTrackingIsReceived();
                 } else if (newStartOfTracking.before(oldStartOfTracking)) {
                     loadFixesForExtendedTimeRange(new TimeRangeImpl(newStartOfTracking, oldStartOfTracking));
                 }
@@ -285,8 +283,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         || firstFixAfterStartOfTracking.getTimePoint().after(trackingTimeRange.to())) {
                     // There is no fix in the tracking interval -> looking for better fixes before start of tracking and
                     // after end of tracking
-                    newlyCoveredTimeRanges.forEach((event, newlyCoveredTimeRange) -> {
-                        loadBetterFixesIfAvailable(trackingTimeRange, newlyCoveredTimeRange, event);
+                    newlyCoveredTimeRanges.forEach((event, timeRange) -> {
+                        loadBetterFixesIfAvailable(trackingTimeRange, timeRange, event);
                     });
                 }
             }
@@ -502,21 +500,12 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {
         deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> addLoadingJob(
-                new LoadFixesForNewlyCoveredTimeRangesJob(item, intersect(mappingsAndCoveredTimeRanges, extendedTimeRange))));
+                new LoadFixesInTrackingTimeRangeJob(mappingsAndCoveredTimeRanges, extendedTimeRange)));
     }
-
-    /**
-     * Produces a new map that holds entries for all keys of the {@code mappingsAndCoveredTimeRanges}
-     * passed, with the value time ranges intersected with the {@code extendedTimeRange} passed.
-     */
-    private Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> intersect(
-            Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> mappingsAndCoveredTimeRanges,
-            TimeRange extendedTimeRange) {
-        final Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> result = new HashMap<>();
-        for (final Entry<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> e : mappingsAndCoveredTimeRanges.entrySet()) {
-            result.put(e.getKey(), e.getValue().intersection(extendedTimeRange));
-        }
-        return result;
+    
+    private void loadFixesWhenStartOfTrackingIsReceived() {
+        deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> addLoadingJob(
+                new LoadFixesForNewlyCoveredTimeRangesJob(item, mappingsAndCoveredTimeRanges)));
     }
 
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
@@ -637,7 +626,32 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
     
     /**
-     * This is used when device mappings for an item changed so that fixes in a new {@link TimeRange} are covered.
+     * Loads fixes for an item's mappings in a defined tracking {@link TimeRange}. This is used when the tracking
+     * {@link TimeRange} is extended. No better fixes for {@link Mark} are being loaded because if available, these must
+     * have either already been loaded or the best fix is inside of the extended {@link TimeRange} that is completely loaded by
+     * this job.
+     */
+    private class LoadFixesInTrackingTimeRangeJob extends AbstractLoadingJob {
+
+        private final Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges;
+        private final TimeRange trackingTimeRange;
+
+        public LoadFixesInTrackingTimeRangeJob(Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges,
+                TimeRange trackingTimeRange) {
+            this.newlyCoveredTimeRanges = newlyCoveredTimeRanges;
+            this.trackingTimeRange = trackingTimeRange;
+        }
+        
+        @Override
+        protected void load() {
+            loadFixesInTrackingTimeRange(newlyCoveredTimeRanges, trackingTimeRange);
+        }
+    }
+    
+    /**
+     * This is used when device mappings for an item changed so that fixes in a new {@link TimeRange} are covered. This is also used when initially loading fixes due to startOfTracking being initially set. If
+     * the mapping is a {@link Mark}, best fixes outside of the tracking {@link TimeRange} are loaded if none is
+     * available in the tracking {@link TimeRange}.
      */
     private class LoadFixesForNewlyCoveredTimeRangesJob extends AbstractLoadingJob {
         private final WithID item;
