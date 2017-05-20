@@ -124,9 +124,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             if (newStartOfTracking != null) {
                 if (oldStartOfTracking == null) {
                     // Fixes wheren't loaded while startOfTracking was null. So we need to load all fixes in the tracking interval now.
-                    loadFixesForExtendedTimeRange(getTrackingTimeRange());
+                    loadFixesForExtendedTimeRange();
                 } else if (newStartOfTracking.before(oldStartOfTracking)) {
-                    loadFixesForExtendedTimeRange(new TimeRangeImpl(newStartOfTracking, oldStartOfTracking));
+                    loadFixesForExtendedTimeRange();
                 }
             }
         }
@@ -135,9 +135,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
             if (trackedRace.getStartOfTracking() != null) {
                 if (newEndOfTracking == null && oldEndOfTracking != null) {
-                    loadFixesForExtendedTimeRange(new TimeRangeImpl(oldEndOfTracking, TimePoint.EndOfTime));
+                    loadFixesForExtendedTimeRange();
                 } else if (newEndOfTracking != null && oldEndOfTracking != null && oldEndOfTracking.before(newEndOfTracking)) {
-                    loadFixesForExtendedTimeRange(new TimeRangeImpl(oldEndOfTracking, newEndOfTracking));
+                    loadFixesForExtendedTimeRange();
                 }
             }
         }
@@ -499,9 +499,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {
+    private void loadFixesForExtendedTimeRange() {
         deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> addLoadingJob(
-                new LoadFixesInTrackingTimeRangeJob(mappingsAndCoveredTimeRanges, extendedTimeRange)));
+                new LoadFixesForNewlyCoveredTimeRangesJob(item, mappingsAndCoveredTimeRanges)));
     }
 
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
@@ -619,30 +619,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
         
         protected abstract void load();
-    }
-    
-    /**
-     * Loads fixes for an item's mappings in a defined tracking {@link TimeRange}. This is used when:
-     * <ul>
-     * <li>Initially loading fixes into tracks</li>
-     * <li>The tracking {@link TimeRange} changes</li>
-     * </ul>
-     */
-    private class LoadFixesInTrackingTimeRangeJob extends AbstractLoadingJob {
-
-        private final Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges;
-        private final TimeRange trackingTimeRange;
-
-        public LoadFixesInTrackingTimeRangeJob(Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges,
-                TimeRange trackingTimeRange) {
-            this.newlyCoveredTimeRanges = newlyCoveredTimeRanges;
-            this.trackingTimeRange = trackingTimeRange;
-        }
-        
-        @Override
-        protected void load() {
-            loadFixesInTrackingTimeRange(newlyCoveredTimeRanges, trackingTimeRange);
-        }
     }
     
     /**
