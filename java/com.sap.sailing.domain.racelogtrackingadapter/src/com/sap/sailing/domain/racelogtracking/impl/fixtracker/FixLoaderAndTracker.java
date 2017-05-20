@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -124,9 +126,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             if (newStartOfTracking != null) {
                 if (oldStartOfTracking == null) {
                     // Fixes wheren't loaded while startOfTracking was null. So we need to load all fixes in the tracking interval now.
-                    loadFixesForExtendedTimeRange();
+                    loadFixesForExtendedTimeRange(getTrackingTimeRange());
                 } else if (newStartOfTracking.before(oldStartOfTracking)) {
-                    loadFixesForExtendedTimeRange();
+                    loadFixesForExtendedTimeRange(new TimeRangeImpl(newStartOfTracking, oldStartOfTracking));
                 }
             }
         }
@@ -135,9 +137,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
             if (trackedRace.getStartOfTracking() != null) {
                 if (newEndOfTracking == null && oldEndOfTracking != null) {
-                    loadFixesForExtendedTimeRange();
+                    loadFixesForExtendedTimeRange(new TimeRangeImpl(oldEndOfTracking, TimePoint.EndOfTime));
                 } else if (newEndOfTracking != null && oldEndOfTracking != null && oldEndOfTracking.before(newEndOfTracking)) {
-                    loadFixesForExtendedTimeRange();
+                    loadFixesForExtendedTimeRange(new TimeRangeImpl(oldEndOfTracking, newEndOfTracking));
                 }
             }
         }
@@ -283,8 +285,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         || firstFixAfterStartOfTracking.getTimePoint().after(trackingTimeRange.to())) {
                     // There is no fix in the tracking interval -> looking for better fixes before start of tracking and
                     // after end of tracking
-                    newlyCoveredTimeRanges.forEach((event, timeRange) -> {
-                        loadBetterFixesIfAvailable(trackingTimeRange, timeRange, event);
+                    newlyCoveredTimeRanges.forEach((event, newlyCoveredTimeRange) -> {
+                        loadBetterFixesIfAvailable(trackingTimeRange, newlyCoveredTimeRange, event);
                     });
                 }
             }
@@ -403,7 +405,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 @Override
                 public void visit(RegattaLogDeviceMarkMappingEvent event) {
                     DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
-                    
                     final GPSFix lastFixAtOrBeforeStartOfTracking = track.getLastFixAtOrBefore(trackingTimeRange.from());
                     // A better fix before start of tracking must be after the current best fix
                     final MultiTimeRange beforeRange = coveredTimeRanges
@@ -499,9 +500,23 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    private void loadFixesForExtendedTimeRange() {
+    private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {
         deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> addLoadingJob(
-                new LoadFixesForNewlyCoveredTimeRangesJob(item, mappingsAndCoveredTimeRanges)));
+                new LoadFixesForNewlyCoveredTimeRangesJob(item, intersect(mappingsAndCoveredTimeRanges, extendedTimeRange))));
+    }
+
+    /**
+     * Produces a new map that holds entries for all keys of the {@code mappingsAndCoveredTimeRanges}
+     * passed, with the value time ranges intersected with the {@code extendedTimeRange} passed.
+     */
+    private Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> intersect(
+            Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> mappingsAndCoveredTimeRanges,
+            TimeRange extendedTimeRange) {
+        final Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> result = new HashMap<>();
+        for (final Entry<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> e : mappingsAndCoveredTimeRanges.entrySet()) {
+            result.put(e.getKey(), e.getValue().intersection(extendedTimeRange));
+        }
+        return result;
     }
 
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {

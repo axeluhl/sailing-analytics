@@ -296,7 +296,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                } finally {
                    trackedRace.getOrCreateTrack(mark).unlockAfterRead();
                }
-           });
+        });
     }
     
     /** 
