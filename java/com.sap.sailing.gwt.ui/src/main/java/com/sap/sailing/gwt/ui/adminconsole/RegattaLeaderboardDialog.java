@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 
-public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog {
+public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog<LeaderboardDescriptor> {
     protected ListBox regattaListBox;
     protected Collection<RegattaDTO> existingRegattas;
     private Label regattaDefinesDiscardsLabel;

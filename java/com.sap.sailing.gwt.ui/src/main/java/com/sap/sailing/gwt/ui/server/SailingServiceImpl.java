@@ -241,6 +241,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
@@ -2453,6 +2454,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         leaderboardDTO.displayName = leaderboard.getDisplayName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         leaderboardDTO.competitorsCount = Util.size(leaderboard.getCompetitors());
+        leaderboardDTO.boatClassName = leaderboard.getBoatClass()==null?null:leaderboard.getBoatClass().getName();
         leaderboardDTO.type = leaderboard.getLeaderboardType();
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
@@ -6533,5 +6535,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return trackingTimes;
+    }
+
+    @Override
+    public Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName) {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
+            throw new IllegalArgumentException(leaderboardName+" does not match a regatta leaderboard with eliminations");
+        }
+        final RegattaLeaderboardWithEliminations rlwe = (RegattaLeaderboardWithEliminations) leaderboard;
+        return convertToCompetitorDTOs(rlwe.getEliminatedCompetitors());
+    }
+    
+    @Override
+    public void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> newEliminatedCompetitorDTOs) {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
+            throw new IllegalArgumentException(leaderboardName+" does not match a regatta leaderboard with eliminations");
+        }
+        final RegattaLeaderboardWithEliminations rlwe = (RegattaLeaderboardWithEliminations) leaderboard;
+        Set<Competitor> newEliminatedCompetitors = new HashSet<>();
+        for (final CompetitorDTO cDTO : newEliminatedCompetitorDTOs) {
+            newEliminatedCompetitors.add(getCompetitor(cDTO));
+        }
+        // first un-eliminate those currently eliminated and no longer in newEliminatedCompetitors
+        for (final Competitor c : rlwe.getEliminatedCompetitors()) {
+            rlwe.setEliminated(c, newEliminatedCompetitors.remove(c));
+        }
+        // then eliminated the remaining ones from newEliminatedCompetitors
+        for (final Competitor c : newEliminatedCompetitors) {
+            rlwe.setEliminated(c, true);
+        }
     }
 }

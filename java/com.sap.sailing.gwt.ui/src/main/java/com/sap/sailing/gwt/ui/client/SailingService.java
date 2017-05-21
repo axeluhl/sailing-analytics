@@ -676,4 +676,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Pair<PersonDTO, CountryCode> serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition);
 
+    Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName);
+
+    void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors);
+
 }

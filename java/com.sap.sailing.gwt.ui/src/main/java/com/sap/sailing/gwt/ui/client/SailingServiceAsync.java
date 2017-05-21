@@ -829,4 +829,13 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void serializationDummy(PersonDTO dummy, CountryCode ccDummy,
 			PreciseCompactPosition preciseCompactPosition, AsyncCallback<Pair<PersonDTO, CountryCode>> callback);
+
+    /**
+     * @param leaderboardName
+     *            expected to match a regatta leaderboard with eliminations
+     */
+    void getEliminatedCompetitors(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> asyncCallback);
+
+    void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors,
+            AsyncCallback<Void> callback);
 }

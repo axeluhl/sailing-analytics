@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sailing.domain.base.Competitor;
 
 /**
@@ -18,5 +21,15 @@ public interface RegattaLeaderboardWithEliminations extends RegattaLeaderboard {
     void setEliminated(Competitor competitor, boolean eliminated);
 
     boolean isEliminated(Competitor competitor);
+    
+    default Set<Competitor> getEliminatedCompetitors() {
+        final Set<Competitor> result = new HashSet<>();
+        for (final Competitor c : getAllCompetitors()) {
+            if (isEliminated(c)) {
+                result.add(c);
+            }
+        }
+        return result;
+    }
 
 }

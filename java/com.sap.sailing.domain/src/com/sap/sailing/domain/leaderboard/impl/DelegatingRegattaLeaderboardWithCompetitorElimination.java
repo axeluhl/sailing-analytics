@@ -2,6 +2,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,6 +101,11 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     @Override
     public boolean isEliminated(Competitor competitor) {
         return eliminatedCompetitors.containsKey(competitor);
+    }
+
+    @Override
+    public Set<Competitor> getEliminatedCompetitors() {
+        return new HashSet<Competitor>(eliminatedCompetitors.keySet());
     }
 
     public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint)
