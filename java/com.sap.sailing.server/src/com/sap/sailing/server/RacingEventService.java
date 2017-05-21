@@ -10,6 +10,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -664,4 +665,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @see #getNumberOfTrackedRacesToRestore()
      */
     int getNumberOfTrackedRacesRestored();
+
+    void setEliminatedCompetitor(String leaderboardName, Set<Competitor> newEliminatedCompetitors);
 }

@@ -427,6 +427,7 @@ import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
+import com.sap.sailing.server.operationaltransformation.UpdateEliminatedCompetitorsInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
@@ -6549,22 +6550,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> newEliminatedCompetitorDTOs) {
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
-            throw new IllegalArgumentException(leaderboardName+" does not match a regatta leaderboard with eliminations");
-        }
-        final RegattaLeaderboardWithEliminations rlwe = (RegattaLeaderboardWithEliminations) leaderboard;
         Set<Competitor> newEliminatedCompetitors = new HashSet<>();
         for (final CompetitorDTO cDTO : newEliminatedCompetitorDTOs) {
             newEliminatedCompetitors.add(getCompetitor(cDTO));
         }
-        // first un-eliminate those currently eliminated and no longer in newEliminatedCompetitors
-        for (final Competitor c : rlwe.getEliminatedCompetitors()) {
-            rlwe.setEliminated(c, newEliminatedCompetitors.remove(c));
-        }
-        // then eliminated the remaining ones from newEliminatedCompetitors
-        for (final Competitor c : newEliminatedCompetitors) {
-            rlwe.setEliminated(c, true);
-        }
+        getService().apply(new UpdateEliminatedCompetitorsInLeaderboard(leaderboardName, newEliminatedCompetitors));
     }
 }

@@ -3740,4 +3740,21 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public int getNumberOfTrackedRacesRestored() {
         return numberOfTrackedRacesRestored.get();
     }
+
+    @Override
+    public void setEliminatedCompetitor(String leaderboardName, Set<Competitor> newEliminatedCompetitors) {
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
+            throw new IllegalArgumentException(leaderboardName+" does not match a regatta leaderboard with eliminations");
+        }
+        final RegattaLeaderboardWithEliminations rlwe = (RegattaLeaderboardWithEliminations) leaderboard;
+        // first un-eliminate those currently eliminated and no longer in newEliminatedCompetitors
+        for (final Competitor c : rlwe.getEliminatedCompetitors()) {
+            rlwe.setEliminated(c, newEliminatedCompetitors.remove(c));
+        }
+        // then eliminated the remaining ones from newEliminatedCompetitors
+        for (final Competitor c : newEliminatedCompetitors) {
+            rlwe.setEliminated(c, true);
+        }
+    }
 }
