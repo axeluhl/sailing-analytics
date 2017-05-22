@@ -4,7 +4,7 @@
 *.bat               text eol=crlf
 *.cfg               text eol=lf
 *.conf              text eol=lf
-*.md                text eol=lf
+*.md                text
 *.jpg               -text
 *.png               -text
 *.ico               -text
@@ -15,28 +15,28 @@
 *.zip               -text
 *.jar               -text
 *.tar.gz            -text
-*.txt               text eol=lf
+*.txt               text
 *.xml               text
-*.html              text eol=lf
-*.css               text eol=lf
-pom.xml             text eol=lf
-settings.xml        text eol=lf
+*.html              text
+*.css               text
+pom.xml             text
+settings.xml        text
 toolchains.xml      text eol=lf
-*.gradle            text eol=lf
-*.java              text eol=lf
-*.properties        text eol=lf
-*.launch            text eol=lf
-MANIFEST.MF         text eol=lf
-.project            text eol=lf
+*.gradle            text
+*.java              text
+*.properties        text
+*.launch            text
+MANIFEST.MF         text
+.project            text
 .classpath          text
 build.properties    text
 feature.xml         text
 site.xml            text
 *.product           text eol=lf
 *.prefs             text
-*.gwt.xml           text eol=lf
-*.ui.xml            text eol=lf
-*.gss               text eol=lf
+*.gwt.xml           text
+*.ui.xml            text
+*.gss               text
 *.swift             text eol=lf
 *.strings           text eol=lf
 *.plist             text eol=lf

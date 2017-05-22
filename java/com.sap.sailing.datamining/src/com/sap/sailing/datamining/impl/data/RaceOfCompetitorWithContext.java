@@ -26,6 +26,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
@@ -222,4 +223,9 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return number;
     }
 
+    @Override
+    public Distance getDistanceTraveled() {
+        return getTrackedRace().getDistanceTraveledIncludingGateStart(getCompetitor(), MillisecondsTimePoint.now());
+    }
+    
 }
