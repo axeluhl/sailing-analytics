@@ -86,9 +86,9 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     /**
      * The leaderboard wrapper starts out with an empty set of eliminated competitors
      */
-    public DelegatingRegattaLeaderboardWithCompetitorElimination(Supplier<RegattaLeaderboard> fullLeaderboard, String name) {
+    public DelegatingRegattaLeaderboardWithCompetitorElimination(Supplier<RegattaLeaderboard> fullLeaderboardSupplier, String name) {
         this.name = name;
-        this.fullLeaderboardSupplier = fullLeaderboard;
+        this.fullLeaderboardSupplier = fullLeaderboardSupplier;
         this.eliminatedCompetitors = new ConcurrentHashMap<>();
         this.triggerWhenFullLeaderboardIsResolved = new ConcurrentHashMap<>();
     }

@@ -56,7 +56,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
@@ -65,8 +65,6 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBre
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie2017;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
-import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -85,11 +83,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRankingTestBase {
-    protected RegattaLeaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
-        ThresholdBasedResultDiscardingRuleImpl discardingRules = new ThresholdBasedResultDiscardingRuleImpl(discardingThresholds);
-        return new RegattaLeaderboardImpl(regatta, discardingRules);
-    }
-    
     protected DelegatingRegattaLeaderboardWithCompetitorElimination createDelegatingRegattaLeaderboardWithCompetitorElimination(
             Regatta regatta, String leaderboardName, int[] discardingThresholds) {
         return new DelegatingRegattaLeaderboardWithCompetitorElimination(()->createLeaderboard(regatta, discardingThresholds), leaderboardName);
@@ -671,52 +664,6 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AtEndOfRace3.asMillis());
         Duration totalTimeSailedC0_AfterRace3 = leaderboard.getTotalTimeSailed(c[0], finish.plus(1000));
         assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AfterRace3.asMillis());
-    }
-
-    /**
-     * See bug 4110: for partial leaderboards that are a "projection" of another leaderboard the suppressed
-     * competitors will receive their scores for all races as usual but won't be shown in the resulting
-     * leaderboard panel, except for score editing / import. Suppressed competitors, however, will not receive
-     * a regatta rank and shall not be part of the set of competitors shown in a leaderboard panel.<p>
-     * 
-     * This test asserts that suppressing competitors will let worse competitors advance in the total ranking.
-     * @throws NoWindException 
-     */
-    @Test
-    public void testEliminationAdvancesWorseCompetitorsInRegattaRankButNotInRaces() throws NoWindException {
-        TimePoint now = MillisecondsTimePoint.now();
-        TimePoint earlier = now.minus(1000000);
-        TimePoint later = now.plus(1000000); // first race from "earlier" to "now", second from "now" to "later", third from "later" to "finish"
-        TimePoint finish = later.plus(1000000);
-        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
-        Competitor[] f1 = new Competitor[] { c[0], c[1], c[2] };
-        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
-                /* medal */ false, /* medal */ 0, "testTotalTimeNotCountedForRacesStartedLaterThanTimePointReqeusted",
-                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
-        DelegatingRegattaLeaderboardWithCompetitorElimination leaderboard = createDelegatingRegattaLeaderboardWithCompetitorElimination(regatta, "Test not counting suppressed", /* discarding thresholds */ new int[0]);
-        @SuppressWarnings("unchecked")
-        Map<Competitor, TimePoint>[] lastMarkPassingTimesForCompetitors = (Map<Competitor, TimePoint>[]) new HashMap<?, ?>[3];
-        lastMarkPassingTimesForCompetitors[0] = new HashMap<>();
-        lastMarkPassingTimesForCompetitors[0].put(c[0], now);
-        lastMarkPassingTimesForCompetitors[0].put(c[1], now);
-        lastMarkPassingTimesForCompetitors[0].put(c[2], now);
-        lastMarkPassingTimesForCompetitors[1] = new HashMap<>();
-        lastMarkPassingTimesForCompetitors[1].put(c[0], later);
-        lastMarkPassingTimesForCompetitors[1].put(c[1], later);
-        lastMarkPassingTimesForCompetitors[1].put(c[2], later);
-        lastMarkPassingTimesForCompetitors[2] = new HashMap<>();
-        lastMarkPassingTimesForCompetitors[2].put(c[0], finish);
-        lastMarkPassingTimesForCompetitors[2].put(c[1], finish);
-        lastMarkPassingTimesForCompetitors[2].put(c[2], finish);
-        createAndAttachTrackedRacesWithStartTimeAndLastMarkPassingTimes(series.get(1), "Default",
-                new Competitor[][] { f1 }, new TimePoint[] { earlier, now, later }, lastMarkPassingTimesForCompetitors);
-        leaderboard.setEliminated(c[1], true);
-        assertEquals(1.0, leaderboard.getTotalPoints(c[0], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);
-        assertEquals(2.0, leaderboard.getTotalPoints(c[1], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);
-        assertEquals(3.0, leaderboard.getTotalPoints(c[2], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);
-        assertEquals(1, leaderboard.getTotalRankOfCompetitor(c[0], later));
-        assertEquals(0, leaderboard.getTotalRankOfCompetitor(c[1], later));
-        assertEquals(2, leaderboard.getTotalRankOfCompetitor(c[2], later));
     }
 
     /**
