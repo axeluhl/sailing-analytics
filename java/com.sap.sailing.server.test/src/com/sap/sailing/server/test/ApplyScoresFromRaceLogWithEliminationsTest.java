@@ -1,7 +1,5 @@
 package com.sap.sailing.server.test;
 
-import java.security.Provider.Service;
-
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;

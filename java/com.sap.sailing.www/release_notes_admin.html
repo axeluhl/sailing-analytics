@@ -48,6 +48,17 @@
                             when the race start / finish times have changed. The feedback from TracTrac will adjust the
                             tracking times as received by the connector, but no race log entries for the tracking times
                             will be created anymore.</li>
+                        <li>A new type of leaderboard has been introduced: a regatta leaderboard with competitor elimination.
+                            Such a leaderboard creates a view onto a regular regatta leaderboard and allows the user to
+                            eliminate a subset of the competitors from its display. The scores of all remaining competitors
+                            are taken from the original regatta leaderboard without modification, including all
+                            corrections, penalties and the discarding rule, including the live ranks. This means,
+                            in particular, that the ranks shown for a race in such a leaderboard are not contiguous in
+                            case there are eliminated competitors. The score sum for each competitor is computed as usual.
+                            For the regatta rank, a contiguous count is applied. This way it is possible to create
+                            a new ranking for only a subset of the competitors; a practice common for championships
+                            that want to publish a separate youth leaderboard, e.g., for all competitors under a
+                            certain age.</li>
                     </ul>
 
                     <h2 class="articleSubheadline">April 2017</h2>
