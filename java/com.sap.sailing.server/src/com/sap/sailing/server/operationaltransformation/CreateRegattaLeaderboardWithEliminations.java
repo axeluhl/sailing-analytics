@@ -22,7 +22,8 @@ public class CreateRegattaLeaderboardWithEliminations extends AbstractLeaderboar
     public RegattaLeaderboard internalApplyTo(RacingEventService toState) {
         RegattaLeaderboard result = null;
         if (toState.getLeaderboardByName(getLeaderboardName()) == null) {
-            result = toState.addRegattaLeaderboardWithEliminations(getLeaderboardName(), leaderboardDisplayName, fullRegattaLeaderboardName);
+            result = toState.addRegattaLeaderboardWithEliminations(getLeaderboardName(), leaderboardDisplayName,
+                    (RegattaLeaderboard) toState.getLeaderboardByName(fullRegattaLeaderboardName));
         } else {
             logger.warning("Cannot replicate creation of flexible leaderboard "+getLeaderboardName()+" because it already exists in the replica");
         }

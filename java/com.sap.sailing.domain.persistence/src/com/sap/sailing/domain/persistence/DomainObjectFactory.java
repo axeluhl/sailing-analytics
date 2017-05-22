@@ -53,7 +53,7 @@ public interface DomainObjectFactory {
      * @return the leaderboard loaded, if successful, or <code>null</code> if the leaderboard couldn't be loaded,
      * e.g., because the regatta for a regatta leaderboard couldn't be found
      */
-    Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry);
+    Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
 
     RaceIdentifier loadRaceIdentifier(DBObject dbObject);
     

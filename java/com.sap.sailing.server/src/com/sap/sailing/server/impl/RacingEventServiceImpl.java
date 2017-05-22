@@ -901,22 +901,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName,
-            String leaderboardDisplayName, String fullRegattaLeaderboardName) {
-        final Leaderboard fullLeaderboard = getLeaderboardByName(fullRegattaLeaderboardName);
-        if (fullLeaderboard == null) {
-            throw new IllegalArgumentException("Leaderboard "+fullRegattaLeaderboardName+" not found");
-        }
-        if (!(fullLeaderboard instanceof RegattaLeaderboard)) {
-            throw new IllegalArgumentException("Leaderboard "+fullRegattaLeaderboardName+" is not a RegattaLeaderboard");
+            String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard) {
+        if (fullRegattaLeaderboard == null) {
+            throw new NullPointerException("Must provide a valid regatta leaderboard, not null");
         }
         if (getLeaderboardByName(leaderboardName) != null) {
             throw new IllegalArgumentException("Leaderboard with name "+leaderboardName+" already exists in "+this);
         }
         final RegattaLeaderboardWithEliminations result = new DelegatingRegattaLeaderboardWithCompetitorElimination(
-                ()->(RegattaLeaderboard) fullLeaderboard, leaderboardName);
+                ()->(RegattaLeaderboard) fullRegattaLeaderboard, leaderboardName);
         result.setDisplayName(leaderboardDisplayName);
         logger.info("adding regatta leaderboard with eliminations for regatta leaderboard "
-                + fullLeaderboard.getName() + " to " + this);
+                + fullRegattaLeaderboard.getName() + " to " + this);
         addLeaderboard(result);
         mongoObjectFactory.storeLeaderboard(result);
         return result;

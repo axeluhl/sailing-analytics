@@ -370,14 +370,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry) {
+    public Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Leaderboard result = null;
         try {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.LEADERBOARD_NAME.name(), name);
             for (DBObject o : leaderboardCollection.find(query)) {
-                result = loadLeaderboard(o, regattaRegistry, /* leaderboardRegistry */ null, /* groupForMetaLeaderboard */ null);
+                result = loadLeaderboard(o, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
             }
         } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
