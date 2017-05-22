@@ -11,15 +11,8 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.home.desktop.places.event.EventView;
-import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.common.Util;
 
 public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends AbstractCell<T> {
@@ -45,33 +38,23 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     private final String liveStyleNames = Util.join(" ", analyzeStyleNames, local_res.css().raceviewerlaunchpadlive());
     private final String iconStyleNames = local_res.css().raceviewerlaunchpad_icon();
 
-    private final EventView.Presenter presenter;
-    private final PopupPanel panel = new PopupPanel(true, false);
+    private final RaceviewerLaunchPadController launchPadController;
     private final boolean showNotTracked;
 
-    public RaceviewerLaunchPadCell(Presenter presenter, boolean showNotTracked) {
+    public RaceviewerLaunchPadCell(RaceviewerLaunchPadController launchPadPresenter, boolean showNotTracked) {
         super(BrowserEvents.CLICK);
         this.showNotTracked = showNotTracked;
         local_res.css().ensureInjected();
-        this.presenter = presenter;
+        this.launchPadController = launchPadPresenter;
     }
 
     @Override
     public void onBrowserEvent(Context context, final Element parent, T data, NativeEvent event,
             ValueUpdater<T> valueUpdater) {
-        if (!renderAsDirectLinkButton(data)) {
+        if (!launchPadController.renderAsDirectLink(data)) {
             if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())
                     && parent.getFirstChildElement().isOrHasChild(Element.as(event.getEventTarget()))) {
-                panel.setWidget(createLaunchPad(parent.getFirstChildElement(), data));
-                panel.setPopupPositionAndShow(new PositionCallback() {
-                    @Override
-                    public void setPosition(int offsetWidth, int offsetHeight) {
-                        int alignBottom = parent.getAbsoluteTop() + parent.getOffsetHeight() - offsetHeight;
-                        int top = (alignBottom - Window.getScrollTop() < 0 ? parent.getAbsoluteTop() - 1 : alignBottom + 1);
-                        panel.setPopupPosition(parent.getAbsoluteRight() + 1 - offsetWidth, top);
-                        panel.getElement().scrollIntoView();
-                    }
-                });
+                launchPadController.showRaceviewerLaunchPad(data, parent);
             }
             return;
         }
@@ -80,11 +63,10 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     
     @Override
     public void render(Context context, T data, SafeHtmlBuilder sb) {
-        switch (getRenderingStyle(data)) {
+        switch (launchPadController.getRenderingStyle(data)) {
         case WATCH_LIVE_ONLY:
                 sb.append(TEMPLATE.standaloneButton(plannedStyleNames, iconStyleNames, I18N.watchLive(), 
-                        "launch-play",
-                        UriUtils.fromString(presenter.getRaceViewerURL(data, RaceBoardModes.PLAYER.name()))));
+                    "launch-play", UriUtils.fromString(launchPadController.getDirectLinkUrl(data))));
                 break;
         case WATCH_LIVE_OR_ANALYZE:
             sb.append(TEMPLATE.raceviewerLaunchPad(liveStyleNames, iconStyleNames, I18N.raceDetailsToShow()));
@@ -96,42 +78,6 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
             sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, showNotTracked ? I18N.eventRegattaRaceNotTracked() : ""));
             break;
         }
-    }
-    
-    public static enum RenderingStyle {
-        WATCH_LIVE_ONLY, WATCH_LIVE_OR_ANALYZE, ANALYZE, NOT_TRACKED
-    }
-    
-    public RenderingStyle getRenderingStyle(T data) {
-        final RenderingStyle result;
-        if (data.hasValidTrackingData()) {
-            if (renderAsDirectLinkButton(data)) {
-                result = RenderingStyle.WATCH_LIVE_ONLY;
-            } else {
-                result = data.isFinished() ? RenderingStyle.ANALYZE : RenderingStyle.WATCH_LIVE_OR_ANALYZE;
-            }
-        } else {
-            result = RenderingStyle.NOT_TRACKED;
-        }
-        return result;
-    }
-    
-    /** 
-     * Creates a {@link RaceviewerLaunchPad} for the given data object.
-     */
-    private RaceviewerLaunchPad createLaunchPad(Element button, T data) {
-        RaceviewerLaunchPad launchPad = new RaceviewerLaunchPad(data, panel) {
-            @Override
-            protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String raceBoardMode) {
-                return presenter.getRaceViewerURL(data, raceBoardMode);
-            }
-        };
-        return launchPad;
-    }
-    
-    /** Determine whether a direct link button should be/is rendered instead of a menu popup. */
-    private boolean renderAsDirectLinkButton(T data) {
-        return !data.isFinished() && !data.isRunning();
     }
 
 }

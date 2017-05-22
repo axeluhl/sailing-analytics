@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.home.communication.race.wind.AbstractWindDTO;
 import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadCell;
+import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadController;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.shared.utils.HomeSailingFlagsBuilder;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
@@ -478,18 +479,19 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(
             final EventView.Presenter presenter, final boolean showNotTracked) {
-        final RaceviewerLaunchPadCell<T> raceviewerLaunchPadCell = new RaceviewerLaunchPadCell<T>(presenter, showNotTracked);
+        final RaceviewerLaunchPadController lpPresenter = new RaceviewerLaunchPadController(presenter::getRaceViewerURL);
+        final RaceviewerLaunchPadCell<T> lpadCell = new RaceviewerLaunchPadCell<T>(lpPresenter, showNotTracked);
         DefaultRaceListColumnComparator<T> comparator = new DefaultRaceListColumnComparator<T>() {
             @Override
             public int compare(T o1, T o2) {
-                int compareResult = raceviewerLaunchPadCell.getRenderingStyle(o1).compareTo(raceviewerLaunchPadCell.getRenderingStyle(o2));
+                int compareResult = lpPresenter.getRenderingStyle(o1).compareTo(lpPresenter.getRenderingStyle(o2));
                 if (compareResult == 0) {
                     compareResult = super.compare(o1, o2);
                 }
                 return compareResult;
             }
         };
-        return new SortableRaceListColumn<T, T>("", raceviewerLaunchPadCell, comparator) {
+        return new SortableRaceListColumn<T, T>("", lpadCell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itembutton());
