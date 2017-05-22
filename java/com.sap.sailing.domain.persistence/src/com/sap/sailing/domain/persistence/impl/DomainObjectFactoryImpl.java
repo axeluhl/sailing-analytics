@@ -433,14 +433,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result = leaderboardRegistry.getLeaderboardByName(leaderboardName);
         }
         if (result == null) {
-            if (groupForMetaLeaderboard != null) {
-                result = new LeaderboardGroupMetaLeaderboard(groupForMetaLeaderboard,
-                        loadScoringScheme(dbLeaderboard), loadResultDiscardingRule(dbLeaderboard, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS));
-                groupForMetaLeaderboard.setOverallLeaderboard(result);
+            String wrappedRegattaLeaderboardName = (String) dbLeaderboard.get(FieldNames.WRAPPED_REGATTA_LEADERBOARD_NAME.name());
+            if (wrappedRegattaLeaderboardName != null) {
+                result = loadRegattaLeaderboardWithEliminations(dbLeaderboard, leaderboardName, wrappedRegattaLeaderboardName, leaderboardRegistry);
             } else {
-                String wrappedRegattaLeaderboardName = (String) dbLeaderboard.get(FieldNames.WRAPPED_REGATTA_LEADERBOARD_NAME.name());
-                if (wrappedRegattaLeaderboardName != null) {
-                    result = loadRegattaLeaderboardWithEliminations(dbLeaderboard, leaderboardName, wrappedRegattaLeaderboardName, leaderboardRegistry);
+                if (groupForMetaLeaderboard != null) {
+                    result = new LeaderboardGroupMetaLeaderboard(groupForMetaLeaderboard,
+                            loadScoringScheme(dbLeaderboard), loadResultDiscardingRule(dbLeaderboard, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS));
+                    groupForMetaLeaderboard.setOverallLeaderboard(result);
                 } else {
                     String regattaName = (String) dbLeaderboard.get(FieldNames.REGATTA_NAME.name());
                     ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbLeaderboard, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS);
@@ -450,12 +450,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         result = loadRegattaLeaderboard(leaderboardName, regattaName, dbLeaderboard,
                                 resultDiscardingRule, regattaRegistry);
                     }
-                    if (result != null) {
-                        DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result, baseDomainFactory);
-                        loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, result.getScoreCorrection());
-                        loadSuppressedCompetitors(dbLeaderboard, loadedLeaderboardCorrections);
-                        loadColumnFactors(dbLeaderboard, result);
-                    }
+                }
+                if (result != null) {
+                    DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result, baseDomainFactory);
+                    loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, result.getScoreCorrection());
+                    loadSuppressedCompetitors(dbLeaderboard, loadedLeaderboardCorrections);
+                    loadColumnFactors(dbLeaderboard, result);
                 }
             }
             if (result != null) {
