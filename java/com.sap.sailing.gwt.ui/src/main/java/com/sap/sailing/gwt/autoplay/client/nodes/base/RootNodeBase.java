@@ -83,7 +83,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                         errorCount = 0;
                         // we have no race, or we have one, and had a different one in the past
                         if (result == null || (currentLifeRace != null && !result.getB().equals(currentLifeRace))) {
-                            cf.getAutoPlayCtx().setCurrenLifeRace(null);
+                            cf.getAutoPlayCtx().setCurrentLifeRace(null);
                             boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null
                                     || (result != null && !result.getB().equals(currentLifeRace));
                             setCurrentState(comingFromLiferace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
@@ -91,7 +91,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                             currentLifeRace = null;
                             currentPreLifeRace = null;
                         } else {
-                            cf.getAutoPlayCtx().setCurrenLifeRace(result.getB());
+                            cf.getAutoPlayCtx().setCurrentLifeRace(result.getB());
                             final Long timeToRaceStartInMs = result.getA();
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
                             if (loadedLiveRace == null || timeToRaceStartInMs > PRE_RACE_DELAY) {
