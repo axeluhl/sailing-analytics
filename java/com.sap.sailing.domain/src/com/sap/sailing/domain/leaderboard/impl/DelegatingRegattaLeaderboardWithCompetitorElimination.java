@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,10 +62,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     private final String name;
     private RegattaLeaderboard fullLeaderboard;
     
-    @FunctionalInterface
-    public static interface SerializableRegattaLeaderboardSupplier extends Supplier<RegattaLeaderboard>, Serializable {};
-    
-    private final SerializableRegattaLeaderboardSupplier fullLeaderboardSupplier;
+    private transient final Supplier<RegattaLeaderboard> fullLeaderboardSupplier;
     
     /**
      * The particular use case for which this field is introduced is registering score correction
@@ -91,7 +87,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     /**
      * The leaderboard wrapper starts out with an empty set of eliminated competitors
      */
-    public DelegatingRegattaLeaderboardWithCompetitorElimination(SerializableRegattaLeaderboardSupplier fullLeaderboardSupplier,
+    public DelegatingRegattaLeaderboardWithCompetitorElimination(Supplier<RegattaLeaderboard> fullLeaderboardSupplier,
             String name) {
         this.name = name;
         this.fullLeaderboardSupplier = fullLeaderboardSupplier;
@@ -432,6 +428,9 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     private RegattaLeaderboard getFullLeaderboard() {
         if (fullLeaderboard == null) {
+            if (fullLeaderboardSupplier == null) {
+                throw new NullPointerException("Internal error: Regatta leaderboard supplier is null; this can only happen upon premature serialization");
+            }
             fullLeaderboard = fullLeaderboardSupplier.get();
             if (fullLeaderboard != null) {
                 for (Iterator<Consumer<RegattaLeaderboard>> i=triggerWhenFullLeaderboardIsResolved.keySet().iterator(); i.hasNext(); ) {
