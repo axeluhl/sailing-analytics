@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -441,5 +443,15 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
             }
         }
         return fullLeaderboard;
+    }
+    
+    /**
+     * Before being serialized, ensure that the leaderboard supplier has been used to tru
+     * to resolve the leaderboard.
+     * @throws IOException 
+     */
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        getFullLeaderboard();
+        oos.defaultWriteObject();
     }
 }
