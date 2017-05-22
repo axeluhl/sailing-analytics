@@ -828,7 +828,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         final LeaderboardScoreCorrectionNotifier scoreCorrectionListener = new LeaderboardScoreCorrectionNotifier(leaderboard);
         scoreCorrectionListenersByLeaderboard.put(leaderboard, scoreCorrectionListener);
-        leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
+        leaderboard.addScoreCorrectionListener(scoreCorrectionListener);
     }
 
     private void loadStoredLeaderboardsAndGroups() {
@@ -913,7 +913,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             throw new IllegalArgumentException("Leaderboard with name "+leaderboardName+" already exists in "+this);
         }
         final RegattaLeaderboardWithEliminations result = new DelegatingRegattaLeaderboardWithCompetitorElimination(
-                (RegattaLeaderboard) fullLeaderboard, leaderboardName);
+                ()->(RegattaLeaderboard) fullLeaderboard, leaderboardName);
         result.setDisplayName(leaderboardDisplayName);
         logger.info("adding regatta leaderboard with eliminations for regatta leaderboard "
                 + fullLeaderboard.getName() + " to " + this);
@@ -3739,22 +3739,5 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public int getNumberOfTrackedRacesRestored() {
         return numberOfTrackedRacesRestored.get();
-    }
-
-    @Override
-    public void setEliminatedCompetitor(String leaderboardName, Set<Competitor> newEliminatedCompetitors) {
-        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
-            throw new IllegalArgumentException(leaderboardName+" does not match a regatta leaderboard with eliminations");
-        }
-        final RegattaLeaderboardWithEliminations rlwe = (RegattaLeaderboardWithEliminations) leaderboard;
-        // first un-eliminate those currently eliminated and no longer in newEliminatedCompetitors
-        for (final Competitor c : rlwe.getEliminatedCompetitors()) {
-            rlwe.setEliminated(c, newEliminatedCompetitors.remove(c));
-        }
-        // then eliminated the remaining ones from newEliminatedCompetitors
-        for (final Competitor c : newEliminatedCompetitors) {
-            rlwe.setEliminated(c, true);
-        }
     }
 }

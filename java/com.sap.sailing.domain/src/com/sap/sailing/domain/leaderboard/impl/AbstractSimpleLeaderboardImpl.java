@@ -33,6 +33,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
+import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -299,6 +300,16 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public SettableScoreCorrection getScoreCorrection() {
         return scoreCorrection;
+    }
+
+    @Override
+    public void addScoreCorrectionListener(ScoreCorrectionListener listener) {
+        getScoreCorrection().addScoreCorrectionListener(listener);
+    }
+
+    @Override
+    public void removeScoreCorrectionListener(ScoreCorrectionListener listener) {
+        getScoreCorrection().removeScoreCorrectionListener(listener);
     }
 
     @Override

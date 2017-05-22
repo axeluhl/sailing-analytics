@@ -92,8 +92,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
     
     protected DelegatingRegattaLeaderboardWithCompetitorElimination createDelegatingRegattaLeaderboardWithCompetitorElimination(
             Regatta regatta, String leaderboardName, int[] discardingThresholds) {
-        final RegattaLeaderboard fullLeaderboard = createLeaderboard(regatta, discardingThresholds);
-        return new DelegatingRegattaLeaderboardWithCompetitorElimination(fullLeaderboard, leaderboardName);
+        return new DelegatingRegattaLeaderboardWithCompetitorElimination(()->createLeaderboard(regatta, discardingThresholds), leaderboardName);
     }
 
     @Test

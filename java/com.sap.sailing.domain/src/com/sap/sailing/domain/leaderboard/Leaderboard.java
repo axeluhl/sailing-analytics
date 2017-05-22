@@ -361,6 +361,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     boolean hasCarriedPoints(Competitor competitor);
 
     SettableScoreCorrection getScoreCorrection();
+    
+    void addScoreCorrectionListener(ScoreCorrectionListener listener);
+
+    void removeScoreCorrectionListener(ScoreCorrectionListener listener);
 
     Competitor getCompetitorByName(String competitorName);
     

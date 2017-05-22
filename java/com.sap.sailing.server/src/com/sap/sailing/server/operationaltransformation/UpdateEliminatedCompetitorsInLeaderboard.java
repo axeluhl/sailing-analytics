@@ -3,6 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -18,7 +19,16 @@ public class UpdateEliminatedCompetitorsInLeaderboard extends AbstractLeaderboar
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        toState.setEliminatedCompetitor(getLeaderboardName(), newEliminatedCompetitors);
+        RegattaLeaderboardWithEliminations leaderboard = (RegattaLeaderboardWithEliminations) toState.getLeaderboardByName(getLeaderboardName());
+        // first un-eliminate those currently eliminated and no longer in newEliminatedCompetitors
+        for (final Competitor c : leaderboard.getEliminatedCompetitors()) {
+            leaderboard.setEliminated(c, newEliminatedCompetitors.remove(c));
+        }
+        // then eliminated the remaining ones from newEliminatedCompetitors
+        for (final Competitor c : newEliminatedCompetitors) {
+            leaderboard.setEliminated(c, true);
+        }
+        updateStoredLeaderboard(toState, leaderboard);
         return null;
     }
     
