@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,7 +62,11 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     private static final long serialVersionUID = 8331154893189722924L;
     private final String name;
     private RegattaLeaderboard fullLeaderboard;
-    private final Supplier<RegattaLeaderboard> fullLeaderboardSupplier;
+    
+    @FunctionalInterface
+    public static interface SerializableRegattaLeaderboardSupplier extends Supplier<RegattaLeaderboard>, Serializable {};
+    
+    private final SerializableRegattaLeaderboardSupplier fullLeaderboardSupplier;
     
     /**
      * The particular use case for which this field is introduced is registering score correction
@@ -86,7 +91,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     /**
      * The leaderboard wrapper starts out with an empty set of eliminated competitors
      */
-    public DelegatingRegattaLeaderboardWithCompetitorElimination(Supplier<RegattaLeaderboard> fullLeaderboardSupplier, String name) {
+    public DelegatingRegattaLeaderboardWithCompetitorElimination(SerializableRegattaLeaderboardSupplier fullLeaderboardSupplier,
+            String name) {
         this.name = name;
         this.fullLeaderboardSupplier = fullLeaderboardSupplier;
         this.eliminatedCompetitors = new ConcurrentHashMap<>();
