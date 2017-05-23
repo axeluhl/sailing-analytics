@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
+import java.util.List;
+
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Header;
@@ -7,10 +9,11 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sse.common.Util;
 
-public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> {
+public abstract class SortableRaceListColumn<T extends RaceMetadataDTO<?>, C> extends SortableColumn<T, C> {
     
     enum ColumnVisibility {
         ALWAYS {
@@ -33,28 +36,34 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
     }
     
     private final Header<?> header;
-    private final InvertibleComparator<T> comparator;
+    private final RaceListColumnComparator<T, ?> comparator;
     private boolean showDetails = true;
     private ColumnVisibility columnVisibility = ColumnVisibility.ALWAYS;
 
-    protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator) {
+    protected SortableRaceListColumn(String headerText, Cell<C> cell, RaceListColumnComparator<T, ?> comparator) {
         this(new WrappedTextHeader(headerText), cell, comparator);
     }
     
-    protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator, SortingOrder preferredSortingOrder) {
+    protected SortableRaceListColumn(String headerText, Cell<C> cell, RaceListColumnComparator<T, ?> comparator, SortingOrder preferredSortingOrder) {
         this(new WrappedTextHeader(headerText), cell, comparator, preferredSortingOrder);
     }
     
-    private SortableRaceListColumn(Header<?> header, Cell<C> cell, InvertibleComparator<T> comparator) {
+    private SortableRaceListColumn(Header<?> header, Cell<C> cell, RaceListColumnComparator<T, ?> comparator) {
         this(header, cell, comparator, SortingOrder.ASCENDING);
     }
     
-    protected SortableRaceListColumn(Header<?> header, Cell<C> cell, InvertibleComparator<T> comparator, SortingOrder preferredSortingOrder) {
+    protected SortableRaceListColumn(Header<?> header, Cell<C> cell, RaceListColumnComparator<T, ?> comparator, SortingOrder preferredSortingOrder) {
         super(cell, preferredSortingOrder);
         this.header = header;
         this.comparator = comparator;
     }
-
+    
+    public void setRacesInNaturalOrder(List<T> racesInNaturalOrder) {
+        if (this.comparator != null) {
+            this.comparator.setRacesInNaturalOrder(racesInNaturalOrder);
+        }
+    }
+    
     @Override
     public final InvertibleComparator<T> getComparator() {
         return comparator;

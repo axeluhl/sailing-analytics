@@ -40,6 +40,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -400,12 +401,12 @@ public class RaceContext {
         // TODO do not calculate the winner if the blue flag is currently shown.
         try {
             TimePoint finishTime = getLiveTimePoint();
-            List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
-            if (competitors == null || competitors.isEmpty()) {
+            Iterable<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
+            if (competitors == null || Util.isEmpty(competitors)) {
                 return null;
             }
             if (Util.size(raceColumn.getFleets()) == 1) {
-                return new SimpleCompetitorDTO(competitors.get(0));
+                return new SimpleCompetitorDTO(competitors.iterator().next());
             }
             for (Competitor competitor : competitors) {
                 if (isCompetitorInFleet(competitor)) {
@@ -447,6 +448,9 @@ public class RaceContext {
     }
 
     public boolean isLiveOrOfPublicInterest() {
+        if (HomeServiceUtil.calculateEventState(event) == EventState.FINISHED) {
+            return false;
+        }
         boolean isLive = false;
         boolean isOfPublicInterest = false;
         if (trackedRace != null) {
