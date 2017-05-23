@@ -48,6 +48,7 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.tracking.RaceLogWindFixDeclinationHelper;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -522,6 +523,9 @@ public class RaceContext {
     }
 
     public boolean isLiveOrOfPublicInterest() {
+        if (HomeServiceUtil.calculateEventState(event) == EventState.FINISHED) {
+            return false;
+        }
         boolean isLive = false;
         boolean isOfPublicInterest = false;
         if (trackedRace != null) {
