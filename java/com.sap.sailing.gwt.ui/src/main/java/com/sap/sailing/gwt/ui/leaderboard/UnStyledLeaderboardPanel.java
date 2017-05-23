@@ -974,13 +974,13 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
                                 UnStyledLeaderboardPanel.this.preSelectedRace)
                         .getAsHtml();
                 String style = determineBoatColorDivStyle(competitorColor);
-                sb.appendHtmlConstant("<div style=\"" + style + "\">");
+                sb.append(SafeHtmlUtils.fromTrustedString("<div style=\"" + style + "\">"));
             }
 
             if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"" + (18 * getFlagScale())
-                        + "px\" height=\"" + (12 * getFlagScale()) + "px\" title=\"" + competitor.getName() + "\"/>");
-                sb.appendHtmlConstant("&nbsp;");
+                sb.append(SafeHtmlUtils.fromTrustedString("<img src=\"" + flagImageURL + "\" width=\"" + (18 * getFlagScale())
+                        + "px\" height=\"" + (12 * getFlagScale()) + "px\" title=\"" + competitor.getName() + "\"/>"));
+                sb.append(SafeHtmlUtils.fromTrustedString("&nbsp;"));
             } else {
                 final ImageResource flagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
@@ -989,15 +989,15 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
                     flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (flagImageResource != null) {
-                    sb.appendHtmlConstant("<img src=\"" + flagImageResource.getSafeUri().asString() + "\" width=\""
+                    sb.append(SafeHtmlUtils.fromTrustedString("<img src=\"" + flagImageResource.getSafeUri().asString() + "\" width=\""
                             + (18 * getFlagScale()) + "px\" height=\"" + (12 * getFlagScale()) + "px\" title=\""
-                            + competitor.getName() + "\"/>");
-                    sb.appendHtmlConstant("&nbsp;");
+                            + competitor.getName() + "\"/>"));
+                    sb.append(SafeHtmlUtils.fromTrustedString("&nbsp;"));
                 }
             }
             sb.appendEscaped(competitor.getSailID());
             if (showBoatColor) {
-                sb.appendHtmlConstant("</div>");
+                sb.append(SafeHtmlUtils.fromTrustedString("</div>"));
             }
         }
 
@@ -1128,36 +1128,36 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     SafeStylesBuilder ssb = new SafeStylesBuilder();
                     processStyleForRaceColumnWithoutReasonForMaxPoints(entry.discarded, ssb);
-                    html.appendHtmlConstant("<span style='");
-                    html.appendHtmlConstant(ssb.toSafeStyles().asString());
-                    html.appendHtmlConstant("'>");
+                    html.append(SafeHtmlUtils.fromTrustedString("<span style='"));
+                    html.append(SafeHtmlUtils.fromTrustedString(ssb.toSafeStyles().asString()));
+                    html.append(SafeHtmlUtils.fromTrustedString("'>"));
                     if (!entry.discarded) {
-                        html.appendHtmlConstant(netOrAddedPointsAsText);
+                        html.append(SafeHtmlUtils.fromTrustedString(netOrAddedPointsAsText));
                     } else {
-                        html.appendHtmlConstant("<del>");
-                        html.appendHtmlConstant(totalOrAddedPointsAsText);
-                        html.appendHtmlConstant("</del>");
+                        html.append(SafeHtmlUtils.fromTrustedString("<del>"));
+                        html.append(SafeHtmlUtils.fromTrustedString(totalOrAddedPointsAsText));
+                        html.append(SafeHtmlUtils.fromTrustedString("</del>"));
                     }
-                    html.appendHtmlConstant("</span>");
+                    html.append(SafeHtmlUtils.fromTrustedString("</span>"));
 
                 } else {
                     SafeStylesBuilder ssb = new SafeStylesBuilder();
                     processStyleForRaceColumnWithReasonForMaxPoints(entry.discarded, ssb);
-                    html.appendHtmlConstant(
-                            "<span title=\"" + totalOrAddedPointsAsText + "/" + netOrAddedPointsAsText + "\" style='");
-                    html.appendHtmlConstant(ssb.toSafeStyles().asString());
-                    html.appendHtmlConstant("'>");
+                    html.append(SafeHtmlUtils.fromTrustedString(
+                            "<span title=\"" + totalOrAddedPointsAsText + "/" + netOrAddedPointsAsText + "\" style='"));
+                    html.append(SafeHtmlUtils.fromTrustedString(ssb.toSafeStyles().asString()));
+                    html.append(SafeHtmlUtils.fromTrustedString("'>"));
                     if (entry.discarded) {
-                        html.appendHtmlConstant("<del>");
+                        html.append(SafeHtmlUtils.fromTrustedString("<del>"));
                     }
                     html.appendEscaped(
                             entry.reasonForMaxPoints == MaxPointsReason.NONE ? "" : entry.reasonForMaxPoints.name());
                     if (entry.discarded) {
-                        html.appendHtmlConstant("</del>");
+                        html.append(SafeHtmlUtils.fromTrustedString("</del>"));
                     }
-                    html.appendHtmlConstant("</span>");
+                    html.append(SafeHtmlUtils.fromTrustedString("</span>"));
                 }
-                html.appendHtmlConstant("</div>");
+                html.append(SafeHtmlUtils.fromTrustedString("</div>"));
             }
         }
 
@@ -1860,9 +1860,9 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
             String textColor = getLeaderboard().hasLiveRace(timer.getLiveTimePointInMillis()) ? IS_LIVE_TEXT_COLOR
                     : DEFAULT_TEXT_COLOR;
 
-            sb.appendHtmlConstant("<span style=\"font-weight: bold; color:" + textColor + "\">");
+            sb.append(SafeHtmlUtils.fromTrustedString("<span style=\"font-weight: bold; color:" + textColor + "\">"));
             sb.appendEscaped(getValue(object));
-            sb.appendHtmlConstant("</span>");
+            sb.append(SafeHtmlUtils.fromTrustedString("</span>"));
         }
 
         @Override
@@ -1919,11 +1919,11 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
 
             SafeStylesBuilder ssb = new SafeStylesBuilder();
             processStyleForTotalNetPointsColumn(textColor, ssb);
-            sb.appendHtmlConstant("<span style='");
-            sb.appendHtmlConstant(ssb.toSafeStyles().asString());
-            sb.appendHtmlConstant("'>");
+            sb.append(SafeHtmlUtils.fromTrustedString("<span style='"));
+            sb.append(SafeHtmlUtils.fromTrustedString(ssb.toSafeStyles().asString()));
+            sb.append(SafeHtmlUtils.fromTrustedString("'>"));
             sb.appendEscaped(getValue(object));
-            sb.appendHtmlConstant("</span>");
+            sb.append(SafeHtmlUtils.fromTrustedString("</span>"));
         }
 
         @Override
