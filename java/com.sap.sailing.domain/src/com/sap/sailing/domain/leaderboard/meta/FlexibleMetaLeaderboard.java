@@ -64,7 +64,7 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
     }
     
     @Override
-    protected LeaderboardType getLeaderboardType() {
+    public LeaderboardType getLeaderboardType() {
         return LeaderboardType.FlexibleMetaLeaderboard;
     }
 }
