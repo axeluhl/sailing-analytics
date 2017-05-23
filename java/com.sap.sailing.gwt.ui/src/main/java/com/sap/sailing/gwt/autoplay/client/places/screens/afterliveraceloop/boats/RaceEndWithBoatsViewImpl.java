@@ -2,19 +2,20 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boa
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLeaderBoardWithImageViewImpl.ImageProvider;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
-import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEndWithBoatsView {
@@ -42,9 +43,19 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     @UiField
     Label subline3;
     @UiField
-    ResizableFlowPanel statistics;
+    Label statisticValue1;
+    @UiField
+    Label statisticProperty1;
+    @UiField
+    Label statisticValue2;
+    @UiField
+    Label statisticProperty2;
+    @UiField
+    Label statisticValue3;
+    @UiField
+    Label statisticProperty3;
 
-    private Timer resizer;
+    private NumberFormat compactFormat = NumberFormat.getFormat("#.0");
 
     private ImageProvider provider;
 
@@ -61,19 +72,10 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     @Override
     public void setLeaderBoard(SixtyInchLeaderBoard leaderboardPanel) {
         leaderBoardHolder.add(leaderboardPanel);
-        resizer = new Timer() {
-
-            @Override
-            public void run() {
-                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX, leaderboardPanel);
-            }
-        };
-        resizer.scheduleRepeating(100);
     }
 
     @Override
     public void onStop() {
-        resizer.cancel();
     }
 
     @Override
@@ -101,6 +103,19 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
         image.getElement().getStyle().setProperty("backgroundPosition", "center bottom");
         image.getElement().getStyle().setProperty("backgroundSize", "contain");
         image.getElement().getStyle().setProperty("backgroundRepeat", "no-repeat");
+    }
+
+    @Override
+    public void setStatistic(int competitorCount, Distance distance, Duration duration) {
+        statisticProperty1.setText(StringMessages.INSTANCE.competitors());
+        statisticValue1.setText(String.valueOf(competitorCount));
+
+        statisticProperty2.setText(StringMessages.INSTANCE.distance());
+        statisticValue2
+                .setText(compactFormat.format(distance.getSeaMiles()) + " " + StringMessages.INSTANCE.seaMiles());
+
+        statisticProperty3.setText(StringMessages.INSTANCE.durationPlain());
+        statisticValue3.setText(compactFormat.format(duration.asMinutes()) + " " + StringMessages.INSTANCE.minutes());
     }
 
 }

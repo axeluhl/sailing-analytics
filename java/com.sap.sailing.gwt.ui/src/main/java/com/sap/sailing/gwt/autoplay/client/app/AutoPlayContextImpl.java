@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
@@ -52,13 +53,12 @@ public class AutoPlayContextImpl implements AutoPlayContext {
 
     @Override
     public void setCurrentLifeRace(RegattaAndRaceIdentifier lifeRace) {
-//        if (this.lifeRace != null) {
-//            if (!this.lifeRace.equals(lifeRace)) {
-//                this.lastRace = this.lifeRace;
-//                GWT.log("lastrace is now " + lastRace + " liferace is " + lifeRace);
-//            }
-//        }
-        this.lastRace = lifeRace;
+        if (this.lifeRace != null) {
+            if (!this.lifeRace.equals(lifeRace)) {
+                this.lastRace = this.lifeRace;
+                GWT.log("lastrace was " + lastRace + " liferace is now " + lifeRace);
+            }
+        }
         this.lifeRace = lifeRace;
     }
 

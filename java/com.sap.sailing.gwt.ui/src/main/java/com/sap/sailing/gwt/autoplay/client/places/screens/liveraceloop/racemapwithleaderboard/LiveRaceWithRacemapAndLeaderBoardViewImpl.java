@@ -9,9 +9,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewImpl;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
-import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
@@ -23,8 +21,6 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
 
     @UiField
     ResizableFlowPanel leaderBoardHolder;
-
-    private Timer resizer;
 
     private RaceMap rawRaceMap;
 
@@ -53,7 +49,6 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
 
     @Override
     public void onStop() {
-        resizer.cancel();
     }
 
     @Override
@@ -65,15 +60,6 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
         resizeMapOnceInitially(raceMap);
 
         leaderBoardHolder.add(leaderboardPanel);
-        resizer = new Timer() {
-
-            @Override
-            public void run() {
-                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX,
-                        leaderboardPanel);
-            }
-        };
-        resizer.scheduleRepeating(100);
     }
 
 

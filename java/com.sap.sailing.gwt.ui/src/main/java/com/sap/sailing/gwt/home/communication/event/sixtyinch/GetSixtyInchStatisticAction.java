@@ -71,6 +71,7 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
         return new GetSixtyInchStatisticDTO(competitors, legs, duration, distance);
     }
 
+    @GwtIncompatible
     private Distance estimateDistance(DynamicTrackedRace trace, Distance distance,TimePoint timePoint) {
         try {
             TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(timePoint);
@@ -83,6 +84,7 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
         return distance;
     }
 
+    @GwtIncompatible
     private Duration estimateDuration(DynamicTrackedRace trace, Duration duration, TimePoint timePoint) {
         try {
             TargetTimeInfo timeToComplete = trace.getEstimatedTimeToComplete(timePoint);
