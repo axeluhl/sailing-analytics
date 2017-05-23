@@ -1,14 +1,16 @@
 package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -17,8 +19,7 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
     private final SettingsDialogComponent<SettingsType> settingsDialogComponent;
 
     private LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator;
-    private Anchor shareAnchor;
-    private HandlerRegistration disablingAnchorHandlerRegistration = null;
+    private ShareLinkAnchor shareAnchor;
     
     protected AbstractSettingsDialog(final String shortName, SettingsDialogComponent<SettingsType> dialogComponent,
             StringMessages stringMessages, boolean animationEnabled, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator, final DialogCallback<SettingsType> callback) {
@@ -28,18 +29,9 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
         
         this.linkWithSettingsGenerator = linkWithSettingsGenerator;
         if(linkWithSettingsGenerator != null) {
-            shareAnchor = new Anchor(stringMessages.sharedSettingsLink());
-            shareAnchor.getElement().getStyle().setMargin(3, Unit.PX);
-            shareAnchor.ensureDebugId("ShareAnchor");
-            shareAnchor.setTarget("_blank");
-            getLeftButtonPannel().add(shareAnchor);
-            
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                @Override
-                public void execute() {
-                    onChange(getResult());
-                }
-            });
+            shareAnchor = new ShareLinkAnchor(stringMessages.sharedSettingsLink(), getLeftButtonPannel());
+            shareAnchor.setEnabled(true);
+            Scheduler.get().scheduleDeferred(() -> onChange(getResult()));
         }
     }
     
@@ -56,19 +48,6 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
         super.onInvalidStateChanged(invalidState);
         if (linkWithSettingsGenerator != null) {
             shareAnchor.setEnabled(!invalidState);
-            
-            if(invalidState && disablingAnchorHandlerRegistration == null) {
-                disablingAnchorHandlerRegistration = shareAnchor.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                       event.preventDefault();
-                    }
-                 });
-                
-            } else if(!invalidState && disablingAnchorHandlerRegistration != null) {
-                disablingAnchorHandlerRegistration.removeHandler();
-                disablingAnchorHandlerRegistration = null;
-            }
         }
     }
 
@@ -87,6 +66,55 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
         return settingsDialogComponent.getFocusWidget();
     }
     
+    private class ShareLinkAnchor implements HasEnabled {
+
+        private final FlowPanel container = new FlowPanel();
+        private final Anchor anchor;
+        private final Label placeholder;
+
+        private ShareLinkAnchor(String anchorText, FlowPanel parent) {
+            this.container.getElement().getStyle().setMargin(0.5, Unit.EM);
+            this.anchor = createEnabledAnchor(anchorText);
+            this.placeholder = createDisabledPlaceholder(anchorText);
+            container.add(anchor);
+            container.add(placeholder);
+            parent.add(container);
+        }
+
+        private Anchor createEnabledAnchor(String anchorText) {
+            Anchor anchor = new Anchor(anchorText);
+            anchor.ensureDebugId("ShareAnchor");
+            anchor.setTarget("_blank");
+            anchor.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+            return anchor;
+        }
+
+        private Label createDisabledPlaceholder(String anchorText) {
+            Label placeholder = new Label(anchorText);
+            placeholder.ensureDebugId("ShareAnchorDiabled");
+            placeholder.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
+            placeholder.getElement().getStyle().setColor(Color.LIGHT_GRAY.getAsHtml());
+            placeholder.getElement().getStyle().setCursor(Cursor.DEFAULT);
+            return placeholder;
+        }
+
+        private void setHref(String href) {
+            this.anchor.setHref(href);
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return anchor.isVisible() && !placeholder.isVisible();
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            anchor.setVisible(enabled);
+            placeholder.setVisible(!enabled);
+        }
+
+    }
+
     private static class NoOpDialogCallback<SettingsType extends Settings> implements DialogCallback<SettingsType> {
         @Override
         public void ok(SettingsType editedObject) {
