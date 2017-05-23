@@ -1,0 +1,56 @@
+package com.sap.sailing.gwt.autoplay.client.nodes;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
+import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPlace;
+import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
+
+public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
+    private final AutoPlayClientFactory cf;
+
+    public IdleOverallLeaderBoardNode(AutoPlayClientFactory cf) {
+
+        this.cf = cf;
+
+    }
+
+    public void onStart() {
+        List<DetailType> overallDetails = new ArrayList<>();
+        overallDetails.add(DetailType.OVERALL_RANK);
+        final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, null, overallDetails , null, null,
+                null, false, null, null, /* ascending */ true, /* updateUponPlayStateChange */ true,
+                RaceColumnSelectionStrategies.EXPLICIT, /* showAddedScores */ true,
+                /* showOverallRacesCompleted */ false, true, false, false);
+
+        com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(
+                // perform the first request as "live" but don't by default auto-play
+                PlayModes.Live, PlayStates.Playing,
+                /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
+        
+        CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
+        SixtyInchLeaderBoard leaderboardPanel = new SixtyInchLeaderBoard(cf.getSailingService(), new AsyncActionsExecutor(), leaderboardSettings,
+                true, null, provider, timer, null, cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getErrorReporter(),
+                StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, false);
+
+        
+        IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
+        setPlaceToGo(place);
+        firePlaceChangeAndStartTimer();
+        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
+                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
+    };
+}
