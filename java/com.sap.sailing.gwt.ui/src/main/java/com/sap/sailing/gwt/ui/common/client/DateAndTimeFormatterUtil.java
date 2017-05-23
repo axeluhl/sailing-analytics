@@ -24,6 +24,10 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG));
     public static DateTimeFormatRenderer longTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("HH:mm:ss zzz"), timeZoneWithoutOffset);
+    public static DateTimeFormatRenderer minutesTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat("m"), timeZoneWithoutOffset);
+    public static DateTimeFormatRenderer hoursAndMinutesTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat("HH:mm"), timeZoneWithoutOffset);
 
     private static DateTimeFormatRenderer secondsTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("m:ss"), timeZoneWithoutOffset);
