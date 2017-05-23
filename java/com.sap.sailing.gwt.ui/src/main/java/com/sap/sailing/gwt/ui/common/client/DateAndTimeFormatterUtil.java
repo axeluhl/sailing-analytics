@@ -71,6 +71,10 @@ public class DateAndTimeFormatterUtil {
         return result;
     }
     
+    public static String formatLongDateAndTimeGMT(Date date) {
+        return longDateFormatter.render(date) + ", " + longTimeFormatter.render(date);
+    }
+
     public static String getClientTimeZoneAsGMTString() {
         Date now = new Date();
         @SuppressWarnings("deprecation")

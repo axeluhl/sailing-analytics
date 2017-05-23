@@ -89,8 +89,7 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
         }
         if (data.getLastScoreUpdate() != null) {
             DivElement lastUpdateElement = Document.get().createDivElement();
-            String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(data.getLastScoreUpdate()) + " "
-                    + DateAndTimeFormatterUtil.formatElapsedTime(data.getLastScoreUpdate().getTime());
+            String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(data.getLastScoreUpdate());
             lastUpdateElement.setInnerText(StringMessages.INSTANCE.lastScoreUpdate() + ": " + lastUpdate);
             scoreInformationUi.appendChild(lastUpdateElement);
         }
