@@ -45,12 +45,13 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     private String leaderboardName;
     private String leaderboardGroupName;
     private AbstractLeaderboardDTO leaderboardDTO;
+    private LeaderboardContextDefinition leaderboardContextDefinition;
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        final LeaderboardContextDefinition leaderboardContextDefinition = new SettingsToUrlSerializer()
+        leaderboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new LeaderboardContextDefinition());
 
         final UUID eventId = leaderboardContextDefinition.getEventId();
@@ -59,35 +60,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         leaderboardGroupName = leaderboardContextDefinition.getLeaderboardGroupName();
 
         if (leaderboardName != null) {
-            final Runnable checkLeaderboardNameAndCreateUI = new Runnable() {
-                @Override
-                public void run() {
-                    if(leaderboardDTO == null) {
-                        sailingService.getLeaderboard(leaderboardName, new MarkedAsyncCallback<StrippedLeaderboardDTO>(
-                                    new AsyncCallback<StrippedLeaderboardDTO>() {
-                                        @Override
-                                        public void onSuccess(
-                                                StrippedLeaderboardDTO leaderboardDTO) {
-                                            if (leaderboardDTO != null) {
-                                                LeaderboardEntryPoint.this.leaderboardDTO = leaderboardDTO;
-                                                Window.setTitle(leaderboardName);
-                                                loadSettingsAndCreateUI(leaderboardContextDefinition, leaderboardDTO);
-                                            } else {
-                                                RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable t) {
-                                            reportError("Error trying to obtain list of leaderboard names: "
-                                                    + t.getMessage());
-                                        }
-                                    }));
-                    }
-                }
-            };
             if (eventId == null) {
-                checkLeaderboardNameAndCreateUI.run(); // use null-initialized event field
+                checkLeaderboardNameAndCreateUI(); // use null-initialized event field
             } else {
                 sailingService.getEventById(eventId, /* withStatisticalData */false,
                         new MarkedAsyncCallback<EventDTO>(new AsyncCallback<EventDTO>() {
@@ -101,7 +75,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                 if(result != null) {
                                     leaderboardDTO = result.getLeaderboardByName(leaderboardName);
                                 }
-                                checkLeaderboardNameAndCreateUI.run();
+                                checkLeaderboardNameAndCreateUI();
                             }
                         }));
             }
@@ -109,8 +83,35 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
         }
     }
+    
+    private void checkLeaderboardNameAndCreateUI() {
+        if(leaderboardDTO == null) {
+            sailingService.getLeaderboard(leaderboardName, new MarkedAsyncCallback<StrippedLeaderboardDTO>(
+                        new AsyncCallback<StrippedLeaderboardDTO>() {
+                            @Override
+                            public void onSuccess(
+                                    StrippedLeaderboardDTO leaderboardDTO) {
+                                if (leaderboardDTO != null) {
+                                    LeaderboardEntryPoint.this.leaderboardDTO = leaderboardDTO;
+                                    Window.setTitle(leaderboardName);
+                                    loadSettingsAndCreateUI();
+                                } else {
+                                    RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
+                                }
+                            }
 
-    private void loadSettingsAndCreateUI(LeaderboardContextDefinition leaderboardContextDefinition, AbstractLeaderboardDTO leaderboardDTO) {
+                            @Override
+                            public void onFailure(Throwable t) {
+                                reportError("Error trying to obtain list of leaderboard names: "
+                                        + t.getMessage());
+                            }
+                        }));
+        } else {
+            loadSettingsAndCreateUI();
+        }
+    }
+
+    private void loadSettingsAndCreateUI() {
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         
