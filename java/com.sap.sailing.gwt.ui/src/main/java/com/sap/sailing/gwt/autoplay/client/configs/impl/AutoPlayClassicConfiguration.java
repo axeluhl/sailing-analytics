@@ -48,25 +48,28 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
         cf.getSailingService().getEventById(eventUUID, true, getEventByIdAsyncCallback);
     }
 
-    public void loadSettings(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard, final Holder settingsHolder) {
+    @Override
+    public void loadSettingsDefault(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard, boolean open,OnSettingsCallback settingsCallback) {
         AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard);
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplayPerspectiveSettings = autoplayLifecycle
                 .createDefaultSettings();
-        DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
-            @Override
-            public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
-                settingsHolder.setSettings(editedObject);
-            }
+        if(open){
+            DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
+                @Override
+                public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
+                    settingsCallback.newSettings(editedObject);
+                }
 
-            @Override
-            public void cancel() {
-            }
-        };
-        if (settingsHolder.isNull()) {
-            settingsHolder.setSettings(autoplayLifecycle.createDefaultSettings());
+                @Override
+                public void cancel() {
+                }
+            };
+            new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(null,
+                    autoplayLifecycle, autoplayPerspectiveSettings, StringMessages.INSTANCE, true, callback).show();
+        }else{
+            settingsCallback.newSettings(autoplayLifecycle.createDefaultSettings());
+            
         }
-        new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(null,
-                autoplayLifecycle, autoplayPerspectiveSettings, StringMessages.INSTANCE, true, callback).show();
     }
 
 }

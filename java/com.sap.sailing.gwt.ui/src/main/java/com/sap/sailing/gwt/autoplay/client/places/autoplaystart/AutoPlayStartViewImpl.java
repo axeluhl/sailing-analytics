@@ -7,16 +7,17 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration;
-import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
+import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration.OnSettingsCallback;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinitionImpl;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayType;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -25,9 +26,10 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.gwt.settings.UrlBuilderUtil;
 
 public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -49,14 +51,17 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     Button settingsButton;
     @UiField
     DivElement leaderboardSelectionUi;
+    @UiField
+    Label configStarter;
+
     private final List<EventDTO> events;
 
-    private AutoPlayConfiguration.Holder settingsHolder = new AutoPlayConfiguration.Holder();
     private AutoPlayType selectedAutoPlayType = null;
     private EventDTO selectedEvent;
     private StrippedLeaderboardDTO selectedLeaderboard;
     private Presenter currentPresenter;
-
+    private AutoPlayContextDefinitionImpl apcd;
+    private PerspectiveCompositeSettings<?> settings;
 
     public AutoPlayStartViewImpl() {
         super();
@@ -136,7 +141,14 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
 
     @UiHandler("settingsButton")
     void onOpenSettings(ClickEvent event) {
-        selectedAutoPlayType.getConfig().loadSettings(selectedEvent, selectedLeaderboard, settingsHolder);
+        selectedAutoPlayType.getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard, true,
+                new OnSettingsCallback() {
+                    @Override
+                    public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
+                        settings = newSettings;
+                        updateURL();
+                    }
+                });
     }
 
     private boolean validate() {
@@ -166,14 +178,34 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
 
         startAutoPlayButton.setEnabled(readyToGo);
         settingsButton.setEnabled(readyToGo);
-        if (readyToGo) {
-            startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
-            settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
-        } else {
+        if (!readyToGo) {
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             settingsButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+            configStarter.setText("");
+        } else {
+            settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+            startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+            apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
+            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard, false,
+                    new OnSettingsCallback() {
+
+                        @Override
+                        public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
+                            settings = newSettings;
+                            updateURL();
+                        }
+                    });
         }
+
         return readyToGo;
+    }
+
+    private void updateURL() {
+        UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
+        SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();
+        urlSerializer.serializeSettingsMapToUrlBuilder(settings, urlBuilder);
+        urlSerializer.serializeToUrlBuilder(apcd, urlBuilder);
+        configStarter.setText(urlBuilder.buildString());
     }
 
     @UiHandler("localeSelectionBox")
@@ -185,12 +217,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     void startAutoPlayClicked(ClickEvent event) {
         if (validate()) {
 
-            EventDTO selectedEvent = getSelectedEvent();
-            String selectedLeaderboardName = getSelectedLeaderboardName();
-
-            AutoPlayContextDefinition apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
-            PerspectiveCompositeSettings<?> settings = settingsHolder.getSettings();
-            currentPresenter.startRootNode(selectedAutoPlayType, apcd, settings);
+            currentPresenter.startRootNode(apcd, settings);
             settingsButton.setEnabled(false);
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             settingsButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
@@ -248,10 +275,4 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         }
         return result;
     }
-
-    interface OnSettingsCallback<PSS extends Settings> {
-        void newSettings(PerspectiveCompositeSettings<PSS> newSettings);
-    }
-
-
 }

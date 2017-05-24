@@ -74,6 +74,7 @@
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 		    		<g:Button ui:field="startAutoPlayButton" text="{i18n.startAutoplay}" styleName="{res.mainCss.button}" />
+		    		<g:Label ui:field="configStarter"/>
 			    </div>
 			</div>
 		</div>

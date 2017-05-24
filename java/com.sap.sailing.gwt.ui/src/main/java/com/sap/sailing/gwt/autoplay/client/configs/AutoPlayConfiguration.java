@@ -10,24 +10,15 @@ public abstract class AutoPlayConfiguration {
 
     public abstract void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
             PerspectiveCompositeSettings<?> settings);
-
-    public void loadSettings(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard, Holder settingsHolder) {
-        Window.alert("This configuration does not have settings");
+    
+    public void loadSettingsDefault(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,boolean open,OnSettingsCallback holder) {
+        if(open){
+            Window.alert("This configuration does not have settings");
+        }
     }
+    
 
-    public static class Holder {
-        private PerspectiveCompositeSettings<?> settings;
-
-        public PerspectiveCompositeSettings<?> getSettings() {
-            return settings;
-        }
-
-        public void setSettings(PerspectiveCompositeSettings<?> settings) {
-            this.settings = settings;
-        }
-
-        public boolean isNull() {
-            return settings == null;
-        }
+    public interface OnSettingsCallback {
+        void newSettings(PerspectiveCompositeSettings<?> newSettings);
     }
 }

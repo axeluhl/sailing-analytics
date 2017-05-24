@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
-import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayType;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -71,9 +70,9 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
     }
 
     @Override
-    public void startRootNode(AutoPlayType type, AutoPlayContextDefinition ctxDef,
+    public void startRootNode(AutoPlayContextDefinition ctxDef,
             PerspectiveCompositeSettings<?> settings) {
-        AutoPlayConfiguration autoPlayConfiguration = type.getConfig();
+        AutoPlayConfiguration autoPlayConfiguration = ctxDef.getType().getConfig();
         autoPlayConfiguration.startRootNode(clientFactory, ctxDef, settings);
     }
 }
