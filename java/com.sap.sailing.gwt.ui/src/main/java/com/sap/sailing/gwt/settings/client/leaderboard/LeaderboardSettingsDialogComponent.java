@@ -53,6 +53,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private CheckBox showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox;
     private CheckBox showCompetitorSailIdColumnheckBox;
     private CheckBox showCompetitorFullNameColumnCheckBox;
+    private CheckBox isCompetitorNationalityColumnVisible;
     private LeaderboardSettings initialSettings;
 
     public LeaderboardSettingsDialogComponent(LeaderboardSettings initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages) {
@@ -200,6 +201,10 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         showCompetitorFullNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorFullNameColumn());
         showCompetitorFullNameColumnCheckBox.setValue(initialSettings.isShowCompetitorFullNameColumn());
         overallDetailDialogContent.add(showCompetitorFullNameColumnCheckBox);
+        isCompetitorNationalityColumnVisible = dialog.createCheckbox(stringMessages.showCompetitorNationalityColumn());
+        isCompetitorNationalityColumnVisible.setValue(initialSettings.isShowCompetitorNationality());
+        overallDetailDialogContent.add(isCompetitorNationalityColumnVisible);
+
         overallDetailDialog.add(overallDetailDialogContent);
         return overallDetailDialog;
     }
@@ -390,7 +395,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
                 /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue(),
                 /*showOverallColumnWithNumberOfRacesSailedPerCompetitor*/ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.getValue().booleanValue(),
-                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue());
+                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
+                isCompetitorNationalityColumnVisible.getValue());
         SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
         return newSettings;
     }

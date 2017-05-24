@@ -44,7 +44,8 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.isShowAddedScores(),
                 defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 defaultSettings.isShowCompetitorSailIdColumn(),
-                defaultSettings.isShowCompetitorFullNameColumn());
+                defaultSettings.isShowCompetitorFullNameColumn(),
+                defaultSettings.isShowCompetitorNationality());
     }
     
     public LeaderboardSettings mergeLeaderboardSettings(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
@@ -75,7 +76,8 @@ public class LeaderboardSettingsFactory {
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, namesOfRacesToShow, numberOfLastRacesToShow, autoExpandPreSelectedRace, refreshIntervalInMs,
                 nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
-                /*showOverallRacesCompleted*/ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns);
+                /* showOverallRacesCompleted */ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns,
+                settingsWithRaceSelection.isShowCompetitorNationality());
     }
     
     private List<DetailType> copyDetailTypes(List<DetailType> detailTypes) {

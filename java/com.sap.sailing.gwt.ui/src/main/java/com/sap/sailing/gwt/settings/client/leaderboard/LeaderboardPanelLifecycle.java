@@ -63,7 +63,8 @@ public class LeaderboardPanelLifecycle
                 currentLeaderboardSettings.isShowAddedScores(),
                 currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
-                currentLeaderboardSettings.isShowCompetitorFullNameColumn());
+                currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowCompetitorNationality());
         SettingsDefaultValuesUtils.keepDefaults(currentLeaderboardSettings, globalLeaderboardSettings);
         return globalLeaderboardSettings;
     }

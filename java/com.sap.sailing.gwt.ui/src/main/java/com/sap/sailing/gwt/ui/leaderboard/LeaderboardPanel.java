@@ -392,6 +392,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
      * of the viewport. See {@link OverlayAssistantScrollPanel}.
      */
     private final boolean enableSyncedScroller;
+    public boolean isShowCompetitorNationality;
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
@@ -651,6 +652,10 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         return COMPONENT_RESOURCES.settingsIcon();
     }
 
+    public void setShowCompetitorNationality(boolean isShowCompetitorNationality) {
+        this.isShowCompetitorNationality = isShowCompetitorNationality;
+    }
+
     public void updateSettings(final LeaderboardSettings newSettings) {
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
@@ -658,6 +663,8 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             selectedOverallDetailColumns.clear();
             selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
         }
+
+        setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
         setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
         setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
@@ -958,21 +965,21 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                 sb.appendHtmlConstant("<div style=\"border-bottom: 2px solid " + competitorColor + ";\">");
             }
 
-            if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\""
-                        + competitor.getName() + "\"/>");
-                sb.appendHtmlConstant("&nbsp;");
-            } else {
-                final ImageResource flagImageResource;
+            if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
+                final ImageResource nationalityFlagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
-                    flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                    nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
                 } else {
-                    flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                    nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
-                if (flagImageResource != null) {
-                    sb.append(renderer.render(flagImageResource));
+                if (nationalityFlagImageResource != null) {
+                    sb.append(renderer.render(nationalityFlagImageResource));
                     sb.appendHtmlConstant("&nbsp;");
                 }
+            }
+            if (flagImageURL != null && !flagImageURL.isEmpty()) {
+                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
+                sb.appendHtmlConstant("&nbsp;");
             }
             sb.appendEscaped(competitor.getSailID());
             if (showBoatColor) {
@@ -3279,7 +3286,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                 autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
                 /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                isShowCompetitorSailId(), isShowCompetitorFullName());
+                isShowCompetitorSailId(), isShowCompetitorFullName(), isShowCompetitorNationality);
         SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
         return leaderboardSettings;
     }

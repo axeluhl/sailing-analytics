@@ -27,7 +27,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     }
     
     @Override
-    public LeaderboardSettings createDefaultSettings() {        
+    public LeaderboardSettings createDefaultSettings() {
         List<String> namesOfRaceColumnsToShow = null;
         List<String> namesOfRacesToShow = Collections.singletonList(raceIdentifier.getRaceName());
         
@@ -43,7 +43,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 defaultSettings.getNumberOfLastRacesToShow(), false, DEFAULT_REFRESH_INTERVAL, raceIdentifier.getRaceName(), defaultSettings.isSortAscending(), defaultSettings.isUpdateUponPlayStateChange(), defaultSettings.getActiveRaceColumnSelectionStrategy(), defaultSettings.isShowAddedScores(), defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
                 /*showCompetitorSailIdColumn*/ true,
                 /* don't showCompetitorFullNameColumn in case screen is so small that we don't
-                 * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard);
+                 * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, false);
         SettingsUtil.copyDefaultsFromValues(settings, settings);
         
         return settings;
@@ -70,7 +70,8 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.isShowAddedScores(),
                 currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
-                currentLeaderboardSettings.isShowCompetitorFullNameColumn());
+                currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowCompetitorNationality());
         SettingsDefaultValuesUtils.keepDefaults(currentLeaderboardSettings, contextSpecificLeaderboardSettings);
         return contextSpecificLeaderboardSettings;
     }
