@@ -14,5 +14,4 @@ public class RaceEndWithCompetitorsTop3Place extends AbstractRaceEndWithImagesTo
             return new RaceEndWithCompetitorsTop3Place();
         }
     }
-
 }

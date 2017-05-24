@@ -96,6 +96,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -294,26 +295,35 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (leaderboard.getDisplayName() != null) {
             dbLeaderboard.put(FieldNames.LEADERBOARD_DISPLAY_NAME.name(), leaderboard.getDisplayName());
         }
-        BasicDBList dbSuppressedCompetitorIds = new BasicDBList();
-        for (Competitor suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
-            dbSuppressedCompetitorIds.add(suppressedCompetitor.getId());
-        }
-        dbLeaderboard.put(FieldNames.LEADERBOARD_SUPPRESSED_COMPETITOR_IDS.name(), dbSuppressedCompetitorIds);
-        if (leaderboard instanceof FlexibleLeaderboard) {
-            storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
-        } else if (leaderboard instanceof RegattaLeaderboard) {
-            storeRegattaLeaderboard((RegattaLeaderboard) leaderboard, dbLeaderboard);
+        if (leaderboard instanceof RegattaLeaderboardWithEliminations) {
+            dbLeaderboard.put(FieldNames.WRAPPED_REGATTA_LEADERBOARD_NAME.name(), ((RegattaLeaderboardWithEliminations) leaderboard).getRegatta().getName());
+            BasicDBList eliminatedCompetitorIds = new BasicDBList();
+            for (final Competitor c : ((RegattaLeaderboardWithEliminations) leaderboard).getEliminatedCompetitors()) {
+                eliminatedCompetitorIds.add(c.getId());
+            }
+            dbLeaderboard.put(FieldNames.ELMINATED_COMPETITORS.name(), eliminatedCompetitorIds);
         } else {
-            // at least store the scoring scheme
-            dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
+            BasicDBList dbSuppressedCompetitorIds = new BasicDBList();
+            for (Competitor suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
+                dbSuppressedCompetitorIds.add(suppressedCompetitor.getId());
+            }
+            dbLeaderboard.put(FieldNames.LEADERBOARD_SUPPRESSED_COMPETITOR_IDS.name(), dbSuppressedCompetitorIds);
+            if (leaderboard instanceof FlexibleLeaderboard) {
+                storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
+            } else if (leaderboard instanceof RegattaLeaderboard) {
+                storeRegattaLeaderboard((RegattaLeaderboard) leaderboard, dbLeaderboard);
+            } else {
+                // at least store the scoring scheme
+                dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
+            }
+            if (leaderboard.getDefaultCourseArea() != null) {
+                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
+            } else {
+                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
+            }
+            storeColumnFactors(leaderboard, dbLeaderboard);
+            storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         }
-        if (leaderboard.getDefaultCourseArea() != null) {
-            dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
-        } else {
-            dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
-        }
-        storeColumnFactors(leaderboard, dbLeaderboard);
-        storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 

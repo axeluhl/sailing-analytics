@@ -41,6 +41,7 @@ public class SwissTimingRaceConfigurationTest {
         }
     }
     
+    @Ignore("According to Radek Masnica ('masnica.r@st-software.com') the OTA stuff may not be supported any longer by the SwissTiming Leipzip lab... 2017-05-19")
     @Test
     public void testRaceConfig_446483_no_detail_config() throws Exception {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "446483"));
@@ -58,6 +59,7 @@ public class SwissTimingRaceConfigurationTest {
 
     }
 
+    @Ignore("According to Radek Masnica ('masnica.r@st-software.com') the OTA stuff may not be supported any longer by the SwissTiming Leipzip lab... 2017-05-19")
     @Test
     public void testRaceConfig_6260_with_detail_config() throws Exception {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "6260"));

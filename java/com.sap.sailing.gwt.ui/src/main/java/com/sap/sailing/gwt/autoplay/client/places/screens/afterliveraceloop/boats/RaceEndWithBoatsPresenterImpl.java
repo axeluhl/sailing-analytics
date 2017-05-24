@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -72,7 +74,11 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 false, null, false, null, false, true, false, false, false);
 
         
+        int competitorCount = getPlace().getStatistic().getCompetitors();
+        Distance distance  = getPlace().getStatistic().getDistance();
+        Duration duration = getPlace().getStatistic().getDuration();
         
+        view.setStatistic(competitorCount,distance,duration);
         
         view.setLeaderBoard(leaderboardPanel);
         leaderboardPanel.addLeaderboardUpdateListener(new LeaderboardUpdateListener() {

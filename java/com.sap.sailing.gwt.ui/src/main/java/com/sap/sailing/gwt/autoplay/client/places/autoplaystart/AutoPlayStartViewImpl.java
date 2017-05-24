@@ -238,7 +238,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         EventDTO result = null;
         int selectedIndex = eventSelectionBox.getSelectedIndex();
         if (events != null && selectedIndex > 0) {
-            String selectedItemText = eventSelectionBox.getItemText(selectedIndex);
+            String selectedItemText = eventSelectionBox.getValue(selectedIndex);
             for (EventDTO event : events) {
                 if (event.getName().equals(selectedItemText)) {
                     result = event;

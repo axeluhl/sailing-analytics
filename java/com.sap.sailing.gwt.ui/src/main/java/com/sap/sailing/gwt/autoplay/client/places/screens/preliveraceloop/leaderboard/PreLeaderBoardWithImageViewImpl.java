@@ -3,16 +3,13 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leade
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewImpl;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
-import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements PreLeaderboardWithImageView {
@@ -36,7 +33,6 @@ public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements 
     @UiField
     Label subline3;
 
-    private Timer resizer;
     private ImageProvider provider;
 
     public interface ImageProvider {
@@ -58,15 +54,6 @@ public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements 
     @Override
     public void setLeaderBoard(SixtyInchLeaderBoard leaderboardPanel) {
         leaderBoardHolder.add(leaderboardPanel);
-        resizer = new Timer() {
-
-            @Override
-            public void run() {
-                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX,
-                        leaderboardPanel);
-            }
-        };
-        resizer.scheduleRepeating(100);
     }
 
     @Override
@@ -94,7 +81,6 @@ public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements 
 
     @Override
     public void onStop() {
-        resizer.cancel();
     }
 
 }

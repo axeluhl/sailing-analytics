@@ -124,7 +124,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             if (newStartOfTracking != null) {
                 if (oldStartOfTracking == null) {
                     // Fixes wheren't loaded while startOfTracking was null. So we need to load all fixes in the tracking interval now.
-                    loadFixesForExtendedTimeRange(getTrackingTimeRange());
+                    loadFixesWhenStartOfTrackingIsReceived();
                 } else if (newStartOfTracking.before(oldStartOfTracking)) {
                     loadFixesForExtendedTimeRange(new TimeRangeImpl(newStartOfTracking, oldStartOfTracking));
                 }
@@ -403,7 +403,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 @Override
                 public void visit(RegattaLogDeviceMarkMappingEvent event) {
                     DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
-                    
                     final GPSFix lastFixAtOrBeforeStartOfTracking = track.getLastFixAtOrBefore(trackingTimeRange.from());
                     // A better fix before start of tracking must be after the current best fix
                     final MultiTimeRange beforeRange = coveredTimeRanges
@@ -502,6 +501,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {
         deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> addLoadingJob(
                 new LoadFixesInTrackingTimeRangeJob(mappingsAndCoveredTimeRanges, extendedTimeRange)));
+    }
+    
+    private void loadFixesWhenStartOfTrackingIsReceived() {
+        deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> addLoadingJob(
+                new LoadFixesForNewlyCoveredTimeRangesJob(item, mappingsAndCoveredTimeRanges)));
     }
 
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
@@ -622,11 +626,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
     
     /**
-     * Loads fixes for an item's mappings in a defined tracking {@link TimeRange}. This is used when:
-     * <ul>
-     * <li>Initially loading fixes into tracks</li>
-     * <li>The tracking {@link TimeRange} changes</li>
-     * </ul>
+     * Loads fixes for an item's mappings in a defined tracking {@link TimeRange}. This is used when the tracking
+     * {@link TimeRange} is extended. No better fixes for {@link Mark} are being loaded because if available, these must
+     * have either already been loaded or the best fix is inside of the extended {@link TimeRange} that is completely loaded by
+     * this job.
      */
     private class LoadFixesInTrackingTimeRangeJob extends AbstractLoadingJob {
 
@@ -646,7 +649,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
     
     /**
-     * This is used when device mappings for an item changed so that fixes in a new {@link TimeRange} are covered.
+     * This is used when device mappings for an item changed so that fixes in a new {@link TimeRange} are covered. This is also used when initially loading fixes due to startOfTracking being initially set. If
+     * the mapping is a {@link Mark}, best fixes outside of the tracking {@link TimeRange} are loaded if none is
+     * available in the tracking {@link TimeRange}.
      */
     private class LoadFixesForNewlyCoveredTimeRangesJob extends AbstractLoadingJob {
         private final WithID item;

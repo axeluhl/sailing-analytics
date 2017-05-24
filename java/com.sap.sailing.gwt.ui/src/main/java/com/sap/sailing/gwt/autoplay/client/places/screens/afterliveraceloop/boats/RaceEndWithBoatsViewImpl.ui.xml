@@ -16,8 +16,10 @@
 		position: absolute;
 		display: inline-block;
 		right: 0px;
-		width: 60%;
+		width: 58%;
 		height: 93%;
+		padding-left:1%;
+		padding-right:1%;
 		border-left: 1px solid #d6d6d6;
 	}
 	
@@ -144,16 +146,16 @@
 		<rf:ResizableFlowPanel styleName="{style.statistics}"
 			ui:field="statistics">
 			<rf:ResizableFlowPanel styleName="{style.info-overlay__item}">
-				<g:Label styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
-				<g:Label styleName="{style.info-overlay__item__property}">Wind</g:Label>
+				<g:Label ui:field="statisticValue1" styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
+				<g:Label ui:field="statisticProperty1" styleName="{style.info-overlay__item__property}">Wind</g:Label>
 			</rf:ResizableFlowPanel>
 			<rf:ResizableFlowPanel styleName="{style.info-overlay__item}">
-				<g:Label styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
-				<g:Label styleName="{style.info-overlay__item__property}">Wind</g:Label>
+				<g:Label ui:field="statisticValue2" styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
+				<g:Label ui:field="statisticProperty2" styleName="{style.info-overlay__item__property}">Wind</g:Label>
 			</rf:ResizableFlowPanel>
 			<rf:ResizableFlowPanel styleName="{style.info-overlay__item}">
-				<g:Label styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
-				<g:Label styleName="{style.info-overlay__item__property}">Wind</g:Label>
+				<g:Label ui:field="statisticValue3" styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
+				<g:Label ui:field="statisticProperty3" styleName="{style.info-overlay__item__property}">Wind</g:Label>
 			</rf:ResizableFlowPanel>
 		</rf:ResizableFlowPanel>
 	</rf:ResizableFlowPanel>
