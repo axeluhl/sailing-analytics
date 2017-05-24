@@ -2560,8 +2560,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                 scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
                 if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                     Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                    String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(lastCorrectionDate) + ", "
-                            + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
+                    String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(lastCorrectionDate);
                     scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
                 } else {
                     scoreCorrectionLastUpdateTimeLabel.setText("");

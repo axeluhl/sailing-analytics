@@ -250,6 +250,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName,
             int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
+    void createRegattaLeaderboardWithEliminations(String name, String displayName, String regattaName,
+            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 
     void removeLeaderboards(Collection<String> leaderboardNames, AsyncCallback<Void> asyncCallback);
@@ -552,7 +555,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName,
             AsyncCallback<List<Util.Pair<String, String>>> callback);
 
-    void checkLeaderboardName(String leaderboardName, AsyncCallback<Util.Pair<String, LeaderboardType>> callback);
+    void getLeaderboardType(String leaderboardName, AsyncCallback<LeaderboardType> callback);
 
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
     
@@ -826,4 +829,13 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void serializationDummy(PersonDTO dummy, CountryCode ccDummy,
 			PreciseCompactPosition preciseCompactPosition, AsyncCallback<Pair<PersonDTO, CountryCode>> callback);
+
+    /**
+     * @param leaderboardName
+     *            expected to match a regatta leaderboard with eliminations
+     */
+    void getEliminatedCompetitors(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> asyncCallback);
+
+    void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors,
+            AsyncCallback<Void> callback);
 }

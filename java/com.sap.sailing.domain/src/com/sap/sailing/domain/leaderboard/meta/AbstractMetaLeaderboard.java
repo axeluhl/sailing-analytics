@@ -194,7 +194,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         leaderboard.addRaceColumnListener(this);
         final ScoreCorrectionChangeForwarder listener = new ScoreCorrectionChangeForwarder();
         scoreCorrectionChangeForwardersByLeaderboard.put(leaderboard, listener);
-        leaderboard.getScoreCorrection().addScoreCorrectionListener(listener);
+        leaderboard.addScoreCorrectionListener(listener);
     }
     
     protected void unregisterScoreCorrectionChangeForwarder(Leaderboard leaderboard) {

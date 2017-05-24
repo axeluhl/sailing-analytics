@@ -122,7 +122,7 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     }
     
     @Override
-    protected LeaderboardType getLeaderboardType() {
+    public LeaderboardType getLeaderboardType() {
         return LeaderboardType.RegattaLeaderboard;
     }
 
