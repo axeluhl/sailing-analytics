@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap;
 
+import java.util.HashMap;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
@@ -11,9 +13,16 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticAction;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
+import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<PreRaceRacemapPlace>
         implements PreRaceRacemapView.Slide7Presenter {
@@ -66,8 +75,11 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
                             break;
                         default:
                         }
+
                     }
-                    view.updateStatistic(lastStatisticResult, getSlideCtx().getEvent().getOfficialWebsiteURL(), windSpeed,
+                    String url = getRaceViewerURL(getSlideCtx().getContextDefinition().getLeaderboardName(), null,
+                            getSlideCtx().getLifeRace());
+                    view.updateStatistic(lastStatisticResult, url, windSpeed,
                             windDegree);
                 }
             }
@@ -79,6 +91,19 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
         view.startingWith(this, panel, getPlace().getRaceMap());
     };
 
+    public String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
+            RegattaAndRaceIdentifier raceIdentifier) {
+        RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
+                raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, null, null);
+        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
+                .createDefaultWithCanReplayDuringLiveRaces(true);
+        ;
+        HashMap<String, Settings> innerSettings = new HashMap<>();
+        innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
+        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                perspectiveOwnSettings, innerSettings);
+        return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
+    }
     @Override
     public void onStop() {
         super.onStop();
