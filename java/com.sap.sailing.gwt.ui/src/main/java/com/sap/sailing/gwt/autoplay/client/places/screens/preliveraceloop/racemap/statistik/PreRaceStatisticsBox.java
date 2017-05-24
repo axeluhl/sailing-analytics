@@ -43,4 +43,8 @@ public class PreRaceStatisticsBox extends AbstractStatisticsBox {
         itemContainerUi.appendChild(new PreRaceStatisticsBoxItem(iconUrl, name, payload).getElement());
     }
 
+    public void addQRItem(String iconUrl, String name, String url) {
+        itemContainerUi.appendChild(new PreRaceStatisticsBoxQR(iconUrl, name, url).getElement());
+    }
+
 }

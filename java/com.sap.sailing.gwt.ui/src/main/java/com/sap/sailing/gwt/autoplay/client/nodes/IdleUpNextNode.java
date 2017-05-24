@@ -18,7 +18,6 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.Id
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -40,7 +39,8 @@ public class IdleUpNextNode extends FiresPlaceNode {
 
     @Override
     public void onStart() {
-        getBus().fireEvent(new AutoPlayHeaderEvent(StringMessages.INSTANCE.upcoming(), ""));
+        String eventName = cf.getAutoPlayCtx().getEvent().getName();
+        getBus().fireEvent(new AutoPlayHeaderEvent(eventName, ""));
         setPlaceToGo(place);
         firePlaceChangeAndStartTimer();
 

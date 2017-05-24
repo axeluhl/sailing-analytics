@@ -1,5 +1,5 @@
-package com.sap.sailing.gwt.autoplay.client.place.sixtyinch ; public class Snippet
-	{ .cellTableWidget { border-top:1pxsolid#c9caca;
+ 
+.cellTableWidget { border-top:1pxsolid#c9caca;
 	border-right: 1px solid #c9caca;
 	border-collapse: separate;
 }
@@ -108,6 +108,7 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch ; public class Snipp
 	
 }
 
+
 .cellTableRaceColumnHeader {
 	background-color: #f2f2f2;
 	font-size: 30px !important;
@@ -135,6 +136,17 @@ package com.sap.sailing.gwt.autoplay.client.place.sixtyinch ; public class Snipp
 .cellTableLegDetailColumnHeader {
 	background-color: #f2f2f2;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 .cellTableRaceColumnHeader span>div, .cellTableLegColumnHeader span>div
 	{

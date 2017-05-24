@@ -20,5 +20,7 @@ public interface PreRaceStatisticsBoxResources extends ClientBundle {
         String statisticsbox_item_icon();
         String statisticsbox_item_name();
         String statisticsbox_item_value();
+
+        String qrHolder();
     }
 }
