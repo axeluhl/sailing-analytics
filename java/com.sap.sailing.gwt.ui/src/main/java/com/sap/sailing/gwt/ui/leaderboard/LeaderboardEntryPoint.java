@@ -63,6 +63,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             if (eventId == null) {
                 checkLeaderboardNameAndCreateUI(); // use null-initialized event field
             } else {
+                // TODO it seems we do not really need the EventDTO. What's the intention of loading it? Should we visualize some information in the header?
                 sailingService.getEventById(eventId, /* withStatisticalData */false,
                         new MarkedAsyncCallback<EventDTO>(new AsyncCallback<EventDTO>() {
                             @Override
