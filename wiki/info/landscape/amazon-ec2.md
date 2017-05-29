@@ -76,7 +76,6 @@ INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
 REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
-REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_NAME=myspecificevent-replica
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
@@ -331,7 +330,10 @@ Follow these steps to upgrade the AMI:
 * Launch a new instance based on the existing AMI
 * Log in as user `root`
 * Run `yum update` to update the operating system
+* Stop the Java instance, e.g., by using `killall -9 java`
 * Remove any obsolete logs from `/home/sailing/servers/server/logs`
+* Stop the httpd server, e.g., using `service httpd stop`
+* Remove httpd logs under `/var/log/httpd`
 * Update the git contents (essential for up-to-date versions of `/etc/init.d/sailing` which links to the git, and the `refreshInstance.sh` script used during automatic instance launch), and clean any build artifacts by doing
 ```
     > su - sailing
