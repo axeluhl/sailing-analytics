@@ -428,12 +428,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
 
     @Override
     public void onCheckedChanged(CompetitorResultEditableImpl competitor, boolean isChecked) {
-        for (CompetitorResultEditableImpl item : mCompetitorResults) {
-            if (item.equals(competitor)) {
-                item.setChecked(isChecked);
-                break;
-            }
-        }
         setPublishButton();
     }
 
