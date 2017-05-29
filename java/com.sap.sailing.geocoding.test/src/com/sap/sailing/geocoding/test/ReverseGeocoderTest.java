@@ -5,8 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
@@ -14,12 +12,13 @@ import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.PlacemarkImpl;
-import com.sap.sailing.domain.common.impl.SerializablePositionImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
+
+import junit.framework.Assert;
 
 public class ReverseGeocoderTest {
     private ReverseGeocoder geocoder = ReverseGeocoder.INSTANCE;
-    private static final Placemark KIEL = new PlacemarkImpl("Kiel", "DE", new SerializablePositionImpl(54.32132926107913, 10.1348876953125), 232758);
+    private static final Placemark KIEL = new PlacemarkImpl("Kiel", "DE", new DegreePosition(54.32132926107913, 10.1348876953125), 232758);
     private static final Position KIEL_POSITION = new DegreePosition(54.3231063453431, 10.12265682220459);
     
     @Test
@@ -54,8 +53,7 @@ public class ReverseGeocoderTest {
     @Test
     public void getPlacemarkBestTest() {
         Position abroad = new DegreePosition(54.43334, 10.299999);
-        Placemark firstByDistance = new PlacemarkImpl("Wendtorf", "DE", new SerializablePositionImpl(54.4166667, 10.3), 1139);
-        
+        Placemark firstByDistance = new PlacemarkImpl("Wendtorf", "DE", new DegreePosition(54.4166667, 10.3), 1139);
         try {
             Placemark p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulation());
             Assert.assertEquals(KIEL.getName(), p.getName());

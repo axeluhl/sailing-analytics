@@ -13,9 +13,8 @@ public interface TrackerManager {
     /**
      * Creates a {@link RaceTracker} based on the {@code params}. If the {@code params} request
      * {@link RaceTrackingConnectivityParameters#isTrackWind() wind tracking}, a callback is
-     * {@link RaceTracker#add(com.sap.sailing.domain.tracking.RaceTracker.RaceCreationListener) registered}
-     * with the {@link RaceTracker} that, when the race has been created by the tracker, will
-     * start wind tracking.
+     * {@link RaceTracker#add(com.sap.sailing.domain.tracking.RaceTracker.RaceCreationListener) registered} with the
+     * {@link RaceTracker} that, when the race has been created by the tracker, will start wind tracking.
      * 
      * @param regattaToAddTo
      *            if <code>null</code> or no regatta by that identifier is found, the regatta into which the race has
@@ -26,6 +25,9 @@ public interface TrackerManager {
      *            regatta is found, it is used to add the races to, and
      *            {@link #setRegattaForRace(Regatta, RaceDefinition)} is called to remember the association
      *            persistently. Otherwise, a default regatta as described above will be created and used.
+     * @param timeoutInMilliseconds
+     *            if -1 then loading doesn't time out; otherwise, if the {@link RaceDefinition} hasn't been received
+     *            after so many milliseconds then the tracker will be {@link RaceTracker#stop(boolean) stopped}.
      */
     RaceHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;

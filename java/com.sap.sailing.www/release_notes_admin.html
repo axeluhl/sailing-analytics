@@ -22,7 +22,88 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+    
+                    <h2 class="articleSubheadline">April 2017</h2>
+                    <ul class="bulletList">
+                        <li><code>/gwt/AutoPlay.html</code> can be fully parameterized. Previously, only few of the
+                            available settings for Leaderboard and RaceBoard embedded into this view were effectively passed via URL
+                            to the views. <code>/gwt/AutoPlay.html</code> is now based on the settings framework so that specific
+                            URL parameters may have changed. Please recreate your bookmarks if you are affected by non-working parameters.
+                        </li>
+                        <li>The leaderboard configuration dialog in the admin console has been updated. Now it is possible to configure
+                        a leaderboard with the whole range of settings it supports.
+                        </li>
+                    </ul>
 
+                    <h2 class="articleSubheadline">April 2017</h2>
+                    <ul class="bulletList">
+                    	<li>Marks can now be given any valid CSS color. This will be considered also in the
+                    	    SAP Race Management app where the mark will be shown in their actual color in
+                    	    the "By Marks" course editor.
+                    	</li>
+                    	<li>Polar diagrams (also known as VPPs) will now be updated after importing wind.
+                    	</li>
+                    	<li>Competitors that the TracTrac connector declares as "non-competing" are consistently
+                    	    ignored. This may include camera boats, jury boats and other moving objects that do
+                    	    not represent competitor boats.
+                    	</li>
+                    	<li>Upgraded to TracAPI 3.6.3 which offers improvements regarding the identification of
+                    	    marks and waypoints.
+                    	</li>
+                    	<li>A bug regarding the regatta filter setting for the tracked races list has been fixed.
+                    	    The filter setting now survives a refresh cycle of the tracked races list.
+                    	</li>
+                    	<li>When using the TracTrac connector, identification of marks has slightly changed for
+                    	    gates and lines. Before, the mark IDs were constructed based on the control point's
+                    	    name. Now, the control point's ID plus a numeric suffic (1/2) is used instead,
+                    	    providing uniqueness at the same scope that TracTrac provides uniqueness regarding
+                    	    their control point IDs. 
+                    	</li>
+                    </ul>
+                    <h2 class="articleSubheadline">March 2017</h2>
+                    <ul class="bulletList">
+                    	<li>A more compact internal storage format for GPS and Wind fixes is now being used. Instead of a full
+                    	    64-bit "double" value for all components such at latitude, longitude, speed over ground or course over
+                    	    ground, "smaller" data types such as "int" and "short" are now employed. The reduction of accuracy
+                    	    that this brings about is negligible given the accuracy of the tracking systems used. For example,
+                    	    the latitude values are encoded such that while covering the full range from -90° to +90°, the
+                    	    resolution is at 4.6mm. Similarly, speeds are represented in their compact form in such a way
+                    	    that speeds up to 500kts can be represented at a resolution of 0.015kts.
+                    	</li>
+                    	<li>When a race cannot be loaded successfully through the TracTrac connector, e.g., because its boat
+                    	    class does not match the regatta's boat class, the tracker is now stopped, and a SEVERE log message
+                    	    is written, giving the reason for the failure to load the race. This gives administrators an opportunity
+                    	    to correct any errors in the underlying data and try again. Previously, tracking such a 
+                    	    was not possible without a server re-start because the tracker continued to exist.
+                    	</li>
+                    	<li>The application's locale now switches based on the client's "Accept-Language" HTTP header field.
+                    	    This means that the application as well as all its parts, including the administration console,
+                    	    will show in the user's default language if supported, defaulting to English otherwise.
+                    	</li>
+                    </ul>
+                    <h2 class="articleSubheadline">February 2017</h2>
+                    <ul class="bulletList">
+                    	<li>Wind data in GRIB format can now be imported in the "Wind" sub-tab of the "Tracked Races" tab
+                    	    in the <tt>AdminConsole</tt>. When one or more races are being tracked, with a tracking time
+                    	    interval that includes the time point(s) for which the GRIB data is valid, the wind data at
+                    	    the resolution of the GRIB file is added as separate wind fixes with type "WEB" to the race(s)
+                    	    selected, or to all races if no race is selected.<p>
+                    	    Multiple GRIB files can be specified; this is even necessary if GRIB sources are being used where
+                    	    the so-called "U" and "V" or "speed" and "direction" components, respectively, are provided in
+                    	    separate files. The importer will merge the GRIB sources to produce wind readings with true
+                    	    wind direction and true wind speed.
+                    	    Note that large GRIB files can result in many wind fixes being added to the WEB source. Make sure
+                    	    the GRIB files you use are adequate in resolution and region as well as adequate in time. Obtaining
+                    	    a forecast 72h in the future makes little sense for an in-shore race starting in 30min.
+                    	</li>
+                    	<li>The REST service for wind (/sailingservice/api/v1/regattas/{regatta}/races/{race}/wind) now considers
+                    	    the center of the course to calculate the COMBINED wind readings. Previously, all wind readings for the COMBINED
+                    	    wind track as published through the REST API were equally considered, regardless of how far away a
+                    	    wind sensor was from the course. Now, sensors closer to the course count more than those further away.
+                    	    Furthermore, the time between two readings in the COMBINED wind track in the REST output has been
+                    	    reduced from ten seconds to one second.
+                    	</li>
+                    </ul>
                     <h2 class="articleSubheadline">January 2017</h2>
                     <ul class="bulletList">
                     	<li>Filter boxes now support quoting phrases, such as <tt>"Race 2"</tt> to make them a single search term.
@@ -45,6 +126,11 @@
                     	<li>There is a new permission, <tt>DATA_MINING</tt>, which is now required in order to use the
                     	    <tt>/gwt/DataMining.html</tt> entry point and the related back-end service.
                     	</li>
+                    	<li>Quoted filtering keywords may now contain leading and/or trailing space characters that are
+                    	    considered when applying the filter. For example, if you have regatta names "Regatta I - 2017" and
+                    	    "Regatta II - 2017" and you would like to filter for "Regatta I" then you now may enter the
+                    	    search term "Regatta I " (with a trailing blank) which then will no longer match "Regatta II - 2017".
+                    	</li> 
                     </ul>
                     <h2 class="articleSubheadline">December 2016</h2>
                     <ul class="bulletList">

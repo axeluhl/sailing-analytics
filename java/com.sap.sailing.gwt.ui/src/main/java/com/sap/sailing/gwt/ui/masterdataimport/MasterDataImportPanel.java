@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
+import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -53,6 +54,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private final EventsRefresher eventRefresher;
     private final LeaderboardsRefresher leaderboardsRefresher;
     private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
+    private final MediaTracksRefresher mediaTracksRefresher;
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
     private CheckBox exportDeviceConfigsSwitch;
@@ -60,13 +62,14 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, LeaderboardsRefresher leaderboardsRefresher,
-            LeaderboardGroupsRefresher leaderboardGroupsRefresher) {
+            LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
         this.eventRefresher = eventsRefresher;
         this.leaderboardsRefresher = leaderboardsRefresher;
         this.leaderboardGroupsRefresher = leaderboardGroupsRefresher;
+        this.mediaTracksRefresher = mediaTracksRefresher;
 
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
@@ -75,6 +78,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         hostBox.setWidth("300px");
         serverAddressPanel.add(hostBox);
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
+        fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
         serverAddressPanel.add(fetchIdsButton);
         this.add(serverAddressPanel);
 
@@ -122,6 +126,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
         final ProgressBar overallProgressBar = new ProgressBar(Style.ANIMATED);
+        overallProgressBar.ensureDebugId("overallProgressBar");
         this.add(overallProgressBar);
         final Label subProgressName = new Label();
         this.add(subProgressName);
@@ -204,6 +209,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         int leaderboardGroupsCreated = creationCount.getLeaderboardGroupCount();
         int eventsCreated = creationCount.getEventCount();
         int regattasCreated = creationCount.getRegattaCount();
+        int mediaTracksImported = creationCount.getMediaTrackCount();
         if (regattasCreated > 0) {
             regattaRefresher.fillRegattas();
         }
@@ -216,9 +222,12 @@ public class MasterDataImportPanel extends VerticalPanel {
         if (leaderboardsCreated > 0) {
             leaderboardsRefresher.fillLeaderboards();
         }
+        if (mediaTracksImported > 0) {
+        	mediaTracksRefresher.loadMediaTracks();
+        }
         Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
-                overwrittenRegattas);
+                mediaTracksImported, overwrittenRegattas);
         changeButtonStateAccordingToApplicationState();
     }
 
@@ -251,10 +260,10 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
-            int regattasCreated, Set<String> overwrittenRegattas) {
+            int regattasCreated, int mediaTracksImported, Set<String> overwrittenRegattas) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
-                regattasCreated));
+                regattasCreated, mediaTracksImported));
         if (overwrittenRegattas.size() > 0) {
             buffer.append("\n\n" + stringMessages.importSuccessOverwriteInfo() + "\n");
             for (String regattaName : overwrittenRegattas) {
@@ -326,12 +335,14 @@ public class MasterDataImportPanel extends VerticalPanel {
         contentPanel.add(filterPanel);
 
         leaderboardgroupListBox = new ListBox();
+        leaderboardgroupListBox.ensureDebugId("LeaderBoardGroupListBox");
         leaderboardgroupListBox.setMultipleSelect(true);
 
         addSelectionChangedListener();
         contentPanel.add(leaderboardgroupListBox);
         
         overrideSwitch = new CheckBox(stringMessages.importOverrideSwitchLabel());
+        overrideSwitch.ensureDebugId("overrideExisting");
         overrideSwitch.setValue(false);
         contentPanel.add(overrideSwitch);
         
@@ -343,6 +354,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         exportWindSwitch = new CheckBox(stringMessages.importWind());
         exportWindSwitch.setTitle(stringMessages.importWindTooltip());
         exportWindSwitch.setValue(true);
+        exportWindSwitch.ensureDebugId("wind");
         contentPanel.add(exportWindSwitch);
         
         exportDeviceConfigsSwitch = new CheckBox(stringMessages.importDeviceConfigurations());
@@ -351,6 +363,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         contentPanel.add(exportDeviceConfigsSwitch);
 
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
+        importLeaderboardGroupsButton.ensureDebugId("import");
         importLeaderboardGroupsButton.setEnabled(false);
         contentPanel.add(importLeaderboardGroupsButton);
     }

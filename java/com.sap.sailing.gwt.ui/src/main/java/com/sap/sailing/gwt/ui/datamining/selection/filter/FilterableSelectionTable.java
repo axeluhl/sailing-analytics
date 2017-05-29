@@ -27,14 +27,13 @@ import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
 public class FilterableSelectionTable<ContentType extends Serializable> {
-    
+
     private final Set<FilterSelectionChangedListener> listeners;
     
     private final Collection<ContentType> allData;
 
     private final FlowPanel mainPanel;
     private final AbstractFilterablePanel<ContentType> filterPanel;
-    private String filterText;
     private final CellTable<ContentType> table;
     private final ControllableMultiSelectionModel<ContentType> selectionModel;
     private final ListDataProvider<ContentType> dataProvider;
@@ -124,7 +123,6 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
         filterPanel.setWidth("95%");
         filterPanel.getTextBox().setWidth("95%");
         filterPanel.setVisible(false);
-        filterText = "";
         
         mainPanel = new FlowPanel();
         mainPanel.add(filterPanel);
@@ -254,16 +252,11 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
     }
     
     public void setFilteringEnabled(boolean visible) {
-        if (visible) {
-            filterPanel.getTextBox().setText(filterText);
-            filterPanel.filter();
-        } else {
-            filterText = filterPanel.getTextBox().getText();
-            filterPanel.getTextBox().setText("");
-            filterPanel.filter();
-        }
-        
         filterPanel.setVisible(visible);
+        if (visible) {
+            filterPanel.getTextBox().setFocus(true);
+            filterPanel.getTextBox().selectAll();
+        }
     }
     
     public void setVisible(boolean visible) {

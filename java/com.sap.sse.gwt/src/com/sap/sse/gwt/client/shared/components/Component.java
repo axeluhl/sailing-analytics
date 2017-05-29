@@ -1,12 +1,15 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
 
 public interface Component<SettingsType extends Settings> {
+    ArrayList<String> getPath();
+
     /**
      * Each component instance has an ID that has to be unique in the context in which the component is used
      * and has its siblings. In particular, multiple components of the same type but with distinct IDs may
@@ -14,7 +17,7 @@ public interface Component<SettingsType extends Settings> {
      * constraint applies only to the single level (in a composite pattern of components, such as
      * {@link Perspective}) in which this component instance is used.
      */
-    Serializable getId();
+    String getId();
     
     /**
      * @return the name to display to a user for quick navigation to this component
@@ -62,4 +65,11 @@ public interface Component<SettingsType extends Settings> {
      * a dependent CSS class name for those components.
      */
     String getDependentCssClassName();
+
+    /**
+     * returns the parentComponent or null
+     */
+    Component<?> getParentComponent();
+
+    ComponentContext<?> getComponentContext();
 }

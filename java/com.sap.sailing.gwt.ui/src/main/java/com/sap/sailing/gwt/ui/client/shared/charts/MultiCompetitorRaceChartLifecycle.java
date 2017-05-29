@@ -1,14 +1,13 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import java.io.Serializable;
-
-import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent> {
+public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChartSettings> {
     private final StringMessages stringMessages;
     private final boolean hasOverallLeaderboard;
+    
+    public static final String ID = "cc";
     
     public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages, boolean hasOverallLeaderboard) {
         this.stringMessages = stringMessages;
@@ -22,14 +21,7 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
 
     @Override
     public MultiCompetitorRaceChartSettings createDefaultSettings() {
-        ChartSettings chartSettings = new ChartSettings(AbstractCompetitorRaceChart.DEFAULT_STEPSIZE);
-        DetailType defaultDetailType = DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
-        return new MultiCompetitorRaceChartSettings(chartSettings, defaultDetailType, null);
-    }
-
-    @Override
-    public MultiCompetitorRaceChartSettings cloneSettings(MultiCompetitorRaceChartSettings settings) {
-        return new MultiCompetitorRaceChartSettings(new ChartSettings(settings.getStepSizeInMillis()), settings.getFirstDetailType(), settings.getSecondDetailType());
+        return new MultiCompetitorRaceChartSettings();
     }
 
     @Override
@@ -38,12 +30,22 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     }
 
     @Override
-    public Serializable getComponentId() {
-        return getLocalizedShortName();
+    public String getComponentId() {
+        return ID;
     }
 
     @Override
     public boolean hasSettings() {
         return true;
+    }
+
+    @Override
+    public MultiCompetitorRaceChartSettings extractGlobalSettings(MultiCompetitorRaceChartSettings settings) {
+        return settings;
+    }
+
+    @Override
+    public MultiCompetitorRaceChartSettings extractContextSpecificSettings(MultiCompetitorRaceChartSettings settings) {
+        return settings;
     }
 }

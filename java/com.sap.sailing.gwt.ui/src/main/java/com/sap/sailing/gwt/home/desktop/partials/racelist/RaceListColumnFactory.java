@@ -488,7 +488,8 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(final EventView.Presenter presenter) {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(
+            final EventView.Presenter presenter, final boolean showNotTracked) {
         InvertibleComparator<T> comparator = new InvertibleComparatorAdapter<T>() {
             @Override
             public int compare(T o1, T o2) {
@@ -503,7 +504,7 @@ public class RaceListColumnFactory {
                 return -o1.getTrackingState().compareTo(o2.getTrackingState());
             }
         };
-        return new SortableRaceListColumn<T, T>("", new RaceviewerLaunchPadCell<T>(presenter), comparator) {
+        return new SortableRaceListColumn<T, T>("", new RaceviewerLaunchPadCell<T>(presenter, showNotTracked), comparator) {
             @Override
             public String getHeaderStyle() {
                 return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itembutton());

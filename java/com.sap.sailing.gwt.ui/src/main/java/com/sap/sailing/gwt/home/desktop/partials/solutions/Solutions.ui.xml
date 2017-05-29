@@ -47,7 +47,6 @@
 				</div>
 			</div>
 
-
 			<div class="{local_res.css.solutions}">
 				<div ui:field="sapInSailingDiv"
 					class="{local_res.css.solutions_content} {local_res.css.solutions_contentsapinsailing}">
@@ -138,13 +137,10 @@
                                     class="{style.storeBadgesContainer}"
                                     >
                                     <a  ui:field="raceManagerPlayStoreLinkUi"
-                                        href="{i18n.playstoreRacecommitteeApp}"
                                         target="_blank"
                                         ><img
                                             ui:field="raceManagerPlayStoreImgUi" 
-                                            alt="Get it on Google Play" 
-                                            src="{i18n.playstoreBadge}" 
-                                            /></a>
+                                            alt="Get it on Google Play" /></a>
                                 </div>
 								<g:Anchor ui:field="raceCommitteeAppDetailsAnchor"
 									styleName="{res.mainCss.button}">
@@ -167,23 +163,19 @@
 							</p>
 							<div class="{style.storeBadgesContainer}">
 								<a  ui:field="inSightAppStoreLinkUi"
-									href="{i18n.appstoreSapSailInsight}"
 									target="_blank"
 								><img
 									ui:field="inSightAppStoreImgUi"
 									alt="Get it on AppStore"
-									src="images/home/appstore{i18n.appstoreBadgeSuffix}.svg"
 								/></a>
 							</div>
 							<div class="{style.storeBadgesContainer}">
 								<a  ui:field="inSightPlayStoreLinkUi"
-									href="{i18n.playstoreInsightApp}"
 									target="_blank"
 								><img
 									ui:field="inSightPlayStoreImgUi"
 									alt="Get it on Google Play"
-									src="{i18n.playstoreBadge}"
-								/></a>
+									/></a>
 							</div>
 							<g:Anchor ui:field="inSightAppDetailsAnchor"
 								styleName="{res.mainCss.button}">
@@ -208,12 +200,10 @@
 									class="{style.storeBadgesContainer}"
 								>
 									<a  ui:field="buoyPingerPlayStoreLinkUi"
-										href="{i18n.playStoreBuoyPingerApp}"
 										target="_blank"
 									><img
 										ui:field="buoyPingerPlayStoreImgUi"
 										alt="Get it on Google Play"
-										src="{i18n.playstoreBadge}"
 									/></a>
 								</div>
 								<g:Anchor ui:field="buoyPingerAppDetailsAnchor"

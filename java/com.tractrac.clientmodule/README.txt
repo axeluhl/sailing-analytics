@@ -17,6 +17,107 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.6.1 ****************
+********************************************
+This is a final version. It adds support for these new features:
+
+- IControl and IRace now have a method getCourseArea() that returns the course area.
+- IControlPoint has a getId method that returns the UUID. It will be initialized with the value set in the P1.UUID and
+  P2.UUID properties defined in the parent IControl. In case these properties are not defined the UUID will fallback to
+  the parent IControl UUID.
+
+Release date: 04/04/2017
+Build number: 13554
+
+This version provides a new JavaDoc version.
+
+********************************************
+************* TracAPI 3.6.0 ****************
+********************************************
+This is a final version. It change the signature of a couple of methods, breaking the
+backward compatibility. These changes are:
+
+ - The IEventFactory.createRace(URI) doesn't throw the TimeOutException.
+ - The IEventFactory.createRace(URI, URI, URI) doesn't throw the TimeOutException.
+
+This version provides a new JavaDoc version.
+
+Release date: 08/03/2017
+Build number: 13498
+
+ 1) Features
+
+ - Removing the TimeOutException of some methods of the IEventFactory (Requested by Axel Uhl, 08/03/2017)
+
+********************************************
+************* TracAPI 3.5.0 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds some new features.
+These features add methods to the API breaking the backward compatibility. These changes are:
+
+ - The IRaceCompetitor interface changes the return type of the getStatusTime method
+  from Date to long.
+ - The methods IEventFactory.createRace throw now a TimeOutException when there is a timeout
+  downloading the parameters file.
+
+This version provides a new JavaDoc version.
+
+Release date: 07/03/2017
+Build number: 13490
+
+ 1) Features
+
+ - Updating the return type of the IRaceCompetitor.getStatusTime from Date to long to
+ be consistent with the API (Requested by Jorge Piera, 13/02/2017)
+ - Adding the methods ISegment.getExtent(), the IRoute.getExtent() and IRace.getExtent()
+ that return the extent of the object (Requested by Jorge Piera, 23/02/2017)
+ - Adding an extra parameter to the IEventFactory.createRace methods to indicate
+ the timeout used to download the parameters file. The IEventFactory also includes a method
+ getDefaultTimeOut that returns the default timeout (Requested by Axel Uhl, 06/03/2017)
+
+********************************************
+************* TracAPI 3.4.1 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 20/02/2017
+Build number: 13415
+
+ 1) Bugs
+
+ - TracAPI doesn't send all data when the races are retrieved in parallel.
+ It is an error in the thread that executes the callback messages that in some
+ internal circumstances, doesn't execute the callback (Reported by Axel Uhl,
+ 13/02/2017)
+
+********************************************
+************* TracAPI 3.4.0 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds some new features.
+These features add methods to the API breaking the backward compatibility. These changes are:
+
+ - The IRacesListener interface implements a new method dataSourceChanged. If
+ your app implements this interface, you have to implement this extra method.
+
+This version provides a new JavaDoc version.
+
+Release date: 31/01/2017
+Build number: 13339
+
+1) Features
+
+ - Adding the method IRace.getDataSource that returns the datasource used by the race
+ to load data (Requested by Axel Uhl, 25/01/2017)
+ - Adding the method IRacesListener.dataSourceChanged that sends a notification
+ every time that the datasource of a race changes (Requested by Axel Uhl, 25/01/2017)
+
+2) Bugs
+
+ - Call IRaceSubscriber.unsubscribePositions() after IRaceSubscriber.start() generates a NullPointerException
+ (Reported by Jerome Soussens, 24/01/2017)
+
+
+********************************************
 ************* TracAPI 3.3.1 ****************
 ********************************************
 This is a final version. It fixes bugs in the implementation and it adds some new features.

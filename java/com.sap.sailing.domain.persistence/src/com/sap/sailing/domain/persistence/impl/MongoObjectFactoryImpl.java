@@ -221,7 +221,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public DBCollection getWindTrackCollection() {
         DBCollection result = database.getCollection(CollectionNames.WIND_TRACKS.name());
-        result.createIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), null));
+        result.createIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), 1));
         return result;
     }
 
@@ -237,7 +237,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public DBCollection getGPSFixMetadataCollection() {
         DBCollection collection = database.getCollection(CollectionNames.GPS_FIXES_METADATA.name());
         DBObject index = new BasicDBObject();
-        index.put(FieldNames.DEVICE_ID.name(), null);
+        index.put(FieldNames.DEVICE_ID.name(), 1);
         collection.createIndex(index);
         return collection;
     }
@@ -741,7 +741,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public DBCollection getRaceLogCollection() {
         DBCollection result = database.getCollection(CollectionNames.RACE_LOGS.name());
-        result.createIndex(new BasicDBObject(FieldNames.RACE_LOG_IDENTIFIER.name(), null));
+        result.createIndex(new BasicDBObject(FieldNames.RACE_LOG_IDENTIFIER.name(), 1));
         return result;
     }
     
@@ -975,8 +975,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (event.getFrom() != null) {
             storeTimePoint(event.getFrom(), result, fromField);
         }
-        if (event.getTo() != null) {
-            storeTimePoint(event.getTo(), result, toField);
+        if (event.getToInclusive() != null) {
+            storeTimePoint(event.getToInclusive(), result, toField);
         }
     }
 
@@ -1226,7 +1226,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storeMark(Mark mark) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.MARK_ID.name(), mark.getId());
-        result.put(FieldNames.MARK_COLOR.name(), mark.getColor());
+        result.put(FieldNames.MARK_COLOR.name(), mark.getColor()==null?null:mark.getColor().getAsHtml());
         result.put(FieldNames.MARK_NAME.name(), mark.getName());
         result.put(FieldNames.MARK_PATTERN.name(), mark.getPattern());
         result.put(FieldNames.MARK_SHAPE.name(), mark.getShape());
@@ -1372,8 +1372,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     public DBCollection getRegattaLogCollection() {
         DBCollection result = database.getCollection(CollectionNames.REGATTA_LOGS.name());
-        DBObject index = new BasicDBObject(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), null);
-        index.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), null);
+        DBObject index = new BasicDBObject(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), 1);
+        index.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), 1);
         result.createIndex(index);
         return result;
     }
@@ -1445,7 +1445,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
-        storeTimePoint(event.getClosingTimePoint(), result, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
+        storeTimePoint(event.getClosingTimePointInclusive(), result, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
         storeRegattaLogEvent(regattaLikeId, result);
     }
 

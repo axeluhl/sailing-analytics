@@ -67,7 +67,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
     private final PreferenceObjectBasedNotificationSet<?, T> associatedNotificationSet;
     private static final ResourceBundleStringMessagesImpl messages = new ResourceBundleStringMessagesImpl(
             SailingNotificationServiceImpl.STRING_MESSAGES_BASE_NAME,
-            NotificationSetNotification.class.getClassLoader());
+            NotificationSetNotification.class.getClassLoader(), StandardCharsets.UTF_8.name());
 
     public NotificationSetNotification(T objectToNotifyAbout, PreferenceObjectBasedNotificationSet<?, T> associatedNotificationSet) {
         this.objectToNotifyAbout = objectToNotifyAbout;

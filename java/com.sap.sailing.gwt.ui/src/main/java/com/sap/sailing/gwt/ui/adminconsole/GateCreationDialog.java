@@ -48,7 +48,7 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
         marksWrapper.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                validate();
+                validateAndUpdate();
             }
         });
     }

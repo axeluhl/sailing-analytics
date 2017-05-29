@@ -19,6 +19,7 @@ import org.junit.rules.TestWatchman;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -82,6 +83,9 @@ public abstract class AbstractSeleniumTest {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+        // clear local storage
+        getWebDriver().get(contextRoot);
+        ((JavascriptExecutor)getWebDriver()).executeScript("window.localStorage.clear();");
     }
     
     protected void setUpAuthenticatedSession() {

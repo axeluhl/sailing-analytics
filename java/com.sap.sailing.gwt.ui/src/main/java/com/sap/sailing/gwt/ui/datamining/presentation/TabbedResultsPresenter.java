@@ -23,7 +23,9 @@ import com.sap.sailing.gwt.ui.polarmining.PolarResultsPresenter;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class TabbedResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
     
@@ -34,7 +36,8 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
     private final ScrolledTabLayoutPanel tabPanel;
     private final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
     
-    public TabbedResultsPresenter(StringMessages stringMessages) {
+    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         
         tabPanel = new ScrolledTabLayoutPanel(30, Unit.PX, resources.arrowLeftIcon(), resources.arrowRightIcon());
@@ -43,7 +46,7 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
         presentersMappedByHeader = new HashMap<>();
         
         addNewTabTab();
-        addTabAndFocus(new MultiResultsPresenter(stringMessages));
+        addTabAndFocus(new MultiResultsPresenter(this, context, stringMessages));
     }
 
     private void addNewTabTab() {
@@ -56,7 +59,8 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
             public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
                 if (event.getItem() == tabPanel.getWidgetCount() - 1) {
                     event.cancel();
-                    addTabAndFocus(new MultiResultsPresenter(stringMessages));
+                    addTabAndFocus(new MultiResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
+                            stringMessages));
                 }
             }
         });
@@ -67,16 +71,18 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
         if (result != null) {
             if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus(new PolarResultsPresenter(stringMessages));
+                addTabAndFocus(
+                        new PolarResultsPresenter(TabbedResultsPresenter.this, getComponentContext(), stringMessages));
                 removeTab(oldHeader);
             } else if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarBackendData")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus(new PolarBackendResultsPresenter(stringMessages));
+                addTabAndFocus(new PolarBackendResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
+                        stringMessages));
                 removeTab(oldHeader);
             } else {
                 if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
                     CloseableTabHeader oldHeader = getSelectedHeader();
-                    addTabAndFocus(new MultiResultsPresenter(stringMessages));
+                    addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), stringMessages));
                     removeTab(oldHeader);
                 }
             }
@@ -201,5 +207,10 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
             tabPanel.checkIfScrollButtonsNecessary();
         }
         
+    }
+
+    @Override
+    public String getId() {
+        return "TabbedResultsPresenter";
     }
 }

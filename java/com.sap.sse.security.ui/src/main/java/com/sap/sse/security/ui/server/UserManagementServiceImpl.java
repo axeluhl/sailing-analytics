@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -427,6 +428,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public void setPreference(String username, String key, String value) {
         getSecurityService().setPreference(username, key, value);
     }
+    
+    @Override
+    public void setPreferences(String username, Map<String, String> keyValuePairs) {
+        for (Entry<String, String> entry : keyValuePairs.entrySet()) {
+            getSecurityService().setPreference(username, entry.getKey(), entry.getValue());
+        }
+        
+    }
 
     @Override
     public void unsetPreference(String username, String key) {
@@ -436,6 +445,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public String getPreference(String username, String key) {
         return getSecurityService().getPreference(username, key);
+    }
+    
+    @Override
+    public Map<String, String> getPreferences(String username, List<String> keys) {
+        Map<String, String> requestedPreferences = new HashMap<>();
+        for (String key : keys) {
+            requestedPreferences.put(key, getPreference(username, key));
+        }
+        return requestedPreferences;
     }
 
     @Override
@@ -447,4 +465,5 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public String getOrCreateAccessToken(String username) {
         return getSecurityService().getOrCreateAccessToken(username);
     }
+
 }
