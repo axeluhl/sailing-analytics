@@ -61,6 +61,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
             holder.mItemPenalty.setText(item.getMaxPointsReason().name());
         }
 
+        holder.mItemCheck.setOnCheckedChangeListener(null); // because of item recycling
         holder.mItemCheck.setChecked(item.isChecked());
         holder.mItemCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
