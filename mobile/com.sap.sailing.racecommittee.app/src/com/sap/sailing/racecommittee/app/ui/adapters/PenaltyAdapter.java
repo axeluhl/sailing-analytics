@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import android.content.Context;
@@ -22,9 +23,15 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.AbstractKeywordFilter;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.util.NaturalComparator;
 
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
+
+    private static final int SAILING_NUMBER_POSITION = 0;
+    private static final int COMPETITOR_NAME_POSITION = 1;
 
     private Context mContext;
     private List<CompetitorResultEditableImpl> mCompetitor;
@@ -126,11 +133,11 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         Comparator<CompetitorResultEditableImpl> comparator = null;
         switch (mOrderBy) {
             case SAILING_NUMBER:
-                comparator = new DisplayNameComparator(0);
+                comparator = new DisplayNameComparator(SAILING_NUMBER_POSITION);
                 break;
 
             case COMPETITOR_NAME:
-                comparator = new DisplayNameComparator(1);
+                comparator = new DisplayNameComparator(COMPETITOR_NAME_POSITION);
                 break;
 
             default:
@@ -168,9 +175,20 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
         @Override
         public int compare(CompetitorResultEditableImpl lhs, CompetitorResultEditableImpl rhs) {
-            String[] leftItem = splitDisplayName(lhs.getCompetitorDisplayName());
-            String[] rightItem = splitDisplayName(rhs.getCompetitorDisplayName());
-            return mNaturalComparator.compare(leftItem[mPos], rightItem[mPos]);
+            String[] left = splitDisplayName(lhs.getCompetitorDisplayName());
+            String[] right = splitDisplayName(rhs.getCompetitorDisplayName());
+
+            String leftItem = left[mPos];
+            String rightItem = right[mPos];
+            if (mPos == SAILING_NUMBER_POSITION) {
+                for (String leftData : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(leftItem)) {
+                    leftItem = leftData;
+                }
+                for (String rightData : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(rightItem)) {
+                    rightItem = rightData;
+                }
+            }
+            return mNaturalComparator.compare(leftItem, rightItem);
         }
 
         private String[] splitDisplayName(String displayName) {
