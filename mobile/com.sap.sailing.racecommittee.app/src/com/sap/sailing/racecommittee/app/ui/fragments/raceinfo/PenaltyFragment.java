@@ -31,6 +31,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +43,8 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.RRS26RacingProcedure;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -55,6 +58,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
@@ -70,6 +74,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private static final int LEADERBOARD_ORDER_LOADER = 2;
 
     private View mButtonBar;
+    private Spinner mPenaltyDropDown;
+    private StringArraySpinnerAdapter mPenaltyAdapter;
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
     private TextView mEntryCount;
@@ -143,6 +149,13 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         mButtonBar = ViewHelper.get(layout, R.id.button_bar);
         mButtonBar.setVisibility(View.GONE);
 
+        mPenaltyDropDown = ViewHelper.get(layout, R.id.spinner_penalty);
+        if (mPenaltyDropDown != null) {
+            mPenaltyAdapter = new StringArraySpinnerAdapter(getAllMaxPointsReasons());
+            mPenaltyDropDown.setAdapter(mPenaltyAdapter);
+            mPenaltyDropDown.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(mPenaltyAdapter));
+        }
+
         Button penaltyButton = ViewHelper.get(layout, R.id.button_penalty);
         if (penaltyButton != null) {
             penaltyButton.setOnClickListener(new View.OnClickListener() {
@@ -195,6 +208,27 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        RacingProcedure procedure = getRaceState().getRacingProcedure();
+        if (procedure instanceof RRS26RacingProcedure) {
+            RRS26RacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
+            switch (racingProcedure.getStartModeFlag()) {
+                case PAPA:
+                    mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name()));
+                    break;
+
+                case BLACK:
+                    mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name()));
+                    break;
+
+                case UNIFORM:
+                    mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name()));
+                    break;
+
+                default:
+                    // nothing
+                    break;
+            }
+        }
         switch (getRaceState().getStatus()) {
             case FINISHED:
                 if (mHeader != null) {
@@ -350,7 +384,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         Collections.sort(sortByRank, new Comparator<CompetitorWithRaceRankImpl>() {
             @Override
             public int compare(CompetitorWithRaceRankImpl left, CompetitorWithRaceRankImpl right) {
-                return (int)left.getRaceRank(raceName) - (int)right.getRaceRank(raceName);
+                return (int) left.getRaceRank(raceName) - (int) right.getRaceRank(raceName);
             }
         });
         List<CompetitorResultEditableImpl> sortedList = new ArrayList<>();
