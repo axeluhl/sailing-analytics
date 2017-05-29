@@ -22,9 +22,10 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
 /**
- * Implementing classes still have to add the table to the main panel. The table created and wrapped by this object
- * offers already a {@link ListHandler} for sorting. Subclasses can obtain the table's default column sort handler
- * created by this class's constructor by calling {@link #getColumnSortHandler}.
+ * The {@link #getTable() table} created and wrapped by this object offers already a {@link ListHandler} for sorting.
+ * Subclasses can obtain the table's default column sort handler created by this class's constructor by calling
+ * {@link #getColumnSortHandler}. The table is wrapped by a panel that can be obtained using {@link #asWidget()}
+ * and which contains, if requested, the pager widget underneath the table.
  */
 public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> implements IsWidget {
     /**

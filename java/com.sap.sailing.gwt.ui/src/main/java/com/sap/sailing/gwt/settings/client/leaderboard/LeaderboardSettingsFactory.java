@@ -83,7 +83,7 @@ public class LeaderboardSettingsFactory {
                         /* refresh interval */ null, /* name of race to sort */ nameOfRaceToSort,
                     /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelectionType,
                         /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false,
-                        showCompetitorSailIdColumn, showCompetitorNameColumn);
+                    showCompetitorSailIdColumn, showCompetitorNameColumn, false);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
@@ -172,7 +172,8 @@ public class LeaderboardSettingsFactory {
                 existingSettings.isShowAddedScores(),
                 existingSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 existingSettings.isShowCompetitorSailIdColumn(),
-                existingSettings.isShowCompetitorFullNameColumn());
+                existingSettings.isShowCompetitorFullNameColumn(),
+                existingSettings.isShowCompetitorNationality());
         
         final LeaderboardSettings existingDefaultSettings = existingSettings.getDefaultSettings();
         
@@ -190,7 +191,8 @@ public class LeaderboardSettingsFactory {
                 existingDefaultSettings.isShowAddedScores(),
                 existingDefaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 existingDefaultSettings.isShowCompetitorSailIdColumn(),
-                existingDefaultSettings.isShowCompetitorFullNameColumn());
+                existingDefaultSettings.isShowCompetitorFullNameColumn(),
+                existingSettings.isShowCompetitorNationality());
         
         newDefaultSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomDefaults(newDefaultSettings);
         
@@ -225,7 +227,8 @@ public class LeaderboardSettingsFactory {
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, namesOfRacesToShow, numberOfLastRacesToShow, autoExpandPreSelectedRace, refreshIntervalInMs,
                 nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
-                /*showOverallRacesCompleted*/ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns);
+                /* showOverallRacesCompleted */ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns,
+                settingsWithRaceSelection.isShowCompetitorNationality());
     }
     
     private List<DetailType> copyDetailTypes(List<DetailType> detailTypes) {

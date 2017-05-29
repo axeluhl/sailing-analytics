@@ -440,6 +440,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
+    String createRegattaLeaderboardWithEliminations();
     String editFlexibleLeaderboard();
     String editRegattaLeaderboard();
     String defaultRegatta();
@@ -603,6 +604,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSeeToolTips();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
+    String competitorNationalityColumnTooltip();
     String sailIdColumnTooltip();
     String rankColumnTooltip();
     String carryColumnTooltip();
@@ -1287,6 +1289,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String removeUploadedFile();
     String showCompetitorSailIdColumn();
     String showCompetitorFullNameColumn();
+    String showCompetitorNationalityColumn();
     String loadingDimensionValues();
     String runningQuery();
     String inviteBuoyTenders();
@@ -1729,6 +1732,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String contentSapInSailing10();
     String contentSapInSailing11();
     String contentSapInSailing12();
+    String contentSapInSailing13();
     String sapSailingAnalyticsTitle();
     String contentSapSailingAnalytics1();
     String contentSapSailingAnalytics2();
@@ -1801,4 +1805,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sampleColor();
     String leaderboardPage();
     String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
+    String unknownLeaderboardType(String name);
+    String selectCompetitorsToEliminate();
 }
