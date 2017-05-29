@@ -19,7 +19,7 @@ import com.sap.sailing.racecommittee.app.R;
 
 public class StringArraySpinnerAdapter implements SpinnerAdapter {
 
-    private static final float sTextSize = 22;
+    private static final float TEXT_SIZE = 22;
     private List<String> mArray;
     private int mSelectedItem = -1;
 
@@ -40,7 +40,7 @@ public class StringArraySpinnerAdapter implements SpinnerAdapter {
         if (mainText != null) {
             mainText.setText(mArray.get(position));
             mainText.setTextColor(context.getResources().getColor(R.color.constant_black));
-            mainText.setTextSize(sTextSize);
+            mainText.setTextSize(TEXT_SIZE);
         }
 
         if (mSelectedItem == position) {
@@ -96,7 +96,7 @@ public class StringArraySpinnerAdapter implements SpinnerAdapter {
         if (mainText != null) {
             mainText.setText(mArray.get(position));
             mainText.setTextColor(context.getResources().getColor(R.color.constant_black));
-            mainText.setTextSize(sTextSize);
+            mainText.setTextSize(TEXT_SIZE);
         }
 
         return layout;
