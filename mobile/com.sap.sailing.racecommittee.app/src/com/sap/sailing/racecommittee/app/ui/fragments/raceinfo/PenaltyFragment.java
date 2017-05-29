@@ -156,6 +156,15 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             mPenaltyDropDown.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(mPenaltyAdapter));
         }
 
+        Button applyButton = ViewHelper.get(layout, R.id.button_apply);
+        if (applyButton != null) {
+            applyButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setReason((String)mPenaltyDropDown.getSelectedItem());
+                }
+            });
+        }
         Button penaltyButton = ViewHelper.get(layout, R.id.button_penalty);
         if (penaltyButton != null) {
             penaltyButton.setOnClickListener(new View.OnClickListener() {
@@ -166,15 +175,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     builder.setTitle(R.string.select_penalty_reason);
                     builder.setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int position) {
-                            for (CompetitorResultEditableImpl item : mCompetitorResults) {
-                                if (item.isChecked()) {
-                                    item.setMaxPointsReason(MaxPointsReason.valueOf(maxPointsReasons[position].toString()));
-                                    item.setChecked(false);
-                                    item.setDirty(true);
-                                }
-                            }
-                            mAdapter.notifyDataSetChanged();
-                            setPublishButton();
+                            setReason(maxPointsReasons[position].toString());
                         }
                     });
                     builder.show();
@@ -202,6 +203,18 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         }
 
         return layout;
+    }
+
+    private void setReason(String reason) {
+        for (CompetitorResultEditableImpl item : mCompetitorResults) {
+            if (item.isChecked()) {
+                item.setMaxPointsReason(MaxPointsReason.valueOf(reason));
+                item.setChecked(false);
+                item.setDirty(true);
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+        setPublishButton();
     }
 
     @Override
