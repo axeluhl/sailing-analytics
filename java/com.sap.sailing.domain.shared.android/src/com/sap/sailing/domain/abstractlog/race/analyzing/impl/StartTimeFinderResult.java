@@ -27,7 +27,7 @@ public class StartTimeFinderResult {
     private final ResolutionFailed resolutionFailed;
     
     private Duration startTimeDiff;
-
+    
     public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff) {
         this(racesDependingOn, startTime, startTimeDiff, /* resolutionFailed */ null);
     }

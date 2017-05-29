@@ -108,11 +108,17 @@ public final class EventActionUtil {
         return calculateTtlForNonLiveEvent(event, eventState);
     }
 
-    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(SailingDispatchContext context, UUID eventId, CalculationWithEvent<T> callback) {
+    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(SailingDispatchContext context,
+            UUID eventId, CalculationWithEvent<T> callback) {
+        return withLiveRaceOrDefaultSchedule(context, eventId, callback, null);
+    }
+
+    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(SailingDispatchContext context,
+            UUID eventId, CalculationWithEvent<T> callback, T defaultResult) {
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState eventState = HomeServiceUtil.calculateEventState(event);
-        if (eventState != EventState.RUNNING) {
-            return new ResultWithTTL<T>(calculateTtlForNonLiveEvent(event, eventState), null);
+        if (eventState == EventState.FINISHED) {
+            return new ResultWithTTL<T>(calculateTtlForNonLiveEvent(event, eventState), defaultResult);
         }
         return callback.calculateWithEvent(event);
     }
