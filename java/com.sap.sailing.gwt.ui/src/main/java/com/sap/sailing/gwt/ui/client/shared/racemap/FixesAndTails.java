@@ -437,52 +437,54 @@ public class FixesAndTails {
             @Override
             public void run() {
                 final Polyline tail = getTail(competitorDTO);
-                int vertexCount = tail.getPath().getLength();
-                final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
-                final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
-                int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1 : firstShownFixForCompetitor.get();
-                // remove fixes before what is now to be the beginning of the polyline:
-                while (indexOfFirstShownFix != -1 && vertexCount > 0
-                        && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
-                    tail.getPath().removeAt(0);
-                    vertexCount--;
-                    indexOfFirstShownFix++;
-                }
-                // now the polyline contains no more vertices representing fixes before "from";
-                // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
-                // and insert corresponding vertices into the polyline
-                while (indexOfFirstShownFix > 0
-                        && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
-                    indexOfFirstShownFix--;
-                    GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfFirstShownFix);
-                    tail.getPath().insertAt(0, coordinateSystem.toLatLng(fix.position));
-                    vertexCount++;
-                }
-                // now adjust the polyline's tail: remove excess vertices that are after "to"
-                final Trigger<Integer> lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
-                int indexOfLastShownFix = (lastShownFixForCompetitor == null || lastShownFixForCompetitor.get() == null) ? -1 : lastShownFixForCompetitor.get();
-                while (indexOfLastShownFix != -1 && vertexCount > 0
-                        && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
-                    if (vertexCount-1 == 0 || (indexOfLastShownFix-1 >= 0 && !fixesForCompetitor.get(indexOfLastShownFix-1).timepoint.after(to))) {
-                        // the loop will abort after this iteration
+                if (tail != null) {
+                    int vertexCount = tail.getPath().getLength();
+                    final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
+                    final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
+                    int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1 : firstShownFixForCompetitor.get();
+                    // remove fixes before what is now to be the beginning of the polyline:
+                    while (indexOfFirstShownFix != -1 && vertexCount > 0
+                            && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
+                        tail.getPath().removeAt(0);
+                        vertexCount--;
+                        indexOfFirstShownFix++;
                     }
-                    tail.getPath().removeAt(--vertexCount);
-                    indexOfLastShownFix--;
-                }
-                // now the polyline contains no more vertices representing fixes after "to";
-                // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
-                // and insert corresponding vertices into the polyline
-                while (indexOfLastShownFix < fixesForCompetitor.size() - 1
-                        && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
-                    indexOfLastShownFix++;
-                    GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfLastShownFix);
-                    tail.getPath().insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
-                    if (indexOfFirstShownFix < 0) { // empty tail before?
-                        indexOfFirstShownFix = indexOfLastShownFix; // set to the first vertex inserted into tail
+                    // now the polyline contains no more vertices representing fixes before "from";
+                    // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
+                    // and insert corresponding vertices into the polyline
+                    while (indexOfFirstShownFix > 0
+                            && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
+                        indexOfFirstShownFix--;
+                        GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfFirstShownFix);
+                        tail.getPath().insertAt(0, coordinateSystem.toLatLng(fix.position));
+                        vertexCount++;
                     }
+                    // now adjust the polyline's tail: remove excess vertices that are after "to"
+                    final Trigger<Integer> lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
+                    int indexOfLastShownFix = (lastShownFixForCompetitor == null || lastShownFixForCompetitor.get() == null) ? -1 : lastShownFixForCompetitor.get();
+                    while (indexOfLastShownFix != -1 && vertexCount > 0
+                            && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
+                        if (vertexCount-1 == 0 || (indexOfLastShownFix-1 >= 0 && !fixesForCompetitor.get(indexOfLastShownFix-1).timepoint.after(to))) {
+                            // the loop will abort after this iteration
+                        }
+                        tail.getPath().removeAt(--vertexCount);
+                        indexOfLastShownFix--;
+                    }
+                    // now the polyline contains no more vertices representing fixes after "to";
+                    // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
+                    // and insert corresponding vertices into the polyline
+                    while (indexOfLastShownFix < fixesForCompetitor.size() - 1
+                            && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
+                        indexOfLastShownFix++;
+                        GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfLastShownFix);
+                        tail.getPath().insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
+                        if (indexOfFirstShownFix < 0) { // empty tail before?
+                            indexOfFirstShownFix = indexOfLastShownFix; // set to the first vertex inserted into tail
+                        }
+                    }
+                    firstShownFix.put(competitorDTO, new Trigger<>(indexOfFirstShownFix));
+                    lastShownFix.put(competitorDTO, new Trigger<>(indexOfLastShownFix));
                 }
-                firstShownFix.put(competitorDTO, new Trigger<>(indexOfFirstShownFix));
-                lastShownFix.put(competitorDTO, new Trigger<>(indexOfLastShownFix));
             }
         };
         runDelayedOrImmediately(delayedOrImmediateExecutor, delayForTailChangeInMillis);
