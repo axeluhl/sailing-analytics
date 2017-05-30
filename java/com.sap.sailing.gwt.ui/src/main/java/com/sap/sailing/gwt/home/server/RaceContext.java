@@ -172,17 +172,19 @@ public class RaceContext {
     
     /**
      * Determines the end of the interval for which to compute wind data for the race. Usually, this will be the
-     * {@link TrackedRace#getEndOfRace() end of the race}; however, if this time point is not (yet) known, e.g., during
+     * {@link getFinishTime() end of the race}; however, if this time point is not (yet) known, e.g., during
      * a live race that is still ongoing, instead the current time point minus the live delay is chosen. If, however,
      * the {@link TrackedRace#getTimePointOfNewestEvent() the race's newest event} is older than this time point,
      * the time point of the race's newest event is used.
      */
     private TimePoint getWindToTimePoint() {
-        TimePoint toTimePoint = trackedRace.getEndOfRace() == null ? MillisecondsTimePoint.now().minus(
-                trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace();
-        TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-        if (newestEvent != null && newestEvent.before(toTimePoint)) {
-            toTimePoint = newestEvent;
+        final TimePoint finishTime = getFinishTime();
+        TimePoint toTimePoint = finishTime == null ? getLiveTimePoint() : finishTime;
+        if(trackedRace != null) {
+            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
+            if (newestEvent != null && newestEvent.before(toTimePoint)) {
+                toTimePoint = newestEvent;
+            }
         }
         return toTimePoint;
     }
@@ -385,12 +387,16 @@ public class RaceContext {
     }
 
     private TimePoint getLiveTimePoint() {
-        return new MillisecondsTimePoint(getLiveTimePointInMillis());
-    }
-    
-    private long getLiveTimePointInMillis() {
-        final Long liveDelay = leaderboard.getDelayToLiveInMillis();
-        return System.currentTimeMillis() - (liveDelay == null ? 0l : liveDelay);
+        final TimePoint liveTimePoint;
+        if (trackedRace != null) {
+            liveTimePoint = MillisecondsTimePoint.now().minus(
+                    trackedRace.getDelayToLiveInMillis());
+        } else {
+            final Long liveDelay = leaderboard.getDelayToLiveInMillis();
+            long liveTimePointInMillis = System.currentTimeMillis() - (liveDelay == null ? 0l : liveDelay);
+            liveTimePoint = new MillisecondsTimePoint(liveTimePointInMillis);
+        }
+        return liveTimePoint;
     }
     
     private SimpleCompetitorDTO getWinnerOrNull() {
