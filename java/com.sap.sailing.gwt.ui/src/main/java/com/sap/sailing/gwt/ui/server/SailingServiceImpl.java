@@ -241,6 +241,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
@@ -400,6 +401,7 @@ import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
+import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboardWithEliminations;
 import com.sap.sailing.server.operationaltransformation.DisconnectLeaderboardColumnFromTrackedRace;
 import com.sap.sailing.server.operationaltransformation.MoveColumnInSeriesDown;
 import com.sap.sailing.server.operationaltransformation.MoveColumnInSeriesUp;
@@ -425,6 +427,7 @@ import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
+import com.sap.sailing.server.operationaltransformation.UpdateEliminatedCompetitorsInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
@@ -2331,22 +2334,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public com.sap.sse.common.Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName) {
-        com.sap.sse.common.Util.Pair<String, LeaderboardType> result = null;
-
-        if(getService().getLeaderboards().containsKey(leaderboardName)) {
-            Leaderboard leaderboard = getService().getLeaderboards().get(leaderboardName);
-            boolean isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
-            boolean isRegattaLeaderboard = leaderboard instanceof RegattaLeaderboard ? true : false;
-            LeaderboardType type;
-            if(isMetaLeaderboard) {
-                type = isRegattaLeaderboard ? LeaderboardType.RegattaMetaLeaderboard : LeaderboardType.FlexibleMetaLeaderboard;
-            } else {
-                type = isRegattaLeaderboard ? LeaderboardType.RegattaLeaderboard : LeaderboardType.FlexibleLeaderboard;
-            }
-            result = new com.sap.sse.common.Util.Pair<String, LeaderboardType>(leaderboard.getName(), type);
+    public LeaderboardType getLeaderboardType(String leaderboardName) {
+        final LeaderboardType result;
+        final Leaderboard leaderboard = getService().getLeaderboards().get(leaderboardName);
+        if (leaderboard != null) {
+            result = leaderboard.getLeaderboardType();
+        } else {
+            result = null;
         }
-        
         return result;
     }
 
@@ -2359,6 +2354,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, leaderboardDisplayName, discardThresholds)), false, false);
+    }
+
+    @Override
+    public StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName,
+            String fullRegattaLeaderboardName) {
+        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboardWithEliminations(name, displayName, fullRegattaLeaderboardName)), false, false);
     }
 
     @Override
@@ -2454,14 +2455,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         leaderboardDTO.displayName = leaderboard.getDisplayName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         leaderboardDTO.competitorsCount = Util.size(leaderboard.getCompetitors());
+        leaderboardDTO.boatClassName = leaderboard.getBoatClass()==null?null:leaderboard.getBoatClass().getName();
+        leaderboardDTO.type = leaderboard.getLeaderboardType();
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             Regatta regatta = regattaLeaderboard.getRegatta();
             leaderboardDTO.regattaName = regatta.getName(); 
-            leaderboardDTO.type = leaderboard instanceof MetaLeaderboard ? LeaderboardType.RegattaMetaLeaderboard : LeaderboardType.RegattaLeaderboard;
             leaderboardDTO.scoringScheme = regatta.getScoringScheme().getType();
         } else {
-            leaderboardDTO.type = leaderboard instanceof MetaLeaderboard ? LeaderboardType.FlexibleMetaLeaderboard : LeaderboardType.FlexibleLeaderboard;
             leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
         }
         if (leaderboard.getDefaultCourseArea() != null) {
@@ -2958,13 +2959,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
                 }
                 break;
+            case CURRENT_HEEL_IN_DEGREES: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    final Bearing bearing = bravoFixTrack.getHeel(timePoint);
+                    result = bearing == null ? null : bearing.getDegrees();
+                }
+            }
+                break;
+            case CURRENT_PITCH_IN_DEGREES: {
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    final Bearing bearing = bravoFixTrack.getPitch(timePoint);
+                    result = bearing == null ? null : bearing.getDegrees();
+                }
+            }
+                break;
             case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+            {
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
                     final Distance rideHeight = bravoFixTrack.getRideHeight(timePoint);
                     result = rideHeight == null ? null : rideHeight.getMeters();
                 }
+            }
                 break;
             default:
                 throw new UnsupportedOperationException("There is currently no support for the enum value '" + dataType
@@ -6011,10 +6032,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<FileStorageServiceDTO> serviceDtos = new ArrayList<>();
         final FileStorageManagementService fileStorageManagementService = getService().getFileStorageManagementService();
         if (fileStorageManagementService != null) {
-			for (FileStorageService s : fileStorageManagementService.getAvailableFileStorageServices()) {
-				serviceDtos.add(FileStorageServiceDTOUtils.convert(s, getLocale(localeInfoName)));
-			}
-		}
+            for (FileStorageService s : fileStorageManagementService.getAvailableFileStorageServices()) {
+                serviceDtos.add(FileStorageServiceDTOUtils.convert(s, getLocale(localeInfoName)));
+            }
+        }
         return serviceDtos.toArray(new FileStorageServiceDTO[0]);
     }
 
@@ -6515,5 +6536,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return trackingTimes;
+    }
+
+    @Override
+    public Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName) {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
+            throw new IllegalArgumentException(leaderboardName+" does not match a regatta leaderboard with eliminations");
+        }
+        final RegattaLeaderboardWithEliminations rlwe = (RegattaLeaderboardWithEliminations) leaderboard;
+        return convertToCompetitorDTOs(rlwe.getEliminatedCompetitors());
+    }
+    
+    @Override
+    public void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> newEliminatedCompetitorDTOs) {
+        Set<Competitor> newEliminatedCompetitors = new HashSet<>();
+        for (final CompetitorDTO cDTO : newEliminatedCompetitorDTOs) {
+            newEliminatedCompetitors.add(getCompetitor(cDTO));
+        }
+        getService().apply(new UpdateEliminatedCompetitorsInLeaderboard(leaderboardName, newEliminatedCompetitors));
     }
 }

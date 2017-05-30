@@ -133,7 +133,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         });
     }
     
-    protected void updateMappings() {
+    private void updateMappings() {
         try {
             updateMappingsInternal();
         } catch (Exception e) {
@@ -181,12 +181,12 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     private Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> calculateCoveredTimeRanges(
             final List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForItem) {
         final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> coveredTimeRanges = new HashMap<>();
-        if(mappingsForItem != null) {
+        if (mappingsForItem != null) {
             Map<Pair<DeviceIdentifier, Class<?>>, Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> groupedMappings = groupMappingsByDeviceIdAndMappingType(mappingsForItem);
             groupedMappings.entrySet().forEach(entry -> {
                 Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForDeviceIdAndMappingType = entry.getValue();
                 final MultiTimeRange coveredTimeRange = getCoveredTimeRange(mappingsForDeviceIdAndMappingType);
-                if(!coveredTimeRange.isEmpty()) {
+                if (!coveredTimeRange.isEmpty()) {
                     coveredTimeRanges.put(Util.get(mappingsForDeviceIdAndMappingType, 0).getRegattaLogEvent(), coveredTimeRange);
                 }
             });
@@ -245,10 +245,10 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                 }
             }
             newDeviceIds.addAll(mappingsByDevice.keySet());
+            calculateDiff(oldMappings, newMappings, oldDeviceIds, newDeviceIds);
         } finally {
             LockUtil.unlockAfterWrite(mappingsLock);
         }
-        calculateDiff(oldMappings, newMappings, oldDeviceIds, newDeviceIds);
     }
     
     /**

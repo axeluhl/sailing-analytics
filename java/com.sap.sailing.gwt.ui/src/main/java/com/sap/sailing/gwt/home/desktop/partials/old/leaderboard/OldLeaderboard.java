@@ -20,6 +20,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -49,9 +50,10 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     }
 
     @UiField HTMLPanel oldLeaderboardPanel;
-    
+
     @UiField Anchor settingsAnchor;
     @UiField Anchor autoRefreshAnchor;
+    @UiField Anchor showLiveRacesAnchor;
     @UiField Anchor fullscreenAnchor;
     @UiField DivElement lastScoringUpdateTimeDiv;
     @UiField DivElement lastScoringUpdateTextDiv;
@@ -65,16 +67,13 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     private Timer autoRefreshTimer;
     private final OldLeaderboardDelegate delegate;
     
-    public OldLeaderboard() {
-        this(null);
-    }
-    
     public OldLeaderboard(final OldLeaderboardDelegate delegate) {
         this.leaderboardPanel = null;
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
         autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
+        showLiveRacesAnchor.setTitle(StringMessages.INSTANCE.showLiveNow());
         fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
@@ -206,6 +205,24 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         }
     }
 
+    /**
+     * Provides access to the {@link OldLeaderboard leaderboard}'s control to show live races.
+     * 
+     * @return the {@link FocusWidget control} for showing live races.
+     */
+    public FocusWidget getShowLiveRacesControl() {
+        return showLiveRacesAnchor;
+    }
+
+    /**
+     * Provides access to the {@link OldLeaderboard leaderboard}'s control for fullscreen mode.
+     * 
+     * @return the {@link FocusWidget control} for fullscreen mode.
+     */
+    public FocusWidget getFullscreenControl() {
+        return fullscreenAnchor;
+    }
+
     public void setLeaderboard(LeaderboardPanel leaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
@@ -274,7 +291,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         }
     }
 
-    public interface OldLeaderboardDelegate extends LeaderboardDelegate<LeaderboardPanel> {
+    public interface OldLeaderboardDelegate extends LeaderboardDelegate {
         Element getHasLiveRaceElement();
     }
 

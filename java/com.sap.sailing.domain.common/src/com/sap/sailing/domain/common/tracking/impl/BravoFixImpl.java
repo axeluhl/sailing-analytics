@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
@@ -8,40 +10,24 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sse.common.TimePoint;
 
 /**
- * Implementation of {@link BravoFix} that wraps a {@link DoubleVectorFix} which holds the actual sensor data.
+ * Implementation of {@link BravoFix} that wraps a {@link DoubleVectorFix} which holds the actual sensor data. The
+ * mapping metadata is stored in the {@link BravoSensorDataMetadata} enum.
  */
 public class BravoFixImpl implements BravoFix {
     private static final long serialVersionUID = 2033254212013221160L;
     private final DoubleVectorFix fix;
-    private final MeterDistance computedRideHeight;
-    private final MeterDistance rideHeightPortHull;
-    private final MeterDistance rideHeightStarboardHull;
-    private final double pitch;
-    private final double heel;
-    private final boolean computedIsFoiling;
 
     public BravoFixImpl(DoubleVectorFix fix) {
         this.fix = fix;
-
-        pitch = fix.get(BravoSensorDataMetadata.INSTANCE.pitchColumn);
-        heel = fix.get(BravoSensorDataMetadata.INSTANCE.heelColumn);
-        double rideHeightPortHullasDouble = fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn);
-        double rideHeightStarboardHullasDouble = fix
-                .get(BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn);
-
-        rideHeightPortHull = new MeterDistance(rideHeightPortHullasDouble);
-        rideHeightStarboardHull = new MeterDistance(rideHeightStarboardHullasDouble);
-
-        computedRideHeight = new MeterDistance(Math.min(rideHeightPortHullasDouble, rideHeightStarboardHullasDouble));
-        computedIsFoiling = computedRideHeight.compareTo(MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
     }
 
     @Override
     public double get(String valueName) {
-        int index = BravoSensorDataMetadata.INSTANCE.getTrackColumnIndex(valueName);
-        if (index < 0) {
+        BravoSensorDataMetadata colDefEnum = BravoSensorDataMetadata.byColumnName(valueName);
+        if (colDefEnum == null) {
             throw new IllegalArgumentException("Unknown value \"" + valueName + "\" for " + getClass().getSimpleName());
         }
+        int index = colDefEnum.getColumnIndex();
         return fix.get(index);
     }
 
@@ -52,31 +38,37 @@ public class BravoFixImpl implements BravoFix {
 
     @Override
     public Distance getRideHeight() {
-        return computedRideHeight;
+        double rideHeightPortHullasDouble = fix.get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex());
+        double rideHeightStarboardHullasDouble = fix
+                .get(BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex());
+        return new MeterDistance(Math.min(rideHeightPortHullasDouble, rideHeightStarboardHullasDouble));
     }
 
     @Override
     public Distance getRideHeightPortHull() {
-        return rideHeightPortHull;
+        double rideHeightPortHullasDouble = fix.get(BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex());
+        return new MeterDistance(rideHeightPortHullasDouble);
     }
 
     @Override
     public Distance getRideHeightStarboardHull() {
-        return rideHeightStarboardHull;
+        double rideHeightStarboardHullasDouble = fix
+                .get(BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex());
+        return new MeterDistance(rideHeightStarboardHullasDouble);
     }
 
     @Override
     public boolean isFoiling() {
-        return computedIsFoiling;
+        return getRideHeight().compareTo(MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
     }
 
     @Override
-    public double getPitch() {
-        return pitch;
+    public Bearing getPitch() {
+        return new DegreeBearingImpl(fix.get(BravoSensorDataMetadata.PITCH.getColumnIndex()));
     }
 
     @Override
-    public double getHeel() {
-        return heel;
+    public Bearing getHeel() {
+        return new DegreeBearingImpl(fix.get(BravoSensorDataMetadata.HEEL.getColumnIndex()));
     }
 }

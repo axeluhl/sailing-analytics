@@ -338,7 +338,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors) {
+    public List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
         for (Competitor competitor : competitors) {
             result.add(convertToCompetitorDTO(competitor));
