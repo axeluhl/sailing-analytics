@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -103,6 +104,8 @@ import com.sap.sse.util.ThreadPoolUtil;
  */
 public class FixLoaderAndTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
+    private static final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(
+            FixLoaderAndTracker.class.getSimpleName()+" loader thread pool");
     protected final DynamicTrackedRace trackedRace;
     private final SensorFixStore sensorFixStore;
     private RegattaLogDeviceMappings<WithID> deviceMappings;
@@ -566,7 +569,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             loadingJobs.add(job);
             updateStatusAndProgress();
         }
-        ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(job);
+        executor.execute(job);
     }
     
     /**
