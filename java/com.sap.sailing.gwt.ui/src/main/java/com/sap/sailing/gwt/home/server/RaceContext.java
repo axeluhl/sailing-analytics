@@ -344,7 +344,9 @@ public class RaceContext {
             raceListRaceDTO.setWindSourcesCount(getWindSourceCount());
             raceListRaceDTO.setVideoCount(getVideoCount());
             raceListRaceDTO.setAudioCount(getAudioCount());
-            raceListRaceDTO.setWind(RaceWindCalculator.getWindStatisticsOrNull(trackedRace,getWindToTimePoint(),getStartTime(),raceLog));
+            if (trackedRace != null) {
+                raceListRaceDTO.setWind(RaceWindCalculator.getWindStatisticsOrNull(trackedRace,getWindToTimePoint(),getStartTime(),raceLog));
+            }
             return raceListRaceDTO;
         }
         return null;
