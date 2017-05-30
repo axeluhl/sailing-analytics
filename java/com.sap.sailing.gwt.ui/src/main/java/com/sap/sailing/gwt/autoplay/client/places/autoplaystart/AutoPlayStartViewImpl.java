@@ -13,6 +13,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -63,6 +64,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     private Presenter currentPresenter;
     private AutoPlayContextDefinitionImpl apcd;
     private PerspectiveCompositeSettings<?> settings;
+    private String configuratedUrl;
 
     public AutoPlayStartViewImpl() {
         super();
@@ -180,6 +182,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         startAutoPlayButton.setEnabled(readyToGo);
         settingsButton.setEnabled(readyToGo);
         if (!readyToGo) {
+            configuratedUrl = null;
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             settingsButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             configStarter.setText("");
@@ -208,8 +211,9 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
             urlSerializer.serializeSettingsMapToUrlBuilder(settings, urlBuilder);
         }
         urlSerializer.serializeToUrlBuilder(apcd, urlBuilder);
-        configStarter.setText(urlBuilder.buildString());
-        configStarter.setTarget(urlBuilder.toString());
+        configuratedUrl = urlBuilder.buildString();
+        configStarter.setText(configuratedUrl);
+        configStarter.setHref(configuratedUrl);
     }
 
     @UiHandler("localeSelectionBox")
@@ -219,13 +223,10 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
 
     @UiHandler("startAutoPlayButton")
     void startAutoPlayClicked(ClickEvent event) {
-        if (validate()) {
-
-            currentPresenter.startRootNode(apcd, settings);
-            settingsButton.setEnabled(false);
-            startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
-            settingsButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
-        }
+        settingsButton.setEnabled(false);
+        startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+        settingsButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
+        Window.Location.assign(configuratedUrl);
     }
 
     private String getSelectedLocale() {

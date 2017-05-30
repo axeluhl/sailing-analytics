@@ -8,6 +8,7 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration.OnSettingsCallback;
@@ -40,35 +41,6 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
-        this.eventBus = eventBus;
-        clientFactory.getSailingService()
-                .getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
-
-                    @Override
-                    public void onSuccess(List<EventDTO> result) {
-                        panel.setWidget(view.asWidget());
-
-                        view.asWidget().ensureDebugId("AutoPlayStartView");
-                        view.setEvents(result);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                    }
-                }, LOAD_EVENTS_DATA_CATEGORY));
-
-        eventBus.addHandler(LocaleChangeEvent.TYPE, new LocaleChangeEventHandler() {
-            @Override
-            public void onLocaleChange(final LocaleChangeEvent event) {
-                UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
-                urlBuilder.removeParameter("locale");
-                urlBuilder.setParameter("locale", event.getNewLocaleID());
-                Window.Location.replace(urlBuilder.buildString());
-            }
-        });
-        view.setCurrentPresenter(this);
-        eventBus.fireEvent(new AutoPlayHeaderEvent(StringMessages.INSTANCE.autoplayConfiguration(), ""));
-
         // check if config can be restored!
         SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
         AutoPlayContextDefinitionImpl apcd = new AutoPlayContextDefinitionImpl();
@@ -86,7 +58,7 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
 
                         @Override
                         public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
-                            if(newSettings != null){
+                            if (newSettings != null) {
                                 serializer.deserializeSettingsMapFromCurrentLocation(newSettings);
                             }
                             startRootNode(apcd, newSettings);
@@ -101,8 +73,38 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
                             new AutoPlayFailureEvent(caught, "Error loading Event with id " + apcd.getEventId()));
                 }
             });
-        }
+            panel.setWidget(new Label(StringMessages.INSTANCE.loading()));
+            eventBus.fireEvent(new AutoPlayHeaderEvent(StringMessages.INSTANCE.loading(), ""));
+        } else {
+            this.eventBus = eventBus;
+            clientFactory.getSailingService()
+                    .getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
 
+                        @Override
+                        public void onSuccess(List<EventDTO> result) {
+                            panel.setWidget(view.asWidget());
+
+                            view.asWidget().ensureDebugId("AutoPlayStartView");
+                            view.setEvents(result);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+                    }, LOAD_EVENTS_DATA_CATEGORY));
+
+            eventBus.addHandler(LocaleChangeEvent.TYPE, new LocaleChangeEventHandler() {
+                @Override
+                public void onLocaleChange(final LocaleChangeEvent event) {
+                    UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
+                    urlBuilder.removeParameter("locale");
+                    urlBuilder.setParameter("locale", event.getNewLocaleID());
+                    Window.Location.replace(urlBuilder.buildString());
+                }
+            });
+            view.setCurrentPresenter(this);
+            eventBus.fireEvent(new AutoPlayHeaderEvent(StringMessages.INSTANCE.autoplayConfiguration(), ""));
+        }
     }
 
     @Override
