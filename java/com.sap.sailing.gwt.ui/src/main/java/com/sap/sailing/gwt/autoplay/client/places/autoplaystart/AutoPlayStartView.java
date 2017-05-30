@@ -19,5 +19,5 @@ public interface AutoPlayStartView {
     Widget asWidget();
     
     void setEvents(List<EventDTO> events);
-
+    void showLoading();
 }

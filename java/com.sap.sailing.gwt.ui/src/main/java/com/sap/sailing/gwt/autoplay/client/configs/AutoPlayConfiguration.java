@@ -15,6 +15,8 @@ public abstract class AutoPlayConfiguration {
         if(open){
             Window.alert("This configuration does not have settings");
         }
+        
+        holder.newSettings(null);
     }
     
 

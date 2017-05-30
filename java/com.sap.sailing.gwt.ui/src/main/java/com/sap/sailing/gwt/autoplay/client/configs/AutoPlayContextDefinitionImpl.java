@@ -57,4 +57,10 @@ public class AutoPlayContextDefinitionImpl extends AbstractGenericSerializableSe
     public AutoPlayType getType() {
         return type.getValue();
     }
+
+    @Override
+    public String toString() {
+        return "AutoPlayContextDefinitionImpl [type=" + type + ", eventUUID=" + eventUUID + ", leaderboardName="
+                + leaderboardName + "]";
+    }
 }

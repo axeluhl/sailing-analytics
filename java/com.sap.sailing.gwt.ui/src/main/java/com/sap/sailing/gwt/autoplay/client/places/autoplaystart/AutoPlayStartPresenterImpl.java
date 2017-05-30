@@ -10,14 +10,20 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration;
+import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration.OnSettingsCallback;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
+import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinitionImpl;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
+import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.event.LocaleChangeEventHandler;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class AutoPlayStartPresenterImpl extends AbstractActivity implements AutoPlayStartView.Presenter {
     public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
@@ -35,21 +41,22 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         this.eventBus = eventBus;
-        clientFactory.getSailingService().getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
-            
-            @Override
-            public void onSuccess(List<EventDTO> result) {
-                panel.setWidget(view.asWidget());
-                
-                view.asWidget().ensureDebugId("AutoPlayStartView");
-                view.setEvents(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-        }, LOAD_EVENTS_DATA_CATEGORY));
-        
+        clientFactory.getSailingService()
+                .getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
+
+                    @Override
+                    public void onSuccess(List<EventDTO> result) {
+                        panel.setWidget(view.asWidget());
+
+                        view.asWidget().ensureDebugId("AutoPlayStartView");
+                        view.setEvents(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+                }, LOAD_EVENTS_DATA_CATEGORY));
+
         eventBus.addHandler(LocaleChangeEvent.TYPE, new LocaleChangeEventHandler() {
             @Override
             public void onLocaleChange(final LocaleChangeEvent event) {
@@ -61,6 +68,41 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
         });
         view.setCurrentPresenter(this);
         eventBus.fireEvent(new AutoPlayHeaderEvent(StringMessages.INSTANCE.autoplayConfiguration(), ""));
+
+        // check if config can be restored!
+        SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
+        AutoPlayContextDefinitionImpl apcd = new AutoPlayContextDefinitionImpl();
+        serializer.deserializeFromCurrentLocation(apcd);
+        if (apcd.getEventId() != null) {
+            view.showLoading();
+            clientFactory.getSailingService().getEventById(apcd.getEventId(), true, new AsyncCallback<EventDTO>() {
+                @Override
+                public void onSuccess(final EventDTO event) {
+
+                    StrippedLeaderboardDTO leaderBoard = AutoplayHelper.getSelectedLeaderboard(event,
+                            apcd.getLeaderboardName());
+
+                    apcd.getType().getConfig().loadSettingsDefault(event, leaderBoard, false, new OnSettingsCallback() {
+
+                        @Override
+                        public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
+                            if(newSettings != null){
+                                serializer.deserializeSettingsMapFromCurrentLocation(newSettings);
+                            }
+                            startRootNode(apcd, newSettings);
+                        }
+
+                    });
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    clientFactory.getEventBus().fireEvent(
+                            new AutoPlayFailureEvent(caught, "Error loading Event with id " + apcd.getEventId()));
+                }
+            });
+        }
+
     }
 
     @Override
@@ -70,8 +112,7 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
     }
 
     @Override
-    public void startRootNode(AutoPlayContextDefinition ctxDef,
-            PerspectiveCompositeSettings<?> settings) {
+    public void startRootNode(AutoPlayContextDefinition ctxDef, PerspectiveCompositeSettings<?> settings) {
         AutoPlayConfiguration autoPlayConfiguration = ctxDef.getType().getConfig();
         autoPlayConfiguration.startRootNode(clientFactory, ctxDef, settings);
     }

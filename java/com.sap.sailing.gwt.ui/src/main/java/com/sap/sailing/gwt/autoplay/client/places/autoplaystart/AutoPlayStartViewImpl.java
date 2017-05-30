@@ -12,9 +12,9 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration.OnSettingsCallback;
@@ -52,7 +52,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     @UiField
     DivElement leaderboardSelectionUi;
     @UiField
-    Label configStarter;
+    Anchor configStarter;
 
     private final List<EventDTO> events;
 
@@ -78,8 +78,6 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         for (AutoPlayType apt : AutoPlayType.values()) {
             configurationSelectionBox.addItem(apt.getName(), apt.name());
         }
-        configurationSelectionBox.addItem("", "");
-        configurationSelectionBox.addItem("", "");
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
         for (String localeName : GWTLocaleUtil.getAvailableLocales()) {
@@ -203,7 +201,9 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     private void updateURL() {
         UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();
-        urlSerializer.serializeSettingsMapToUrlBuilder(settings, urlBuilder);
+        if(settings != null){
+            urlSerializer.serializeSettingsMapToUrlBuilder(settings, urlBuilder);
+        }
         urlSerializer.serializeToUrlBuilder(apcd, urlBuilder);
         configStarter.setText(urlBuilder.buildString());
     }
@@ -275,4 +275,10 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         }
         return result;
     }
+
+    @Override
+    public void showLoading() {
+        startAutoPlayButton.setEnabled(false);
+    }
+
 }
