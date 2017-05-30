@@ -1288,8 +1288,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     @Override
     String removeUploadedFile();
     String showCompetitorSailIdColumn();
+    String showCompetitorSailIdColumnTooltip();
     String showCompetitorFullNameColumn();
-    String showCompetitorNationalityColumn();
+    String alwaysShowCompetitorNationalityColumn();
+    String alwaysShowCompetitorNationalityColumnTooltip();
     String loadingDimensionValues();
     String runningQuery();
     String inviteBuoyTenders();
