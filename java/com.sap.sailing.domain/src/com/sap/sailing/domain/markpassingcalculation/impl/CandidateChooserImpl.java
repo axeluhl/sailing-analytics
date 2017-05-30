@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -321,8 +322,10 @@ public class CandidateChooserImpl implements CandidateChooser {
                         continue; // don't create edge from/to same waypoint
                     }
     
+                    final Supplier<Double> estimatedDistanceProbabilitySupplier;
                     final double estimatedDistanceProbability;
                     final double startTimingProbability;
+                    final boolean ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping;
                     if (early == start) {
                         // An edge starting at the start proxy node. If the late candidate is for a start mark passing,
                         // determine a probability not based on distance traveled but based on the
@@ -332,7 +335,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                         // the race's start time.
                         if (isGateStart == Boolean.TRUE || start.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
                             startTimingProbability = 1; // no start time point known; all candidate time points equally likely
-                            estimatedDistanceProbability = 1.0; // can't tell distance sailed either because we don't know the start time
+                            estimatedDistanceProbabilitySupplier = null; // can't tell distance sailed either because we don't know the start time
+                            estimatedDistanceProbability = 1.0;
+                            ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = false;
                         } else {
                             // no gate start and we know the race start time
                             if (late.getWaypoint() != null && late.getWaypoint() == race.getRace().getCourse().getFirstWaypoint()) {
@@ -346,20 +351,33 @@ public class CandidateChooserImpl implements CandidateChooser {
                                 startTimingProbability = DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES.divide(
                                         DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES.plus(
                                                 timeGapBetweenStartOfRaceAndCandidateTimePoint));
+                                estimatedDistanceProbabilitySupplier = null;
                                 estimatedDistanceProbability = 1.0;
+                                ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = false;
                             } else {
                                 startTimingProbability = 1; // can't really tell how well the start time was matched when
-                                                              // we don't have a start candidate
-                                estimatedDistanceProbability = late == end ? 1.0 : getDistanceEstimationBasedProbability(c, early, late);
+                                                            // we don't have a start candidate
+                                if (late == end) {
+                                    estimatedDistanceProbability = 1.0;
+                                    estimatedDistanceProbabilitySupplier = null;
+                                } else {
+                                    estimatedDistanceProbability = 0.0;
+                                    estimatedDistanceProbabilitySupplier = ()->getDistanceEstimationBasedProbability(c, early, late);
+                                }
+                                ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = late == end ? false : getIgnoreDueToTimingInducedEstimatedSpeeds(c, early, late);
                             }
                         }
                     } else {
                         startTimingProbability = 1; // no penalty for any start time difference because this edge doesn't cover a start
                         if (late == end) {
                             // final edge; we don't know anything about distances for the end proxy node
+                            estimatedDistanceProbabilitySupplier = null;
                             estimatedDistanceProbability = 1.0;
+                            ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = false;
                         } else {
-                            estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
+                            ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = getIgnoreDueToTimingInducedEstimatedSpeeds(c, early, late);
+                            estimatedDistanceProbability = 0.0;
+                            estimatedDistanceProbabilitySupplier = ()->getDistanceEstimationBasedProbability(c, early, late);
                         }
                     }
                     // If one of the candidates is fixed, the edge is always created unless they travel backwards in time.
@@ -368,9 +386,16 @@ public class CandidateChooserImpl implements CandidateChooser {
                     final NavigableSet<Candidate> fixed = fixedPassings.get(c);
                     // TODO this comparison does not exactly implement the condition "if distance is more likely than skipping"
                     if (travelingForwardInTimeOrUnknown(early, late) &&
-                            (fixed.contains(early) || fixed.contains(late) || estimatedDistanceProbability > MINIMUM_PROBABILITY)) {
-                        addEdge(edges, new Edge(early, late,
-                                startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse().getNumberOfWaypoints()));
+                            (fixed.contains(early) || fixed.contains(late) || !ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping)) {
+                        final Edge edge;
+                        if (estimatedDistanceProbabilitySupplier != null) {
+                            edge = new Edge(early, late,
+                                        ()->startTimingProbability * estimatedDistanceProbabilitySupplier.get(), race.getRace().getCourse().getNumberOfWaypoints());
+                        } else {
+                            edge = new Edge(early, late,
+                                    startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse().getNumberOfWaypoints());
+                        }
+                        addEdge(edges, edge);
                     }
                 }
             }
@@ -428,7 +453,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 boolean endFound = false;
                 currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(new Edge(
                         new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
-                        1, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
+                        ()->1.0, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
                 while (!endFound) {
                     Util.Pair<Edge, Double> mostLikelyEdgeWithProbability = currentEdgesMoreLikelyFirst.pollFirst();
                     if (mostLikelyEdgeWithProbability == null) {
@@ -504,6 +529,48 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     /**
+     * The timing of the candidates is put in relation to the distance between the waypoints they connect. This implies a
+     * rough speed estimate. If this is completely "out of whack" (way too low or way too high), we can assume that if ultimately
+     * carrying out the potentially expensive (for long-distance races) calculation of the distance sailed, we would only
+     * find that the distance-based probability would be below the {@link #MINIMUM_PROBABILITY} threshold such that that edge
+     * would be ignored.
+     */
+    private boolean getIgnoreDueToTimingInducedEstimatedSpeeds(Competitor c, Candidate c1, Candidate c2) {
+        final boolean result;
+        assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();
+        assert c2 != end;
+        final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
+        Waypoint first = getFirstWaypoint(c1);
+        final Waypoint second = c2.getWaypoint();
+        final Distance totalGreatCircleDistance = getMinimumTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
+        if (totalGreatCircleDistance == null) {
+            result = true; // no distance known; cannot tell, so ignore the edge
+        } else {
+            // Computing the distance traveled can be quite expensive, especially for candidates very far apart.
+            // As a quick approximation let's look at how long the time between the candidates was and relate that to the minimum distance
+            // between the waypoints. This leads to a speed estimation; if we take the minimum distance times two, we
+            // get an upper bound for a reasonable distance sailed between the waypoints and therefore an estimation
+            // for the maximum speed at which the competitor would have had to sail:
+            result = getEstimatedSpeedBasedProbabilityMinimum(c1, c2, totalGreatCircleDistance) < MINIMUM_PROBABILITY;
+        }
+        return result;
+    }
+
+    /**
+     * If the candidate has no waypoint associated, return the course's first waypoint; otherwise, return the candidates
+     * {@link Candidate#getWaypoint() waypoint}.
+     */
+    private Waypoint getFirstWaypoint(Candidate candidate) {
+        Waypoint first;
+        if (candidate.getOneBasedIndexOfWaypoint() == 0) {
+            first = race.getRace().getCourse().getFirstWaypoint();
+        } else {
+            first = candidate.getWaypoint();
+        }
+        return first;
+    }
+
+    /**
      * The distance between waypoints is used to estimate the distance that should be covered between these two
      * candidates. This estimation is then compared to the distance actually sailed. A distance smaller than the
      * estimation is (aside from a small tolerance) impossible, a distance larger get increasingly unlikely.
@@ -512,13 +579,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         final double result;
         assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();
         assert c2 != end;
-        Waypoint first;
         final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
-        if (c1.getOneBasedIndexOfWaypoint() == 0) {
-            first = race.getRace().getCourse().getFirstWaypoint();
-        } else {
-            first = c1.getWaypoint();
-        }
+        Waypoint first = getFirstWaypoint(c1);
         final Waypoint second = c2.getWaypoint();
         final Distance totalGreatCircleDistance = getMinimumTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
         if (totalGreatCircleDistance == null) {
@@ -529,10 +591,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             // between the waypoints. This leads to a speed estimation; if we take the minimum distance times two, we
             // get an upper bound for a reasonable distance sailed between the waypoints and therefore an estimation
             // for the maximum speed at which the competitor would have had to sail:
-            Speed estimatedMaxSpeed = totalGreatCircleDistance.scale(2).inTime(c1.getTimePoint().until(c2.getTimePoint()));
-            final double estimatedMinSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MINIMUM_REASONABLE_SPEED));
-            final double estimatedMaxSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MAXIMUM_REASONABLE_SPEED));
-            final double estimatedSpeedBasedProbabilityMinimum = Math.min(estimatedMaxSpeedBasedProbability, estimatedMinSpeedBasedProbability);
+            final double estimatedSpeedBasedProbabilityMinimum = getEstimatedSpeedBasedProbabilityMinimum(c1, c2, totalGreatCircleDistance);
             if (estimatedSpeedBasedProbabilityMinimum < MINIMUM_PROBABILITY) {
                 result = estimatedSpeedBasedProbabilityMinimum;
             } else {
@@ -544,6 +603,15 @@ public class CandidateChooserImpl implements CandidateChooser {
             }
         }
         return result;
+    }
+
+    private double getEstimatedSpeedBasedProbabilityMinimum(Candidate c1, Candidate c2,
+            final Distance totalGreatCircleDistance) {
+        Speed estimatedMaxSpeed = totalGreatCircleDistance.scale(2).inTime(c1.getTimePoint().until(c2.getTimePoint()));
+        final double estimatedMinSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MINIMUM_REASONABLE_SPEED));
+        final double estimatedMaxSpeedBasedProbability = Math.max(0, MAXIMUM_REASONABLE_SPEED.divide(estimatedMaxSpeed));
+        final double estimatedSpeedBasedProbabilityMinimum = Math.min(estimatedMaxSpeedBasedProbability, estimatedMinSpeedBasedProbability);
+        return estimatedSpeedBasedProbabilityMinimum;
     }
 
     /**
