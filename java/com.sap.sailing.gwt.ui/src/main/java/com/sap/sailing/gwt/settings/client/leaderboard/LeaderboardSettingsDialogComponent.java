@@ -198,13 +198,13 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         showCompetitorSailIdColumnheckBox.setTitle(stringMessages.showCompetitorSailIdColumnTooltip(stringMessages.alwaysShowCompetitorNationalityColumn()));
         showCompetitorSailIdColumnheckBox.setValue(initialSettings.isShowCompetitorSailIdColumn());
         overallDetailDialogContent.add(showCompetitorSailIdColumnheckBox);
-        showCompetitorFullNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorFullNameColumn());
-        showCompetitorFullNameColumnCheckBox.setValue(initialSettings.isShowCompetitorFullNameColumn());
-        overallDetailDialogContent.add(showCompetitorFullNameColumnCheckBox);
         isCompetitorNationalityColumnVisible = dialog.createCheckbox(stringMessages.alwaysShowCompetitorNationalityColumn());
         isCompetitorNationalityColumnVisible.setTitle(stringMessages.alwaysShowCompetitorNationalityColumnTooltip());
         isCompetitorNationalityColumnVisible.setValue(initialSettings.isShowCompetitorNationality());
         overallDetailDialogContent.add(isCompetitorNationalityColumnVisible);
+        showCompetitorFullNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorFullNameColumn());
+        showCompetitorFullNameColumnCheckBox.setValue(initialSettings.isShowCompetitorFullNameColumn());
+        overallDetailDialogContent.add(showCompetitorFullNameColumnCheckBox);
 
         overallDetailDialog.add(overallDetailDialogContent);
         return overallDetailDialog;
