@@ -567,6 +567,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
         initWidget(mainPanel);
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
+        this.setStyleName("leaderboardMainpanel");
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
