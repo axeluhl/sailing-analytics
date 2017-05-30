@@ -602,10 +602,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                     List<Distance> waypointDistances = fixDistances.get(w);
                     List<Distance> waypointDistancesBefore = fixDistancesBefore.get(w);
                     List<Distance> waypointDistancesAfter = fixDistancesAfter.get(w);
-                    // due to course changes, waypoints that exist in the waypoints collection may not have a
-                    // corresponding
-                    // key in passingInstructions' key set which is the basis for the waypoints for which
-                    // getDistances(...)
+                    // due to course changes, waypoints that exist in the waypoints collection may not have a corresponding
+                    // key in passingInstructions' key set which is the basis for the waypoints for which getDistances(...)
                     // computes results; so we have to check for null here:
                     if (waypointDistances != null && waypointDistancesBefore != null && waypointDistancesAfter != null) {
                         Iterator<Distance> disIter = waypointDistances.iterator();
@@ -871,7 +869,8 @@ public class CandidateFinderImpl implements CandidateFinder {
         final Distance d = portMark ? distances.get(0) : distances.get(1);
         final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(race, t);
         final double sidePenalty = getSidePenalty(w, p, t, portMark, markPositionCache);
-        double probability = getDistanceBasedProbability(w, t, d, markPositionCache) * sidePenalty;
+        final Double distanceBasedProbability = getDistanceBasedProbability(w, t, d, markPositionCache);
+        double probability = distanceBasedProbability == null ? sidePenalty : distanceBasedProbability * sidePenalty;
         final Double passesInTheRightDirectionProbability = passesInTheRightDirection(w, xte1, xte2, portMark);
         // null would mean "unknown"; no penalty for those cases
         probability = passesInTheRightDirectionProbability == null ? probability : probability * passesInTheRightDirectionProbability;
@@ -1202,20 +1201,31 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
-     * @return a probability based on the distance to <code>w</code> and the average leg lengths before and after.
+     * @return a probability based on the distance to <code>w</code>; for single marks the average leg lengths before
+     *         and after the waypoint {@code w} is also taken into account; for two-mark waypoints such as gates and
+     *         lines it seems fair to assume that the length of the adjacent legs should not play a role in how accurate
+     *         the competitor needs to pass the waypoint.
      */
     private Double getDistanceBasedProbability(Waypoint w, TimePoint t, Distance distance, MarkPositionAtTimePointCache markPositionCache) {
         assert t.equals(markPositionCache.getTimePoint());
         assert race == markPositionCache.getTrackedRace();
+        assert distance.getMeters() >= 0;
         final Double result;
-        Distance legLength = getAverageLengthOfAdjacentLegs(t, w, markPositionCache);
-        if (legLength != null) {
+        if (Util.size(w.getControlPoint().getMarks())>1) {
             result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
-                    // reduce distance by 2x the typical HDOP, accounting for the possibility that some distance from the mark
-                    // may have been caused by inaccurate GPS tracking
-                    * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.scale(-2)).divide(legLength))) + 1);
+                    // for a two-mark control point such as a gate or a line only consider the relation of
+                    // the distance to 30x the typical HDOP error; 
+                    * Math.abs(Math.max(0.0, distance.divide(GPSFix.TYPICAL_HDOP.scale(30)))) + 1);
         } else {
-            result = null;
+            Distance legLength = getAverageLengthOfAdjacentLegs(t, w, markPositionCache);
+            if (legLength != null) {
+                result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
+                        // reduce distance by 2x the typical HDOP, accounting for the possibility that some distance from the mark
+                        // may have been caused by inaccurate GPS tracking
+                        * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.scale(-2)).divide(legLength))) + 1);
+            } else {
+                result = null;
+            }
         }
         return result;
     }
@@ -1414,7 +1424,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
             markPositions.add(estimatedMarkPosition);
         }
-        if (markPositions.size() != 2){
+        if (markPositions.size() != 2) {
             return new Util.Pair<Mark, Mark>(null, null);
         }
         final List<Leg> legs = race.getRace().getCourse().getLegs();
