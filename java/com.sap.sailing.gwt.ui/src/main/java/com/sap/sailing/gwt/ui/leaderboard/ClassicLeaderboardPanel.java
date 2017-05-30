@@ -1,7 +1,11 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -53,6 +57,17 @@ public class ClassicLeaderboardPanel extends LeaderboardPanel {
         super(parent, context, sailingService, asyncActionsExecutor, settings, competitorSelectionProvider,
                 leaderboardName, errorReporter, stringMessages, showRaceDetails, resources, componentResources,
                 tableResources);
+    }
+
+    @Override
+    public void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb) {
+        ImageResourceRenderer renderer = new ImageResourceRenderer();
+        sb.append(renderer.render(nationalityFlagImageResource));             
+    }
+
+    @Override
+    protected void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb,CompetitorDTO competitor) {
+        sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");        
     }
 
 }
