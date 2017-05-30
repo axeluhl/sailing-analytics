@@ -49,6 +49,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -395,6 +396,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
      */
     private final boolean enableSyncedScroller;
     private boolean showRaceRankColumn = false;
+    public boolean isShowCompetitorNationality;
 
     public UnStyledLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
@@ -668,6 +670,10 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
         return componentResources.settingsIcon();
     }
 
+    public void setShowCompetitorNationality(boolean isShowCompetitorNationality) {
+        this.isShowCompetitorNationality = isShowCompetitorNationality;
+    }
+
     public void updateSettings(final LeaderboardSettings newSettings) {
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
@@ -678,6 +684,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
             selectedOverallDetailColumns.clear();
             selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
         }
+        setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
         setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
         setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
@@ -962,6 +969,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
 
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
+            ImageResourceRenderer renderer = new ImageResourceRenderer();
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
             final String flagImageURL = competitor.getFlagImageURL();
@@ -977,23 +985,21 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
                 sb.append(SafeHtmlUtils.fromTrustedString("<div style=\"" + style + "\">"));
             }
 
-            if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                sb.append(SafeHtmlUtils.fromTrustedString("<img src=\"" + flagImageURL + "\" width=\"" + (18 * getFlagScale())
-                        + "px\" height=\"" + (12 * getFlagScale()) + "px\" title=\"" + competitor.getName() + "\"/>"));
-                sb.append(SafeHtmlUtils.fromTrustedString("&nbsp;"));
-            } else {
-                final ImageResource flagImageResource;
-                if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
-                    flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+            if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
+                final ImageResource nationalityFlagImageResource;
+                if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                    nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
                 } else {
-                    flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                    nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
-                if (flagImageResource != null) {
-                    sb.append(SafeHtmlUtils.fromTrustedString("<img src=\"" + flagImageResource.getSafeUri().asString() + "\" width=\""
-                            + (18 * getFlagScale()) + "px\" height=\"" + (12 * getFlagScale()) + "px\" title=\""
-                            + competitor.getName() + "\"/>"));
-                    sb.append(SafeHtmlUtils.fromTrustedString("&nbsp;"));
+                if (nationalityFlagImageResource != null) {
+                    sb.append(renderer.render(nationalityFlagImageResource));
+                    sb.appendHtmlConstant("&nbsp;");
                 }
+            }
+            if (flagImageURL != null && !flagImageURL.isEmpty()) {
+                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
+                sb.appendHtmlConstant("&nbsp;");
             }
             sb.appendEscaped(competitor.getSailID());
             if (showBoatColor) {
@@ -3421,7 +3427,7 @@ public class UnStyledLeaderboardPanel extends AbstractCompositeComponent<Leaderb
                 autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
                 /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                isShowCompetitorSailId(), isShowCompetitorFullName(), isShowRaceRankColumn());
+                isShowCompetitorSailId(), isShowCompetitorFullName(), isShowRaceRankColumn(), isShowCompetitorNationality);
         return LeaderboardSettingsFactory.getInstance().keepDefaults(currentSettings, leaderboardSettings);
     }
 

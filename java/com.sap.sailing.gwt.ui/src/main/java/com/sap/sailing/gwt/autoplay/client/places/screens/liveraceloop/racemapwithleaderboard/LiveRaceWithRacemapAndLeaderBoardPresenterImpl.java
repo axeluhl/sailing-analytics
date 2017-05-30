@@ -112,7 +112,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
         null, racesToShow, null, false, null, lifeRace.getRaceName(),
         /* ascending */ true, /* updateUponPlayStateChange */ true, RaceColumnSelectionStrategies.EXPLICIT,
         /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true,
-        false,true);
+        false, true, false);
 
 
         com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(

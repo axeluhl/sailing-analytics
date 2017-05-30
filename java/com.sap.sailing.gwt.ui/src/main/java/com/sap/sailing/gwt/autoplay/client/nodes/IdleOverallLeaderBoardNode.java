@@ -38,7 +38,7 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
         final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, raceDetails, overallDetails , null, null,
                 null, false, null, null, /* ascending */ true, /* updateUponPlayStateChange */ true,
                 RaceColumnSelectionStrategies.EXPLICIT, /* showAddedScores */ true,
-                /* showOverallRacesCompleted */ false, true, false, false);
+                /* showOverallRacesCompleted */ false, true, false, false, false);
 
         com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play

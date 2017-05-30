@@ -25,9 +25,9 @@ import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LegColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ManeuverCountRaceColumn;
+import com.sap.sailing.gwt.ui.leaderboard.UnStyledLeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -53,6 +53,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private CheckBox showCompetitorSailIdColumnheckBox;
     private CheckBox showCompetitorFullNameColumnCheckBox;
     private CheckBox showRaceRankColumnCheckBox;
+    private CheckBox isCompetitorNationalityColumnVisible;
     private LeaderboardSettings initialSettings;
 
     public LeaderboardSettingsDialogComponent(LeaderboardSettings initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages) {
@@ -133,7 +134,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         int detailCountInCurrentFlowPanel = 0;
         List<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
-        for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
+        for (DetailType type : UnStyledLeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceDetailDialogContent = new FlowPanel();
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
@@ -167,7 +168,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         int detailCountInCurrentFlowPanel = 0;
         List<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceStartAnalysisDialogContent = null;
-        for (DetailType type : LeaderboardPanel.getAvailableRaceStartAnalysisColumnTypes()) {
+        for (DetailType type : UnStyledLeaderboardPanel.getAvailableRaceStartAnalysisColumnTypes()) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceStartAnalysisDialogContent = new FlowPanel();
                 raceStartAnalysisDialogContent.addStyleName("dialogInnerContent");
@@ -189,7 +190,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel overallDetailDialogContent = new FlowPanel();
         overallDetailDialogContent.addStyleName("dialogInnerContent");
         List<DetailType> currentOverallDetailSelection = initialSettings.getOverallDetailsToShow();
-        for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
+        for (DetailType type : UnStyledLeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
             CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);
@@ -204,6 +205,10 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         showCompetitorFullNameColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorFullNameColumn());
         showCompetitorFullNameColumnCheckBox.setValue(initialSettings.isShowCompetitorFullNameColumn());
         overallDetailDialogContent.add(showCompetitorFullNameColumnCheckBox);
+        isCompetitorNationalityColumnVisible = dialog.createCheckbox(stringMessages.showCompetitorNationalityColumn());
+        isCompetitorNationalityColumnVisible.setValue(initialSettings.isShowCompetitorNationality());
+        overallDetailDialogContent.add(isCompetitorNationalityColumnVisible);
+
         overallDetailDialog.add(overallDetailDialogContent);
         return overallDetailDialog;
     }
@@ -394,7 +399,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
                 /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue(),
                 /*showOverallColumnWithNumberOfRacesSailedPerCompetitor*/ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.getValue().booleanValue(),
-                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),showRaceRankColumnCheckBox.getValue());
+                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(), showRaceRankColumnCheckBox.getValue(),
+                isCompetitorNationalityColumnVisible.getValue());
         return LeaderboardSettingsFactory.getInstance().keepDefaults(initialSettings, newSettings);
     }
 

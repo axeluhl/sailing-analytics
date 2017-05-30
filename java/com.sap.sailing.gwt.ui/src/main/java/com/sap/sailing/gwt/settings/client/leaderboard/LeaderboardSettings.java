@@ -54,6 +54,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     private boolean autoExpandPreSelectedRace = false;
     private LongSetting delayBetweenAutoAdvancesInMilliseconds;
     private BooleanSetting updateUponPlayStateChange;
+    private BooleanSetting isShowCompetitorNationality;
     
     /**
      * There are two ways to select race columns.
@@ -87,6 +88,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     
     @Override
     protected void addChildSettings() {
+        isShowCompetitorNationality = new BooleanSetting("showCompetitorNationality", this, false);
         showRaceRankColumn = new BooleanSetting("racerank", this,false);
         namesOfRaceColumnsToShow = new StringListSetting("namesOfRaceColumnsToShow", this);
         namesOfRacesToShow = new StringListSetting("namesOfRacesToShow", this, null);
@@ -158,7 +160,8 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
             boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
             boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
-            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,boolean showRaceRankColumn) {
+            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn, boolean showRaceRankColumn,
+            boolean isCompetitorNationalityColumnVisible) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -180,6 +183,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         this.showCompetitorFullNameColumn.setValue(showCompetitorFullNameColumn);
         this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(showOverallColumnWithNumberOfRacesCompletedPerCompetitor);
         this.showRaceRankColumn.setValue(showRaceRankColumn);
+        this.isShowCompetitorNationality.setValue(isCompetitorNationalityColumnVisible);
     }
   
     /**
@@ -284,6 +288,10 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         return showCompetitorFullNameColumn.getValue();
     }
     
+    public boolean isShowCompetitorNationality() {
+        return isShowCompetitorNationality.getValue();
+    }
+
     void overrideDefaultValues(LeaderboardSettings newDefaults) {
         autoExpandPreSelectedRace = newDefaults.autoExpandPreSelectedRace;
         boolean namesOfRaceColumnsToShowWasDefault = Util.equals(namesOfRaceColumnsToShow.getValues(), namesOfRaceColumnsToShow.getDefaultValues());
@@ -311,6 +319,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         showCompetitorFullNameColumn.setDefaultValue(newDefaults.showCompetitorFullNameColumn.getValue());
         showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setDefaultValue(newDefaults.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.getValue());
         showRaceRankColumn.setDefaultValue(newDefaults.showRaceRankColumn.getValue());
+        isShowCompetitorNationality.setDefaultValue(newDefaults.isShowCompetitorNationality.getValue());
     }
     
     void setValues(LeaderboardSettings settingsWithCustomValues) {
@@ -330,6 +339,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         this.showAddedScores.setValue(settingsWithCustomValues.isShowAddedScores());
         this.showCompetitorSailIdColumn.setValue(settingsWithCustomValues.isShowCompetitorSailIdColumn());
         this.showCompetitorFullNameColumn.setValue(settingsWithCustomValues.isShowCompetitorFullNameColumn());
+        this.isShowCompetitorNationality.setValue(settingsWithCustomValues.isShowCompetitorNationality());
         this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(settingsWithCustomValues.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         this.showRaceRankColumn.setValue(settingsWithCustomValues.isShowRaceRankColumn());
     }
@@ -354,6 +364,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         leaderboardSettings.showCompetitorFullNameColumn.setDefaultValue(showCompetitorFullNameColumn.getDefaultValue());
         leaderboardSettings.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setDefaultValue(showOverallColumnWithNumberOfRacesCompletedPerCompetitor.getDefaultValue());
         leaderboardSettings.showRaceRankColumn.setDefaultValue(showRaceRankColumn.getDefaultValue());
+        leaderboardSettings.isShowCompetitorNationality.setDefaultValue(isShowCompetitorNationality.getDefaultValue());
         return leaderboardSettings;
     }
     
