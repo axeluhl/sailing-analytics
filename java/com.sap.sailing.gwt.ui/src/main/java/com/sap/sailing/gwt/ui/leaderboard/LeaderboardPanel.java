@@ -49,7 +49,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -137,7 +136,7 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSettings>
+public abstract class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSettings>
         implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider, IsEmbeddableComponent,
         CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider, LeaderboardUpdateProvider {
 
@@ -970,7 +969,6 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
 
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
-            ImageResourceRenderer renderer = new ImageResourceRenderer();
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
             final String flagImageURL = competitor.getFlagImageURL();
@@ -994,12 +992,12 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                     nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (nationalityFlagImageResource != null) {
-                    sb.append(renderer.render(nationalityFlagImageResource));
+                    renderNationalityFlag(nationalityFlagImageResource,sb);
                     sb.appendHtmlConstant("&nbsp;");
                 }
             }
             if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
+                renderFlagImage(flagImageURL,sb,competitor);
                 sb.appendHtmlConstant("&nbsp;");
             }
             sb.appendEscaped(competitor.getSailID());
@@ -1017,6 +1015,10 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
     protected String determineBoatColorDivStyle(String competitorColor) {
         return "border-bottom: 2px solid " + competitorColor + ";";
     }
+
+    protected abstract void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb, CompetitorDTO competitor);
+
+    protected abstract void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb);
 
     protected void processStyleForRaceColumnWithoutReasonForMaxPoints(boolean isDiscarded, SafeStylesBuilder ssb) {
         if (isDiscarded) {

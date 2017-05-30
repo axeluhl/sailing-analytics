@@ -121,7 +121,7 @@ public class PreLeaderBoardWithImagePresenterImpl extends AutoPlayPresenterConfi
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 false, lifeRace, competitorSelectionProvider, timer, null, leaderboard.name, errorReporter,
-                StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, false);
+                StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, true);
         view.setLeaderBoard(leaderboardPanel);
         selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
 
