@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -24,7 +24,7 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
  * @author Frank Mittag (c163874)
  */
 public class RegattaAnalyticsDataManager {
-    private LeaderboardPanel leaderboardPanel;
+    private ClassicLeaderboardPanel leaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
 
     private final CompetitorSelectionModel competitorSelectionProvider;
@@ -44,12 +44,12 @@ public class RegattaAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+    public ClassicLeaderboardPanel createLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if (leaderboardPanel == null) {
-            leaderboardPanel = new LeaderboardPanel(parent, context, sailingService,
+            leaderboardPanel = new ClassicLeaderboardPanel(parent, context, sailingService,
                     asyncActionsExecutor,
                     leaderboardSettings,
                     true, preselectedRace,
@@ -71,7 +71,7 @@ public class RegattaAnalyticsDataManager {
         return multiCompetitorChart;
     }
     
-    public LeaderboardPanel getLeaderboardPanel() {
+    public ClassicLeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
 

@@ -38,12 +38,12 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 
 /**
- * A panel managing multiple {@link LeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
+ * A panel managing multiple {@link ClassicLeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
  * @author Frank
  */
 public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<LeaderboardSettings> implements TimeListener, SelectedLeaderboardChangeProvider {
 
-    private LeaderboardPanel selectedLeaderboardPanel;
+    private ClassicLeaderboardPanel selectedLeaderboardPanel;
     private FlowPanel selectedLeaderboardFlowPanel;
 
     private final StringMessages stringMessages;
@@ -299,7 +299,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     }
 
     @Override
-    public void setSelectedLeaderboard(LeaderboardPanel selectedLeaderboard) {
+    public void setSelectedLeaderboard(ClassicLeaderboardPanel selectedLeaderboard) {
         if (this.selectedLeaderboardPanel != selectedLeaderboard) {
             this.selectedLeaderboardPanel = selectedLeaderboard;
             for (SelectedLeaderboardChangeListener listener : selectedLeaderboardChangeListeners) {

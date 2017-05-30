@@ -27,7 +27,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.LegColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ManeuverCountRaceColumn;
-import com.sap.sailing.gwt.ui.leaderboard.UnStyledLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -134,7 +134,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         int detailCountInCurrentFlowPanel = 0;
         List<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
-        for (DetailType type : UnStyledLeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
+        for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceDetailDialogContent = new FlowPanel();
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
@@ -168,7 +168,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         int detailCountInCurrentFlowPanel = 0;
         List<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceStartAnalysisDialogContent = null;
-        for (DetailType type : UnStyledLeaderboardPanel.getAvailableRaceStartAnalysisColumnTypes()) {
+        for (DetailType type : LeaderboardPanel.getAvailableRaceStartAnalysisColumnTypes()) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceStartAnalysisDialogContent = new FlowPanel();
                 raceStartAnalysisDialogContent.addStyleName("dialogInnerContent");
@@ -190,7 +190,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel overallDetailDialogContent = new FlowPanel();
         overallDetailDialogContent.addStyleName("dialogInnerContent");
         List<DetailType> currentOverallDetailSelection = initialSettings.getOverallDetailsToShow();
-        for (DetailType type : UnStyledLeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
+        for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
             CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
                     overallDetailCheckboxes);
             overallDetailDialogContent.add(checkbox);

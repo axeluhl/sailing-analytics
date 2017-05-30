@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
 
 /**
@@ -73,10 +73,10 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
-            final Consumer<LeaderboardPanel> leaderboardConsumer = new Consumer<LeaderboardPanel>() {
+            ClassicLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
+            final Consumer<ClassicLeaderboardPanel> leaderboardConsumer = new Consumer<ClassicLeaderboardPanel>() {
                 @Override
-                public void consume(LeaderboardPanel leaderboardPanel) {
+                public void consume(ClassicLeaderboardPanel leaderboardPanel) {
                     leaderboardUpdateProvider = leaderboardPanel;
                     leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaLeaderboardTabView.this);
                     initWidget(ourUiBinder.createAndBindUi(RegattaLeaderboardTabView.this));

@@ -14,14 +14,14 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardResources;
-import com.sap.sailing.gwt.ui.leaderboard.UnStyledLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
-public class SixtyInchLeaderBoard extends UnStyledLeaderboardPanel {
+public class SixtyInchLeaderBoard extends LeaderboardPanel {
     private static final LeaderboardResources resources = GWT.create(LeaderboardResources.class);
     private static final ComponentResources componentResources = GWT.create(ComponentResources.class);
     private static final LeaderboardTableResourcesSixty tableResources = GWT

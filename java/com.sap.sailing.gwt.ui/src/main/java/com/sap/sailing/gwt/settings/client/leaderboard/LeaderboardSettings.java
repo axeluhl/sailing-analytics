@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.settingtypes.converter.DetailTypeStringToEnumConverter;
 import com.sap.sailing.gwt.settings.client.settingtypes.converter.RaceColumnSelectionStrategiesStringToEnumConverter;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
@@ -20,7 +20,7 @@ import com.sap.sse.common.settings.generic.StringListSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 
 /**
- * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
+ * Settings for the {@link ClassicLeaderboardPanel} component. If you change here, please also visit
  * {@link LeaderboardSettingsDialogComponent} to make the setting editable, and edit {@link LeaderboardUrlSettings}
  * for URL generation and parsing.
  * 
@@ -216,7 +216,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     
     /**
      * If <code>null</code>, this is to mean that the race columns should not be modified by
-     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}. Otherwise a
+     * {@link ClassicLeaderboardPanel#updateSettings(LeaderboardSettings)}. Otherwise a
      * live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<String> getNamesOfRaceColumnsToShow() {
@@ -225,7 +225,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
 
     /**
      * If <code>null</code>, this is to mean that the race columns should not be modified by
-     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}. Otherwise
+     * {@link ClassicLeaderboardPanel#updateSettings(LeaderboardSettings)}. Otherwise
      * a live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<String> getNamesOfRacesToShow() {
@@ -234,7 +234,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     
     /**
      * If <code>null</code>, this is to mean that the race columns should not be modified by
-     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
+     * {@link ClassicLeaderboardPanel#updateSettings(LeaderboardSettings)}.
      */
     public Integer getNumberOfLastRacesToShow() {
         return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.LAST_N ? numberOfLastRacesToShow.getValue() : null;
@@ -246,7 +246,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
 
     /**
      * @return if <code>null</code>, leave refresh interval alone (don't change in
-     *         {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}
+     *         {@link ClassicLeaderboardPanel#updateSettings(LeaderboardSettings)}
      */
     public Long getDelayBetweenAutoAdvancesInMilliseconds() {
         return delayBetweenAutoAdvancesInMilliseconds.getValue();

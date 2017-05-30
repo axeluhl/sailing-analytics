@@ -9,6 +9,6 @@ public interface SelectedLeaderboardChangeListener {
     /**
      * @param selectedLeaderboard the selected non-<code>null</code> LeaderboardPanel 
      */
-    void onSelectedLeaderboardChanged(LeaderboardPanel selectedLeaderboard);
+    void onSelectedLeaderboardChanged(ClassicLeaderboardPanel selectedLeaderboard);
 
 }

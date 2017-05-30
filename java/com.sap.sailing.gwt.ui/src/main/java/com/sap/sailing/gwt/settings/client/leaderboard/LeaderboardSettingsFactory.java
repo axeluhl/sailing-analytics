@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -28,7 +28,7 @@ public class LeaderboardSettingsFactory {
      *            if <code>null</code>, don't sort any race column
      * @param nameOfRaceColumnToShow
      *            if <code>null</code>, the settings returned will cause the list of race columns shown to remain
-     *            unchanged during {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}; otherwise, the settings
+     *            unchanged during {@link ClassicLeaderboardPanel#updateSettings(LeaderboardSettings)}; otherwise, the settings
      *            will show the single race column identified by this argument
      * @param nameOfRaceToShow
      *            alternatively to <code>nameOfRaceColumnToShow</code>, this argument may be used in case the race name
@@ -110,7 +110,7 @@ public class LeaderboardSettingsFactory {
     /**
      * @param namesOfRaceColumnsToShow
      *            if <code>null</code>, create settings which leave the list of races to show unchanged when applied
-     *            using {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}; otherwise, the list of names of
+     *            using {@link ClassicLeaderboardPanel#updateSettings(LeaderboardSettings)}; otherwise, the list of names of
      *            the race columns (not their races!) that will be shown, so that, e.g., an empty list causes no race
      *            columns to be shown
      * @param namesOfRacesToShow

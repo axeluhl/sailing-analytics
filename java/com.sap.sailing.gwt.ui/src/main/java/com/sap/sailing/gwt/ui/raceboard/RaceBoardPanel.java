@@ -76,7 +76,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
@@ -129,7 +129,7 @@ public class RaceBoardPanel
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
     private final String leaderboardName;
-    private final LeaderboardPanel leaderboardPanel;
+    private final ClassicLeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
     private MediaPlayerManagerComponent mediaPlayerManagerComponent;
@@ -445,7 +445,7 @@ public class RaceBoardPanel
         }
     }
     
-    private LeaderboardPanel createLeaderboardPanel(RaceBoardPerspectiveLifecycle lifecycle,
+    private ClassicLeaderboardPanel createLeaderboardPanel(RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
             String leaderboardGroupName,
             CompetitorFilterPanel competitorSearchTextBox, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard) {
@@ -462,7 +462,7 @@ public class RaceBoardPanel
                         /* don't showCompetitorFullNameColumn in case screen is so small that we don't
                          * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard,raceColumn.getNumberOfLastRaceColumnsToShow(),raceColumn.getType());
         leaderboardSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesWithNewDefaults(leaderboardSettings, defaultLeaderboardSettingsForCurrentPlayMode);
-        return new LeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
+        return new ClassicLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 leaderboardSettings,
                 selectedRaceIdentifier != null, selectedRaceIdentifier,
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
@@ -477,7 +477,7 @@ public class RaceBoardPanel
         componentViewer.forceLayout();
     }
     
-    LeaderboardPanel getLeaderboardPanel() {
+    ClassicLeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
     

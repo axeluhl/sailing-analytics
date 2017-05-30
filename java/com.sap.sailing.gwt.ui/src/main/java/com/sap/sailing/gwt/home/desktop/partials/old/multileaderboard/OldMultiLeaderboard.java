@@ -27,7 +27,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.SelectedLeaderboardChangeListener;
@@ -59,7 +59,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     private MultiLeaderboardProxyPanel multiLeaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldMultiLeaderboardDelegate delegate;
-    private LeaderboardPanel lastSelectedLeaderboardPanel;
+    private ClassicLeaderboardPanel lastSelectedLeaderboardPanel;
 
     public OldMultiLeaderboard() {
         this(null);
@@ -232,7 +232,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     }
 
     @Override
-    public void onSelectedLeaderboardChanged(LeaderboardPanel selectedLeaderboard) {
+    public void onSelectedLeaderboardChanged(ClassicLeaderboardPanel selectedLeaderboard) {
         if(lastSelectedLeaderboardPanel != null) {
             lastSelectedLeaderboardPanel.removeBusyStateChangeListener(this);
         }

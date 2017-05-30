@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
@@ -61,7 +61,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
-    private LeaderboardPanel leaderboardPanel;
+    private ClassicLeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldLeaderboardDelegate delegate;
     
@@ -206,7 +206,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         }
     }
 
-    public void setLeaderboard(LeaderboardPanel leaderboardPanel, final Timer timer) {
+    public void setLeaderboard(ClassicLeaderboardPanel leaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
         if (leaderboardPanel.getComponentContext() == null) {
@@ -274,7 +274,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         }
     }
 
-    public interface OldLeaderboardDelegate extends LeaderboardDelegate<LeaderboardPanel> {
+    public interface OldLeaderboardDelegate extends LeaderboardDelegate<ClassicLeaderboardPanel> {
         Element getHasLiveRaceElement();
     }
 

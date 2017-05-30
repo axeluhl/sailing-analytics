@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver;
 import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver.DomMutationCallback;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
@@ -33,7 +33,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     }
 
     public void createSharedLeaderboardPanel(String leaderboardName, RegattaAnalyticsDataManager regattaAnalyticsManager, UserService userService,
-            String placeToken, final Consumer<LeaderboardPanel> consumer) {
+            String placeToken, final Consumer<ClassicLeaderboardPanel> consumer) {
         
         // FIXME remove
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
@@ -44,7 +44,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
         componentContext.initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
             @Override
             public void onSuccess(LeaderboardSettings leaderboardSettings) {
-                final LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel(null, componentContext, //
+                final ClassicLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel(null, componentContext, //
                         leaderboardSettings, //
                         null, //
                         "leaderboardGroupName", // TODO: keep using magic string? ask frank!

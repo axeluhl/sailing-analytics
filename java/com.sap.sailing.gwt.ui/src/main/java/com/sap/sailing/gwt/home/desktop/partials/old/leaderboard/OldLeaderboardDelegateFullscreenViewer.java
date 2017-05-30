@@ -4,9 +4,9 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.home.desktop.partials.old.AbstractLeaderboardFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard.OldLeaderboardDelegate;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 
-public class OldLeaderboardDelegateFullscreenViewer extends AbstractLeaderboardFullscreenViewer<LeaderboardPanel>
+public class OldLeaderboardDelegateFullscreenViewer extends AbstractLeaderboardFullscreenViewer<ClassicLeaderboardPanel>
         implements OldLeaderboardDelegate {
     
     private final Label hasLiveRace = new Label();

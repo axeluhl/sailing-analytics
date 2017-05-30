@@ -27,7 +27,7 @@ import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -268,7 +268,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                             public void onSuccess(List<StrippedLeaderboardDTO> result) {
                                 leaderboardsTabPanel.clear();
                                 for (StrippedLeaderboardDTO leaderboard : result) {
-                                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(null, null, sailingService,
+                                    ClassicLeaderboardPanel leaderboardPanel = new ClassicLeaderboardPanel(null, null, sailingService,
                                             new AsyncActionsExecutor(), leaderboardSettings, false, 
                                             /*preSelectedRace*/null, 
                                             competitorSelectionProvider, 

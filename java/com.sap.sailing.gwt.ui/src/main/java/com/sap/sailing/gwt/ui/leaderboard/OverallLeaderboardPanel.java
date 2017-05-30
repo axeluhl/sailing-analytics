@@ -13,7 +13,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
-public class OverallLeaderboardPanel extends LeaderboardPanel {
+public class OverallLeaderboardPanel extends ClassicLeaderboardPanel {
     public OverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,

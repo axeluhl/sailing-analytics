@@ -30,7 +30,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
  */
 public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPerspectiveLifecycle> {
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
-    private LeaderboardPanel overallLeaderboardPanel;
+    private ClassicLeaderboardPanel overallLeaderboardPanel;
     
     public LeaderboardViewer(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
@@ -58,7 +58,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
         // FIXME: Cleanup with java8 using supplier
-        init(new LeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
+        init(new ClassicLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), preselectedRace != null,
                 preselectedRace, competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
