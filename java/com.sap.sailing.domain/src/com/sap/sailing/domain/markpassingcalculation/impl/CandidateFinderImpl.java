@@ -1214,8 +1214,8 @@ public class CandidateFinderImpl implements CandidateFinder {
         if (Util.size(w.getControlPoint().getMarks())>1) {
             result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
                     // for a two-mark control point such as a gate or a line only consider the relation of
-                    // the distance to 30x the typical HDOP error; 
-                    * Math.abs(Math.max(0.0, distance.divide(GPSFix.TYPICAL_HDOP.scale(30)))) + 1);
+                    // the distance to 150x the typical HDOP error; 
+                    * Math.abs(Math.max(0.0, distance.divide(GPSFix.TYPICAL_HDOP.scale(150)))) + 1);
         } else {
             Distance legLength = getAverageLengthOfAdjacentLegs(t, w, markPositionCache);
             if (legLength != null) {
