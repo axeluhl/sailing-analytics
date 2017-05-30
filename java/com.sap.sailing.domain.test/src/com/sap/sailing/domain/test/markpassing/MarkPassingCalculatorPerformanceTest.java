@@ -8,8 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.Assert;
-
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -31,6 +29,8 @@ import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import junit.framework.Assert;
 
 public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
