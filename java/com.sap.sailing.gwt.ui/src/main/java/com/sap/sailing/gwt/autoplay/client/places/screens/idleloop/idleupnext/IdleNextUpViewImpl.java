@@ -22,7 +22,6 @@ import com.sap.sse.common.Util.Pair;
 
 public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
     private static final int MAX_RACES_IN_LIST = 10;
-    private static final double RACE_SEPERATOR_SIZE = 20;
     private static IdleNextUpViewImplUiBinder uiBinder = GWT.create(IdleNextUpViewImplUiBinder.class);
     @UiField
     SimplePanel mainPanelUi;

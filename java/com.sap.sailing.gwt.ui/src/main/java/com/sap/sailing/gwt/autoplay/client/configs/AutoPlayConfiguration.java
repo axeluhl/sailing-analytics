@@ -10,15 +10,17 @@ public abstract class AutoPlayConfiguration {
 
     public abstract void startRootNode(AutoPlayClientFactory cf, AutoPlayContextDefinition context,
             PerspectiveCompositeSettings<?> settings);
-    
-    public void loadSettingsDefault(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,boolean open,OnSettingsCallback holder) {
-        if(open){
-            Window.alert("This configuration does not have settings");
-        }
-        
+
+    public void openSettingsDialog(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
+            OnSettingsCallback holder, PerspectiveCompositeSettings<?> settings,AutoPlayContextDefinition apcd) {
+        Window.alert("This configuration does not have settings");
+
+    }
+
+    public void loadSettingsDefault(EventDTO selectedEvent, StrippedLeaderboardDTO leaderboard,
+            OnSettingsCallback holder) {
         holder.newSettings(null);
     }
-    
 
     public interface OnSettingsCallback {
         void newSettings(PerspectiveCompositeSettings<?> newSettings);

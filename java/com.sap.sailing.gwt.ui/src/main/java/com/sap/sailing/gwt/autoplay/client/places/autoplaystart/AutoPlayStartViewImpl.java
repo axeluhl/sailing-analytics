@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.http.client.UrlBuilder;
@@ -91,6 +92,8 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
         initWidget(uiBinder.createAndBindUi(this));
         this.ensureDebugId("AutoPlayStartView");
 
+        configStarter.getElement().getStyle().setDisplay(Display.BLOCK);
+
         validate();
     }
 
@@ -139,14 +142,14 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
 
     @UiHandler("settingsButton")
     void onOpenSettings(ClickEvent event) {
-        selectedAutoPlayType.getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard, true,
+        selectedAutoPlayType.getConfig().openSettingsDialog(selectedEvent, selectedLeaderboard,
                 new OnSettingsCallback() {
                     @Override
                     public void newSettings(PerspectiveCompositeSettings<?> newSettings) {
                         settings = newSettings;
                         updateURL();
                     }
-                });
+                }, settings, apcd);
     }
 
     private boolean validate() {
@@ -184,7 +187,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
             settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
-            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard, false,
+            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, selectedLeaderboard,
                     new OnSettingsCallback() {
 
                         @Override
@@ -201,11 +204,12 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
     private void updateURL() {
         UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();
-        if(settings != null){
+        if (settings != null) {
             urlSerializer.serializeSettingsMapToUrlBuilder(settings, urlBuilder);
         }
         urlSerializer.serializeToUrlBuilder(apcd, urlBuilder);
         configStarter.setText(urlBuilder.buildString());
+        configStarter.setTarget(urlBuilder.toString());
     }
 
     @UiHandler("localeSelectionBox")

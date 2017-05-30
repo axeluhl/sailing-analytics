@@ -2,7 +2,9 @@ package com.sap.sailing.gwt.autoplay.client.configs;
 
 import java.util.UUID;
 
-public interface AutoPlayContextDefinition {
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
+
+public interface AutoPlayContextDefinition extends GenericSerializableSettings{
     
     AutoPlayType getType();
     UUID getEventId();
