@@ -1338,12 +1338,11 @@ public class CandidateFinderImpl implements CandidateFinder {
         PassingInstruction instruction = getPassingInstructions(w);
         if (instruction == PassingInstruction.Line) {
             Util.Pair<Mark, Mark> marks = getPortAndStarboardMarks(t, w, markPositionCache);
-            Position portPosition = null;
             Bearing b = null;
             Mark portMark = marks.getA();
             Mark starBoardMark = marks.getB();
             if (portMark != null && starBoardMark != null) {
-                portPosition = markPositionCache.getEstimatedPosition(portMark);
+                Position portPosition = markPositionCache.getEstimatedPosition(portMark);
                 Position starboardPosition = markPositionCache.getEstimatedPosition(starBoardMark);
                 if (portPosition != null && starboardPosition != null) {
                     b = portPosition.getBearingGreatCircle(starboardPosition);
