@@ -477,9 +477,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             }
         }
         sensorFixStore.removeListener(listener);
-        if (preemptiveStopRequested.get()) {
-            waitForLoadingToFinishRunning();
-        }
     }
 
     private void startTracking() {
@@ -487,18 +484,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         trackedRace.addListener(raceChangeListener);
         this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs(),
                 trackedRace.getRace().getName());
-    }
-
-    private void waitForLoadingToFinishRunning() {
-        synchronized (loadingJobs) {
-            try {
-                while (!loadingJobs.isEmpty()) {
-                    loadingJobs.wait();
-                }
-            } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
-            }
-        }
     }
 
     private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {
