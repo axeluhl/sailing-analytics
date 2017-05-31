@@ -75,7 +75,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         final long time = timeToAddCandidatesToChooser(500, 1, 25);
         System.out.println(time);
         result.put("ChooserPerformance", time);
-        assertTrue(time < 5000);
+        assertTrue(time < 15000);
     }
 
     private long timeToAddCandidatesToChooser(int numberOfTimesAdding, int numberToAddEachTime, int numberOfRepititions) {
