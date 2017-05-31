@@ -525,7 +525,7 @@
 
     <string name="publish_button_empty">Veröffentlichen</string>
     <string name="publish_button_other">Veröffentlichen (%d)</string>
-    <string name="publish_clicked">Teilnehmerliste wird versendet</string>
+    <string name="publish_clicked">Ergebnisliste veröffentlicht</string>
     <string name="competitor_count">%d</string>
 
 </resources>
