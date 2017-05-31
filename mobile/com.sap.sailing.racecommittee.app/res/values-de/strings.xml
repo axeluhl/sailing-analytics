@@ -102,7 +102,7 @@
     <string name="tracking_list_01">Teilnehmerliste</string>
     <string name="tracking_list_02">Ergebnisliste</string>
     <string name="set_tracking_list">Ergebnisliste füllen</string>
-    <string name="confirm_tracking_list">Ergebnisliste bestätigen</string>
+    <string name="confirm_tracking_list">@string/publish_button_empty</string>
     <string name="availableFinishingCompetitors">Segler</string>
     <string name="choose_blue_flag_finishing">Rennen beenden</string>
     <string name="drag_handle_description">Cursor</string>
