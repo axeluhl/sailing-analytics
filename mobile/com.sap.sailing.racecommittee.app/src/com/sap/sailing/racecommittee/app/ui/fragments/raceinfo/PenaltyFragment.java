@@ -44,7 +44,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.RRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -222,8 +222,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         super.onActivityCreated(savedInstanceState);
 
         RacingProcedure procedure = getRaceState().getRacingProcedure();
-        if (procedure instanceof RRS26RacingProcedure) {
-            RRS26RacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
+        if (procedure instanceof ConfigurableStartModeFlagRacingProcedure) {
+            ConfigurableStartModeFlagRacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
             switch (racingProcedure.getStartModeFlag()) {
                 case PAPA:
                     mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name()));
