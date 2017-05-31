@@ -105,7 +105,7 @@ import com.sap.sse.util.ThreadPoolUtil;
 public class FixLoaderAndTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
     private static final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(
-            FixLoaderAndTracker.class.getSimpleName()+" loader thread pool");
+            FixLoaderAndTracker.class.getSimpleName());
     protected final DynamicTrackedRace trackedRace;
     private final SensorFixStore sensorFixStore;
     private RegattaLogDeviceMappings<WithID> deviceMappings;
