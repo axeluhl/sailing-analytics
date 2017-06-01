@@ -29,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 
 /**
@@ -96,9 +96,9 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
                 }
             };
             if(regattaAnalyticsManager.getLeaderboardPanel() == null) {
-                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<ClassicLeaderboardPanel>() {
+                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<LeaderboardPanel>() {
                     @Override
-                    public void consume(ClassicLeaderboardPanel object) {
+                    public void consume(LeaderboardPanel object) {
                         callback.run();
                     }
                 });

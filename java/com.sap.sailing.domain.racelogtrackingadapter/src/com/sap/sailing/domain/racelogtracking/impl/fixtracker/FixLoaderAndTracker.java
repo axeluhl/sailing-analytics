@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -103,6 +104,8 @@ import com.sap.sse.util.ThreadPoolUtil;
  */
 public class FixLoaderAndTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
+    private static final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(
+            FixLoaderAndTracker.class.getSimpleName());
     protected final DynamicTrackedRace trackedRace;
     private final SensorFixStore sensorFixStore;
     private RegattaLogDeviceMappings<WithID> deviceMappings;
@@ -474,9 +477,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             }
         }
         sensorFixStore.removeListener(listener);
-        if (preemptiveStopRequested.get()) {
-            waitForLoadingToFinishRunning();
-        }
     }
 
     private void startTracking() {
@@ -484,18 +484,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         trackedRace.addListener(raceChangeListener);
         this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs(),
                 trackedRace.getRace().getName());
-    }
-
-    private void waitForLoadingToFinishRunning() {
-        synchronized (loadingJobs) {
-            try {
-                while (!loadingJobs.isEmpty()) {
-                    loadingJobs.wait();
-                }
-            } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
-            }
-        }
     }
 
     private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {
@@ -566,7 +554,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             loadingJobs.add(job);
             updateStatusAndProgress();
         }
-        ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(job);
+        executor.execute(job);
     }
     
     /**

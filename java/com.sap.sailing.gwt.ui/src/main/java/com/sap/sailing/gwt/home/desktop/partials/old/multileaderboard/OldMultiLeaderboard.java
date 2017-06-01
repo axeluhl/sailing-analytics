@@ -240,6 +240,6 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         lastSelectedLeaderboardPanel = selectedLeaderboard;
     }
     
-    public interface OldMultiLeaderboardDelegate extends LeaderboardDelegate<MultiLeaderboardProxyPanel>{
+    public interface OldMultiLeaderboardDelegate extends LeaderboardDelegate {
     }
 }

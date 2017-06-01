@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver;
 import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver.DomMutationCallback;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
@@ -33,7 +34,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     }
 
     public void createSharedLeaderboardPanel(String leaderboardName, RegattaAnalyticsDataManager regattaAnalyticsManager, UserService userService,
-            String placeToken, final Consumer<ClassicLeaderboardPanel> consumer) {
+            String placeToken, final Consumer<LeaderboardPanel> leaderboardConsumer) {
         
         // FIXME remove
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
@@ -75,7 +76,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                     }); 
                     observer.observe(leaderboardPanel.getLeaderboardTable().getElement());
                 }
-                consumer.consume(leaderboardPanel);
+                leaderboardConsumer.consume(leaderboardPanel);
             }
         });
     }

@@ -1288,8 +1288,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     @Override
     String removeUploadedFile();
     String showCompetitorSailIdColumn();
+    String showCompetitorSailIdColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
     String showCompetitorFullNameColumn();
-    String showCompetitorNationalityColumn();
+    String alwaysShowCompetitorNationalityColumn();
+    String alwaysShowCompetitorNationalityColumnTooltip();
     String loadingDimensionValues();
     String runningQuery();
     String inviteBuoyTenders();
@@ -1804,6 +1806,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String integer();
     String sampleColor();
     String leaderboardPage();
+    String showLiveNow();
     String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
     String estimatedDistance();
     String estimatedTime();
