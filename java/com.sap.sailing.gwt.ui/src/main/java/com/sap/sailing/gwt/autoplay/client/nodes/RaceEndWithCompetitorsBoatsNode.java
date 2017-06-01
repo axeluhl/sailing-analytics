@@ -6,20 +6,20 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
-import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsTop3Place;
+import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsBoatsPlace;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticAction;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class RaceEndWithCompetitorsNode extends FiresPlaceNode {
+public class RaceEndWithCompetitorsBoatsNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
 
-    public RaceEndWithCompetitorsNode(AutoPlayClientFactory cf) {
+    public RaceEndWithCompetitorsBoatsNode(AutoPlayClientFactory cf) {
         this.cf = cf;
     }
 
     public void onStart() {
-        RaceEndWithCompetitorsTop3Place place = new RaceEndWithCompetitorsTop3Place();
+        RaceEndWithCompetitorsBoatsPlace place = new RaceEndWithCompetitorsBoatsPlace();
 
         RegattaAndRaceIdentifier lastRace = cf.getAutoPlayCtx().getLastRace();
         place.setLifeRace(lastRace);
