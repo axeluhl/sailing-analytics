@@ -43,7 +43,8 @@ public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements I
             @Override
             public void run() {
                 SortedCellTable<LeaderboardRowDTO> tbl = leaderboardPanel.getLeaderboardTable();
-                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX, tbl);
+                Widget tb = leaderboardPanel.getToolbarWidget();
+                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX+tb.getOffsetHeight(), tbl);
             }
         };
         resizer.scheduleRepeating(100);

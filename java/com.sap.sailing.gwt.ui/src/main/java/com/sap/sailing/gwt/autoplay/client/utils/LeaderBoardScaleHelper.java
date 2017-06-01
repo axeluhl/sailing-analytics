@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.autoplay.client.utils;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.CSS3Util;
@@ -12,7 +11,6 @@ public class LeaderBoardScaleHelper {
     public static void scaleContentWidget(int headerHeight, Widget contentWidget) {
         int clientWidth = Window.getClientWidth();
         int contentWidth = contentWidget.getOffsetWidth();
-        GWT.log("clientw  " + clientWidth + " " + contentWidth);
         double scaleFactorX = clientWidth / (double) contentWidth;
         if(scaleFactorX > 1){
             scaleFactorX = 1;

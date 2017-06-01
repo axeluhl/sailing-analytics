@@ -396,6 +396,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     private final boolean enableSyncedScroller;
     private boolean showRaceRankColumn = false;
     public boolean isShowCompetitorNationality;
+    private FlowPanel informationPanel;
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
@@ -579,7 +580,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
 
     protected Widget createToolbarPanel() {
         GWT.log("createToolbarPanel()");
-        FlowPanel informationPanel = new FlowPanel();
+        informationPanel = new FlowPanel();
         informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");
         scoreCorrectionCommentLabel = new Label("");
@@ -649,7 +650,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
 
     @Override
     public Widget getToolbarWidget() {
-        return null;
+        return informationPanel;
     }
 
     @Override
