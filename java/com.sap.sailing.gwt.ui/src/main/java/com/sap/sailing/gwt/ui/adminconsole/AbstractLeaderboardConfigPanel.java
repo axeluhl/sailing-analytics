@@ -95,6 +95,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     
     private final LeaderboardsRefresher leaderboardsRefresher;
     
+    private RaceDTO oldSelectedRace;
+    
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
 
@@ -229,25 +231,54 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
         trackedRaceListHandler = new SelectionChangeEvent.Handler() {
-        @Override
+        
+            @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<RaceDTO> selectedRaces = refreshableTrackedRaceSelectionModel.getSelectedSet();
-                // if no leaderboard column is selected, ignore the race selection change
+               
                 RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName = getSelectedRaceColumnWithFleet();
+                
+                RaceDTO linkedRaceOfSelectedRaceColumn = selectedRaceColumnAndFleetName.getA().getRace(selectedRaceColumnAndFleetName.getB());
+                
+                GWT.log(linkedRaceOfSelectedRaceColumn.getRaceIdentifier().toString());
+                
                 if (selectedRaceColumnAndFleetName != null) {
                     if (selectedRaces.isEmpty()) {
-                        if (selectedRaceColumnAndFleetName.getA()
-                                .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null) {
+                        if (hasLink(selectedRaceColumnAndFleetName)) {
                             unlinkRaceColumnFromTrackedRace(selectedRaceColumnAndFleetName.getA().getRaceColumnName(),
                                     selectedRaceColumnAndFleetName.getB());
                         }
                     } else {
-                        linkTrackedRaceToSelectedRaceColumn(selectedRaceColumnAndFleetName.getA(),
-                                selectedRaceColumnAndFleetName.getB(),
-                                selectedRaces.iterator().next().getRaceIdentifier());
+                        RaceDTO newSelectedRace = selectedRaces.iterator().next();
+                       
+                        if(hasLink(selectedRaceColumnAndFleetName) && !isLinkedToRace(selectedRaceColumnAndFleetName, newSelectedRace)){
+                            if (Window.confirm("Do you really want to change the link?")){
+                                linkTrackedRaceToSelectedRaceColumn(selectedRaceColumnAndFleetName.getA(),
+                                        selectedRaceColumnAndFleetName.getB(),
+                                        selectedRaces.iterator().next().getRaceIdentifier());
+                                }
+                            else{
+                                selectTrackedRaceInRaceList();
+                            }
+                        }
+                        else{
+                            linkTrackedRaceToSelectedRaceColumn(selectedRaceColumnAndFleetName.getA(),
+                                    selectedRaceColumnAndFleetName.getB(),
+                                    selectedRaces.iterator().next().getRaceIdentifier());
+                        }
                     }
                 }
             }
+
+        private boolean hasLink(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName) {
+            return selectedRaceColumnAndFleetName.getA()
+                    .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null;
+        }
+        
+        private boolean isLinkedToRace(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName, RaceDTO race){
+            return selectedRaceColumnAndFleetName.getA().getRaceIdentifier(selectedRaceColumnAndFleetName.getB()).equals(race.getRaceIdentifier());
+        }
+        
         };
         trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
 
