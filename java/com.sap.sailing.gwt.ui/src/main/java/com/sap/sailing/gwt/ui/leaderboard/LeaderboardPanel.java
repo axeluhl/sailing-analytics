@@ -244,7 +244,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
 
     private final Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> overallDetailColumnMap;
 
-    private RaceColumnSelection raceColumnSelection;
+    protected RaceColumnSelection raceColumnSelection;
 
     protected final String RACE_COLUMN_HEADER_STYLE;
 
@@ -3054,7 +3054,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
      * Existing and matching race columns may still need to be removed, re-created and inserted because the "tracked"
      * property may have changed, changing the columns expandability.
      */
-    private void createMissingAndAdjustExistingRaceColumns(LeaderboardDTO leaderboard) {
+    protected void createMissingAndAdjustExistingRaceColumns(LeaderboardDTO leaderboard) {
         // Correct order of races in selectedRaceColum
         Iterable<RaceColumnDTO> correctedOrderSelectedRaces = raceColumnSelection
                 .getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard);

@@ -25,8 +25,9 @@
         display: block;
         margin: auto;
         min-width: 50%;
-        height: 90%;
+        height: 85%;
         width: auto;
+        padding-bottom: 2em;
     }
     .subline1{
         font-size:20px;
