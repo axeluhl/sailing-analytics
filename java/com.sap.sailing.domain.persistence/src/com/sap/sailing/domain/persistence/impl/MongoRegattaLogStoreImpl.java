@@ -49,4 +49,10 @@ public class MongoRegattaLogStoreImpl implements RegattaLogStore {
         addListener(identifier, regattaLog);
         regattaLogCache.put(identifier, regattaLog);
     }
+
+    @Override
+    public void clear() {
+        mongoObjectFactory.removeAllRegattaLogs();
+        regattaLogCache.clear();
+    }
 }

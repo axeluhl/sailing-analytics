@@ -17,4 +17,9 @@ public interface RegattaLogStore {
      * Adds the mongo listener to the regatta log and adds regatta log to cache.
      */
     void addImportedRegattaLog(RegattaLog regattaLog, RegattaLikeIdentifier identifier);
+
+    /**
+     * For Testing purposes only! Deletes all stored RegattaLogs.
+     */
+    void clear();
 }
