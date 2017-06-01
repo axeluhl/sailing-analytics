@@ -2395,7 +2395,9 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            currentSettings = currentSettings.overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
+                            if(preSelectedRace == null) {
+                                currentSettings = currentSettings.overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
+                            }
                             
                             try {
                                 updateLeaderboard(result);
