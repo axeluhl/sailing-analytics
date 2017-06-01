@@ -31,9 +31,10 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
     public void onStart() {
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.OVERALL_RANK);
+        overallDetails.add(DetailType.REGATTA_RANK);
         
         List<DetailType> raceDetails = new ArrayList<>();
-        raceDetails.add(DetailType.RACE_RANK);
+        // raceDetails.add(DetailType.RACE_RANK);
         
         final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, raceDetails, overallDetails , null, null,
                 null, false, null, null, /* ascending */ true, /* updateUponPlayStateChange */ true,

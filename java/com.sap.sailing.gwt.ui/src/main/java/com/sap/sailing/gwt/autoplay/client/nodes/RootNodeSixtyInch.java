@@ -19,11 +19,13 @@ public class RootNodeSixtyInch extends RootNodeBase {
         this.idleLoop = new AutoPlayLoopNode(30,new IdleUpNextNode(cf),new IdleOverallLeaderBoardNode(cf));
         this.preLiveRaceLoop = new AutoPlayLoopNode(90,  new PreLeaderBoardWithCompetitorsNode(cf),new PreRaceWithRacemapNode(cf));
         this.liveRaceLoop = new AutoPlayLoopNode(30, new LiveRaceWithRacemapNode(cf));
-        this.afterLiveRaceLoop = new AutoPlayLoopNode(30, new RaceEndWithCompetitorsNode(cf), idleLoop);
+        this.afterLiveRaceLoop = new AutoPlayLoopNode(30, new RaceEndWithCompetitorsBoatsNode(cf),
+                new RaceEndWithCompetitorsFlagsNode(cf), idleLoop);
 
         afterLiveRaceLoop.setOnLoopEnd(new Command() {
             @Override
             public void execute() {
+
                 transitionTo(idleLoop);
             }
         });

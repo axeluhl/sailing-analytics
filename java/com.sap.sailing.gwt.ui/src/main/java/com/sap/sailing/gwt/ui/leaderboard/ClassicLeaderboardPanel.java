@@ -67,7 +67,8 @@ public class ClassicLeaderboardPanel extends LeaderboardPanel {
 
     @Override
     protected void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb,CompetitorDTO competitor) {
-        sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");        
+        sb.appendHtmlConstant("<img src=\"" + flagImageURL
+                + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
     }
 
 }

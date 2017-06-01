@@ -98,8 +98,9 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
 
     private void setImage(FlowPanel image, String imageUrl, boolean slightlyLarger) {
         image.getElement().getStyle().setBackgroundImage("url(" + imageUrl + ")");
-        image.getElement().getStyle().setHeight(90, Unit.PCT);
         image.getElement().getStyle().setWidth(slightlyLarger ? 100 : 90, Unit.PCT);
+        image.getElement().getStyle().setProperty("height", "90%");
+        image.getElement().getStyle().setProperty("margin", "auto");
         image.getElement().getStyle().setProperty("backgroundPosition", "center bottom");
         image.getElement().getStyle().setProperty("backgroundSize", "contain");
         image.getElement().getStyle().setProperty("backgroundRepeat", "no-repeat");

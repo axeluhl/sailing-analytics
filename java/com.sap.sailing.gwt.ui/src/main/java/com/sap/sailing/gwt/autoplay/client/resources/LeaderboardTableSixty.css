@@ -10,7 +10,7 @@
      */
 .cellTableHeader {
     position: relative;
-    vertical-align: bottom;
+    vertical-align: middle;
     background-color: #f2f2f2;
     border-right: 0px solid #c9caca !important;
     border-top: none !important;
@@ -173,5 +173,7 @@
 
 .cellTableSailIdColumn img {
 	max-width: none;
+	margin-right: 20px;
+    margin-left: 10px;
 }
 }

@@ -8,8 +8,8 @@ import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartPre
 import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithBoatsPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithBoatsViewImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsTop3Place;
-import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithFlagesTop3Place;
+import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boats.RaceEndWithCompetitorsBoatsPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.flags.RaceEndWithCompetitorFlagsPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleNextUpViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleUpNextPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.idleupnext.IdleUpNextPresenterImpl;
@@ -85,12 +85,12 @@ public class AutoPlayActivityMapperImpl implements ActivityMapper {
             return new LiveRaceWithRacemapAndLeaderBoardPresenterImpl((LiveRaceWithRacemapAndLeaderBoardPlace) place,
                     clientFactory, new LiveRaceWithRacemapAndLeaderBoardViewImpl());
         }
-        if (place instanceof RaceEndWithCompetitorsTop3Place) {
-            return new RaceEndWithBoatsPresenterImpl((RaceEndWithCompetitorsTop3Place) place, clientFactory,
+        if (place instanceof RaceEndWithCompetitorsBoatsPlace) {
+            return new RaceEndWithBoatsPresenterImpl((RaceEndWithCompetitorsBoatsPlace) place, clientFactory,
                     new RaceEndWithBoatsViewImpl(new CompetitorImageProvider()));
         }
-        if (place instanceof RaceEndWithFlagesTop3Place) {
-            return new RaceEndWithBoatsPresenterImpl((RaceEndWithFlagesTop3Place) place, clientFactory,
+        if (place instanceof RaceEndWithCompetitorFlagsPlace) {
+            return new RaceEndWithBoatsPresenterImpl((RaceEndWithCompetitorFlagsPlace) place, clientFactory,
                     new RaceEndWithBoatsViewImpl(new FlagImageProvider()));
         }
         if (place instanceof IdleOverallLeaderBoardPlace) {
