@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
@@ -58,6 +59,10 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
+/**
+ * @author D069485
+ *
+ */
 public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
         RegattasDisplayer {
 
@@ -76,6 +81,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     private Iterable<RaceDTO> allRaces;
 
     private Label noTrackedRacesLabel;
+    
+    private RaceDTO oldSelectedRace;
 
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
@@ -127,6 +134,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
     
     protected void createUI() {
+
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         raceList = new ListDataProvider<>();
         settings = new TrackedRacesSettings();
@@ -241,6 +249,16 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
+        
+        raceTable.addCellPreviewHandler(new CellPreviewEvent.Handler<RaceDTO>(){
+            @Override
+            public void onCellPreview(CellPreviewEvent<RaceDTO> event){
+                if ("click".equals(event.getNativeEvent().getType())) {
+                    oldSelectedRace = getSelectionModel().getSelectedSet().iterator().next();
+                }
+            }
+        });
+        
         addControlButtons(trackedRacesButtonPanel);
     }
     
@@ -482,6 +500,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     public void addRaceSelectionChangeHandler(Handler handler) {
         refreshableSelectionModel.addSelectionChangeHandler(handler);
     }
+    
 
     public RaceDTO getRaceByIdentifier(RaceIdentifier raceIdentifier) {
         RaceDTO result = null;
@@ -587,5 +606,15 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     public RefreshableSelectionModel<RaceDTO> getSelectionModel() {
         return refreshableSelectionModel;
     }
+
+    public RaceDTO getOldSelectedRace() {
+        return oldSelectedRace;
+    }
+
+    public void setOldSelectedRace(RaceDTO oldSelectedRace) {
+        this.oldSelectedRace = oldSelectedRace;
+    }
+    
+    
 
 }

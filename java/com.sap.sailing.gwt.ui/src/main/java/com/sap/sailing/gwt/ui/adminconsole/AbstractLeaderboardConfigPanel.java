@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
@@ -235,20 +236,48 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 // if no leaderboard column is selected, ignore the race selection change
                 RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName = getSelectedRaceColumnWithFleet();
                 if (selectedRaceColumnAndFleetName != null) {
+                    RaceDTO oldRace = selectedRaceColumnAndFleetName.getA().getRace(selectedRaceColumnAndFleetName.getB());
                     if (selectedRaces.isEmpty()) {
-                        if (selectedRaceColumnAndFleetName.getA()
-                                .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null) {
+                        if (isRaceColumnAlreadyLinkedToAnotherTrackedRace(selectedRaceColumnAndFleetName)) {
                             unlinkRaceColumnFromTrackedRace(selectedRaceColumnAndFleetName.getA().getRaceColumnName(),
                                     selectedRaceColumnAndFleetName.getB());
                         }
                     } else {
-                        linkTrackedRaceToSelectedRaceColumn(selectedRaceColumnAndFleetName.getA(),
-                                selectedRaceColumnAndFleetName.getB(),
-                                selectedRaces.iterator().next().getRaceIdentifier());
+                        if(isRaceColumnAlreadyLinkedToAnotherTrackedRace(selectedRaceColumnAndFleetName)){
+                            if(Window.confirm("Do you really want to change the link?")){
+                                linkTrackedRaceToSelectedRaceColumn(selectedRaceColumnAndFleetName.getA(),
+                                        selectedRaceColumnAndFleetName.getB(),
+                                        selectedRaces.iterator().next().getRaceIdentifier());
+                            }
+                            else{
+                                trackedRacesListComposite.removeTrackedRaceChangeListener(AbstractLeaderboardConfigPanel.this);
+                                refreshableTrackedRaceSelectionModel.setSelected(selectedRaceColumnAndFleetName.getA().getRace(selectedRaceColumnAndFleetName.getB()),true);
+                                trackedRacesListComposite.addTrackedRaceChangeListener(AbstractLeaderboardConfigPanel.this);
+                            }
+                        }
+                        else{
+                            linkTrackedRaceToSelectedRaceColumn(selectedRaceColumnAndFleetName.getA(),
+                                    selectedRaceColumnAndFleetName.getB(),
+                                    selectedRaces.iterator().next().getRaceIdentifier());
+                        }
+                        
                     }
                 }
             }
+
+        private boolean isRaceColumnAlreadyLinkedToAnotherTrackedRace(
+                RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName) {
+            if(selectedRaceColumnAndFleetName.getA()
+                    .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null)
+                    {
+                return true;
+            }
+            return false;
+        }
+        
         };
+        
+        
         trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
 
         Button reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
