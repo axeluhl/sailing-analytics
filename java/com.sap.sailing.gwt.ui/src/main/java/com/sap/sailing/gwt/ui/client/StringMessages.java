@@ -1808,4 +1808,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
     String unknownLeaderboardType(String name);
     String selectCompetitorsToEliminate();
+    String trackedRaceAlreadyLinked();
 }
