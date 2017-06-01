@@ -525,16 +525,48 @@ public class TrackingListFragment extends BaseFragment
     }
 
     @Override
-    public void afterMoved() {
-        // no-op
+    public void onItemMove(int fromPosition, int toPosition) {
+        CompetitorResultWithIdImpl item = mFinishedData.get(fromPosition);
+        mFinishedData.remove(item);
+        mFinishedData.add(toPosition, item);
+        // now adjust ranks of all in-between results
+        for (int i=Math.min(fromPosition, toPosition); i<=Math.max(fromPosition, toPosition); i++) {
+            mFinishedData.set(i, cloneCompetitorResultAndAdjustRank(mFinishedData.get(i),
+                        /* newOneBasedRank */ mFinishedData.get(i).getOneBasedRank() == 0 ? 0 : i+1));
+        }
+        mFinishedAdapter.notifyItemMoved(fromPosition, toPosition);
     }
 
     @Override
-    public void onItemRemoved(CompetitorResultWithIdImpl item) {
+    public void onItemRemove(int position) {
+        CompetitorResultWithIdImpl item = mFinishedData.get(position);
+        if (position >= 0) { // found
+            mFinishedData.remove(position);
+            for (int i = position; i < mFinishedData.size(); i++) {
+                CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition = mFinishedData.get(i);
+                final int newOneBasedRank = Math
+                    .max(0, competitorToReplaceWithAdjustedPosition.getOneBasedRank() - 1);  // adjust rank for removed competitor
+                mFinishedData.set(i, cloneCompetitorResultAndAdjustRank(competitorToReplaceWithAdjustedPosition, newOneBasedRank));
+            }
+            mFinishedAdapter.notifyItemRemoved(position);
+        }
         Competitor competitor = getCompetitorStore().getExistingCompetitorById(item.getCompetitorId());
         if (competitor != null) {
             addNewCompetitorToCompetitorList(competitor);
         }
+    }
+
+    private CompetitorResultWithIdImpl cloneCompetitorResultAndAdjustRank(
+        CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition, final int newOneBasedRank) {
+        return new CompetitorResultWithIdImpl(
+            competitorToReplaceWithAdjustedPosition.getId(),
+            competitorToReplaceWithAdjustedPosition.getCompetitorId(),
+            competitorToReplaceWithAdjustedPosition.getCompetitorDisplayName(),
+            newOneBasedRank,
+            competitorToReplaceWithAdjustedPosition.getMaxPointsReason(),
+            competitorToReplaceWithAdjustedPosition.getScore(),
+            competitorToReplaceWithAdjustedPosition.getFinishingTime(),
+            competitorToReplaceWithAdjustedPosition.getComment());
     }
 
     private void addNewCompetitorToCompetitorList(Competitor competitor) {
@@ -558,7 +590,7 @@ public class TrackingListFragment extends BaseFragment
     }
 
     @Override
-    public void onEditItem(final CompetitorResultWithIdImpl item) {
+    public void onItemEdit(final CompetitorResultWithIdImpl item) {
         Context context = getActivity();
         if (context instanceof AppCompatActivity) {
             ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
@@ -579,19 +611,18 @@ public class TrackingListFragment extends BaseFragment
                 if (item.getMaxPointsReason() != newItem.getMaxPointsReason() && item.getMaxPointsReason() == MaxPointsReason.NONE) {
                     mFinishedData.remove(item);
                     mFinishedData.add(mFinishedData.size(), newItem);
-                } else if (item.getOneBasedRank() != newItem.getOneBasedRank()) {
-                    int newPos = newItem.getOneBasedRank();
-                    if (newPos > 0) {
-                        newPos -= 1;
+                } else if (item.getOneBasedRank() != newItem.getOneBasedRank()) { //rank changed
+                    if (newItem.getOneBasedRank() > 0) {
+                        onItemMove(item.getOneBasedRank() - 1, newItem.getOneBasedRank() - 1);
+                    } else {
+                        onItemRemove(mFinishedData.indexOf(item));
                     }
-                    int firstPenalty = mAdapter.getFirstPenalty();
-                    if (newPos >= firstPenalty) {
-                        newPos = firstPenalty;
+                } else { // same rank
+                    if (newItem.getOneBasedRank() == 0) { // empty rank -> remove
+                        onItemRemove(mFinishedData.indexOf(item));
+                    } else {
+                        replaceItemInPositioningList(index, item, newItem);
                     }
-                    mFinishedData.remove(item);
-                    mFinishedData.add(newPos, newItem);
-                } else {
-                    replaceItemInPositioningList(index, item, newItem);
                 }
                 mFinishedAdapter.notifyDataSetChanged();
             }
