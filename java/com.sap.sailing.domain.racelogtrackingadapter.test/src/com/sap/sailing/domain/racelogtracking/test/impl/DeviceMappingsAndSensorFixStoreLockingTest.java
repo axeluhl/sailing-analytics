@@ -44,7 +44,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
             @Override
             protected void deviceIdAdded(DeviceIdentifier deviceIdentifier) {
                 try {
-                    barrier.await(1000, TimeUnit.MILLISECONDS);
+                    barrier.await();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -62,7 +62,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
         };
         store.addListener((dev,  fix)-> {
             try {
-                barrier.await(1000, TimeUnit.MILLISECONDS);
+                barrier.await();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
