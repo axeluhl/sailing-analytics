@@ -3,7 +3,6 @@ package com.sap.sailing.domain.racelogtracking.test.impl;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Rule;
 import org.junit.Test;
