@@ -31,7 +31,6 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
  */
 public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite {
     final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
-   
     private Button btnUntrack;
     private Button btnRemoveRace;
     private Button btnSetDelayToLive;
@@ -46,7 +45,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
-        
         createUI();
     }
 
@@ -61,12 +59,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     public void addTrackedRaceChangeListener(TrackedRaceChangedListener listener) {
         this.raceIsTrackedRaceChangeListener.add(listener);
     }
-    
-    public void removeTrackedRaceChangeListener(TrackedRaceChangedListener listener){
-        this.raceIsTrackedRaceChangeListener.remove(listener);
-        
-    }
-    
 
     void stopTrackingRaces(final Iterable<RaceDTO> races) {
         final List<RegattaAndRaceIdentifier> racesToStopTracking = new ArrayList<RegattaAndRaceIdentifier>();
