@@ -67,7 +67,10 @@
 							<li>
 								<ui:text from='{i18n.contentSapInSailing12}' />
 							</li>
-						</ul>
+                                                        <li>
+                                                                <ui:text from='{i18n.contentSapInSailing13}' />
+                                                        </li>
+              						</ul>
 					</div>
 				</div>
 				<div ui:field="sapSailingAnalyticsUi"

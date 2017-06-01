@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2017-04-12T15:29:00Z" original="/usr/sap/ljs/app/Converter_429408536936316109/java/com.sap.sailing.server/resources/stringmessages/StringMessages.properties" source-language="en" target-language="es">
+	<file datatype="javapropertyresourcebundle" date="2017-04-19T13:56:15Z" original="/usr/sap/ljs/app/Converter_429408536936316109/java/com.sap.sailing.server/resources/stringmessages/StringMessages.properties" source-language="en" target-language="es">
 		<header>
 			<skl>
 				<internal-file crc="8ee9f762b976b9f98d3355409c00d411" form="base64">H4sIAAAAAAAAAKVUTW/aQBC9+1eM1AOtRBFJb0g+UFJUpCpBITnkuDbjMM1619pdmyLEf+/smg9DbBU1F4xn3rw3b2a9RqQ4U4/4KpwTD9mPCpWLDQdhO9wBKTB1Cnq97c2u1wOdAXqQD9xyIDKBYSoRXTfR5+233Zer6CSKJZpEC7M8sDRCHja8rPNEUbNwsdLrR7SldPYXqbcnchJjH2T5EA1N24cKTUW4vsT4HOh9MkBPrPzSAj+BPGCshNxYeqfthyH2uShiuJtIYa0vmZIiu8Llokx+Y+piH4NMG/AoSD0szHElLGR7LHwFhUdLICpBUiQSo08wHMGR/l7k2IebUdC/Q5saKhxp1d7Ad73cxPcN2pYmeI08cxAGT6KDhqFFqg1OtDHshIUOnpqsZ7UtGl0eGktutXIh/QE3qc4LdOS0mTMSbT2gg5fJMRs4Cg9Z7jcDkhR6WlGfjWDlRNe5j3bFYOEqOXZx1vd/rSE9U+rsvWMPneKtizjX+uexei64gNSrP64HM+P6q2pZ65qkBOuEcWA1t3bdR9GH2xE4yrFdNtiYvhfzfTcERVEY/Ydy4VBugJF8tbETWyZHoZninhnAf+MXXQbXPCukiqVAaUcZpSHNszI6h8V4Dgueik+HC8ZRagfwpMGVRvF9mJ1X9aHgJVmEiiw52OjSQGnRALeWEW+b23Ir9KfnDRKUej2IfH5ep+Nnj92/RJQXhvgmntXPiH8rkW7ief2MrJClq838FFJqP5R+9Bd0t0VsXAYAAA==</internal-file>
@@ -13,15 +13,15 @@
 		<body>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceInRegattaOfEvent" resname="raceInRegattaOfEvent">
 				<source>race <ph id="1">{0}</ph> in regatta ''<ph id="2">{1}</ph>'' of event ''<ph id="3">{2}</ph>''</source>
-				<target state="signed-off">Carrera <ph id="1">{0}</ph> en regata ''<ph id="2">{1}</ph>''de evento ''<ph id="3">{2}</ph>''</target>
+				<target state="translated">Carrera <ph id="1">{0}</ph> en regata ''<ph id="2">{1}</ph>'’ de evento ''<ph id="3">{2}</ph>''</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceInFleetInRegattaOfEvent" resname="raceInFleetInRegattaOfEvent">
 				<source>race <ph id="1">{0}</ph> (<ph id="2">{3}</ph>) in regatta ''<ph id="3">{1}</ph>'' of event ''<ph id="4">{2}</ph>''</source>
-				<target state="signed-off">Carrera <ph id="1">{0}</ph> (<ph id="2">{3}</ph>)en regata ''<ph id="3">{1}</ph>''de evento ''<ph id="4">{2}</ph>''</target>
+				<target state="translated">Carrera <ph id="1">{0}</ph> (<ph id="2">{3}</ph>)en regata ''<ph id="3">{1}</ph>'’ de evento ''<ph id="4">{2}</ph>''</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboardOfEvent" resname="leaderboardOfEvent">
 				<source>leaderboard ''<ph id="1">{0}</ph>'' of event ''<ph id="2">{1}</ph>''</source>
-				<target state="signed-off">Clasificación ''<ph id="1">{0}</ph>'’ de evento ''<ph id="2">{1}</ph>'’</target>
+				<target state="translated">Clasificación ''<ph id="1">{0}</ph>'' de evento ''<ph id="2">{1}</ph>''</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboardShowResultsLinkTitle" resname="leaderboardShowResultsLinkTitle">
 				<source>Show results</source>
