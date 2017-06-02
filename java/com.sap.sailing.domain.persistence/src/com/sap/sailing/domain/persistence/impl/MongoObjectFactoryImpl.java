@@ -1355,12 +1355,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogIdentifier(identifier, query);
         getRaceLogCollection().remove(query);
     }
+    
+    @Override
+    public void removeAllRaceLogs() {
+        getRaceLogCollection().drop();;
+    }
 
     @Override
     public void removeRegattaLog(RegattaLikeIdentifier identifier) {
         DBObject query = new BasicDBObject();
         addRegattaLikeIdentifier(identifier, query);
         getRegattaLogCollection().remove(query);
+    }
+    
+    @Override
+    public void removeAllRegattaLogs() {
+        getRegattaLogCollection().drop();
     }
 
     @Override
