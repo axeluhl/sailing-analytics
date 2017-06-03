@@ -95,8 +95,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     
     private final LeaderboardsRefresher leaderboardsRefresher;
     
-    private RaceDTO oldSelectedRace;
-    
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
 
