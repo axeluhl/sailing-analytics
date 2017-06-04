@@ -234,11 +234,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<RaceDTO> selectedRaces = refreshableTrackedRaceSelectionModel.getSelectedSet();
                 RaceDTO selectedRace = selectedRaces.iterator().next();
-
                 RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName = getSelectedRaceColumnWithFleet();
                 RaceColumnDTO selectedRaceColumn = selectedRaceColumnAndFleetName.getA();
                 FleetDTO selectedRaceColumnFleet = selectedRaceColumnAndFleetName.getB();
-
+                // if no leaderboard column is selected, ignore the race selection change
                 if (selectedRaceColumnAndFleetName != null) {
                     if (selectedRaces.isEmpty()) {
                         if (hasLink(selectedRaceColumnAndFleetName)) {
