@@ -45,8 +45,6 @@ public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements I
             @Override
             public void run() {
                 SortedCellTable<LeaderboardRowDTO> tbl = leaderboardPanel.getLeaderboardTable();
-                Widget tb = leaderboardPanel.getToolbarWidget();
-                GWT.log("toolbarsize "+tb.getOffsetHeight());
                 LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX+TOOLBAR_SIZE, tbl);
             }
         };
