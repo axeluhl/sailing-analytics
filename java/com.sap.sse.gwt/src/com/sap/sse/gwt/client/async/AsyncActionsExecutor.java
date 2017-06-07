@@ -44,7 +44,7 @@ public class AsyncActionsExecutor {
         @Override
         public void onSuccess(T result) {
             try {
-//                GWT.log("Execution success for action of type " + getType() + ", category "+getCategory());
+                GWT.log("Execution success for action of type " + getType() + ", category "+getCategory());
                 this.callback.onSuccess(result);
             } finally {
                 AsyncActionsExecutor.this.callCompleted(this);
