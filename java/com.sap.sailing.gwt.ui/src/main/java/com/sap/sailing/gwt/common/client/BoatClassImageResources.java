@@ -253,6 +253,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/KIELZUGVOGEL.png")
     ImageResource KielzugvogelIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FORMULA_KITE.png")
+    ImageResource FormulaKiteIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TRIAS.png")
     ImageResource TriasIcon();
 
