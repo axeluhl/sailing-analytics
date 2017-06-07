@@ -4,6 +4,7 @@ import com.google.gwt.user.client.Command;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlaySequenceNode;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeBase;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.RootNodeState;
 
@@ -12,30 +13,31 @@ public class RootNodeSixtyInch extends RootNodeBase {
     private final AutoPlayLoopNode idleLoop;
     private final AutoPlayLoopNode preLiveRaceLoop;
     private final AutoPlayLoopNode liveRaceLoop;
-    private final AutoPlayLoopNode afterLiveRaceLoop;
+    private final AutoPlaySequenceNode afterLiveRaceLoop;
+    protected boolean afterRaceFinished = true;
 
     public RootNodeSixtyInch(AutoPlayClientFactory cf) {
         super(cf);
         this.idleLoop = new AutoPlayLoopNode(30,new IdleUpNextNode(cf),new IdleOverallLeaderBoardNode(cf));
         this.preLiveRaceLoop = new AutoPlayLoopNode(90,  new PreLeaderBoardWithCompetitorsNode(cf),new PreRaceWithRacemapNode(cf));
         this.liveRaceLoop = new AutoPlayLoopNode(30, new LiveRaceWithRacemapNode(cf));
-        this.afterLiveRaceLoop = new AutoPlayLoopNode(30, new RaceEndWithCompetitorsBoatsNode(cf),
-                new RaceEndWithCompetitorsFlagsNode(cf), idleLoop);
+        this.afterLiveRaceLoop = new AutoPlaySequenceNode(30, new RaceEndWithCompetitorsBoatsNode(cf),
+                new RaceEndWithCompetitorsFlagsNode(cf));
 
-        afterLiveRaceLoop.setOnLoopEnd(new Command() {
+        afterLiveRaceLoop.setOnSequenceEnd(new Command() {
             @Override
             public void execute() {
-
-                transitionTo(idleLoop);
+                afterRaceFinished  = true;
             }
         });
     }
 
     protected boolean processStateTransition(RootNodeState goingTo, RootNodeState comingFrom) {
-        // block transitions, until the afterLiveRaceLoop returns to the idleLoop, to ensure scoreboard is shown at
-        // least 30 seconds
-        if (comingFrom == RootNodeState.AFTER_LIVE && afterLiveRaceLoop.getCurrentNode() != idleLoop) {
+        // block transitions, until the afterLiveRaceLoop is finished
+        if (comingFrom == RootNodeState.AFTER_LIVE && !afterRaceFinished) {
             return true;
+        }else{
+            afterRaceFinished = false;
         }
         switch (goingTo) {
         case IDLE:

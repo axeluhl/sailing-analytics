@@ -1,41 +1,23 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
-import java.util.UUID;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
-import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
-import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
-import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.AbstractPreRaceLeaderBoardWithImagePlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderBoardWithCompetitorPlace;
 
-public class PreLeaderBoardWithFlagsNode extends FiresPlaceNode {
+public class PreLeaderBoardWithCompetitorsNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
 
-    public PreLeaderBoardWithFlagsNode(AutoPlayClientFactory cf) {
+    public PreLeaderBoardWithCompetitorsNode(AutoPlayClientFactory cf) {
         this.cf = cf;
     }
 
-
     public void onStart() {
-
-        UUID eventId = cf.getAutoPlayCtx().getContextDefinition().getEventId();
-        String leaderBoardName = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
-        cf.getDispatch().execute(new GetMiniLeaderbordAction(eventId, leaderBoardName),
-                new AsyncCallback<ResultWithTTL<GetMiniLeaderboardDTO>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // fireEvent(new DataLoadFailureEvent(MiniLeaderboardLoader.this, caught));
-                    }
-
-                    @Override
-                    public void onSuccess(ResultWithTTL<GetMiniLeaderboardDTO> resultTTL) {
-                        /*
-                         * GetMiniLeaderboardDTO dto = resultTTL.getDto(); AbstractPreRaceLeaderBoardWithImagePlace
-                         * place = new AbstractPreRaceLeaderBoardWithImagePlace(); place.setLeaderBoardDTO(dto);
-                         * setPlaceToGo(place); firePlaceChangeAndStartTimer();
-                         */
-                    }
-                });
+        AbstractPreRaceLeaderBoardWithImagePlace place = new PreRaceLeaderBoardWithCompetitorPlace();
+        setPlaceToGo(place);
+        firePlaceChangeAndStartTimer();
+        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),
+                cf.getAutoPlayCtx().getLifeRace().getRaceName()));
     };
 }

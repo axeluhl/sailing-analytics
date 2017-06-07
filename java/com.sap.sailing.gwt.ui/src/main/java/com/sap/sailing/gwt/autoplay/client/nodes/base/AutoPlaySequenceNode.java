@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 
-public class AutoPlayLoopNode extends BaseCompositeNode {
+public class AutoPlaySequenceNode extends BaseCompositeNode {
 
     private List<AutoPlayNode> nodes = new ArrayList<>();
-    private int loopTimePerNodeInSeconds;
+    private int sequenceTimePerNodeInSeconds;
     private int currentPos = -1;
+    private Command onLoopEnd;
     private Timer transitionTimer = new Timer() {
         @Override
         public void run() {
@@ -21,22 +23,30 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
     private void gotoNext() {
         currentPos++;
         if (currentPos > nodes.size() - 1) {
-            currentPos = 0;
+            if (onLoopEnd != null) {
+                onLoopEnd.execute();
+            }
+            //do nothing we stay at the end position
+        }else{
+            transitionTo(nodes.get(currentPos));
         }
-        transitionTo(nodes.get(currentPos));
     }
     
     @Override
     protected void transitionTo(AutoPlayNode nextNode) {
         super.transitionTo(nextNode);
         if (!isStopped()) {
-            transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
+            transitionTimer.schedule(sequenceTimePerNodeInSeconds * 1000);
         }
     }
     
-    public AutoPlayLoopNode(int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {
-        this.loopTimePerNodeInSeconds = loopTimePerNodeInSeconds;
+    public AutoPlaySequenceNode(int sequenceTimePerNodeInSeconds, AutoPlayNode... nodes) {
+        this.sequenceTimePerNodeInSeconds = sequenceTimePerNodeInSeconds;
         this.nodes.addAll(Arrays.asList(nodes));
+    }
+
+    public void setOnSequenceEnd(Command onLoopEnd) {
+        this.onLoopEnd = onLoopEnd;
     }
 
     @Override

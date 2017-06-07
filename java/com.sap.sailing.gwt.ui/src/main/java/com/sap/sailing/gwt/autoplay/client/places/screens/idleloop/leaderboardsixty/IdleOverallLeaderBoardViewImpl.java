@@ -15,6 +15,8 @@ import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements IdleOverallLeaderBoardView {
+    protected static final int TOOLBAR_SIZE = 182;
+
     private static LifeRaceWithRacemapViewImplUiBinder uiBinder = GWT.create(LifeRaceWithRacemapViewImplUiBinder.class);
 
     @UiField
@@ -44,7 +46,8 @@ public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements I
             public void run() {
                 SortedCellTable<LeaderboardRowDTO> tbl = leaderboardPanel.getLeaderboardTable();
                 Widget tb = leaderboardPanel.getToolbarWidget();
-                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX+tb.getOffsetHeight(), tbl);
+                GWT.log("toolbarsize "+tb.getOffsetHeight());
+                LeaderBoardScaleHelper.scaleContentWidget(AutoPlayMainViewImpl.SAP_HEADER_IN_PX+TOOLBAR_SIZE, tbl);
             }
         };
         resizer.scheduleRepeating(100);
