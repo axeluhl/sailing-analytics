@@ -394,7 +394,7 @@
     <string name="finished_replay">Replay Voice</string>
     <string name="finished_list">Finish List</string>
     <string name="finished_photos">Take Photos</string>
-    <string name="finished_tracking">Competitor</string>
+    <string name="finished_tracking">@string/competitor_list</string>
     <string name="finished_edit">Edit List</string>
     <string name="finished_publishing">Publishing</string>
     <string name="finished_submit">Submit</string>

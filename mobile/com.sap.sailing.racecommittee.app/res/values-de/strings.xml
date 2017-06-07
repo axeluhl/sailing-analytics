@@ -373,7 +373,7 @@
     <string name="finished_photos">Fotos aufnehmen</string>
     <string name="finished_recording">Aufzeichnen</string>
     <string name="finished_replay">Stimme abspielen</string>
-    <string name="finished_tracking">Teilnehmer</string>
+    <string name="finished_tracking">@string/competitor_list</string>
     <string name="finished_publishing">Veröffentlichen</string>
     <string name="finished_submit">Übermitteln</string>
     <string name="finished_text_01">Bitte evaluieren und übermitteln Sie die Zusammenfassung des Rennens.</string>
