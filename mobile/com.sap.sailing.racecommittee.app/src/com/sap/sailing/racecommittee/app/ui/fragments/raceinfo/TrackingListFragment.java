@@ -278,6 +278,7 @@ public class TrackingListFragment extends BaseFragment
                     public void onClick(View v) {
                         sendUnconfirmed();
                         getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
+                        Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
                         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
                     }
