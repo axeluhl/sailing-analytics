@@ -613,7 +613,8 @@ public class TrackingListFragment extends BaseFragment
                     mFinishedData.add(mFinishedData.size(), newItem);
                 } else if (item.getOneBasedRank() != newItem.getOneBasedRank()) { //rank changed
                     if (newItem.getOneBasedRank() > 0) {
-                        onItemMove(item.getOneBasedRank() - 1, newItem.getOneBasedRank() - 1);
+                        replaceItemInPositioningList(index, item, newItem);
+                        onItemMove(mFinishedData.indexOf(newItem), newItem.getOneBasedRank() - 1);
                     } else {
                         onItemRemove(mFinishedData.indexOf(item));
                     }
