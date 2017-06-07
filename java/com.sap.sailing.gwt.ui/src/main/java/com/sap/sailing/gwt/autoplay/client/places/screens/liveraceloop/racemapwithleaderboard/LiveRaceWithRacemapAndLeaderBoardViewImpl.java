@@ -67,7 +67,6 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
         new Timer() {
             @Override
             public void run() {
-                GWT.log("reinit fallback");
                 raceMap2.redraw();
                 racemap.onResize();
                 if(racemap.isAttached()){

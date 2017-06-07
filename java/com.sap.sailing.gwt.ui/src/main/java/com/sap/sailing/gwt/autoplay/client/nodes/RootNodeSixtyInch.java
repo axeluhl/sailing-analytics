@@ -34,10 +34,12 @@ public class RootNodeSixtyInch extends RootNodeBase {
 
     protected boolean processStateTransition(RootNodeState goingTo, RootNodeState comingFrom) {
         // block transitions, until the afterLiveRaceLoop is finished
-        if (comingFrom == RootNodeState.AFTER_LIVE && !afterRaceFinished) {
-            return true;
-        }else{
-            afterRaceFinished = false;
+        if (comingFrom == RootNodeState.AFTER_LIVE) {
+            if(afterRaceFinished){
+                afterRaceFinished = false;
+            }else{
+                return true;
+            }
         }
         switch (goingTo) {
         case IDLE:

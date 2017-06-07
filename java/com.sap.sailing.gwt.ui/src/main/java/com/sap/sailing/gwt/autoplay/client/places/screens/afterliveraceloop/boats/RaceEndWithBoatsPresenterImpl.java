@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boa
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.Distance;
@@ -35,7 +34,6 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
     private RaceEndWithBoatsView view;
     private SixtyInchLeaderBoard leaderboardPanel;
     private CompetitorSelectionModel competitorSelectionProvider;
-    private Timer updater;
 
     public RaceEndWithBoatsPresenterImpl(AbstractRaceEndWithImagesTop3Place place, AutoPlayClientFactory clientFactory,
             RaceEndWithBoatsView slide1ViewImpl) {
@@ -112,6 +110,5 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
     @Override
     public void onStop() {
         view.onStop();
-        updater.cancel();
     }
 }

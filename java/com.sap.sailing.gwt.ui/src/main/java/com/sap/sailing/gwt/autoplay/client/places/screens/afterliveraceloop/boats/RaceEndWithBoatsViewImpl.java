@@ -112,8 +112,13 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
         statisticValue1.setText(String.valueOf(competitorCount));
 
         statisticProperty2.setText(StringMessages.INSTANCE.distance());
-        statisticValue2
-                .setText(compactFormat.format(distance.getSeaMiles()) + " " + StringMessages.INSTANCE.seaMiles());
+        if(distance == null){
+            statisticValue2
+            .setText(StringMessages.INSTANCE.noDataFound());
+        }else{
+            statisticValue2
+            .setText(compactFormat.format(distance.getSeaMiles()) + " " + StringMessages.INSTANCE.seaMiles());
+        }
 
         statisticProperty3.setText(StringMessages.INSTANCE.durationPlain());
         statisticValue3.setText(compactFormat.format(duration.asMinutes()) + " " + StringMessages.INSTANCE.minutes());
