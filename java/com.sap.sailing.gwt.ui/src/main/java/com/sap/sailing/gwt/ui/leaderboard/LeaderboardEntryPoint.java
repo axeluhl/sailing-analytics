@@ -25,7 +25,6 @@ import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
@@ -64,16 +63,14 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             final Runnable checkLeaderboardNameAndCreateUI = new Runnable() {
                 @Override
                 public void run() {
-                    sailingService.checkLeaderboardName(leaderboardName,
-                            new MarkedAsyncCallback<Util.Pair<String, LeaderboardType>>(
-                                    new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
+                    sailingService.getLeaderboardType(leaderboardName,
+                            new MarkedAsyncCallback<LeaderboardType>(
+                                    new AsyncCallback<LeaderboardType>() {
                                         @Override
-                                        public void onSuccess(
-                                                Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
-                                            if (leaderboardNameAndType != null
-                                                    && leaderboardName.equals(leaderboardNameAndType.getA())) {
+                                        public void onSuccess(LeaderboardType theLeaderboardType) {
+                                            if (theLeaderboardType != null) {
                                                 Window.setTitle(leaderboardName);
-                                                leaderboardType = leaderboardNameAndType.getB();
+                                                leaderboardType = theLeaderboardType;
                                                 loadSettingsAndCreateUI(leaderboardContextDefinition, event);
                                             } else {
                                                 RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));

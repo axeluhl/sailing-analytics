@@ -92,7 +92,7 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
     }
     
     @Override
-    protected LeaderboardType getLeaderboardType() {
+    public LeaderboardType getLeaderboardType() {
         return LeaderboardType.RegattaMetaLeaderboard;
     }
 }

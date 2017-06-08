@@ -67,7 +67,9 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activities.RacingActivity" />
+        <activity
+            android:name=".ui.activities.RacingActivity"
+            android:windowSoftInputMode="adjustNothing" />
         <activity android:name=".ui.activities.PasswordActivity" />
         <activity
             android:name=".ui.activities.PreferenceActivity"
@@ -80,7 +82,8 @@
         </activity>
         <activity android:name=".ui.activities.SystemInformationActivity" />
 
-        <service android:name=".services.polling.RaceLogPollingService"
+        <service
+            android:name=".services.polling.RaceLogPollingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.sap.sailing.racecommittee.app.action.stopPoller" />
