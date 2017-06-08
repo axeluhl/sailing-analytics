@@ -60,7 +60,7 @@ public enum BoatClassMasterdata {
     J105 ("J/105", true, 10.52, 3.35, BoatHullType.MONOHULL, true, "J105", "J-105"),
     J111 ("J/111", true, 11.1, 3.29, BoatHullType.MONOHULL, true, "J111", "J-111"),
     KIELZUGVOGEL ("Kielzugvogel", true, 5.80, 1.88, BoatHullType.MONOHULL, false, "KZV"), 
-    KITE ("Kite", true, 3.35, 1.52, BoatHullType.MONOHULL, false), 
+    FORMULA_KITE ("Kite", true, 3.35, 1.52, BoatHullType.MONOHULL, false, "Formula Kite"), 
     LASER_2 ("Laser 2", true, 4.39, 1.42, BoatHullType.MONOHULL, false, "Laser II", "Laser2", "Laser-2", "Laser-II"),
     LASER_4_7 ("Laser 4.7", true, 4.20, 1.39, BoatHullType.MONOHULL, false, "L4.7"),
     LASER_RADIAL ("Laser Radial", true, 4.19, 1.41, BoatHullType.MONOHULL, false, "LAR", "Laser RAD", "RAD", "Radial"),

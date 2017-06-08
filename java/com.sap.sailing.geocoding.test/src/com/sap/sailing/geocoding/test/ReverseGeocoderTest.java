@@ -52,7 +52,7 @@ public class ReverseGeocoderTest {
     
     @Test
     public void getPlacemarkBestTest() {
-        Position abroad = new DegreePosition(54.43334, 10.299999);
+        Position abroad = new DegreePosition(54.429758, 10.289335);
         Placemark firstByDistance = new PlacemarkImpl("Wendtorf", "DE", new DegreePosition(54.4166667, 10.3), 1139);
         try {
             Placemark p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulation());

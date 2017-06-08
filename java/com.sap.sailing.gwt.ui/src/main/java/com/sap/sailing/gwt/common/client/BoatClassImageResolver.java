@@ -73,6 +73,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.J105.getDisplayName(), imageResources.J105Icon());
         boatClassIconsMap.put(BoatClassMasterdata.J111.getDisplayName(), imageResources.J111Icon());
         boatClassIconsMap.put(BoatClassMasterdata.KIELZUGVOGEL.getDisplayName(), imageResources.KielzugvogelIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.FORMULA_KITE.getDisplayName(), imageResources.FormulaKiteIcon());
         boatClassIconsMap.put(BoatClassMasterdata.LASER_2.getDisplayName(), imageResources.Laser2Icon());
         boatClassIconsMap.put(BoatClassMasterdata.LASER_SB3.getDisplayName(), imageResources.LaserSB3Icon());
         boatClassIconsMap.put(BoatClassMasterdata.LASER_INT.getDisplayName(), imageResources.LaserIcon());
