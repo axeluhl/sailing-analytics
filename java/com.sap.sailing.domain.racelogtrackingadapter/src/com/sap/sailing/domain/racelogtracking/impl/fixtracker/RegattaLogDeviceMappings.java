@@ -245,10 +245,10 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                 }
             }
             newDeviceIds.addAll(mappingsByDevice.keySet());
-            calculateDiff(oldMappings, newMappings, oldDeviceIds, newDeviceIds);
         } finally {
             LockUtil.unlockAfterWrite(mappingsLock);
         }
+        calculateDiff(oldMappings, newMappings, oldDeviceIds, newDeviceIds);
     }
     
     /**
