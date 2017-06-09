@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
@@ -36,7 +37,8 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     private static final long serialVersionUID = -5958519195756937338L;
     
     private final RacingEventService service;
-    private final static String COMMENT_TEXT_ON_SCORE_CORRECTION = "Update triggered by Race Committee.";
+    private final static String COMMENT_TEXT_ON_SCORE_CORRECTION_SINGLE_FLEET = "Results of race %s have been updated.";
+    private final static String COMMENT_TEXT_ON_SCORE_CORRECTION_MULTI_FLEET = "Results of race %s, s% have been updated.";
     
     public RaceLogScoringReplicator(RacingEventService service) {
         this.service = service;
@@ -192,7 +194,10 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
             }
             // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
             // be triggered, even though no score correction may have been performed
-            applyMetadataUpdate(leaderboard, timePoint, COMMENT_TEXT_ON_SCORE_CORRECTION);
+            String comment = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())
+                    ? String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_SINGLE_FLEET, raceColumn.getName())
+                    : String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_MULTI_FLEET, raceColumn.getName(), fleet.getName());
+            applyMetadataUpdate(leaderboard, timePoint, comment);
         }
     }
 

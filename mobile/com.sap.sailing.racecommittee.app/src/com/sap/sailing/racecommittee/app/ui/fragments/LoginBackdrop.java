@@ -1,9 +1,40 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URL;
+
+import android.app.Activity;
+import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.UnderlineSpan;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.LoginData;
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
@@ -22,39 +53,9 @@ import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
-import android.app.Activity;
-import android.app.Fragment;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.UnderlineSpan;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListener, AuthCheckTask.AuthCheckTaskListener, BackPressListener {
 
@@ -67,6 +68,15 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
     private View onboarding;
     private boolean useBack;
     private String server;
+
+    public static LoginBackdrop newInstance() {
+
+        Bundle args = new Bundle();
+        args.putBoolean(SHOW_BACKDROP_TEXT, false);
+        LoginBackdrop fragment = new LoginBackdrop();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.login_backdrop, container, false);
@@ -112,15 +122,6 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
         receiver = new IntentReceiver();
 
         return layout;
-    }
-
-    public static LoginBackdrop newInstance() {
-
-        Bundle args = new Bundle();
-        args.putBoolean(SHOW_BACKDROP_TEXT, false);
-        LoginBackdrop fragment = new LoginBackdrop();
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -240,8 +241,8 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (saveData(
-                                    url.getText().toString() + "#" + DeviceConfigurationQRCodeUtils.deviceIdentifierKey + "=" + device_id.getText()
-                                            .toString())) {
+                                url.getText().toString() + "#" + DeviceConfigurationQRCodeUtils.deviceIdentifierKey + "=" + device_id.getText()
+                                    .toString())) {
                                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
                             }
                         }
@@ -292,7 +293,7 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
                 public void onClick(View v) {
                     LoginTask task = new LoginTask(getActivity(), AppPreferences.on(getActivity()).getServerBaseURL(), LoginBackdrop.this);
                     task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new LoginData(userName.getText().toString(), userPassword.getText()
-                            .toString()));
+                        .toString()));
                 }
             });
         }
@@ -323,17 +324,17 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
     private boolean saveData(String content) {
         try {
             DeviceConfigurationQRCodeUtils.DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils
-                    .splitQRContent(content, new URLDecoder() {
-                        @Override
-                        public String decode(String encodedURL) {
-                            try {
-                                return java.net.URLDecoder.decode(encodedURL, "UTF-8");
-                            } catch (UnsupportedEncodingException e) {
-                                ExLog.w(getActivity(), TAG, "Couldn't resolve encoding UTF-8");
-                                return encodedURL;
-                            }
+                .splitQRContent(content, new URLDecoder() {
+                    @Override
+                    public String decode(String encodedURL) {
+                        try {
+                            return java.net.URLDecoder.decode(encodedURL, "UTF-8");
+                        } catch (UnsupportedEncodingException e) {
+                            ExLog.w(getActivity(), TAG, "Couldn't resolve encoding UTF-8");
+                            return encodedURL;
                         }
-                    });
+                    }
+                });
 
             final String identifier = connectionConfiguration.getDeviceIdentifier();
             final URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
@@ -362,7 +363,8 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
         if (textView != null) {
             SpannableString string = new SpannableString(textView.getText());
             string.setSpan(new UnderlineSpan(), 0, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            string.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.constant_sap_blue_1)), 0, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            string.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.constant_sap_blue_1)), 0, string
+                .length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             textView.setText(string);
         }
     }
@@ -422,7 +424,12 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
         @Override
         public void onClick(View view) {
             if (view.getVisibility() == View.VISIBLE && view.getAlpha() == 1) {
-                PopupMenu popupMenu = new PopupMenu(getActivity(), view);
+                PopupMenu popupMenu;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    popupMenu = new PopupMenu(getActivity(), view, Gravity.RIGHT);
+                } else {
+                    popupMenu = new PopupMenu(getActivity(), view);
+                }
                 popupMenu.inflate(R.menu.login_menu);
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -443,37 +450,7 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
                     }
                 });
                 popupMenu.show();
-
-                // Try to force some vertical offset
-                try {
-                    Object menuHelper;
-                    Field fMenuHelper = PopupMenu.class.getDeclaredField("mPopup");
-                    fMenuHelper.setAccessible(true);
-                    menuHelper = fMenuHelper.get(popupMenu);
-                    Field fListPopup = menuHelper.getClass().getDeclaredField("mPopup");
-                    fListPopup.setAccessible(true);
-                    Object listPopup = fListPopup.get(menuHelper);
-                    Class<?> listPopupClass = listPopup.getClass();
-
-                    int height = view.getHeight();
-                    // Invoke setVerticalOffset() with the negative height to move up by that distance
-                    Method setVerticalOffset = listPopupClass.getDeclaredMethod("setVerticalOffset", int.class);
-                    setVerticalOffset.invoke(listPopup, -height);
-
-                    int width = (Integer) listPopupClass.getDeclaredMethod("getWidth").invoke(listPopup);
-                    width -= view.getWidth();
-                    // Invoke setHorizontalOffset() with the negative height to move up by that distance
-                    Method setHorizontalOffset = listPopupClass.getDeclaredMethod("setHorizontalOffset", int.class);
-                    setHorizontalOffset.invoke(listPopup, -width);
-
-                    // Invoke show() to update the window's position
-                    Method show = listPopupClass.getDeclaredMethod("show");
-                    show.invoke(listPopup);
-                } catch (Exception e) {
-                    // an exception here indicates a programming error rather than an exceptional condition
-                    // at runtime
-                    ExLog.w(getActivity(), TAG, "Unable to force offset" + e.getLocalizedMessage());
-                }
+                ThemeHelper.positioningPopupMenu(getActivity(), popupMenu, view);
             }
         }
     }

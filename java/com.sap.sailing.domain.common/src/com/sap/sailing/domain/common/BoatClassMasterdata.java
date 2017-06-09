@@ -48,6 +48,7 @@ public enum BoatClassMasterdata {
     GP_26 ("GP 26", true, 7.90, 2.55, BoatHullType.MONOHULL, true, "GP26", "GP-26"),
     HOBIE_16 ("Hobie 16", true, 5.05, 2.41, BoatHullType.CATAMARAN, false, "H16"),
     H_BOAT ("H-Boat", true, 8.28, 2.18, BoatHullType.MONOHULL, true, "HB"),
+    HANSA_303 ("Hansa 303", false, 3.03, 1.35, BoatHullType.MONOHULL, false, "Hansa-303", "Hansa303"),
     HOBIE_TIGER ("Hobie Tiger", true, 5.51, 2.60, BoatHullType.CATAMARAN, true),
     HOBIE_WILD_CAT ("Hobie Wild Cat", true, 5.49, 2.59, BoatHullType.CATAMARAN, true, "Hobie Wild Cat F18"),
     INTERNATIONAL_14("International 14", true, 4.27, 1.83, BoatHullType.MONOHULL, true, "I14", "Int.14", "Int14"),
@@ -59,7 +60,7 @@ public enum BoatClassMasterdata {
     J105 ("J/105", true, 10.52, 3.35, BoatHullType.MONOHULL, true, "J105", "J-105"),
     J111 ("J/111", true, 11.1, 3.29, BoatHullType.MONOHULL, true, "J111", "J-111"),
     KIELZUGVOGEL ("Kielzugvogel", true, 5.80, 1.88, BoatHullType.MONOHULL, false, "KZV"), 
-    KITE ("Kite", true, 3.35, 1.52, BoatHullType.MONOHULL, false), 
+    FORMULA_KITE ("Kite", true, 3.35, 1.52, BoatHullType.MONOHULL, false, "Formula Kite"), 
     LASER_2 ("Laser 2", true, 4.39, 1.42, BoatHullType.MONOHULL, false, "Laser II", "Laser2", "Laser-2", "Laser-II"),
     LASER_4_7 ("Laser 4.7", true, 4.20, 1.39, BoatHullType.MONOHULL, false, "L4.7"),
     LASER_RADIAL ("Laser Radial", true, 4.19, 1.41, BoatHullType.MONOHULL, false, "LAR", "Laser RAD", "RAD", "Radial"),
@@ -89,6 +90,7 @@ public enum BoatClassMasterdata {
     RS_AERO ("RS Aero", true, 4.00, 1.40, BoatHullType.MONOHULL, false, "RSAERO", "RS_Aero"),
     RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X", "RS:X Men", "RS:X Woman"),
     RS_FEVA ("RS Feva", true, 3.64, 1.42, BoatHullType.MONOHULL, true, "RSFeva"),
+    SKUD_18 ("SKUD 18", true, 5.8, 2.29, BoatHullType.MONOHULL, true),
     SONAR ("Sonar", true, 7.01, 2.39, BoatHullType.MONOHULL, true),
     SOLING ("Soling", true, 8.15, 1.91, BoatHullType.MONOHULL, true),
     SPLASH_BLUE ("Splash Blue", true, 3.50, 1.50, BoatHullType.MONOHULL, false, "Splash_Blue"),
@@ -105,6 +107,7 @@ public enum BoatClassMasterdata {
     VIPER_640 ("Viper 640", true, 6.43, 2.49, BoatHullType.MONOHULL, true),
     VO60 ("VO60", true, 19.5, 5.25, BoatHullType.MONOHULL, true, "Volvo Ocean 60", "VolvoOcean60", "W60", "Whitbread60", "Whitbread 60"),
     VX_ONE ("VX ONE", true, 5.79, 2.19, BoatHullType.MONOHULL, true, "VX-ONE"),
+    WETA ("Weta", true, 4.4, 3.5, BoatHullType.TRIMARAN, true, "Weta Trimaran"),
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, true, "X99"),
     
     // multi-class "boat classes"; to be replaced at some later point in time by something like a RegattaClass

@@ -144,7 +144,11 @@ public interface MongoObjectFactory {
     
     void removeRaceLog(RaceLogIdentifier identifier);
     
+    void removeAllRaceLogs();
+    
     void removeRegattaLog(RegattaLikeIdentifier identifier);
+    
+    void removeAllRegattaLogs();
 
     void storeResultUrl(String resultProviderName, URL url);
 

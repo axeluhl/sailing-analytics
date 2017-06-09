@@ -59,6 +59,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -220,6 +221,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId);
 
     RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
+
+    RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName, String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard);
 
     void removeLeaderboard(String leaderboardName);
 
