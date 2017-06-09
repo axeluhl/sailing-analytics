@@ -1367,7 +1367,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         int legOfLeaderCompetitor = -1;
         // this only works because the quickRanks are sorted
         for (Entry<CompetitorDTO, Integer> competitorsByWindwardDistanceTraveledAndOneBasedLegNumber :
-            competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber.entrySet()) {
+            getCompetitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber()) {
             if (Util.contains(competitorsToShow, competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getKey()) && 
                     competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue() != null) {
                 leadingCompetitorDTO = competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getKey();
@@ -1376,6 +1376,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
         return null;
+    }
+
+    private Set<Entry<CompetitorDTO, Integer>> getCompetitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber() {
+        // TODO bug4175: obtain from raceBoardPanel.leaderboardPanel.leaderboard instead of QuickRanks
+        return competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber.entrySet();
     }
 
     final static Distance advantageLineLength = new MeterDistance(1000); // TODO this should probably rather scale with the visible area of the map; bug 616
@@ -1979,9 +1984,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         infoText.append(competitorDTO.getSailID()).append("\n");
         infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(gpsFixDTO.speedWithBearing.speedInKnots))
                 .append(" ").append(stringMessages.knotsUnit()).append("\n");
-        QuickRankDTO quickRankDTO = quickRanks.get(competitorDTO);
-        if (quickRankDTO != null) {
-            infoText.append(stringMessages.rank()).append(" : ").append(quickRanks.get(competitorDTO).rank);
+        final Integer rank = getRank(competitorDTO);
+        if (rank != null) {
+            infoText.append(stringMessages.rank()).append(" : ").append(rank);
         }
         return infoText.toString();
     }
@@ -2148,13 +2153,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.getName()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorDTO.getSailID()));
-        Integer rank = null;
-        if (quickRanks != null) {
-            QuickRankDTO quickRank = quickRanks.get(competitorDTO);
-            if (quickRank != null) {
-                rank = quickRank.rank;
-            }
-        }
+        final Integer rank = getRank(competitorDTO);
         if (rank != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.rank(), String.valueOf(rank)));
         }
@@ -2786,10 +2785,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return result;
     }
 
+    private QuickRankDTO getQuickRank(CompetitorDTO competitorDTO) {
+        return quickRanks.get(competitorDTO);
+    }
+
     @Override
     public Integer getRank(CompetitorDTO competitor) {
+        // TODO bug4175: obtain from raceBoardPanel.leaderboardPanel.leaderboard instead of QuickRanks
         final Integer result;
-        QuickRankDTO quickRank = quickRanks.get(competitor);
+        QuickRankDTO quickRank = getQuickRank(competitor);
         if (quickRank != null) {
             result = quickRank.rank;
         } else {
