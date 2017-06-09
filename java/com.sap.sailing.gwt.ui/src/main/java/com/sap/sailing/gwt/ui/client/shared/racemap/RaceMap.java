@@ -2775,7 +2775,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public Integer getRank(CompetitorDTO competitor) {
         // TODO bug4175: obtain from raceBoardPanel.leaderboardPanel.leaderboard instead of QuickRanks
         final Integer result;
-        QuickRankDTO quickRank = quickRanksDTOProvider.getQuickRanks().get(competitor);
+        QuickRankDTO quickRank = quickRanksDTOProvider.getQuickRanks().get(competitor.getIdAsString());
         if (quickRank != null) {
             result = quickRank.rank;
         } else {

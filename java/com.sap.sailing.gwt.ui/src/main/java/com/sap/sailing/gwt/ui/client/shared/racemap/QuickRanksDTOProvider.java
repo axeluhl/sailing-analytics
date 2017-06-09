@@ -29,8 +29,14 @@ public interface QuickRanksDTOProvider {
      * that was delivered through a different channel. Therefore, a strategy that has access to a current
      * {@link LeaderboardDTO leaderboard} should ignore this call if it already has quick ranks information available
      * from a leaderboard.
+     * 
+     * @param quickRanksFromServer keys are the competitor IDs as strings
      */
-    void quickRanksReceivedFromServer(LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanksFromServer);
+    void quickRanksReceivedFromServer(LinkedHashMap<String, QuickRankDTO> quickRanksFromServer);
     
-    LinkedHashMap<CompetitorDTO, QuickRankDTO> getQuickRanks();
+    /**
+     * @return keys are the {@link CompetitorDTO#getIdAsString() competitor IDs are string}, values are the quick ranks
+     *         pertaining to the competitors whose IDs are provided as keys
+     */
+    LinkedHashMap<String, QuickRankDTO> getQuickRanks();
 }

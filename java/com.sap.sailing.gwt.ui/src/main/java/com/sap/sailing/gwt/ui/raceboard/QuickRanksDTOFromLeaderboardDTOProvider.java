@@ -26,7 +26,7 @@ import com.sap.sse.common.Util;
  *
  */
 public class QuickRanksDTOFromLeaderboardDTOProvider implements QuickRanksDTOProvider {
-    private LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
+    private LinkedHashMap<String, QuickRankDTO> quickRanks;
     private final RaceCompetitorSet raceCompetitorSet;
     private final RaceIdentifier selectedRace;
     private boolean lastLeaderboardProvidedLegNumbers;
@@ -38,12 +38,15 @@ public class QuickRanksDTOFromLeaderboardDTOProvider implements QuickRanksDTOPro
     }
 
     @Override
-    public void quickRanksReceivedFromServer(LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanksFromServer) {
+    public void quickRanksReceivedFromServer(LinkedHashMap<String, QuickRankDTO> quickRanksFromServer) {
         if (quickRanks == null) {
-            quickRanks = quickRanksFromServer;
+            quickRanks = new LinkedHashMap<>();
+            for (final Entry<String, QuickRankDTO> e : quickRanksFromServer.entrySet()) {
+                quickRanks.put(e.getKey(), e.getValue());
+            }
         } else if (!lastLeaderboardProvidedLegNumbers) {
             // extract at least the leg numbers and update existing quick ranks accordingly in place
-            for (final Entry<CompetitorDTO, QuickRankDTO> e : quickRanks.entrySet()) {
+            for (final Entry<String, QuickRankDTO> e : quickRanks.entrySet()) {
                 final QuickRankDTO quickRankFromServer = quickRanksFromServer.get(e.getKey());
                 if (quickRankFromServer != null) {
                     e.getValue().legNumberOneBased = quickRankFromServer.legNumberOneBased;
@@ -64,7 +67,7 @@ public class QuickRanksDTOFromLeaderboardDTOProvider implements QuickRanksDTOPro
             final List<CompetitorDTO> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumnName);
             int rank = 1;
             for (final CompetitorDTO c : competitorsFromBestToWorst) {
-                if (Util.contains(raceCompetitorSet.getCompetitorsParticipatingInRace(), c)) {
+                if (Util.contains(raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings(), c.getIdAsString())) {
                     final LeaderboardRowDTO row = leaderboard.rows.get(c);
                     final int oneBasedLegNumber;
                     if (row != null) {
@@ -79,9 +82,9 @@ public class QuickRanksDTOFromLeaderboardDTOProvider implements QuickRanksDTOPro
                     } else {
                         oneBasedLegNumber = 0;
                     }
-                    QuickRankDTO quickRankToUpdate = quickRanks.get(c);
+                    QuickRankDTO quickRankToUpdate = quickRanks.get(c.getIdAsString());
                     if (quickRankToUpdate == null) {
-                        quickRanks.put(c, new QuickRankDTO(c, rank, oneBasedLegNumber));
+                        quickRanks.put(c.getIdAsString(), new QuickRankDTO(c, rank, oneBasedLegNumber));
                     } else {
                         quickRankToUpdate.rank = rank;
                         if (lastLeaderboardProvidedLegNumbers) {
@@ -104,7 +107,7 @@ public class QuickRanksDTOFromLeaderboardDTOProvider implements QuickRanksDTOPro
     }
 
     @Override
-    public LinkedHashMap<CompetitorDTO, QuickRankDTO> getQuickRanks() {
+    public LinkedHashMap<String, QuickRankDTO> getQuickRanks() {
         return quickRanks;
     }
 
