@@ -491,7 +491,7 @@
         <!-- GWT version detected from dependencyManagement -->
         <execution>
           <configuration>
-            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2048m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
+            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
             <!--
             <userAgents>chrome</userAgents>
           -->

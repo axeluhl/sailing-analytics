@@ -45,7 +45,8 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
     }
 
     private ScheduledExecutorService createThreadPoolExecutor(String name, final int priority, final int size) {
-        return new NamedTracingScheduledThreadPoolExecutor(name, /* corePoolSize */ size, new ThreadFactoryWithPriority(priority, /* daemon */ true));
+        return new NamedTracingScheduledThreadPoolExecutor(name, /* corePoolSize */ size, new ThreadFactoryWithPriority(
+                name, priority, /* daemon */ true));
     }
 
     @Override

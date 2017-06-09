@@ -6,6 +6,7 @@ import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.sto
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -198,16 +199,17 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         storeFixes(device, Collections.singletonList(fix));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private <FixT extends Timed> void notifyListeners(DeviceIdentifier device, Iterable<FixT> fixes) {
-        LockUtil.executeWithReadLock(listenersLock, () -> {
-            for (FixT fix : fixes) {
-                for (FixReceivedListener<FixT> listener : Util.<DeviceIdentifier, Set<FixReceivedListener<FixT>>> get(
-                        (Map) listeners, device, Collections.emptySet())) {
-                    listener.fixReceived(device, fix);
-                }
-            }
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        final Set<FixReceivedListener<FixT>> listenersToInform = LockUtil.executeWithReadLockAndResult(listenersLock, () -> {
+            return new HashSet<>(Util.<DeviceIdentifier, Set<FixReceivedListener<FixT>>> get(
+                    (Map) listeners, device, Collections.emptySet()));
         });
+        for (FixT fix : fixes) {
+            for (FixReceivedListener<FixT> listener : listenersToInform) {
+                listener.fixReceived(device, fix);
+            }
+        }
     }
 
     @Override

@@ -83,7 +83,9 @@
 .regattaleaderboard_meta_update {
   display: inline-block;
   text-align: right;
+  vertical-align: top;
 }
+.regattaleaderboard_meta_liveraces_button,
 .regattaleaderboard_meta_reload,
 .regattaleaderboard_meta_settings_button,
 .regattaleaderboard_meta_fullscreen_button {
@@ -109,6 +111,7 @@
 .regattaleaderboard_meta_busyindicator {
   display: inline-block;
   margin: 0 0.666666666666667em;
+  vertical-align: text-bottom;
 }
 
 .regattaleaderboard_meta_liverace {
@@ -127,6 +130,11 @@
 .regattaleaderboard_meta_settings {
   display: inline-block;
   text-align: right;
+  font-size: 0;
+}
+
+.regattaleaderboard_meta_settings * {
+  font-size: 1rem;
 }
 .regattaleaderboard_meta_settings_button {
   background-color: #9f9f9f;
@@ -228,9 +236,6 @@
   width: 100%;
   table-layout: fixed;
 }
-.marginFix {
-  margin-top:0.5rem;
-}
 .letItScroll {
   overflow-x: auto;
   margin: 10px 0px;
@@ -238,4 +243,8 @@
 .regattaleaderboard_meta_fullscreen_button {
   background-color: #9f9f9f;
   background-image: url("images/home/fullscreen.svg");
+}
+.regattaleaderboard_meta_liveraces_button {
+  background-color: #9f9f9f;
+  background-image: url("images/home/liveraces.svg");
 }

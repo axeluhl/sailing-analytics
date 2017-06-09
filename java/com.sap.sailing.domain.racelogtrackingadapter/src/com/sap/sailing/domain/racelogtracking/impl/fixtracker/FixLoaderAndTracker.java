@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -103,6 +104,8 @@ import com.sap.sse.util.ThreadPoolUtil;
  */
 public class FixLoaderAndTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
+    private static final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(
+            FixLoaderAndTracker.class.getSimpleName());
     protected final DynamicTrackedRace trackedRace;
     private final SensorFixStore sensorFixStore;
     private RegattaLogDeviceMappings<WithID> deviceMappings;
@@ -124,7 +127,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             if (newStartOfTracking != null) {
                 if (oldStartOfTracking == null) {
                     // Fixes wheren't loaded while startOfTracking was null. So we need to load all fixes in the tracking interval now.
-                    loadFixesForExtendedTimeRange(getTrackingTimeRange());
+                    loadFixesWhenStartOfTrackingIsReceived();
                 } else if (newStartOfTracking.before(oldStartOfTracking)) {
                     loadFixesForExtendedTimeRange(new TimeRangeImpl(newStartOfTracking, oldStartOfTracking));
                 }
@@ -403,7 +406,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 @Override
                 public void visit(RegattaLogDeviceMarkMappingEvent event) {
                     DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
-                    
                     final GPSFix lastFixAtOrBeforeStartOfTracking = track.getLastFixAtOrBefore(trackingTimeRange.from());
                     // A better fix before start of tracking must be after the current best fix
                     final MultiTimeRange beforeRange = coveredTimeRanges
@@ -475,9 +477,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             }
         }
         sensorFixStore.removeListener(listener);
-        if (preemptiveStopRequested.get()) {
-            waitForLoadingToFinishRunning();
-        }
     }
 
     private void startTracking() {
@@ -487,21 +486,14 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 trackedRace.getRace().getName());
     }
 
-    private void waitForLoadingToFinishRunning() {
-        synchronized (loadingJobs) {
-            try {
-                while (!loadingJobs.isEmpty()) {
-                    loadingJobs.wait();
-                }
-            } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
-            }
-        }
-    }
-
     private void loadFixesForExtendedTimeRange(final TimeRange extendedTimeRange) {
         deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> addLoadingJob(
                 new LoadFixesInTrackingTimeRangeJob(mappingsAndCoveredTimeRanges, extendedTimeRange)));
+    }
+    
+    private void loadFixesWhenStartOfTrackingIsReceived() {
+        deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> addLoadingJob(
+                new LoadFixesForNewlyCoveredTimeRangesJob(item, mappingsAndCoveredTimeRanges)));
     }
 
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
@@ -562,7 +554,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             loadingJobs.add(job);
             updateStatusAndProgress();
         }
-        ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(job);
+        executor.execute(job);
     }
     
     /**
@@ -590,7 +582,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void newTimeRangesCovered(WithID item,
             Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
-            addLoadingJob(new LoadFixesForNewlyCoveredTimeRangesJob(item, newlyCoveredTimeRanges));
+            if (trackedRace.getStartOfTracking() != null) {
+                addLoadingJob(new LoadFixesForNewlyCoveredTimeRangesJob(item, newlyCoveredTimeRanges));
+            }
         }
     }
     
@@ -620,11 +614,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
     
     /**
-     * Loads fixes for an item's mappings in a defined tracking {@link TimeRange}. This is used when:
-     * <ul>
-     * <li>Initially loading fixes into tracks</li>
-     * <li>The tracking {@link TimeRange} changes</li>
-     * </ul>
+     * Loads fixes for an item's mappings in a defined tracking {@link TimeRange}. This is used when the tracking
+     * {@link TimeRange} is extended. No better fixes for {@link Mark} are being loaded because if available, these must
+     * have either already been loaded or the best fix is inside of the extended {@link TimeRange} that is completely loaded by
+     * this job.
      */
     private class LoadFixesInTrackingTimeRangeJob extends AbstractLoadingJob {
 
@@ -644,7 +637,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
     
     /**
-     * This is used when device mappings for an item changed so that fixes in a new {@link TimeRange} are covered.
+     * This is used when device mappings for an item changed so that fixes in a new {@link TimeRange} are covered. This is also used when initially loading fixes due to startOfTracking being initially set. If
+     * the mapping is a {@link Mark}, best fixes outside of the tracking {@link TimeRange} are loaded if none is
+     * available in the tracking {@link TimeRange}.
      */
     private class LoadFixesForNewlyCoveredTimeRangesJob extends AbstractLoadingJob {
         private final WithID item;
