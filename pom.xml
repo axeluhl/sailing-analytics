@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 	<parent>
       	   <groupId>com.sap.prd.mobile.ios.mios</groupId>
-           <artifactId>ios-parent</artifactId>
+           <artifactId>parent</artifactId>
            <version>1.14.2</version>
         </parent>
       <profiles>
