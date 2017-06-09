@@ -2245,7 +2245,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (date == null) {
             result = quickRanksLiveCache.get(raceIdentifier);
         } else {
-            result = computeQuickRanks(raceIdentifier, date == null ? null : new MillisecondsTimePoint(date));
+            result = computeQuickRanks(raceIdentifier, new MillisecondsTimePoint(date));
         }
         return result;
     }
