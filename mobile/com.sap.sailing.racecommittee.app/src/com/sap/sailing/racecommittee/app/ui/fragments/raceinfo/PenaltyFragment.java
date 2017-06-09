@@ -1,13 +1,43 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import static com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.ItemListener;
-import static com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.OrderBy;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
+import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.ItemListener;
+import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.OrderBy;
+import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+import com.sap.sailing.racecommittee.app.ui.views.SearchView;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -35,42 +65,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
-import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
-import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
-import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
-import com.sap.sailing.racecommittee.app.ui.views.SearchView;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-
 public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, ItemListener, SearchView.SearchTextWatcher {
 
     private static final int COMPETITOR_LOADER = 0;
-    private static final int START_ORDER_LOADER = 1;
     private static final int LEADERBOARD_ORDER_LOADER = 2;
 
     private View mButtonBar;
@@ -326,23 +323,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }));
         // Force load to get non-cached remote competitors...
         competitorLoader.forceLoad();
-    }
-
-    private void loadStartOrder() {
-        ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
-        final Loader<?> startOrderLoader = getLoaderManager()
-            .initLoader(START_ORDER_LOADER, null, dataManager.createStartOrderLoader(getRace(), new LoadClient<Collection<Competitor>>() {
-                @Override
-                public void onLoadFailed(Exception reason) {
-
-                }
-
-                @Override
-                public void onLoadSucceeded(Collection<Competitor> data, boolean isCached) {
-                    ExLog.i(getActivity(), "asd", data.toString());
-                }
-            }));
-        startOrderLoader.forceLoad();
     }
 
     private void loadLeaderboardResult() {
