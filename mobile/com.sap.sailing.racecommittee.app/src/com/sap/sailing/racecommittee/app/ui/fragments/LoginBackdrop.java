@@ -374,8 +374,10 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
         if (login != null) {
             login.setVisibility(View.GONE);
         }
-        AppPreferences.on(getActivity()).setAccessToken(accessToken);
-        BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
+        if (isAdded()) {
+            AppPreferences.on(getActivity()).setAccessToken(accessToken);
+            BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
+        }
     }
 
     @Override
