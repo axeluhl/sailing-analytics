@@ -83,6 +83,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                     @Override
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
+
                         // we have no race, or we have one, and had a different one in the past
                         if (result == null || (currentLiveRace != null && !result.getB().equals(currentLiveRace))) {
                             log("No live race found or currentLiveRace differs from loaded liverace");
@@ -93,8 +94,10 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                                     currentState);
 
                         } else {
+
                             final Long timeToRaceStartInMs = result.getA();
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
+                            log("live race found: " + loadedLiveRace + " starting in " + timeToRaceStartInMs + "ms");
                             if (loadedLiveRace == null || timeToRaceStartInMs > PRE_RACE_DELAY) {
                                 boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null;
                                 if (loadedLiveRace == null) {
