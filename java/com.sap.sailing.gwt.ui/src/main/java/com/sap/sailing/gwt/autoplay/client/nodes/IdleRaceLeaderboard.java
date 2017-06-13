@@ -42,7 +42,9 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
         boolean withFullscreenButton = settings.getPerspectiveOwnSettings().isFullscreen();
         PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings = settings
                 .findSettingsByComponentId(autoplayLifecycle.getLeaderboardLifecycle().getComponentId());
+
         StringMessages stringMessages = StringMessages.INSTANCE;
+
         LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(null, null,
                 autoplayLifecycle.getLeaderboardLifecycle(), leaderboardSettings, cf.getSailingService(),
                 cf.getUserService(), AutoplayHelper.asyncActionsExecutor,

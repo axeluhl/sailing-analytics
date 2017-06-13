@@ -29,6 +29,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
     private SixtyInchLeaderBoard leaderboardPanel;
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
+    private com.sap.sse.gwt.client.player.Timer timer;
 
     public LiveRaceWithRacemapAndLeaderBoardPresenterImpl(LiveRaceWithRacemapAndLeaderBoardPlace place,
             AutoPlayClientFactory clientFactory,
@@ -115,7 +116,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
         false, true, true);
 
 
-        com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(
+        timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
@@ -127,9 +128,13 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
     }
+    
 
     @Override
     public void onStop() {
+        if(timer != null){
+            timer.pause();
+        }
         selectionTimer.cancel();
         view.onStop();
     }

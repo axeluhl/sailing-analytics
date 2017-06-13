@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 
@@ -16,4 +17,6 @@ public interface PreLeaderboardWithImageView {
     void scrollLeaderBoardToTop();
 
     void onStop();
+
+    void nextRace(RegattaAndRaceIdentifier race);
 }

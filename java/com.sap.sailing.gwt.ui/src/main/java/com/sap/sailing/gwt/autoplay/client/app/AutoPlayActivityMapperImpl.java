@@ -29,8 +29,8 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.compet
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsImagePlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsViewImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLeaderBoardWithImagePresenterImpl;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLeaderBoardWithImageViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImagePresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImageViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderBoardWithCompetitorPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderBoardWithFlagPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPlace;
@@ -59,12 +59,12 @@ public class AutoPlayActivityMapperImpl implements ActivityMapper {
             return new LeaderboardPresenterImpl((LeaderboardPlace) place, clientFactory, new LeaderboardViewImpl());
         }
         if (place instanceof PreRaceLeaderBoardWithCompetitorPlace) {
-            return new PreLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithCompetitorPlace) place,
-                    clientFactory, new PreLeaderBoardWithImageViewImpl(new CompetitorImageProvider()));
+            return new PreLiveRaceLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithCompetitorPlace) place,
+                    clientFactory, new PreLiveRaceLeaderBoardWithImageViewImpl(new CompetitorImageProvider()));
         }
         if (place instanceof PreRaceLeaderBoardWithFlagPlace) {
-            return new PreLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithFlagPlace) place, clientFactory,
-                    new PreLeaderBoardWithImageViewImpl(new FlagImageProvider()));
+            return new PreLiveRaceLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithFlagPlace) place, clientFactory,
+                    new PreLiveRaceLeaderBoardWithImageViewImpl(new FlagImageProvider()));
         }
         if (place instanceof IdleUpNextPlace) {
             return new IdleUpNextPresenterImpl((IdleUpNextPlace) place, clientFactory, new IdleNextUpViewImpl());

@@ -8,14 +8,17 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
-public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements PreLeaderboardWithImageView {
-    private static IdleLeaderBoardWithFlagsViewImplUiBinder uiBinder = GWT.create(IdleLeaderBoardWithFlagsViewImplUiBinder.class);
+public class PreLiveRaceLeaderBoardWithImageViewImpl extends ResizeComposite implements PreLeaderboardWithImageView {
+    private static IdleLeaderBoardWithFlagsViewImplUiBinder uiBinder = GWT
+            .create(IdleLeaderBoardWithFlagsViewImplUiBinder.class);
 
-    interface IdleLeaderBoardWithFlagsViewImplUiBinder extends UiBinder<Widget, PreLeaderBoardWithImageViewImpl> {
+    interface IdleLeaderBoardWithFlagsViewImplUiBinder extends UiBinder<Widget, PreLiveRaceLeaderBoardWithImageViewImpl> {
     }
 
     @UiField
@@ -23,6 +26,9 @@ public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements 
 
     @UiField
     ResizableFlowPanel infoHolder;
+
+    @UiField
+    Label bottomInfoPanel;
 
     @UiField
     Image image;
@@ -41,7 +47,7 @@ public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements 
 
     }
 
-    public PreLeaderBoardWithImageViewImpl(ImageProvider provider) {
+    public PreLiveRaceLeaderBoardWithImageViewImpl(ImageProvider provider) {
         initWidget(uiBinder.createAndBindUi(this));
         this.provider = provider;
     }
@@ -81,6 +87,12 @@ public class PreLeaderBoardWithImageViewImpl extends ResizeComposite implements 
 
     @Override
     public void onStop() {
+    }
+
+    @Override
+    public void nextRace(RegattaAndRaceIdentifier race) {
+        bottomInfoPanel
+                .setText(StringMessages.INSTANCE.next() + " " + race.getRegattaName() + " " + race.getRaceName());
     }
 
 }

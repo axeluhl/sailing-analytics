@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLeaderBoardWithImageViewImpl.ImageProvider;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImageViewImpl.ImageProvider;
 
 public class PreRaceCompetitorsViewImpl extends ResizeComposite implements PreRaceCompetitorsView {
     private static PreRaceCompetitorsViewImplUiBinder uiBinder = GWT.create(PreRaceCompetitorsViewImplUiBinder.class);

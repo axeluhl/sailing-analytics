@@ -43,7 +43,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
             view.showErrorNoLive(this, panel, getPlace().getError());
             return;
         }
-        view.nextRace(getSlideCtx().getLiveRace());
+        view.nextRace(getSlideCtx().getPreLiveRace());
         reloadStatistics();
         reloadStatistics = new Timer() {
             @Override

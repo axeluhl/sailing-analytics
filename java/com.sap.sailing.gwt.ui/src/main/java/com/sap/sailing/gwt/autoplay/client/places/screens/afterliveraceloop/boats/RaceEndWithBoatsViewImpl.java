@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLeaderBoardWithImageViewImpl.ImageProvider;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImageViewImpl.ImageProvider;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Duration;
@@ -72,10 +72,6 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     @Override
     public void setLeaderBoard(SixtyInchLeaderBoard leaderboardPanel) {
         leaderBoardHolder.add(leaderboardPanel);
-    }
-
-    @Override
-    public void onStop() {
     }
 
     @Override

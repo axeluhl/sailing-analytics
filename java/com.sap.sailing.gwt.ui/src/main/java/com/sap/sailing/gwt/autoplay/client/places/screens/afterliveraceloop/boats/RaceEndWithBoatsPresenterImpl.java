@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boa
 
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.Distance;
@@ -25,6 +24,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
@@ -34,6 +34,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
     private RaceEndWithBoatsView view;
     private SixtyInchLeaderBoard leaderboardPanel;
     private CompetitorSelectionModel competitorSelectionProvider;
+    private Timer timer;
 
     public RaceEndWithBoatsPresenterImpl(AbstractRaceEndWithImagesTop3Place place, AutoPlayClientFactory clientFactory,
             RaceEndWithBoatsView slide1ViewImpl) {
@@ -63,7 +64,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
 
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
 
-        com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live,
+        timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live,
                 PlayStates.Paused,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
@@ -100,7 +101,6 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 .getCompetitorsFromBestToWorst(preselectedRaceColumn);
 
         if (sortedCompetitors.size() >= 3) {
-            GWT.log("First is " + sortedCompetitors.get(0));
             view.setFirst(sortedCompetitors.get(0));
             view.setSecond(sortedCompetitors.get(1));
             view.setThird(sortedCompetitors.get(2));
@@ -109,6 +109,8 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
 
     @Override
     public void onStop() {
-        view.onStop();
+        if(timer!= null){
+            timer.pause();
+        }
     }
 }

@@ -16,11 +16,13 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
+    private Timer timer;
 
     public IdleOverallLeaderBoardNode(AutoPlayClientFactory cf) {
         super(IdleOverallLeaderBoardNode.class.getName());
@@ -41,7 +43,7 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                 RaceColumnSelectionStrategies.EXPLICIT, /* showAddedScores */ true,
                 /* showOverallRacesCompleted */ false, true, false, false, true);
 
-        com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(
+        timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
@@ -58,4 +60,12 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
         getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getEvent().getName(),
                 cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()));
     };
+    
+    @Override
+    public void onStop() {
+        if(timer != null){
+            timer.pause();
+        }
+        super.onStop();
+    }
 }

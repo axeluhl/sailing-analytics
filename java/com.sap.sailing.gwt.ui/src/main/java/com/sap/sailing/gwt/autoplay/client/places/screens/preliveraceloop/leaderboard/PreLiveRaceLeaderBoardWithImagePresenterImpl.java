@@ -25,7 +25,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class PreLeaderBoardWithImagePresenterImpl
+public class PreLiveRaceLeaderBoardWithImagePresenterImpl
         extends AutoPlayPresenterConfigured<AbstractPreRaceLeaderBoardWithImagePlace>
         implements PreLeaderboardWithImageView.Slide1Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
@@ -35,8 +35,9 @@ public class PreLeaderBoardWithImagePresenterImpl
     private Timer selectionTimer;
     private CompetitorSelectionModel competitorSelectionProvider;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
+    private com.sap.sse.gwt.client.player.Timer timer;
 
-    public PreLeaderBoardWithImagePresenterImpl(AbstractPreRaceLeaderBoardWithImagePlace place,
+    public PreLiveRaceLeaderBoardWithImagePresenterImpl(AbstractPreRaceLeaderBoardWithImagePlace place,
             AutoPlayClientFactory clientFactory, PreLeaderboardWithImageView slide1ViewImpl) {
         super(place, clientFactory);
         this.view = slide1ViewImpl;
@@ -88,40 +89,41 @@ public class PreLeaderBoardWithImagePresenterImpl
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
         view.startingWith(this, panel);
+        view.nextRace(getSlideCtx().getPreLiveRace());
 
-        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLiveRace();
+        RegattaAndRaceIdentifier liveRace = getSlideCtx().getPreLiveRace();
         ArrayList<String> racesToShow = null;
-        if (lifeRace != null) {
+        if (liveRace != null) {
             racesToShow = new ArrayList<>();
-//            racesToShow.add(lifeRace.getRaceName());
+            // racesToShow.add(lifeRace.getRaceName());
         } else {
             return;
         }
 
         final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, null, null, null,
-                racesToShow, null, false, null, lifeRace.getRaceName(), /* ascending */ true,
+                racesToShow, null, false, null, liveRace.getRaceName(), /* ascending */ true,
                 /* updateUponPlayStateChange */ true, RaceColumnSelectionStrategies.EXPLICIT,
                 /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true, false, false, true);
 
         GWT.log("event " + getSlideCtx().getEvent());
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
 
-        com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(
+        timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new NoRaceColumnsSixtyInchLeaderboard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-                true, lifeRace, competitorSelectionProvider, timer, null,
+        leaderboardPanel = new NoRaceColumnsSixtyInchLeaderboard(sailingService, new AsyncActionsExecutor(),
+                leaderboardSettings, true, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, null,
                 false, null, false, null, false, true, false, false, false);
         view.setLeaderBoard(leaderboardPanel);
         selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
-        
 
     }
 
     @Override
     public void onStop() {
+        timer.pause();
         selectionTimer.cancel();
         view.onStop();
     }

@@ -13,8 +13,6 @@ public interface RaceEndWithBoatsView {
 
     void setLeaderBoard(SixtyInchLeaderBoard leaderboardPanel);
 
-    void onStop();
-
     void setFirst(CompetitorDTO c);
 
     void setSecond(CompetitorDTO c);

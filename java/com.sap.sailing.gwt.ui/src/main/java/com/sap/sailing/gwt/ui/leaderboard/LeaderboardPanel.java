@@ -579,7 +579,6 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     }
 
     protected Widget createToolbarPanel() {
-        GWT.log("createToolbarPanel()");
         informationPanel = new FlowPanel();
         informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");

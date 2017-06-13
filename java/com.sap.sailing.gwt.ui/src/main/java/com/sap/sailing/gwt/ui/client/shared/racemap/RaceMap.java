@@ -1420,72 +1420,75 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     double bearingOfCombinedWindInDeg = windFix.trueWindBearingDeg;
                     double rotatedBearingDeg1 = 0.0;
                     double rotatedBearingDeg2 = 0.0;
-                    switch (lastBoatFix.legType) {
-                    case UPWIND:
-                    case DOWNWIND: {
-                        rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
-                        if (rotatedBearingDeg1 >= 360.0) {
-                            rotatedBearingDeg1 -= 360.0;
-                        }
-                        rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
-                        if (rotatedBearingDeg2 < 0.0) {
-                            rotatedBearingDeg2 += 360.0;
-                        }
-                    }
-                        break;
-                    case REACHING: {
-                        rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
-                        if (rotatedBearingDeg1 >= 360.0) {
-                            rotatedBearingDeg1 -= 360.0;
-                        }
-                        rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
-                        if (rotatedBearingDeg2 < 0.0) {
-                            rotatedBearingDeg2 += 360.0;
-                        }
-                    }
-                        break;
-                    }
-                    MVCArray<LatLng> nextPath = MVCArray.newInstance();
-                    LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
-                            coordinateSystem.mapDegreeBearing(rotatedBearingDeg1), advantageLineLength.scale(0.5));
-                    LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
-                            coordinateSystem.mapDegreeBearing(rotatedBearingDeg2), advantageLineLength.scale(0.5));
-                    if (advantageLine == null) {
-                        PolylineOptions options = PolylineOptions.newInstance();
-                        options.setClickable(true);
-                        options.setGeodesic(true);
-                        options.setStrokeColor("#000000");
-                        options.setStrokeWeight(1);
-                        options.setStrokeOpacity(0.5);
-
-                        advantageLine = Polyline.newInstance(options);
-                        advantageTimer = new AdvantageLineAnimator(advantageLine);
-                        MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
-                        pointsAsArray.insertAt(0, advantageLinePos1);
-                        pointsAsArray.insertAt(1, advantageLinePos2);
-                        advantageLine.setPath(pointsAsArray);
-                        advantageLine.setMap(map);
-                        Hoverline advantageHoverline = new Hoverline(advantageLine, options, this);
-
-                        advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
-                                bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
-                        advantageLine.addMouseOverHandler(advantageLineMouseOverHandler);
-                        advantageHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
-                            @Override
-                            public void onEvent(MouseOutMapEvent event) {
-                                map.setTitle("");
+                    if(lastBoatFix.legType != null){
+                        switch (lastBoatFix.legType) {
+                        case UPWIND:
+                        case DOWNWIND: {
+                            rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
+                            if (rotatedBearingDeg1 >= 360.0) {
+                                rotatedBearingDeg1 -= 360.0;
                             }
-                        });
-                    } else {
-                        nextPath.push(advantageLinePos1);
-                        nextPath.push(advantageLinePos2);
-                        advantageTimer.setNextPositionAndTransitionMillis(nextPath, timeForPositionTransitionMillis);
-                        if (advantageLineMouseOverHandler != null) {
-                            advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
-                            advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
+                            rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
+                            if (rotatedBearingDeg2 < 0.0) {
+                                rotatedBearingDeg2 += 360.0;
+                            }
                         }
+                            break;
+                        case REACHING: {
+                            rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
+                            if (rotatedBearingDeg1 >= 360.0) {
+                                rotatedBearingDeg1 -= 360.0;
+                            }
+                            rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
+                            if (rotatedBearingDeg2 < 0.0) {
+                                rotatedBearingDeg2 += 360.0;
+                            }
+                        }
+                            break;
+                        }
+                        MVCArray<LatLng> nextPath = MVCArray.newInstance();
+                        LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
+                                coordinateSystem.mapDegreeBearing(rotatedBearingDeg1), advantageLineLength.scale(0.5));
+                        LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
+                                coordinateSystem.mapDegreeBearing(rotatedBearingDeg2), advantageLineLength.scale(0.5));
+                        if (advantageLine == null) {
+                            PolylineOptions options = PolylineOptions.newInstance();
+                            options.setClickable(true);
+                            options.setGeodesic(true);
+                            options.setStrokeColor("#000000");
+                            options.setStrokeWeight(1);
+                            options.setStrokeOpacity(0.5);
+                            
+                            advantageLine = Polyline.newInstance(options);
+                            advantageTimer = new AdvantageLineAnimator(advantageLine);
+                            MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
+                            pointsAsArray.insertAt(0, advantageLinePos1);
+                            pointsAsArray.insertAt(1, advantageLinePos2);
+                            advantageLine.setPath(pointsAsArray);
+                            advantageLine.setMap(map);
+                            Hoverline advantageHoverline = new Hoverline(advantageLine, options, this);
+                            
+                            advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
+                                    bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
+                            advantageLine.addMouseOverHandler(advantageLineMouseOverHandler);
+                            advantageHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                                @Override
+                                public void onEvent(MouseOutMapEvent event) {
+                                    map.setTitle("");
+                                }
+                            });
+                        } else {
+                            nextPath.push(advantageLinePos1);
+                            nextPath.push(advantageLinePos2);
+                            advantageTimer.setNextPositionAndTransitionMillis(nextPath, timeForPositionTransitionMillis);
+                            if (advantageLineMouseOverHandler != null) {
+                                advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
+                                advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
+                            }
+                        }
+                        drawAdvantageLine = true;
                     }
-                    drawAdvantageLine = true;
+                   
                 }
             }
             if (!drawAdvantageLine) {
