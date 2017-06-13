@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
 
 public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
-    private static final int MAX_RACES_IN_LIST = 10;
+    private static final int MAX_RACES_IN_LIST = 8;
     private static IdleNextUpViewImplUiBinder uiBinder = GWT.create(IdleNextUpViewImplUiBinder.class);
     @UiField
     SimplePanel mainPanelUi;
@@ -52,14 +52,17 @@ public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
     @Override
     public void setData(ArrayList<Pair<RegattaAndRaceIdentifier, Date>> data) {
         dataPanel.clear();
-        if (data.isEmpty()) {
+        if(data == null){
+            dataPanel.add(new Label(StringMessages.INSTANCE.noData()));
+        }
+        else if ( data.isEmpty()) {
             dataPanel.add(new Label(StringMessages.INSTANCE.nothingUpcoming()));
         } else {
             dataPanel.add(new Label(StringMessages.INSTANCE.upcoming()));
-            int index = 0;
+            int index = 1;
             for (Pair<RegattaAndRaceIdentifier, Date> race : data) {
-                index++;
                 if (index > MAX_RACES_IN_LIST) {
+                    GWT.log("Count of races" + index);
                     return;
                 }
                 String formatedDate;
@@ -67,6 +70,7 @@ public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
                 Date now = new Date();
                 boolean past = race.getB().before(now);
                 if (today && !past) {
+                    index++;
                     DateTimeFormat simpleFormat = DateTimeFormat.getFormat("HH:mm");
                     formatedDate = simpleFormat.format(race.getB());
                     String raceName = race.getA().getRaceName();

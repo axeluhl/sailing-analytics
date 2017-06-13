@@ -35,6 +35,7 @@ public class PreLeaderBoardWithImagePresenterImpl
     private Timer selectionTimer;
     private CompetitorSelectionModel competitorSelectionProvider;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
+    private com.sap.sse.gwt.client.player.Timer timer;
 
     public PreLeaderBoardWithImagePresenterImpl(AbstractPreRaceLeaderBoardWithImagePlace place,
             AutoPlayClientFactory clientFactory, PreLeaderboardWithImageView slide1ViewImpl) {
@@ -88,12 +89,13 @@ public class PreLeaderBoardWithImagePresenterImpl
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
         view.startingWith(this, panel);
+        view.nextRace(getSlideCtx().getLifeRace());
 
         RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLifeRace();
         ArrayList<String> racesToShow = null;
         if (lifeRace != null) {
             racesToShow = new ArrayList<>();
-//            racesToShow.add(lifeRace.getRaceName());
+            // racesToShow.add(lifeRace.getRaceName());
         } else {
             return;
         }
@@ -106,22 +108,22 @@ public class PreLeaderBoardWithImagePresenterImpl
         GWT.log("event " + getSlideCtx().getEvent());
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
 
-        com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(
+        timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new NoRaceColumnsSixtyInchLeaderboard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-                true, lifeRace, competitorSelectionProvider, timer, null,
+        leaderboardPanel = new NoRaceColumnsSixtyInchLeaderboard(sailingService, new AsyncActionsExecutor(),
+                leaderboardSettings, true, lifeRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, null,
                 false, null, false, null, false, true, false, false, false);
         view.setLeaderBoard(leaderboardPanel);
         selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
-        
 
     }
 
     @Override
     public void onStop() {
+        timer.pause();
         selectionTimer.cancel();
         view.onStop();
     }

@@ -59,6 +59,7 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
     protected void updateData() {
         ArrayList<Pair<RegattaAndRaceIdentifier, Date>> data = getPlace().getRaceToStartOfRace();
         if (data == null) {
+            view.setData(null);
             return;
         }
         ArrayList<Pair<RegattaAndRaceIdentifier, Date>> filteredData = new ArrayList<>();

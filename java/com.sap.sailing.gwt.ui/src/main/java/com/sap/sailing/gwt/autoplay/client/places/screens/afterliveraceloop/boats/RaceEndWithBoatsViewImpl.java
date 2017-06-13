@@ -75,10 +75,6 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     }
 
     @Override
-    public void onStop() {
-    }
-
-    @Override
     public void setFirst(CompetitorDTO c) {
         subline1.setText("1. " + c.getName());
         setImage(image1, provider.getImageUrl(c), true);

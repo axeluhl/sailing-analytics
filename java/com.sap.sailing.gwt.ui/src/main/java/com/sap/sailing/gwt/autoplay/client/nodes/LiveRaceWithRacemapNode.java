@@ -5,8 +5,8 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardPlace;
-import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper;
-import com.sap.sailing.gwt.autoplay.client.utils.RaceMapHelper.RVWrapper;
+import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
+import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper.RVWrapper;
 
 public class LiveRaceWithRacemapNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
@@ -18,7 +18,7 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
     }
 
     public void onStart() {
-        RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),
+        AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
                 cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtx().getContextDefinition().getEventId(),
                 cf.getAutoPlayCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtx().getLifeRace(),
                 new AsyncCallback<RVWrapper>() {
