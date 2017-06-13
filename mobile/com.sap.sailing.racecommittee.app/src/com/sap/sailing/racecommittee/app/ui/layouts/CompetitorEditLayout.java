@@ -84,6 +84,9 @@ public class CompetitorEditLayout extends ScrollView {
         }
 
         mCompetitor = competitor;
+        if (!mCompetitor.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+            maxPos++;
+        }
 
         mCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
         if (mCompetitor.getFinishingTime() != null) {

@@ -105,7 +105,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     @Override
     public ItemDraggableRange onGetItemDraggableRange(ViewHolder viewHolder, int position) {
         final int start = 0;
-        final int end = getFirstPenalty() - 1;
+        final int end = getFirstPenaltyPosition() - 1;
 
         return new GroupPositionItemDraggableRange(start, end);
     }
@@ -120,7 +120,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         }
     }
 
-    public int getFirstPenalty() {
+    public int getFirstPenaltyPosition() {
         int result = getItemCount();
         for (int i = 0; i < getItemCount(); i++) {
             if (!mCompetitor.get(i).getMaxPointsReason().equals(MaxPointsReason.NONE)) {

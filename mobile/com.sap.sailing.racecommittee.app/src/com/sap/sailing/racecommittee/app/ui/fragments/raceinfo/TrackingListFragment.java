@@ -500,7 +500,7 @@ public class TrackingListFragment extends BaseFragment
             name += competitor.getBoat().getSailID();
         }
         name += " - " + competitor.getName();
-        int pos = mAdapter.getFirstPenalty();
+        int pos = mAdapter.getFirstPenaltyPosition();
         // FIXME mFinishedData.size()+1 also counts penalized competitors before which the competitor is to be inserted! I just wonder how the position shown in the app seems correct...
         int greatestOneBasedRankSoFar = 0;
         for (final CompetitorResultWithIdImpl result : mFinishedData) {
@@ -601,7 +601,7 @@ public class TrackingListFragment extends BaseFragment
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState()
-            .getFinishingTime(), item, mFinishedAdapter.getItemCount(), false);
+            .getFinishingTime(), item, mAdapter.getFirstPenaltyPosition(), false);
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -616,11 +616,11 @@ public class TrackingListFragment extends BaseFragment
                         replaceItemInPositioningList(index, item, newItem);
                         onItemMove(mFinishedData.indexOf(newItem), newItem.getOneBasedRank() - 1);
                     } else {
-                        onItemRemove(mFinishedData.indexOf(item));
+                        onItemRemove(index);
                     }
                 } else { // same rank
                     if (newItem.getOneBasedRank() == 0) { // empty rank -> remove
-                        onItemRemove(mFinishedData.indexOf(item));
+                        onItemRemove(index);
                     } else {
                         replaceItemInPositioningList(index, item, newItem);
                     }
@@ -657,8 +657,8 @@ public class TrackingListFragment extends BaseFragment
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
 
-    private void replaceItemInPositioningList(int index, CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
-        mFinishedData.remove(item);
+    private void replaceItemInPositioningList(int index, CompetitorResultWithIdImpl oldItem, CompetitorResultWithIdImpl newItem) {
+        mFinishedData.remove(oldItem);
         mFinishedData.add(index, newItem);
     }
 
