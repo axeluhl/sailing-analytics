@@ -40,7 +40,9 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 public class AutoplayHelper {
+    private static final long PRE_RACE_DELAY = 180000;
     private static final long WAIT_TIME_AFTER_END_OF_RACE_MIILIS = 60 * 1000; // 1 min
+
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private static RaceTimesInfoProvider raceTimesInfoProvider;
     private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
@@ -125,8 +127,11 @@ public class AutoplayHelper {
                                     .getTime() < raceTimes.endOfRace.getTime() + WAIT_TIME_AFTER_END_OF_RACE_MIILIS)) {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long delayToLiveInMs = raceTimes.delayToLiveInMs;
-                        return new Pair<Long, RegattaAndRaceIdentifier>(
-                                startTimeInMs - serverTimeDuringRequest.getTime() - delayToLiveInMs, raceIdentifier);
+                        long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - delayToLiveInMs;
+                        if(startIn <= PRE_RACE_DELAY){
+                            return new Pair<Long, RegattaAndRaceIdentifier>(
+                                    startIn, raceIdentifier);
+                        }
                     }
                 }
             }
