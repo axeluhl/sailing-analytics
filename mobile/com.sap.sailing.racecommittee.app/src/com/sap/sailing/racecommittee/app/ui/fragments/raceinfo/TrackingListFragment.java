@@ -608,6 +608,7 @@ public class TrackingListFragment extends BaseFragment
             public void onClick(DialogInterface dialog, int which) {
                 CompetitorResultWithIdImpl newItem = layout.getValue();
                 int index = mFinishedData.indexOf(item);
+                // if the competitor went from no penalty to penalty, move the competitor to the end of the list
                 if (item.getMaxPointsReason() != newItem.getMaxPointsReason() && item.getMaxPointsReason() == MaxPointsReason.NONE) {
                     mFinishedData.remove(item);
                     mFinishedData.add(mFinishedData.size(), newItem);
@@ -616,6 +617,7 @@ public class TrackingListFragment extends BaseFragment
                         replaceItemInPositioningList(index, item, newItem);
                         onItemMove(mFinishedData.indexOf(newItem), newItem.getOneBasedRank() - 1);
                     } else {
+                        // TODO shoulnd't it be possible to set a penalty via the edit dialog, setting the rank to 0?
                         onItemRemove(index);
                     }
                 } else { // same rank
