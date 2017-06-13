@@ -20,8 +20,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     private String leaderBoardName;
     private int errorCount = 0;;
     private RootNodeState currentState;
-    private RegattaAndRaceIdentifier currentPreLiveRace;
-    private RegattaAndRaceIdentifier currentLiveRace;
     private Timer checkTimer = new Timer() {
         @Override
         public void run() {
@@ -75,6 +73,10 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     }
 
     private void _doCheck() {
+
+        final RegattaAndRaceIdentifier currentPreLiveRace = cf.getAutoPlayCtx().getPreLiveRace();
+        final RegattaAndRaceIdentifier currentLiveRace = cf.getAutoPlayCtx().getLiveRace();
+
         this.leaderBoardName = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
         AutoplayHelper.getLiveRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtx().getEvent(),
                 leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
@@ -85,10 +87,10 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                         if (result == null || (currentLiveRace != null && !result.getB().equals(currentLiveRace))) {
                             boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null
                                     || (result != null && !result.getB().equals(currentLiveRace));
-                            setCurrentState(comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
+                            setCurrentState(null, null,
+                                    comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
                                     currentState);
-                            currentLiveRace = null;
-                            currentPreLiveRace = null;
+
                         } else {
                             final Long timeToRaceStartInMs = result.getA();
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
@@ -99,30 +101,28 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                                 } else {
                                     log("Live race is too far away, isComingFromLiveRace: " + comingFromLiveRace);
                                 }
-                                setCurrentState(comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
+                                setCurrentState(null, null,
+                                        comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
                                         currentState);
-                                currentLiveRace = null;
-                                currentPreLiveRace = null;
                             } else if (/* is pre liverace */ timeToRaceStartInMs < PRE_RACE_DELAY
                                     && timeToRaceStartInMs > LIVE_SWITCH_DELAY) {
                                 if (/* is new pre live race */!loadedLiveRace.equals(currentPreLiveRace)) {
                                     log("New pre live race: " + loadedLiveRace.getRaceName());
-                                    boolean veto = setCurrentState(RootNodeState.PRE_RACE, currentState);
+                                    boolean veto = setCurrentState(loadedLiveRace, null, RootNodeState.PRE_RACE,
+                                            currentState);
                                     if (!veto) {
-                                        currentPreLiveRace = loadedLiveRace;
-                                        currentLiveRace = null;
-                                        log("Switched to pre live race: " + loadedLiveRace.getRaceName());
+                                        log("Switched to pre live race: " + currentPreLiveRace.getRaceName());
                                     } else {
-                                        log("Veto, not switching to pre live race: " + loadedLiveRace.getRaceName());
+                                        log("Veto, not switching to pre live race: "
+                                                + currentPreLiveRace.getRaceName());
                                     }
                                 }
                             } else /* is live race */ {
-                                currentPreLiveRace = null;
                                 if (/* is new live race */!loadedLiveRace.equals(currentLiveRace)) {
-                                    log("New live race: " + loadedLiveRace.getRaceName());
-                                    boolean veto = setCurrentState(RootNodeState.LIVE, currentState);
+                                    boolean veto = setCurrentState(null, loadedLiveRace, RootNodeState.LIVE,
+                                            currentState);
                                     if (!veto) {
-                                        currentLiveRace = loadedLiveRace;
+                                        log("New live race: " + loadedLiveRace.getRaceName());
                                     }
                                 }
                             }
@@ -139,10 +139,11 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                 });
     }
 
-    private final boolean setCurrentState(RootNodeState goingTo, RootNodeState comingFrom) {
+    private final boolean setCurrentState(RegattaAndRaceIdentifier candidatePreLiveRace,
+            RegattaAndRaceIdentifier candidateLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
         if (goingTo != comingFrom) {
             log("RootNodeBase transition " + comingFrom + " -> " + goingTo);
-            boolean veto = processStateTransition(currentPreLiveRace, currentLiveRace, goingTo, comingFrom);
+            boolean veto = processStateTransition(candidatePreLiveRace, candidateLiveRace, goingTo, comingFrom);
             if (veto) {
                 log("Vetoed switching to state " + goingTo + " coming from " + comingFrom);
             } else {

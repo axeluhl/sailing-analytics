@@ -22,7 +22,9 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
-public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPresenterConfigured<LiveRaceWithRacemapAndLeaderBoardPlace> implements LiveRaceWithRacemapAndLeaderBoardView.Slide7Presenter {
+public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
+        extends AutoPlayPresenterConfigured<LiveRaceWithRacemapAndLeaderBoardPlace>
+        implements LiveRaceWithRacemapAndLeaderBoardView.Slide7Presenter {
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private LiveRaceWithRacemapAndLeaderBoardView view;
     private Timer selectionTimer;
@@ -32,14 +34,13 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
     private com.sap.sse.gwt.client.player.Timer timer;
 
     public LiveRaceWithRacemapAndLeaderBoardPresenterImpl(LiveRaceWithRacemapAndLeaderBoardPlace place,
-            AutoPlayClientFactory clientFactory,
-            LiveRaceWithRacemapAndLeaderBoardView LifeRaceWithRacemapViewImpl) {
+            AutoPlayClientFactory clientFactory, LiveRaceWithRacemapAndLeaderBoardView LifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
         this.view = LifeRaceWithRacemapViewImpl;
         selectionTimer = new Timer() {
             @Override
             public void run() {
-                 selectNext();
+                selectNext();
             }
         };
     }
@@ -57,13 +58,11 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
                 selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
                 return;
             }
-
             selected++;
             // overflow, restart
             if (selected > compList.size() - 1) {
                 selected = 0;
             }
-
             CompetitorDTO marked = compList.get(selected);
             getPlace().getRaceMapSelectionProvider().setSelected(marked, true);
             onSelect(marked);
@@ -95,48 +94,39 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
             view.showErrorNoLive(this, panel, getPlace().getError());
             return;
         }
-
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
-
         RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLiveRace();
         ArrayList<String> racesToShow = null;
         if (lifeRace != null) {
             racesToShow = new ArrayList<>();
             racesToShow.add(lifeRace.getRaceName());
         } else {
-            view.showErrorNoLive(this, panel, new IllegalStateException("Na race is life"));
+            view.showErrorNoLive(this, panel, new IllegalStateException("No race is live"));
             return;
         }
-
-        final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, null, null,
-        null, racesToShow, null, false, null, lifeRace.getRaceName(),
-        /* ascending */ true, /* updateUponPlayStateChange */ true, RaceColumnSelectionStrategies.EXPLICIT,
-        /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true,
-        false, true, true);
-
-
+        final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, null, null, null,
+                racesToShow, null, false, null, lifeRace.getRaceName(), /* ascending */ true,
+                /* updateUponPlayStateChange */ true, RaceColumnSelectionStrategies.EXPLICIT,
+                /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true, false, true, true);
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 true, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
-                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter,
-                StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false, false);
-        
+                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, null,
+                false, null, false, null, false, true, false, false, false);
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
     }
-    
 
     @Override
     public void onStop() {
-        if(timer != null){
+        if (timer != null) {
             timer.pause();
         }
         selectionTimer.cancel();
         view.onStop();
     }
-
 }

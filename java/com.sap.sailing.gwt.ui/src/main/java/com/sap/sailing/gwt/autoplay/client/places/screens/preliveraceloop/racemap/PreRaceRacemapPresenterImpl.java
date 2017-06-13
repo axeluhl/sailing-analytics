@@ -75,16 +75,13 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
                             break;
                         default:
                         }
-
                     }
                     String url = getRaceViewerURL(getSlideCtx().getContextDefinition().getLeaderboardName(), null,
                             getSlideCtx().getLiveRace());
-                    view.updateStatistic(lastStatisticResult, url, windSpeed,
-                            windDegree);
+                    view.updateStatistic(lastStatisticResult, url, windSpeed, windDegree);
                 }
             }
         };
-
         updateStatistics.scheduleRepeating(1000);
         // load only slowly, to reduce jitter in display, but still allow to respect coarse course changes
         reloadStatistics.scheduleRepeating(30000);
@@ -104,6 +101,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
                 perspectiveOwnSettings, innerSettings);
         return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
     }
+
     @Override
     public void onStop() {
         super.onStop();
@@ -116,7 +114,6 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
         getClientFactory().getDispatch().execute(
                 new GetSixtyInchStatisticAction(upcomingRace.getRaceName(), upcomingRace.getRegattaName()),
                 new AsyncCallback<GetSixtyInchStatisticDTO>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         GWT.log("error getting data! " + caught.getMessage());
@@ -128,6 +125,5 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
                         lastStatisticResult = result;
                     }
                 });
-
     }
 }
