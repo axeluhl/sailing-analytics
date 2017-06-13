@@ -13,7 +13,6 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
 
 public abstract class RootNodeBase extends BaseCompositeNode {
-    protected static final long PRE_RACE_DELAY = 180000;
     protected static final long LIVE_SWITCH_DELAY = 1000;
     private int UPDATE_STATE_TIMER = 5000;
     private final AutoPlayClientFactory cf;
@@ -85,11 +84,13 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                         errorCount = 0;
 
                         // we have no race, or we have one, and had a different one in the past
-                        if (result == null || (currentLiveRace != null && !result.getB().equals(currentLiveRace))) {
-                            log("No live race found or currentLiveRace differs from loaded liverace");
-                            boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null
-                                    || (result != null && !result.getB().equals(currentLiveRace));
-                            setCurrentState(null, null,
+                        if (result == null || result.getB() == null) {
+
+                            boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null;
+
+                            log("No live race found, " + (!comingFromLiveRace ? "not " : "") + "coming from live race");
+
+                            setCurrentState(false, null,
                                     comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
                                     currentState);
 
@@ -97,38 +98,20 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
                             final Long timeToRaceStartInMs = result.getA();
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
-                            log("live race found: " + loadedLiveRace + " starting in " + timeToRaceStartInMs + "ms");
-                            if (loadedLiveRace == null || timeToRaceStartInMs > PRE_RACE_DELAY) {
-                                boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null;
-                                if (loadedLiveRace == null) {
-                                    log("No live race, isComingFromLiveRace: " + comingFromLiveRace);
-                                } else {
-                                    log("Live race is too far away, isComingFromLiveRace: " + comingFromLiveRace);
-                                }
-                                setCurrentState(null, null,
-                                        comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
-                                        currentState);
-                            } else if (/* is pre liverace */ timeToRaceStartInMs < PRE_RACE_DELAY
-                                    && timeToRaceStartInMs > LIVE_SWITCH_DELAY) {
-                                if (/* is new pre live race */!loadedLiveRace.equals(currentPreLiveRace)) {
-                                    log("New pre live race: " + loadedLiveRace.getRaceName());
-                                    boolean veto = setCurrentState(loadedLiveRace, null, RootNodeState.PRE_RACE,
-                                            currentState);
-                                    if (!veto) {
-                                        log("Switched to pre live race: " + currentPreLiveRace.getRaceName());
-                                    } else {
-                                        log("Veto, not switching to pre live race: "
-                                                + currentPreLiveRace.getRaceName());
-                                    }
-                                }
-                            } else /* is live race */ {
-                                if (/* is new live race */!loadedLiveRace.equals(currentLiveRace)) {
-                                    boolean veto = setCurrentState(null, loadedLiveRace, RootNodeState.LIVE,
-                                            currentState);
-                                    if (!veto) {
-                                        log("New live race: " + loadedLiveRace.getRaceName());
-                                    }
-                                }
+
+                            boolean isPreLiveRace = timeToRaceStartInMs > LIVE_SWITCH_DELAY;
+                            // exit 
+                            if (currentLiveRace != null && !loadedLiveRace.equals(currentLiveRace)) {
+                                log("Received different live race, hard switching to AFTER_LIVE race");
+                                setCurrentState(isPreLiveRace, loadedLiveRace, RootNodeState.AFTER_LIVE , currentState);
+                            } else {
+                                
+
+                            log("New " + (isPreLiveRace?"live ":"pre live")
+                                    + " race found: " + loadedLiveRace + " starting in " + (timeToRaceStartInMs/1000) + "s");
+                                                        
+                                setCurrentState(isPreLiveRace, loadedLiveRace, isPreLiveRace? RootNodeState.PRE_RACE: RootNodeState.LIVE, currentState);
+                            
                             }
                         }
                     }
@@ -143,10 +126,12 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                 });
     }
 
-    private final boolean setCurrentState(RegattaAndRaceIdentifier candidatePreLiveRace,
-            RegattaAndRaceIdentifier candidateLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
+    private final void setCurrentState(boolean isPreLiveRace, RegattaAndRaceIdentifier liveRace,
+            RootNodeState goingTo, RootNodeState comingFrom) {
         if (goingTo != comingFrom) {
             log("RootNodeBase transition " + comingFrom + " -> " + goingTo);
+            RegattaAndRaceIdentifier candidatePreLiveRace = isPreLiveRace ? liveRace : null;
+            RegattaAndRaceIdentifier candidateLiveRace = isPreLiveRace ? null : liveRace;
             boolean veto = processStateTransition(candidatePreLiveRace, candidateLiveRace, goingTo, comingFrom);
             if (veto) {
                 log("Vetoed switching to state " + goingTo + " coming from " + comingFrom);
@@ -155,10 +140,8 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                 log("Switching to state " + goingTo + " coming from " + comingFrom);
                 this.currentState = goingTo;
             }
-            return veto;
         } else {
             log("Transition to same autoplay state, skipping");
-            return true;
         }
     }
 
