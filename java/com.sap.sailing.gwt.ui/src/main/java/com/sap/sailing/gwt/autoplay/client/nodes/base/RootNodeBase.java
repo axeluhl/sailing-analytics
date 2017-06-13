@@ -85,6 +85,7 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                         errorCount = 0;
                         // we have no race, or we have one, and had a different one in the past
                         if (result == null || (currentLiveRace != null && !result.getB().equals(currentLiveRace))) {
+                            log("No live race found or currentLiveRace differs from loaded liverace");
                             boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null
                                     || (result != null && !result.getB().equals(currentLiveRace));
                             setCurrentState(null, null,

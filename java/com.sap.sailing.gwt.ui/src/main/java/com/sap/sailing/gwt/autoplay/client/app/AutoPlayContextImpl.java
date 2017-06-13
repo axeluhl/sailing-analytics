@@ -1,13 +1,16 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
-import com.google.gwt.core.client.GWT;
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayConfiguration;
 import com.sap.sailing.gwt.autoplay.client.configs.AutoPlayContextDefinition;
+import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlaySequenceNode;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class AutoPlayContextImpl implements AutoPlayContext {
+    private static final Logger LOG = Logger.getLogger(AutoPlaySequenceNode.class.getName());
     private AutoPlayConfiguration configuration;
     private AutoPlayContextDefinition contextDefinition;
     private EventDTO event;
@@ -52,9 +55,9 @@ public class AutoPlayContextImpl implements AutoPlayContext {
     public void updateLiveRace(RegattaAndRaceIdentifier currentPreLifeRace,
             RegattaAndRaceIdentifier currentLiveRace) {
         if (this.liveRace != null) {
-            if (!this.liveRace.equals(liveRace)) {
+            if (!this.liveRace.equals(currentLiveRace)) {
+                LOG.info(">> AUTOPLAY >> Context >> Lastrace was " + lastRace + " liferace is now " + liveRace);
                 this.lastRace = this.liveRace;
-                GWT.log("lastrace was " + lastRace + " liferace is now " + liveRace);
             }
         }
         this.preLiveRace = currentPreLifeRace;

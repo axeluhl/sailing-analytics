@@ -196,7 +196,7 @@ public class AutoplayHelper {
                                         }
                                     });
                         } else {
-                            callback.onFailure(new IllegalStateException("No Life Race Found"));
+                            callback.onFailure(new IllegalStateException("No Live Race Found"));
                         }
                     }
                 }, raceTimesInfoProvider);
