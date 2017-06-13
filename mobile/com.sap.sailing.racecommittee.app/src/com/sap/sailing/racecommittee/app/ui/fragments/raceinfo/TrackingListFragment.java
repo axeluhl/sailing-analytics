@@ -530,9 +530,9 @@ public class TrackingListFragment extends BaseFragment
         mFinishedData.remove(item);
         mFinishedData.add(toPosition, item);
         // now adjust ranks of all in-between results
-        for (int i=Math.min(fromPosition, toPosition); i<=Math.max(fromPosition, toPosition); i++) {
+        for (int i = Math.min(fromPosition, toPosition); i <= Math.max(fromPosition, toPosition); i++) {
             mFinishedData.set(i, cloneCompetitorResultAndAdjustRank(mFinishedData.get(i),
-                        /* newOneBasedRank */ mFinishedData.get(i).getOneBasedRank() == 0 ? 0 : i+1));
+                        /* newOneBasedRank */ mFinishedData.get(i).getOneBasedRank() == 0 ? 0 : i + 1));
         }
         mFinishedAdapter.notifyItemMoved(fromPosition, toPosition);
     }
