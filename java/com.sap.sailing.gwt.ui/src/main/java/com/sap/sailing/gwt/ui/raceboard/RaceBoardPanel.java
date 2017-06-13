@@ -70,13 +70,15 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
@@ -129,7 +131,7 @@ public class RaceBoardPanel
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
     private final String leaderboardName;
-    private final ClassicLeaderboardPanel leaderboardPanel;
+    private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
     private MediaPlayerManagerComponent mediaPlayerManagerComponent;
@@ -158,6 +160,7 @@ public class RaceBoardPanel
     
     private final RaceBoardResources raceBoardResources = RaceBoardResources.INSTANCE; 
     private final RaceBoardMainCss mainCss = raceBoardResources.mainCss();
+    private final QuickRanksDTOFromLeaderboardDTOProvider quickRanksDTOProvider;
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
@@ -168,13 +171,11 @@ public class RaceBoardPanel
      * @param isScreenLargeEnoughToOfferChartSupport
      *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
-     *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint}
-     *            class.
+     *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
      * @param showChartMarkEditMediaButtonsAndVideo
-     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark
-     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that aligns
-     *            its right border with that of the chart. Otherwise those components will be hidden.
-     * @param showHeaderPanel
+     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark 
+     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that
+     *            aligns its right border with that of the chart. Otherwise those components will be hidden.
      */
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
@@ -220,10 +221,12 @@ public class RaceBoardPanel
         RaceTimePanelLifecycle raceTimePanelLifecycle = lifecycle.getRaceTimePanelLifecycle();
         RaceTimePanelSettings raceTimePanelSettings = settings
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
+        final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
+        quickRanksDTOProvider = new QuickRanksDTOFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
-                competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
-                /* showHeaderPanel */ showHeaderPanel) {
+                competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
+                raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -445,7 +448,7 @@ public class RaceBoardPanel
         }
     }
     
-    private ClassicLeaderboardPanel createLeaderboardPanel(RaceBoardPerspectiveLifecycle lifecycle,
+    private LeaderboardPanel createLeaderboardPanel(RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
             String leaderboardGroupName,
             CompetitorFilterPanel competitorSearchTextBox, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard) {
@@ -477,7 +480,7 @@ public class RaceBoardPanel
         componentViewer.forceLayout();
     }
     
-    ClassicLeaderboardPanel getLeaderboardPanel() {
+    LeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
     
@@ -570,6 +573,7 @@ public class RaceBoardPanel
         if (editMarkPositionPanel != null) {
             editMarkPositionPanel.setLeaderboard(leaderboard);
         }
+        quickRanksDTOProvider.updateQuickRanks(leaderboard);
     }
 
     @Override

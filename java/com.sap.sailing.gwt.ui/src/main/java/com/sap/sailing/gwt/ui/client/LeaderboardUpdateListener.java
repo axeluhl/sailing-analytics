@@ -17,7 +17,6 @@ public interface LeaderboardUpdateListener {
     
     /**
      * Called whenever the leaderboard has been updated.
-     * @param leaderboard
      */
     void updatedLeaderboard(LeaderboardDTO leaderboard);
     

@@ -22,6 +22,8 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.DefaultQuickRanksDTOProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
@@ -128,9 +130,8 @@ public class AutoplayHelper {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long delayToLiveInMs = raceTimes.delayToLiveInMs;
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - delayToLiveInMs;
-                        if(startIn <= PRE_RACE_DELAY){
-                            return new Pair<Long, RegattaAndRaceIdentifier>(
-                                    startIn, raceIdentifier);
+                        if (startIn <= PRE_RACE_DELAY) {
+                            return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
                         }
                     }
                 }
@@ -269,7 +270,8 @@ public class AutoplayHelper {
         competitorSelectionProvider.setCompetitors(competitors);
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
                 asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
-                StringMessages.INSTANCE, currentLiveRace, raceMapResources, false);
+                new RaceCompetitorSet(competitorSelectionProvider), StringMessages.INSTANCE, currentLiveRace,
+                raceMapResources, false, new DefaultQuickRanksDTOProvider());
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
                 serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         // raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceboardPerspective);

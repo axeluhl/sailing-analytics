@@ -1709,22 +1709,9 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null && !fieldsForRace.legDetails.isEmpty()) {
-                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                        if (legDetail != null) {
-                            if (legDetail.started) {
-                                if (result == null) {
-                                    result = 0.0;
-                                }
-                                result++;
-                            } else {
-                                if (result != null) {
-                                    result++;
-                                }
-                                break;
-                            }
-                        }
-                    }
+                if (fieldsForRace != null) {
+                    int currentLeg = fieldsForRace.getOneBasedCurrentLegNumber();
+                    result = currentLeg == 0 ? null : (double) currentLeg;
                 }
                 return result;
             }

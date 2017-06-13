@@ -74,7 +74,6 @@ public class TrackingListFragment extends BaseFragment
     PopupMenu.OnMenuItemClickListener, SearchView.SearchTextWatcher {
 
     private static final int COMPETITOR_LOADER = 0;
-    private static final int START_ORDER_LOADER = 1;
     private static final int LEADERBOARD_ORDER_LOADER = 2;
 
     private static final int SORT_SAIL_NUMBER = 0;
