@@ -6,15 +6,16 @@
 	<ui:style>
 	.image {
 		display: inline-block;
-		height: auto;
+		height: 80%;
 		width: 33.3%;
 		max-height: 90%;
 		border-radius: 4px;
+		padding-top:20%
 	}
 	
 	.image img {
 		display: block;
-		height: auto;
+		height: 80%;
 		width: 100%;
 		max-height: 90%;
 		border-radius: 4px;
@@ -50,7 +51,7 @@
         left: 34%;
     }
     .holder{
-	
+	   vertical-align: bottom;
 	}
 	</ui:style>
 	<rf:ResizableFlowPanel styleName="{style.holder">

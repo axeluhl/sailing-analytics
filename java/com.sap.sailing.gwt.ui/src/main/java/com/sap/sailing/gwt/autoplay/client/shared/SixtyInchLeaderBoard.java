@@ -101,11 +101,11 @@ public class SixtyInchLeaderBoard extends LeaderboardPanel {
 
     @Override
     public void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb) {
-        sb.append(FLAG_RENDERER.flag(nationalityFlagImageResource.getSafeUri(), 36, 24,""));
+        sb.append(FLAG_RENDERER.flag(nationalityFlagImageResource.getSafeUri(), 60, 40, ""));
     }
     
     @Override
     protected void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb,CompetitorDTO competitor) {
-        sb.append(FLAG_RENDERER.flag(UriUtils.fromString(flagImageURL), 36, 24,competitor.getName()));
+        sb.append(FLAG_RENDERER.flag(UriUtils.fromString(flagImageURL), 60, 40, competitor.getName()));
     }
 }

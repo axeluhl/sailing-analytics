@@ -19,17 +19,20 @@
 		right: 0px;
 		height: 100%;
 		width: 50%;
+		padding: 70px 20px 20px 40px
 	}
 	
 	.bottom {
 		width: 100%;
 		height: 80px;
-		font-size: 50px;
+		font-size: 40px;
+		line-height: 70px;
 		text-align: center;
 		position: absolute;
 		bottom: 0px;
 		background-color: #008fcc;
 		color: white;
+		padding: 10px;
 	}
 	
 	.image {
