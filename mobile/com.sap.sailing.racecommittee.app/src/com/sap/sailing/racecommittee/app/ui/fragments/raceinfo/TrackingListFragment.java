@@ -529,8 +529,8 @@ public class TrackingListFragment extends BaseFragment
         CompetitorResultWithIdImpl item = mFinishedData.get(fromPosition);
         mFinishedData.remove(item);
         mFinishedData.add(toPosition, item);
-        // now adjust ranks of all in-between results
-        for (int i = Math.min(fromPosition, toPosition); i <= Math.max(fromPosition, toPosition); i++) {
+        // now adjust ranks of all results
+        for (int i = 0; i < mFinishedData.size(); i++) {
             mFinishedData.set(i, cloneCompetitorResultAndAdjustRank(mFinishedData.get(i),
                         /* newOneBasedRank */ mFinishedData.get(i).getOneBasedRank() == 0 ? 0 : i + 1));
         }
