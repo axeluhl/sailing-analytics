@@ -11,6 +11,7 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
     private List<AutoPlayNode> nodes = new ArrayList<>();
     private int loopTimePerNodeInSeconds;
     private int currentPos = -1;
+
     private Timer transitionTimer = new Timer() {
         @Override
         public void run() {
@@ -34,19 +35,22 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
         }
     }
     
-    public AutoPlayLoopNode(int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {
+    public AutoPlayLoopNode(String name, int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {
+        super(name);
         this.loopTimePerNodeInSeconds = loopTimePerNodeInSeconds;
         this.nodes.addAll(Arrays.asList(nodes));
     }
 
     @Override
     public void onStart() {
+        log("Start sequence " + getName());
         currentPos = -1;
         gotoNext();
     }
 
     @Override
     public void onStop() {
+        log("Stop sequence " + getName());
         super.onStop();
         for (AutoPlayNode autoPlayNode : nodes) {
             autoPlayNode.stop();

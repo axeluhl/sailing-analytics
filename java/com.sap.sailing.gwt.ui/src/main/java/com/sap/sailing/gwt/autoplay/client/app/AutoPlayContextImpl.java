@@ -11,8 +11,9 @@ public class AutoPlayContextImpl implements AutoPlayContext {
     private AutoPlayConfiguration configuration;
     private AutoPlayContextDefinition contextDefinition;
     private EventDTO event;
-    private RegattaAndRaceIdentifier lifeRace;
+    private RegattaAndRaceIdentifier liveRace;
     private RegattaAndRaceIdentifier lastRace;
+    private RegattaAndRaceIdentifier preLiveRace;
     private AutoplayPerspectiveLifecycle autoplayLifecycle;
     private PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> autoplaySettings;
 
@@ -46,20 +47,18 @@ public class AutoPlayContextImpl implements AutoPlayContext {
         return contextDefinition;
     }
 
-    @Override
-    public RegattaAndRaceIdentifier getLifeRace() {
-        return lifeRace;
-    }
 
     @Override
-    public void setCurrentLifeRace(RegattaAndRaceIdentifier lifeRace) {
-        if (this.lifeRace != null) {
-            if (!this.lifeRace.equals(lifeRace)) {
-                this.lastRace = this.lifeRace;
-                GWT.log("lastrace was " + lastRace + " liferace is now " + lifeRace);
+    public void updateLiveRace(RegattaAndRaceIdentifier currentPreLifeRace,
+            RegattaAndRaceIdentifier currentLiveRace) {
+        if (this.liveRace != null) {
+            if (!this.liveRace.equals(liveRace)) {
+                this.lastRace = this.liveRace;
+                GWT.log("lastrace was " + lastRace + " liferace is now " + liveRace);
             }
         }
-        this.lifeRace = lifeRace;
+        this.preLiveRace = currentPreLifeRace;
+        this.liveRace = currentLiveRace;
     }
 
     @Override
@@ -75,6 +74,16 @@ public class AutoPlayContextImpl implements AutoPlayContext {
     @Override
     public void updateEvent(EventDTO event) {
         this.event = event;
+    }
+
+    @Override
+    public RegattaAndRaceIdentifier getLiveRace() {
+        return liveRace;
+    }
+
+    @Override
+    public RegattaAndRaceIdentifier getPreLiveRace() {
+        return preLiveRace;
     }
 
     @Override

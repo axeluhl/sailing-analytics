@@ -32,7 +32,7 @@ public class IdleUpNextNode extends FiresPlaceNode {
     // */1000l);
 
     public IdleUpNextNode(AutoPlayClientFactory cf) {
-        
+        super(IdleUpNextNode.class.getName());
         this.cf = cf;
         place = new IdleUpNextPlace();
     }

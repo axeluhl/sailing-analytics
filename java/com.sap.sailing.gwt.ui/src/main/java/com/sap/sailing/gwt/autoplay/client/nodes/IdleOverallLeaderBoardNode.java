@@ -23,7 +23,7 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
 
     public IdleOverallLeaderBoardNode(AutoPlayClientFactory cf) {
-
+        super(IdleOverallLeaderBoardNode.class.getName());
         this.cf = cf;
 
     }

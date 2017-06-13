@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
 import com.google.gwt.user.client.Command;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayLoopNode;
@@ -17,11 +18,14 @@ public class RootNodeSixtyInch extends RootNodeBase {
     protected boolean afterRaceFinished = true;
 
     public RootNodeSixtyInch(AutoPlayClientFactory cf) {
-        super(cf);
-        this.idleLoop = new AutoPlayLoopNode(30,new IdleUpNextNode(cf),new IdleOverallLeaderBoardNode(cf));
-        this.preLiveRaceLoop = new AutoPlayLoopNode(90,  new PreLeaderBoardWithCompetitorsNode(cf),new PreRaceWithRacemapNode(cf));
-        this.liveRaceLoop = new AutoPlayLoopNode(30, new LiveRaceWithRacemapNode(cf));
-        this.afterLiveRaceLoop = new AutoPlaySequenceNode(30, new RaceEndWithCompetitorsBoatsNode(cf),
+        super(RaceEndWithCompetitorsFlagsNode.class.getName(), cf);
+        this.idleLoop = new AutoPlayLoopNode("IdleLoop", 30, new IdleUpNextNode(cf),
+                new IdleOverallLeaderBoardNode(cf));
+        this.preLiveRaceLoop = new AutoPlayLoopNode("PreLiveRaceLoop", 90, new PreLiveRaceLeaderBoardWithCompetitorsNode(cf),
+                new PreLiveRaceWithRacemapNode(cf));
+        this.liveRaceLoop = new AutoPlayLoopNode("LiveRaceLoop", 30, new LiveRaceWithRacemapNode(cf));
+        this.afterLiveRaceLoop = new AutoPlaySequenceNode("AfterLiveRaceLoop", 30,
+                new RaceEndWithCompetitorsBoatsNode(cf),
                 new RaceEndWithCompetitorsFlagsNode(cf));
 
         afterLiveRaceLoop.setOnSequenceEnd(new Command() {
@@ -32,7 +36,8 @@ public class RootNodeSixtyInch extends RootNodeBase {
         });
     }
 
-    protected boolean processStateTransition(RootNodeState goingTo, RootNodeState comingFrom) {
+    protected boolean processStateTransition(RegattaAndRaceIdentifier currentPreLiveRace,
+            RegattaAndRaceIdentifier currentLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
         // block transitions, until the afterLiveRaceLoop is finished
         if (comingFrom == RootNodeState.AFTER_LIVE) {
             if(afterRaceFinished){
@@ -41,6 +46,7 @@ public class RootNodeSixtyInch extends RootNodeBase {
                 return true;
             }
         }
+        getClientFactory().getAutoPlayCtx().updateLiveRace(currentPreLiveRace, currentLiveRace);
         switch (goingTo) {
         case IDLE:
             transitionTo(idleLoop);

@@ -6,10 +6,15 @@ import com.google.gwt.place.shared.PlaceChangeEvent;
 public abstract class FiresPlaceNode
         extends AutoPlayNodeBase {
 
+    public FiresPlaceNode(String name) {
+        super(name);
+    }
+
     private Place placeToGo;
 
 
     public void onStart() {
+        log("Start place node");
         firePlaceChangeAndStartTimer();
     }
 
@@ -23,6 +28,7 @@ public abstract class FiresPlaceNode
 
     protected void firePlaceChangeAndStartTimer() {
         if (placeToGo != null) {
+            log("Fire place change to " + placeToGo);
             getBus().fireEvent(new PlaceChangeEvent(placeToGo));
         }
     }

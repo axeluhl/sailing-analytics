@@ -98,7 +98,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl extends AutoPlayPres
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
 
-        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLifeRace();
+        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLiveRace();
         ArrayList<String> racesToShow = null;
         if (lifeRace != null) {
             racesToShow = new ArrayList<>();

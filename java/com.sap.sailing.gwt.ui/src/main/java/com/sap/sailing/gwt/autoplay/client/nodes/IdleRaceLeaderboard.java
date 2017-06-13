@@ -23,8 +23,10 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
     private final Timer leaderboardTimer;
 
     public IdleRaceLeaderboard(AutoPlayClientFactory cf) {
+        super(IdleRaceLeaderboard.class.getName());
         this.cf = cf;
-        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx().getAutoplaySettings();
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx()
+                .getAutoplaySettings();
         leaderboardTimer = new Timer(PlayModes.Live,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardTimer
@@ -32,36 +34,28 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
         leaderboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD);
     }
 
-
     public void onStart() {
         leaderboardTimer.play();
-        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx().getAutoplaySettings();
+        PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx()
+                .getAutoplaySettings();
         AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getAutoPlayCtx().getAutoplayLifecycle();
         boolean withFullscreenButton = settings.getPerspectiveOwnSettings().isFullscreen();
         PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings = settings
                 .findSettingsByComponentId(autoplayLifecycle.getLeaderboardLifecycle().getComponentId());
-               
-        
         StringMessages stringMessages = StringMessages.INSTANCE;
-        
         LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(null, null,
                 autoplayLifecycle.getLeaderboardLifecycle(), leaderboardSettings, cf.getSailingService(),
-                cf.getUserService(),
-                AutoplayHelper.asyncActionsExecutor, new CompetitorSelectionModel(/* hasMultiSelection */ true),
-                leaderboardTimer, cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getErrorReporter(),
-                stringMessages,
+                cf.getUserService(), AutoplayHelper.asyncActionsExecutor,
+                new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
+                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getErrorReporter(), stringMessages,
                 withFullscreenButton);
         setPlaceToGo(new LeaderboardPlace(leaderboardPerspective));
-        
         StrippedLeaderboardDTO leaderboard = AutoplayHelper.getSelectedLeaderboard(cf.getAutoPlayCtx().getEvent(),
                 cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
         String title = stringMessages.leaderboard() + ": "
                 + (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName());
-        
         getBus().fireEvent(new AutoPlayHeaderEvent(title, ""));
-        
         firePlaceChangeAndStartTimer();
-
     };
 
     @Override

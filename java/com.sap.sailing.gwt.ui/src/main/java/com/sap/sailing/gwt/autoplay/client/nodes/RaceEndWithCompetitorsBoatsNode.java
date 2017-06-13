@@ -15,6 +15,7 @@ public class RaceEndWithCompetitorsBoatsNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
 
     public RaceEndWithCompetitorsBoatsNode(AutoPlayClientFactory cf) {
+        super(RaceEndWithCompetitorsBoatsNode.class.getName());
         this.cf = cf;
     }
 

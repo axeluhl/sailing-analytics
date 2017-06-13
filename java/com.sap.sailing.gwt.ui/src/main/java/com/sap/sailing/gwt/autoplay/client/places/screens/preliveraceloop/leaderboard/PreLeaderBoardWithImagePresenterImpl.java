@@ -89,7 +89,7 @@ public class PreLeaderBoardWithImagePresenterImpl
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
         view.startingWith(this, panel);
 
-        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLifeRace();
+        RegattaAndRaceIdentifier lifeRace = getSlideCtx().getLiveRace();
         ArrayList<String> racesToShow = null;
         if (lifeRace != null) {
             racesToShow = new ArrayList<>();

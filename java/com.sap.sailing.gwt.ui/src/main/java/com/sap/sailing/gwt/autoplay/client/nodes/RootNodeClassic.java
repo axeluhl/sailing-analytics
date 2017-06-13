@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.AutoPlayNode;
@@ -11,12 +12,14 @@ public class RootNodeClassic extends RootNodeBase {
     private final AutoPlayNode live;
 
     public RootNodeClassic(AutoPlayClientFactory cf) {
-        super(cf);
+        super(RaceEndWithCompetitorsFlagsNode.class.getName(), cf);
         this.idle = new IdleRaceLeaderboard(cf);
         this.live = new LiveRaceBoardNode(cf);
     }
 
-    protected boolean processStateTransition(RootNodeState goingTo, RootNodeState comingFrom) {
+    protected boolean processStateTransition(RegattaAndRaceIdentifier currentPreLiveRace,
+            RegattaAndRaceIdentifier currentLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
+        getClientFactory().getAutoPlayCtx().updateLiveRace(currentPreLiveRace, currentLiveRace);
         switch (goingTo) {
         case IDLE:
         case AFTER_LIVE:

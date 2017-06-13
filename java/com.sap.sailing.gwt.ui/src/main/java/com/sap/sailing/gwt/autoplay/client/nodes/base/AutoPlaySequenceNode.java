@@ -8,11 +8,11 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 
 public class AutoPlaySequenceNode extends BaseCompositeNode {
-
     private List<AutoPlayNode> nodes = new ArrayList<>();
     private int sequenceTimePerNodeInSeconds;
     private int currentPos = -1;
     private Command onLoopEnd;
+
     private Timer transitionTimer = new Timer() {
         @Override
         public void run() {
@@ -34,13 +34,15 @@ public class AutoPlaySequenceNode extends BaseCompositeNode {
     
     @Override
     protected void transitionTo(AutoPlayNode nextNode) {
+        log("Sequence transition to " + nextNode);
         super.transitionTo(nextNode);
         if (!isStopped()) {
-            transitionTimer.schedule(sequenceTimePerNodeInSeconds * 1000);
+            transitionTimer.schedule(sequenceTimePerNodeInSeconds * 2000);
         }
     }
     
-    public AutoPlaySequenceNode(int sequenceTimePerNodeInSeconds, AutoPlayNode... nodes) {
+    public AutoPlaySequenceNode(String name, int sequenceTimePerNodeInSeconds, AutoPlayNode... nodes) {
+        super(name);
         this.sequenceTimePerNodeInSeconds = sequenceTimePerNodeInSeconds;
         this.nodes.addAll(Arrays.asList(nodes));
     }
@@ -51,12 +53,14 @@ public class AutoPlaySequenceNode extends BaseCompositeNode {
 
     @Override
     public void onStart() {
+        log("Start sequence");
         currentPos = -1;
         gotoNext();
     }
 
     @Override
     public void onStop() {
+        log("Stop sequence ");
         super.onStop();
         for (AutoPlayNode autoPlayNode : nodes) {
             autoPlayNode.stop();

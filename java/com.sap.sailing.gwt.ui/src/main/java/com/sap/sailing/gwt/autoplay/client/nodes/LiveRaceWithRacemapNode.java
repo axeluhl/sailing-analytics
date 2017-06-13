@@ -12,7 +12,7 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
 
     public LiveRaceWithRacemapNode(AutoPlayClientFactory cf) {
-
+        super(LiveRaceWithRacemapNode.class.getName());
         this.cf = cf;
 
     }
@@ -20,7 +20,7 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
     public void onStart() {
         RaceMapHelper.create(cf.getSailingService(), cf.getErrorReporter(),
                 cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtx().getContextDefinition().getEventId(),
-                cf.getAutoPlayCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtx().getLifeRace(),
+                cf.getAutoPlayCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtx().getLiveRace(),
                 new AsyncCallback<RVWrapper>() {
 
                     @Override
@@ -38,8 +38,8 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                         place.setRaceMap(result.raceboardPerspective, result.csel);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
-                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),
-                                cf.getAutoPlayCtx().getLifeRace().getRaceName()));
+                        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLiveRace().getRegattaName(),
+                                cf.getAutoPlayCtx().getLiveRace().getRaceName()));
                     }
                 });
     };

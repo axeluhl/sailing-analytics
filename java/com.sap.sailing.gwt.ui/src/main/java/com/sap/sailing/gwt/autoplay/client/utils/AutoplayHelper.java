@@ -30,7 +30,7 @@ public class AutoplayHelper {
     private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
     public static final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
-    public static void getLifeRace(SailingServiceAsync sailingService,
+    public static void getLiveRace(SailingServiceAsync sailingService,
             ErrorReporter errorReporter, EventDTO event, String leaderBoardName, SailingDispatchSystem dispatch,
             AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
         raceboardTimer.reset();

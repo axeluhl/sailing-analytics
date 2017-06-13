@@ -43,7 +43,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
             view.showErrorNoLive(this, panel, getPlace().getError());
             return;
         }
-        view.nextRace(getSlideCtx().getLifeRace());
+        view.nextRace(getSlideCtx().getLiveRace());
         reloadStatistics();
         reloadStatistics = new Timer() {
             @Override
@@ -78,7 +78,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
 
                     }
                     String url = getRaceViewerURL(getSlideCtx().getContextDefinition().getLeaderboardName(), null,
-                            getSlideCtx().getLifeRace());
+                            getSlideCtx().getLiveRace());
                     view.updateStatistic(lastStatisticResult, url, windSpeed,
                             windDegree);
                 }
@@ -112,7 +112,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
     }
 
     private void reloadStatistics() {
-        RegattaAndRaceIdentifier upcomingRace = getSlideCtx().getLifeRace();
+        RegattaAndRaceIdentifier upcomingRace = getSlideCtx().getLiveRace();
         getClientFactory().getDispatch().execute(
                 new GetSixtyInchStatisticAction(upcomingRace.getRaceName(), upcomingRace.getRegattaName()),
                 new AsyncCallback<GetSixtyInchStatisticDTO>() {

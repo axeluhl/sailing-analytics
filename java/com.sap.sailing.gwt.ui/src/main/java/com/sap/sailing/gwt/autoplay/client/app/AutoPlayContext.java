@@ -15,11 +15,13 @@ public interface AutoPlayContext {
 
     EventDTO getEvent();
 
-    public RegattaAndRaceIdentifier getLifeRace();
+    RegattaAndRaceIdentifier getPreLiveRace();
 
-    public RegattaAndRaceIdentifier getLastRace();
+    RegattaAndRaceIdentifier getLiveRace();
 
-    public void setCurrentLifeRace(RegattaAndRaceIdentifier lifeRace);
+    RegattaAndRaceIdentifier getLastRace();
+
+    void updateLiveRace(RegattaAndRaceIdentifier currentPreLifeRace, RegattaAndRaceIdentifier currentLifeRace);
 
     PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> getAutoplaySettings();
 

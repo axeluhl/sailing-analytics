@@ -6,10 +6,11 @@ import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.AbstractPreRaceLeaderBoardWithImagePlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreRaceLeaderBoardWithCompetitorPlace;
 
-public class PreLeaderBoardWithCompetitorsNode extends FiresPlaceNode {
+public class PreLiveRaceLeaderBoardWithCompetitorsNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
 
-    public PreLeaderBoardWithCompetitorsNode(AutoPlayClientFactory cf) {
+    public PreLiveRaceLeaderBoardWithCompetitorsNode(AutoPlayClientFactory cf) {
+        super(PreLiveRaceLeaderBoardWithCompetitorsNode.class.getName());
         this.cf = cf;
     }
 
@@ -17,7 +18,7 @@ public class PreLeaderBoardWithCompetitorsNode extends FiresPlaceNode {
         AbstractPreRaceLeaderBoardWithImagePlace place = new PreRaceLeaderBoardWithCompetitorPlace();
         setPlaceToGo(place);
         firePlaceChangeAndStartTimer();
-        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLifeRace().getRegattaName(),
-                cf.getAutoPlayCtx().getLifeRace().getRaceName()));
+        getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getPreLiveRace().getRegattaName(),
+                cf.getAutoPlayCtx().getPreLiveRace().getRaceName()));
     };
 }

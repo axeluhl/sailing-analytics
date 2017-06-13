@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.autoplay.client.nodes.base;
 
 import java.util.UUID;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -17,20 +16,21 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     protected static final long PRE_RACE_DELAY = 180000;
     protected static final long LIVE_SWITCH_DELAY = 1000;
     private int UPDATE_STATE_TIMER = 5000;
-
     private final AutoPlayClientFactory cf;
     private String leaderBoardName;
     private int errorCount = 0;;
     private RootNodeState currentState;
-    private RegattaAndRaceIdentifier currentPreLifeRace;
-    private RegattaAndRaceIdentifier currentLifeRace;
+    private RegattaAndRaceIdentifier currentPreLiveRace;
+    private RegattaAndRaceIdentifier currentLiveRace;
     private Timer checkTimer = new Timer() {
         @Override
         public void run() {
             doCheck();
         }
     };
-    protected RootNodeBase(AutoPlayClientFactory cf) {
+
+    protected RootNodeBase(String name, AutoPlayClientFactory cf) {
+        super(name);
         this.cf = cf;
     }
 
@@ -76,47 +76,53 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
     private void _doCheck() {
         this.leaderBoardName = cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName();
-        AutoplayHelper.getLifeRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtx().getEvent(),
+        AutoplayHelper.getLiveRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtx().getEvent(),
                 leaderBoardName, cf.getDispatch(), new AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>>() {
                     @Override
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
                         // we have no race, or we have one, and had a different one in the past
-                        if (result == null || (currentLifeRace != null && !result.getB().equals(currentLifeRace))) {
-                            cf.getAutoPlayCtx().setCurrentLifeRace(null);
-                            boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null
-                                    || (result != null && !result.getB().equals(currentLifeRace));
-                            setCurrentState(comingFromLiferace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
+                        if (result == null || (currentLiveRace != null && !result.getB().equals(currentLiveRace))) {
+                            boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null
+                                    || (result != null && !result.getB().equals(currentLiveRace));
+                            setCurrentState(comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
                                     currentState);
-                            currentLifeRace = null;
-                            currentPreLifeRace = null;
+                            currentLiveRace = null;
+                            currentPreLiveRace = null;
                         } else {
-                            cf.getAutoPlayCtx().setCurrentLifeRace(result.getB());
                             final Long timeToRaceStartInMs = result.getA();
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
                             if (loadedLiveRace == null || timeToRaceStartInMs > PRE_RACE_DELAY) {
-                                boolean comingFromLiferace = currentLifeRace != null || currentPreLifeRace != null;
-                                GWT.log("FallbackToIdleLoopEvent: isComingFromLiferace: " + comingFromLiferace);
-                                setCurrentState(comingFromLiferace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
+                                boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null;
+                                if (loadedLiveRace == null) {
+                                    log("No live race, isComingFromLiveRace: " + comingFromLiveRace);
+                                } else {
+                                    log("Live race is too far away, isComingFromLiveRace: " + comingFromLiveRace);
+                                }
+                                setCurrentState(comingFromLiveRace ? RootNodeState.AFTER_LIVE : RootNodeState.IDLE,
                                         currentState);
-                                currentLifeRace = null;
-                                currentPreLifeRace = null;
+                                currentLiveRace = null;
+                                currentPreLiveRace = null;
                             } else if (/* is pre liverace */ timeToRaceStartInMs < PRE_RACE_DELAY
                                     && timeToRaceStartInMs > LIVE_SWITCH_DELAY) {
-                                if (/* is new pre live race */!loadedLiveRace.equals(currentPreLifeRace)) {
+                                if (/* is new pre live race */!loadedLiveRace.equals(currentPreLiveRace)) {
+                                    log("New pre live race: " + loadedLiveRace.getRaceName());
                                     boolean veto = setCurrentState(RootNodeState.PRE_RACE, currentState);
                                     if (!veto) {
-                                        currentPreLifeRace = loadedLiveRace;
-                                        currentLifeRace = null;
-                                        GWT.log("UpcomingLiferaceDetectedEvent: " + loadedLiveRace.toString());
+                                        currentPreLiveRace = loadedLiveRace;
+                                        currentLiveRace = null;
+                                        log("Switched to pre live race: " + loadedLiveRace.getRaceName());
+                                    } else {
+                                        log("Veto, not switching to pre live race: " + loadedLiveRace.getRaceName());
                                     }
                                 }
                             } else /* is live race */ {
-                                currentPreLifeRace = null;
-                                if (/* is new live race */!loadedLiveRace.equals(currentLifeRace)) {
+                                currentPreLiveRace = null;
+                                if (/* is new live race */!loadedLiveRace.equals(currentLiveRace)) {
+                                    log("New live race: " + loadedLiveRace.getRaceName());
                                     boolean veto = setCurrentState(RootNodeState.LIVE, currentState);
                                     if (!veto) {
-                                        currentLifeRace = loadedLiveRace;
+                                        currentLiveRace = loadedLiveRace;
                                     }
                                 }
                             }
@@ -135,17 +141,18 @@ public abstract class RootNodeBase extends BaseCompositeNode {
 
     private final boolean setCurrentState(RootNodeState goingTo, RootNodeState comingFrom) {
         if (goingTo != comingFrom) {
-            boolean veto = processStateTransition(goingTo, comingFrom);
+            log("RootNodeBase transition " + comingFrom + " -> " + goingTo);
+            boolean veto = processStateTransition(currentPreLiveRace, currentLiveRace, goingTo, comingFrom);
             if (veto) {
-                GWT.log("Vetoed switching to state " + goingTo + " coming from " + comingFrom);
+                log("Vetoed switching to state " + goingTo + " coming from " + comingFrom);
             } else {
                 // only update the state if it was not vetoed, to ensure that a futurs change comingFrom is clean
-                GWT.log("Switching to state " + goingTo + " coming from " + comingFrom);
+                log("Switching to state " + goingTo + " coming from " + comingFrom);
                 this.currentState = goingTo;
             }
             return veto;
         } else {
-            GWT.log("Transition to same autoplay state, skipping");
+            log("Transition to same autoplay state, skipping");
             return true;
         }
     }
@@ -158,7 +165,8 @@ public abstract class RootNodeBase extends BaseCompositeNode {
         cf.getPlaceController().goTo(cf.getDefaultPlace());
     }
 
-    protected abstract boolean processStateTransition(RootNodeState goingTo, RootNodeState comingFrom);
+    protected abstract boolean processStateTransition(RegattaAndRaceIdentifier currentLiveRace,
+            RegattaAndRaceIdentifier currentPreLiveRace, RootNodeState goingTo, RootNodeState comingFrom);
 
     protected abstract void processFailure(FailureEvent event);
 }
