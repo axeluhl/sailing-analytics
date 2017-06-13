@@ -2,6 +2,7 @@ package com.sap.sailing.android.shared.util;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -21,27 +22,27 @@ public class AuthCheckTask extends AsyncTask<Void, Void, Boolean> {
 
     private final static String HELLO_REQUEST = "/security/api/restsecurity/hello";
 
-    private Context context;
-    private URL url;
-    private AuthCheckTaskListener listener;
-    private Exception exception;
+    private Context mContext;
+    private URL mUrl;
+    private WeakReference<AuthCheckTaskListener> mListener;
+    private Exception mException;
 
     public AuthCheckTask(Context ctx, String baseUrl, AuthCheckTaskListener taskListener) {
         try {
-            context = ctx;
-            url = new URL(baseUrl + HELLO_REQUEST);
-            listener = taskListener;
+            mContext = ctx;
+            mUrl = new URL(baseUrl + HELLO_REQUEST);
+            mListener = new WeakReference<>(taskListener);
         } catch (MalformedURLException e) {
-            ExLog.e(context, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
+            ExLog.e(mContext, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
         }
     }
 
     @Override
     protected Boolean doInBackground(Void... params) {
         Boolean authenticated = false;
-        if (url != null) {
+        if (mUrl != null) {
             try {
-                HttpRequest request = new HttpJsonGetRequest(context, url);
+                HttpRequest request = new HttpJsonGetRequest(mContext, mUrl);
                 InputStream responseStream = request.execute();
 
                 JSONParser parser = new JSONParser();
@@ -50,10 +51,10 @@ public class AuthCheckTask extends AsyncTask<Void, Void, Boolean> {
                     authenticated = (Boolean) json.get("authenticated");
                 }
             } catch (Exception e) {
-                exception = e;
+                mException = e;
             }
         } else {
-            exception = new IllegalArgumentException();
+            mException = new IllegalArgumentException();
         }
         return authenticated;
     }
@@ -61,9 +62,10 @@ public class AuthCheckTask extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected void onPostExecute(Boolean authenticated) {
         super.onPostExecute(authenticated);
+        AuthCheckTaskListener listener = mListener.get();
         if (listener != null) {
-            if (exception != null) {
-                listener.onException(exception);
+            if (mException != null) {
+                listener.onException(mException);
             } else {
                 listener.onRequestReceived(authenticated);
             }

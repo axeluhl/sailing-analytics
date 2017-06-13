@@ -2,6 +2,7 @@ package com.sap.sailing.android.shared.util;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -22,16 +23,16 @@ public class LoginTask extends AsyncTask<LoginData, Void, String> {
 
     private final static String TOKEN_REQUEST = "/security/api/restsecurity/access_token";
 
-    private URL url = null;
-    private Context context;
-    private LoginTaskListener listener;
-    private Exception exception;
+    private URL mUrl = null;
+    private Context mContext;
+    private WeakReference<LoginTaskListener> mListener;
+    private Exception mException;
 
     public LoginTask(Context context, String baseUrl, LoginTaskListener listener) {
         try {
-            this.context = context.getApplicationContext();
-            this.url = new URL(baseUrl + TOKEN_REQUEST);
-            this.listener = listener;
+            mContext = context.getApplicationContext();
+            mUrl = new URL(baseUrl + TOKEN_REQUEST);
+            mListener = new WeakReference<>(listener);
         } catch (MalformedURLException e) {
             ExLog.e(context, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
         }
@@ -40,19 +41,19 @@ public class LoginTask extends AsyncTask<LoginData, Void, String> {
     @Override
     protected String doInBackground(LoginData... params) {
         String access_token = null;
-        if (url != null && params != null && params.length > 0) {
+        if (mUrl != null && params != null && params.length > 0) {
             try {
-                HttpRequest request = new LoginGetRequest(url, context, params[0]);
+                HttpRequest request = new LoginGetRequest(mUrl, mContext, params[0]);
                 InputStream responseStream = request.execute();
 
                 JSONParser parser = new JSONParser();
                 JSONObject result = (JSONObject) parser.parse(new InputStreamReader(responseStream));
                 access_token = (String) result.get("access_token");
             } catch (Exception e) {
-                exception = e;
+                mException = e;
             }
         } else {
-            exception = new IllegalArgumentException();
+            mException = new IllegalArgumentException();
         }
         return access_token;
     }
@@ -60,9 +61,10 @@ public class LoginTask extends AsyncTask<LoginData, Void, String> {
     @Override
     protected void onPostExecute(String accessToken) {
         super.onPostExecute(accessToken);
+        LoginTaskListener listener = mListener.get();
         if (listener != null) {
-            if (exception != null) {
-                listener.onException(exception);
+            if (mException != null) {
+                listener.onException(mException);
             } else {
                 listener.onTokenReceived(accessToken);
             }
