@@ -297,6 +297,10 @@ public class TrackingListFragment extends BaseFragment
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
     }
+    
+    private int getFirstRankZeroPosition() {
+        return mAdapter.getFirstRankZeroPosition();
+    }
 
     @Override
     public void onPause() {
@@ -500,7 +504,7 @@ public class TrackingListFragment extends BaseFragment
             name += competitor.getBoat().getSailID();
         }
         name += " - " + competitor.getName();
-        int pos = mAdapter.getFirstPenaltyPosition();
+        int pos = mAdapter.getFirstRankZeroPosition();
         // FIXME mFinishedData.size()+1 also counts penalized competitors before which the competitor is to be inserted! I just wonder how the position shown in the app seems correct...
         int greatestOneBasedRankSoFar = 0;
         for (final CompetitorResultWithIdImpl result : mFinishedData) {
@@ -524,16 +528,28 @@ public class TrackingListFragment extends BaseFragment
         mCompetitorAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * The {@code fromPosition} identifies the position where the item to be moved in the underlying
+     * {@link #mFinishedData data model} shall be moved to {@code toPosition}. The item will be moved in
+     * {@link #mFinishedData} as requested, and all ranks of items affected will be {@link #adjustRanks(int, int)
+     * adjusted}. The item moved will only have its rank corrected if it moved to a position before the
+     * {@link #getFirstRankZeroPosition()}. Four cases are possible:
+     * <ol>
+     * <li>Rank set from non-0 to 0: move item to the end of the list, into the "penalized section"; decrement ranks
+     * greater than old rank</li>
+     * <li>Rank set from 0 to non-0: move from penalized to ranked section; increment ranks greater than or equal to old
+     * rank</li>
+     * <li>Rank changed from non-0 to other non-0 value: adjust all ranks between and including old and new list
+     * position</li>
+     * </ol>
+     */
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
         CompetitorResultWithIdImpl item = mFinishedData.get(fromPosition);
         mFinishedData.remove(item);
         mFinishedData.add(toPosition, item);
-        // now adjust ranks of all results
-        for (int i = 0; i < mFinishedData.size(); i++) {
-            mFinishedData.set(i, cloneCompetitorResultAndAdjustRank(mFinishedData.get(i),
-                        /* newOneBasedRank */ mFinishedData.get(i).getOneBasedRank() == 0 ? 0 : i + 1));
-        }
+        adjustRanks(Math.min(getFirstRankZeroPosition(), Math.min(fromPosition, toPosition)), 
+                Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition)));
         mFinishedAdapter.notifyItemMoved(fromPosition, toPosition);
     }
 
@@ -542,17 +558,30 @@ public class TrackingListFragment extends BaseFragment
         CompetitorResultWithIdImpl item = mFinishedData.get(position);
         if (position >= 0) { // found
             mFinishedData.remove(position);
-            for (int i = position; i < mFinishedData.size(); i++) {
-                CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition = mFinishedData.get(i);
-                final int newOneBasedRank = Math
-                    .max(0, competitorToReplaceWithAdjustedPosition.getOneBasedRank() - 1);  // adjust rank for removed competitor
-                mFinishedData.set(i, cloneCompetitorResultAndAdjustRank(competitorToReplaceWithAdjustedPosition, newOneBasedRank));
-            }
+            adjustRanks(position, getFirstRankZeroPosition());
             mFinishedAdapter.notifyItemRemoved(position);
         }
         Competitor competitor = getCompetitorStore().getExistingCompetitorById(item.getCompetitorId());
         if (competitor != null) {
             addNewCompetitorToCompetitorList(competitor);
+        }
+    }
+
+    /**
+     * In {@link #mFinishedData}, starting at index {@code fromPosition}, updates all ranks so they equal the
+     * position in the list plus one; stop before reaching the entry at list index {@code toPosition} or the
+     * {@link #getFirstRankZeroPosition() first penalty position}.
+     * 
+     * @param fromPosition inclusive start index into {@link #mFinishedData} where to start updating the ranks
+     * @param toPosition exclusive end index into {@link #mFinishedData} where to stop updating the ranks; must not be -1
+     */
+    private void adjustRanks(int fromPosition, int toPosition) {
+        final int end = Math.min(toPosition, getFirstRankZeroPosition());
+        for (int i = fromPosition; i < end; i++) {
+            CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition = mFinishedData.get(i);
+            final int newOneBasedRank = Math
+                .max(0, competitorToReplaceWithAdjustedPosition.getOneBasedRank() - 1);  // adjust rank for removed competitor
+            mFinishedData.set(i, cloneCompetitorResultAndAdjustRank(competitorToReplaceWithAdjustedPosition, newOneBasedRank));
         }
     }
 
@@ -601,13 +630,19 @@ public class TrackingListFragment extends BaseFragment
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState()
-            .getFinishingTime(), item, mAdapter.getFirstPenaltyPosition(), false);
+            .getFinishingTime(), item, mAdapter.getFirstRankZeroPosition(), false);
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 CompetitorResultWithIdImpl newItem = layout.getValue();
                 int index = mFinishedData.indexOf(item);
+                // Four cases are possible:
+                //  1) Rank is 0, MaxPointsReason is NONE --> remove entry from list; if rank was non-0, decrement ranks greater than old rank
+                //  2) Rank set from non-0 to 0: move item to the end of the list, into the "penalized section"; decrement ranks greater than old rank
+                //  3) Rank set from 0 to non-0: move from penalized to ranked section; increment ranks greater than or equal to old rank
+                //  4) Rank changed from non-0 to other non-0 value: adjust all ranks between and including old and new list position
+                
                 // if the competitor went from no penalty to penalty, move the competitor to the end of the list
                 if (item.getMaxPointsReason() != newItem.getMaxPointsReason() && item.getMaxPointsReason() == MaxPointsReason.NONE) {
                     mFinishedData.remove(item);

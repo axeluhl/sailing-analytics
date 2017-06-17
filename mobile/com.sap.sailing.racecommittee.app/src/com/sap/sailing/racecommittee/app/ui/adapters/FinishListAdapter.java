@@ -9,6 +9,7 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeMana
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
@@ -105,7 +106,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     @Override
     public ItemDraggableRange onGetItemDraggableRange(ViewHolder viewHolder, int position) {
         final int start = 0;
-        final int end = getFirstPenaltyPosition() - 1;
+        final int end = getFirstRankZeroPosition() - 1;
 
         return new GroupPositionItemDraggableRange(start, end);
     }
@@ -120,10 +121,18 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         }
     }
 
-    public int getFirstPenaltyPosition() {
+    /**
+     * Determines the first position of an item in {@link #mCompetitor} for which its {@link CompetitorResult#getOneBasedRank() rank} is zero and for which
+     * this condition holds for all its successors. This means in particular that any in-between rank-0 item that is followed
+     * by other non-zero-ranked items will <em>not</em> be returned as the first such item.<p>
+     * 
+     * If no such item is found, the size of {@link #mCompetitor} is returned, thus pointing at "behind" the end of the list.
+     * @return
+     */
+    public int getFirstRankZeroPosition() {
         int result = getItemCount();
-        for (int i = 0; i < getItemCount(); i++) {
-            if (!mCompetitor.get(i).getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+        for (int i = getItemCount()-1; i >= 0; i--) {
+            if (mCompetitor.get(i).getOneBasedRank() == 0) {
                 result = i;
                 break;
             }
