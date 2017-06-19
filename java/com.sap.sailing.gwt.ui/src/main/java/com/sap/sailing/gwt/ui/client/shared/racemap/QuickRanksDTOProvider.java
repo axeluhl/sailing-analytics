@@ -23,6 +23,14 @@ import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
  *
  */
 public interface QuickRanksDTOProvider {
+    public interface QuickRanksListener {
+        void rankChanged(String competitorIdAsString, QuickRankDTO quickRanks);
+    }
+    
+    void addQuickRanksListener(QuickRanksListener listener);
+    
+    void removeQuickRanksListener(QuickRanksListener listener);
+    
     /**
      * The strategy may or may not use this quick ranks information provided directly from the server. This information
      * may have been provided with some delay and may be slightly inconsistent with a {@link LeaderboardDTO leaderboard}

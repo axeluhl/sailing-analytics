@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.client.shared.racemap.QuickRanksDTOProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sse.common.Util;
@@ -25,7 +24,7 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  *
  */
-public class QuickRanksDTOFromLeaderboardDTOProvider implements QuickRanksDTOProvider {
+public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksDTOProvider {
     private LinkedHashMap<String, QuickRankDTO> quickRanks;
     private final RaceCompetitorSet raceCompetitorSet;
     private final RaceIdentifier selectedRace;
@@ -43,6 +42,7 @@ public class QuickRanksDTOFromLeaderboardDTOProvider implements QuickRanksDTOPro
             quickRanks = new LinkedHashMap<>();
             for (final Entry<String, QuickRankDTO> e : quickRanksFromServer.entrySet()) {
                 quickRanks.put(e.getKey(), e.getValue());
+                notifyListeners(e.getKey(), e.getValue());
             }
         } else if (!lastLeaderboardProvidedLegNumbers) {
             // extract at least the leg numbers and update existing quick ranks accordingly in place
@@ -110,5 +110,4 @@ public class QuickRanksDTOFromLeaderboardDTOProvider implements QuickRanksDTOPro
     public LinkedHashMap<String, QuickRankDTO> getQuickRanks() {
         return quickRanks;
     }
-
 }
