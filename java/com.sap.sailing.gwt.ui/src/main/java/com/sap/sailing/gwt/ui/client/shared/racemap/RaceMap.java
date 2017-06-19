@@ -1236,9 +1236,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                         lastBoatFix, rank, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.addToMap();
                             } else {
-                                competitorInfoOverlays.updatePosition(competitorDTO, lastBoatFix);
-                                competitorInfoOverlays.updateRank(competitorDTO, rank);
-                                competitorInfoOverlays.get(competitorDTO).draw();
+                                competitorInfoOverlays.updatePosition(competitorDTO, lastBoatFix, timeForPositionTransitionMillis);
                             }
                             toRemoveCompetorInfoOverlaysIdsAsStrings.remove(competitorDTO.getIdAsString());
                         }
@@ -2764,7 +2762,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final Integer result;
         QuickRankDTO quickRank = quickRanksDTOProvider.getQuickRanks().get(competitor.getIdAsString());
         if (quickRank != null) {
-            result = quickRank.rank;
+            result = quickRank.oneBasedRank;
         } else {
             result = null;
         }

@@ -65,33 +65,44 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
         }
         if (raceColumnName != null) {
             final List<CompetitorDTO> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumnName);
-            int rank = 1;
-            for (final CompetitorDTO c : competitorsFromBestToWorst) {
-                if (Util.contains(raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings(), c.getIdAsString())) {
-                    final LeaderboardRowDTO row = leaderboard.rows.get(c);
-                    final int oneBasedLegNumber;
-                    if (row != null) {
-                        final LeaderboardEntryDTO raceEntryForCompetitor = row.fieldsByRaceColumnName.get(raceColumnName);
-                        if (raceEntryForCompetitor != null && raceEntryForCompetitor.legDetails != null) {
-                            oneBasedLegNumber = raceEntryForCompetitor.getOneBasedCurrentLegNumber();
-                            lastLeaderboardProvidedLegNumbers = true;
+            if (competitorsFromBestToWorst.isEmpty()) {
+                for (CompetitorDTO c : leaderboard.competitors) {
+                    final QuickRankDTO quickRank = new QuickRankDTO(c, /* oneBasedRank */ 0, /* leg number ignored */ 0);
+                    quickRanks.put(c.getIdAsString(), quickRank);
+                    notifyListeners(c.getIdAsString(), quickRank);
+                }
+            } else {
+                int oneBasedRank = 1;
+                for (final CompetitorDTO c : competitorsFromBestToWorst) {
+                    if (Util.contains(raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings(), c.getIdAsString())) {
+                        final LeaderboardRowDTO row = leaderboard.rows.get(c);
+                        final int oneBasedLegNumber;
+                        if (row != null) {
+                            final LeaderboardEntryDTO raceEntryForCompetitor = row.fieldsByRaceColumnName.get(raceColumnName);
+                            if (raceEntryForCompetitor != null && raceEntryForCompetitor.legDetails != null) {
+                                oneBasedLegNumber = raceEntryForCompetitor.getOneBasedCurrentLegNumber();
+                                lastLeaderboardProvidedLegNumbers = true;
+                            } else {
+                                oneBasedLegNumber = 0;
+                                lastLeaderboardProvidedLegNumbers = false;
+                            }
                         } else {
                             oneBasedLegNumber = 0;
-                            lastLeaderboardProvidedLegNumbers = false;
                         }
-                    } else {
-                        oneBasedLegNumber = 0;
-                    }
-                    QuickRankDTO quickRankToUpdate = quickRanks.get(c.getIdAsString());
-                    if (quickRankToUpdate == null) {
-                        quickRanks.put(c.getIdAsString(), new QuickRankDTO(c, rank, oneBasedLegNumber));
-                    } else {
-                        quickRankToUpdate.rank = rank;
-                        if (lastLeaderboardProvidedLegNumbers) {
-                            quickRankToUpdate.legNumberOneBased = oneBasedLegNumber;
+                        QuickRankDTO quickRankToUpdate = quickRanks.get(c.getIdAsString());
+                        if (quickRankToUpdate == null) {
+                            final QuickRankDTO quickRankDTO = new QuickRankDTO(c, oneBasedRank, oneBasedLegNumber);
+                            quickRanks.put(c.getIdAsString(), quickRankDTO);
+                            notifyListeners(c.getIdAsString(), quickRankDTO);
+                        } else {
+                            quickRankToUpdate.oneBasedRank = oneBasedRank;
+                            if (lastLeaderboardProvidedLegNumbers) {
+                                quickRankToUpdate.legNumberOneBased = oneBasedLegNumber;
+                            }
+                            notifyListeners(c.getIdAsString(), quickRankToUpdate);
                         }
+                        oneBasedRank++;
                     }
-                    rank++;
                 }
             }
         }
