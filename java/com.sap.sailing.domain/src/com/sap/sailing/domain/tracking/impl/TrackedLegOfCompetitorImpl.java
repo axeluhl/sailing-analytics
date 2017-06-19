@@ -453,7 +453,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                             } else {
                                 Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
                                         .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode, cache);
-                                result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                                if (distanceToNextMark != null) {
+                                    result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                                } else {
+                                    result = null;
+                                    break;
+                                }
                             }
                             currentPosition = nextMarkPosition;
                         } else {
