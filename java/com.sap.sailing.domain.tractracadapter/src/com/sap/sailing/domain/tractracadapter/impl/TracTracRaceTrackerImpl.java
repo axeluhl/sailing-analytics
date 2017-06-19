@@ -22,7 +22,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -334,10 +333,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         eventSubscriber.subscribeCompetitors(new ICompetitorsListener() {
             @Override
             public void updateCompetitor(ICompetitor competitor) {
-                final Competitor domainCompetitor = TracTracRaceTrackerImpl.this.domainFactory.getOrCreateCompetitor(competitor);
-                logger.info("Competitor "+competitor+" was updated on TracTrac side. Maybe consider updating in competitor store as well. "+
-                            "TracTrac competitor maps to "+domainCompetitor.getName()+" with sail ID "+domainCompetitor.getBoat().getSailID()+
-                            " and boat class "+domainCompetitor.getBoat().getBoatClass().getName());
+                // TODO: How should we handle an updated sailID now as the sailID belongs to the boat in our domain model
+                TracTracRaceTrackerImpl.this.domainFactory.getOrCreateCompetitorAndBoat(competitor);
             }
             
             @Override

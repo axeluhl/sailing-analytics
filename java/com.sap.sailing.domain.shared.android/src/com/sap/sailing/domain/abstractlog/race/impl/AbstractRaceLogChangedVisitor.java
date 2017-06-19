@@ -23,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
@@ -108,7 +109,12 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     public void visit(RaceLogRegisterCompetitorEvent event) {
         notifyListenerAboutEventAdded(event);
     }
-    
+
+    @Override
+    public void visit(RaceLogRegisterCompetitorAndBoatEvent event) {
+        notifyListenerAboutEventAdded(event);
+    }
+
     @Override
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation) {
         notifyListenerAboutEventAdded(additionalScoringInformation);

@@ -2,7 +2,6 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +34,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -57,6 +57,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.dto.BasicRaceDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -1307,8 +1308,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
             }
+            // List<CompetitorWithoutBoatDTO> getCompetitorWithoutBoatDTOList(List<Competitor> competitors);
+            // List<CompetitorDTO> getCompetitorDTOList(List<CompetitorWithBoat> competitors);
             Future<List<CompetitorDTO>> task = executor.submit(
-                    () -> baseDomainFactory.getCompetitorDTOList(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
+                    () -> baseDomainFactory.getCompetitorDTOListTemp(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
@@ -2012,8 +2015,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public BoatClass getBoatClass() {
-        return Util.getDominantObject(StreamSupport.stream(getCompetitors().spliterator(), /* parallel */ false).
-                map(c->c.getBoat().getBoatClass()).collect(Collectors.toList()));
+        Set<Boat> allBoats = new HashSet<>();
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats();
+            allBoats.addAll(competitorsAndTheirBoats.values());
+        }
+        return Util.getDominantObject(StreamSupport.stream(allBoats.spliterator(), /* parallel */ false).
+                map(b->b.getBoatClass()).collect(Collectors.toList()));
     }
 
     protected abstract LeaderboardType getLeaderboardType();

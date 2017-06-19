@@ -72,7 +72,7 @@ public class RegattaByKeywordSearchService {
                 leaderboardStrings.add(leaderboard.getDisplayName());
                 for (Competitor competitor : leaderboard.getCompetitors()) {
                     leaderboardStrings.add(competitor.getName());
-                    leaderboardStrings.add(competitor.getBoat().getSailID());
+                    leaderboardStrings.add(competitor.getShortName());
                     String competitorDisplayName = leaderboard.getDisplayName(competitor);
                     if (competitorDisplayName != null) {
                         leaderboardStrings.add(competitorDisplayName);

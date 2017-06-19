@@ -26,6 +26,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -35,7 +36,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -73,6 +74,7 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -233,24 +235,25 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(ICompetitor competitor) {
+    public CompetitorAndBoat getOrCreateCompetitorAndBoat(ICompetitor competitor) {
         final UUID competitorId = competitor.getId();
         final String competitorClassName = competitor.getCompetitorClass()==null?null:competitor.getCompetitorClass().getName();
         final String nationalityAsString = competitor.getNationality();
         final String name = competitor.getName();
         final String shortName = competitor.getShortName();
-        Competitor result = getOrCreateCompetitor(competitorId, competitorClassName, nationalityAsString, name,
+        CompetitorAndBoat result = getOrCreateCompetitorAndBoat(competitorId, competitorClassName, nationalityAsString, name,
                 shortName, competitor.getHandicapToT(), competitor.getHandicapToD(), null);
         return result;
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(final UUID competitorId, final String competitorClassName,
+    public CompetitorAndBoat getOrCreateCompetitorAndBoat(final UUID competitorId, final String competitorClassName,
             final String nationalityAsString, final String name, final String shortName, float timeOnTimeFactor,
             float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag) {
         CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
-        Competitor result = competitorStore.getExistingCompetitorById(competitorId);
-        if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
+        Competitor domainCompetitor = competitorStore.getExistingCompetitorById(competitorId);
+        Boat domainBoat = competitorStore.getExistingBoatById(competitorId);
+        if (domainCompetitor == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
             Nationality nationality;
             try {
                 nationality = getOrCreateNationality(nationalityAsString);
@@ -260,11 +263,17 @@ public class DomainFactoryImpl implements DomainFactory {
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
             DynamicTeam team = createTeam(name, nationality, competitorId);
-            result = competitorStore.getOrCreateCompetitor(competitorId, name, shortName, null /* displayColor */,
+            domainCompetitor = competitorStore.getOrCreateCompetitor(competitorId, name, shortName, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
         }
-        return result;
+        return new CompetitorAndBoatImpl(domainCompetitor, domainBoat);
+    }
+
+    private Boat getOrCreateBoat(Serializable competitorId, Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor) {
+        CompetitorStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
+        Boat  boat = competitorAndBoatStore.getOrCreateBoat(competitorId, boatName, boatClass, sailId, boatColor);
+        return boat;
     }
 
     private DynamicTeam createTeam(String name, Nationality nationality, UUID competitorId) {
@@ -594,9 +603,10 @@ public class DomainFactoryImpl implements DomainFactory {
         final Map<Competitor, Boat> competitorBoatInfos = new HashMap<>();
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
             Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
-            Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
+            CompetitorAndBoat existingCompetitorAndBoat = getOrCreateCompetitorAndBoat(rc.getCompetitor());
+            Competitor existingCompetitor = existingCompetitorAndBoat.getCompetitor();
             if (existingCompetitor != null && competitorBoatInfo != null) {
-                Boat boatOfCompetitor = new BoatImpl(competitorBoatInfo.getB(), 
+                Boat boatOfCompetitor = getOrCreateBoat(existingCompetitor.getId(), competitorBoatInfo.getB(), 
                         competitorBoatInfo.getA(), defaultBoatClass, null, AbstractColor.getCssColor(competitorBoatInfo.getC()));
                 competitorBoatInfos.put(existingCompetitor, boatOfCompetitor);
             }
@@ -612,7 +622,7 @@ public class DomainFactoryImpl implements DomainFactory {
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
             // also add those whose race class doesn't match the dominant one (such as camera boats)
             // because they may still send data that we would like to record in some tracks
-            competitors.add(getOrCreateCompetitor(rc.getCompetitor()));
+            competitors.add(getOrCreateCompetitorAndBoat(rc.getCompetitor()).getCompetitor());
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         }
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);

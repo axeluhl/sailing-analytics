@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -56,7 +57,14 @@ public interface DomainFactory extends SharedDomainFactory {
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 
+    CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat c);
+
+    /** Temporary functions -> REMOVE later on */
     CompetitorDTO convertToCompetitorDTO(Competitor c);
+
+    CompetitorDTO convertToCompetitorDTO(Competitor c, Boat b);
+    
+    CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c);
 
     BoatDTO convertToBoatDTO(Boat boat);
 
@@ -69,7 +77,12 @@ public interface DomainFactory extends SharedDomainFactory {
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 
-    List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors);
+    List<CompetitorDTO> getCompetitorDTOList(List<CompetitorWithBoat> competitors);
+
+    /** Temporary function -> REMOVE later on */
+    List<CompetitorWithoutBoatDTO> getCompetitorWithoutBoatDTOListTemp(List<Competitor> competitors);
+
+    List<CompetitorDTO> getCompetitorDTOListTemp(List<Competitor> competitors);
 
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 

@@ -41,6 +41,7 @@ import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysesDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 
@@ -240,7 +241,7 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         competitorSelectionPopup.addListener(new CompetitorSelectionListener() {
 
             @Override
-            public void didClickOKWithSelectedCompetitor(CompetitorDTO competitor) {
+            public void didClickOKWithSelectedCompetitor(CompetitorWithoutBoatDTO competitor) {
                 if (competitor != null) {
                     Cookies.removeCookie(cookieKeyForSelectedCompetitorInLeaderboard);
                     Cookies.setCookie(cookieKeyForSelectedCompetitorInLeaderboard, competitor.getIdAsString(), new Date(new Date().getTime()+SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS));

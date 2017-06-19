@@ -133,7 +133,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     void setSuppressed(Competitor competitor, boolean suppressed);
 
     /**
-     * Retrieves the boat for a given competitor.
+     * Retrieves the boat of a given competitor for the specified raceColumn and fleet.
      */
     Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet);
 
