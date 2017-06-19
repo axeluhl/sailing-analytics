@@ -258,6 +258,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
 
         URL request = new URL(url.toString());
         URLConnection connection = request.openConnection();
+        connection.setRequestProperty("User-Agent", "");
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(in);
