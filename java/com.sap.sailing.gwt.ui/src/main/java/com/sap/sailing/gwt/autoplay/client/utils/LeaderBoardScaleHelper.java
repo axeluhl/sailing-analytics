@@ -12,16 +12,16 @@ public class LeaderBoardScaleHelper {
         int clientWidth = Window.getClientWidth();
         int contentWidth = contentWidget.getOffsetWidth();
         double scaleFactorX = clientWidth / (double) contentWidth;
-        if(scaleFactorX > 1){
-            scaleFactorX = 1;
-        }
+        // if(scaleFactorX > 1){
+        // scaleFactorX = 1;
+        // }
         
         int clientHeight = Window.getClientHeight()-headerHeight;
         int contentHeight = contentWidget.getOffsetHeight();
         double scaleFactorY = clientHeight / (double)contentHeight;
-        if(scaleFactorY < 1){
-            scaleFactorY = 1;
-        }
+//        if(scaleFactorY < 1){
+//            scaleFactorY = 1;
+//        }
         
         scaleContentWidget(contentWidget, scaleFactorX,scaleFactorY);
     }

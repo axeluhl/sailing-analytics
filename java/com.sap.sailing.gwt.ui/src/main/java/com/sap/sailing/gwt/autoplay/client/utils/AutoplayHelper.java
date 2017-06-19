@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.utils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -130,8 +131,13 @@ public class AutoplayHelper {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long delayToLiveInMs = raceTimes.delayToLiveInMs;
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - delayToLiveInMs;
-                        if (startIn <= PRE_RACE_DELAY) {
-                            return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
+                        List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = currentLeaderboard
+                                .getLiveRaces(serverTimeDuringRequest.getTime());
+                        for (Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
+                            RegattaAndRaceIdentifier identifier = liveRace.getA().getRaceIdentifier(liveRace.getB());
+                            if (startIn <= PRE_RACE_DELAY && raceIdentifier.equals(identifier)) {
+                                return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
+                            }
                         }
                     }
                 }
@@ -279,5 +285,10 @@ public class AutoplayHelper {
         // wait for one update
         raceboardPerspective.onResize();
         callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider));
+    }
+
+    public static String getSelectedLeaderboardsGroup(EventDTO event, String leaderboardName) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

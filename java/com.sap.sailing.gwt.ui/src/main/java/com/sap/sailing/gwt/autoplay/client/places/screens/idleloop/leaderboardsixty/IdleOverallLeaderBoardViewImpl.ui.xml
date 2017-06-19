@@ -7,10 +7,10 @@
 	.fullscreen {
 		position: absolute;
 		display: inline-block;
-		height: 100%;
+		top: 0px;
+		bottom: 80px;
 		width: 100%;
 	}
-	
 	</ui:style>
 	<rf:ResizableFlowPanel styleName="{res.style.slideBackground}">
 		<rf:ResizableFlowPanel ui:field="leaderBoardHolder"
