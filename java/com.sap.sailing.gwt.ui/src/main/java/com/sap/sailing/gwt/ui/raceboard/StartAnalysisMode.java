@@ -193,7 +193,8 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
 
             @Override
             public void onSettingsReloaded(LeaderboardSettings patchedSettings) {
-                leaderboardPanel.updateSettings(patchedSettings);
+                LeaderboardSettings settingsToUse = LeaderboardSettingsFactory.getInstance().createSettingsWithCustomExpandPreselectedRaceState(patchedSettings, true);
+                leaderboardPanel.updateSettings(settingsToUse);
             }
             
         });
