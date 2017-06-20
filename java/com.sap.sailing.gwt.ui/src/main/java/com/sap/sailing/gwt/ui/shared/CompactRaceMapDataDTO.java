@@ -47,7 +47,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
         Map<String, Integer> competitorIdAsStringToOneBasedLegNumber = new HashMap<>();
         if (quickRanks != null) {
             for (QuickRankDTO quickRank : quickRanks.getQuickRanks()) {
-                this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.rank,
+                this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.oneBasedRank,
                         quickRank.legNumberOneBased));
                 competitorIdAsStringToOneBasedLegNumber.put(quickRank.competitor.getIdAsString(), quickRank.legNumberOneBased);
             }
@@ -63,7 +63,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
         for (CompactQuickRankDTO compactQuickRank : this.quickRanks) {
             final CompetitorDTO competitorDTO = competitorsByIdAsString.get(compactQuickRank.getCompetitorIdAsString());
             if (competitorDTO != null) {
-                result.quickRanks.put(compactQuickRank.getCompetitorIdAsString(), new QuickRankDTO(competitorDTO, compactQuickRank.getRank(), compactQuickRank.getLegNumber()));
+                result.quickRanks.put(compactQuickRank.getCompetitorIdAsString(), new QuickRankDTO(competitorDTO, compactQuickRank.getOneBasedRank(), compactQuickRank.getLegNumber()));
             }
         }
         result.courseSidelines = courseSidelines;
