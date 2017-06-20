@@ -43,10 +43,6 @@ public class VideoViewImpl extends Composite implements VideoView {
             @Override
             public void onStart(PlayEvent event) {
                 int duration = player.getDuration();
-                if (duration > 60 * 5) {
-                    // WORKAROUND FOR TOO LONG VIDEOS
-                    duration = 60 * 5;
-                }
                 currentPresenter.publishDuration(duration);
             }
         });
