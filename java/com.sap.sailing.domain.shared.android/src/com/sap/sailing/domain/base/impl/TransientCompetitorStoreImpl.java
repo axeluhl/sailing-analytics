@@ -18,12 +18,15 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTOImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
@@ -47,7 +50,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
      */
     private final Set<Competitor> competitorsToUpdateDuringGetOrCreate;
     
-    private transient WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
+    private transient WeakHashMap<Competitor, CompetitorWithoutBoatDTO> weakCompetitorDTOCache;
 
     private final Set<Boat> boatsToUpdateDuringGetOrCreate;
     
@@ -60,7 +63,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         competitorCache = new HashMap<Serializable, Competitor>();
         competitorsByIdAsString = new HashMap<String, Competitor>();
         competitorsToUpdateDuringGetOrCreate = new HashSet<Competitor>();
-        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
+        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorWithoutBoatDTO>();
         competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
         boatCache = new HashMap<Serializable, Boat>();
         boatsByIdAsString = new HashMap<String, Boat>();
@@ -71,7 +74,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
+        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorWithoutBoatDTO>();
         competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
         weakBoatDTOCache = new WeakHashMap<Boat, BoatDTO>();
         boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.BoatUpdateListener>());
@@ -246,11 +249,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorDTO(Competitor c) {
+    public CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c) {
         LockUtil.lockForRead(lock);
         boolean needToUnlockReadLock = true;
         try {
-            CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
+            CompetitorWithoutBoatDTO competitorDTO = weakCompetitorDTOCache.get(c);
             if (competitorDTO == null) {
                 LockUtil.unlockAfterRead(lock);
                 needToUnlockReadLock = false;
@@ -259,18 +262,12 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 if (competitorDTO == null) {
                     final Nationality nationality = c.getTeam().getNationality();
                     CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
-                    Boat b = c.getBoat();
-                    BoatClassDTO boatClassDTO = new BoatClassDTO(b.getBoatClass().getName(), b.getBoatClass().getDisplayName(), 
-                            b.getBoatClass().getHullLength(), b.getBoatClass().getHullBeam());
-                    BoatDTO boatDTO = new BoatDTO(b.getId().toString(), b.getName(), boatClassDTO, b.getSailID(), b.getColor());  
-                    competitorDTO = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(), countryCode == null ? ""
+                    competitorDTO = new CompetitorWithoutBoatDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(), countryCode == null ? ""
                             : countryCode.getTwoLetterISOCode(), countryCode == null ? ""
                             : countryCode.getThreeLetterIOCCode(), countryCode == null ? "" : countryCode.getName(),
                               c.getId().toString(),
                               c.getTeam().getImage() == null ? null : c.getTeam().getImage().toString(),
                               c.getFlagImage() == null ? null : c.getFlagImage().toString(),
-                            boatDTO,
-                            boatClassDTO,
                             c.getTimeOnTimeFactor(), c.getTimeOnDistanceAllowancePerNauticalMile(), c.getSearchTag());
                     weakCompetitorDTOCache.put(c, competitorDTO);
                 }
@@ -283,6 +280,34 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 LockUtil.unlockAfterWrite(lock);
             }
         }
+    }
+
+    @Override
+    public CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat competitorWithBoat) {
+        return convertToCompetitorDTO(competitorWithBoat, competitorWithBoat.getBoat());
+    }
+    
+    @Override
+    public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
+        CompetitorWithoutBoatDTO c = convertToCompetitorWithoutBoatDTO(competitor);
+        BoatClassDTO boatClassDTO = null;
+        BoatDTO boatDTO = null;
+        if (boat != null) {
+            boatClassDTO = new BoatClassDTO(boat.getBoatClass().getName(), boat.getBoatClass().getDisplayName(), 
+                    boat.getBoatClass().getHullLength(), boat.getBoatClass().getHullBeam());
+            boatDTO = new BoatDTO(boat.getId().toString(), boat.getName(), boatClassDTO, boat.getSailID(), boat.getColor());  
+        }
+        CompetitorDTO competitorDTO = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(), c.getTwoLetterIsoCountryCode(),
+                   c.getThreeLetterIocCountryCode(),
+                   c.getCountryName(),
+                  c.getIdAsString(),
+                  c.getImageURL(),
+                  c.getFlagImageURL(),
+                boatDTO,
+                boatClassDTO,
+                c.getTimeOnTimeFactor(), c.getTimeOnDistanceAllowancePerNauticalMile(), c.getSearchTag());
+
+        return competitorDTO;
     }
 
     @Override

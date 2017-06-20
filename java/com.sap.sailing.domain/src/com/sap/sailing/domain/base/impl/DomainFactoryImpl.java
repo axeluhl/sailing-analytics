@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
@@ -48,10 +50,10 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBre
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie2017;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointMatchRacing;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEight;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterpolation;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
-import com.sap.sailing.domain.leaderboard.impl.HighPointMatchRacing;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
@@ -140,8 +142,23 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorDTO(Competitor c) {
+    public CompetitorDTO convertToCompetitorDTO(Competitor competitor) {
+        return competitorAndBoatStore.convertToCompetitorDTO(competitor, null);
+    }
+
+    @Override
+    public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
+        return competitorAndBoatStore.convertToCompetitorDTO(competitor, boat);
+    }
+
+    @Override
+    public CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat c) {
         return competitorAndBoatStore.convertToCompetitorDTO(c);
+    }
+
+    @Override
+    public CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c) {
+        return competitorAndBoatStore.convertToCompetitorWithoutBoatDTO(c);
     }
 
     @Override
@@ -196,6 +213,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();
         Competitor leaderOrWinner = null;
+        Boat leaderOrWinnerBoat = null;
         TimePoint now = MillisecondsTimePoint.now();
         try {
             if (trackedRace.isLive(now)) {
@@ -205,13 +223,14 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
                     Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
                     if (fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
                         leaderOrWinner = competitor;
+                        leaderOrWinnerBoat = trackedRace.getBoatOfCompetitor(leaderOrWinner);
                         break;
                     }
                 }
             }
             if (leaderOrWinner != null) {
                 statisticsDTO.hasLeaderOrWinnerData = true;
-                statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner);
+                statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner, leaderOrWinnerBoat);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
                 if (track != null) {
                     statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenRawFixes();
@@ -345,12 +364,29 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors) {
+    public List<CompetitorDTO> getCompetitorDTOList(List<CompetitorWithBoat> competitors) {
+        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
+        for (CompetitorWithBoat competitor : competitors) {
+            result.add(convertToCompetitorDTO(competitor));
+        }
+        return result;
+    }
+
+    @Override
+    public List<CompetitorDTO> getCompetitorDTOListTemp(List<Competitor> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
         for (Competitor competitor : competitors) {
             result.add(convertToCompetitorDTO(competitor));
         }
         return result;
     }
-
+    
+    @Override
+    public List<CompetitorWithoutBoatDTO> getCompetitorWithoutBoatDTOListTemp(List<Competitor> competitors) {
+        List<CompetitorWithoutBoatDTO> result = new ArrayList<CompetitorWithoutBoatDTO>();
+        for (Competitor competitor : competitors) {
+            result.add(convertToCompetitorWithoutBoatDTO(competitor));
+        }
+        return result;
+    }
 }

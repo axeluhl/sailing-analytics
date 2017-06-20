@@ -163,57 +163,29 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         return filterField;
     }
     
-    public void refreshBoatList(Iterable<BoatDTO> boats) {
+    public void filterBoats(Iterable<BoatDTO> boats) {
         getFilteredBoats(boats);
     }
     
-    public void refreshBoatList(String leaderboardName) {
-        refreshBoatList(leaderboardName, null);
-    }
-    
-    /**
-     * @param leaderboardName If null, all existing boats are loaded
-     */
-    public void refreshBoatList(String leaderboardName, final Callback<Iterable<BoatDTO>,
-            Throwable> callback) {
-        if (leaderboardName != null) {
-            sailingService.getBoatsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<BoatDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                    if (callback != null) {
-                        callback.onFailure(caught);
-                    }
+    public void refreshBoatList(final Callback<Iterable<BoatDTO>, Throwable> callback) {
+        sailingService.getBoats(new AsyncCallback<Iterable<BoatDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
+                if (callback != null) {
+                    callback.onFailure(caught);
                 }
+            }
 
-                @Override
-                public void onSuccess(Iterable<BoatDTO> result) {
-                    refreshBoatList(result);
-                    if (callback != null) {
-                        callback.onSuccess(result);
-                    }
+            @Override
+            public void onSuccess(Iterable<BoatDTO> result) {
+                getFilteredBoats(result);
+                filterBoats(result);
+                if (callback != null) {
+                    callback.onSuccess(result);
                 }
-            });
-        } else {
-            sailingService.getBoats(new AsyncCallback<Iterable<BoatDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
-                    if (callback != null) {
-                        callback.onFailure(caught);
-                    }
-                }
-
-                @Override
-                public void onSuccess(Iterable<BoatDTO> result) {
-                    getFilteredBoats(result);
-                    refreshBoatList(result);
-                    if (callback != null) {
-                        callback.onSuccess(result);
-                    }
-                }
-            });
-        }
+            }
+        });
     }
 
     private void getFilteredBoats(Iterable<BoatDTO> result) {

@@ -146,11 +146,11 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             boatClass = rLeaderboard.getRegatta().getBoatClass();
         } else {
             if (!Util.isEmpty(raceColumn.getAllCompetitors(fleet))) {
-                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors(fleet));
+                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitorsAndTheirBoats(fleet).values());
             } else if (!Util.isEmpty(raceColumn.getAllCompetitors())) {
-                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors());
+                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitorsAndTheirBoats().values());
             } else if (!Util.isEmpty(leaderboard.getAllCompetitors())) {
-                boatClass = findDominatingBoatClass(leaderboard.getAllCompetitors());
+                boatClass = leaderboard.getBoatClass();
             } else { 
                 throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
             }

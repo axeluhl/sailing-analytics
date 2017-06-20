@@ -68,11 +68,12 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
 	                IControl controlPointPassed = passing.getControl();
 	                com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
 	                        .getOrCreateControlPoint(new ControlPointAdapter(controlPointPassed));
-	                Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint);
+                        Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
+                                getDomainFactory().getOrCreateCompetitorAndBoat(event.getA().getCompetitor()).getCompetitor());
 	                if (passed != null) {
 	                    TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
 	                    MarkPassing markPassing = getDomainFactory().createMarkPassing(time, passed,
-	                            getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
+                            getDomainFactory().getOrCreateCompetitorAndBoat(event.getA().getCompetitor()).getCompetitor());
 	                    passingsByWaypoint.put(passed, markPassing);
 	                } else {
 	                    logger.warning("Didn't find waypoint in course " + course + " for mark passing around "
@@ -88,9 +89,9 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
 	            }
 	            logger.fine("Received mark passings in race "+trackedRace.getRace().getName()+": "+markPassings);
 	            if (getSimulator() != null) {
-	                getSimulator().delayMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()), markPassings);
+                getSimulator().delayMarkPassings(getDomainFactory().getOrCreateCompetitorAndBoat(event.getA().getCompetitor()).getCompetitor(), markPassings);
 	            } else {
-	                trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
+                trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitorAndBoat(event.getA().getCompetitor()).getCompetitor(),
 	                        markPassings);
 	            }
 	        } else {

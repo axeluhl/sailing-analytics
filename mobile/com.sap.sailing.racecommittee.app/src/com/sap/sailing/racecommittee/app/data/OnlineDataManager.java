@@ -8,12 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
-import android.content.Loader;
-import android.os.Bundle;
-import android.util.Log;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -66,9 +60,7 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBase
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorWithBoatJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
@@ -81,6 +73,12 @@ import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
 import com.sap.sse.common.Util;
+
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
+import android.content.Loader;
+import android.os.Bundle;
+import android.util.Log;
 
 /**
  * Enables accessing of data.
@@ -249,9 +247,8 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, "Creating Competitor-OnlineDataLoader " + id);
-                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorWithBoatJsonDeserializer(domainFactory.getCompetitorStore(), 
-                        new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))),
-                        new BoatJsonDeserializer(domainFactory, new BoatClassJsonDeserializer(domainFactory)));
+                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(), 
+                        new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))));
                 DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
                 DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
 

@@ -46,6 +46,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
@@ -56,6 +57,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
@@ -114,7 +116,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 import com.sap.sse.common.Duration;
@@ -132,7 +133,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
-    private final CompetitorWithBoatJsonSerializer competitorSerializer = CompetitorWithBoatJsonSerializer.create();
+    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
     private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
@@ -880,6 +881,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
         
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogRegisterCompetitorAndBoatEvent event) {
+        BasicDBObject result = new BasicDBObject();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRegisterCompetitorAndBoatEvent(event));
+        return result;
+    }
+
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogEndOfTrackingEvent event) {
         BasicDBObject result = new BasicDBObject();
         storeRaceLogIdentifier(raceLogIdentifier, result);
@@ -1018,6 +1026,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogRegisterCompetitorEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
+        return result;
+    }
+
+    private Object storeRaceLogRegisterCompetitorAndBoatEvent(RaceLogRegisterCompetitorAndBoatEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogRegisterCompetitorAndBoatEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
+        result.put(FieldNames.RACE_LOG_BOAT_ID.name(), event.getBoat().getId());
         return result;
     }
 
@@ -1468,6 +1485,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRegisterCompetitorEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRegisterCompetitorAndBoatEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRegisterCompetitorAndBoatEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
+        result.put(FieldNames.REGATTA_LOG_BOAT_ID.name(), event.getBoat().getId());
         storeRegattaLogEvent(regattaLikeId, result);
     }
 

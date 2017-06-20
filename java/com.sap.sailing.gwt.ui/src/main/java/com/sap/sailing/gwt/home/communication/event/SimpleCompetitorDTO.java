@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
@@ -22,13 +23,17 @@ public class SimpleCompetitorDTO extends NamedDTO implements DTO, Serializable, 
     }
     
     @GwtIncompatible
-    public SimpleCompetitorDTO(Competitor competitor) {
+    public <C extends Competitor> SimpleCompetitorDTO(C competitor) {
         super(competitor.getName());
         final Nationality nationality = competitor.getTeam().getNationality();
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
-        this.sailID = competitor.getBoat().getSailID();
         this.twoLetterIsoCountryCode = countryCode == null ? null : countryCode.getTwoLetterISOCode();
         this.flagImageURL = competitor.getFlagImage() == null ? null : competitor.getFlagImage().toString();
+        if (competitor instanceof CompetitorWithBoat) {
+            this.sailID = ((CompetitorWithBoat) competitor).getBoat().getSailID();
+        } else {
+            this.sailID = null;
+        }
     }
 
     @GwtIncompatible

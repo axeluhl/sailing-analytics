@@ -6,6 +6,39 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
+import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
+import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
+import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
+import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Loader;
@@ -26,38 +59,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
-import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
-import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
-import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
-import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
-import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
-import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
-import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackingListFragment extends BaseFragment
     implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents, View.OnClickListener, AdapterView.OnItemSelectedListener {
@@ -356,8 +357,11 @@ public class TrackingListFragment extends BaseFragment
 
     private void moveCompetitorToFinishList(Competitor competitor) {
         String name = "";
-        if (competitor.getBoat() != null) {
-            name += competitor.getBoat().getSailID();
+        if (competitor instanceof CompetitorWithBoat) {
+            CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) competitor;
+            if (competitorWithBoat.getBoat() != null) {
+                name += competitorWithBoat.getBoat().getSailID();
+            }
         }
         name += " - " + competitor.getName();
         mFinishedData.add(new CompetitorResultWithIdImpl(mId, competitor.getId(), name, mFinishedData.size() + 1, MaxPointsReason.NONE,

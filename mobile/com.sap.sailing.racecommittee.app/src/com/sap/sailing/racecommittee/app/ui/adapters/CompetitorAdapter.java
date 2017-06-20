@@ -39,8 +39,11 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
 
         if (competitor != null) {
             String name = "";
-            if (competitor.getBoat() != null) {
-                name = competitor.getBoat().getSailID() + " - ";
+            if (competitor instanceof CompetitorWithBoat) {
+                CompetitorWithBoat competitorWithBoat = (CompetitorWithBoat) competitor;
+                if (competitorWithBoat.getBoat() != null) {
+                    name = competitorWithBoat.getBoat().getSailID() + " - ";
+                }
             }
             name += competitor.getName();
             if (holder.competitor != null) {

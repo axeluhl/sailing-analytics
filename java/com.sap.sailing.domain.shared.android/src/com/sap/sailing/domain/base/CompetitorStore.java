@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
@@ -75,8 +76,12 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
 
     void addCompetitors(Iterable<Competitor> competitors);
 
-    CompetitorDTO convertToCompetitorDTO(Competitor c);
-    
+    CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c);
+
+    CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat c);
+
+    CompetitorDTO convertToCompetitorDTO(Competitor c, Boat b);
+
     /**
      * Listeners added here are notified whenever {@link #updateCompetitor(String, String, Color, String, Nationality)} is called
      * for any competitor in this store.

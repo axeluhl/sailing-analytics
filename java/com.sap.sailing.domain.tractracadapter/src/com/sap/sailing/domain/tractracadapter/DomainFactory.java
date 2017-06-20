@@ -80,9 +80,9 @@ public interface DomainFactory {
 
     Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
-    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
+    com.sap.sailing.domain.base.CompetitorAndBoat getOrCreateCompetitorAndBoat(ICompetitor competitor);
 
-    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
+    com.sap.sailing.domain.base.CompetitorAndBoat getOrCreateCompetitorAndBoat(UUID competitorId, String competitorClassName,
             String nationalityAsString, String name, String shortName, float timeOnTimeFactor, float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag);
 
     /**

@@ -96,7 +96,7 @@ public class CompetitorStoreTest {
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
         DynamicBoat template = new BoatImpl("id-12345", "Morning Glory", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), 
                 "GER 1234", new RGBColor(255, 0, 0));
-        DynamicBoat boat = (DynamicBoat) persistentStore1.getOrCreateBoat(template.getId(), template.getName(), template.getBoatClass(), 
+        persistentStore1.getOrCreateBoat(template.getId(), template.getName(), template.getBoatClass(), 
                 template.getSailID(), template.getColor());
 
         CompetitorStore persistentStore2 = new PersistentCompetitorStore(

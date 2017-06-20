@@ -31,8 +31,7 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
     private final AbstractListFilter<Competitor> competitorFilter = new AbstractListFilter<Competitor>() {
         @Override
         public Iterable<String> getStrings(Competitor competitor) {
-            if (competitor.getBoat() == null) return Arrays.asList(competitor.getName());
-            return Arrays.asList(competitor.getBoat().getSailID(), competitor.getName());
+            return Arrays.asList(competitor.getName());
         }
     };
     

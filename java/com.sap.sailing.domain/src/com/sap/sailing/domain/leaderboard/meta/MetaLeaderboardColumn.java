@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.leaderboard.meta;
 
 import java.util.Collections;
+import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -283,5 +285,17 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
 
     @Override
     public void disableCompetitorRegistrationOnRaceLog(Fleet fleetByName) {
+    }
+
+    @Override
+    public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats() {
+        // TODO: What should we do here? Returning a boat makes only sense when the competitors keep their boats through all regattas
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats(Fleet fleet) {
+        // TODO: What should we do here? Returning a boat makes only sense when the competitors keep their boats through all regattas 
+        return Collections.emptyMap();
     }
 }

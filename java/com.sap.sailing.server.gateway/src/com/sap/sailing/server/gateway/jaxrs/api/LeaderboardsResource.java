@@ -43,7 +43,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpe
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.OpenEndedDeviceMappingFinder;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -230,12 +229,10 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         for (Competitor competitor : leaderboard.getCompetitors()) {
             JSONObject jsonCompetitor = new JSONObject();
             jsonCompetitor.put("name", competitor.getName());
+            jsonCompetitor.put("shortName", competitor.getShortName());
             final String displayName = leaderboard.getDisplayName(competitor);
             jsonCompetitor.put("displayName", displayName == null ? competitor.getName() : displayName);
             jsonCompetitor.put("id", competitor.getId().toString());
-            final Boat boatOfCompetitor = leaderboard.getBoatOfCompetitor(competitor);
-            final String sailID = boatOfCompetitor != null ? boatOfCompetitor.getSailID() : null;
-            jsonCompetitor.put("sailID", sailID);
             Nationality nationality = competitor.getTeam().getNationality();
             jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym() : null);
             jsonCompetitor.put("countryCode", nationality != null ? (nationality.getCountryCode() != null ? nationality
