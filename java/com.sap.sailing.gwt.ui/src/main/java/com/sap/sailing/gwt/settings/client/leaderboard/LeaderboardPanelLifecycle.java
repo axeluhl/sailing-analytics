@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class LeaderboardPanelLifecycle
@@ -27,7 +28,7 @@ public class LeaderboardPanelLifecycle
     @Override
     public LeaderboardSettings createDefaultSettings() {
         return LeaderboardSettingsFactory.getInstance()
-                .createNewSettingsWithCustomDefaults(new LeaderboardSettings(namesOfRaceColumns));
+                .createNewDefaultSettingsWithRaceColumns(namesOfRaceColumns);
     }
 
     @Override
@@ -46,8 +47,8 @@ public class LeaderboardPanelLifecycle
     }
 
     @Override
-    public LeaderboardSettings extractGlobalSettings(LeaderboardSettings currentLeaderboardSettings) {
-        LeaderboardSettings defaultLeaderboardSettings = currentLeaderboardSettings.getDefaultSettings();
+    public LeaderboardSettings extractUserSettings(LeaderboardSettings currentLeaderboardSettings) {
+        LeaderboardSettings defaultLeaderboardSettings = SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), currentLeaderboardSettings);
         LeaderboardSettings globalLeaderboardSettings = new LeaderboardSettings(
                 currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
@@ -65,13 +66,12 @@ public class LeaderboardPanelLifecycle
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
                 defaultLeaderboardSettings.isShowRaceRankColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality());
-        globalLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(currentLeaderboardSettings,
-                globalLeaderboardSettings);
+        SettingsDefaultValuesUtils.keepDefaults(currentLeaderboardSettings, globalLeaderboardSettings);
         return globalLeaderboardSettings;
     }
 
     @Override
-    public LeaderboardSettings extractContextSpecificSettings(LeaderboardSettings leaderboardSettings) {
+    public LeaderboardSettings extractDocumentSettings(LeaderboardSettings leaderboardSettings) {
         return leaderboardSettings;
     }
 

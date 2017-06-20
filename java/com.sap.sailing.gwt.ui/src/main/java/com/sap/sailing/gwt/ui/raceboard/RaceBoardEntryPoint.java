@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
-import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -29,12 +29,11 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
-import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
-import com.sap.sse.security.ui.settings.StorageDefinitionId;
-import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceWithCompetitorsDTO selectedRace;
@@ -69,22 +68,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             return;
         }
         
-        final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
-        
-        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRaceBoard(raceboardContextDefinition);
-        final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
-        ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
-                lifeCycle,
-                new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
-                        getUserService(), storageDefinitionId)) {
-            @Override
-            public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
-                // TODO bug3529 temporarily deactivated for raceboard due to finishing settings storage for race modes
-                return false;
-            };
-        };
-        
-        context.initInitialSettings();
         AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO raceboardData) {
@@ -116,11 +99,17 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     return;
                 }
                 
-                context.initInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
+                final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
+                final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition);
+                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(raceboardData.getRace().getRaceIdentifier(), StringMessages.INSTANCE);
+                RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(), storageDefinition);
+                
+                componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override
                     public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
-                        final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, context, initialSettings,
-                                        raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle);
+                        Timer timer = new Timer(PlayModes.Replay, 1000l);
+                        final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, componentContext, initialSettings,
+                                        raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle, timer);
                                 if (finalMode != null) {
                                     finalMode.getMode().applyTo(raceBoardPanel);
                         }
@@ -152,10 +141,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceBoardPanel createPerspectivePage(Component<?> parent,
             ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, RaceboardDataDTO raceboardData,
-            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle) {
+            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle, Timer timer) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
-        Timer timer = new Timer(PlayModes.Replay, 1000l);
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);

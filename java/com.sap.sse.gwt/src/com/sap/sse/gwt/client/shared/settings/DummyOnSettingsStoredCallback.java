@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.shared.perspective;
+package com.sap.sse.gwt.client.shared.settings;
 
 public class DummyOnSettingsStoredCallback implements OnSettingsStoredCallback {
 
@@ -9,5 +9,5 @@ public class DummyOnSettingsStoredCallback implements OnSettingsStoredCallback {
     @Override
     public void onSuccess() {
     }
-    
+
 }

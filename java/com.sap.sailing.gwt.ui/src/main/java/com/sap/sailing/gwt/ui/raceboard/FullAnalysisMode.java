@@ -6,8 +6,10 @@ import java.util.List;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
  * This mode best applies to non-live "replay" races. It sets the time to the "end of race" time point and makes sure
@@ -26,13 +28,6 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
      */
     @Override
     protected void trigger() {
-        if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
-            leaderboardSettingsAdjusted = true;
-            // it's important to first unregister the listener before updateSettings is called because
-            // updateSettings will trigger another leaderboard load, leading to an endless recursion otherwise
-            stopReceivingLeaderboard();
-            adjustLeaderboardSettings();
-        }
         if (!timerAdjusted && getRaceTimesInfoForRace() != null && getRaceTimesInfoForRace().endOfRace != null) {
             timerAdjusted = true;
             stopReceivingRaceTimesInfos();
@@ -41,15 +36,31 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
             }
             getTimer().setTime(getRaceTimesInfoForRace().endOfRace.getTime());
         }
+        if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
+            leaderboardSettingsAdjusted = true;
+            // it's important to first unregister the listener before updateSettings is called because
+            // updateSettings will trigger another leaderboard load, leading to an endless recursion otherwise
+            stopReceivingLeaderboard();
+            adjustLeaderboardSettings();
+        }
     }
 
     private void adjustLeaderboardSettings() {
-        final LeaderboardSettings existingSettings = getLeaderboardPanel().getSettings();
-        final List<DetailType> raceDetailsToShow = new ArrayList<>(existingSettings.getRaceDetailsToShow());
+        final LeaderboardPanel leaderboardPanel = getLeaderboardPanel();
+        final List<DetailType> raceDetailsToShow = new ArrayList<>();
+        raceDetailsToShow.add(DetailType.DISPLAY_LEGS);
         raceDetailsToShow.add(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
-        final LeaderboardSettings newSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesForRaceDetails(existingSettings, raceDetailsToShow);
-        getLeaderboardPanel().updateSettings(newSettings);
+        final LeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
+        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<LeaderboardSettings>() {
+
+            @Override
+            public void onSettingsReloaded(LeaderboardSettings patchedSettings) {
+                LeaderboardSettings settingsToUse = LeaderboardSettingsFactory.getInstance().createSettingsWithCustomExpandPreselectedRaceState(patchedSettings, true);
+                leaderboardPanel.updateSettings(settingsToUse);
+            }
+            
+        });
     }
 }

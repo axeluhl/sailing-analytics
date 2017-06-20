@@ -81,7 +81,6 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -108,6 +107,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -128,7 +128,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -549,7 +549,9 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
             competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
+                    SettingsDialog<LeaderboardSettings> settingsDialog = new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages);
+                    settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
+                    settingsDialog.show();
                 }
             });
             this.competitorFilterPanel = competitorSearchTextBox;
@@ -986,7 +988,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
 
             if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
                 final ImageResource nationalityFlagImageResource;
-                if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
                     nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
                 } else {
                     nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
@@ -2491,9 +2493,10 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            currentSettings = LeaderboardSettingsFactory.getInstance()
-                                    .createNewSettingsWithCustomDefaults(
-                                            new LeaderboardSettings(result.getNamesOfRaceColumns()), currentSettings);
+                            if(preSelectedRace == null) {
+                                currentSettings = currentSettings.overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
+                            }
+                            
                             try {
                                 updateLeaderboard(result);
                                 // reapply, as columns might have changed
@@ -3418,7 +3421,8 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
                 /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 isShowCompetitorSailId(), isShowCompetitorFullName(), isShowRaceRankColumn(), isShowCompetitorNationality);
-        return LeaderboardSettingsFactory.getInstance().keepDefaults(currentSettings, leaderboardSettings);
+        SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
+        return leaderboardSettings;
     }
 
     @Override

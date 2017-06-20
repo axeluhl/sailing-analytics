@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
 
 public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComponentSettings> {

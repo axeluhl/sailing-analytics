@@ -21,7 +21,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class AnchorDataMiningSettingsControl extends AbstractComponent<CompositeSettings> implements DataMiningSettingsControl {
     public static final ComponentResources resources = GWT.create(ComponentResources.class);

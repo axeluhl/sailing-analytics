@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
-import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -78,7 +78,7 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
             if(leaderboardPanel == null) {
                 createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), /*FIXME placeToken */ null, leaderboardConsumer);
             } else if( /*FIXME placeToken not empty */ false) {
-                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null).initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+                createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(), /*FIXME placeToken */ null).getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
                     @Override
                     public void onSuccess(LeaderboardSettings settings) {
                         leaderboardPanel.updateSettings(settings);

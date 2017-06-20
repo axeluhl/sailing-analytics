@@ -96,6 +96,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             }
         };
         settingsButton = new Button();
+        settingsButton.ensureDebugId("leaderboardSettingsButton");
         settingsButton.setTitle(stringMessages.settings());
         settingsButton.setStyleName(css.button());
         settingsButton.addStyleName(css.settingsButton());

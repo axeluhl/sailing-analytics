@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.shared.perspective;
+package com.sap.sse.gwt.client.shared.settings;
 
 import com.sap.sse.common.settings.Settings;
 

@@ -1,7 +1,7 @@
 package com.sap.sse.gwt.client.shared.components;
 
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * An abstract implementation of the component interfaces indented to use for components without the need of having settings.

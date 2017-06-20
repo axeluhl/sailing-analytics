@@ -5,6 +5,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A component that contains a collection of settings components in a tabbed panel.

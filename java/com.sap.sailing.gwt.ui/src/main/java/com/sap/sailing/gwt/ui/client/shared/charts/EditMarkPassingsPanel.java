@@ -48,7 +48,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSettings> implements CompetitorSelectionChangeListener {
     private static class AnchorCell extends AbstractCell<SafeHtml> {
