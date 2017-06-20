@@ -46,6 +46,7 @@ public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
 
     @Override
     public void setBackgroudImage(String string) {
+        mainPanelUi.getElement().getStyle().setProperty("backgroundPosition", "center center");
         mainPanelUi.getElement().getStyle().setBackgroundImage(string);
     }
 

@@ -22,7 +22,6 @@
     	width: 700px;
     	right: 100px;
     	top: 100px;
-    	bottom: 100px;
     	background-color: rgba(255,255,255,0.95);
     	border-radius: 10px;
     	padding: 40px;

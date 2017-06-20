@@ -19,6 +19,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpNextPlace>
         implements IdleUpNextView.IdleUpNextPresenter {
+    private static final int IMAGE_SWITCH_DELAY = 10000;
     private static final int SHOW_RACES_STARTED = 1000 * 60 * 30;
     private IdleUpNextView view;
     private Timer updateImage;
@@ -41,7 +42,6 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
                 updateEventImage();
             }
         };
-        updateImage.scheduleRepeating(30000);
 
         updateData = new Timer() {
 
@@ -50,7 +50,7 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
                 updateData();
             }
         };
-        updateImage.scheduleRepeating(60000);
+        updateImage.scheduleRepeating(IMAGE_SWITCH_DELAY);
         updateData.scheduleRepeating(1000);
 
         updateData();
@@ -88,26 +88,36 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
         if (getClientFactory().getAutoPlayCtx() == null || getClientFactory().getAutoPlayCtx().getEvent() == null) {
             return;
         }
-        List<ImageDTO> images = new ArrayList<>();
+        List<ImageDTO> teaserHighlight = new ArrayList<>();
+        List<ImageDTO> bigScreenImages = new ArrayList<>();
         for (ImageDTO imageDTO : getSlideCtx().getEvent().getImages()) {
-            if (imageDTO.getTags().contains(MediaTagConstants.TEASER)) {
-                images.add(imageDTO);
+            if (imageDTO.getTags().contains(MediaTagConstants.BIGSCREEN)) {
+                bigScreenImages.add(imageDTO);
+            } else if (imageDTO.getTags().contains(MediaTagConstants.TEASER)) {
+                teaserHighlight.add(imageDTO);
             } else if (imageDTO.getTags().contains(MediaTagConstants.HIGHLIGHT)) {
-                images.add(imageDTO);
+                teaserHighlight.add(imageDTO);
             }
         }
-        if (images.isEmpty()) {
-            // add any image that might work in this case
-            images.addAll(getSlideCtx().getEvent().getImages());
+        List<ImageDTO> usedImages;
+        if (bigScreenImages.isEmpty()) {
+            if (teaserHighlight.isEmpty()) {
+                usedImages = getSlideCtx().getEvent().getImages();
+            } else {
+                usedImages = teaserHighlight;
+            }
+        } else {
+            usedImages = bigScreenImages;
         }
-        if (!images.isEmpty()) {
+
+        if (!usedImages.isEmpty()) {
             int selected = 0;
-            if (images.size() > 1) {
+            if (usedImages.size() > 1) {
                 Random r = new Random();
-                selected = r.nextInt(images.size() - 1);
+                selected = r.nextInt(usedImages.size());
             }
-            GWT.log("Selecting " + selected + " from " + images.size());
-            ImageDTO imageToUseDTO = images.get(selected);
+            GWT.log("Selecting " + (selected+1) + " from " + usedImages.size());
+            ImageDTO imageToUseDTO = usedImages.get(selected);
             if (imageToUseDTO != null) {
                 final StringBuilder thumbnailUrlBuilder = new StringBuilder("url('");
                 thumbnailUrlBuilder.append(UriUtils.fromString(imageToUseDTO.getSourceRef()).asString());
