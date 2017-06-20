@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.autoplay.client.utils;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,8 +48,17 @@ public class AutoplayHelper {
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private static RaceTimesInfoProvider raceTimesInfoProvider;
     private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
+    private static Date startOfLifeRace;
     public static final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
+    public static long durationOfCurrentLiveRaceRunning(){
+        if(startOfLifeRace != null){
+            return raceboardTimer.getLiveTimePointInMillis()-startOfLifeRace.getTime();
+        }else{
+            return 0;
+        }
+    }
+    
     public static void getLiveRace(SailingServiceAsync sailingService, ErrorReporter errorReporter, EventDTO event,
             String leaderBoardName, SailingDispatchSystem dispatch,
             AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
@@ -131,18 +139,15 @@ public class AutoplayHelper {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long delayToLiveInMs = raceTimes.delayToLiveInMs;
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - delayToLiveInMs;
-                        List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = currentLeaderboard
-                                .getLiveRaces(serverTimeDuringRequest.getTime());
-                        for (Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
-                            RegattaAndRaceIdentifier identifier = liveRace.getA().getRaceIdentifier(liveRace.getB());
-                            if (startIn <= PRE_RACE_DELAY && raceIdentifier.equals(identifier)) {
-                                return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
-                            }
+                        if (startIn <= PRE_RACE_DELAY) {
+                            startOfLifeRace = raceTimes.getStartOfRace();
+                            return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
                         }
                     }
                 }
             }
         }
+        startOfLifeRace = null;
         return null;
     }
 
