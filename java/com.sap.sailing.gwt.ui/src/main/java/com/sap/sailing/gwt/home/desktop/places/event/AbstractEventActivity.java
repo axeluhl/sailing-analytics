@@ -155,7 +155,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                 null, mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                 .createDefaultWithCanReplayDuringLiveRaces(true);
-        ;
+        
         HashMap<String, Settings> innerSettings = new HashMap<>();
         innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
@@ -170,7 +170,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                 raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, null, null);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                 .createDefaultWithCanReplayDuringLiveRaces(true);
-        ;
+        
         HashMap<String, Settings> innerSettings = new HashMap<>();
         innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
