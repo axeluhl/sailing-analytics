@@ -6,7 +6,13 @@
     <div class="innerContent">
         <h5 class="articleSubheadline">June 2017</h5>
         <ul class="bulletList">
-           <li>The functionality to save user settings has been extended to also be available for <code>/gwt/RaceBoard.html</code>.
+           <li>User settings are now saved as delta to a usage specific default. For collection based settings,
+               this means that removals and additions are being recorded instead of all values of a setting.
+               This means, user defaults and document settings will now work together in a much more clever way.
+               When loading settings, the old format is also recognized, so that formerly saved settings shouldn't be lost.
+               In addition, document settings are now being stored as delta to a user's default settings.
+           </li>
+           <li>User settings can now also be saved for <code>/gwt/RaceBoard.html</code>.
            </li>
         </ul>
         
