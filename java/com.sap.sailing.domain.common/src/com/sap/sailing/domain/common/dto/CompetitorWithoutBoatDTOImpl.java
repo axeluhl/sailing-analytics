@@ -15,7 +15,7 @@ import com.sap.sse.common.Duration;
  * 
  */
 public class CompetitorWithoutBoatDTOImpl extends NamedDTO implements CompetitorWithoutBoatDTO, Serializable {
-    private static final long serialVersionUID = -4997852354821083154L;
+    private static final long serialVersionUID = 3019126418065082622L;
     private String countryName;
     private String twoLetterIsoCountryCode;
     private String threeLetterIocCountryCode;

@@ -6,7 +6,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
 public class CompetitorDTOImpl extends CompetitorWithoutBoatDTOImpl implements CompetitorDTO, Serializable {
-    private static final long serialVersionUID = 6749455739529431935L;
+    private static final long serialVersionUID = -4997852354821083154L;
     private BoatClassDTO boatClass;
     private BoatDTO boat;
     
