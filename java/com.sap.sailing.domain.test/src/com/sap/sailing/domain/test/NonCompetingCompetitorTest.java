@@ -8,10 +8,12 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Map.Entry;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -43,9 +45,9 @@ public class NonCompetingCompetitorTest extends AbstractManeuverDetectionTestCas
      */
     @Test
     public void testNoNonCompetingCompetitors() throws ParseException, NoWindException {
-    	for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-    		assertFalse(competitor.getName().startsWith("Ump"));
-    		assertSame(getDomainFactory().getOrCreateBoatClass("GC32"), competitor.getBoat().getBoatClass());
+    	for (final Entry<Competitor, Boat> competitorAndBoatEntry : getTrackedRace().getRace().getCompetitorsAndTheirBoats().entrySet()) {
+    		assertFalse(competitorAndBoatEntry.getKey().getName().startsWith("Ump"));
+    		assertSame(getDomainFactory().getOrCreateBoatClass("GC32"), competitorAndBoatEntry.getValue().getBoatClass());
     	}
     }
 }
