@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
@@ -19,4 +20,6 @@ public interface LiveRaceWithRacemapAndLeaderBoardView {
     void scrollLeaderBoardToTop();
 
     void onStop();
+
+    void setStatistic(String windSpeed, Distance distance, long timeSinceStart);
 }

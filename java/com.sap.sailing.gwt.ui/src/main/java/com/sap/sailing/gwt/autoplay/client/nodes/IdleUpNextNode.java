@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 
+import com.google.gwt.core.shared.GWT;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -44,46 +45,49 @@ public class IdleUpNextNode extends FiresPlaceNode {
         firePlaceChangeAndStartTimer();
 
         if (raceTimesInfoProvider == null) {
-
-            raceTimesInfoProvider = new RaceTimesInfoProvider(cf.getSailingService(), AutoplayHelper.asyncActionsExecutor,
-                    cf.getErrorReporter(), new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
-            raceTimesInfoProvider.reset();
-
-            StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(
-                    cf.getAutoPlayCtx().getEvent(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
-            for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
-                for (FleetDTO fleet : race.getFleets()) {
-                    RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
-                    if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
-                        raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
-                    }
-                }
-            }
-            raceTimesInfoProvider.forceTimesInfosUpdate();
-            raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
-
-                @Override
-                public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
-                        long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
-                        long clientTimeWhenResponseWasReceived) {
-                    ArrayList<Pair<RegattaAndRaceIdentifier, Date>> raceToStartOfRace = new ArrayList<Pair<RegattaAndRaceIdentifier, Date>>();
-                    checkForRaceStarts(selectedLeaderboard, serverTimeDuringRequest, raceTimesInfoProvider,
-                            raceToStartOfRace);
-
-                    Collections.sort(raceToStartOfRace, new Comparator<Pair<RegattaAndRaceIdentifier, Date>>() {
-
-                        @Override
-                        public int compare(Pair<RegattaAndRaceIdentifier, Date> o1,
-                                Pair<RegattaAndRaceIdentifier, Date> o2) {
-                            return Long.compare(o1.getB().getTime(), o2.getB().getTime());
-                        }
-                    });
-                    place.setUpData(raceToStartOfRace);
-
-                }
-            });
+            createRaceTimeInfoProvider();
         }
 
+    }
+
+    private void createRaceTimeInfoProvider() {
+        raceTimesInfoProvider = new RaceTimesInfoProvider(cf.getSailingService(), AutoplayHelper.asyncActionsExecutor,
+                cf.getErrorReporter(), new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
+        raceTimesInfoProvider.reset();
+
+        StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(
+                cf.getAutoPlayCtx().getEvent(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
+        for (RaceColumnDTO race : selectedLeaderboard.getRaceList()) {
+            for (FleetDTO fleet : race.getFleets()) {
+                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
+                if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
+                    raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
+                }
+            }
+        }
+        raceTimesInfoProvider.forceTimesInfosUpdate();
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
+
+            @Override
+            public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
+                    long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
+                    long clientTimeWhenResponseWasReceived) {
+                ArrayList<Pair<RegattaAndRaceIdentifier, Date>> raceToStartOfRace = new ArrayList<Pair<RegattaAndRaceIdentifier, Date>>();
+                checkForRaceStarts(selectedLeaderboard, serverTimeDuringRequest, raceTimesInfoProvider,
+                        raceToStartOfRace);
+
+                Collections.sort(raceToStartOfRace, new Comparator<Pair<RegattaAndRaceIdentifier, Date>>() {
+
+                    @Override
+                    public int compare(Pair<RegattaAndRaceIdentifier, Date> o1,
+                            Pair<RegattaAndRaceIdentifier, Date> o2) {
+                        return Long.compare(o1.getB().getTime(), o2.getB().getTime());
+                    }
+                });
+                place.setUpData(raceToStartOfRace);
+
+            }
+        });
     };
 
     /**
@@ -107,6 +111,7 @@ public class IdleUpNextNode extends FiresPlaceNode {
         for (RaceColumnDTO race : currentLeaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
+                GWT.log("Checking starts " + raceIdentifier);
                 if (raceIdentifier != null) {
                     RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
                     if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.getStartOfRace() != null

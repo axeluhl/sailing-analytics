@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapw
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
+import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 
@@ -21,10 +22,15 @@ public class LiveRaceWithRacemapAndLeaderBoardPlace extends Place {
     private RaceMap raceMap;
     private Throwable error;
     private CompetitorSelectionModel raceMapSelectionProvider;
+    private GetSixtyInchStatisticDTO statistic;
 
     public void setRaceMap(RaceMap result, CompetitorSelectionModel csel) {
         this.raceMap = result;
         this.raceMapSelectionProvider = csel;
+    }
+    
+    public GetSixtyInchStatisticDTO getStatistic() {
+        return statistic;
     }
 
     public RaceMap getRaceMap() {
@@ -41,6 +47,10 @@ public class LiveRaceWithRacemapAndLeaderBoardPlace extends Place {
 
     public CompetitorSelectionModel getRaceMapSelectionProvider() {
         return raceMapSelectionProvider;
+    }
+
+    public void setStatistic(GetSixtyInchStatisticDTO result) {
+        statistic = result;
     }
 
 }

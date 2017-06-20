@@ -1,22 +1,28 @@
 package com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
+import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -32,10 +38,12 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
+    private AutoPlayClientFactory cf;
 
     public LiveRaceWithRacemapAndLeaderBoardPresenterImpl(LiveRaceWithRacemapAndLeaderBoardPlace place,
             AutoPlayClientFactory clientFactory, LiveRaceWithRacemapAndLeaderBoardView LifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
+        this.cf = clientFactory;
         this.view = LifeRaceWithRacemapViewImpl;
         selectionTimer = new Timer() {
             @Override
@@ -82,6 +90,37 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             selected = 0;
         }
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
+
+        updateStatistics();
+    }
+
+    private void updateStatistics() {
+        String windSpeed = null;
+        if (getPlace().getRaceMap().getLastCombinedWindTrackInfoDTO() != null) {
+            for (WindSource windSource : getPlace().getRaceMap()
+                    .getLastCombinedWindTrackInfoDTO().windTrackInfoByWindSource.keySet()) {
+                WindTrackInfoDTO windTrackInfoDTO = getPlace().getRaceMap()
+                        .getLastCombinedWindTrackInfoDTO().windTrackInfoByWindSource.get(windSource);
+                switch (windSource.getType()) {
+                case COMBINED:
+                    if (!windTrackInfoDTO.windFixes.isEmpty()) {
+                        WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
+                        double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
+                        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
+                        windSpeed = numberFormat.format(speedInKnots) + " " + StringMessages.INSTANCE.knotsUnit();
+                    }
+                    break;
+                default:
+                }
+            }
+        }
+
+        
+        
+        List<LeaderboardRowDTO> sortedCompetitors = leaderboardPanel.getLeaderboardTable().getVisibleItems();
+        if (sortedCompetitors.size() > 0) {
+            view.setStatistic(windSpeed,getPlace().getStatistic().getDistance(), AutoplayHelper.durationOfCurrentLiveRaceRunning());
+        }
     }
 
     private void onSelect(CompetitorDTO marked) {

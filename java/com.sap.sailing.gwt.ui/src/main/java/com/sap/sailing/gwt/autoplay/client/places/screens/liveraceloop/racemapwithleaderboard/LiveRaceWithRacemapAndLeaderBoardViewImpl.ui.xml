@@ -17,7 +17,8 @@
 		position: absolute;
 		display: inline-block;
 		right: 0px;
-		height: 100%;
+		top: 0px;
+		bottom: 80px;
 		width: 65%;
 	}
 	
@@ -45,12 +46,69 @@
 		font-size: 20px;
 		text-align: center;
 	}
+	
+	.statistics {
+		position: absolute;
+		background-color: black;
+		width: 65%;
+		right: 0px;
+		bottom: 0px;
+		height: 80px;
+		font-size: 1rem;
+		display: flex;
+		-webkit-align-items: center;
+		-moz-box-align: center;
+		-ms-flex-align: center;
+		align-items: center;
+		-webkit-justify-content: space-around;
+		-ms-flex-pack: distribute;
+		justify-content: space-around;
+		background: #333;
+		border-top: .3125em solid #f0ab00;
+		padding: .9375em 0;
+	}
+	
+	.info-overlay__item {
+		text-align: center;
+		color: #fff;
+		-webkit-box-flex: 1;
+		-webkit-flex: 1 0 auto;
+		-moz-box-flex: 1;
+		-ms-flex: 1 0 auto;
+		flex: 1 0 auto;
+		border-right: 1px solid #999;
+	}
+	
+	.info-overlay__item__value {
+		font-size: 1.5em;
+	}
+	
+	.info-overlay__item__property {
+		font-size: 1em;
+		font-weight: 700;
+		text-transform: uppercase;
+	}
 	</ui:style>
 	<rf:ResizableFlowPanel styleName="{res.style.slideBackground}">
 		<rf:ResizableFlowPanel ui:field="leaderBoardHolder"
 			styleName="{style.left}" />
 		<rf:ResizableFlowPanel ui:field="racemap"
 			styleName="{style.right}">
+		</rf:ResizableFlowPanel>
+		<rf:ResizableFlowPanel styleName="{style.statistics}"
+			ui:field="statistics">
+			<rf:ResizableFlowPanel styleName="{style.info-overlay__item}">
+				<g:Label ui:field="statisticValue1" styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
+				<g:Label ui:field="statisticProperty1" styleName="{style.info-overlay__item__property}">Wind</g:Label>
+			</rf:ResizableFlowPanel>
+			<rf:ResizableFlowPanel styleName="{style.info-overlay__item}">
+				<g:Label ui:field="statisticValue2" styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
+				<g:Label ui:field="statisticProperty2" styleName="{style.info-overlay__item__property}">Wind</g:Label>
+			</rf:ResizableFlowPanel>
+			<rf:ResizableFlowPanel styleName="{style.info-overlay__item}">
+				<g:Label ui:field="statisticValue3" styleName="{style.info-overlay__item__value}">10.3 kts</g:Label>
+				<g:Label ui:field="statisticProperty3" styleName="{style.info-overlay__item__property}">Wind</g:Label>
+			</rf:ResizableFlowPanel>
 		</rf:ResizableFlowPanel>
 	</rf:ResizableFlowPanel>
 </ui:UiBinder> 

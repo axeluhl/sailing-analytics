@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.nodes;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
@@ -7,17 +9,31 @@ import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper.RVWrapper;
+import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticAction;
+import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class LiveRaceWithRacemapNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
+    protected LiveRaceWithRacemapAndLeaderBoardPlace place;
+    private Timer updateTimer;
 
     public LiveRaceWithRacemapNode(AutoPlayClientFactory cf) {
         super(LiveRaceWithRacemapNode.class.getName());
         this.cf = cf;
 
     }
+    
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(updateTimer != null){
+            updateTimer.cancel();
+        }
+    }
 
     public void onStart() {
+        place = new LiveRaceWithRacemapAndLeaderBoardPlace();
         AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
                 cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtx().getContextDefinition().getEventId(),
                 cf.getAutoPlayCtx().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtx().getLiveRace(),
@@ -34,7 +50,6 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
 
                     @Override
                     public void onSuccess(RVWrapper result) {
-                        LiveRaceWithRacemapAndLeaderBoardPlace place = new LiveRaceWithRacemapAndLeaderBoardPlace();
                         place.setRaceMap(result.raceboardPerspective, result.csel);
                         setPlaceToGo(place);
                         firePlaceChangeAndStartTimer();
@@ -42,5 +57,30 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
                                 cf.getAutoPlayCtx().getLiveRace().getRaceName()));
                     }
                 });
+        
+      
+        
+        updateTimer = new Timer(){
+
+            @Override
+            public void run() {
+                cf.getDispatch().execute(new GetSixtyInchStatisticAction(cf.getAutoPlayCtx().getLiveRace().getRaceName(), cf.getAutoPlayCtx().getLiveRace().getRegattaName()),
+                        new AsyncCallback<GetSixtyInchStatisticDTO>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                GWT.log("error getting data! " + caught.getMessage());
+                                caught.printStackTrace();
+                            }
+
+                            @Override
+                            public void onSuccess(GetSixtyInchStatisticDTO result) {
+                                place.setStatistic(result);
+                            }
+                        });
+            }
+            
+        };
+        updateTimer.scheduleRepeating(2000);
     };
 }
