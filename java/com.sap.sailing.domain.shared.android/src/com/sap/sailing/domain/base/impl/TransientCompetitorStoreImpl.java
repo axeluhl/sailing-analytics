@@ -286,12 +286,17 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     public CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat competitorWithBoat) {
         return convertToCompetitorDTO(competitorWithBoat, competitorWithBoat.getBoat());
     }
+    
     @Override
-    public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat b) {
+    public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
         CompetitorWithoutBoatDTO c = convertToCompetitorWithoutBoatDTO(competitor);
-        BoatClassDTO boatClassDTO = new BoatClassDTO(b.getBoatClass().getName(), b.getBoatClass().getDisplayName(), 
-                b.getBoatClass().getHullLength(), b.getBoatClass().getHullBeam());
-        BoatDTO boatDTO = new BoatDTO(b.getId().toString(), b.getName(), boatClassDTO, b.getSailID(), b.getColor());  
+        BoatClassDTO boatClassDTO = null;
+        BoatDTO boatDTO = null;
+        if (boat != null) {
+            boatClassDTO = new BoatClassDTO(boat.getBoatClass().getName(), boat.getBoatClass().getDisplayName(), 
+                    boat.getBoatClass().getHullLength(), boat.getBoatClass().getHullBeam());
+            boatDTO = new BoatDTO(boat.getId().toString(), boat.getName(), boatClassDTO, boat.getSailID(), boat.getColor());  
+        }
         CompetitorDTO competitorDTO = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(), c.getTwoLetterIsoCountryCode(),
                    c.getThreeLetterIocCountryCode(),
                    c.getCountryName(),
