@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
-import com.sap.sse.common.settings.generic.EnumSetSetting;
+import com.sap.sse.common.settings.generic.EnumLinkedHashSetSetting;
 import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
@@ -47,10 +47,10 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      */
     private IntegerSetting numberOfLastRacesToShow;
 
-    private EnumSetSetting<DetailType> maneuverDetailsToShow;
-    private EnumSetSetting<DetailType> legDetailsToShow;
-    private EnumSetSetting<DetailType> raceDetailsToShow;
-    private EnumSetSetting<DetailType> overallDetailsToShow;
+    private EnumLinkedHashSetSetting<DetailType> maneuverDetailsToShow;
+    private EnumLinkedHashSetSetting<DetailType> legDetailsToShow;
+    private EnumLinkedHashSetSetting<DetailType> raceDetailsToShow;
+    private EnumLinkedHashSetSetting<DetailType> overallDetailsToShow;
     private boolean autoExpandPreSelectedRace = false;
     private LongSetting delayBetweenAutoAdvancesInMilliseconds;
     private BooleanSetting updateUponPlayStateChange;
@@ -94,18 +94,18 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         maneuverDetails.add(DetailType.TACK);
         maneuverDetails.add(DetailType.JIBE);
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
-        maneuverDetailsToShow = new EnumSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, new DetailTypeStringToEnumConverter());
+        maneuverDetailsToShow = new EnumLinkedHashSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, new DetailTypeStringToEnumConverter());
         List<DetailType> legDetails = new ArrayList<DetailType>();
         legDetails.add(DetailType.DISTANCE_TRAVELED);
         legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         legDetails.add(DetailType.RANK_GAIN);
-        legDetailsToShow = new EnumSetSetting<>("legDetailsToShow", this, legDetails, new DetailTypeStringToEnumConverter());
+        legDetailsToShow = new EnumLinkedHashSetSetting<>("legDetailsToShow", this, legDetails, new DetailTypeStringToEnumConverter());
         List<DetailType> raceDetails = new ArrayList<DetailType>();
         raceDetails.add(DetailType.DISPLAY_LEGS);
-        raceDetailsToShow = new EnumSetSetting<>("raceDetailsToShow", this, raceDetails, new DetailTypeStringToEnumConverter());
+        raceDetailsToShow = new EnumLinkedHashSetSetting<>("raceDetailsToShow", this, raceDetails, new DetailTypeStringToEnumConverter());
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.REGATTA_RANK);
-        overallDetailsToShow = new EnumSetSetting<>("overallDetailsToShow", this, overallDetails, new DetailTypeStringToEnumConverter());
+        overallDetailsToShow = new EnumLinkedHashSetSetting<>("overallDetailsToShow", this, overallDetails, new DetailTypeStringToEnumConverter());
         delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, new RaceColumnSelectionStrategiesStringToEnumConverter());
         nameOfRaceToSort = new StringSetting("nameOfRaceToSort", this, null);
