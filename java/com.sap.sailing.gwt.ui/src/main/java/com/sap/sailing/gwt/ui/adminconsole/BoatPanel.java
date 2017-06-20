@@ -23,17 +23,9 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 public class BoatPanel extends SimplePanel {
     private final BoatTableWrapper<RefreshableMultiSelectionModel<BoatDTO>> boatTable;
     private final RefreshableMultiSelectionModel<BoatDTO> refreshableBoatSelectionModel;
-    private final String leaderboardName;
 
-    public BoatPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter) {
-        this(sailingService, null, stringMessages, errorReporter);
-    }
-
-    public BoatPanel(final SailingServiceAsync sailingService, final String leaderboardName,
-            final StringMessages stringMessages, final ErrorReporter errorReporter) {
+    public BoatPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
-        this.leaderboardName = leaderboardName;
         this.boatTable = new BoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false);
         this.refreshableBoatSelectionModel = (RefreshableMultiSelectionModel<BoatDTO>) boatTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
@@ -92,10 +84,6 @@ public class BoatPanel extends SimplePanel {
             }
         });
         allowReloadButton.setEnabled(!refreshableBoatSelectionModel.getSelectedSet().isEmpty());
-
-        if (leaderboardName != null) {
-            refreshBoatList();
-        }
     }
 
     private void openAddBoatDialog() {
@@ -103,6 +91,6 @@ public class BoatPanel extends SimplePanel {
     }
     
     public void refreshBoatList() {
-        boatTable.refreshBoatList(leaderboardName);
+        boatTable.refreshBoatList(null);
     }
 }

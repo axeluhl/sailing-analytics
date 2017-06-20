@@ -442,8 +442,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Iterable<BoatDTO> getBoats();
     
-    Iterable<BoatDTO> getBoatsOfLeaderboard(String leaderboardName);
-
     BoatDTO addOrUpdateBoat(BoatDTO boat) throws Exception;
 
     void allowBoatResetToDefaults(Iterable<BoatDTO> boats);

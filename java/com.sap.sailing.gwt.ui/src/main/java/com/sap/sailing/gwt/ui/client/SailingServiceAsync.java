@@ -596,8 +596,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getBoats(AsyncCallback<Iterable<BoatDTO>> asyncCallback);
 
-    void getBoatsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<BoatDTO>> asyncCallback);
-
     void addOrUpdateBoat(BoatDTO boat, AsyncCallback<BoatDTO> asyncCallback);
 
     void allowBoatResetToDefaults(Iterable<BoatDTO> boats, AsyncCallback<Void> asyncCallback);

@@ -3895,7 +3895,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
                         
                         for(Competitor c: leaderboard.getCompetitors()) {
-                            Boat b = null;  // TODO: How di we get the boat?
+                            Boat b = null;  // TODO bug2822: How do we get the boat?
                             if(b != null && b.getBoatClass() != null) {
                                 raceGroup.boatClass = b.getBoatClass().getDisplayName();
                             }
@@ -4873,12 +4873,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Iterable<BoatDTO> getBoats() {
         return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorStore().getBoats());
-    }
-
-    @Override
-    public Iterable<BoatDTO> getBoatsOfLeaderboard(String leaderboardName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        return Collections.emptyList(); //convertToBoatDTOs(leaderboard.getAllBoats());
     }
 
     @Override
