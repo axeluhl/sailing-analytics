@@ -2229,17 +2229,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 actualTimePoint = timePoint;
             }
             final RaceDefinition race = trackedRace.getRace();
-            int rank = 1;
+            int oneBasedRank = 1;
             final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(actualTimePoint);
             for (Competitor competitor : competitorsFromBestToWorst) {
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, actualTimePoint);
                 if (trackedLeg != null) {
                     int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
                     QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor),
-                            rank, legNumberOneBased);
+                            oneBasedRank, legNumberOneBased);
                     result.add(quickRankDTO);
                 }
-                rank++;
+                oneBasedRank++;
             }
         }
         return new QuickRanksDTO(result);
