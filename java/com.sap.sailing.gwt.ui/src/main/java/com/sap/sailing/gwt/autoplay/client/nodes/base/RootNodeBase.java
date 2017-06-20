@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayFailureEvent;
+import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.events.FailureEvent;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -58,8 +59,16 @@ public abstract class RootNodeBase extends BaseCompositeNode {
         checkTimer.schedule(UPDATE_STATE_TIMER);
         final UUID eventUUID = cf.getAutoPlayCtx().getContextDefinition().getEventId();
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
+            boolean firstTimeEventLoaded = true;
+
             @Override
             public void onSuccess(final EventDTO event) {
+                if (firstTimeEventLoaded) {
+                    AutoPlayHeaderEvent hE = new AutoPlayHeaderEvent(event.getName(), "");
+                    hE.setHeaderLogoUrl(event.getLogoImage().getSourceRef());
+                    cf.getEventBus().fireEvent(hE);
+                    firstTimeEventLoaded = false;
+                }
                 cf.getAutoPlayCtx().updateEvent(event);
                 _doCheck();
             }

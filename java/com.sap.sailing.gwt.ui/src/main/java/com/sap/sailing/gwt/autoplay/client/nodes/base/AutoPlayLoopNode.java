@@ -3,15 +3,15 @@ package com.sap.sailing.gwt.autoplay.client.nodes.base;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Timer;
 
 public class AutoPlayLoopNode extends BaseCompositeNode {
-
     private List<AutoPlayNode> nodes = new ArrayList<>();
     private int loopTimePerNodeInSeconds;
     private int currentPos = -1;
-
     private Timer transitionTimer = new Timer() {
         @Override
         public void run() {
@@ -26,15 +26,30 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
         }
         transitionTo(nodes.get(currentPos));
     }
-    
+
     @Override
     protected void transitionTo(AutoPlayNode nextNode) {
         super.transitionTo(nextNode);
         if (!isStopped()) {
-            transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
+            if (nextNode instanceof ProvidesDuration) {
+                ProvidesDuration nodeWithDuration = (ProvidesDuration) nextNode;
+                nodeWithDuration.setDurationConsumer(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer durationInSeconds) {
+                        GWT.log("Got duration published: " + durationInSeconds);
+                        if (durationInSeconds == 0) {
+                            gotoNext();
+                        } else {
+                            transitionTimer.schedule(durationInSeconds * 1000);
+                        }
+                    }
+                });
+            } else {
+                transitionTimer.schedule(loopTimePerNodeInSeconds * 1000);
+            }
         }
     }
-    
+
     public AutoPlayLoopNode(String name, int loopTimePerNodeInSeconds, AutoPlayNode... nodes) {
         super(name);
         this.loopTimePerNodeInSeconds = loopTimePerNodeInSeconds;
@@ -57,6 +72,4 @@ public class AutoPlayLoopNode extends BaseCompositeNode {
         }
         transitionTimer.cancel();
     }
-
-
 }

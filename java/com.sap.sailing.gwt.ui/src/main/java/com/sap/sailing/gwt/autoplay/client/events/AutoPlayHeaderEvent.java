@@ -19,10 +19,19 @@ public class AutoPlayHeaderEvent extends GwtEvent<AutoPlayHeaderEvent.Handler> {
 
     private final String headerText;
     private final String headerSubText;
+    private String headerLogoUrl;
 
     public AutoPlayHeaderEvent(String headerText, String headerSubText) {
         this.headerText = headerText;
         this.headerSubText = headerSubText;
+    }
+
+    public void setHeaderLogoUrl(String headerLogoUrl) {
+        this.headerLogoUrl = headerLogoUrl;
+    }
+
+    public String getHeaderLogoUrl() {
+        return headerLogoUrl;
     }
 
     @Override

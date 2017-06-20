@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ResizeComposite;
@@ -43,10 +44,23 @@ public class AutoPlayMainViewImpl extends ResizeComposite
         mainPanel.setWidgetTopHeight(sapHeader, 0, Unit.PX, SAP_HEADER_IN_PX, Unit.PX);
         eventBus.addHandler(AutoPlayHeaderEvent.TYPE, new AutoPlayHeaderEvent.Handler() {
 
+            private Image eventLogoImage;
+
             @Override
             public void onHeaderChanged(AutoPlayHeaderEvent event) {
                 sapHeader.setHeaderTitle(event.getHeaderText());
                 sapHeader.setHeaderSubTitle(event.getHeaderSubText());
+                if (event.getHeaderLogoUrl() != null && !event.getHeaderLogoUrl().isEmpty()) {
+                    if (eventLogoImage == null) {
+                        eventLogoImage = new Image(event.getHeaderLogoUrl());
+                        eventLogoImage.getElement().getStyle().setHeight(50, Unit.PX);
+                        sapHeader.addWidgetToRightSide(eventLogoImage);
+                    } else {
+                        if (!eventLogoImage.getUrl().equals(event.getHeaderLogoUrl())) {
+                            eventLogoImage.setUrl(event.getHeaderLogoUrl());
+                        }
+                    }
+                }
             }
         });
         mainPanel.add(animationPanel);
