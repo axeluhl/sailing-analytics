@@ -106,6 +106,11 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
         public String getAsHtml() {
             return stringMessages.invalidColor(exception.getMessage());
         }
+
+        @Override
+        public Color invert() {
+            return null;
+        }
         
     }
 
