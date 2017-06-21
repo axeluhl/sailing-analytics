@@ -12,7 +12,7 @@ public class SettingsEntryDialog extends DataEntryDialog<UserSettingsEntry> {
     private final FlowPanel fp;
 
     public SettingsEntryDialog(UserSettingsEntry entry) {
-        super(StringMessages.INSTANCE.settings(), "TODO settings for: '"+entry.getKey()+"'", StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), null, false, new DialogCallback<UserSettingsEntry>() {
+        super(StringMessages.INSTANCE.settings(), StringMessages.INSTANCE.settingsForId(entry.getKey()), StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), null, false, new DialogCallback<UserSettingsEntry>() {
             @Override
             public void ok(UserSettingsEntry editedObject) {
             }

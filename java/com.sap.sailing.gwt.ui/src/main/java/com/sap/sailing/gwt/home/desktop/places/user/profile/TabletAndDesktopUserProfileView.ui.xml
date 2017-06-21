@@ -47,7 +47,7 @@
       <c:tabcontent title="{i18n.favoritesAndNotifications}">
         <s:preferencestab.UserProfilePreferencesTabView ui:field="preferencesTabUi" />
       </c:tabcontent>
-      <c:tabcontent title="TODO: my settings">
+      <c:tabcontent title="{i18n.settings}">
         <s:settingstab.UserProfileSettingsTabView ui:field="settingsTabUi" />
       </c:tabcontent>
     </c:TabPanel>

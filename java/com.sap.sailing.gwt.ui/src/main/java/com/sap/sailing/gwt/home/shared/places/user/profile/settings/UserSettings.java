@@ -85,8 +85,8 @@ public class UserSettings extends Composite implements UserSettingsView {
             }
         });
 
-        userSettingsTable.addColumn(keyColumn, "TODO: key", new StringComparator(UserSettingsEntry::getKeyWithoutContext), true);
-        userSettingsTable.addColumn(documentSettingsIdColumn, "TODO: document settings ID", new StringComparator(UserSettingsEntry::getDocumentSettingsId), true);
+        userSettingsTable.addColumn(keyColumn, StringMessages.INSTANCE.settingsId(), new StringComparator(UserSettingsEntry::getKeyWithoutContext), true);
+        userSettingsTable.addColumn(documentSettingsIdColumn, StringMessages.INSTANCE.documentSettingsId(), new StringComparator(UserSettingsEntry::getDocumentSettingsId), true);
         showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         userSettingsTable.addColumn(showColumn, "", null, false);
         deleteColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
