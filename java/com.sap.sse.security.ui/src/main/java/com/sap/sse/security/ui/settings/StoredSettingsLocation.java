@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
  */
 public class StoredSettingsLocation {
 
-    private static final String PREFIX = "sailing.ui.usersettings.";
+    private final String PREFIX;
 
     private final String userSettingsIdPart;
     private final String documentSettingsIdPart;
@@ -28,7 +28,8 @@ public class StoredSettingsLocation {
      *            The storage id part (without "sailing.ui.usersettings" prefix and {@code userSettingsIdPart} part) for
      *            Document Settings, which is context dependent
      */
-    public StoredSettingsLocation(String userSettingsIdPart, String documentSettingsIdPart) {
+    public StoredSettingsLocation(String prefix, String userSettingsIdPart, String documentSettingsIdPart) {
+        this.PREFIX = prefix;
         this.userSettingsIdPart = userSettingsIdPart;
         this.documentSettingsIdPart = documentSettingsIdPart;
     }
