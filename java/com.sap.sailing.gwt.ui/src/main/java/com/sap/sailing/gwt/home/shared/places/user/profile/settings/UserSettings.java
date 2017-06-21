@@ -7,12 +7,12 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.util.NaturalComparator;
@@ -36,7 +36,7 @@ public class UserSettings extends Composite implements UserSettingsView {
     @UiField
     SharedResources res;
     @UiField(provided = true)
-    final SortedCellTable<UserSettingsEntry> userSettingsTable = new SortedCellTable<>(0, /*TODO CleanCellTableResources.INSTANCE*/GWT.create(CellTable.Resources.class));
+    final SortedCellTable<UserSettingsEntry> userSettingsTable = new SortedCellTable<>(0, DesignedCellTableResources.INSTANCE);
     private final Column<UserSettingsEntry, String> keyColumn = new Column<UserSettingsEntry, String>(new TextCell()) {
         @Override
         public String getValue(UserSettingsEntry entry) {
