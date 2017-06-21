@@ -26,6 +26,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String refresh();
     @Override
     String remove();
+    String removeAndShowCount(int count);
     String windSource();
     String dampeningInterval();
     String map();
@@ -956,7 +957,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String offset();
     String line();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
-    String doYouReallyWantToRemoveEvents();
+    String doYouReallyWantToRemoveEvents(String events);
     String doYouReallyWantToRemoveEvent(String eventName);
     String doYouReallyWantToRemoveCompetitors();
     String doYouReallyWantToRemoveCompetitor(String name);
