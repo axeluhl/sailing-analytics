@@ -175,6 +175,20 @@ public class LeaderboardEntryDTO implements Serializable {
         }
         return result;
     }
+    
+    public int getOneBasedCurrentLegNumber() {
+        int result = 0;
+        if (legDetails != null && !legDetails.isEmpty()) {
+            for (LegEntryDTO legDetail : legDetails) {
+                if (legDetail != null && legDetail.started) {
+                    result++;
+                } else {
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 
     @Override
     public int hashCode() {

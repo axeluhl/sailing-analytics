@@ -3,11 +3,11 @@ package com.sap.sailing.racecommittee.app.ui.layouts;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
 
 import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
 
-public class TimePanelHeaderLayout extends RelativeLayout {
+public class TimePanelHeaderLayout extends FrameLayout {
 
     private TouchEventListener mTouchEventListener;
 
