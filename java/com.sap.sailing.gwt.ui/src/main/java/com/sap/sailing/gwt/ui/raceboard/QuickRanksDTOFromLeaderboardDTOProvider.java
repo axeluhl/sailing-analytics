@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -25,7 +27,7 @@ import com.sap.sse.common.Util;
  *
  */
 public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksDTOProvider {
-    private LinkedHashMap<String, QuickRankDTO> quickRanks;
+    private Map<String, QuickRankDTO> quickRanks;
     private final RaceCompetitorSet raceCompetitorSet;
     private final RaceIdentifier selectedRace;
     private boolean lastLeaderboardProvidedLegNumbers;
@@ -37,9 +39,9 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
     }
 
     @Override
-    public void quickRanksReceivedFromServer(LinkedHashMap<String, QuickRankDTO> quickRanksFromServer) {
+    public void quickRanksReceivedFromServer(Map<String, QuickRankDTO> quickRanksFromServer) {
         if (quickRanks == null) {
-            quickRanks = new LinkedHashMap<>();
+            quickRanks = new HashMap<>();
             for (final Entry<String, QuickRankDTO> e : quickRanksFromServer.entrySet()) {
                 quickRanks.put(e.getKey(), e.getValue());
                 notifyListeners(e.getKey(), e.getValue());
@@ -118,7 +120,7 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
     }
 
     @Override
-    public LinkedHashMap<String, QuickRankDTO> getQuickRanks() {
+    public Map<String, QuickRankDTO> getQuickRanks() {
         return quickRanks;
     }
 }
