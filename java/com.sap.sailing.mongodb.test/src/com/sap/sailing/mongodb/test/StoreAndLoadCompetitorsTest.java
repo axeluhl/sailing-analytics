@@ -26,10 +26,10 @@ import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sse.common.Util;
 
-public class StoreCompetitorTest extends AbstractMongoDBTest {
+public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     private DomainFactory domainFactory;
     
-    public StoreCompetitorTest() throws UnknownHostException, MongoException {
+    public StoreAndLoadCompetitorsTest() throws UnknownHostException, MongoException {
         super();
     }
 
@@ -52,12 +52,15 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
         URI flagImageURI2 = new URI("http://www.sapsailing/flagimage2.jpg");
         String competitorName1 = "Hasso";
         String competitorName2 = "Hasso Plattner";
+        String competitorShortName1 = "H.";
+        String competitorShortName2 = "H.P.";
 
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
         DynamicCompetitor c = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat(competitorName1).getCompetitor();
+        c.setShortName(competitorShortName1);
         c.setFlagImage(flagImageURI1);
         mongoObjectFactory.storeCompetitor(c);
         
@@ -66,8 +69,10 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
         DynamicCompetitor loadedCompetitor = (DynamicCompetitor) allCompetitors.iterator().next();
         assertEquals(flagImageURI1, loadedCompetitor.getFlagImage());
         assertEquals(competitorName1, loadedCompetitor.getName());
+        assertEquals(competitorShortName1, loadedCompetitor.getShortName());
         
         loadedCompetitor.setName(competitorName2);
+        loadedCompetitor.setShortName(competitorShortName2);
         loadedCompetitor.setFlagImage(flagImageURI2);
         mongoObjectFactory.storeCompetitor(loadedCompetitor);
 
@@ -76,6 +81,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
         loadedCompetitor = (DynamicCompetitor) allCompetitors.iterator().next();
         assertEquals(flagImageURI2, loadedCompetitor.getFlagImage());
         assertEquals(competitorName2, loadedCompetitor.getName());
+        assertEquals(competitorShortName2, loadedCompetitor.getShortName());
     }
 
     @Test
