@@ -14,7 +14,7 @@ public class ExperimentalFeatures {
      */
     public static final boolean SHOW_SOCIAL_LOGINS_FOR_USER_MANAGEMENT = false;
     /**
-     * Provide a tab "my settings" in the user profile page.
+     * Provide a tab "settings" in the user profile page.
      */
-    public static final boolean SHOW_MY_SETTINGS_IN_USER_PROFILE = false;
+    public static final boolean SHOW_MY_SETTINGS_IN_USER_PROFILE = true;
 }
