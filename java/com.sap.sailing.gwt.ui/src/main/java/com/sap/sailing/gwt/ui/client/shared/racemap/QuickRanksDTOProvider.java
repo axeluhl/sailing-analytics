@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
  */
 public interface QuickRanksDTOProvider {
     public interface QuickRanksListener {
-        void rankChanged(String competitorIdAsString, QuickRankDTO quickRanks);
+        void rankChanged(String competitorIdAsString, QuickRankDTO oldQuickRank, QuickRankDTO quickRanks);
     }
     
     void addQuickRanksListener(QuickRanksListener listener);
