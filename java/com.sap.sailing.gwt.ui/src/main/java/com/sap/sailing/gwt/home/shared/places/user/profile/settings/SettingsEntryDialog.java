@@ -1,0 +1,51 @@
+package com.sap.sailing.gwt.home.shared.places.user.profile.settings;
+
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+
+public class SettingsEntryDialog extends DataEntryDialog<UserSettingsEntry> {
+
+    private final FlowPanel fp;
+
+    public SettingsEntryDialog(UserSettingsEntry entry) {
+        super(StringMessages.INSTANCE.settings(), "TODO settings for: '"+entry.getKey()+"'", StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), null, false, new DialogCallback<UserSettingsEntry>() {
+            @Override
+            public void ok(UserSettingsEntry editedObject) {
+            }
+
+            @Override
+            public void cancel() {
+            }
+        });
+        
+        fp = new FlowPanel();
+        
+        final String userProfileSettings = entry.getProfileData();
+        boolean hasUserData = (userProfileSettings != null && !userProfileSettings.isEmpty());
+        final String localSettings = entry.getLocalData();
+        
+        fp.add(createTextArea(hasUserData ? userProfileSettings : localSettings));
+    }
+
+    public TextArea createTextArea(final String initialValue) {
+        final TextArea textArea = super.createTextArea(initialValue);
+        textArea.getElement().getStyle().setWidth(25, Unit.EM);
+        textArea.getElement().getStyle().setHeight(15, Unit.EM);
+        return textArea;
+    }
+    
+    @Override
+    protected Widget getAdditionalWidget() {
+        return fp;
+    }
+
+    @Override
+    protected UserSettingsEntry getResult() {
+        return null;
+    }
+
+}

@@ -60,6 +60,13 @@ public class UserSettings extends Composite implements UserSettingsView {
             return StringMessages.INSTANCE.remove();
         }
     };
+    private final Column<UserSettingsEntry, String> showColumn = new Column<UserSettingsEntry, String>(
+            new ButtonCell()) {
+        @Override
+        public String getValue(UserSettingsEntry entry) {
+            return StringMessages.INSTANCE.show();
+        }
+    };
 
     public UserSettings(UserSettingsView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -70,9 +77,18 @@ public class UserSettings extends Composite implements UserSettingsView {
                 presenter.remove(object);
             }
         });
+        
+        showColumn.setFieldUpdater(new FieldUpdater<UserSettingsEntry, String>() {
+            @Override
+            public void update(int index, UserSettingsEntry object, String value) {
+                new SettingsEntryDialog(object).show();
+            }
+        });
 
         userSettingsTable.addColumn(keyColumn, "TODO: key", new StringComparator(UserSettingsEntry::getKeyWithoutContext), true);
         userSettingsTable.addColumn(documentSettingsIdColumn, "TODO: document settings ID", new StringComparator(UserSettingsEntry::getDocumentSettingsId), true);
+        showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
+        userSettingsTable.addColumn(showColumn, "", null, false);
         deleteColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         userSettingsTable.addColumn(deleteColumn, "", null, false);
         
