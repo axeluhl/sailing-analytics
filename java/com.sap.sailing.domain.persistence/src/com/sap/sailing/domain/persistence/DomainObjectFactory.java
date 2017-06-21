@@ -29,6 +29,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -53,9 +54,7 @@ public interface DomainObjectFactory {
      * @return the leaderboard loaded, if successful, or <code>null</code> if the leaderboard couldn't be loaded,
      * e.g., because the regatta for a regatta leaderboard couldn't be found
      */
-    Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry);
-
-    Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
+    Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
 
     RaceIdentifier loadRaceIdentifier(DBObject dbObject);
     
@@ -197,4 +196,7 @@ public interface DomainObjectFactory {
      */
     ConnectivityParametersLoadingResult loadConnectivityParametersForRacesToRestore(
             Consumer<RaceTrackingConnectivityParameters> callback);
+
+    RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(DBObject dbLeaderboard,
+            String leaderboardName, String wrappedRegattaLeaderboardName, LeaderboardRegistry leaderboardRegistry);
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,7 @@ import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -1163,6 +1165,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
                         .build();
             } else {
+                Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 Course course = trackedRace.getRace().getCourse();
                 Waypoint lastWaypoint = course.getLastWaypoint();
@@ -1184,9 +1187,16 @@ public class RegattasResource extends AbstractSailingServerResource {
                         jsonLiveData.put("timeToStart-s", (startOfRace.asMillis() - now.asMillis()) / 1000.0);
                     }
                 }
-
                 JSONArray jsonCompetitors = new JSONArray();
                 List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
+                Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
+                if(leaderboard != null) {
+                    List<Competitor> overallRanking= leaderboard.getCompetitorsFromBestToWorst(timePoint);
+                    Integer overallRank = 1;
+                    for (Competitor competitor: overallRanking) {
+                        overallRankPerCompetitor.put(competitor, overallRank++);
+                    }
+                }
                 Integer rank = 1;
                 for (Competitor competitor : competitorsFromBestToWorst) {
                     JSONObject jsonCompetitorInLeg = new JSONObject();
@@ -1200,7 +1210,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                     jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml()
                             : null);
                     jsonCompetitorInLeg.put("rank", rank++);
-
+                    if (overallRankPerCompetitor.containsKey(competitor)) {
+                        jsonCompetitorInLeg.put("overallRank", overallRankPerCompetitor.get(competitor));
+                    }
                     TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
                     if (currentLegOfCompetitor != null) {
                         int indexOfWaypoint = course.getIndexOfWaypoint(currentLegOfCompetitor.getLeg().getFrom());

@@ -77,12 +77,12 @@ public interface DomainFactory extends SharedDomainFactory {
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 
-    List<CompetitorDTO> getCompetitorDTOList(List<CompetitorWithBoat> competitors);
+    List<CompetitorDTO> getCompetitorDTOList(Iterable<CompetitorWithBoat> competitors);
 
     /** Temporary function -> REMOVE later on */
-    List<CompetitorWithoutBoatDTO> getCompetitorWithoutBoatDTOListTemp(List<Competitor> competitors);
+    List<CompetitorWithoutBoatDTO> getCompetitorWithoutBoatDTOListTemp(Iterable<Competitor> competitors);
 
-    List<CompetitorDTO> getCompetitorDTOListTemp(List<Competitor> competitors);
+    List<CompetitorDTO> getCompetitorDTOListTemp(Iterable<Competitor> competitors);
 
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 

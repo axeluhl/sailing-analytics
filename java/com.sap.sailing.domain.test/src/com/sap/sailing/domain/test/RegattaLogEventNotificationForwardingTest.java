@@ -159,7 +159,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
     @Test
     public void testAddCompetitorToRegattaAndEnsureCacheInvalidation() throws NoWindException, InterruptedException, ExecutionException {
         Regatta regatta = createRegatta();
-        RegattaLeaderboard leaderboard = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
+        RegattaLeaderboard leaderboard = createRegattaLeaderboard(regatta);
         final TimePoint now = MillisecondsTimePoint.now();
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
         LeaderboardDTO dto = leaderboard.getLeaderboardDTO(now.plus(10), Collections.emptySet(), /* addOverallDetails */ false,
@@ -190,7 +190,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
     public void testAddCompetitorToRegattaAndEnsureCacheInvalidationOnDeserializedRegattaLeaderboard() throws NoWindException,
             InterruptedException, ExecutionException, ClassNotFoundException, IOException {
         Regatta regatta = createRegatta();
-        RegattaLeaderboard leaderboard = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
+        RegattaLeaderboard leaderboard = createRegattaLeaderboard(regatta);
         final TimePoint now = MillisecondsTimePoint.now();
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
         RegattaLeaderboard deserializedLeaderboard = cloneBySerialization(leaderboard, DomainFactory.INSTANCE);
@@ -207,5 +207,9 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertFalse(dto3.competitors.isEmpty());
         assertEquals(event.getCompetitor().getName(), dto3.competitors.get(0).getName());
+    }
+
+    protected RegattaLeaderboard createRegattaLeaderboard(Regatta regatta) {
+        return new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
     }
 }

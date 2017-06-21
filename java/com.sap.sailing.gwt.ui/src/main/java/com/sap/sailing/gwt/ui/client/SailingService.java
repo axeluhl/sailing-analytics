@@ -200,6 +200,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
 
+    StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName, String regattaName);
+
     void removeLeaderboard(String leaderboardName);
 
     void removeLeaderboards(Collection<String> leaderboardNames);
@@ -402,7 +404,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName);
 
-    Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
+    LeaderboardType getLeaderboardType(String leaderboardName);
 
         /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
@@ -679,5 +681,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> getTrackingTimes(Collection<Triple<String, String, String>> raceColumnsAndFleets);
 
     Pair<PersonDTO, CountryCode> serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition);
+
+    Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName);
+
+    void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors);
 
 }

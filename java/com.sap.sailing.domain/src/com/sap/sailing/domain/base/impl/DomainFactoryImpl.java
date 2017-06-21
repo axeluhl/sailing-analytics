@@ -364,7 +364,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorDTOList(List<CompetitorWithBoat> competitors) {
+    public List<CompetitorDTO> getCompetitorDTOList(Iterable<CompetitorWithBoat> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
         for (CompetitorWithBoat competitor : competitors) {
             result.add(convertToCompetitorDTO(competitor));
@@ -373,7 +373,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorDTOListTemp(List<Competitor> competitors) {
+    public List<CompetitorDTO> getCompetitorDTOListTemp(Iterable<Competitor> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
         for (Competitor competitor : competitors) {
             result.add(convertToCompetitorDTO(competitor));
@@ -382,7 +382,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
     
     @Override
-    public List<CompetitorWithoutBoatDTO> getCompetitorWithoutBoatDTOListTemp(List<Competitor> competitors) {
+    public List<CompetitorWithoutBoatDTO> getCompetitorWithoutBoatDTOListTemp(Iterable<Competitor> competitors) {
         List<CompetitorWithoutBoatDTO> result = new ArrayList<CompetitorWithoutBoatDTO>();
         for (Competitor competitor : competitors) {
             result.add(convertToCompetitorWithoutBoatDTO(competitor));

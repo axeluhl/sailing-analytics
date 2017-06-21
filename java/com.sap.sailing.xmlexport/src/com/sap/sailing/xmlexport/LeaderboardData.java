@@ -228,7 +228,7 @@ public class LeaderboardData extends ExportAction {
         if (competitorsForColumn == null) {
             competitorsForColumn = new ArrayList<>();
         }
-        List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(column, timepointToBeUsed);
+        Iterable<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(column, timepointToBeUsed);
         for (Competitor competitorInLeaderboard : competitors) {
             // we must keep track of competitors that we are associated to fleets
             // in order to not export the score correction twice. This is needed

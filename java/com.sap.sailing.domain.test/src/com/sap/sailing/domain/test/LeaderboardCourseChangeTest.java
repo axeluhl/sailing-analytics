@@ -41,6 +41,7 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -114,7 +115,7 @@ public class LeaderboardCourseChangeTest {
         
         int[] ruleRaw = { 5, 3, 2 };
         ThresholdBasedResultDiscardingRule rule = new ThresholdBasedResultDiscardingRuleImpl(ruleRaw);
-        Leaderboard leaderboard = new RegattaLeaderboardImpl(mockedRegatta, rule);
+        Leaderboard leaderboard = createRegattaLeaderboard(mockedRegatta, rule);
         
         DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false,
@@ -131,6 +132,11 @@ public class LeaderboardCourseChangeTest {
         assertEquals(4, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
 
+    }
+
+    protected RegattaLeaderboard createRegattaLeaderboard(Regatta mockedRegatta,
+            ThresholdBasedResultDiscardingRule rule) {
+        return new RegattaLeaderboardImpl(mockedRegatta, rule);
     }
 
     private TrackedRace createSpyedTrackedRace(Regatta regatta, Course course, TimePoint timePoint, BoatClass boatClass) {

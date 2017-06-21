@@ -291,7 +291,7 @@ public class LeaderboardCacheManager {
                 final CacheInvalidationUponCompetitorChangeListener competitorChangeListener = new CacheInvalidationUponCompetitorChangeListener(
                         leaderboard);
                 final NameChangeListener nameChangeListener = new NameChangeListener(leaderboard);
-                leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
+                leaderboard.addScoreCorrectionListener(scoreCorrectionListener);
                 leaderboard.addLeaderboardChangeListener(nameChangeListener);
                 scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
                 competitorChangeListeners.put(leaderboard, competitorChangeListener);

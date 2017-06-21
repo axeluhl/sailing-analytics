@@ -46,7 +46,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
@@ -579,12 +578,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                                     content = RaceFlagViewerFragment.newInstance();
                                 } else {
-                                    if (preferences.getRacingProcedureIsResultEntryEnabled(mSelectedRace.getState().
-                                        getRacingProcedure().getType())) {
-                                        content = TrackingListFragment.newInstance(args, 1);
-                                    } else {
-                                        content = RaceFinishingFragment.newInstance();
-                                    }
+                                    content = RaceFinishingFragment.newInstance();
                                 }
                                 content.setArguments(args);
                                 transaction.replace(R.id.race_content, content);

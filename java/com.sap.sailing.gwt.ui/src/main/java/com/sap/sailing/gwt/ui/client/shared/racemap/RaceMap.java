@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -76,11 +75,11 @@ import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
@@ -270,7 +269,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     /**
      * html5 canvases used for competitor info display on the map
      */
-    private final Map<CompetitorDTO, CompetitorInfoOverlay> competitorInfoOverlays;
+    private final CompetitorInfoOverlays competitorInfoOverlays;
     
     private SmallTransparentInfoOverlay countDownOverlay;
 
@@ -349,18 +348,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private int lastLegNumber;
 
     /**
-     * The last quick ranks received from a call to {@link SailingServiceAsync#getQuickRanks(RaceIdentifier, Date, AsyncCallback)} upon
-     * the last {@link #timeChanged(Date, Date)} event. Therefore, the ranks listed here correspond to the {@link #timer}'s time.
+     * The strategy for maintaining and delivering the "quick ranks" information. The provider will be informed about
+     * quick ranks received from a {@link RaceMapDataDTO#quickRanks} field but may choose to ignore this information, e.g.,
+     * if it can assume that more current information about ranks and leg numbers is available from a {@link LeaderboardDTO}.
      */
-    private LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
+    private final QuickRanksDTOProvider quickRanksDTOProvider;
     
-    /**
-     * Taken from {@link RaceMapDataDTO#competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber}; tells the
-     * windward distances traveled and the leg numbers in which the respective competitor is.
-     */
-    private LinkedHashMap<CompetitorDTO, Integer> competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
-
-
     private final CombinedWindPanel combinedWindPanel;
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
     private final FlowPanel topLeftControlsWrapperPanel;
@@ -418,10 +411,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
-            RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, 
-            boolean showHeaderPanel) {
+            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
+            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
+            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
         super(parent, context);
+        this.quickRanksDTOProvider = quickRanksDTOProvider;
         this.raceMapLifecycle = raceMapLifecycle;
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -437,12 +431,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         courseMiddleLines = new HashMap<>();
         infoOverlaysForLinesForCourseGeometry = new HashMap<>();
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
-        competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
+        competitorInfoOverlays = new CompetitorInfoOverlays(this, stringMessages);
+        quickRanksDTOProvider.addQuickRanksListener(competitorInfoOverlays);
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
         courseMarkClickHandlers = new HashMap<String, HandlerRegistration>();
         this.competitorSelection = competitorSelection;
-        this.raceCompetitorSet = new RaceCompetitorSet(competitorSelection);
+        this.raceCompetitorSet = raceCompetitorSet;
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = raceMapSettings;
         coordinateSystem = new DelegateCoordinateSystem(new IdentityCoordinateSystem());
@@ -747,9 +742,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             boatOverlay.removeCanvasPositionAndRotationTransition();
         }
         // remove the canvas animations for the info overlays of the selected boats
-        for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
-            infoOverlay.removeCanvasPositionAndRotationTransition();
-        }
+        competitorInfoOverlays.removeTransitions();
         for (CourseMarkOverlay markOverlay : courseMarkOverlays.values()) {
             markOverlay.removeCanvasPositionAndRotationTransition();
         }
@@ -767,6 +760,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return Collections.unmodifiableMap(boatOverlays);
     }
     
+    protected CompetitorSelectionProvider getCompetitorSelection() {
+        return competitorSelection;
+    }
+
+    protected Timer getTimer() {
+        return timer;
+    }
+
+    protected RegattaAndRaceIdentifier getRaceIdentifier() {
+        return raceIdentifier;
+    }
+
     public MapWidget getMap() {
         return map;
     }
@@ -972,9 +977,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                         " in regatta "+raceIdentifier.getRegattaName(), e);
                             }
                         }
-                        quickRanks = raceMapDataDTO.quickRanks;
-                        competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber =
-                                raceMapDataDTO.competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
+                        quickRanksDTOProvider.quickRanksReceivedFromServer(raceMapDataDTO.quickRanks);
                         if (isSimulationEnabled && settings.isShowSimulationOverlay()) {
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
                         	simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
@@ -1220,54 +1223,64 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void showCompetitorInfoOnMap(final Date newTime, final long timeForPositionTransitionMillis, final Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
             if (settings.isShowSelectedCompetitorsInfo()) {
-                Set<CompetitorDTO> toRemoveCompetorInfoOverlays = new HashSet<CompetitorDTO>(
-                        competitorInfoOverlays.keySet());
+                Set<String> toRemoveCompetorInfoOverlaysIdsAsStrings = new HashSet<>();
+                Util.addAll(competitorInfoOverlays.getCompetitorIdsAsStrings(), toRemoveCompetorInfoOverlaysIdsAsStrings);
                 for (CompetitorDTO competitorDTO : competitorsToShow) {
                     if (fixesAndTails.hasFixesFor(competitorDTO)) {
                         GPSFixDTOWithSpeedWindTackAndLegType lastBoatFix = getBoatFix(competitorDTO, newTime);
                         if (lastBoatFix != null) {
                             CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
+                            final Integer rank = getRank(competitorDTO);
                             if (competitorInfoOverlay == null) {
-                                competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, competitorDTO);
-                                competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
-                                competitorInfoOverlay.setInfoText(createInfoText(competitorDTO, lastBoatFix));
-                                competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
+                                competitorInfoOverlay = competitorInfoOverlays.createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, competitorDTO,
+                                        lastBoatFix, rank, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.addToMap();
                             } else {
-                                competitorInfoOverlay.setInfoText(createInfoText(competitorDTO, lastBoatFix));
-                                competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
-                                competitorInfoOverlay.draw();
+                                competitorInfoOverlays.updatePosition(competitorDTO, lastBoatFix, timeForPositionTransitionMillis);
                             }
-                            toRemoveCompetorInfoOverlays.remove(competitorDTO);
+                            toRemoveCompetorInfoOverlaysIdsAsStrings.remove(competitorDTO.getIdAsString());
                         }
                     }
                 }
-                for (CompetitorDTO toRemoveCompetorDTO : toRemoveCompetorInfoOverlays) {
-                    CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(toRemoveCompetorDTO);
-                    competitorInfoOverlay.removeFromMap();
-                    competitorInfoOverlays.remove(toRemoveCompetorDTO);
+                for (String toRemoveCompetitorOverlayIdAsString : toRemoveCompetorInfoOverlaysIdsAsStrings) {
+                    competitorInfoOverlays.remove(toRemoveCompetitorOverlayIdAsString);
                 }
             } else {
                 // remove all overlays
-                for (CompetitorInfoOverlay competitorInfoOverlay : competitorInfoOverlays.values()) {
-                    competitorInfoOverlay.removeFromMap();
-                }
                 competitorInfoOverlays.clear();
             }
         }
     }
 
     private long calculateTimeForPositionTransitionInMillis(final Date newTime, final Date oldTime) {
+        final long timeForPositionTransitionMillisSmoothed;
         final long timeForPositionTransitionMillis;
-        boolean hasTimeJumped = oldTime != null && Math.abs(oldTime.getTime() - newTime.getTime()) > 3*timer.getRefreshInterval();
-        if (timer.getPlayState() == PlayStates.Playing && !hasTimeJumped) {
+        if (newTime != null && oldTime != null) {
+            timeForPositionTransitionMillis = newTime.getTime() - oldTime.getTime();
+        } else {
+            timeForPositionTransitionMillis = -1;
+        }
+        if (timer.getPlayState() == PlayStates.Playing) {
             // choose 130% of the refresh interval as transition period to make it unlikely that the transition
             // stops before the next update has been received
-            timeForPositionTransitionMillis = 1300 * timer.getRefreshInterval() / 1000; 
+            long smoothIntervall = 1300 * timer.getRefreshInterval() / 1000;
+            if (timeForPositionTransitionMillis > 0 && timeForPositionTransitionMillis < smoothIntervall) {
+                timeForPositionTransitionMillisSmoothed = smoothIntervall;
+            } else {
+                // either a large transition positive transition happend or any negative one, do not use the smooth
+                // value
+                if (timeForPositionTransitionMillis > 0) {
+                    timeForPositionTransitionMillisSmoothed = timeForPositionTransitionMillis;
+                } else {
+                    timeForPositionTransitionMillisSmoothed = -1;
+                }
+            }
+
         } else {
-            timeForPositionTransitionMillis = -1; // -1 means 'no transition
+            // do not animate in non live modus
+            timeForPositionTransitionMillisSmoothed = -1; // -1 means 'no transition
         }
-        return timeForPositionTransitionMillis;
+        return timeForPositionTransitionMillisSmoothed;
     }
     
     /**
@@ -1287,6 +1300,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 competitorDTOsOfUnusedBoatCanvases.addAll(boatOverlays.keySet());
             }
             for (CompetitorDTO competitorDTO : competitorsToShow) {
+                boolean hasTimeJumped = timeForPositionTransitionMillis > 3 * timer.getRefreshInterval();
+                if (hasTimeJumped) {
+                    fixesAndTails.clearTails();
+                }
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     if (!fixesAndTails.hasTail(competitorDTO)) {
                         fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
@@ -1339,17 +1356,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     /**
      * Returns a pair whose first component is the leg number (one-based) of the competitor returned as the second component.
      */
-    private com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> getFarthestAheadVisibleCompetitorWithOneBasedLegNumber(
+    private com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> getBestVisibleCompetitorWithOneBasedLegNumber(
             Iterable<CompetitorDTO> competitorsToShow) {
         CompetitorDTO leadingCompetitorDTO = null;
         int legOfLeaderCompetitor = -1;
         // this only works because the quickRanks are sorted
-        for (Entry<CompetitorDTO, Integer> competitorsByWindwardDistanceTraveledAndOneBasedLegNumber :
-            competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber.entrySet()) {
-            if (Util.contains(competitorsToShow, competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getKey()) && 
-                    competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue() != null) {
-                leadingCompetitorDTO = competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getKey();
-                legOfLeaderCompetitor = competitorsByWindwardDistanceTraveledAndOneBasedLegNumber.getValue();
+        for (QuickRankDTO competitorFromBestToWorstAndOneBasedLegNumber : quickRanksDTOProvider.getQuickRanks().values()) {
+            if (Util.contains(competitorsToShow, competitorFromBestToWorstAndOneBasedLegNumber.competitor) && 
+                    competitorFromBestToWorstAndOneBasedLegNumber.legNumberOneBased != 0) {
+                leadingCompetitorDTO = competitorFromBestToWorstAndOneBasedLegNumber.competitor;
+                legOfLeaderCompetitor = competitorFromBestToWorstAndOneBasedLegNumber.legNumberOneBased;
                 return new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
             }
         }
@@ -1358,11 +1374,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     final static Distance advantageLineLength = new MeterDistance(1000); // TODO this should probably rather scale with the visible area of the map; bug 616
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
-        if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null) {
+        if (map != null && lastRaceTimesInfo != null && quickRanksDTOProvider.getQuickRanks() != null && lastCombinedWindTrackInfoDTO != null) {
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
                 // find competitor with highest rank
-                com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> visibleLeaderInfo = getFarthestAheadVisibleCompetitorWithOneBasedLegNumber(competitorsToShow);
+                com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> visibleLeaderInfo = getBestVisibleCompetitorWithOneBasedLegNumber(competitorsToShow);
                 // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat;
                 // don't show anything
                 GPSFixDTOWithSpeedWindTackAndLegType lastBoatFix = null;
@@ -1880,6 +1896,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * @param timeForPositionTransitionMillis use -1 to not animate the position transition, e.g., during map zoom or non-play
      */
     private boolean updateBoatCanvasForCompetitor(CompetitorDTO competitorDTO, Date date, long timeForPositionTransitionMillis) {
+        boolean hasTimeJumped = timeForPositionTransitionMillis > 3 * timer.getRefreshInterval();
+        if (hasTimeJumped) {
+            timeForPositionTransitionMillis = -1;
+        }
+        
         boolean usedExistingCanvas = false;
         GPSFixDTOWithSpeedWindTackAndLegType lastBoatFix = getBoatFix(competitorDTO, date);
         if (lastBoatFix != null) {
@@ -1942,23 +1963,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    private CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO) {
-        GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO = getBoatFix(competitorDTO, timer.getTime());
-        return new CompetitorInfoOverlay(map, zIndex, competitorSelection.getColor(competitorDTO, raceIdentifier), createInfoText(competitorDTO, gpsFixDTO), coordinateSystem);
-    }
-    
-    private String createInfoText(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO) {
-        StringBuilder infoText = new StringBuilder();
-        infoText.append(competitorDTO.getSailID()).append("\n");
-        infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(gpsFixDTO.speedWithBearing.speedInKnots))
-                .append(" ").append(stringMessages.knotsUnit()).append("\n");
-        QuickRankDTO quickRankDTO = quickRanks.get(competitorDTO);
-        if (quickRankDTO != null) {
-            infoText.append(stringMessages.rank()).append(" : ").append(quickRanks.get(competitorDTO).rank);
-        }
-        return infoText.toString();
-    }
-    
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
         final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO, raceIdentifier), coordinateSystem);
         boatCanvas.setSelected(highlighted);
@@ -2121,13 +2125,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.getName()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorDTO.getSailID()));
-        Integer rank = null;
-        if (quickRanks != null) {
-            QuickRankDTO quickRank = quickRanks.get(competitorDTO);
-            if (quickRank != null) {
-                rank = quickRank.rank;
-            }
-        }
+        final Integer rank = getRank(competitorDTO);
         if (rank != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.rank(), String.valueOf(rank)));
         }
@@ -2762,9 +2760,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public Integer getRank(CompetitorDTO competitor) {
         final Integer result;
-        QuickRankDTO quickRank = quickRanks.get(competitor);
+        QuickRankDTO quickRank = quickRanksDTOProvider.getQuickRanks().get(competitor.getIdAsString());
         if (quickRank != null) {
-            result = quickRank.rank;
+            result = quickRank.oneBasedRank;
         } else {
             result = null;
         }

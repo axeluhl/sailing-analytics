@@ -548,6 +548,7 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                         if (fromPos == null) {
                             result = Distance.NULL;
                         } else {
+                            // TODO bug 4122: idea: use the subset to determine fromPos and toPos in one go, eliminating two expensive getEstimatedPosition calls
                             NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
                             /* fromInclusive */false, new DummyGPSFix(to),
                             /* toInclusive */false);

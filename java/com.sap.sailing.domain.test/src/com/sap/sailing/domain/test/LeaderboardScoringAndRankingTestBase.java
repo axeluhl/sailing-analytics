@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
@@ -42,7 +43,7 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
 public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTest {
     protected ArrayList<Series> series;
 
-    protected Leaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
+    protected RegattaLeaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
         ThresholdBasedResultDiscardingRuleImpl discardingRules = new ThresholdBasedResultDiscardingRuleImpl(discardingThresholds);
         return new RegattaLeaderboardImpl(regatta, discardingRules);
     }

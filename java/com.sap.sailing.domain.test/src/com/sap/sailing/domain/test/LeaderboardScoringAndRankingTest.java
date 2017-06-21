@@ -56,6 +56,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
@@ -64,7 +65,6 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBre
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie2017;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -83,9 +83,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRankingTestBase {
-    protected Leaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
-        ThresholdBasedResultDiscardingRuleImpl discardingRules = new ThresholdBasedResultDiscardingRuleImpl(discardingThresholds);
-        return new RegattaLeaderboardImpl(regatta, discardingRules);
+    protected DelegatingRegattaLeaderboardWithCompetitorElimination createDelegatingRegattaLeaderboardWithCompetitorElimination(
+            Regatta regatta, String leaderboardName, int[] discardingThresholds) {
+        return new DelegatingRegattaLeaderboardWithCompetitorElimination(()->createLeaderboard(regatta, discardingThresholds), leaderboardName);
     }
 
     @Test
@@ -1819,7 +1819,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(1. + .9, leaderboard1.getNetPoints(c1[0], afterEndOfR1), 0.00000001);
         assertEquals(1, leaderboard1.getTotalRankOfCompetitor(c1[0], afterEndOfR1));
         // now assert that the competitor c1[0] is best in r2 because of the score correction, although c1[0] doesn't have a fleet
-        assertEquals(0, leaderboard1.getCompetitorsFromBestToWorst(r2, afterEndOfR1).indexOf(c1[0]));
+        assertEquals(0, Util.indexOf(leaderboard1.getCompetitorsFromBestToWorst(r2, afterEndOfR1), c1[0]));
     }
 
     @Test
