@@ -22,17 +22,6 @@
     text-align: left;
 }
 
-.cellTableFirstColumn {
-}
-
-.cellTableLastColumn {
-}
-
-.cellTableFooter {
-}
-
-.cellTableHeader {
-}
 
 .cellTableCell {
     text-align: left;
@@ -42,65 +31,38 @@
     padding: 1.4em .666666666666667em .733333333333333em 1.333333333333333em;
 }
 
-.cellTableFirstColumnFooter {
+.buttonCell {
+    text-align: right;
+    vertical-align: middle;
+    padding-left: 0;
+    padding-right: .666666666666667em;
+    padding-top: .666666666666667em;
 }
 
-.cellTableFirstColumnHeader {
-}
-
-.cellTableLastColumnFooter {
-}
-
-.cellTableLastColumnHeader {
-}
-
-.cellTableSortableHeader {
-  cursor: pointer;
-  cursor: hand;
-}
-
-.cellTableSortableHeader:hover {
-  color: #6c6b6b;
-}
-
-.cellTableSortedHeaderAscending {
-}
-
-.cellTableSortedHeaderDescending {
-}
-
-.cellTableEvenRow {
-}
-
-.cellTableEvenRowCell {
-}
-
-.cellTableOddRow {
-}
-
-.cellTableOddRowCell {
-}
-
-.cellTableHoveredRow {
-}
-
-.cellTableHoveredRowCell {
-}
-
-.cellTableKeyboardSelectedRow {
-}
-
-.cellTableKeyboardSelectedRowCell {
-}
-
-.cellTableSelectedRow {
-}
-
-.cellTableSelectedRowCell {
-}
-
-.cellTableKeyboardSelectedCell {
-}
-
-.cellTableLoading {
+.buttonCell>div>button {
+    font-size: 1rem;
+    color: #fff;
+    font-weight: 700;
+    background: #008fcc;
+    display: -webkit-inline-box;
+    display: -webkit-inline-flex;
+    display: -moz-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0;
+    -moz-box-flex: 0;
+    -ms-flex: 0;
+    flex: 0;
+    text-align: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 2.666666666666667em;
+    padding: 0 1em 0 1em;
+    border-radius: .2em;
+    position: relative;
+    border: none;
 }

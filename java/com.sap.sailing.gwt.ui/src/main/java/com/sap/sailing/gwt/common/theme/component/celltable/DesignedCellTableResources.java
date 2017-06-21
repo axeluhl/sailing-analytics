@@ -12,6 +12,7 @@ public interface DesignedCellTableResources extends CellTable.Resources {
     public static final DesignedCellTableResources INSTANCE = GWT.create(DesignedCellTableResources.class);
     
     public interface DesignedCellTableStyle extends CellTable.Style {
+        String buttonCell();
     }
 
     @Override

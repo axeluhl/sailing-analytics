@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.home.shared.places.user.profile.settings;
 
 import java.util.List;
 
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
@@ -13,6 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.util.NaturalComparator;
@@ -40,7 +43,7 @@ public class UserSettings extends Composite implements UserSettingsView {
     private final Column<UserSettingsEntry, String> keyColumn = new Column<UserSettingsEntry, String>(new TextCell()) {
         @Override
         public String getValue(UserSettingsEntry entry) {
-            return entry.getKey();
+            return entry.getKeyWithoutContext();
         }
     };
     private final Column<UserSettingsEntry, String> documentSettingsIdColumn = new Column<UserSettingsEntry, String>(
@@ -50,12 +53,28 @@ public class UserSettings extends Composite implements UserSettingsView {
             return entry.getDocumentSettingsId();
         }
     };
+    private final Column<UserSettingsEntry, String> deleteColumn = new Column<UserSettingsEntry, String>(
+            new ButtonCell()) {
+        @Override
+        public String getValue(UserSettingsEntry entry) {
+            return StringMessages.INSTANCE.remove();
+        }
+    };
 
     public UserSettings(UserSettingsView.Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
 
-        userSettingsTable.addColumn(keyColumn, "TODO: key", new StringComparator(UserSettingsEntry::getKey), true);
+        deleteColumn.setFieldUpdater(new FieldUpdater<UserSettingsEntry, String>() {
+            @Override
+            public void update(int index, UserSettingsEntry object, String value) {
+                presenter.remove(object);
+            }
+        });
+
+        userSettingsTable.addColumn(keyColumn, "TODO: key", new StringComparator(UserSettingsEntry::getKeyWithoutContext), true);
         userSettingsTable.addColumn(documentSettingsIdColumn, "TODO: document settings ID", new StringComparator(UserSettingsEntry::getDocumentSettingsId), true);
+        deleteColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
+        userSettingsTable.addColumn(deleteColumn, "", null, false);
         
         presenter.setView(this);
     }

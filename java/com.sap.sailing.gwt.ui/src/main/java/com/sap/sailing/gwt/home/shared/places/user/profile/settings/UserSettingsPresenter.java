@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
-import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 /**
  * @param <C>
@@ -26,6 +25,8 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
 
     private final C clientFactory;
     private UserSettingsView view;
+
+    private final List<UserSettingsEntry> currentlyShownEntries = new ArrayList<>();
 
     public UserSettingsPresenter(C clientFactory) {
         this.clientFactory = clientFactory;
@@ -55,20 +56,11 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
         final Set<String> allKeys = new TreeSet<>((a, b) -> a.compareTo(b));
         allKeys.addAll(userSettings.keySet());
         allKeys.addAll(localSettings.keySet());
-        final List<UserSettingsEntry> entries = new ArrayList<>(allKeys.size());
+        currentlyShownEntries.clear();
         for(String key : allKeys) {
-            final String keyWithoutContext, documentSettingsId;
-            final int separatorIndex = key.indexOf(StoredSettingsLocation.DOCUMENT_SETTINGS_SUFFIX_SEPARATOR);
-            if(separatorIndex > 0) {
-                keyWithoutContext = key.substring(0, separatorIndex);
-                documentSettingsId = key.substring(separatorIndex + 1);
-            } else {
-                keyWithoutContext = key;
-                documentSettingsId = null;
-            }
-            entries.add(new UserSettingsEntry(keyWithoutContext, documentSettingsId, userSettings.get(key), localSettings.get(key)));
+            currentlyShownEntries.add(new UserSettingsEntry(key, userSettings.get(key), localSettings.get(key)));
         }
-        view.setEntries(entries);
+        view.setEntries(currentlyShownEntries);
     }
     
     private Map<String, String> loadSettingsFromLocalStorage() {
@@ -91,8 +83,14 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
 
     @Override
     public void remove(UserSettingsEntry entry) {
-        // TODO Auto-generated method stub
-        
+        String storageKey = entry.getKey();
+        clientFactory.getUserService().unsetPreference(storageKey);
+        if(Storage.isLocalStorageSupported()) {
+            Storage localStorage = Storage.getLocalStorageIfSupported();
+            localStorage.removeItem(storageKey);
+        }
+        currentlyShownEntries.remove(entry);
+        view.setEntries(currentlyShownEntries);
     }
 
     @Override
