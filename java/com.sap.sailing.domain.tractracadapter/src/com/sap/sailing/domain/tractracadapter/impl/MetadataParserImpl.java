@@ -81,7 +81,27 @@ public class MetadataParserImpl implements MetadataParser {
             return id;
         }
     }
-    
+
+    public class BoatMetaDataImpl extends NamedImpl implements BoatMetaData  {
+        private static final long serialVersionUID = 1L;
+        private final String id; 
+        private final String color; 
+
+        public BoatMetaDataImpl(String boatName, String boatId, String boatColor) {
+            super(boatName);
+            this.id = boatId;
+            this.color = boatColor;
+        }
+        
+        public String getId() {
+            return id;
+        }
+
+        public String getColor() {
+            return color;
+        }
+    }
+
     /**
      * Parses the route metadata for additional course information
      * The 'passing side' for each course waypoint is encoded like this...
@@ -212,8 +232,8 @@ public class MetadataParserImpl implements MetadataParser {
     }
 
     @Override
-    public Util.Triple<String, String, String> parseCompetitorBoat(IRaceCompetitor competitor) {
-        Util.Triple<String, String, String> result = null;
+    public BoatMetaData parseCompetitorBoat(IRaceCompetitor competitor) {
+        BoatMetaData result = null;
         String parsedBoatName = null;
         String parsedBoatId = null;
         String parsedColor = null;
@@ -230,7 +250,7 @@ public class MetadataParserImpl implements MetadataParser {
                 }
             }
             if (parsedBoatName != null && parsedBoatId != null && parsedColor != null) {
-                result = new Util.Triple<String, String, String>(parsedBoatName, parsedBoatId, parsedColor);
+                result = new BoatMetaDataImpl(parsedBoatName, parsedBoatId, parsedColor);
             }
         }
         return result;

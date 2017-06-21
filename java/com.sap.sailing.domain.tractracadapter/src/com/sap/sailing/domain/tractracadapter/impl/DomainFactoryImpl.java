@@ -29,7 +29,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -39,7 +38,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -71,6 +69,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
+import com.sap.sailing.domain.tractracadapter.MetadataParser.BoatMetaData;
 import com.sap.sailing.domain.tractracadapter.MetadataParser.ControlPointMetaData;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -240,24 +239,23 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public CompetitorAndBoat getOrCreateCompetitorAndBoat(ICompetitor competitor) {
+    public Competitor getOrCreateCompetitor(ICompetitor competitor) {
         final UUID competitorId = competitor.getId();
         final String competitorClassName = competitor.getCompetitorClass()==null?null:competitor.getCompetitorClass().getName();
         final String nationalityAsString = competitor.getNationality();
         final String name = competitor.getName();
         final String shortName = competitor.getShortName();
-        CompetitorAndBoat result = getOrCreateCompetitorAndBoat(competitorId, competitorClassName, nationalityAsString, name,
+        Competitor result = getOrCreateCompetitor(competitorId, competitorClassName, nationalityAsString, name,
                 shortName, competitor.getHandicapToT(), competitor.getHandicapToD(), null);
         return result;
     }
 
     @Override
-    public CompetitorAndBoat getOrCreateCompetitorAndBoat(final UUID competitorId, final String competitorClassName,
+    public Competitor getOrCreateCompetitor(final UUID competitorId, final String competitorClassName,
             final String nationalityAsString, final String name, final String shortName, float timeOnTimeFactor,
             float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag) {
         CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
         Competitor domainCompetitor = competitorStore.getExistingCompetitorById(competitorId);
-        Boat domainBoat = competitorStore.getExistingBoatById(competitorId);
         if (domainCompetitor == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
             Nationality nationality;
             try {
@@ -272,13 +270,16 @@ public class DomainFactoryImpl implements DomainFactory {
                     null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
         }
-        return new CompetitorAndBoatImpl(domainCompetitor, domainBoat);
+        return domainCompetitor;
     }
 
-    private Boat getOrCreateBoat(Serializable competitorId, Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor) {
-        CompetitorStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
-        Boat  boat = competitorAndBoatStore.getOrCreateBoat(competitorId, boatName, boatClass, sailId, boatColor);
-        return boat;
+    public Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor) {
+        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
+        Boat domainBoat = competitorStore.getExistingBoatById(boatId);
+        if (domainBoat == null) {
+            domainBoat = baseDomainFactory.getCompetitorStore().getOrCreateBoat(boatId, boatName, boatClass, sailId, boatColor);
+        }
+        return domainBoat;
     }
 
     private DynamicTeam createTeam(String name, Nationality nationality, UUID competitorId) {
@@ -638,22 +639,55 @@ public class DomainFactoryImpl implements DomainFactory {
                 raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver);
     }
 
+    /**
+     * Obtains the boats for the given competitors.
+     * There are 2 cases to distinguish:
+     * 1. Races with boat information in the competitor metadata field  
+     * 2. Races without any boat information
+     */
     @Override
-    public Map<Competitor, Boat> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass) {
-        final Map<Competitor, Boat> competitorBoatInfos = new HashMap<>();
+    public Map<Competitor, Boat> getCompetitorsAndTheirBoats(IRace race, BoatClass defaultBoatClass) {
+        
+        final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         getCompetingCompetitors(race).forEach(rc->{
-            Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
-            CompetitorAndBoat existingCompetitorAndBoat = getOrCreateCompetitorAndBoat(rc.getCompetitor());
-            Competitor existingCompetitor = existingCompetitorAndBoat.getCompetitor();
-            if (existingCompetitor != null && competitorBoatInfo != null) {
-                Boat boatOfCompetitor = getOrCreateBoat(existingCompetitor.getId(), competitorBoatInfo.getB(), 
-                        competitorBoatInfo.getA(), defaultBoatClass, null, AbstractColor.getCssColor(competitorBoatInfo.getC()));
-                competitorBoatInfos.put(existingCompetitor, boatOfCompetitor);
+            BoatMetaData competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
+            Boat boatOfCompetitor;
+            String sailId = rc.getCompetitor().getShortName();
+            // Case 1
+            if (competitorBoatInfo != null) {
+                // create an unique for such a boot an search in the boat store for it
+                Serializable boatId = createUniqueBoatIdentifierFromBoatMetadata(race, competitorBoatInfo);
+                boatOfCompetitor = getOrCreateBoat(boatId, competitorBoatInfo.getName(), 
+                        defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()) );
+            } else {
+                // Case 2
+                Serializable boatId = createUniqueBoatIdentifierFromCompetitor(race, rc);
+                boatOfCompetitor = getOrCreateBoat(boatId, "Boat of " + sailId, defaultBoatClass, sailId, null);
             }
+            
+            Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
+            competitorsAndBoats.put(existingCompetitor, boatOfCompetitor);
         });
-        return competitorBoatInfos;
+        return competitorsAndBoats;
     }
  
+    /**
+     * Create an unique key for a boat derived from the tractrac event UUID and the boat Id given by the boat metadata
+     * @return the unique key (per tractrac event) 
+     */
+    private String createUniqueBoatIdentifierFromBoatMetadata(IRace race, BoatMetaData boatMetadata) {
+        UUID eventUUID = race.getEvent().getId();
+        String boatIdentifier = eventUUID.toString() + '#' + boatMetadata.getId();
+        return boatIdentifier;
+    }
+
+    private String createUniqueBoatIdentifierFromCompetitor(IRace race, IRaceCompetitor competitor) {
+        UUID eventUUID = race.getEvent().getId();
+        UUID competitorUUID = competitor.getCompetitor().getId();
+        String boatIdentifier = eventUUID.toString() + '#' + competitorUUID.toString();
+        return boatIdentifier;
+    }
+
     /**
      * Obtains those {@link IRace#getRaceCompetitors() competitors} that are actually competing in the race
      * ({@link ICompetitor#isNonCompeting()}=={@code false})
@@ -661,7 +695,7 @@ public class DomainFactoryImpl implements DomainFactory {
     private Stream<IRaceCompetitor> getCompetingCompetitors(IRace race) {
     	return race.getRaceCompetitors().stream().filter(rc->!rc.getCompetitor().isNonCompeting());
     }
-    
+
     @Override
     public Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
         List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
@@ -669,7 +703,7 @@ public class DomainFactoryImpl implements DomainFactory {
         getCompetingCompetitors(race).forEach(rc->{
             // also add those whose race class doesn't match the dominant one (such as camera boats)
             // because they may still send data that we would like to record in some tracks
-            competitors.add(getOrCreateCompetitorAndBoat(rc.getCompetitor()).getCompetitor());
+            competitors.add(getOrCreateCompetitor(rc.getCompetitor()));
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         });
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);

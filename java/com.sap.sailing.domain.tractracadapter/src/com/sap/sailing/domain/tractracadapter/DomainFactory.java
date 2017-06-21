@@ -46,6 +46,7 @@ import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -80,9 +81,11 @@ public interface DomainFactory {
 
     Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
-    com.sap.sailing.domain.base.CompetitorAndBoat getOrCreateCompetitorAndBoat(ICompetitor competitor);
+    com.sap.sailing.domain.base.Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor);
 
-    com.sap.sailing.domain.base.CompetitorAndBoat getOrCreateCompetitorAndBoat(UUID competitorId, String competitorClassName,
+    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
+
+    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
             String nationalityAsString, String name, String shortName, float timeOnTimeFactor, float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag);
 
     /**
@@ -261,7 +264,7 @@ public interface DomainFactory {
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
-    Map<Competitor, Boat> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass);
+    Map<Competitor, Boat> getCompetitorsAndTheirBoats(IRace race, BoatClass defaultBoatClass);
 
     Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race);
     

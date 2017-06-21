@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -72,7 +73,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
 	                if (passed != null) {
 	                    TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
 	                    MarkPassing markPassing = getDomainFactory().createMarkPassing(time, passed,
-                            getDomainFactory().getOrCreateCompetitorAndBoat(event.getA().getCompetitor()).getCompetitor());
+                            getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
 	                    passingsByWaypoint.put(passed, markPassing);
 	                } else {
 	                    logger.warning("Didn't find waypoint in course " + course + " for mark passing around "
@@ -87,11 +88,11 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
 	                }
 	            }
 	            logger.fine("Received mark passings in race "+trackedRace.getRace().getName()+": "+markPassings);
+	            Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
 	            if (getSimulator() != null) {
-                getSimulator().delayMarkPassings(getDomainFactory().getOrCreateCompetitorAndBoat(event.getA().getCompetitor()).getCompetitor(), markPassings);
+	                getSimulator().delayMarkPassings(competitor, markPassings);
 	            } else {
-                trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitorAndBoat(event.getA().getCompetitor()).getCompetitor(),
-	                        markPassings);
+	                trackedRace.updateMarkPassings(competitor, markPassings);
 	            }
 	        } else {
 	            logger.warning("Couldn't find tracked race for race " + event.getA().getRace().getName()
