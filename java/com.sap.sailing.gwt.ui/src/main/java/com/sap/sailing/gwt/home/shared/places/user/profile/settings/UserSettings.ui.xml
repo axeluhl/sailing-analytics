@@ -15,7 +15,10 @@
         }
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
+        <div ui:field="notificationsTextUi" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall}">
+            <ui:text from="{i18n.userNotificationsOnlyIfMailAddressIsVerified}" />
+        </div>
+        <div ui:field="tableWrapper" class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
             <c:CellTable ui:field="userSettingsTable" addStyleNames="{style.table}" />
         </div>
     </g:HTMLPanel>

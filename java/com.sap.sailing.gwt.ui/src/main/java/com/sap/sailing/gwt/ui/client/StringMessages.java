@@ -1814,4 +1814,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String settingsId();
     String documentSettingsId();
     String settingsForId(String id);
+    String userProfileSettingsTabDescription();
 }

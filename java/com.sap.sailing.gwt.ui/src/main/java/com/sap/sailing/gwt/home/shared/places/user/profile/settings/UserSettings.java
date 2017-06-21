@@ -6,6 +6,8 @@ import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -38,6 +40,10 @@ public class UserSettings extends Composite implements UserSettingsView {
     Style style;
     @UiField
     SharedResources res;
+    @UiField
+    DivElement notificationsTextUi;
+    @UiField
+    DivElement tableWrapper;
     @UiField(provided = true)
     final SortedCellTable<UserSettingsEntry> userSettingsTable = new SortedCellTable<>(0, DesignedCellTableResources.INSTANCE);
     private final Column<UserSettingsEntry, String> keyColumn = new Column<UserSettingsEntry, String>(new TextCell()) {
@@ -101,8 +107,15 @@ public class UserSettings extends Composite implements UserSettingsView {
 
     @Override
     public void setEntries(List<UserSettingsEntry> entries) {
-        userSettingsTable.setPageSize(entries.size());
-        userSettingsTable.setList(entries);
+        if (entries.isEmpty()) {
+            notificationsTextUi.setInnerText(StringMessages.INSTANCE.noDataFound());
+            tableWrapper.getStyle().setDisplay(Display.NONE);
+        } else {
+            notificationsTextUi.setInnerText(StringMessages.INSTANCE.userProfileSettingsTabDescription());
+            tableWrapper.getStyle().clearDisplay();
+            userSettingsTable.setPageSize(entries.size());
+            userSettingsTable.setList(entries);
+        }
     }
 
     private static final class StringComparator extends InvertibleComparatorAdapter<UserSettingsEntry> {
