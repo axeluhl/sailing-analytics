@@ -455,6 +455,17 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         return requestedPreferences;
     }
+    
+    @Override
+    public Map<String, String> getPreferencesWithPrefix(String username, String prefix) {
+        final Map<String, String> result = new HashMap<>();
+        for(Map.Entry<String, String> entry : getSecurityService().getAllPreferences(username).entrySet()) {
+            if(entry.getKey().startsWith(prefix)) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
+    }
 
     @Override
     public String getAccessToken(String username) {

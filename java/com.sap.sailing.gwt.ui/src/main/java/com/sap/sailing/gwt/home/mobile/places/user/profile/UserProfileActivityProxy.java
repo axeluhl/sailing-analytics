@@ -23,6 +23,7 @@ public class UserProfileActivityProxy extends AbstractActivityProxy {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
+                // TODO UserProfileSettingsPlace
                 if (currentPlace instanceof UserProfilePreferencesPlace) {
                     UserProfilePreferencesPlace userProfilePrefsPlace = (UserProfilePreferencesPlace) currentPlace;
                     super.onSuccess(new UserProfilePreferencesActivity(userProfilePrefsPlace, clientFactory));
