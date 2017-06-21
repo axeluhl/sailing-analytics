@@ -28,7 +28,9 @@ public class SettingsEntryDialog extends DataEntryDialog<UserSettingsEntry> {
         boolean hasUserData = (userProfileSettings != null && !userProfileSettings.isEmpty());
         final String localSettings = entry.getLocalData();
         
-        fp.add(createTextArea(hasUserData ? userProfileSettings : localSettings));
+        TextArea textArea = createTextArea(hasUserData ? userProfileSettings : localSettings);
+        textArea.setReadOnly(true);
+        fp.add(textArea);
     }
 
     public TextArea createTextArea(final String initialValue) {
