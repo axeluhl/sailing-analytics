@@ -125,7 +125,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         
         for (Competitor competitor : masterCompetitors) {
             Competitor replicaCompetitor = findCompetitor(replicaCompetitors, competitor);
-            Boat competitorBoat = masterTrackedRace.getBoatOfCompetitor(competitor.getId());
+            Boat competitorBoat = masterTrackedRace.getBoatOfCompetitor(competitor);
             switch (competitorBoat.getSailID()) {
                 case boat1CompetitorName:
                     compareBoatOfCompetitors(masterTrackedRace.getRace().getBoatOfCompetitorById(competitor.getId()),

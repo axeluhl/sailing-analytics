@@ -873,7 +873,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Boat getBoatOfCompetitor(Serializable competitorId) {
+    public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
 }

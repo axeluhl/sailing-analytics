@@ -705,7 +705,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Boat getBoatOfCompetitor(Serializable competitorId) {
+    public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
 }

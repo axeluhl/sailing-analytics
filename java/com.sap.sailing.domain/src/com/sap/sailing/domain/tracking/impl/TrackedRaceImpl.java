@@ -1416,8 +1416,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Boat getBoatOfCompetitor(Serializable competitorId) {
-        return getRace().getBoatOfCompetitorById(competitorId);
+    public Boat getBoatOfCompetitor(Competitor competitor) {
+        return getRace().getBoatOfCompetitorById(competitor.getId());
     }
 
     @Override

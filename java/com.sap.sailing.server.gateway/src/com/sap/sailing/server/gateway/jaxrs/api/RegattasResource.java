@@ -281,7 +281,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         JSONObject jsonCompetitor = new JSONObject();
                         jsonCompetitor.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
                         jsonCompetitor.put("name", competitor.getName());
-                        jsonCompetitor.put("sailNumber", trackedRace.getBoatOfCompetitor(competitor.getId()).getSailID());
+                        jsonCompetitor.put("sailNumber", trackedRace.getBoatOfCompetitor(competitor).getSailID());
                         jsonCompetitor.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
                         if(competitor.getFlagImage() != null) {
                             jsonCompetitor.put("flagImage", competitor.getFlagImage().toString());
@@ -933,7 +933,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 CompetitorWithBoatJsonSerializer serializer = new CompetitorWithBoatJsonSerializer();
                 JSONArray result = new JSONArray();
                 for (final Competitor c : competitors) {
-                    Boat boat = trackedRace.getBoatOfCompetitor(c.getId());
+                    Boat boat = trackedRace.getBoatOfCompetitor(c);
                     JSONObject jsonCompetitor = serializer.serialize(new CompetitorAndBoatImpl(c, boat));
                     result.add(jsonCompetitor);
                 }
@@ -1206,7 +1206,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                     jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
                     jsonCompetitorInLeg.put("name", competitor.getName());
-                    jsonCompetitorInLeg.put("sailNumber", trackedRace.getBoatOfCompetitor(competitor.getId()).getSailID());
+                    jsonCompetitorInLeg.put("sailNumber", trackedRace.getBoatOfCompetitor(competitor).getSailID());
                     jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml()
                             : null);
                     jsonCompetitorInLeg.put("rank", rank++);

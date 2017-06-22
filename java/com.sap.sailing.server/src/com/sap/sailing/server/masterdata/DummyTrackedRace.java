@@ -624,7 +624,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public Boat getBoatOfCompetitor(Serializable competitorId) {
+    public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
 

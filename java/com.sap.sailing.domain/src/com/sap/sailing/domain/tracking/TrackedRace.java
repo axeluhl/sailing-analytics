@@ -710,7 +710,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     
     Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
-    Boat getBoatOfCompetitor(Serializable competitorId);
+    Boat getBoatOfCompetitor(Competitor competitor);
     
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose

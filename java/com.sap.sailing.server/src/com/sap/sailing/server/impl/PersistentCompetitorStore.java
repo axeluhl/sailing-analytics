@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Collection;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
@@ -52,10 +53,13 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
             storeTo.removeAllCompetitors();
             storeTo.removeAllBoats();
         } else {
-            for (Competitor competitor : loadFrom.loadAllCompetitors()) {
+            // TODO bug2822: How to migrate the competitors with contained boats to competitors with separate boat
+            Collection<Competitor> allCompetitors = loadFrom.loadAllCompetitors();
+            for (Competitor competitor : allCompetitors) {
                 addCompetitorToTransientStore(competitor.getId(), competitor);
             }
-            for (Boat boat: loadFrom.loadAllBoats()) {
+            Collection<Boat> allBoats = loadFrom.loadAllBoats();
+            for (Boat boat: allBoats) {
                 addBoatToTransientStore(boat.getId(), boat);
             }
         }
