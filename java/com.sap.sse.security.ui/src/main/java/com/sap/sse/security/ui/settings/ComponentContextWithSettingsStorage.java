@@ -79,15 +79,13 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     protected ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StoredSettingsLocation storageDefinition,
-            SettingsRepresentationTransformer settingsRepresentationTransformer) {
+            StoredSettingsLocation storageDefinition, SettingsRepresentationTransformer settingsRepresentationTransformer) {
         this(rootLifecycle, userService, storageDefinition, settingsRepresentationTransformer,
                 new UserSettingsBuildingPipeline(settingsRepresentationTransformer));
     }
 
     protected ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle, UserService userService,
-            StoredSettingsLocation storageDefinition,
-            SettingsRepresentationTransformer settingsRepresentationTransformer,
+            StoredSettingsLocation storageDefinition, SettingsRepresentationTransformer settingsRepresentationTransformer,
             SettingsBuildingPipeline settingsBuildingPipeline) {
         super(rootLifecycle, settingsRepresentationTransformer, settingsBuildingPipeline);
         if (IgnoreLocalSettings.getIgnoreLocalSettingsFromCurrentUrl().isIgnoreLocalSettings()) {
@@ -192,9 +190,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     /**
-     * Stores the provided {@link Settings} of the provided {@link Component} as User Settings which are
-     * context-independent. Make sure to call this method only when {@link #isStorageSupported(Component)} method
-     * returns {@code true} for the provided {@link Component}.
+     * Stores the provided {@link Settings} of the provided {@link Component} as User Settings which are context-independent. Make sure to
+     * call this method only when {@link #isStorageSupported(Component)} method returns {@code true} for the provided
+     * {@link Component}.
      * 
      * @param component
      *            The component which corresponds to the provided {@link Settings}
@@ -302,8 +300,8 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process finishes
      */
-    private <CS extends Settings> void updateUserSettings(final List<String> path, final Settings newUserSettings,
-            final CS newInstance, final OnSettingsStoredCallback onSettingsStoredCallback) {
+    private<CS extends Settings> void updateUserSettings(final List<String> path, final Settings newUserSettings, final CS newInstance,
+            final OnSettingsStoredCallback onSettingsStoredCallback) {
         settingsStorageManager.retrieveSettingsRepresentation(
                 new OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>() {
 
@@ -315,19 +313,17 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
                     @Override
                     public void onSuccess(StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
-                        StorableSettingsRepresentation newUserSettingsRepresentationOfComponent = settingsBuildingPipeline
-                                .getStorableRepresentationOfUserSettings(newUserSettings, newInstance,
-                                        cachedSettingsRepresentation, path);
-                        StorableSettingsRepresentation userSettingsRepresentationRoot = StorableSettingsRepresentation
-                                .patchSettingsRepresentation(settingsRepresentation.getUserSettingsRepresentation(),
-                                        new ArrayList<>(path), newUserSettingsRepresentationOfComponent);
-
+                        StorableSettingsRepresentation newUserSettingsRepresentationOfComponent = settingsBuildingPipeline.getStorableRepresentationOfUserSettings(newUserSettings, newInstance, path);
+                        StorableSettingsRepresentation userSettingsRepresentationRoot = StorableSettingsRepresentation.patchSettingsRepresentation(
+                                settingsRepresentation.getUserSettingsRepresentation(), new ArrayList<>(path),
+                                newUserSettingsRepresentationOfComponent);
+                        
                         cachedSettingsRepresentation = new StorableRepresentationOfDocumentAndUserSettings(
                                 userSettingsRepresentationRoot,
                                 cachedSettingsRepresentation.getDocumentSettingsRepresentation());
-
-                        StorableRepresentationOfDocumentAndUserSettings settingsRepresentationToStore = new StorableRepresentationOfDocumentAndUserSettings(
-                                userSettingsRepresentationRoot, null);
+                        
+                        StorableRepresentationOfDocumentAndUserSettings settingsRepresentationToStore = new StorableRepresentationOfDocumentAndUserSettings(userSettingsRepresentationRoot,
+                                null);
                         settingsStorageManager.storeSettingsRepresentations(settingsRepresentationToStore,
                                 onSettingsStoredCallback);
                     }
@@ -350,8 +346,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process finishes
      */
-    private <CS extends Settings> void updateDocumentSettings(final ArrayList<String> path,
-            final CS newDocumentSettings, final CS newInstance,
+    private<CS extends Settings> void updateDocumentSettings(final ArrayList<String> path, final CS newDocumentSettings, final CS newInstance,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
         settingsStorageManager.retrieveSettingsRepresentation(
                 new OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>() {
@@ -364,19 +359,17 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
                     @Override
                     public void onSuccess(StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
-                        StorableSettingsRepresentation newDocumentSettingsRepresentationOfComponent = settingsBuildingPipeline
-                                .getStorableRepresentationOfDocumentSettings(newDocumentSettings, newInstance,
-                                        cachedSettingsRepresentation, path);
-                        StorableSettingsRepresentation documentSettingsRepresentationRoot = StorableSettingsRepresentation
-                                .patchSettingsRepresentation(settingsRepresentation.getDocumentSettingsRepresentation(),
-                                        new ArrayList<>(path), newDocumentSettingsRepresentationOfComponent);
-
+                        StorableSettingsRepresentation newDocumentSettingsRepresentationOfComponent = settingsBuildingPipeline.getStorableRepresentationOfDocumentSettings(newDocumentSettings, newInstance, cachedSettingsRepresentation, path);
+                        StorableSettingsRepresentation documentSettingsRepresentationRoot = StorableSettingsRepresentation.patchSettingsRepresentation(
+                                settingsRepresentation.getDocumentSettingsRepresentation(), new ArrayList<>(path),
+                                newDocumentSettingsRepresentationOfComponent);
+                        
                         cachedSettingsRepresentation = new StorableRepresentationOfDocumentAndUserSettings(
                                 cachedSettingsRepresentation.getUserSettingsRepresentation(),
                                 documentSettingsRepresentationRoot);
-
-                        StorableRepresentationOfDocumentAndUserSettings settingsRepresentationToStore = new StorableRepresentationOfDocumentAndUserSettings(
-                                null, documentSettingsRepresentationRoot);
+                        
+                        StorableRepresentationOfDocumentAndUserSettings settingsRepresentationToStore = new StorableRepresentationOfDocumentAndUserSettings(null,
+                                documentSettingsRepresentationRoot);
                         settingsStorageManager.storeSettingsRepresentations(settingsRepresentationToStore,
                                 onSettingsStoredCallback);
                     }
@@ -393,5 +386,5 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             settingsStorageManager.dispose();
         }
     }
-
+    
 }

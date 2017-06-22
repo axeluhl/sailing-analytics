@@ -1,10 +1,8 @@
 package com.sap.sailing.manage2sail.resultimport;
 
-import java.io.IOException;
 import java.net.URL;
 
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
-import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 
@@ -12,11 +10,6 @@ public class Manage2SailResultDocumentProvider extends AbstractManage2SailResult
 
     public Manage2SailResultDocumentProvider(final ResultUrlProvider resultUrlProvider) {
         super(resultUrlProvider);
-    }
-
-    @Override
-    public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
-        return super.getResultDocumentDescriptors();
     }
 
     @Override
