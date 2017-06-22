@@ -161,7 +161,7 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
     }
 
     @Override
-    public SettingsDialogComponent<QueryRunnerSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<QueryRunnerSettings> getSettingsDialogComponent(QueryRunnerSettings settings) {
         return new QueryRunnerSettingsDialogComponent(settings, stringMessages);
     }
 

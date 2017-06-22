@@ -596,8 +596,8 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     }
 
     @Override
-    public SettingsDialogComponent<T> getSettingsDialogComponent() {
-        return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
+    public SettingsDialogComponent<T> getSettingsDialogComponent(T settings) {
+        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages);
     }
 
     @Override

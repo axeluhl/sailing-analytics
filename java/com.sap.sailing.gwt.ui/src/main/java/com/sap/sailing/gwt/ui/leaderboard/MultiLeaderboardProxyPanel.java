@@ -151,8 +151,8 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return selectedLeaderboardPanel.getSettingsDialogComponent();
+    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent(LeaderboardSettings settings) {
+        return selectedLeaderboardPanel.getSettingsDialogComponent(settings);
     }
 
     @Override

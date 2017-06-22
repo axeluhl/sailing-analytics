@@ -151,8 +151,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     @Override
-    public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent() {
-        return componentLifecycle.getSettingsDialogComponent(getSettings());
+    public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent(RaceTimePanelSettings settings) {
+        return componentLifecycle.getSettingsDialogComponent(settings);
     }
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {

@@ -46,7 +46,7 @@ public interface Component<SettingsType extends Settings> {
      * as well as to produce a result from the widget's state when the settings dialog wants to validate or return the
      * settings.
      */
-    SettingsDialogComponent<SettingsType> getSettingsDialogComponent();
+    SettingsDialogComponent<SettingsType> getSettingsDialogComponent(SettingsType useTheseSettings);
     
     /** 
      * @return the current settings of the component or {@code null} if the component has no settings.

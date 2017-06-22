@@ -226,7 +226,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 

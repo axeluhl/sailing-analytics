@@ -3261,8 +3261,8 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return new LeaderboardSettingsDialogComponent(getSettings(), leaderboard.getNamesOfRaceColumns(),
+    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent(LeaderboardSettings settings) {
+        return new LeaderboardSettingsDialogComponent(settings, leaderboard.getNamesOfRaceColumns(),
                 stringMessages);
     }
 

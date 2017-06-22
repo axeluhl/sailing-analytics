@@ -73,9 +73,13 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     }
 
     @Override
-    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
-        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(
-                getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType()),
+    public MultiCompetitorRaceChartSettings getSettings() {
+        return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
+    }
+    
+    @Override
+    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent(MultiCompetitorRaceChartSettings settings) {
+        return new MultiCompetitorRaceChartSettingsComponent(settings,
                 getStringMessages(), hasOverallLeaderboard);
     }
 
@@ -90,11 +94,6 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         }
     }
 
-    @Override
-    public MultiCompetitorRaceChartSettings getSettings() {
-        return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
-    }
-    
     @Override
     protected Component<MultiCompetitorRaceChartSettings> getComponent() {
         return this;

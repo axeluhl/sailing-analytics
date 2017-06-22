@@ -74,6 +74,13 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
                 + this.getClass().getName() + " " + component.getPath() + " " + newDefaultSettings);
     }
 
+    @Override
+    public <CS extends Settings> void resetSettingsToDefault(Component<CS> component, CS newSettings,
+            OnSettingsLoadedCallback<CS> onSettingsStoredCallback) {
+        throw new UnsupportedOperationException("Settings storage is unsupported for this type of ComponentContext "
+                + this.getClass().getName() + " " + component.getPath() + " " + newSettings);
+    }
+    
     /**
      * This operation is unsupported for this simple implementation and will throw a
      * {@link UnsupportedOperationException} when it is called.
