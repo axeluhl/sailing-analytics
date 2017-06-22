@@ -212,7 +212,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent(AbstractSettings settings) {
         return null;
     }
 

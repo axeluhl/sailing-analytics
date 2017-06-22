@@ -78,7 +78,7 @@ public interface UserManagementService extends RemoteService {
     
     Map<String, String> getPreferences(String username, List<String> keys);
     
-    Map<String, String> getPreferencesWithPrefix(String username, String prefix);
+    Map<String, String> getAllPreferences(String username);
 
     String getAccessToken(String username);
 

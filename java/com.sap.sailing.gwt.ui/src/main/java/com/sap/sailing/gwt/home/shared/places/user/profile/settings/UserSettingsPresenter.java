@@ -35,7 +35,7 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
     @Override
     public void loadData() {
         if(clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn()) {
-            clientFactory.getUserService().getPreferenceswithPrefix(SailingSettingsConstants.USER_SETTINGS_UI, new AsyncCallback<Map<String,String>>() {
+            clientFactory.getUserService().getAllPreferences(new AsyncCallback<Map<String,String>>() {
                 @Override
                 public void onSuccess(Map<String, String> result) {
                     loadSettingsFromLocalStorage(result);

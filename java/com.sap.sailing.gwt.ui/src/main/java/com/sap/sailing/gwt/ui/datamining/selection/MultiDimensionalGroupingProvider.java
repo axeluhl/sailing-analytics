@@ -254,7 +254,7 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
     }
 
     @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
         return null;
     }
 

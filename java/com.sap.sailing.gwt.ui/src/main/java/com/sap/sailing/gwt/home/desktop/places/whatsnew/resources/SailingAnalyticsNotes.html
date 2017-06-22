@@ -6,13 +6,18 @@
     <div class="innerContent">
         <h5 class="articleSubheadline">June 2017</h5>
         <ul class="bulletList">
-           <li>User settings are now saved as delta to a usage specific default. For collection based settings,
-               this means that removals and additions are being recorded instead of all values of a setting.
-               This means, user defaults and document settings will now work together in a much more clever way.
-               When loading settings, the old format is also recognized, so that formerly saved settings shouldn't be lost.
-               In addition, document settings are now being stored as delta to a user's default settings.
-           </li>
-           <li>User settings can now also be saved for <code>/gwt/RaceBoard.html</code>.
+           <li>Several improvements were implemented regarding user settings:
+               <ul>
+                    <li>Document settings are saved as delta to the user defaults instead of the delta to the system defaults.
+                        In cases where a setting has the value 'A' as system default and 'B' as user default, it's now possible to set it back to 'A' for a document.
+                        Settings stored before this change will continue to work with the old overwriting semantic.</li>
+                    <li>Collection based settings are now stored as delta to the default set of values. This means that removals and additions are being recorded instead of all values of a setting.
+                        Having value 'A' as system default and adding 'B' for the user default and 'C' for one document will select values 'A', 'B' and 'C' for the document.</li>
+                    <li>Settings dialogs now have a 'reset to default' button. When pressing this button, user defaults as well as the current document settings are being reset to the system defaults.
+                        In addition, the settings dialog is updated to show the system defaults. Those defaults will only take effect for the current view when pressing ok.</li>
+                    <li>User settings can now also be saved for <code>/gwt/RaceBoard.html</code>.</li>
+                    <li>There is now a new tab in the user profile page, listing all stored settings of the user. You can show the technical settings data and remove specific settings.</li>
+               </ul>
            </li>
         </ul>
         
@@ -26,20 +31,22 @@
         
         <h5 class="articleSubheadline">April 2017</h5>
         <ul class="bulletList">
-           <li>Several pages are now enabled to save user settings. In settings dialogs there is a "Make default"
-               button in the lower-left corner which is displayed when saving of settings is enabled. A click on that
-               button causes the system to use the new settings as default values for the same page for any other context opened, e.g. another event.
-               A click on OK button causes the system to store current settings for the current context and restore the same settings
-               when the user opens the page with the same context again unless there are specific parameters given by the URL. Settings saved this way are
-               stored locally in the browser's local storage and in the user profile if you are logged in.
-               Some settings are only valid in a specific context (e.g. the selected race columns to show are stored for a specific leaderboard only).
-               This feature required changing several URL parameters, which means that previously saved bookmarks might work slightly different.
-               Affected pages:
+           <li>Several pages are now enabled to save user settings with the following specifics:
+               <ul>
+                    <li>In settings dialogs there is a "Make default" button in the lower-left corner which is displayed when saving of settings is enabled. A click on that
+                        button causes the system to use the new settings as default values for the same page. This is independent of a race, event or leaderboard to be shown.</li>
+                    <li>A click on OK button causes the system to store the settings as document settings. Document settings are only used for the same event, leaderboard or race.
+                        When the page is opened for e.g. the same race, the settings used last time are loaded.</li>
+                    <li>Settings saved this way are stored locally in the browser's local storage and in the user profile if you are logged in.</li>
+                    <li>Settings can be overwritten by URL parameters.</li>
+               </ul>
+               The following pages are now enabled to provide user settings:
                <ul>
                     <li><code>/gwt/Leaderboard.html</code></li>
                     <li><code>/gwt/RegattaOverview.html</code></li>
                     <li>Leaderboards embedded in <code>/gwt/Home.html</code></li>
-               </ul> 
+               </ul>
+               This feature required changing several URL parameters, which means that previously saved bookmarks might work slightly different.
            </li>
            <li>The maneuver loss calculation for penalty circles has been improved. Previously, the end of the
                penalty circle maneuver was considered to be at the last of the two adjacent tack/gybe maneuvers.

@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.settings.Settings;
@@ -16,23 +17,34 @@ import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractSettingsDialog<SettingsType extends Settings> extends DataEntryDialog<SettingsType> {
-    private final SettingsDialogComponent<SettingsType> settingsDialogComponent;
+    private SettingsDialogComponent<SettingsType> settingsDialogComponent;
 
     private LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator;
     private ShareLinkAnchor shareAnchor;
+
+    private SimplePanel sp;
     
     protected AbstractSettingsDialog(final String shortName, SettingsDialogComponent<SettingsType> dialogComponent,
             StringMessages stringMessages, boolean animationEnabled, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator, final DialogCallback<SettingsType> callback) {
         super(stringMessages.settingsForComponent(shortName), null, stringMessages.ok(), stringMessages.cancel(),
                 dialogComponent.getValidator(), animationEnabled, callback != null ? callback : new NoOpDialogCallback<SettingsType>());
         this.settingsDialogComponent = dialogComponent;
-        
+        sp =  new SimplePanel();
         this.linkWithSettingsGenerator = linkWithSettingsGenerator;
         if(linkWithSettingsGenerator != null) {
             shareAnchor = new ShareLinkAnchor(stringMessages.sharedSettingsLink(), getLeftButtonPannel());
             shareAnchor.setEnabled(true);
             Scheduler.get().scheduleDeferred(() -> onChange(getResult()));
         }
+        
+        sp.setWidget(dialogComponent.getAdditionalWidget(this));
+    }
+    
+    void setDialogComponent(SettingsDialogComponent<SettingsType> dialog){
+        sp.setWidget(dialog.getAdditionalWidget(this));
+        settingsDialogComponent = dialog;
+        setValidator(dialog.getValidator());
+        validateAndUpdate();
     }
     
     @Override
@@ -53,7 +65,7 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
 
     @Override
     protected Widget getAdditionalWidget() {
-        return settingsDialogComponent.getAdditionalWidget(this);
+        return sp;
     }
 
     @Override
@@ -74,6 +86,7 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
 
         private ShareLinkAnchor(String anchorText, FlowPanel parent) {
             this.container.getElement().getStyle().setMargin(0.5, Unit.EM);
+            this.container.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
             this.anchor = createEnabledAnchor(anchorText);
             this.placeholder = createDisabledPlaceholder(anchorText);
             container.add(anchor);

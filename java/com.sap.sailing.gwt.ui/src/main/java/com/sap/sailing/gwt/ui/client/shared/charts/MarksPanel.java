@@ -136,7 +136,7 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent(AbstractSettings settings) {
         return null;
     }
 

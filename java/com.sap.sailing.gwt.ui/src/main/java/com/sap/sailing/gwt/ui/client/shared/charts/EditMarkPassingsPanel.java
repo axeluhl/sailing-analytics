@@ -460,7 +460,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent(AbstractSettings settings) {
         return null;
     }
 

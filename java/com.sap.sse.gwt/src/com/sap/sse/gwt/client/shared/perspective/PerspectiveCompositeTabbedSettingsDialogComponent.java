@@ -159,7 +159,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
 
     private <SettingsType extends Settings> ComponentIdWithSettingsAndDialogComponent<SettingsType> createComponentAndDialogComponent(Component<SettingsType> component) {
         return new ComponentIdWithSettingsAndDialogComponent<SettingsType>(component.getLocalizedShortName(), component.getId(), component.getSettings(),
-                component.getSettingsDialogComponent());
+                component.getSettingsDialogComponent(component.getSettings()));
     }
     
     private PS getPerspectiveOwnSettings(PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveAndDialog) {

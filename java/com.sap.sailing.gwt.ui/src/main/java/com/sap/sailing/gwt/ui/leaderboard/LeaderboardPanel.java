@@ -660,8 +660,8 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
         if (newSettings.getOverallDetailsToShow() != null) {
-            selectedOverallDetailColumns.clear();
-            selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
+                    selectedOverallDetailColumns);
         }
 
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
@@ -685,16 +685,19 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             }
         }
         if (newSettings.getManeuverDetailsToShow() != null) {
-            selectedManeuverDetails.clear();
-            selectedManeuverDetails.addAll(newSettings.getManeuverDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getManeuverDetailsToShow(),
+                    ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
         }
         if (newSettings.getLegDetailsToShow() != null) {
-            selectedLegDetails.clear();
-            selectedLegDetails.addAll(newSettings.getLegDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getLegDetailsToShow(), LegColumn.getAvailableLegDetailColumnTypes(),
+                    selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
-            selectedRaceDetails.clear();
-            selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
+            List<DetailType> allRaceDetailsTypes = new ArrayList<>();
+            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceDetailColumnTypes()));
+            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceStartAnalysisColumnTypes()));
+            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), allRaceDetailsTypes.toArray(new DetailType[allRaceDetailsTypes.size()]),
+                    selectedRaceDetails);
         }
 
         addBusyTask();
@@ -781,6 +784,13 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         } else { // meaning that now the details need to be loaded from the server
             updateLeaderboardAndRun(doWhenNecessaryDetailHasBeenLoaded);
         }
+    }
+
+    private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet,
+            DetailType[] referenceOrder, List<DetailType> collectionToSetValuesTo) {
+        collectionToSetValuesTo.clear();
+        collectionToSetValuesTo.addAll(Arrays.asList(referenceOrder));
+        collectionToSetValuesTo.retainAll(valuesToSet);
     }
 
     /**
@@ -3254,8 +3264,8 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return new LeaderboardSettingsDialogComponent(getSettings(), leaderboard.getNamesOfRaceColumns(),
+    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent(LeaderboardSettings settings) {
+        return new LeaderboardSettingsDialogComponent(settings, leaderboard.getNamesOfRaceColumns(),
                 stringMessages);
     }
 

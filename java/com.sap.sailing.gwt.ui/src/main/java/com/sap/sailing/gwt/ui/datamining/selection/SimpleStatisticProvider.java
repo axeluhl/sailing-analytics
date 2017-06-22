@@ -274,7 +274,7 @@ public class SimpleStatisticProvider extends AbstractComponent<SerializableSetti
     }
 
     @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
         return null;
     }
 
