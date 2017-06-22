@@ -88,7 +88,8 @@ public class AnchorDataMiningSettingsControl extends AbstractComponent<Composite
     }
 
     @Override
-    public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent() {
+    //FIXME why does this not use a perspective? 
+    public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent(CompositeSettings settings) {
         return new CompositeTabbedSettingsDialogComponent(components);
     }
 

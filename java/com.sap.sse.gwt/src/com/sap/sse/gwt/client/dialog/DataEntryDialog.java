@@ -59,7 +59,7 @@ import com.sap.sse.gwt.client.controls.IntegerBox;
  */
 public abstract class DataEntryDialog<T> {
     private final DialogBox dateEntryDialog;
-    private final Validator<T> validator;
+    private Validator<T> validator;
     private final Button okButton;
     private final Button cancelButton;
     private final Label statusLabel;
@@ -159,6 +159,10 @@ public abstract class DataEntryDialog<T> {
                 callback.ok(getResult());
             }
         });
+    }
+    
+    public void setValidator(Validator<T> validator) {
+        this.validator = validator;
     }
     
     protected boolean validateAndUpdate() {
@@ -597,7 +601,7 @@ public abstract class DataEntryDialog<T> {
             Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});
         }
     }
-
+    
     /**
      * Defines the {@link #okButton} as the default initial focus widget. Subclasses may redefine. Return
      * {@code null} to not set the focus on any widget.

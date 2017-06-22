@@ -74,7 +74,7 @@ public class StorableSettingsRepresentation {
     public static StorableSettingsRepresentation patchSettingsRepresentation(StorableSettingsRepresentation root,
             List<String> path, StorableSettingsRepresentation newSettings) {
         JSONObject patchedSettingsJsonRepresentation = patchJsonObject(root == null ? null : root.asJson(), path,
-                Collections.unmodifiableList(new ArrayList<>(path)), newSettings.asJson());
+                Collections.unmodifiableList(new ArrayList<>(path)), newSettings==null?null:newSettings.asJson());
         return new StorableSettingsRepresentation(patchedSettingsJsonRepresentation);
     }
     
@@ -105,6 +105,10 @@ public class StorableSettingsRepresentation {
             if (child == null || child.isObject() == null) {
                 if (haskey) {
                     GWT.log("Warning: replacing some subtree element that is wrong type!");
+                }
+                if(newSettings == null){
+                    //no need to create tree, if we only want to remove settings!
+                    return null;
                 }
                 child = new JSONObject();
                 root.put(current, child);

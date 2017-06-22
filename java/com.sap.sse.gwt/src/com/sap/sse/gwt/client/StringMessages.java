@@ -29,4 +29,8 @@ public interface StringMessages extends Messages {
     String pleaseSelect();
 
     String sharedSettingsLink();
+    String resetToDefault();
+    String resetToDefaultInProgress();
+    String settingsRemoved();
+    String settingsRemovedError();
 }

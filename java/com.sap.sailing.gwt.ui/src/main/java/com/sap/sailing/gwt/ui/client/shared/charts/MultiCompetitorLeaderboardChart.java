@@ -36,14 +36,13 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
 
     @Override
     public MultiCompetitorLeaderboardChartSettings getSettings() {
-        return settings;
+        return MultiCompetitorLeaderboardChartSettings
+                .createWithDefaultDetailType(isOverall, settings.getDetailType());
     }
     
     @Override
-    public SettingsDialogComponent<MultiCompetitorLeaderboardChartSettings> getSettingsDialogComponent() {
-        MultiCompetitorLeaderboardChartSettings chartSettings = MultiCompetitorLeaderboardChartSettings
-                .createWithDefaultDetailType(isOverall, settings.getDetailType());
-        return new MultiCompetitorLeaderboardChartSettingsDialogComponent(chartSettings, isOverall);
+    public SettingsDialogComponent<MultiCompetitorLeaderboardChartSettings> getSettingsDialogComponent(MultiCompetitorLeaderboardChartSettings settings) {
+        return new MultiCompetitorLeaderboardChartSettingsDialogComponent(settings, isOverall);
     }
 
     @Override

@@ -230,7 +230,59 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(path),
                 rootLifecycle);
         CS documentSettings = targetLifecycle.extractDocumentSettings(newSettings);
-        updateDocumentSettings(component.getPath(), documentSettings, targetLifecycle.createDefaultSettings(), onSettingsStoredCallback);
+        updateDocumentSettings(component.getPath(), documentSettings, targetLifecycle.createDefaultSettings(),
+                onSettingsStoredCallback);
+    }
+
+    @Override
+    public <CS extends Settings> void resetSettingsToDefault(Component<CS> component, CS newSettings,
+            OnSettingsLoadedCallback<CS> onSettingsStoredCallback) {
+        List<String> path = component.getPath();
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(path),
+                rootLifecycle);
+        removeGlobalAndContextSettings(path, targetLifecycle, new OnSettingsStoredCallback() {
+            
+            @Override
+            public void onSuccess() {
+                getInitialSettingsForComponent(component, onSettingsStoredCallback);                
+            }
+            
+            @Override
+            public void onError(Throwable caught) {
+                onSettingsStoredCallback.onError(caught, targetLifecycle.createDefaultSettings());
+            }
+        });
+       
+    }
+
+    private void removeGlobalAndContextSettings(List<String> path, ComponentLifecycle<?> targetLifecycle,
+            OnSettingsStoredCallback onSettingsStoredCallback) {
+        settingsStorageManager.retrieveSettingsRepresentation(
+                new OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>() {
+
+                    @Override
+                    public void onError(Throwable caught,
+                            StorableRepresentationOfDocumentAndUserSettings fallbackDefaultSettings) {
+                        onSettingsStoredCallback.onError(caught);
+                    }
+
+                    @Override
+                    public void onSuccess(StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
+                        StorableSettingsRepresentation documentSettingsRepresentationRoot = StorableSettingsRepresentation
+                                .patchSettingsRepresentation(settingsRepresentation.getDocumentSettingsRepresentation(),
+                                        new ArrayList<>(path), null);
+
+                        StorableSettingsRepresentation userSettingsRepresentationRoot = StorableSettingsRepresentation
+                                .patchSettingsRepresentation(settingsRepresentation.getUserSettingsRepresentation(),
+                                        new ArrayList<>(path), null);
+
+                        StorableRepresentationOfDocumentAndUserSettings settingsRepresentationToStore = new StorableRepresentationOfDocumentAndUserSettings(
+                                userSettingsRepresentationRoot, documentSettingsRepresentationRoot);
+                        cachedSettingsRepresentation = settingsRepresentationToStore;
+                        settingsStorageManager.storeSettingsRepresentations(settingsRepresentationToStore,
+                                onSettingsStoredCallback);
+                    }
+                });
     }
 
     /**
