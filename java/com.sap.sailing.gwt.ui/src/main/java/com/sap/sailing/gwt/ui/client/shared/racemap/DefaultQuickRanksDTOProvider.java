@@ -1,24 +1,29 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.gwt.ui.raceboard.AbstractQuickRanksDTOProvider;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sse.common.Util;
 
 public class DefaultQuickRanksDTOProvider extends AbstractQuickRanksDTOProvider {
-    private LinkedHashMap<String, QuickRankDTO> quickRanksFromServer;
+    private Map<String, QuickRankDTO> quickRanksFromServer;
     
     @Override
-    public void quickRanksReceivedFromServer(LinkedHashMap<String, QuickRankDTO> quickRanksFromServer) {
+    public void quickRanksReceivedFromServer(Map<String, QuickRankDTO> quickRanksFromServer) {
+        final Map<String, QuickRankDTO> oldQuickRanksFromServer = quickRanksFromServer;
         this.quickRanksFromServer = quickRanksFromServer;
         for (final Entry<String, QuickRankDTO> e : quickRanksFromServer.entrySet()) {
-            notifyListeners(e.getKey(), e.getValue());
+            final QuickRankDTO oldQuickRank = oldQuickRanksFromServer.get(e.getKey());
+            if (Util.equalsWithNull(oldQuickRank, e.getValue())) {
+                notifyListeners(e.getKey(), oldQuickRank, e.getValue());
+            }
         }
     }
 
     @Override
-    public LinkedHashMap<String, QuickRankDTO> getQuickRanks() {
+    public Map<String, QuickRankDTO> getQuickRanks() {
         return quickRanksFromServer;
     }
 
