@@ -288,7 +288,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 

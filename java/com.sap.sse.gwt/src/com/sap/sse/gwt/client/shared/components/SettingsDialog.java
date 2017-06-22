@@ -8,28 +8,33 @@ import com.google.gwt.user.client.ui.Button;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
 
 public class SettingsDialog<SettingsType extends Settings> extends AbstractSettingsDialog<SettingsType> {
-    
+
     private Button makeDefaultButton;
+    private Button resetDefault;
 
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages) {
         this(component, stringMessages, /* animationEnabled */ true, null);
     }
-    
-    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator) {
+
+    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages,
+            LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator) {
         this(component, stringMessages, /* animationEnabled */ true, linkWithSettingsGenerator);
     }
-    
+
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages,
             boolean animationEnabled, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator) {
-        this(component, component.getSettingsDialogComponent(), stringMessages, animationEnabled, linkWithSettingsGenerator, null);
+        this(component, component.getSettingsDialogComponent(component.getSettings()), stringMessages, animationEnabled,
+                linkWithSettingsGenerator, null);
     }
 
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages,
             DialogCallback<SettingsType> callback) {
-        this(component, component.getSettingsDialogComponent(), stringMessages, /* animationEnabled */ true, null, callback);
+        this(component, component.getSettingsDialogComponent(component.getSettings()), stringMessages, /* animationEnabled */ true, null,
+                callback);
     }
 
     /**
@@ -58,12 +63,12 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
      */
     private SettingsDialog(final Component<SettingsType> component,
             SettingsDialogComponent<SettingsType> dialogComponent, StringMessages stringMessages,
-            boolean animationEnabled, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator, final DialogCallback<SettingsType> callback) {
-        super(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled, linkWithSettingsGenerator,
-                new SettingsDialogCallback<>(component, callback));
+            boolean animationEnabled, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator,
+            final DialogCallback<SettingsType> callback) {
+        super(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled,
+                linkWithSettingsGenerator, new SettingsDialogCallback<>(component, callback));
 
-        if (component.getComponentContext() != null
-                && component.getComponentContext().isStorageSupported(component)) {
+        if (component.getComponentContext() != null && component.getComponentContext().isStorageSupported(component)) {
             initMakeDefaultButtons(component, stringMessages);
         }
     }
@@ -75,72 +80,107 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
         getLeftButtonPannel().add(makeDefaultButton);
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                setButtonSavingState(true);
-                component.getComponentContext().makeSettingsDefault(component, getResult(), new OnSettingsStoredCallback() {
-                    
-                    @Override
-                    public void onSuccess() {
-                        setButtonSavingState(false);
-                        Window.alert(stringMessages.settingsSavedMessage());
-                    }
-                    
-                    @Override
-                    public void onError(Throwable caught) {
-                        setButtonSavingState(false);
-                        Window.alert(stringMessages.settingsSaveErrorMessage());
-                    }
-                    
-                    
-                });
-            }
-            
-            private void setButtonSavingState(boolean savingState) {
-                if(savingState) {
-                    makeDefaultButton.setEnabled(false);
-                    makeDefaultButton.setText(stringMessages.makeDefaultInProgress());
-                } else {
-                    makeDefaultButton.setEnabled(true);
-                    makeDefaultButton.setText(stringMessages.makeDefault());
-                }
+                setButtonSavingState(true, stringMessages);
+                component.getComponentContext().makeSettingsDefault(component, getResult(),
+                        new OnSettingsStoredCallback() {
+
+                            @Override
+                            public void onSuccess() {
+                                setButtonSavingState(false, stringMessages);
+                                Window.alert(stringMessages.settingsSavedMessage());
+                            }
+
+                            @Override
+                            public void onError(Throwable caught) {
+                                setButtonSavingState(false, stringMessages);
+                                Window.alert(stringMessages.settingsSaveErrorMessage());
+                            }
+
+                        });
             }
         });
+        resetDefault = new Button(stringMessages.resetToDefault());
+        resetDefault.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                component.getComponentContext().resetSettingsToDefault(component, getResult(),
+                        new OnSettingsLoadedCallback<SettingsType>() {
+
+                            @Override
+                            public void onError(Throwable caught, SettingsType fallbackDefaultSettings) {
+                                setButtonSavingState(false, stringMessages);
+                                onChange(fallbackDefaultSettings);
+                                Window.alert(stringMessages.settingsRemovedError());
+                            }
+
+                            @Override
+                            public void onSuccess(SettingsType settings) {
+                                setButtonSavingState(false, stringMessages);
+                                setDialogComponent(component.getSettingsDialogComponent(settings));
+                                
+                                Window.alert(stringMessages.settingsRemoved());
+                            }
+                        });
+            }
+
+        });
+        resetDefault.getElement().getStyle().setMargin(3, Unit.PX);
+        resetDefault.ensureDebugId("ResetToDefaultButton");
+        getLeftButtonPannel().add(resetDefault);
     }
-    
+
+    private void setButtonSavingState(boolean savingState, StringMessages stringMessages) {
+        if (savingState) {
+            makeDefaultButton.setEnabled(false);
+            makeDefaultButton.setText(stringMessages.makeDefaultInProgress());
+            resetDefault.setEnabled(false);
+            resetDefault.setText(stringMessages.resetToDefaultInProgress());
+        } else {
+            makeDefaultButton.setEnabled(true);
+            makeDefaultButton.setText(stringMessages.makeDefault());
+            resetDefault.setEnabled(true);
+            resetDefault.setText(stringMessages.resetToDefault());
+        }
+    }
+
     @Override
     protected void onInvalidStateChanged(boolean invalidState) {
         super.onInvalidStateChanged(invalidState);
-        if(makeDefaultButton != null) {
+        if (makeDefaultButton != null) {
             makeDefaultButton.setEnabled(!invalidState);
         }
     }
-    
+
     private static class SettingsDialogCallback<SettingsType extends Settings> implements DialogCallback<SettingsType> {
-        
+
         private final DialogCallback<SettingsType> nestedCallback;
         private final Component<SettingsType> component;
-        
+
         public SettingsDialogCallback(Component<SettingsType> component, DialogCallback<SettingsType> nestedCallback) {
             this.component = component;
             this.nestedCallback = nestedCallback;
         }
-        
+
         @Override
         public void ok(SettingsType editedSettings) {
             if (component.getComponentContext() != null
                     && component.getComponentContext().isStorageSupported(component)) {
-                component.getComponentContext().storeSettingsForContext(component, editedSettings, new DummyOnSettingsStoredCallback());
+                component.getComponentContext().storeSettingsForContext(component, editedSettings,
+                        new DummyOnSettingsStoredCallback());
             }
             component.updateSettings(editedSettings);
-            if(nestedCallback != null) {
+            if (nestedCallback != null) {
                 nestedCallback.ok(editedSettings);
             }
         }
+
         @Override
         public void cancel() {
-            if(nestedCallback != null) {
+            if (nestedCallback != null) {
                 nestedCallback.cancel();
             }
         }
     }
-    
+
 }

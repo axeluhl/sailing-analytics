@@ -218,7 +218,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     }
 
     @Override
-    public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent(CompositeSettings settings) {
         retrieverLevelSettingsComponents.clear();
         retrieverLevelSettingsComponents.addAll(createSettingsComponentsFor(getDataRetrieverChainDefinition()));
         return new CompositeTabbedSettingsDialogComponent(retrieverLevelSettingsComponents);
@@ -234,7 +234,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
                     getComponentContext(),
                     retrieverLevel, settingsInfo.getId(), settingsInfo.getLocalizedName(stringMessages)) {
                 @Override
-                public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+                public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
                     return settingsManager.getSettingsInfo(settingsType).createSettingsDialogComponent(settingsMap.get(retrieverChain).get(retrieverLevel));
                 }
                 @Override
@@ -278,7 +278,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
                     settingsInfo.getId(),
                     settingsInfo.getLocalizedName(stringMessages)) {
                 @Override
-                public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+                public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
                     return null;
                 }
                 @Override

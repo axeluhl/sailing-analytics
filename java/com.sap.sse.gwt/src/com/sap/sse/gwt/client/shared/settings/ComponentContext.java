@@ -123,4 +123,10 @@ public interface ComponentContext<S extends Settings> {
      */
     void dispose();
 
+    /**
+     * Removes usersettings onrequest
+     */
+    <CS extends Settings> void resetSettingsToDefault(Component<CS> component, CS newSettings,
+            OnSettingsLoadedCallback<CS> onSettingsStoredCallback);
+
 }

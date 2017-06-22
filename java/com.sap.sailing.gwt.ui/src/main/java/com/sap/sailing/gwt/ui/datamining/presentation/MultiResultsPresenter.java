@@ -143,7 +143,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 

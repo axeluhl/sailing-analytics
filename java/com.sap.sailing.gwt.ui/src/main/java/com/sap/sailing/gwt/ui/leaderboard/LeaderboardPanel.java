@@ -715,7 +715,10 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
                     selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), getAvailableRaceDetailColumnTypes(),
+            List<DetailType> allRaceDetailsTypes = new ArrayList<>();
+            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceDetailColumnTypes()));
+            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceStartAnalysisColumnTypes()));
+            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), allRaceDetailsTypes.toArray(new DetailType[allRaceDetailsTypes.size()]),
                     selectedRaceDetails);
         }
 
@@ -3406,8 +3409,8 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return new LeaderboardSettingsDialogComponent(getSettings(), leaderboard.getNamesOfRaceColumns(),
+    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent(LeaderboardSettings settings) {
+        return new LeaderboardSettingsDialogComponent(settings, leaderboard.getNamesOfRaceColumns(),
                 stringMessages);
     }
 

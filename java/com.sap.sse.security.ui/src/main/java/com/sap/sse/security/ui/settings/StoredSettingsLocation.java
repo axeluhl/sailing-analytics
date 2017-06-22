@@ -12,6 +12,8 @@ import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
  */
 public class StoredSettingsLocation {
 
+    public static final String DOCUMENT_SETTINGS_SUFFIX_SEPARATOR = "#";
+
     private final String PREFIX;
 
     private final String userSettingsIdPart;
@@ -53,7 +55,7 @@ public class StoredSettingsLocation {
      * @return Storage key for Document Settings
      */
     public String generateStorageKeyForDocumentSettings() {
-        return generateStorageKeyForUserSettings() + "#" + documentSettingsIdPart;
+        return generateStorageKeyForUserSettings() + DOCUMENT_SETTINGS_SUFFIX_SEPARATOR + documentSettingsIdPart;
     }
 
     /**

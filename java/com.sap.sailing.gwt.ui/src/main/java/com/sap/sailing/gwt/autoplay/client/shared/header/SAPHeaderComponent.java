@@ -56,7 +56,7 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
     }
     
     @Override
-    public SAPHeaderComponentSettingsDialogComponent getSettingsDialogComponent() {
+    public SAPHeaderComponentSettingsDialogComponent getSettingsDialogComponent(SAPHeaderComponentSettings settings) {
         return componentLifecycle.getSettingsDialogComponent(settings);
     }
     

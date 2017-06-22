@@ -1819,4 +1819,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String selectCompetitorsToEliminate();
     String trackedRaceAlreadyLinked();
     String noData();
+    String settingsId();
+    String documentSettingsId();
+    String settingsForId(String id);
+    String userProfileSettingsTabDescription();
 }

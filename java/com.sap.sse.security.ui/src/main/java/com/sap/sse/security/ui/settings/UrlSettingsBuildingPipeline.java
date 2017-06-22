@@ -56,7 +56,7 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
      * representation, because it is supposed to be used by read-only {@link ComponentContext} implementations.
      */
     @Override
-    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings, CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
+    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings, CS newInstance, List<String> path) {
         throw new UnsupportedOperationException("This pipeline does not support JSON conversion");
     }
     

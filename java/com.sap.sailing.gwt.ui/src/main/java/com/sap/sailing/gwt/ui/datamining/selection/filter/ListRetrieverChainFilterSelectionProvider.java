@@ -328,7 +328,7 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     }
 
     @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
         return null;
     }
 

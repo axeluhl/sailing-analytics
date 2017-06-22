@@ -431,7 +431,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     }
 
     @Override
-    public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent(WindChartSettings settings) {
         return windChartLifecycle.getSettingsDialogComponent(settings);
     }
 

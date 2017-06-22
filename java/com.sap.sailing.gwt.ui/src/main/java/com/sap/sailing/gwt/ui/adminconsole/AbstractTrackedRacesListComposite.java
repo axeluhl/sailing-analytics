@@ -435,7 +435,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
 
     @Override
-    public SettingsDialogComponent<TrackedRacesSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<TrackedRacesSettings> getSettingsDialogComponent(TrackedRacesSettings settings) {
         return new TrackedRacesSettingsDialogComponent<TrackedRacesSettings>(settings, stringMessages);
     }
 

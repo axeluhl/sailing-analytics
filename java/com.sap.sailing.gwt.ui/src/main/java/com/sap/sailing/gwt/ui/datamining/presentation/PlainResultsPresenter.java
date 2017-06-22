@@ -134,7 +134,7 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 
