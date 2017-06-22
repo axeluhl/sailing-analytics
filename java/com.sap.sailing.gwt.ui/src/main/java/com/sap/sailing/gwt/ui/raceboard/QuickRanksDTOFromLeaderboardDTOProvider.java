@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -25,7 +27,7 @@ import com.sap.sse.common.Util;
  *
  */
 public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksDTOProvider {
-    private LinkedHashMap<String, QuickRankDTO> quickRanks;
+    private Map<String, QuickRankDTO> quickRanks;
     private final RaceCompetitorSet raceCompetitorSet;
     private final RaceIdentifier selectedRace;
     private boolean lastLeaderboardProvidedLegNumbers;
@@ -37,12 +39,12 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
     }
 
     @Override
-    public void quickRanksReceivedFromServer(LinkedHashMap<String, QuickRankDTO> quickRanksFromServer) {
+    public void quickRanksReceivedFromServer(Map<String, QuickRankDTO> quickRanksFromServer) {
         if (quickRanks == null) {
-            quickRanks = new LinkedHashMap<>();
+            quickRanks = new HashMap<>();
             for (final Entry<String, QuickRankDTO> e : quickRanksFromServer.entrySet()) {
                 quickRanks.put(e.getKey(), e.getValue());
-                notifyListeners(e.getKey(), e.getValue());
+                notifyListeners(e.getKey(), /* oldQuickRank */ null, e.getValue());
             }
         } else if (!lastLeaderboardProvidedLegNumbers) {
             // extract at least the leg numbers and update existing quick ranks accordingly in place
@@ -68,8 +70,10 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
             if (competitorsFromBestToWorst.isEmpty()) {
                 for (CompetitorDTO c : leaderboard.competitors) {
                     final QuickRankDTO quickRank = new QuickRankDTO(c, /* oneBasedRank */ 0, /* leg number ignored */ 0);
-                    quickRanks.put(c.getIdAsString(), quickRank);
-                    notifyListeners(c.getIdAsString(), quickRank);
+                    QuickRankDTO oldQuickRank = quickRanks.put(c.getIdAsString(), quickRank);
+                    if (Util.equalsWithNull(oldQuickRank, quickRank)) {
+                        notifyListeners(c.getIdAsString(), oldQuickRank, quickRank);
+                    }
                 }
             } else {
                 int oneBasedRank = 1;
@@ -93,13 +97,14 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
                         if (quickRankToUpdate == null) {
                             final QuickRankDTO quickRankDTO = new QuickRankDTO(c, oneBasedRank, oneBasedLegNumber);
                             quickRanks.put(c.getIdAsString(), quickRankDTO);
-                            notifyListeners(c.getIdAsString(), quickRankDTO);
+                            notifyListeners(c.getIdAsString(), /* oldQuickRank */ null, quickRankDTO);
                         } else {
+                            final QuickRankDTO oldQuickRank = new QuickRankDTO(quickRankToUpdate.competitor, quickRankToUpdate.oneBasedRank, quickRankToUpdate.legNumberOneBased);
                             quickRankToUpdate.oneBasedRank = oneBasedRank;
                             if (lastLeaderboardProvidedLegNumbers) {
                                 quickRankToUpdate.legNumberOneBased = oneBasedLegNumber;
                             }
-                            notifyListeners(c.getIdAsString(), quickRankToUpdate);
+                            notifyListeners(c.getIdAsString(), oldQuickRank, quickRankToUpdate);
                         }
                         oneBasedRank++;
                     }
@@ -118,7 +123,7 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
     }
 
     @Override
-    public LinkedHashMap<String, QuickRankDTO> getQuickRanks() {
+    public Map<String, QuickRankDTO> getQuickRanks() {
         return quickRanks;
     }
 }

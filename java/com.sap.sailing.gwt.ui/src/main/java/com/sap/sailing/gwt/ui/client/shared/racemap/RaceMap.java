@@ -100,6 +100,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.QuickRanksDTOProvider.QuickRanksListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
@@ -408,6 +409,24 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
     
+    /**
+     * The competitor for which the advantage line is currently showing. Should this competitor's quick rank change, or
+     * should ranks be received while this field is {@code null}, the advantage line
+     * {@link #showAdvantageLine(Iterable, Date, long)} drawing procedure} needs to be triggered.
+     */
+    private CompetitorDTO advantageLineCompetitor;
+
+    private class AdvantageLineUpdater implements QuickRanksListener {
+        @Override
+        public void rankChanged(String competitorIdAsString, QuickRankDTO oldQuickRank, QuickRankDTO quickRank) {
+            if (advantageLineCompetitor == null ||
+                    (oldQuickRank != null && advantageLineCompetitor.getIdAsString().equals(oldQuickRank.competitor.getIdAsString())) ||
+                    (quickRank != null && advantageLineCompetitor.getIdAsString().equals(quickRank.competitor.getIdAsString()))) {
+                showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
+            }
+        }
+    }
+    
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -433,6 +452,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
         competitorInfoOverlays = new CompetitorInfoOverlays(this, stringMessages);
         quickRanksDTOProvider.addQuickRanksListener(competitorInfoOverlays);
+        quickRanksDTOProvider.addQuickRanksListener(new AdvantageLineUpdater());
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
         courseMarkClickHandlers = new HashMap<String, HandlerRegistration>();
@@ -1358,21 +1378,27 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     /**
      * Returns a pair whose first component is the leg number (one-based) of the competitor returned as the second component.
+     * The competitor returned currently has the best ranking in the quick ranks provided by the {@link #quickRanksDTOProvider}.
      */
     private com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> getBestVisibleCompetitorWithOneBasedLegNumber(
             Iterable<CompetitorDTO> competitorsToShow) {
         CompetitorDTO leadingCompetitorDTO = null;
         int legOfLeaderCompetitor = -1;
-        // this only works because the quickRanks are sorted
+        int bestOneBasedRank = Integer.MAX_VALUE;
         for (QuickRankDTO competitorFromBestToWorstAndOneBasedLegNumber : quickRanksDTOProvider.getQuickRanks().values()) {
             if (Util.contains(competitorsToShow, competitorFromBestToWorstAndOneBasedLegNumber.competitor) && 
-                    competitorFromBestToWorstAndOneBasedLegNumber.legNumberOneBased != 0) {
+                    competitorFromBestToWorstAndOneBasedLegNumber.legNumberOneBased != 0 &&
+                    competitorFromBestToWorstAndOneBasedLegNumber.oneBasedRank < bestOneBasedRank) {
                 leadingCompetitorDTO = competitorFromBestToWorstAndOneBasedLegNumber.competitor;
                 legOfLeaderCompetitor = competitorFromBestToWorstAndOneBasedLegNumber.legNumberOneBased;
-                return new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
+                bestOneBasedRank = competitorFromBestToWorstAndOneBasedLegNumber.oneBasedRank;
+                if (bestOneBasedRank == 1) {
+                    break; // as good as it gets
+                }
             }
         }
-        return null;
+        return leadingCompetitorDTO == null ? null :
+            new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
     }
 
     final static Distance advantageLineLength = new MeterDistance(1000); // TODO this should probably rather scale with the visible area of the map; bug 616
@@ -1481,6 +1507,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             }
                         }
                         drawAdvantageLine = true;
+                    advantageLineCompetitor = visibleLeaderInfo.getB();
                     }
                    
                 }
