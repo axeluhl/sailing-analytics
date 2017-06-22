@@ -48,8 +48,7 @@ public interface SettingsBuildingPipeline {
      * @return The storable settings representation of provided settings as User Settings
      */
     <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings,
-            CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation,
-            List<String> path);
+            CS newInstance, List<String> path);
 
     /**
      * Converts the provided settings according to storable settings representation for Document Settings. This method

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
@@ -31,9 +32,9 @@ public class LeaderboardSettingsFactory {
     public LeaderboardSettings createNewSettingsWithCustomRaceDetails(List<DetailType> raceDetailsToShow) {
         LeaderboardSettings defaultSettings = new LeaderboardSettings();
         return new LeaderboardSettings(
-                Util.cloneListOrNull(defaultSettings.getManeuverDetailsToShow()),
-                Util.cloneListOrNull(defaultSettings.getLegDetailsToShow()),
-                raceDetailsToShow, Util.cloneListOrNull(defaultSettings.getOverallDetailsToShow()),
+                defaultSettings.getManeuverDetailsToShow(),
+                defaultSettings.getLegDetailsToShow(),
+                raceDetailsToShow, defaultSettings.getOverallDetailsToShow(),
                 Util.cloneListOrNull(defaultSettings.getNamesOfRaceColumnsToShow()),
                 Util.cloneListOrNull(defaultSettings.getNamesOfRacesToShow()),
                 defaultSettings.getNumberOfLastRacesToShow(),
@@ -51,9 +52,9 @@ public class LeaderboardSettingsFactory {
     
     public LeaderboardSettings createSettingsWithCustomExpandPreselectedRaceState(LeaderboardSettings settings, boolean expandPreselectedRace) {
         return new LeaderboardSettings(
-                Util.cloneListOrNull(settings.getManeuverDetailsToShow()),
-                Util.cloneListOrNull(settings.getLegDetailsToShow()),
-                settings.getRaceDetailsToShow(), Util.cloneListOrNull(settings.getOverallDetailsToShow()),
+                settings.getManeuverDetailsToShow(),
+                settings.getLegDetailsToShow(),
+                settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
                 Util.cloneListOrNull(settings.getNamesOfRaceColumnsToShow()),
                 Util.cloneListOrNull(settings.getNamesOfRacesToShow()),
                 settings.getNumberOfLastRacesToShow(), expandPreselectedRace,
@@ -76,10 +77,10 @@ public class LeaderboardSettingsFactory {
     }
     
     private LeaderboardSettings mergeLeaderboardSettingsHelper(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
-        List<DetailType> maneuverDetails = copyDetailTypes(settingsWithDetails.getManeuverDetailsToShow());
-        List<DetailType> legDetails = copyDetailTypes(settingsWithDetails.getLegDetailsToShow());
-        List<DetailType> raceDetails = copyDetailTypes(settingsWithDetails.getRaceDetailsToShow());
-        List<DetailType> overallDetailsToShow = copyDetailTypes(settingsWithDetails.getOverallDetailsToShow());
+        Collection<DetailType> maneuverDetails = settingsWithDetails.getManeuverDetailsToShow();
+        Collection<DetailType> legDetails = settingsWithDetails.getLegDetailsToShow();
+        Collection<DetailType> raceDetails = settingsWithDetails.getRaceDetailsToShow();
+        Collection<DetailType> overallDetailsToShow = settingsWithDetails.getOverallDetailsToShow();
         Long refreshIntervalInMs = settingsWithDetails.getDelayBetweenAutoAdvancesInMilliseconds();
         
         RaceColumnSelectionStrategies strategy = settingsWithRaceSelection.getActiveRaceColumnSelectionStrategy();
@@ -98,14 +99,6 @@ public class LeaderboardSettingsFactory {
                 nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
                 /* showOverallRacesCompleted */ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns,
                 settingsWithRaceSelection.isShowCompetitorNationality());
-    }
-    
-    private List<DetailType> copyDetailTypes(List<DetailType> detailTypes) {
-        List<DetailType> result = null;
-        if(detailTypes != null) {
-            result = new ArrayList<DetailType>(detailTypes);
-        }
-        return result;
     }
     
     private List<String> copyRaceNamesList(List<String> raceNames) {
