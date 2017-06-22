@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper.RVWrapper;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticAction;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class LiveRaceWithRacemapNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;

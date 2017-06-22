@@ -38,12 +38,10 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
-    private AutoPlayClientFactory cf;
 
     public LiveRaceWithRacemapAndLeaderBoardPresenterImpl(LiveRaceWithRacemapAndLeaderBoardPlace place,
             AutoPlayClientFactory clientFactory, LiveRaceWithRacemapAndLeaderBoardView LifeRaceWithRacemapViewImpl) {
         super(place, clientFactory);
-        this.cf = clientFactory;
         this.view = LifeRaceWithRacemapViewImpl;
         selectionTimer = new Timer() {
             @Override
