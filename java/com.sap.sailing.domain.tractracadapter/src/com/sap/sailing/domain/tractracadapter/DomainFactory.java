@@ -264,7 +264,7 @@ public interface DomainFactory {
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
-    Map<Competitor, Boat> getCompetitorsAndTheirBoats(IRace race, BoatClass defaultBoatClass);
+    Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(IRace race, BoatClass defaultBoatClass);
 
     Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race);
     

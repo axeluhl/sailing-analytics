@@ -646,22 +646,24 @@ public class DomainFactoryImpl implements DomainFactory {
      * 2. Races without any boat information
      */
     @Override
-    public Map<Competitor, Boat> getCompetitorsAndTheirBoats(IRace race, BoatClass defaultBoatClass) {
+    public Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(IRace race, BoatClass defaultBoatClass) {
         
         final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         getCompetingCompetitors(race).forEach(rc->{
             BoatMetaData competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
             Boat boatOfCompetitor;
-            String sailId = rc.getCompetitor().getShortName();
+            
             // Case 1
             if (competitorBoatInfo != null) {
                 // create an unique for such a boot an search in the boat store for it
                 Serializable boatId = createUniqueBoatIdentifierFromBoatMetadata(race, competitorBoatInfo);
+                String sailId = competitorBoatInfo.getId(); // we take here the boatId as sailID which is a number like 1, 2, 3
                 boatOfCompetitor = getOrCreateBoat(boatId, competitorBoatInfo.getName(), 
-                        defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()) );
+                        defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()));
             } else {
                 // Case 2
                 Serializable boatId = createUniqueBoatIdentifierFromCompetitor(race, rc);
+                String sailId = rc.getCompetitor().getShortName();
                 boatOfCompetitor = getOrCreateBoat(boatId, "Boat of " + sailId, defaultBoatClass, sailId, null);
             }
             
