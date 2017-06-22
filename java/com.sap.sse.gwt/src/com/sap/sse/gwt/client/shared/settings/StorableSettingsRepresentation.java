@@ -38,7 +38,7 @@ public class StorableSettingsRepresentation {
      *            not be {@code null}.
      */
     public StorableSettingsRepresentation(String settingsStringRepresentation) {
-        this.internalSettingsRepresentation = (JSONObject) JSONParser.parseLenient(settingsStringRepresentation);
+        this.internalSettingsRepresentation = (JSONObject) JSONParser.parseStrict(settingsStringRepresentation);
     }
 
     /**
