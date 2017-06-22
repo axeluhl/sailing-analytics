@@ -38,7 +38,7 @@ public class StorableSettingsRepresentation {
      *            not be {@code null}.
      */
     public StorableSettingsRepresentation(String settingsStringRepresentation) {
-        this.internalSettingsRepresentation = (JSONObject) JSONParser.parseLenient(settingsStringRepresentation);
+        this.internalSettingsRepresentation = (JSONObject) JSONParser.parseStrict(settingsStringRepresentation);
     }
 
     /**
@@ -54,7 +54,11 @@ public class StorableSettingsRepresentation {
      * @return The representation of settings as String. Cannot be {@code null}.
      */
     public String asString() {
-        return internalSettingsRepresentation.toString();
+        if(internalSettingsRepresentation != null) {
+            return internalSettingsRepresentation.toString();
+        } else {
+            return "{}";
+        }
     }
     
     /**
