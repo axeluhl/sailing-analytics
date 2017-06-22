@@ -136,8 +136,7 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
      */
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings,
-            CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation,
-            List<String> path) {
+            CS newInstance, List<String> path) {
         CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);
         pipelinedSettings = SettingsUtil.copyDefaults(newSettings, newInstance); // overrides values which are set to
                                                                                  // default values

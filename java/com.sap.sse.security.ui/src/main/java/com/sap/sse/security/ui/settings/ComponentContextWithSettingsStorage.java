@@ -261,7 +261,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
 
                     @Override
                     public void onSuccess(StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
-                        StorableSettingsRepresentation newUserSettingsRepresentationOfComponent = settingsBuildingPipeline.getStorableRepresentationOfUserSettings(newUserSettings, newInstance, cachedSettingsRepresentation, path);
+                        StorableSettingsRepresentation newUserSettingsRepresentationOfComponent = settingsBuildingPipeline.getStorableRepresentationOfUserSettings(newUserSettings, newInstance, path);
                         StorableSettingsRepresentation userSettingsRepresentationRoot = StorableSettingsRepresentation.patchSettingsRepresentation(
                                 settingsRepresentation.getUserSettingsRepresentation(), new ArrayList<>(path),
                                 newUserSettingsRepresentationOfComponent);

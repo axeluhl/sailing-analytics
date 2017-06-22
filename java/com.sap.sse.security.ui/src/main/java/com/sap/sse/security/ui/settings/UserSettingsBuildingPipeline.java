@@ -86,8 +86,7 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
      */
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings,
-            CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation,
-            List<String> path) {
+            CS newInstance, List<String> path) {
         return settingsRepresentationTransformer.convertToSettingsRepresentation(newSettings);
     }
 
