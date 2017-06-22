@@ -167,7 +167,7 @@ public class CompetitorInfoOverlays implements QuickRanksListener {
      *            uses the {@link QuickRankDTO#oneBasedRank} and {@link QuickRankDTO#competitor} fields
      */
     @Override
-    public void rankChanged(String competitorIdAsString, QuickRankDTO quickRanks) {
+    public void rankChanged(String competitorIdAsString, QuickRankDTO oldQuickRank, QuickRankDTO quickRanks) {
         final CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorIdAsString);
         ranks.put(competitorIdAsString, quickRanks.oneBasedRank);
         if (competitorInfoOverlay != null) {

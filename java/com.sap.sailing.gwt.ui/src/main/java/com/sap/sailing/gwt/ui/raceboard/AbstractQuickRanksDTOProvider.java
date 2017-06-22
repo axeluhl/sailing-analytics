@@ -23,9 +23,9 @@ public abstract class AbstractQuickRanksDTOProvider implements QuickRanksDTOProv
         listeners.remove(listener);
     }
 
-    protected void notifyListeners(String competitorIdAsString, QuickRankDTO quickRank) {
+    protected void notifyListeners(String competitorIdAsString, QuickRankDTO oldQuickRank, QuickRankDTO newQuickRank) {
         for (QuickRanksListener listener : listeners) {
-            listener.rankChanged(competitorIdAsString, quickRank);
+            listener.rankChanged(competitorIdAsString, oldQuickRank, newQuickRank);
         }
     }
 }
