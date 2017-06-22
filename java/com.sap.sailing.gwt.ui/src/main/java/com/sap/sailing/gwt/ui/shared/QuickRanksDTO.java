@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-
 /**
  * Combines a list of {@link QuickRankDTO} objects telling about the (calculated, according to any handicap ranking metric
  * in place)) ranks of the competitors with an information about the boat farthest ahead in the race. The latter is useful,
@@ -17,23 +15,12 @@ public class QuickRanksDTO {
      */
     private final Iterable<QuickRankDTO> quickRanksAfterCalculatedTime;
     
-    /**
-     * Lists the competitors according to their windward distance traveled. The first boat (rank 1) is the
-     * competitor farthest ahead.
-     */
-    private final Iterable<CompetitorDTO> competitorsInOrderOfWindwardDistanceTraveledFarthestFirst;
-    
-    public QuickRanksDTO(Iterable<QuickRankDTO> quickRanks, Iterable<CompetitorDTO> competitorsInOrderOfWindwardDistanceTraveledFarthestFirst) {
+    public QuickRanksDTO(Iterable<QuickRankDTO> quickRanks) {
         super();
         this.quickRanksAfterCalculatedTime = quickRanks;
-        this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirst = competitorsInOrderOfWindwardDistanceTraveledFarthestFirst;
     }
 
     public Iterable<QuickRankDTO> getQuickRanks() {
         return quickRanksAfterCalculatedTime;
-    }
-
-    public Iterable<CompetitorDTO> getCompetitorsInOrderOfWindwardDistanceTraveledFarthestFirst() {
-        return competitorsInOrderOfWindwardDistanceTraveledFarthestFirst;
     }
 }

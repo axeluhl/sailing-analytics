@@ -65,6 +65,7 @@ import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
 import com.tractrac.subscription.lib.api.competitor.ICompetitorsListener;
+import com.tractrac.subscription.lib.api.control.IControlsListener;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
@@ -194,6 +195,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     private final com.sap.sailing.domain.base.Regatta regatta;
     private final IEventSubscriber eventSubscriber;
     private final IRaceSubscriber raceSubscriber;
+    private final IRacesListener racesListener;
+    private final IControlsListener controlsListener;
+    private final ICompetitorsListener competitorsListener;
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final WindStore windStore;
@@ -331,7 +335,16 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         // Initialize data controller using live and stored data sources
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
         eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, effectifeStoredURI);
-        eventSubscriber.subscribeCompetitors(new ICompetitorsListener() {
+        controlsListener = new IControlsListener() {
+            @Override
+            public void updateControl(IControl control) {}
+            @Override
+            public void deleteControl(UUID controlId) {}
+            @Override
+            public void addControl(IControl control) {}
+        };
+        eventSubscriber.subscribeControls(controlsListener);
+        competitorsListener = new ICompetitorsListener() {
             @Override
             public void updateCompetitor(ICompetitor competitor) {
             	if (!competitor.isNonCompeting()) {
@@ -349,8 +362,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override
             public void addCompetitor(ICompetitor competitor) {
             }
-        });
-        eventSubscriber.subscribeRaces(new IRacesListener() {
+        };
+        eventSubscriber.subscribeCompetitors(competitorsListener);
+        racesListener = new IRacesListener() {
             @Override public void abandonRace(UUID raceId) {}
             @Override public void addRace(IRace race) {}
             @Override public void deleteRace(UUID raceId) {}
@@ -369,7 +383,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                     }
                 }
             }
-        });
+        };
+        eventSubscriber.subscribeRaces(racesListener);
         // Start live and stored data streams
         final Regatta effectiveRegatta;
         raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, effectifeStoredURI);
@@ -532,6 +547,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     protected void onStop(boolean stopReceiversPreemtively) throws InterruptedException {
         if (!stopped) {
             stopped = true;
+            eventSubscriber.unsubscribeRaces(racesListener);
+            eventSubscriber.unsubscribeCompetitors(competitorsListener);
+            eventSubscriber.unsubscribeControls(controlsListener);
             raceSubscriber.stop();
             eventSubscriber.stop();
             raceSubscriber.unsubscribeConnectionStatus(this);
