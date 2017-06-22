@@ -57,6 +57,8 @@ public interface UserManagementServiceAsync {
     
     void getPreferences(String username, List<String> keys,
             final AsyncCallback<Map<String, String>> callback);
+    
+    void getAllPreferences(String username, final AsyncCallback<Map<String, String>> callback);
 
     /**
      * Obtains an access token for the user specified by {@code username}. The caller needs to
