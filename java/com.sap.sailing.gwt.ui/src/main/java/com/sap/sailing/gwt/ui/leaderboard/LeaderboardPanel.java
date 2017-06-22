@@ -683,8 +683,8 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         showRaceRankColumn = newSettings.isShowRaceRankColumn();
 
         if (newSettings.getOverallDetailsToShow() != null) {
-            selectedOverallDetailColumns.clear();
-            selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
+                    selectedOverallDetailColumns);
         }
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
@@ -707,16 +707,16 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
             }
         }
         if (newSettings.getManeuverDetailsToShow() != null) {
-            selectedManeuverDetails.clear();
-            selectedManeuverDetails.addAll(newSettings.getManeuverDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getManeuverDetailsToShow(),
+                    ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
         }
         if (newSettings.getLegDetailsToShow() != null) {
-            selectedLegDetails.clear();
-            selectedLegDetails.addAll(newSettings.getLegDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getLegDetailsToShow(), LegColumn.getAvailableLegDetailColumnTypes(),
+                    selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
-            selectedRaceDetails.clear();
-            selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), getAvailableRaceDetailColumnTypes(),
+                    selectedRaceDetails);
         }
 
         addBusyTask();
@@ -801,6 +801,13 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         } else { // meaning that now the details need to be loaded from the server
             updateLeaderboardAndRun(doWhenNecessaryDetailHasBeenLoaded);
         }
+    }
+
+    private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet,
+            DetailType[] referenceOrder, List<DetailType> collectionToSetValuesTo) {
+        collectionToSetValuesTo.clear();
+        collectionToSetValuesTo.addAll(Arrays.asList(referenceOrder));
+        collectionToSetValuesTo.retainAll(valuesToSet);
     }
 
     /**

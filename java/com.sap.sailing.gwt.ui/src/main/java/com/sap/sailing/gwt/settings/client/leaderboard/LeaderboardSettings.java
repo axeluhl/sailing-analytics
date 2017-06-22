@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
@@ -9,7 +10,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
-import com.sap.sse.common.settings.generic.EnumLinkedHashSetSetting;
+import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
@@ -45,10 +46,10 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      */
     private IntegerSetting numberOfLastRacesToShow;
 
-    private EnumLinkedHashSetSetting<DetailType> maneuverDetailsToShow;
-    private EnumLinkedHashSetSetting<DetailType> legDetailsToShow;
-    private EnumLinkedHashSetSetting<DetailType> raceDetailsToShow;
-    private EnumLinkedHashSetSetting<DetailType> overallDetailsToShow;
+    private EnumSetSetting<DetailType> maneuverDetailsToShow;
+    private EnumSetSetting<DetailType> legDetailsToShow;
+    private EnumSetSetting<DetailType> raceDetailsToShow;
+    private EnumSetSetting<DetailType> overallDetailsToShow;
     private boolean autoExpandPreSelectedRace = false;
     private LongSetting delayBetweenAutoAdvancesInMilliseconds;
     private BooleanSetting updateUponPlayStateChange;
@@ -93,18 +94,18 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         maneuverDetails.add(DetailType.TACK);
         maneuverDetails.add(DetailType.JIBE);
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
-        maneuverDetailsToShow = new EnumLinkedHashSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, DetailType::valueOf);
+        maneuverDetailsToShow = new EnumSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, DetailType::valueOf);
         List<DetailType> legDetails = new ArrayList<DetailType>();
         legDetails.add(DetailType.DISTANCE_TRAVELED);
         legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         legDetails.add(DetailType.RANK_GAIN);
-        legDetailsToShow = new EnumLinkedHashSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOf);
+        legDetailsToShow = new EnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOf);
         List<DetailType> raceDetails = new ArrayList<DetailType>();
         raceDetails.add(DetailType.DISPLAY_LEGS);
-        raceDetailsToShow = new EnumLinkedHashSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOf);
+        raceDetailsToShow = new EnumSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOf);
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.REGATTA_RANK);
-        overallDetailsToShow = new EnumLinkedHashSetSetting<>("overallDetailsToShow", this, overallDetails, DetailType::valueOf);
+        overallDetailsToShow = new EnumSetSetting<>("overallDetailsToShow", this, overallDetails, DetailType::valueOf);
         delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, RaceColumnSelectionStrategies::valueOf);
         nameOfRaceToSort = new StringSetting("nameOfRaceToSort", this, null);
@@ -127,8 +128,8 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     /**
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
      */
-    public LeaderboardSettings(List<DetailType> maneuverDetailsToShow, List<DetailType> legDetailsToShow,
-            List<DetailType> raceDetailsToShow, List<DetailType> overallDetailsToShow,
+    public LeaderboardSettings(Collection<DetailType> maneuverDetailsToShow, Collection<DetailType> legDetailsToShow,
+            Collection<DetailType> raceDetailsToShow, Collection<DetailType> overallDetailsToShow,
             List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
             boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
             boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
@@ -164,29 +165,29 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
-    public List<DetailType> getManeuverDetailsToShow() {
-        return Util.createList(maneuverDetailsToShow.getValues());
+    public Collection<DetailType> getManeuverDetailsToShow() {
+        return Util.createSet(maneuverDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
-    public List<DetailType> getLegDetailsToShow() {
-        return Util.createList(legDetailsToShow.getValues());
+    public Collection<DetailType> getLegDetailsToShow() {
+        return Util.createSet(legDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
-    public List<DetailType> getRaceDetailsToShow() {
-        return Util.createList(raceDetailsToShow.getValues());
+    public Collection<DetailType> getRaceDetailsToShow() {
+        return Util.createSet(raceDetailsToShow.getValues());
     }
     
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
-    public List<DetailType> getOverallDetailsToShow() {
-        return Util.createList(overallDetailsToShow.getValues());
+    public Collection<DetailType> getOverallDetailsToShow() {
+        return Util.createSet(overallDetailsToShow.getValues());
     }
     
     /**

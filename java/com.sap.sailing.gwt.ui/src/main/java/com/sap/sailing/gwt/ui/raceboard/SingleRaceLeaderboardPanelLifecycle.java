@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 
 public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
     
@@ -57,7 +56,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     @Override
     public LeaderboardSettings extractDocumentSettings(LeaderboardSettings currentLeaderboardSettings) {
-        LeaderboardSettings defaultLeaderboardSettings = SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), currentLeaderboardSettings);
+        LeaderboardSettings defaultLeaderboardSettings = createDefaultSettings();
         LeaderboardSettings contextSpecificLeaderboardSettings = new LeaderboardSettings(
                 currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
@@ -75,10 +74,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
                 currentLeaderboardSettings.isShowRaceRankColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality());
-        SettingsDefaultValuesUtils.keepDefaults(currentLeaderboardSettings, contextSpecificLeaderboardSettings);
-        return contextSpecificLeaderboardSettings;
+        return SettingsUtil.copyValues(contextSpecificLeaderboardSettings, defaultLeaderboardSettings);
     }
-    
-    
-
 }

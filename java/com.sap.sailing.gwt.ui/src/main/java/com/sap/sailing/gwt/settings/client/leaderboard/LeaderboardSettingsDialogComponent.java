@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +92,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         meneuverPanel.addStyleName("SettingsDialogComponent");
         FlowPanel meneuverContent = new FlowPanel();
         meneuverContent.addStyleName("dialogInnerContent");
-        List<DetailType> currentMeneuverDetailSelection = initialSettings.getManeuverDetailsToShow();
+        Collection<DetailType> currentMeneuverDetailSelection = initialSettings.getManeuverDetailsToShow();
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
             CheckBox checkbox = createAndRegisterCheckbox(dialog, detailType,
                     currentMeneuverDetailSelection.contains(detailType), maneuverDetailCheckboxes);
@@ -133,7 +134,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
         raceDetailDialog.addStyleName("SettingsDialogComponent");
         int detailCountInCurrentFlowPanel = 0;
-        List<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
+        Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
@@ -167,7 +168,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         raceStartAnalysisDialog.add(dialog.createHeadline(stringMessages.raceStartAnalysis(), true));
         raceStartAnalysisDialog.addStyleName("SettingsDialogComponent");
         int detailCountInCurrentFlowPanel = 0;
-        List<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
+        Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceStartAnalysisDialogContent = null;
         for (DetailType type : LeaderboardPanel.getAvailableRaceStartAnalysisColumnTypes()) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {
@@ -190,7 +191,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         overallDetailDialog.addStyleName("SettingsDialogComponent overallDetailSettings");
         FlowPanel overallDetailDialogContent = new FlowPanel();
         overallDetailDialogContent.addStyleName("dialogInnerContent");
-        List<DetailType> currentOverallDetailSelection = initialSettings.getOverallDetailsToShow();
+        Collection<DetailType> currentOverallDetailSelection = initialSettings.getOverallDetailsToShow();
         for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
             CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentOverallDetailSelection.contains(type),
                     overallDetailCheckboxes);
@@ -226,7 +227,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         legDetailsToShow.add(dialog.createHeadline(stringMessages.legDetailsToShow(), true));
         legDetailsToShow.addStyleName("SettingsDialogComponent");
         FlowPanel legDetailsContent = null;
-        List<DetailType> currentLegDetailSelection = initialSettings.getLegDetailsToShow();
+        Collection<DetailType> currentLegDetailSelection = initialSettings.getLegDetailsToShow();
         int detailCountInCurrentFlowPanel = 0;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
             if (detailCountInCurrentFlowPanel % 8 == 0) {

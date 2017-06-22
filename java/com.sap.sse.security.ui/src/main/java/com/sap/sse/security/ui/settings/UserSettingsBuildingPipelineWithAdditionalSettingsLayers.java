@@ -188,14 +188,10 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
                     previousSettingsRepresentation.getUserSettingsRepresentation().getSubSettingsRepresentation(path));
 
             pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
-
-            pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS, path,
-                    layersSettingsPatches);
-
-        } else {
-            pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS, path,
-                    layersSettingsPatches);
         }
+        pipelinedSettings = applyPatchesForPipelineLevel(pipelinedSettings, PipelineLevel.USER_DEFAULTS, path,
+                layersSettingsPatches);
+        
         pipelinedSettings = SettingsUtil.copyDefaultsFromValues(pipelinedSettings, pipelinedSettings);
         pipelinedSettings = SettingsUtil.copyValues(newSettings, pipelinedSettings);
         return settingsRepresentationTransformer.convertToSettingsRepresentation(pipelinedSettings);

@@ -74,6 +74,7 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
 
         private ShareLinkAnchor(String anchorText, FlowPanel parent) {
             this.container.getElement().getStyle().setMargin(0.5, Unit.EM);
+            this.container.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
             this.anchor = createEnabledAnchor(anchorText);
             this.placeholder = createDisabledPlaceholder(anchorText);
             container.add(anchor);
