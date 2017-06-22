@@ -693,7 +693,10 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                     selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), getAvailableRaceDetailColumnTypes(),
+            List<DetailType> allRaceDetailsTypes = new ArrayList<>();
+            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceDetailColumnTypes()));
+            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceStartAnalysisColumnTypes()));
+            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), allRaceDetailsTypes.toArray(new DetailType[allRaceDetailsTypes.size()]),
                     selectedRaceDetails);
         }
 
