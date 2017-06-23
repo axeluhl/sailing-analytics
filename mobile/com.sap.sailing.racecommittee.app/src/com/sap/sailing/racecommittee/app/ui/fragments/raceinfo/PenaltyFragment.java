@@ -147,7 +147,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             mPenaltyDropDown.setAdapter(mPenaltyAdapter);
             mPenaltyDropDown.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(mPenaltyAdapter));
         }
-        Button applyButton = ViewHelper.get(layout, R.id.button_apply);
+        View applyButton = ViewHelper.get(layout, R.id.button_apply);
         if (applyButton != null) {
             applyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -156,7 +156,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 }
             });
         }
-        Button penaltyButton = ViewHelper.get(layout, R.id.button_penalty);
+        View penaltyButton = ViewHelper.get(layout, R.id.button_penalty);
         if (penaltyButton != null) {
             penaltyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -208,22 +208,27 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        RacingProcedure procedure = getRaceState().getRacingProcedure();
-        if (procedure instanceof ConfigurableStartModeFlagRacingProcedure) {
-            ConfigurableStartModeFlagRacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
-            switch (racingProcedure.getStartModeFlag()) {
-                case PAPA:
-                    mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name()));
-                    break;
-                case BLACK:
-                    mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name()));
-                    break;
-                case UNIFORM:
-                    mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name()));
-                    break;
-                default:
-                    // nothing
-                    break;
+        if (mPenaltyDropDown != null) {
+            RacingProcedure procedure = getRaceState().getRacingProcedure();
+            if (procedure instanceof ConfigurableStartModeFlagRacingProcedure) {
+                ConfigurableStartModeFlagRacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
+                switch (racingProcedure.getStartModeFlag()) {
+                    case PAPA:
+                        mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name()));
+                        break;
+
+                    case BLACK:
+                        mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name()));
+                        break;
+
+                    case UNIFORM:
+                        mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name()));
+                        break;
+
+                    default:
+                        // nothing
+                        break;
+                }
             }
         }
         switch (getRaceState().getStatus()) {
