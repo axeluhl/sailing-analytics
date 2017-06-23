@@ -6,6 +6,9 @@ import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
+/**
+ * Equality and hash code are based on the {@link #getIdAsString() ID} and all contained attributes like name, shortName, email, etc.
+ */
 public interface CompetitorWithoutBoatDTO extends Serializable, MappableToDevice {
     
     String getTwoLetterIsoCountryCode();
