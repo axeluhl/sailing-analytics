@@ -22,6 +22,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
@@ -377,7 +378,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
     
     private void adjustObserverForRelativeStartTime(final StartTimeFinderResult startTimeAnalysisResult) {
-        if (startTimeAnalysisResult.isDependentStartTime()) {
+        if (startTimeAnalysisResult.getResolutionFailed() != ResolutionFailed.CYCLIC_DEPENDENCY && startTimeAnalysisResult.isDependentStartTime()) {
             setupListenersOnDependentRace(startTimeAnalysisResult, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
         } else if (raceStateToObserve != null) {
             raceStateToObserve.removeChangedListener(raceStateToObserveListener);
