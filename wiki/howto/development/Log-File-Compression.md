@@ -1,3 +1,5 @@
+# Log File Compression
+
 Servers have a logrotate configuration that ensures that during normal operation the httpd log files from ``/var/log/httpd`` are regularly copied to ``/var/log/old/<SERVER_NAME>/<SERVER_EXTERNAL_IP>``. Note that before terminating an instance, this step needs to be carried out manually one more time to ensure all latest logs are saved before the instance and its file systems go away.
 
 The logrotate configuration asks for the logs to be compressed. However, due to ``/var/log/old`` residing on a separate file system partition, this usually does not work, unfortunately. It seems logrotate works with simple file handles or inodes when moving and trying to compress the log files, but when moving across file systems, the inodes and file handles don't survive.
