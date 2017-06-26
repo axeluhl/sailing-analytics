@@ -668,6 +668,20 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             
             Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
+            if (competitorBoatInfo != null && existingCompetitor.getShortName() != rc.getCompetitor().getShortName()) {
+                // in case we find a boat info we only want to update the shortName field of the competitor (instead of using sailID)
+                CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
+                boolean isOldCompetitorToUpdateDuringGetOrCreate = competitorStore.isCompetitorToUpdateDuringGetOrCreate(existingCompetitor);
+                competitorStore.allowCompetitorResetToDefaults(existingCompetitor);
+                existingCompetitor = competitorStore.getOrCreateCompetitor(existingCompetitor.getId(), existingCompetitor.getName(),
+                        rc.getCompetitor().getShortName(), existingCompetitor.getColor(), existingCompetitor.getEmail(),
+                        existingCompetitor.getFlagImage(), (DynamicTeam) existingCompetitor.getTeam(), existingCompetitor.getTimeOnTimeFactor(),
+                        existingCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), existingCompetitor.getSearchTag());
+                if (isOldCompetitorToUpdateDuringGetOrCreate) {
+                    competitorStore.allowCompetitorResetToDefaults(existingCompetitor);
+                }
+                
+            }
             competitorsAndBoats.put(existingCompetitor, boatOfCompetitor);
         });
         return competitorsAndBoats;
