@@ -1,12 +1,20 @@
 package com.sap.sailing.server.notification.impl;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.util.Arrays;
 
 import com.sap.sse.common.Util.Pair;
 
-public class NotificationMailTemplate {
-  
+/**
+ * The class needs to implement the {@link Serializable} interface because it can become part of a
+ * {@link SerializableMultipartSupplier}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public class NotificationMailTemplate implements Serializable {
+    private static final long serialVersionUID = 3291811210425722552L;
     private final String subject;
     private final String title;
     private final String text;
