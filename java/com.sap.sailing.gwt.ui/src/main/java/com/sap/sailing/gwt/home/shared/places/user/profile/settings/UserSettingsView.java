@@ -12,15 +12,6 @@ import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSel
  */
 public interface UserSettingsView extends IsWidget {
 
-    /**
-     * Defines whether or not the {@link UserSettingsView} should be optimized to fill the whole display width.
-     * 
-     * @param edgeToEdge
-     *            <code>true</code> if this view is used in an edge-to-edge layout (usually in mobile version),
-     *            <code>false</code> otherwise
-     */
-    void setEdgeToEdge(boolean edgeToEdge);
-
     void setEntries(List<UserSettingsEntry> entries);
 
     /**

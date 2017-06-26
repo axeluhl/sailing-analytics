@@ -1,7 +1,5 @@
 package com.sap.sse.gwt.client.shared.settings;
 
-import java.util.List;
-
 import com.sap.sse.common.settings.Settings;
 
 /**
@@ -48,7 +46,7 @@ public interface SettingsBuildingPipeline {
      * @return The storable settings representation of provided settings as User Settings
      */
     <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings,
-            CS newInstance, List<String> path);
+            CS newInstance, Iterable<String> path);
 
     /**
      * Converts the provided settings according to storable settings representation for Document Settings. This method
@@ -68,6 +66,6 @@ public interface SettingsBuildingPipeline {
      */
     <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(CS newSettings,
             CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation,
-            List<String> path);
+            Iterable<String> path);
 
 }

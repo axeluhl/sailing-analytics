@@ -4,8 +4,10 @@ import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.details.UserProfileDetailsActivity;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.preferences.UserProfilePreferencesActivity;
+import com.sap.sailing.gwt.home.mobile.places.user.profile.settings.UserProfileSettingsActivity;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class UserProfileActivityProxy extends AbstractActivityProxy {
@@ -23,10 +25,11 @@ public class UserProfileActivityProxy extends AbstractActivityProxy {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                // TODO UserProfileSettingsPlace
                 if (currentPlace instanceof UserProfilePreferencesPlace) {
                     UserProfilePreferencesPlace userProfilePrefsPlace = (UserProfilePreferencesPlace) currentPlace;
                     super.onSuccess(new UserProfilePreferencesActivity(userProfilePrefsPlace, clientFactory));
+                } else if(currentPlace instanceof UserProfileSettingsPlace) {
+                    super.onSuccess(new UserProfileSettingsActivity((UserProfileSettingsPlace) currentPlace, clientFactory));
                 } else {
                     super.onSuccess(new UserProfileDetailsActivity(currentPlace, clientFactory));
                 }

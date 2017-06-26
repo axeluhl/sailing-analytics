@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
@@ -84,16 +85,16 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
     }
 
     protected static <CS extends Settings> CS applyPatchesForPipelineLevel(CS currentSettings,
-            PipelineLevel pipelineLevel, List<String> absolutePathOfComponentWithSettings,
+            PipelineLevel pipelineLevel, Iterable<String> absolutePathOfComponentWithSettings,
             SettingsPatches settingsPatchesToConsider) {
         CS effectiveSettings = currentSettings;
         for (Entry<List<String>, List<SettingsPatch<? extends Settings>>> entry : settingsPatchesToConsider
                 .getSettingsPatches(pipelineLevel).entrySet()) {
             List<String> path = new ArrayList<>(entry.getKey());
-            if (path.size() >= absolutePathOfComponentWithSettings.size()
-                    && path.subList(path.size() - absolutePathOfComponentWithSettings.size(), path.size())
+            if (path.size() >= Util.size(absolutePathOfComponentWithSettings)
+                    && path.subList(path.size() - Util.size(absolutePathOfComponentWithSettings), path.size())
                             .equals(absolutePathOfComponentWithSettings)) {
-                path = path.subList(0, path.size() - absolutePathOfComponentWithSettings.size());
+                path = path.subList(0, path.size() - Util.size(absolutePathOfComponentWithSettings));
                 List<SettingsPatch<? extends Settings>> settingsPatches = entry.getValue();
                 if (!settingsPatches.isEmpty()) {
                     Settings patchedComponentSettings = ComponentUtils
@@ -136,7 +137,7 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
      */
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings,
-            CS newInstance, List<String> path) {
+            CS newInstance, Iterable<String> path) {
         CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);
         pipelinedSettings = SettingsUtil.copyDefaults(newSettings, newInstance); // overrides values which are set to
                                                                                  // default values
@@ -173,7 +174,7 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(
             CS newSettings, CS newInstance,
-            StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
+            StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, Iterable<String> path) {
         CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);
         pipelinedSettings = SettingsUtil.copyDefaults(newSettings, newInstance); // overrides values which are set to
                                                                                  // default values
@@ -241,7 +242,7 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
 
         private Map<PipelineLevel, Map<List<String>, List<SettingsPatch<? extends Settings>>>> patchesForSettings = new HashMap<>();
 
-        public void addSettingsPatch(List<String> path, SettingsPatch<? extends Settings> settingsPatch,
+        public void addSettingsPatch(Iterable<String> path, SettingsPatch<? extends Settings> settingsPatch,
                 PipelineLevel pipelineLevel) {
             Map<List<String>, List<SettingsPatch<? extends Settings>>> pipelinePatches = patchesForSettings
                     .get(pipelineLevel);
@@ -252,7 +253,7 @@ public class UserSettingsBuildingPipelineWithAdditionalSettingsLayers extends Us
             List<SettingsPatch<? extends Settings>> componentPatches = pipelinePatches.get(path);
             if (componentPatches == null) {
                 componentPatches = new ArrayList<>();
-                pipelinePatches.put(path, componentPatches);
+                pipelinePatches.put(Util.asList(path), componentPatches);
             }
             componentPatches.add(settingsPatch);
         }

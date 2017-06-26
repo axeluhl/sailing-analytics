@@ -1,7 +1,5 @@
 package com.sap.sse.security.ui.settings;
 
-import java.util.List;
-
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.gwt.client.shared.settings.SettingsRepresentationTransformer;
@@ -86,7 +84,7 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
      */
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings,
-            CS newInstance, List<String> path) {
+            CS newInstance, Iterable<String> path) {
         return settingsRepresentationTransformer.convertToSettingsRepresentation(newSettings);
     }
 
@@ -112,7 +110,7 @@ public class UserSettingsBuildingPipeline extends UrlSettingsBuildingPipeline {
     @Override
     public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(
             CS newSettings, CS newInstance,
-            StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
+            StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, Iterable<String> path) {
         CS documentSettingsWithUserSettingsDiff;
         if (previousSettingsRepresentation.hasStoredUserSettings()) {
             CS pipelinedSettings = SettingsUtil.copyDefaultsFromValues(newInstance, newInstance);

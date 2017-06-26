@@ -1,7 +1,5 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.util.ArrayList;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sse.common.settings.Settings;
@@ -24,11 +22,6 @@ public abstract class AbstractCompositeComponent<SettingsType extends Settings> 
 
     public Component<?> getParentComponent() {
         return parentComponent;
-    }
-
-    @Override
-    public ArrayList<String> getPath() {
-        return ComponentPathDeterminer.determinePath(this);
     }
 
     @Override
