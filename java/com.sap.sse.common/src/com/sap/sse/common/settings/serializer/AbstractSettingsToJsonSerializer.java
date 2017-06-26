@@ -1,9 +1,11 @@
 package com.sap.sse.common.settings.serializer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.CollectionSetting;
@@ -163,8 +165,14 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     private <T> Object serializeValueCollection(ValueCollectionSetting<T> valueListSetting) {
         final ValueConverter<T> converter = valueListSetting.getValueConverter();
         final OBJECT diffDataObject = newOBJECT();
-        set(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN, serializeMultipleValues(converter, valueListSetting.getAddedValues()));
-        set(diffDataObject, AbstractGenericSerializableSettings.REMOVED_TOKEN, serializeMultipleValues(converter, valueListSetting.getRemovedValues()));
+        Iterable<T> addedValues = valueListSetting.getAddedValues();
+        if(!Util.isEmpty(addedValues)) {
+            set(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN, serializeMultipleValues(converter, addedValues));
+        }
+        Iterable<T> removedValues = valueListSetting.getRemovedValues();
+        if(!Util.isEmpty(removedValues)) {
+            set(diffDataObject, AbstractGenericSerializableSettings.REMOVED_TOKEN, serializeMultipleValues(converter, removedValues));
+        }
         return diffDataObject;
     }
 
@@ -264,12 +272,22 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
         } else {
             @SuppressWarnings("unchecked")
             final OBJECT diffDataObject = (OBJECT) jsonValue;
-            @SuppressWarnings("unchecked")
-            final ARRAY addedValuesArray = (ARRAY) get(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN);
-            @SuppressWarnings("unchecked")
-            final ARRAY removedValuesArray = (ARRAY) get(diffDataObject, AbstractGenericSerializableSettings.REMOVED_TOKEN);
-            final List<T> addedValues = deserializeMultipleValues(addedValuesArray, converter);
-            final List<T> removedValues = deserializeMultipleValues(removedValuesArray, converter);
+            final List<T> addedValues;
+            if (hasProperty(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN)) {
+                @SuppressWarnings("unchecked")
+                final ARRAY addedValuesArray = (ARRAY) get(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN);
+                addedValues = deserializeMultipleValues(addedValuesArray, converter);
+            } else {
+                addedValues = Collections.emptyList();
+            }
+            final List<T> removedValues;
+            if (hasProperty(diffDataObject, AbstractGenericSerializableSettings.REMOVED_TOKEN)) {
+                @SuppressWarnings("unchecked")
+                final ARRAY removedValuesArray = (ARRAY) get(diffDataObject, AbstractGenericSerializableSettings.REMOVED_TOKEN);
+                removedValues = deserializeMultipleValues(removedValuesArray, converter);
+            } else {
+                removedValues = Collections.emptyList();
+            }
             valueListSetting.setDiff(removedValues, addedValues);
             
         }
