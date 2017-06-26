@@ -63,6 +63,9 @@
   font-size: 0.866666666666667em;
   color: #0a0a0a;
 }
+.sectionheader_item, .sectionheader_item_title, .sectionheader_item_subtitle {
+  max-width: 100%;
+}
 .sectionheader_item_infotext {
   display: inline-block;
   vertical-align: middle;
@@ -112,9 +115,8 @@ img.sectionheader_item_arrow.accordion.collapsed {
   background: url("images/mobile/filter.svg") 100% no-repeat transparent;
   background-size: 1.333333333333333em;
 }
-.sectionheader_item_adjust_title {
-  margin-left: 4em;
-  margin-right: 2.5em;
+.sectionheader_item_adjust_title_left {
+  padding-left: 4em;
   position: absolute;
   top: 50%;
   -webkit-transform: translateY(-50%);
@@ -122,6 +124,9 @@ img.sectionheader_item_arrow.accordion.collapsed {
       -ms-transform: translateY(-50%);
           transform: translateY(-50%);
 }
-.sectionheader_item_adjust_title > h2 {
+.sectionheader_item_adjust_title_left > h2 {
 	display: inline;
+}
+.sectionheader_item_adjust_title_right {
+  padding-right: 2.5em;
 }
