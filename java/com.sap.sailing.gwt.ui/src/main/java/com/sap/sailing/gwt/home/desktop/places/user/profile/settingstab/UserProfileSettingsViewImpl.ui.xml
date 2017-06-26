@@ -1,6 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
     xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
-    xmlns:us="urn:import:com.sap.sailing.gwt.home.shared.places.user.profile.settings">
+    xmlns:us="urn:import:com.sap.sailing.gwt.home.desktop.places.user.profile.settingstab">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">

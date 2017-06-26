@@ -458,7 +458,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     @Override
     public Map<String, String> getAllPreferences(String username) {
-        return new HashMap<>(getSecurityService().getAllPreferences(username));
+        final Map<String, String> allPreferences = getSecurityService().getAllPreferences(username);
+        final Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, String> entry : allPreferences.entrySet()) {
+            if(!entry.getKey().startsWith("_")) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
     }
 
     @Override

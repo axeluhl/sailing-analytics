@@ -4,12 +4,7 @@
             xmlns:ms="urn:import:com.sap.sailing.gwt.home.shared.partials.multiselection" xmlns:c="urn:import:com.google.gwt.user.cellview.client">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style type="com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettings.Style">
-        .edgeToEdge {
-            border-radius: 0;
-            border-left: none;
-            border-right: none;
-        }
+    <ui:style>
         .table {
             width: 100%;
         }
