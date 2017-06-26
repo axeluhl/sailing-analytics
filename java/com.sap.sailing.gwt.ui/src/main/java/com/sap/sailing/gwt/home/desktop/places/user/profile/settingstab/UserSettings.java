@@ -93,10 +93,6 @@ public class UserSettings extends Composite implements UserSettingsView {
         presenter.setView(this);
     }
 
-    public void setEdgeToEdge(boolean edgeToEdge) {
-        // TODO do we need this?
-    }
-
     @Override
     public void setEntries(List<UserSettingsEntry> entries) {
         if (entries.isEmpty()) {
