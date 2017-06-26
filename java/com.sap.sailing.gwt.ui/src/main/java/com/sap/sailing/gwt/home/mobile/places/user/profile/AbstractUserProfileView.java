@@ -44,7 +44,7 @@ public class AbstractUserProfileView extends Composite implements UserProfileVie
         this.layout.quickfinderUi.addItem(i18n.details(), presenter.getUserProfileNavigation());
         this.layout.quickfinderUi.addItem(i18n.favoritesAndNotifications(), presenter.getUserPreferencesNavigation());
         if(ExperimentalFeatures.SHOW_MY_SETTINGS_IN_USER_PROFILE) {
-            this.layout.quickfinderUi.addItem(i18n.settings(), presenter.getUserPreferencesNavigation());
+            this.layout.quickfinderUi.addItem(i18n.settings(), presenter.getUserSettingsNavigation());
         }
     }
     
