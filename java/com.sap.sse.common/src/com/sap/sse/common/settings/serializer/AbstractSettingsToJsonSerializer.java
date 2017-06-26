@@ -256,8 +256,6 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
                 throw new IllegalStateException("Unknown ListSetting type");
             }
         }
-            
-            
     }
 
     private <T> void deserializeValueListSetting(CollectionSetting<T> listSetting, Object jsonValue) {
