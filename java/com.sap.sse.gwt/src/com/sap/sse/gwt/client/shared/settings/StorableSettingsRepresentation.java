@@ -56,7 +56,7 @@ public class StorableSettingsRepresentation {
         if(internalSettingsRepresentation != null) {
             return internalSettingsRepresentation.toString();
         } else {
-            return "{}";
+            return null;
         }
     }
     
@@ -76,8 +76,17 @@ public class StorableSettingsRepresentation {
      */
     public static StorableSettingsRepresentation patchSettingsRepresentation(StorableSettingsRepresentation root,
             Iterable<String> path, StorableSettingsRepresentation newSettings) {
+        JSONObject settingsAsJson;
+        if(newSettings == null) {
+            settingsAsJson = null;
+        } else {
+            settingsAsJson = newSettings.asJson();
+            if(settingsAsJson != null && settingsAsJson.keySet().isEmpty()) {
+                settingsAsJson = null;
+            }
+        }
         JSONObject patchedSettingsJsonRepresentation = patchJsonObject(root == null ? null : root.asJson(),
-                path.iterator(), newSettings == null ? null : newSettings.asJson());
+                path.iterator(), settingsAsJson);
         return new StorableSettingsRepresentation(patchedSettingsJsonRepresentation);
     }
     
@@ -92,8 +101,8 @@ public class StorableSettingsRepresentation {
      * @param pipelineLevel
      * @return
      */
-    private static JSONObject patchJsonObject(JSONObject root, Iterator<String> path,
-            JSONObject newSettings) {
+    private static JSONObject patchJsonObject(JSONObject root, final Iterator<String> path,
+            final JSONObject newSettings) {
         if (!path.hasNext()) {
             return newSettings;
         }
@@ -103,22 +112,26 @@ public class StorableSettingsRepresentation {
         String current = path.next();
         // we need to go further
         if (path.hasNext()) {
-            JSONValue child = root.get(current);
             boolean haskey = root.containsKey(current);
-            if (child == null || child.isObject() == null) {
-                if (haskey) {
-                    GWT.log("Warning: replacing some subtree element that is wrong type!");
+            if(haskey || newSettings != null) {
+                // if (!haskey && newSettings == null) we have currently no settings on the path and there are no new settings,
+                // so do not have to do anything
+                JSONObject currentObject = null;
+                JSONValue child = root.get(current);
+                if (child != null) {
+                    currentObject = child.isObject();
+                    if (currentObject == null) {
+                        GWT.log("Warning: replacing some subtree element that is wrong type!");
+                    }
                 }
-                if(newSettings == null){
-                    //no need to create tree, if we only want to remove settings!
-                    return null;
-                }
-                child = new JSONObject();
-                root.put(current, child);
+                root.put(current, patchJsonObject(child.isObject(), path, newSettings));
             }
-            return patchJsonObject(child.isObject(), path, newSettings);
         } else {
             root.put(current, newSettings);
+        }
+        if(root.keySet().isEmpty()) {
+            // If there aren't any settings in this path, we just remove the whole path
+            root = null;
         }
         return root;
     }

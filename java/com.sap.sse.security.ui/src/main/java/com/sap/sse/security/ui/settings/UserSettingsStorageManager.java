@@ -95,13 +95,19 @@ public class UserSettingsStorageManager implements SettingsStorageManager {
         if (localStorage != null) {
             if (settingsRepresentations.hasStoredUserSettings()) {
                 localStorage.removeItem(storageKeyForUserSettings);
-                localStorage.setItem(storageKeyForUserSettings,
-                        settingsRepresentations.getUserSettingsRepresentation().asString());
+                final String settingsString = settingsRepresentations.getUserSettingsRepresentation().asString();
+                if(settingsString != null) {
+                    localStorage.setItem(storageKeyForUserSettings,
+                            settingsString);
+                }
             }
             if (settingsRepresentations.hasStoredDocumentSettings()) {
                 localStorage.removeItem(storageKeyForDocumentSettings);
-                localStorage.setItem(storageKeyForDocumentSettings,
-                        settingsRepresentations.getDocumentSettingsRepresentation().asString());
+                final String settingsString = settingsRepresentations.getDocumentSettingsRepresentation().asString();
+                if(settingsString != null) {
+                    localStorage.setItem(storageKeyForDocumentSettings,
+                            settingsString);
+                }
             }
         }
     }
