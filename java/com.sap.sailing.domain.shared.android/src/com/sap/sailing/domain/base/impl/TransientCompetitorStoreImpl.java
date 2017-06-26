@@ -304,7 +304,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                   c.getImageURL(),
                   c.getFlagImageURL(),
                 boatDTO,
-                boatClassDTO,
                 c.getTimeOnTimeFactor(), c.getTimeOnDistanceAllowancePerNauticalMile(), c.getSearchTag());
 
         return competitorDTO;

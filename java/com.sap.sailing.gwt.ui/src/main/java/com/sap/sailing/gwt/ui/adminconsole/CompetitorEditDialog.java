@@ -61,7 +61,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
      *            The 'competitorToEdit' parameter contains the competitor which should be changed or initialized.
      * @param boatClass
      *            The boat class is the default shown boat class for new competitors. Set <code>null</code> if your competitor is
-     *            already initialized or you don�t want a default boat class.
+     *            already initialized or you don't want a default boat class.
      */
     public CompetitorEditDialog(final StringMessages stringMessages, CompetitorDTO competitorToEdit,
             DialogCallback<CompetitorDTO> callback, String boatClass) {
@@ -202,7 +202,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, competitorToEdit.getIdAsString(),
-                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(), boat, boatClass,
+                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(), boat,
                 timeOnTimeFactor.getValue(),
                 timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue() == null ? null :
                         new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue()*1000)), searchTag.getValue());

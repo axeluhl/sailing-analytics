@@ -17,19 +17,20 @@ public abstract class BaseRegisterCompetitorAndBoatEventImpl<VisitorT> extends A
 
     /**
      * @throws IllegalArgumentException
-     *             if {@code competitor} is null
+     *             if {@code competitor} is null or if {@code boat} is null
      */
     public BaseRegisterCompetitorAndBoatEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, Competitor competitor, Boat boat) throws IllegalArgumentException {
         super(createdAt, logicalTimePoint, author, pId);
         checkCompetitor(competitor);
+        checkBoat(boat);
         this.competitor = competitor;
         this.boat = boat;
     }
 
     /**
      * @throws IllegalArgumentException
-     *             if {@code competitor} is null
+     *             if {@code competitor} is null or if {@code boat} is null
      */
     public BaseRegisterCompetitorAndBoatEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Competitor competitor, Boat boat) throws IllegalArgumentException {
@@ -39,6 +40,12 @@ public abstract class BaseRegisterCompetitorAndBoatEventImpl<VisitorT> extends A
     private static void checkCompetitor(Competitor competitor) throws IllegalArgumentException {
         if (competitor == null) {
             throw new IllegalArgumentException("Competitor may not be null");
+        }
+    }
+
+    private static void checkBoat(Boat boat) throws IllegalArgumentException {
+        if (boat == null) {
+            throw new IllegalArgumentException("Boat may not be null");
         }
     }
 

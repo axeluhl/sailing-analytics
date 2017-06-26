@@ -108,7 +108,33 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return comparator.compare(o1.getBoatClass().getName(), o2.getBoatClass().getName());
             }
         });
-        
+
+        Column<CompetitorDTO, SafeHtml> flagImageColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
+            @Override
+            public SafeHtml getValue(CompetitorDTO competitor) {
+                SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                ImageResourceRenderer renderer = new ImageResourceRenderer();
+                final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
+                final String flagImageURL = competitor.getFlagImageURL();
+                if (flagImageURL != null && !flagImageURL.isEmpty()) {
+                    sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
+                    sb.appendHtmlConstant("&nbsp;");
+                } else {
+                    final ImageResource flagImageResource;
+                    if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                        flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                    } else {
+                        flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                    }
+                    if (flagImageResource != null) {
+                        sb.append(renderer.render(flagImageResource));
+                        sb.appendHtmlConstant("&nbsp;");
+                    }
+                }
+                return sb.toSafeHtml();
+            }
+        };
+
         Column<CompetitorDTO, SafeHtml> sailIdColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(CompetitorDTO competitor) {
@@ -268,7 +294,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             @Override
             public void update(int index, final CompetitorDTO competitor, String value) {
                 if (CompetitorConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    openEditCompetitorDialog(competitor, competitor.getBoatClass().getName());
+                    openEditCompetitorDialog(competitor, competitor.getBoatClass() != null ? competitor.getBoatClass().getName() : null);
                 } else if (CompetitorConfigImagesBarCell.ACTION_REFRESH.equals(value)) {
                     allowUpdate(Collections.singleton(competitor));
                 }
@@ -279,8 +305,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         table.addColumnSortHandler(competitorColumnListHandler);
         table.addColumn(competitorNameColumn, stringMessages.name());
         table.addColumn(competitorShortNameColumn, stringMessages.shortName());
-        table.addColumn(sailIdColumn, stringMessages.sailNumber());
-        table.addColumn(boatClassColumn, stringMessages.boatClass());
+        table.addColumn(flagImageColumn, stringMessages.flags());
+//        table.addColumn(sailIdColumn, stringMessages.sailNumber());
+//        table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(timeOnTimeFactorColumn, stringMessages.timeOnTimeFactor());
         table.addColumn(timeOnDistanceAllowancePerNauticalMileColumn, stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile());
         table.addColumn(displayColorColumn, stringMessages.color());

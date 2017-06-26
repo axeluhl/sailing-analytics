@@ -236,7 +236,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
         CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", "SN", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
                 /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("123", "LSC", new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), "GER 1234"),
-                new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), /* timeOnTimeFactor */ null,
+                /* timeOnTimeFactor */ null,
                 /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         newVersion.competitors.add(13, somebodyNew); // insert a competitor; this should mess up all others' indexes; check if this works
         CompetitorDTO wolfgang = getPreviousCompetitorByName("HUNGER +JESS");
@@ -258,7 +258,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
         CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", "SN", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
                 /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("123", "LSC", new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), "GER 1234"), 
-                new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), /* timeOnTimeFactor */ null,
+                /* timeOnTimeFactor */ null,
                 /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         newVersion.setSuppressed(newVersion.competitors.get(13), true); // suppress an existing competitor; compaction should reduce this to a single number only
         newVersion.setSuppressed(somebodyNew, true); // check that mixed mode with existing and new competitors works as well
@@ -282,7 +282,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
         CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", "SN", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
                 /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("123", "LSC", new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), "GER 1234"),
-                new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), /* timeOnTimeFactor */ null,
+                /* timeOnTimeFactor */ null,
                 /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         newVersion.competitors.add(somebodyNew);
         newVersion.competitorDisplayNames = new HashMap<CompetitorDTO, String>(newVersion.competitorDisplayNames);
@@ -313,7 +313,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
         CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", "SN", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
                 /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("123", "LSC", new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), "GER 1234"), 
-                new BoatClassDTO("505", BoatClassMasterdata._5O5.getHullLength(), BoatClassMasterdata._5O5.getHullBeam()), /* timeOnTimeFactor */ null,
+                /* timeOnTimeFactor */ null,
                 /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         newVersion.competitors.add(somebodyNew);
         newOrdering.add(somebodyNew);
