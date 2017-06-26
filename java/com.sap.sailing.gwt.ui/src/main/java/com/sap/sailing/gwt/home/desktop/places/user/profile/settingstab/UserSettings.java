@@ -27,9 +27,9 @@ import com.sap.sse.common.util.NaturalComparator;
  */
 public class UserSettings extends Composite implements UserSettingsView {
 
-    private static UserPreferencesUiBinder uiBinder = GWT.create(UserPreferencesUiBinder.class);
+    private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface UserPreferencesUiBinder extends UiBinder<Widget, UserSettings> {
+    interface MyUiBinder extends UiBinder<Widget, UserSettings> {
     }
 
     @UiField
@@ -37,7 +37,9 @@ public class UserSettings extends Composite implements UserSettingsView {
     @UiField
     DivElement tableWrapper;
     @UiField(provided = true)
-    final SortedCellTable<UserSettingsEntry> userSettingsTable = new SortedCellTable<>(0, DesignedCellTableResources.INSTANCE);
+
+    final SortedCellTable<UserSettingsEntry> userSettingsTable = new SortedCellTable<>(0,
+            DesignedCellTableResources.INSTANCE);
     private final Column<UserSettingsEntry, String> keyColumn = new Column<UserSettingsEntry, String>(new TextCell()) {
         @Override
         public String getValue(UserSettingsEntry entry) {
@@ -75,7 +77,7 @@ public class UserSettings extends Composite implements UserSettingsView {
                 presenter.remove(object);
             }
         });
-        
+
         showColumn.setFieldUpdater(new FieldUpdater<UserSettingsEntry, String>() {
             @Override
             public void update(int index, UserSettingsEntry object, String value) {
@@ -83,13 +85,15 @@ public class UserSettings extends Composite implements UserSettingsView {
             }
         });
 
-        userSettingsTable.addColumn(keyColumn, StringMessages.INSTANCE.settingsId(), new StringComparator(UserSettingsEntry::getKeyWithoutContext), true);
-        userSettingsTable.addColumn(documentSettingsIdColumn, StringMessages.INSTANCE.documentSettingsId(), new StringComparator(UserSettingsEntry::getDocumentSettingsId), true);
+        userSettingsTable.addColumn(keyColumn, StringMessages.INSTANCE.settingsId(),
+                new StringComparator(UserSettingsEntry::getKeyWithoutContext), true);
+        userSettingsTable.addColumn(documentSettingsIdColumn, StringMessages.INSTANCE.documentSettingsId(),
+                new StringComparator(UserSettingsEntry::getDocumentSettingsId), true);
         showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         userSettingsTable.addColumn(showColumn, "", null, false);
         deleteColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         userSettingsTable.addColumn(deleteColumn, "", null, false);
-        
+
         presenter.setView(this);
     }
 
