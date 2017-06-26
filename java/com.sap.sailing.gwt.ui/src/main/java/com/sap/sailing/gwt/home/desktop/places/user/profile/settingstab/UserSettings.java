@@ -37,7 +37,6 @@ public class UserSettings extends Composite implements UserSettingsView {
     @UiField
     DivElement tableWrapper;
     @UiField(provided = true)
-
     final SortedCellTable<UserSettingsEntry> userSettingsTable = new SortedCellTable<>(0,
             DesignedCellTableResources.INSTANCE);
     private final Column<UserSettingsEntry, String> keyColumn = new Column<UserSettingsEntry, String>(new TextCell()) {
