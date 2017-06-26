@@ -1,5 +1,7 @@
 package com.sap.sse.mail.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -65,8 +67,8 @@ public class MailServiceImpl implements ReplicableMailService {
         }
     }
 
-    protected static interface ContentSetter {
-        void setContent(MimeMessage msg) throws MessagingException;
+    protected static interface MimeMessageConstructor extends Serializable {
+        MimeMessage createMimeMessage(Session session) throws MessagingException;
     }
 
     private boolean canSendMail() {
@@ -74,11 +76,11 @@ public class MailServiceImpl implements ReplicableMailService {
     }
 
     // protected for testing purposes
-    protected void internalSendMail(String toAddress, String subject, ContentSetter contentSetter) throws MailException {
+    protected void internalSendMail(String toAddress, String subject, MimeMessageConstructor mimeMessageConstructor) throws MailException, MessagingException {
         if (canSendMail()) {
             if (toAddress != null) {
                 Session session = Session.getInstance(mailProperties, new SMTPAuthenticator());
-                MimeMessage msg = new MimeMessage(session);
+                MimeMessage msg = mimeMessageConstructor.createMimeMessage(session);
                 ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
                     msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
@@ -88,16 +90,11 @@ public class MailServiceImpl implements ReplicableMailService {
                         msg.setSubject(subject);
                     }
                     msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
-                    
                     // this fixes the DCH MIME type error 
                     // see http://tanyamadurapperuma.blogspot.de/2014/01/struggling-with-nosuchproviderexception.html
                     Thread.currentThread().setContextClassLoader(javax.mail.Session.class.getClassLoader());
-
-                    contentSetter.setContent(msg);
-                    
                     // for testing with gmail
                     //Transport ts = session.getTransport("smtps");
-
                     Transport ts = session.getTransport();
                     ts.connect();
                     ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
@@ -118,11 +115,15 @@ public class MailServiceImpl implements ReplicableMailService {
     }
 
     @Override
-    public Void internalSendMail(String toAddress, String subject, String body) throws MailException {
-        internalSendMail(toAddress, subject, new ContentSetter() {
+    public Void internalSendMail(String toAddress, String subject, String body) throws MailException, MessagingException {
+        internalSendMail(toAddress, subject, new MimeMessageConstructor() {
+            private static final long serialVersionUID = 1143693344101301674L;
+
             @Override
-            public void setContent(MimeMessage msg) throws MessagingException {
-                msg.setContent(body, "text/plain");
+            public MimeMessage createMimeMessage(Session session) throws MessagingException {
+                final MimeMessage result = new MimeMessage(session);
+                result.setContent(body, "text/plain");
+                return result;
             }
         });
         return null;
@@ -134,19 +135,24 @@ public class MailServiceImpl implements ReplicableMailService {
     }
 
     @Override
-    public Void internalSendMail(String toAddress, String subject, Multipart multipartContent) throws MailException {
-        internalSendMail(toAddress, subject, new ContentSetter() {
+    public Void internalSendMail(String toAddress, String subject, final byte[] multipartContentAsByteArray) throws MailException, MessagingException {
+        internalSendMail(toAddress, subject, new MimeMessageConstructor() {
+            private static final long serialVersionUID = -3874896927287907321L;
+
             @Override
-            public void setContent(MimeMessage msg) throws MessagingException {
-                msg.setContent(multipartContent);
+            public MimeMessage createMimeMessage(Session session) throws MessagingException {
+                final MimeMessage result = new MimeMessage(session, new ByteArrayInputStream(multipartContentAsByteArray));
+                return result;
             }
         });
         return null;
     }
 
     @Override
-    public void sendMail(String toAddress, String subject, Multipart multipartContent) throws MailException {
-        apply(s -> s.internalSendMail(toAddress, subject, multipartContent));
+    public void sendMail(String toAddress, String subject, Multipart multipartContent) throws MailException, IOException, MessagingException {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        multipartContent.writeTo(bos);
+        apply(s -> s.internalSendMail(toAddress, subject, bos.toByteArray()));
     }
 
     @Override

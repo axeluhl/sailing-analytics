@@ -34,7 +34,7 @@ public class AbstractMailServiceReplicationTest extends AbstractServerWithSingle
         };
         mailService[0] = new MailServiceImpl(null, mailServiceResolver) {
             @Override
-            protected void internalSendMail(String toAddress, String subject, ContentSetter contentSetter)
+            protected void internalSendMail(String toAddress, String subject, MimeMessageConstructor mimeMessageConstructor)
                     throws MailException {
                 if (canSendMail) {
                     Integer old = numberOfMailsSent.get(this);
