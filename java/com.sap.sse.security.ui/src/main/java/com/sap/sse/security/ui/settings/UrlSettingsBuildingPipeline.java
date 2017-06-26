@@ -1,7 +1,5 @@
 package com.sap.sse.security.ui.settings;
 
-import java.util.List;
-
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.SettingsBuildingPipeline;
@@ -56,7 +54,7 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
      * representation, because it is supposed to be used by read-only {@link ComponentContext} implementations.
      */
     @Override
-    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings, CS newInstance, List<String> path) {
+    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfUserSettings(CS newSettings, CS newInstance, Iterable<String> path) {
         throw new UnsupportedOperationException("This pipeline does not support JSON conversion");
     }
     
@@ -65,7 +63,7 @@ public class UrlSettingsBuildingPipeline implements SettingsBuildingPipeline {
      * representation, because it is supposed to be used by read-only {@link ComponentContext} implementations.
      */
     @Override
-    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(CS newSettings, CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, List<String> path) {
+    public <CS extends Settings> StorableSettingsRepresentation getStorableRepresentationOfDocumentSettings(CS newSettings, CS newInstance, StorableRepresentationOfDocumentAndUserSettings previousSettingsRepresentation, Iterable<String> path) {
         throw new UnsupportedOperationException("This pipeline does not support JSON conversion");
     }
 

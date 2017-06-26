@@ -8,7 +8,15 @@ import com.sap.sse.gwt.client.shared.perspective.Perspective;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public interface Component<SettingsType extends Settings> {
-    ArrayList<String> getPath();
+    default Iterable<String> getPath() {
+        ArrayList<String> path = new ArrayList<>();
+        Component<?> cur = this;
+        while (cur.getParentComponent() != null) {
+            path.add(0, cur.getId());
+            cur = cur.getParentComponent();
+        }
+        return path;
+    };
 
     /**
      * Each component instance has an ID that has to be unique in the context in which the component is used

@@ -1,8 +1,5 @@
 package com.sap.sse.security.ui.settings;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
@@ -204,8 +201,8 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     @Override
     public <CS extends Settings> void makeSettingsDefault(Component<CS> component, CS newDefaultSettings,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
-        List<String> path = component.getPath();
-        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(path),
+        Iterable<String> path = component.getPath();
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(path,
                 rootLifecycle);
         CS userSettings = targetLifecycle.extractUserSettings(newDefaultSettings);
         updateUserSettings(path, userSettings, targetLifecycle.createDefaultSettings(), onSettingsStoredCallback);
@@ -226,8 +223,8 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     @Override
     public <CS extends Settings> void storeSettingsForContext(Component<CS> component, CS newSettings,
             OnSettingsStoredCallback onSettingsStoredCallback) {
-        List<String> path = component.getPath();
-        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(path),
+        Iterable<String> path = component.getPath();
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(path,
                 rootLifecycle);
         CS documentSettings = targetLifecycle.extractDocumentSettings(newSettings);
         updateDocumentSettings(component.getPath(), documentSettings, targetLifecycle.createDefaultSettings(),
@@ -237,14 +234,14 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     @Override
     public <CS extends Settings> void resetSettingsToDefault(Component<CS> component, CS newSettings,
             OnSettingsLoadedCallback<CS> onSettingsStoredCallback) {
-        List<String> path = component.getPath();
-        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(new ArrayList<>(path),
+        Iterable<String> path = component.getPath();
+        ComponentLifecycle<CS> targetLifecycle = ComponentUtils.determineLifecycle(path,
                 rootLifecycle);
         removeGlobalAndContextSettings(path, targetLifecycle, new OnSettingsStoredCallback() {
             
             @Override
             public void onSuccess() {
-                getInitialSettingsForComponent(component, onSettingsStoredCallback);                
+                getInitialSettingsForComponent(component, onSettingsStoredCallback);
             }
             
             @Override
@@ -255,7 +252,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
        
     }
 
-    private void removeGlobalAndContextSettings(List<String> path, ComponentLifecycle<?> targetLifecycle,
+    private void removeGlobalAndContextSettings(Iterable<String> path, ComponentLifecycle<?> targetLifecycle,
             OnSettingsStoredCallback onSettingsStoredCallback) {
         settingsStorageManager.retrieveSettingsRepresentation(
                 new OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>() {
@@ -270,11 +267,11 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
                     public void onSuccess(StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
                         StorableSettingsRepresentation documentSettingsRepresentationRoot = StorableSettingsRepresentation
                                 .patchSettingsRepresentation(settingsRepresentation.getDocumentSettingsRepresentation(),
-                                        new ArrayList<>(path), null);
+                                        path, null);
 
                         StorableSettingsRepresentation userSettingsRepresentationRoot = StorableSettingsRepresentation
                                 .patchSettingsRepresentation(settingsRepresentation.getUserSettingsRepresentation(),
-                                        new ArrayList<>(path), null);
+                                        path, null);
 
                         StorableRepresentationOfDocumentAndUserSettings settingsRepresentationToStore = new StorableRepresentationOfDocumentAndUserSettings(
                                 userSettingsRepresentationRoot, documentSettingsRepresentationRoot);
@@ -300,7 +297,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process finishes
      */
-    private<CS extends Settings> void updateUserSettings(final List<String> path, final Settings newUserSettings, final CS newInstance,
+    private<CS extends Settings> void updateUserSettings(final Iterable<String> path, final Settings newUserSettings, final CS newInstance,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
         settingsStorageManager.retrieveSettingsRepresentation(
                 new OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>() {
@@ -315,7 +312,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
                     public void onSuccess(StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
                         StorableSettingsRepresentation newUserSettingsRepresentationOfComponent = settingsBuildingPipeline.getStorableRepresentationOfUserSettings(newUserSettings, newInstance, path);
                         StorableSettingsRepresentation userSettingsRepresentationRoot = StorableSettingsRepresentation.patchSettingsRepresentation(
-                                settingsRepresentation.getUserSettingsRepresentation(), new ArrayList<>(path),
+                                settingsRepresentation.getUserSettingsRepresentation(), path,
                                 newUserSettingsRepresentationOfComponent);
                         
                         cachedSettingsRepresentation = new StorableRepresentationOfDocumentAndUserSettings(
@@ -346,7 +343,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
      * @param onSettingsStoredCallback
      *            The callback which is called when the settings storage process finishes
      */
-    private<CS extends Settings> void updateDocumentSettings(final ArrayList<String> path, final CS newDocumentSettings, final CS newInstance,
+    private<CS extends Settings> void updateDocumentSettings(final Iterable<String> path, final CS newDocumentSettings, final CS newInstance,
             final OnSettingsStoredCallback onSettingsStoredCallback) {
         settingsStorageManager.retrieveSettingsRepresentation(
                 new OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>() {
@@ -361,7 +358,7 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
                     public void onSuccess(StorableRepresentationOfDocumentAndUserSettings settingsRepresentation) {
                         StorableSettingsRepresentation newDocumentSettingsRepresentationOfComponent = settingsBuildingPipeline.getStorableRepresentationOfDocumentSettings(newDocumentSettings, newInstance, cachedSettingsRepresentation, path);
                         StorableSettingsRepresentation documentSettingsRepresentationRoot = StorableSettingsRepresentation.patchSettingsRepresentation(
-                                settingsRepresentation.getDocumentSettingsRepresentation(), new ArrayList<>(path),
+                                settingsRepresentation.getDocumentSettingsRepresentation(), path,
                                 newDocumentSettingsRepresentationOfComponent);
                         
                         cachedSettingsRepresentation = new StorableRepresentationOfDocumentAndUserSettings(

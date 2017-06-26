@@ -1,7 +1,5 @@
 package com.sap.sse.security.ui.settings;
 
-import java.util.ArrayList;
-
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
@@ -155,14 +153,14 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
             @Override
             public void onError(Throwable caught, S fallbackDefaultSettings) {
                 CS componentFallbackSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(
-                        new ArrayList<>(component.getPath()), fallbackDefaultSettings);
+                        component.getPath(), fallbackDefaultSettings);
                 callback.onError(caught, componentFallbackSettings);
             }
 
             @Override
             public void onSuccess(S settings) {
                 CS componentSettings = ComponentUtils.determineComponentSettingsFromPerspectiveSettings(
-                        new ArrayList<>(component.getPath()), settings);
+                        component.getPath(), settings);
                 callback.onSuccess(componentSettings);
             }
         };

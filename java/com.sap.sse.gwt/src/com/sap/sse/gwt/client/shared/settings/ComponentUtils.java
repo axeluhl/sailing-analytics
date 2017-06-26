@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.shared.settings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,26 +26,28 @@ public class ComponentUtils {
      *             When the path cannot be resolved from the provided root lifecycle
      */
     @SuppressWarnings("unchecked")
-    public static <CS extends Settings> ComponentLifecycle<CS> determineLifecycle(List<String> path,
+    public static <CS extends Settings> ComponentLifecycle<CS> determineLifecycle(Iterable<String> path,
             ComponentLifecycle<? extends Settings> current) {
-        while (current instanceof PerspectiveLifecycle<?> && !path.isEmpty()) {
-            String last = path.remove(path.size() - 1);
+        final Iterator<String> pathIterator = path.iterator();
+        while (current instanceof PerspectiveLifecycle<?> && pathIterator.hasNext()) {
+            String last = pathIterator.next();
             current = ((PerspectiveLifecycle<?>) current).getLifecycleForId(last);
         }
-        if (!path.isEmpty() || current == null) {
+        if (pathIterator.hasNext() || current == null) {
             throw new IllegalStateException("Settings path is not finished, but no perspective at current level");
         }
         return (ComponentLifecycle<CS>) current;
     }
 
     @SuppressWarnings("unchecked")
-    public static <CS extends Settings> CS determineComponentSettingsFromPerspectiveSettings(List<String> path,
+    public static <CS extends Settings> CS determineComponentSettingsFromPerspectiveSettings(Iterable<String> path,
             Settings current) {
-        while (current instanceof PerspectiveCompositeSettings<?> && !path.isEmpty()) {
-            String last = path.remove(path.size() - 1);
+        final Iterator<String> pathIterator = path.iterator();
+        while (current instanceof PerspectiveCompositeSettings<?> && pathIterator.hasNext()) {
+            String last = pathIterator.next();
             current = ((PerspectiveCompositeSettings<?>) current).findSettingsByComponentId(last);
         }
-        if (!path.isEmpty() || current == null) {
+        if (pathIterator.hasNext() || current == null) {
             throw new IllegalStateException("Settings path is not finished, but no settings at current level");
         }
         return (CS) current;

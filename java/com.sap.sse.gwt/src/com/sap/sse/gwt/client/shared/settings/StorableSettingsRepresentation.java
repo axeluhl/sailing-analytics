@@ -1,7 +1,6 @@
 package com.sap.sse.gwt.client.shared.settings;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -76,9 +75,9 @@ public class StorableSettingsRepresentation {
      * @return The patched storable settings representation
      */
     public static StorableSettingsRepresentation patchSettingsRepresentation(StorableSettingsRepresentation root,
-            List<String> path, StorableSettingsRepresentation newSettings) {
-        JSONObject patchedSettingsJsonRepresentation = patchJsonObject(root == null ? null : root.asJson(), path,
-                Collections.unmodifiableList(new ArrayList<>(path)), newSettings==null?null:newSettings.asJson());
+            Iterable<String> path, StorableSettingsRepresentation newSettings) {
+        JSONObject patchedSettingsJsonRepresentation = patchJsonObject(root == null ? null : root.asJson(),
+                path.iterator(), newSettings == null ? null : newSettings.asJson());
         return new StorableSettingsRepresentation(patchedSettingsJsonRepresentation);
     }
     
@@ -93,17 +92,17 @@ public class StorableSettingsRepresentation {
      * @param pipelineLevel
      * @return
      */
-    private static JSONObject patchJsonObject(JSONObject root, List<String> path, List<String> originalPath,
+    private static JSONObject patchJsonObject(JSONObject root, Iterator<String> path,
             JSONObject newSettings) {
-        if (path.isEmpty()) {
+        if (!path.hasNext()) {
             return newSettings;
         }
         if (root == null) {
             root = new JSONObject();
         }
-        String current = path.remove(path.size() - 1);
+        String current = path.next();
         // we need to go further
-        if (!path.isEmpty()) {
+        if (path.hasNext()) {
             JSONValue child = root.get(current);
             boolean haskey = root.containsKey(current);
             if (child == null || child.isObject() == null) {
@@ -117,22 +116,22 @@ public class StorableSettingsRepresentation {
                 child = new JSONObject();
                 root.put(current, child);
             }
-            return patchJsonObject(child.isObject(), path, originalPath, newSettings);
+            return patchJsonObject(child.isObject(), path, newSettings);
         } else {
             root.put(current, newSettings);
         }
         return root;
     }
     
-    public StorableSettingsRepresentation getSubSettingsRepresentation(List<String> subPath) {
-        return new StorableSettingsRepresentation(getSubSettingsRepresentation(internalSettingsRepresentation, new ArrayList<>(subPath)));
+    public StorableSettingsRepresentation getSubSettingsRepresentation(Iterable<String> subPath) {
+        return new StorableSettingsRepresentation(getSubSettingsRepresentation(internalSettingsRepresentation, subPath.iterator()));
     }
     
-    public static JSONObject getSubSettingsRepresentation(JSONObject root, List<String> subPath) {
-        if (subPath.isEmpty()) {
+    public static JSONObject getSubSettingsRepresentation(JSONObject root, Iterator<String> subPath) {
+        if (!subPath.hasNext()) {
             return root;
         } else {
-            String current = subPath.remove(subPath.size() - 1);
+            String current = subPath.next();
             // we need to go further
             JSONValue child = root.get(current);
             boolean haskey = root.containsKey(current);
