@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.places.user.profile.settings;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.settingstab;
 
 import java.util.List;
 
@@ -17,6 +17,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
+import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsEntry;
+import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util.Function;
