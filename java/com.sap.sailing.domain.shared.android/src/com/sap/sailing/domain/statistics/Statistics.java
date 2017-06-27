@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.statistics;
 
+import com.sap.sailing.domain.common.Distance;
+
 /**
  * A {@link Statistics} object represents several statistical information.
  */
@@ -36,7 +38,12 @@ public interface Statistics {
     long getNumberOfWindFixes();
 
     /**
-     * @return the total sailed distance (in sea miles)
+     * @return the totally sailed {@link Distance}
+     */
+    Distance getDistanceTraveled();
+
+    /**
+     * @return the totally sailed distance (in sea miles)
      */
     double getSailedMiles();
 

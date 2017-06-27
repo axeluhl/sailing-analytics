@@ -56,15 +56,16 @@ public class StatisticsImpl implements Statistics {
     }
 
     @Override
+    public Distance getDistanceTraveled() {
+        return distanceTraveled;
+    }
+
+    @Override
     public double getSailedMiles() {
         if(getDistanceTraveled() == null) {
             return 0.0;
         }
         return getDistanceTraveled().getNauticalMiles();
-    }
-
-    public Distance getDistanceTraveled() {
-        return distanceTraveled;
     }
 
 }
