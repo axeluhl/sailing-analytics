@@ -1443,7 +1443,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     double bearingOfCombinedWindInDeg = windFix.trueWindBearingDeg;
                     double rotatedBearingDeg1 = 0.0;
                     double rotatedBearingDeg2 = 0.0;
-                    if(lastBoatFix.legType != null){
+                    if (lastBoatFix.legType == null) {
+                        GWT.log("no legType to display advantage line");
+                    } else {
                         switch (lastBoatFix.legType) {
                         case UPWIND:
                         case DOWNWIND: {
@@ -1455,8 +1457,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             if (rotatedBearingDeg2 < 0.0) {
                                 rotatedBearingDeg2 += 360.0;
                             }
+                                break;
                         }
-                            break;
                         case REACHING: {
                             rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
                             if (rotatedBearingDeg1 >= 360.0) {
@@ -1466,8 +1468,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             if (rotatedBearingDeg2 < 0.0) {
                                 rotatedBearingDeg2 += 360.0;
                             }
+                                break;
                         }
-                            break;
                         }
                         MVCArray<LatLng> nextPath = MVCArray.newInstance();
                         LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
