@@ -15,6 +15,7 @@ import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
@@ -125,7 +126,6 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         if (numPoints < 1) {
             return;
         }
-        String title = "Path at " + numPoints + " points.";
         long totalTime = windDTOList.get(numPoints - 1).timepoint - windDTOList.get(0).timepoint;
 
         //LatLng start = LatLng.newInstance(windDTOList.get(0).position.latDeg, windDTOList.get(0).position.latDeg);
@@ -190,11 +190,8 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
             // MeterDistance meterDistance = new MeterDistance(distance);
             Date timeDiffDate = new Date(totalTime);
             TimeZone gmt = TimeZone.createTimeZone(0);
-            title += " " + NumberFormat.getFormat("0.00").format(distance) + " nmi";
-            title += " in " + DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(timeDiffDate, gmt);
-
             // logger.info(title);
-            getCanvas().setTitle(title);
+            getCanvas().setTitle(StringMessages.INSTANCE.pathCanvasOverlayTitle(numPoints,NumberFormat.getFormat("0.00").format(distance),DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(timeDiffDate, gmt)));
         }
     }
 

@@ -71,7 +71,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to stop tracking races " + races + ": " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(Util.createList(races),caught.getMessage()));
                     }
         
                     @Override
@@ -93,8 +93,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to remove races " + regattaNamesAndRaceNames +
-                                ": " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorRemovingRace(regattaNamesAndRaceNames,caught.getMessage()));
                     }
 
                     @Override

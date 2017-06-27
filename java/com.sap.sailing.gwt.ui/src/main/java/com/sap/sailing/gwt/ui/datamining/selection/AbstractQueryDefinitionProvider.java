@@ -55,8 +55,7 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
                 getDataMiningService().getComponentsChangedTimepoint(new AsyncCallback<Date>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        AbstractQueryDefinitionProvider.this.errorReporter.reportError("Error fetching components changed timepoint from the server: "
-                                + caught.getMessage());
+                        AbstractQueryDefinitionProvider.this.errorReporter.reportError(stringMessages.errorFetchingComponentsChangedTimepoint(caught.getMessage()));
                         dataminingComponentsChangedTimer.schedule(timerDelayInMillis);
                     }
                     @Override
@@ -78,8 +77,7 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
         getDataMiningService().getComponentsChangedTimepoint(new AsyncCallback<Date>() {
             @Override
             public void onFailure(Throwable caught) {
-                AbstractQueryDefinitionProvider.this.errorReporter.reportError("Error fetching components changed timepoint from the server: "
-                        + caught.getMessage());
+                AbstractQueryDefinitionProvider.this.errorReporter.reportError(stringMessages.errorFetchingComponentsChangedTimepoint(caught.getMessage()));
             }
             @Override
             public void onSuccess(Date componentsChangedTimepoint) {

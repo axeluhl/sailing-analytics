@@ -532,7 +532,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error adding a wind fix for race " + raceIdentifier + ": " + caught.getMessage());
+                errorReporter.reportError(stringMessages.errorAddingWindFixForRace(raceIdentifier,caught.getMessage()));
             }
         });
     }
@@ -566,7 +566,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error reading wind fixes: " + caught.getMessage());
+                            errorReporter.reportError(stringMessages.errorReadingWindFixes(caught.getMessage()));
                         }
                     });
 

@@ -296,8 +296,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             @Override
             public void onFailure(Throwable caught) {
                 notifyStateChange();
-                errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: "
-                        + caught.getMessage());
+                errorReporter.reportError(stringMessages.remoteProcedureCall()+ "getMediaTracksForRace(...) - " +stringMessages.error()
+                + caught.getMessage());
+                
             }
 
             @Override
@@ -330,7 +331,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             @Override
             public void onFailure(Throwable caught) {
                 notifyStateChange();
-                errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: "
+                errorReporter.reportError(stringMessages.remoteProcedureCall()+ "getMediaTracksForRace(...) - " +stringMessages.error()
                         + caught.getMessage());
             }
 
