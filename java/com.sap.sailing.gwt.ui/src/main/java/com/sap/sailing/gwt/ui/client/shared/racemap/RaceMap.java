@@ -353,7 +353,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * quick ranks received from a {@link RaceMapDataDTO#quickRanks} field but may choose to ignore this information, e.g.,
      * if it can assume that more current information about ranks and leg numbers is available from a {@link LeaderboardDTO}.
      */
-    private final QuickRanksDTOProvider quickRanksDTOProvider;
+    private QuickRanksDTOProvider quickRanksDTOProvider;
     
     private final CombinedWindPanel combinedWindPanel;
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
@@ -487,6 +487,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.setSize("100%", "100%");
     }
     
+    public void setQuickRanksDTOProvider(QuickRanksDTOProvider quickRanksDTOProvider) {
+        this.quickRanksDTOProvider = quickRanksDTOProvider;
+    }
     /**
      * The {@link WindDTO#dampenedTrueWindFromDeg} direction if {@link #lastCombinedWindTrackInfoDTO} has a
      * {@link WindSourceType#COMBINED} source which has at least one fix recorded; <code>null</code> otherwise.

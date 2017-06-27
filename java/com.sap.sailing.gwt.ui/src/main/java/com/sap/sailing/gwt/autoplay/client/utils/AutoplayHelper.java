@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
+import com.sap.sailing.gwt.ui.raceboard.AbstractQuickRanksDTOProvider;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -203,7 +204,7 @@ public class AutoplayHelper {
                                                     AutoplayHelper.asyncActionsExecutor, errorReporter, raceboardTimer,
                                                     callback, clientTimeWhenResponseWasReceived,
                                                     serverTimeDuringRequest, clientTimeWhenRequestWasSent,
-                                                    raceTimesInfo);
+                                                    raceTimesInfo,new DefaultQuickRanksDTOProvider());
                                         }
 
                                         @Override
@@ -261,7 +262,7 @@ public class AutoplayHelper {
             Iterable<CompetitorDTO> competitors, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
             AsyncCallback<RVWrapper> callback, long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest,
-            long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+            long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos,AbstractQuickRanksDTOProvider provider) {
 
         ArrayList<ZoomTypes> typesToConsiderOnZoom = new ArrayList<>();
         // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
@@ -282,7 +283,7 @@ public class AutoplayHelper {
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
                 asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
                 new RaceCompetitorSet(competitorSelectionProvider), StringMessages.INSTANCE, currentLiveRace,
-                raceMapResources, false, new DefaultQuickRanksDTOProvider());
+                raceMapResources, false,provider);
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
                 serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         // raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceboardPerspective);
