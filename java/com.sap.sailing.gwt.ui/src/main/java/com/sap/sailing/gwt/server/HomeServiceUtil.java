@@ -20,9 +20,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -177,51 +175,6 @@ public final class HomeServiceUtil {
 
     public static int calculateCompetitorsCount(Leaderboard sl) {
         return Util.size(sl.getCompetitors());
-    }
-    
-    public static int calculateRaceCount(Leaderboard sl) {
-        int nonCarryForwardRacesCount = 0;
-        for (RaceColumn column : sl.getRaceColumns()) {
-            if (!column.isCarryForward()) {
-                nonCarryForwardRacesCount += Util.size(column.getFleets());
-            }
-        }
-        return nonCarryForwardRacesCount;
-    }
-    
-    public static int calculateRaceColumnCount(Leaderboard sl) {
-        int nonCarryForwardRacesCount = 0;
-        for (RaceColumn rc : sl.getRaceColumns()) {
-            nonCarryForwardRacesCount += rc.isCarryForward() ? 0 : 1;
-        }
-        return nonCarryForwardRacesCount;
-    }
-    
-    public static int calculateTrackedRaceCount(Leaderboard sl) {
-        int count=0;
-        for (RaceColumn column : sl.getRaceColumns()) {
-            for (Fleet fleet : column.getFleets()) {
-                TrackedRace trackedRace = column.getTrackedRace(fleet);
-                if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-    
-    public static int calculateTrackedRaceColumnCount(Leaderboard sl) {
-        int count=0;
-        for (RaceColumn column : sl.getRaceColumns()) {
-            for (Fleet fleet : column.getFleets()) {
-                TrackedRace trackedRace = column.getTrackedRace(fleet);
-                if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
-                    count++;
-                    break;
-                }
-            }
-        }
-        return count;
     }
     
     public static String getBoatClassName(Leaderboard leaderboard) {
