@@ -6,8 +6,10 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
@@ -213,5 +216,15 @@ public class RemoteSailingServerSet {
             LockUtil.unlockAfterRead(lock);
         }
         return result;
+    }
+    
+    public Map<RemoteSailingServerReference, Util.Pair<Map<Year, Statistics>, Exception>> getCachedStatisticsForRemoteSailingServers() {
+        LockUtil.lockForRead(lock);
+        try {
+            // TODO proper implementation
+            return new HashMap<>();
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
     }
 }

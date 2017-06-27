@@ -33,6 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -153,7 +154,6 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.statistics.Statistics;
-import com.sap.sailing.domain.statistics.impl.StatisticsImpl;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -228,6 +228,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
+import com.sap.sailing.server.statistics.StatisticsAggregator;
 import com.sap.sailing.server.statistics.StatisticsCalculator;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
@@ -3750,24 +3751,51 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         getAllEvents().forEach((event) -> {
             final Year eventYear = EventUtil.getYearOfEvent(event);
             final StatisticsCalculator calculator;
-            if(calculators.containsKey(eventYear)) {
+            if (calculators.containsKey(eventYear)) {
                 calculator = calculators.get(eventYear);
             } else {
                 calculator = new StatisticsCalculator();
                 calculators.put(eventYear, calculator);
             }
-            event.getLeaderboardGroups().forEach((lg)->{
+            event.getLeaderboardGroups().forEach((lg) -> {
                 lg.getLeaderboards().forEach(calculator::addLeaderboard);
             });
         });
         Map<Year, Statistics> result = new HashMap<>();
         calculators.forEach((year, calculator) -> {
-            result.put(year,
-                    new StatisticsImpl(calculator.getNumberOfCompetitors(), calculator.getNumberOfRegattas(),
-                            calculator.getNumberOfRaces(), calculator.getNumberOfTrackedRaces(),
-                            calculator.getNumberOfGPSFixes(), calculator.getNumberOfWindFixes(),
-                            calculator.getTotalDistanceTraveled()));
+            result.put(year, calculator.getStatistics());
         });
+        return result;
+    }
+
+    @Override
+    public Map<Year, Statistics> getOverallStatisticsByYear() {
+        final Map<Year, StatisticsAggregator> statisticsAggregators = new HashMap<>();
+        final BiConsumer<Year, Statistics> statisticsConsumer = (year, statistics) -> {
+            final StatisticsAggregator statisticsAggregator;
+            if (statisticsAggregators.containsKey(year)) {
+                statisticsAggregator = statisticsAggregators.get(year);
+            } else {
+                statisticsAggregator = new StatisticsAggregator();
+                statisticsAggregators.put(year, statisticsAggregator);
+            }
+            statisticsAggregator.addStatistics(statistics);
+        };
+
+        Map<Year, Statistics> localStatistics = getLocalStatisticsByYear();
+        localStatistics.forEach(statisticsConsumer);
+
+        Map<RemoteSailingServerReference, Pair<Map<Year, Statistics>, Exception>> remoteStatistics = remoteSailingServerSet
+                .getCachedStatisticsForRemoteSailingServers();
+        remoteStatistics.forEach((ref, statisticsOrError) -> {
+            Map<Year, Statistics> remoteStatisticsOrNull = statisticsOrError.getA();
+            if (remoteStatisticsOrNull != null) {
+                remoteStatisticsOrNull.forEach(statisticsConsumer);
+            }
+        });
+
+        final Map<Year, Statistics> result = new HashMap<>();
+        statisticsAggregators.forEach((year, aggregator) -> result.put(year, aggregator.getStatistics()));
         return result;
     }
 }

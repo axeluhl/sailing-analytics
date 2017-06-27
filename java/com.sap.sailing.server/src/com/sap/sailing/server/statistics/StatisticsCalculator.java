@@ -16,6 +16,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.statistics.Statistics;
+import com.sap.sailing.domain.statistics.impl.StatisticsImpl;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -190,5 +192,12 @@ public class StatisticsCalculator {
 
     public int getNumberOfCompetitors() {
         return competitors.size();
+    }
+    
+    public Statistics getStatistics() {
+        return new StatisticsImpl(getNumberOfCompetitors(), getNumberOfRegattas(),
+                getNumberOfRaces(), getNumberOfTrackedRaces(),
+                getNumberOfGPSFixes(), getNumberOfWindFixes(),
+                getTotalDistanceTraveled());
     }
 }

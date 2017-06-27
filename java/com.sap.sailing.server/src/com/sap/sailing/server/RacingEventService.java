@@ -675,4 +675,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a map of {@link Statistics statistic objects} keyed be the {@link Year year} they are representing
      */
     Map<Year, Statistics> getLocalStatisticsByYear();
+
+    /**
+     * Provides {@link Statistics statistic information} for every {@link Year year} which is covered by the local and
+     * all remote servers.
+     * 
+     * @return a map of {@link Statistics statistic objects} keyed be the {@link Year year} they are representing
+     */
+    Map<Year, Statistics> getOverallStatisticsByYear();
 }
