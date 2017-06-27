@@ -17,11 +17,11 @@ public class StatisticsJsonDeserializer implements JsonDeserializer<Statistics> 
         int competitors = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_COMPETITORS);
         int regattas = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_REGATTAS);
         int races = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_RACES);
-        int rrackedRaces = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_TRACKED_RACES);
+        int trackedRaces = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_TRACKED_RACES);
         long gpsFixes = (long) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_GPS_FIXES);
         long windFixes = (long) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_WIND_FIXES);
         Distance distance = new MeterDistance((double) object.get(StatisticsJsonSerializer.FIELD_DISTANCE_TRAVELED));
-        return new StatisticsImpl(competitors, regattas, races, rrackedRaces, gpsFixes, windFixes, distance);
+        return new StatisticsImpl(competitors, regattas, races, trackedRaces, gpsFixes, windFixes, distance);
     }
 
 }
