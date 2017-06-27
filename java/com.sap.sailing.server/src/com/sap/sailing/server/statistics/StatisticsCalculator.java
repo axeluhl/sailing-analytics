@@ -8,7 +8,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
@@ -45,7 +47,9 @@ public class StatisticsCalculator {
     private final boolean calculateDistanceTravelled;
 
     private Set<Competitor> competitors = new HashSet<>();
-    private int races, trackedRaces, regattas;
+    private Set<Pair<RaceColumn, Fleet>> races = new HashSet<>();
+    private Set<TrackedRace> trackedRaces = new HashSet<>();
+    private Set<String> regattas = new HashSet<>();
     private long numberOfGPSFixes, numberOfWindFixes;
     private Distance totalDistanceTraveled = Distance.NULL;
     private Triple<Competitor, Speed, TimePoint> maxSpeed = null;
@@ -61,19 +65,22 @@ public class StatisticsCalculator {
     }
 
     public void addLeaderboard(Leaderboard leaderboard) {
-        races += LeaderboardUtil.calculateRaceCount(leaderboard);
-        trackedRaces += LeaderboardUtil.calculateTrackedRaceCount(leaderboard);
-        regattas++;
+        races.addAll(LeaderboardUtil.calculateRaces(leaderboard));
+        Set<TrackedRace> trackedRacesForLeaderboardWithData = LeaderboardUtil.calculateTrackedRacesWithData(leaderboard);
+        regattas.add(leaderboard.getName());
         String disableStats = System.getenv("DISABLE_STATS");
         if (disableStats == null || "false".equals(disableStats)) {
             try {
-                for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-                    doForTrackedRace(trackedRace);
+                for (TrackedRace trackedRace : trackedRacesForLeaderboardWithData) {
+                    if(!trackedRaces.contains(trackedRace)) {
+                        doForTrackedRace(trackedRace);
+                    }
                 }
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Exception during calculation of event statistics", e);
             }
         }
+        trackedRaces.addAll(trackedRacesForLeaderboardWithData);
     }
 
     private void doForTrackedRace(TrackedRace trackedRace) {
@@ -163,15 +170,15 @@ public class StatisticsCalculator {
     }
 
     public int getNumberOfRaces() {
-        return races;
+        return races.size();
     }
 
     public int getNumberOfTrackedRaces() {
-        return trackedRaces;
+        return trackedRaces.size();
     }
 
     public int getNumberOfRegattas() {
-        return regattas;
+        return regattas.size();
     }
 
     public long getNumberOfGPSFixes() {
