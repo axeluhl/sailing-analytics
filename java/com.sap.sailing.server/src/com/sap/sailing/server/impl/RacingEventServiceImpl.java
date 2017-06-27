@@ -153,6 +153,7 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.statistics.Statistics;
+import com.sap.sailing.domain.statistics.impl.StatisticsImpl;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -3761,8 +3762,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         });
         Map<Year, Statistics> result = new HashMap<>();
         calculators.forEach((year, calculator) -> {
-            // TODO
-//            result.put(year, new StatisticsImpl());
+            result.put(year,
+                    new StatisticsImpl(calculator.getNumberOfCompetitors(), calculator.getNumberOfRegattas(),
+                            calculator.getNumberOfRaces(), calculator.getNumberOfTrackedRaces(),
+                            calculator.getNumberOfGPSFixes(), calculator.getNumberOfWindFixes(),
+                            calculator.getTotalDistanceTraveled()));
         });
         return result;
     }
