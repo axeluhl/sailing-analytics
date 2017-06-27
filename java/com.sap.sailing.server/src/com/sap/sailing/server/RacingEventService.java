@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.time.Year;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
@@ -669,18 +668,18 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     int getNumberOfTrackedRacesRestored();
 
     /**
-     * Provides {@link Statistics statistic information} for every {@link Year year} which is covered by the local
+     * Provides {@link Statistics statistic information} for every year which is covered by the local
      * server.
      * 
-     * @return a map of {@link Statistics statistic objects} keyed be the {@link Year year} they are representing
+     * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
      */
-    Map<Year, Statistics> getLocalStatisticsByYear();
+    Map<Integer, Statistics> getLocalStatisticsByYear();
 
     /**
-     * Provides {@link Statistics statistic information} for every {@link Year year} which is covered by the local and
+     * Provides {@link Statistics statistic information} for every year which is covered by the local and
      * all remote servers.
      * 
-     * @return a map of {@link Statistics statistic objects} keyed be the {@link Year year} they are representing
+     * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
      */
-    Map<Year, Statistics> getOverallStatisticsByYear();
+    Map<Integer, Statistics> getOverallStatisticsByYear();
 }

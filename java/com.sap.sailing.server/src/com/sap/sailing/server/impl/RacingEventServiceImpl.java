@@ -12,7 +12,6 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -3746,10 +3745,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Map<Year, Statistics> getLocalStatisticsByYear() {
-        final Map<Year, StatisticsCalculator> calculators = new HashMap<>();
+    public Map<Integer, Statistics> getLocalStatisticsByYear() {
+        final Map<Integer, StatisticsCalculator> calculators = new HashMap<>();
         getAllEvents().forEach((event) -> {
-            final Year eventYear = EventUtil.getYearOfEvent(event);
+            final Integer eventYear = EventUtil.getYearOfEvent(event);
             final StatisticsCalculator calculator;
             if (calculators.containsKey(eventYear)) {
                 calculator = calculators.get(eventYear);
@@ -3761,7 +3760,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 lg.getLeaderboards().forEach(calculator::addLeaderboard);
             });
         });
-        Map<Year, Statistics> result = new HashMap<>();
+        Map<Integer, Statistics> result = new HashMap<>();
         calculators.forEach((year, calculator) -> {
             result.put(year, calculator.getStatistics());
         });
@@ -3769,9 +3768,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Map<Year, Statistics> getOverallStatisticsByYear() {
-        final Map<Year, StatisticsAggregator> statisticsAggregators = new HashMap<>();
-        final BiConsumer<Year, Statistics> statisticsConsumer = (year, statistics) -> {
+    public Map<Integer, Statistics> getOverallStatisticsByYear() {
+        final Map<Integer, StatisticsAggregator> statisticsAggregators = new HashMap<>();
+        final BiConsumer<Integer, Statistics> statisticsConsumer = (year, statistics) -> {
             final StatisticsAggregator statisticsAggregator;
             if (statisticsAggregators.containsKey(year)) {
                 statisticsAggregator = statisticsAggregators.get(year);
@@ -3782,19 +3781,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             statisticsAggregator.addStatistics(statistics);
         };
 
-        Map<Year, Statistics> localStatistics = getLocalStatisticsByYear();
+        Map<Integer, Statistics> localStatistics = getLocalStatisticsByYear();
         localStatistics.forEach(statisticsConsumer);
 
-        Map<RemoteSailingServerReference, Pair<Map<Year, Statistics>, Exception>> remoteStatistics = remoteSailingServerSet
+        Map<RemoteSailingServerReference, Pair<Map<Integer, Statistics>, Exception>> remoteStatistics = remoteSailingServerSet
                 .getCachedStatisticsForRemoteSailingServers();
         remoteStatistics.forEach((ref, statisticsOrError) -> {
-            Map<Year, Statistics> remoteStatisticsOrNull = statisticsOrError.getA();
+            Map<Integer, Statistics> remoteStatisticsOrNull = statisticsOrError.getA();
             if (remoteStatisticsOrNull != null) {
                 remoteStatisticsOrNull.forEach(statisticsConsumer);
             }
         });
 
-        final Map<Year, Statistics> result = new HashMap<>();
+        final Map<Integer, Statistics> result = new HashMap<>();
         statisticsAggregators.forEach((year, aggregator) -> result.put(year, aggregator.getStatistics()));
         return result;
     }

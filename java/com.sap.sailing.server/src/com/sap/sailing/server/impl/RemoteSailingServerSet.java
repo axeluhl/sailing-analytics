@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -218,7 +217,7 @@ public class RemoteSailingServerSet {
         return result;
     }
     
-    public Map<RemoteSailingServerReference, Util.Pair<Map<Year, Statistics>, Exception>> getCachedStatisticsForRemoteSailingServers() {
+    public Map<RemoteSailingServerReference, Util.Pair<Map<Integer, Statistics>, Exception>> getCachedStatisticsForRemoteSailingServers() {
         LockUtil.lockForRead(lock);
         try {
             // TODO proper implementation
