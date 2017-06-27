@@ -1811,7 +1811,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unknownLeaderboardType(String name);
     String selectCompetitorsToEliminate();
     String trackedRaceAlreadyLinked();
-    String settingsId();
+    String reallyRemoveSeries(String seriesName);
     String documentSettingsId();
     String settingsForId(String id);
     String userProfileSettingsTabDescription();
