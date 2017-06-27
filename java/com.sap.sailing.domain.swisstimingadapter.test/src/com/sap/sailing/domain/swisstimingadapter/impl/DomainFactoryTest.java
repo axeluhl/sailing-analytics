@@ -53,14 +53,4 @@ public class DomainFactoryTest {
         assertThat(raceType, is(notNullValue()));
         assertThat(raceType.getRaceCode(), is(OlympicRaceCode.UNKNOWN));
     }
-    
-    @Ignore
-    @Test
-    public void testCompetitorLookup() throws Exception {
-        before();
-        
-//        swissTimingDomainFactory.getOrCreateCompetitor(boatID, threeLetterIOCCode, name, boatClass);
-
-    }
-
 }
