@@ -1811,4 +1811,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unknownLeaderboardType(String name);
     String selectCompetitorsToEliminate();
     String trackedRaceAlreadyLinked();
+    String requiresRegattaRaceAndLeaderboard();
+    String couldNotFindRaceInRegatte(String raceName, String regattaName);
+    String algorithmTimeOutText();
+    String mixedLegText();
 }
