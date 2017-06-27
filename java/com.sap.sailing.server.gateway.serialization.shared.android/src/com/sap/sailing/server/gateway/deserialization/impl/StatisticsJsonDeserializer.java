@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.statistics.impl.StatisticsImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -13,15 +14,14 @@ public class StatisticsJsonDeserializer implements JsonDeserializer<Statistics> 
 
     @Override
     public Statistics deserialize(JSONObject object) throws JsonDeserializationException {
-        int numberOfCompetitors = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_COMPETITORS);
-        int numberOfRegattas = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_REGATTAS);
-        int numberOfRaces = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_RACES);
-        int numberOfTrackedRaces = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_TRACKED_RACES);
-        long numberOfGPSFixes = (long) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_GPS_FIXES);
-        long numberOfWindFixes = (long) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_WIND_FIXES);
-        Distance distanceTraveled = (Distance) object.get(StatisticsJsonSerializer.FIELD_DISTANCE_TRAVELED);
-        return new StatisticsImpl(numberOfCompetitors, numberOfRegattas, numberOfRaces, numberOfTrackedRaces,
-                numberOfGPSFixes, numberOfWindFixes, distanceTraveled);
+        int competitors = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_COMPETITORS);
+        int regattas = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_REGATTAS);
+        int races = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_RACES);
+        int rrackedRaces = (int) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_TRACKED_RACES);
+        long gpsFixes = (long) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_GPS_FIXES);
+        long windFixes = (long) object.get(StatisticsJsonSerializer.FIELD_NUMBER_OF_WIND_FIXES);
+        Distance distance = new MeterDistance((double) object.get(StatisticsJsonSerializer.FIELD_DISTANCE_TRAVELED));
+        return new StatisticsImpl(competitors, regattas, races, rrackedRaces, gpsFixes, windFixes, distance);
     }
 
 }

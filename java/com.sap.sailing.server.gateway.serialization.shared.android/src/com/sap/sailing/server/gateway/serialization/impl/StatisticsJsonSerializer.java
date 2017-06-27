@@ -24,7 +24,7 @@ public class StatisticsJsonSerializer implements JsonSerializer<Statistics> {
         result.put(FIELD_NUMBER_OF_TRACKED_RACES, object.getNumberOfTrackedRaces());
         result.put(FIELD_NUMBER_OF_GPS_FIXES, object.getNumberOfGPSFixes());
         result.put(FIELD_NUMBER_OF_WIND_FIXES, object.getNumberOfWindFixes());
-        result.put(FIELD_DISTANCE_TRAVELED, object.getDistanceTraveled());
+        result.put(FIELD_DISTANCE_TRAVELED, object.getDistanceTraveled().getMeters());
         return result;
     }
 }
