@@ -756,6 +756,8 @@ public class SensorFixStoreAndLoadTest {
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         addBravoFixes();
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        // creating a new RaceLog instance to ensure that startOfTracking insn't set initially
+        raceLog = new RaceLogImpl("racelog");
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 0);

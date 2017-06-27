@@ -31,6 +31,9 @@
     <color name="switch_track">#898989</color>
     <color name="switch_thumb">@color/constant_sap_yellow_1</color>
 
+    <color name="popup_background">#fafafa</color>
+    <color name="popup_pressed">#ebebeb</color>
+
     <!-- buoy colors -->
     <!-- color layer -->
     <color name="buoy_color">#f8ac00</color> <!-- default -->

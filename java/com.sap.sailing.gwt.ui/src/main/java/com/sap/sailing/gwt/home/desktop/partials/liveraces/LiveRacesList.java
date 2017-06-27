@@ -50,6 +50,11 @@ public class LiveRacesList extends Composite {
         }
         
         @Override
+        protected SortableRaceListColumn<LiveRaceDTO, ?> getDefaultSortColumn() {
+            return startTimeColumn;
+        }
+        
+        @Override
         protected void setTableData(Collection<LiveRaceDTO> data) {
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
             this.fleetCornerColumn.setShowDetails(hasFleets);

@@ -70,6 +70,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
@@ -158,6 +159,7 @@ public class RaceBoardPanel
     
     private final RaceBoardResources raceBoardResources = RaceBoardResources.INSTANCE; 
     private final RaceBoardMainCss mainCss = raceBoardResources.mainCss();
+    private final QuickRanksDTOFromLeaderboardDTOProvider quickRanksDTOProvider;
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
@@ -218,10 +220,12 @@ public class RaceBoardPanel
         RaceTimePanelLifecycle raceTimePanelLifecycle = lifecycle.getRaceTimePanelLifecycle();
         RaceTimePanelSettings raceTimePanelSettings = settings
                 .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
+        final RaceCompetitorSet raceCompetitorSet = new RaceCompetitorSet(competitorSelectionProvider);
+        quickRanksDTOProvider = new QuickRanksDTOFromLeaderboardDTOProvider(raceCompetitorSet, selectedRaceIdentifier);
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
-                competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
-                /* showHeaderPanel */ true) {
+                competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
+                raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -568,6 +572,7 @@ public class RaceBoardPanel
         if (editMarkPositionPanel != null) {
             editMarkPositionPanel.setLeaderboard(leaderboard);
         }
+        quickRanksDTOProvider.updateQuickRanks(leaderboard);
     }
 
     @Override

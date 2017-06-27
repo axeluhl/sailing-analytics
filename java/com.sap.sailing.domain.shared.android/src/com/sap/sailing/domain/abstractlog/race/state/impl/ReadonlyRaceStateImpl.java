@@ -173,7 +173,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     protected ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog,
             SimpleRaceLogIdentifier forRaceLogIdentifier, Clock analyzersClock,
             RacingProcedureFactory procedureFactory,
-            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates, boolean update) {
+            final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates, boolean update) {
         this.raceLog = raceLog;
         this.raceLogResolver = raceLogResolver;
         this.procedureFactory = procedureFactory;
@@ -212,7 +212,6 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.raceLog.addListener(new WeakRaceLogChangedVisitor(this.raceLog, this));
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
-        recreateRacingProcedure();
         final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStatesAndMe;
         if (forRaceLogIdentifier != null) {
             dependentRaceStatesAndMe = new HashMap<>(dependentRaceStates);
@@ -220,9 +219,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         } else {
             dependentRaceStatesAndMe = dependentRaceStates;
         }
+        recreateRacingProcedure(dependentRaceStatesAndMe);
         // Check whether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
         // dependent startTime setup listeners
-        adjustObserverForRelativeStartTime();
+        adjustObserverForRelativeStartTime(dependentRaceStatesAndMe);
     }
     
     protected ReadonlyRaceState getRaceStateToObserve() {
@@ -372,13 +372,17 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     private void adjustObserverForRelativeStartTime() {
-        final StartTimeFinderResult startTimeAnalysisResult = startTimeAnalyzer.analyze();
-        adjustObserverForRelativeStartTime(startTimeAnalysisResult);
+        adjustObserverForRelativeStartTime(Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
     }
     
-    private void adjustObserverForRelativeStartTime(final StartTimeFinderResult startTimeAnalysisResult) {
+    private void adjustObserverForRelativeStartTime(final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        final StartTimeFinderResult startTimeAnalysisResult = startTimeAnalyzer.analyze();
+        adjustObserverForRelativeStartTime(startTimeAnalysisResult, dependentRaceStates);
+    }
+    
+    private void adjustObserverForRelativeStartTime(final StartTimeFinderResult startTimeAnalysisResult, Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         if (startTimeAnalysisResult.isDependentStartTime()) {
-            setupListenersOnDependentRace(startTimeAnalysisResult, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
+            setupListenersOnDependentRace(startTimeAnalysisResult, dependentRaceStates);
         } else if (raceStateToObserve != null) {
             raceStateToObserve.removeChangedListener(raceStateToObserveListener);
             raceStateToObserve = null;
@@ -418,11 +422,15 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     protected void update() {
+        update(/* dependentRaceStates */ Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
+    }
+    
+    protected void update(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         RacingProcedureType type = racingProcedureAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedRacingProcedureType, type) && type != RacingProcedureType.UNKNOWN) {
             cachedRacingProcedureType = type;
             cachedRacingProcedureTypeNoFallback = determineInitialProcedureType(type);
-            recreateRacingProcedure();
+            recreateRacingProcedure(dependentRaceStates);
             changedListeners.onRacingProcedureChanged(this);
         }
 
@@ -446,7 +454,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedStartTimeFinderResult = startTimeFinderResult;
             changedListeners.onStartTimeChanged(this);
         }
-        adjustObserverForRelativeStartTime(startTimeFinderResult);
+        adjustObserverForRelativeStartTime(startTimeFinderResult, dependentRaceStates);
 
         TimePoint finishingTime = finishingTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedFinishingTime, finishingTime)) {
@@ -493,7 +501,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         }
     }
 
-    private void recreateRacingProcedure() {
+    private void recreateRacingProcedure(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         if (racingProcedure != null) {
             removeChangedListener(racingProcedure);
             racingProcedure.detach();
@@ -504,7 +512,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
         statusAnalyzer = new RaceStatusAnalyzer(raceLogResolver, raceLog, statusAnalyzerClock, racingProcedure);
         // let's do an update because status might have changed with new procedure
-        update();
+        update(dependentRaceStates);
     }
 
 }

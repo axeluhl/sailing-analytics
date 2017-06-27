@@ -62,7 +62,8 @@ public class LeaderboardPanelLifecycle
                 currentLeaderboardSettings.isShowAddedScores(),
                 currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
-                currentLeaderboardSettings.isShowCompetitorFullNameColumn());
+                currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowCompetitorNationality());
         globalLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(currentLeaderboardSettings,
                 globalLeaderboardSettings);
         return globalLeaderboardSettings;
