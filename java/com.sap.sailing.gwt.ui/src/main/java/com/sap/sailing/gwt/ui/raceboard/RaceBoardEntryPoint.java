@@ -65,7 +65,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 || raceboardContextDefinition.getRaceName() == null || raceboardContextDefinition.getRaceName().isEmpty()
                 || raceboardContextDefinition.getLeaderboardName() == null
                 || raceboardContextDefinition.getLeaderboardName().isEmpty()) {
-            createErrorPage("This page requires a valid regatta name, race name and leaderboard name.");
+            createErrorPage(getStringMessages().requiresRegattaRaceAndLeaderboard());
             return;
         }
         
@@ -111,8 +111,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     }
                 }
                 if (raceboardData.getRace() == null) {
-                    createErrorPage("Could not obtain a race with name " + raceboardContextDefinition.getRaceName()
-                            + " for a regatta with name " + raceboardContextDefinition.getRegattaName());
+                    createErrorPage(getStringMessages().couldNotFindRaceInRegatte( raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getRegattaName()));
                     return;
                 }
                 
