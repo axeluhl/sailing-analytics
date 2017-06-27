@@ -3,14 +3,20 @@ package com.sap.sailing.gwt.home.communication.eventlist;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.statistics.Statistics;
 
 public class EventListYearDTO implements IsSerializable {
     private int year;
     private int eventCount;
-    private int countryCount;
-    private int sailorCount;
-    private int trackedRacesCount;
+    private int numberOfCompetitors;
+    private int numberOfRegattas;
+    private int numberOfRaces;
+    private int numberOfTrackedRaces;
+    private long numberOfGPSFixes;
+    private long numberOfWindFixes;
+    private double sailedMiles;
     private ArrayList<EventListEventDTO> events = new ArrayList<>();
     
     @SuppressWarnings("unused")
@@ -29,6 +35,7 @@ public class EventListYearDTO implements IsSerializable {
         return events;
     }
 
+    @GwtIncompatible
     protected void addEvent(EventListEventDTO event) {
         eventCount += event.getEventSeries() == null ? 1 : event.getEventSeries().getEventsCount();
         for(int i = 0; i < events.size(); i++) {
@@ -40,31 +47,46 @@ public class EventListYearDTO implements IsSerializable {
         events.add(event);
     }
     
+    @GwtIncompatible
+    protected void addStatistics(Statistics statistics) {
+        numberOfCompetitors = statistics.getNumberOfCompetitors();
+        numberOfRegattas = statistics.getNumberOfRegattas();
+        numberOfRaces = statistics.getNumberOfRaces();
+        numberOfTrackedRaces = statistics.getNumberOfTrackedRaces();
+        numberOfGPSFixes = statistics.getNumberOfGPSFixes();
+        numberOfWindFixes = statistics.getNumberOfWindFixes();
+        sailedMiles = statistics.getSailedMiles();
+    }
+    
     public int getEventCount() {
         return eventCount;
     }
 
-    public int getCountryCount() {
-        return countryCount;
+    public int getNumberOfCompetitors() {
+        return numberOfCompetitors;
     }
 
-    public void setCountryCount(int countryCount) {
-        this.countryCount = countryCount;
+    public int getNumberOfRegattas() {
+        return numberOfRegattas;
     }
 
-    public int getSailorCount() {
-        return sailorCount;
+    public int getNumberOfRaces() {
+        return numberOfRaces;
     }
 
-    public void setSailorCount(int sailorCount) {
-        this.sailorCount = sailorCount;
+    public int getNumberOfTrackedRaces() {
+        return numberOfTrackedRaces;
     }
 
-    public int getTrackedRacesCount() {
-        return trackedRacesCount;
+    public long getNumberOfGPSFixes() {
+        return numberOfGPSFixes;
     }
 
-    public void setTrackedRacesCount(int trackedRacesCount) {
-        this.trackedRacesCount = trackedRacesCount;
+    public long getNumberOfWindFixes() {
+        return numberOfWindFixes;
+    }
+
+    public double getSailedMiles() {
+        return sailedMiles;
     }
 }
