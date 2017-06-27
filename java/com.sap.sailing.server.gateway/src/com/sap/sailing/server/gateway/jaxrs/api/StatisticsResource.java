@@ -6,12 +6,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.StatisticsByYearJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.StatisticsJsonSerializer;
+import com.sap.sse.common.Util.Pair;
 
 @Path("/v1/statistics")
 public class StatisticsResource extends AbstractSailingServerResource {
@@ -26,7 +27,9 @@ public class StatisticsResource extends AbstractSailingServerResource {
     @Produces(CONTENT_TYPE_JSON_UTF8)
     @Path("years")
     public Response getStatisticsByYear() {
-        JSONObject json = statisticsByYearJsonSerializer.serialize(getService().getLocalStatisticsByYear());
+        JSONArray json = new JSONArray();
+        getService().getLocalStatisticsByYear().forEach(
+                (year, statistics) -> json.add(statisticsByYearJsonSerializer.serialize(new Pair<>(year, statistics))));
         return getJsonResponse(json);
     }
 
