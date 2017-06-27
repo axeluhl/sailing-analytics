@@ -227,6 +227,8 @@ import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
+import com.sap.sailing.server.statistics.StatisticsCalculator;
+import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -3743,7 +3745,25 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Map<Year, Statistics> getLocalStatisticsByYear() {
-        // TODO: Calculate statistics by year
-        return new HashMap<>();
+        final Map<Year, StatisticsCalculator> calculators = new HashMap<>();
+        getAllEvents().forEach((event) -> {
+            final Year eventYear = EventUtil.getYearOfEvent(event);
+            final StatisticsCalculator calculator;
+            if(calculators.containsKey(eventYear)) {
+                calculator = calculators.get(eventYear);
+            } else {
+                calculator = new StatisticsCalculator();
+                calculators.put(eventYear, calculator);
+            }
+            event.getLeaderboardGroups().forEach((lg)->{
+                lg.getLeaderboards().forEach(calculator::addLeaderboard);
+            });
+        });
+        Map<Year, Statistics> result = new HashMap<>();
+        calculators.forEach((year, calculator) -> {
+            // TODO
+//            result.put(year, new StatisticsImpl());
+        });
+        return result;
     }
 }
