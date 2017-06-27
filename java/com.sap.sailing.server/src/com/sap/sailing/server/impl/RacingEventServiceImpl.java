@@ -12,6 +12,7 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -151,6 +152,7 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -3737,5 +3739,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public int getNumberOfTrackedRacesRestored() {
         return numberOfTrackedRacesRestored.get();
+    }
+
+    @Override
+    public Map<Year, Statistics> getLocalStatisticsByYear() {
+        // TODO: Calculate statistics by year
+        return new HashMap<>();
     }
 }

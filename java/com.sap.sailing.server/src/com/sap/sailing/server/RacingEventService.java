@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
+import java.time.Year;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
@@ -67,6 +68,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
+import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -665,4 +667,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @see #getNumberOfTrackedRacesToRestore()
      */
     int getNumberOfTrackedRacesRestored();
+
+    /**
+     * Provides {@link Statistics statistic information} for every {@link Year year} which is covered by the local
+     * server.
+     * 
+     * @return a map of {@link Statistics statistic objects} keyed be the {@link Year year} they are representing
+     */
+    Map<Year, Statistics> getLocalStatisticsByYear();
 }
