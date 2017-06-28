@@ -487,8 +487,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.setSize("100%", "100%");
     }
     
-    public void setQuickRanksDTOProvider(QuickRanksDTOProvider quickRanksDTOProvider) {
-        this.quickRanksDTOProvider = quickRanksDTOProvider;
+    public void setQuickRanksDTOProvider(QuickRanksDTOProvider newQuickRanksDTOProvider) {
+        if (this.quickRanksDTOProvider != null) {
+            this.quickRanksDTOProvider.moveListernersTo(newQuickRanksDTOProvider);
+        }
+        this.quickRanksDTOProvider = newQuickRanksDTOProvider;
     }
     /**
      * The {@link WindDTO#dampenedTrueWindFromDeg} direction if {@link #lastCombinedWindTrackInfoDTO} has a
@@ -1406,7 +1409,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     final static Distance advantageLineLength = new MeterDistance(1000); // TODO this should probably rather scale with the visible area of the map; bug 616
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
-        if (map != null && lastRaceTimesInfo != null && quickRanksDTOProvider.getQuickRanks() != null && lastCombinedWindTrackInfoDTO != null) {
+        if (map != null && lastRaceTimesInfo != null && quickRanksDTOProvider.getQuickRanks().isEmpty()
+                && lastCombinedWindTrackInfoDTO != null) {
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
                 // find competitor with highest rank
