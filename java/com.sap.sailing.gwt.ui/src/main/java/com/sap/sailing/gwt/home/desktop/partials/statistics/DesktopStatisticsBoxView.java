@@ -18,8 +18,15 @@ public class DesktopStatisticsBoxView extends Composite implements StatisticsBox
     @UiField UListElement itemContainerUi;
     
     public DesktopStatisticsBoxView() {
+        this(false);
+    }
+    
+    public DesktopStatisticsBoxView(boolean embedded) {
         StatisticsBoxResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        if(embedded) {
+            addStyleName(StatisticsBoxResources.INSTANCE.css().box_embedded());
+        }
         setVisible(false);
     }
 

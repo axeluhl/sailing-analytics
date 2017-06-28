@@ -5,7 +5,7 @@
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.eventsrecent.EventsOverviewRecentResources" />
   <ui:style>
   	.quickFix {
-		padding: 0px 10px 10px 10px;
+		padding: 0px 10px;
 	}
   </ui:style>
   <g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewrecent_year}">
