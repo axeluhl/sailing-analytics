@@ -487,8 +487,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.setSize("100%", "100%");
     }
     
-    public void setQuickRanksDTOProvider(QuickRanksDTOProvider quickRanksDTOProvider) {
-        this.quickRanksDTOProvider = quickRanksDTOProvider;
+    public void setQuickRanksDTOProvider(QuickRanksDTOProvider newQuickRanksDTOProvider) {
+        if (this.quickRanksDTOProvider != null) {
+            this.quickRanksDTOProvider.moveListernersTo(newQuickRanksDTOProvider);
+        }
+        this.quickRanksDTOProvider = newQuickRanksDTOProvider;
     }
     /**
      * The {@link WindDTO#dampenedTrueWindFromDeg} direction if {@link #lastCombinedWindTrackInfoDTO} has a
