@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boa
 
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.Distance;
@@ -95,10 +96,17 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
     }
 
     private void determinePlacement(RegattaAndRaceIdentifier lifeRace) {
-
-        RaceColumnDTO preselectedRaceColumn = leaderboardPanel.getLeaderboard().getRaceList().get(0);
+        //TODO this is not multifleet capable currently, think about alternatives
+        List<RaceColumnDTO> lifeRaceResult = leaderboardPanel.getLeaderboard().getRaceList();
+        RaceColumnDTO raceColumn = null;
+        for(RaceColumnDTO column:lifeRaceResult){
+            if(column.containsRace(lifeRace)){
+                raceColumn = column;
+            }
+        }
+        GWT.debugger();
         List<CompetitorDTO> sortedCompetitors = leaderboardPanel.getLeaderboard()
-                .getCompetitorsFromBestToWorst(preselectedRaceColumn);
+                .getCompetitorsFromBestToWorst(raceColumn);
 
         if (sortedCompetitors.size() >= 3) {
             view.setFirst(sortedCompetitors.get(0));
