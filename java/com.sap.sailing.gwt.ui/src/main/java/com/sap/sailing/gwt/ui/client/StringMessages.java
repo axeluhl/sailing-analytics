@@ -1817,6 +1817,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showRacePlaceColumn();
     String unknownLeaderboardType(String name);
     String selectCompetitorsToEliminate();
-    String trackedRaceAlreadyLinked();
+    String trackedRaceAlreadyLinked();    
+    String reallyRemoveSeries(String seriesName);
     String noData();
 }

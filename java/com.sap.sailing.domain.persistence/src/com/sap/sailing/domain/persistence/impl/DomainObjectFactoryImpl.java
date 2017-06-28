@@ -528,7 +528,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.info("Couldn't find regatta "+regattaName+" for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
             result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
-            result.setName(leaderboardName);
+            result.setName(leaderboardName); // this will temporarily set the display name; it will be adjusted later if a display name is found
         }
         return result;
     }
