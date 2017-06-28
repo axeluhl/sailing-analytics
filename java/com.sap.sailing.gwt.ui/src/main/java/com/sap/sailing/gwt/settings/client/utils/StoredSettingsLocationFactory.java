@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.settings.client.utils;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 /**
@@ -24,8 +25,11 @@ public class StoredSettingsLocationFactory {
     private static final String SERIES_REGATTA_LEADERBOARDS = "SeriesRegattaLeaderboards";
 
     public static final StoredSettingsLocation createStoredSettingsLocatorForRaceBoard(
-            RaceboardContextDefinition raceboardContextDefinition) {
+            RaceboardContextDefinition raceboardContextDefinition, RaceBoardModes effectiveMode) {
         String userSettingsIdPart = RACEBOARD;
+        if(effectiveMode != null) {
+            userSettingsIdPart += "." + effectiveMode.name();
+        }
         String documentSettingsIdPart = StoredSettingsLocation.buildDocumentSettingsIdPart(raceboardContextDefinition.getRegattaName(),
                 raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName());
 

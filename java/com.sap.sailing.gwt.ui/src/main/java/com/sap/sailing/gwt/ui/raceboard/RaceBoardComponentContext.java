@@ -72,7 +72,7 @@ public class RaceBoardComponentContext extends
      */
     public <CS extends GenericSerializableSettings> void addModesPatching(Component<CS> component, CS modeSettings,
             OnSettingsReloadedCallback<CS> patchCallback) {
-        super.addAdditionalSettingsLayerForComponent(component, PipelineLevel.USER_DEFAULTS, modeSettings,
+        super.addAdditionalSettingsLayerForComponent(component, PipelineLevel.SYSTEM_DEFAULTS, modeSettings,
                 patchCallback);
     }
 

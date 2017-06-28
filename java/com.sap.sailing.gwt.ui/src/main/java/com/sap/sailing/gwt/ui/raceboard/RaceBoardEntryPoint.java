@@ -100,7 +100,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 }
                 
                 final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
-                final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition);
+                final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition, finalMode);
                 final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(raceboardData.getRace().getRaceIdentifier(), StringMessages.INSTANCE);
                 RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(), storageDefinition);
                 
@@ -112,8 +112,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                                         raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle, timer);
                                 if (finalMode != null) {
                                     finalMode.getMode().applyTo(raceBoardPanel);
+                            }
                         }
-                    }
                     });
             }
             
