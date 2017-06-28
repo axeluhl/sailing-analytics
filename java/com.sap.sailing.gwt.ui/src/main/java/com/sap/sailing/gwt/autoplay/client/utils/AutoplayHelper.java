@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
+import com.sap.sailing.gwt.ui.raceboard.AbstractQuickRanksDTOProvider;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -50,15 +51,19 @@ public class AutoplayHelper {
     private static Timer raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
     private static Date startOfLifeRace;
     public static final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
+    /**
+     * If a racestart is longer ago, the race is never considered live, even if all other checks pass
+     */
+    private static final long NEGATIVE_SANITY_CHECK = -24 * 60 * 60 * 1000;
 
-    public static long durationOfCurrentLiveRaceRunning(){
-        if(startOfLifeRace != null){
-            return raceboardTimer.getLiveTimePointInMillis()-startOfLifeRace.getTime();
-        }else{
+    public static long durationOfCurrentLiveRaceRunning() {
+        if (startOfLifeRace != null) {
+            return raceboardTimer.getLiveTimePointInMillis() - startOfLifeRace.getTime();
+        } else {
             return 0;
         }
     }
-    
+
     public static void getLiveRace(SailingServiceAsync sailingService, ErrorReporter errorReporter, EventDTO event,
             String leaderBoardName, SailingDispatchSystem dispatch,
             AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
@@ -139,7 +144,7 @@ public class AutoplayHelper {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long delayToLiveInMs = raceTimes.delayToLiveInMs;
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - delayToLiveInMs;
-                        if (startIn <= PRE_RACE_DELAY) {
+                        if (startIn <= PRE_RACE_DELAY && startIn > NEGATIVE_SANITY_CHECK) {
                             startOfLifeRace = raceTimes.getStartOfRace();
                             return new Pair<Long, RegattaAndRaceIdentifier>(startIn, raceIdentifier);
                         }
@@ -203,7 +208,7 @@ public class AutoplayHelper {
                                                     AutoplayHelper.asyncActionsExecutor, errorReporter, raceboardTimer,
                                                     callback, clientTimeWhenResponseWasReceived,
                                                     serverTimeDuringRequest, clientTimeWhenRequestWasSent,
-                                                    raceTimesInfo);
+                                                    raceTimesInfo, new DefaultQuickRanksDTOProvider());
                                         }
 
                                         @Override
@@ -261,7 +266,8 @@ public class AutoplayHelper {
             Iterable<CompetitorDTO> competitors, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
             AsyncCallback<RVWrapper> callback, long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest,
-            long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+            long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos,
+            AbstractQuickRanksDTOProvider provider) {
 
         ArrayList<ZoomTypes> typesToConsiderOnZoom = new ArrayList<>();
         // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
@@ -282,7 +288,7 @@ public class AutoplayHelper {
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
                 asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
                 new RaceCompetitorSet(competitorSelectionProvider), StringMessages.INSTANCE, currentLiveRace,
-                raceMapResources, false, new DefaultQuickRanksDTOProvider());
+                raceMapResources, false, provider);
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
                 serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         // raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceboardPerspective);

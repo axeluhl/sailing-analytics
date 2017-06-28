@@ -20,7 +20,9 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.raceboard.QuickRanksDTOFromLeaderboardDTOProvider;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -117,7 +119,11 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         
         List<LeaderboardRowDTO> sortedCompetitors = leaderboardPanel.getLeaderboardTable().getVisibleItems();
         if (sortedCompetitors.size() > 0) {
-            view.setStatistic(windSpeed,getPlace().getStatistic().getDistance(), AutoplayHelper.durationOfCurrentLiveRaceRunning());
+            if(getPlace().getStatistic() == null){
+                view.setStatistic(windSpeed,null, AutoplayHelper.durationOfCurrentLiveRaceRunning());
+            }else{
+                view.setStatistic(windSpeed,getPlace().getStatistic().getDistance(), AutoplayHelper.durationOfCurrentLiveRaceRunning());
+            }
         }
     }
 
@@ -154,6 +160,9 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
                 true, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, null,
                 false, null, false, null, false, true, false, false, false);
+        
+        getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), lifeRace));
+        
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY);
     }
