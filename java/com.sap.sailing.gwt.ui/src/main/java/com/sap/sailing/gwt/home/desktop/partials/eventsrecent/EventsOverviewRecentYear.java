@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -33,12 +32,6 @@ public class EventsOverviewRecentYear extends Composite {
 
     @UiField SpanElement year;
     @UiField SpanElement eventsCount;
-    @UiField SpanElement countriesCount;
-    @UiField SpanElement sailorsCount;
-    @UiField SpanElement trackedRacesCount;
-    @UiField Element countriesContainer;
-    @UiField Element sailorsContainer;
-    @UiField Element trackedRacesContainer;
     @UiField FlowPanel recentEventsTeaserPanel;
     @UiField DivElement contentDiv;
     @UiField HTMLPanel headerDiv;
@@ -57,22 +50,6 @@ public class EventsOverviewRecentYear extends Composite {
         this.year.setInnerText(String.valueOf(yearDTO.getYear()));
         this.eventsCount.setInnerText(i18n.eventsCount(yearDTO.getEventCount()));
         
-        if(yearDTO.getNumberOfCompetitors() > 0) {
-            sailorsCount.setInnerText(i18n.competitorsCount(yearDTO.getNumberOfCompetitors()));
-        } else {
-            sailorsContainer.removeFromParent();
-        }
-        // TODO this information isn't available yet
-//        if(yearDTO.getCountryCount() > 0) {
-//            countriesCount.setInnerText(i18n.countriesCount(yearDTO.getCountryCount()));
-//        } else {
-            countriesContainer.removeFromParent();
-//        }
-        if(yearDTO.getNumberOfTrackedRaces() > 0) {
-            trackedRacesCount.setInnerText(i18n.trackedRacesCount(yearDTO.getNumberOfTrackedRaces()));
-        } else {
-            trackedRacesContainer.removeFromParent();
-        }
         for (EventListEventDTO eventDTO : events) {
             PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
             RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState().getListStateMarker());
