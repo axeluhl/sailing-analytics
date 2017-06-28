@@ -53,13 +53,4 @@ public class PreRaceRacemapPlace extends Place {
     public String getUrl() {
         return url;
     }
-
-    public void setLeaderBoardDTO(GetMiniLeaderboardDTO dto) {
-        this.leaderboard = dto;
-    }
-
-    public GetMiniLeaderboardDTO getLeaderboard() {
-        return leaderboard;
-    }
-
 }

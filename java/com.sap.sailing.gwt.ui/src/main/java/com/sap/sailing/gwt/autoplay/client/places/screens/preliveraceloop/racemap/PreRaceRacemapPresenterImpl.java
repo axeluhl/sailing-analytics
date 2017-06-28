@@ -77,7 +77,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
                         }
                     }
                     String url = getRaceViewerURL(getSlideCtx().getContextDefinition().getLeaderboardName(), null,
-                            getSlideCtx().getLiveRace());
+                            getSlideCtx().getPreLiveRace());
                     view.updateStatistic(lastStatisticResult, url, windSpeed, windDegree);
                 }
             }
@@ -110,7 +110,7 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
     }
 
     private void reloadStatistics() {
-        RegattaAndRaceIdentifier upcomingRace = getSlideCtx().getLiveRace();
+        RegattaAndRaceIdentifier upcomingRace = getSlideCtx().getPreLiveRace();
         getClientFactory().getDispatch().execute(
                 new GetSixtyInchStatisticAction(upcomingRace.getRaceName(), upcomingRace.getRegattaName()),
                 new AsyncCallback<GetSixtyInchStatisticDTO>() {

@@ -8,9 +8,6 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwi
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.PreRaceRacemapPlace;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper.RVWrapper;
-import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
-import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
-import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
     private final AutoPlayClientFactory cf;
@@ -21,12 +18,12 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
 
     }
 
-
     public void onStart() {
         AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
-                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtx().getContextDefinition().getEventId(),
-                cf.getAutoPlayCtx().getEvent(), cf.getEventBus(), cf.getDispatch(),
-                cf.getAutoPlayCtx().getPreLiveRace(), new AsyncCallback<RVWrapper>() {
+                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(),
+                cf.getAutoPlayCtx().getContextDefinition().getEventId(), cf.getAutoPlayCtx().getEvent(),
+                cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtx().getPreLiveRace(),
+                new AsyncCallback<RVWrapper>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -39,33 +36,16 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
 
                     @Override
                     public void onSuccess(RVWrapper result) {
-                        cf.getDispatch().execute(
-                                new GetMiniLeaderbordAction(cf.getAutoPlayCtx().getEvent().id,
-                                        cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName()),
-                                new AsyncCallback<ResultWithTTL<GetMiniLeaderboardDTO>>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        // fireEvent(new DataLoadFailureEvent(MiniLeaderboardLoader.this, caught));
-                                        firePlaceChangeAndStartTimer();
-                                    }
+                        PreRaceRacemapPlace place = new PreRaceRacemapPlace();
+                        place.setRaceMap(result.raceboardPerspective, result.csel);
+                        // add later with settings here
+                        place.setURL(cf.getAutoPlayCtx().getEvent().getOfficialWebsiteURL());
+                        setPlaceToGo(place);
+                        getBus().fireEvent(
+                                new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getPreLiveRace().getRegattaName(),
+                                        cf.getAutoPlayCtx().getPreLiveRace().getRaceName()));
+                        firePlaceChangeAndStartTimer();
 
-                                    @Override
-                                    public void onSuccess(ResultWithTTL<GetMiniLeaderboardDTO> resultTTL) {
-                                        GetMiniLeaderboardDTO dto = resultTTL.getDto();
-                                        PreRaceRacemapPlace place = new PreRaceRacemapPlace();
-                                        place.setLeaderBoardDTO(dto);
-                                        place.setRaceMap(result.raceboardPerspective, result.csel);
-                                        // add later with settings here
-                                        place.setURL(cf.getAutoPlayCtx().getEvent().getOfficialWebsiteURL());
-                                        setPlaceToGo(place);
-                                        getBus().fireEvent(
-                                                new AutoPlayHeaderEvent(
-                                                        cf.getAutoPlayCtx().getPreLiveRace().getRegattaName(),
-                                                        cf.getAutoPlayCtx().getPreLiveRace().getRaceName()));
-                                        firePlaceChangeAndStartTimer();
-
-                                    }
-                                });
                     }
                 });
     }
