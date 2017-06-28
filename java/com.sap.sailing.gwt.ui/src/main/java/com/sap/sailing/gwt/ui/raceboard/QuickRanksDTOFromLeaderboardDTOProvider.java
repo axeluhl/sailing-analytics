@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ import com.sap.sse.common.Util;
  *
  */
 public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksDTOProvider {
-    private Map<String, QuickRankDTO> quickRanks;
+    private final Map<String, QuickRankDTO> quickRanks = new LinkedHashMap<>();
     private final RaceCompetitorSet raceCompetitorSet;
     private final RaceIdentifier selectedRace;
     private boolean lastLeaderboardProvidedLegNumbers;
@@ -40,8 +39,7 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
 
     @Override
     public void quickRanksReceivedFromServer(Map<String, QuickRankDTO> quickRanksFromServer) {
-        if (quickRanks == null) {
-            quickRanks = new HashMap<>();
+        if (quickRanks.isEmpty()) {
             for (final Entry<String, QuickRankDTO> e : quickRanksFromServer.entrySet()) {
                 quickRanks.put(e.getKey(), e.getValue());
                 notifyListeners(e.getKey(), /* oldQuickRank */ null, e.getValue());
@@ -58,9 +56,7 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
     }
     
     public void updateQuickRanks(final LeaderboardDTO leaderboard) {
-        if (quickRanks == null) {
-            quickRanks = new LinkedHashMap<>();
-        }
+
         RaceColumnDTO raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null || !raceColumn.containsRace(selectedRace)) {
             raceColumnName = getRaceColumnName(leaderboard, selectedRace);
