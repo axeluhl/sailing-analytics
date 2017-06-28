@@ -12,10 +12,11 @@ public class SettingsEntryDialog extends DataEntryDialog<UserSettingsEntry> {
 
     private final FlowPanel fp;
 
-    public SettingsEntryDialog(UserSettingsEntry entry) {
-        super(StringMessages.INSTANCE.settings(), StringMessages.INSTANCE.settingsForId(entry.getKey()), StringMessages.INSTANCE.ok(), StringMessages.INSTANCE.cancel(), null, false, new DialogCallback<UserSettingsEntry>() {
+    public SettingsEntryDialog(UserSettingsEntry entry, Runnable deleteCallback) {
+        super(StringMessages.INSTANCE.settings(), StringMessages.INSTANCE.settingsForId(entry.getKey()), StringMessages.INSTANCE.remove(), StringMessages.INSTANCE.cancel(), null, false, new DialogCallback<UserSettingsEntry>() {
             @Override
             public void ok(UserSettingsEntry editedObject) {
+                deleteCallback.run();
             }
 
             @Override
