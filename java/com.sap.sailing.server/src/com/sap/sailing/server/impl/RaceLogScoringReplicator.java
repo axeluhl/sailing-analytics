@@ -17,13 +17,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
@@ -32,7 +31,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCo
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
-public class RaceLogScoringReplicator implements RaceColumnListener {
+public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAction {
     
     private static final long serialVersionUID = -5958519195756937338L;
     
@@ -42,58 +41,6 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     
     public RaceLogScoringReplicator(RacingEventService service) {
         this.service = service;
-    }
-
-    @Override
-    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-    }
-
-    @Override
-    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-    }
-
-    @Override
-    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-    }
-
-    @Override
-    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
-    }
-
-    @Override
-    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
-    }
-
-    @Override
-    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
-    }
-
-    @Override
-    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
-    }
-
-    @Override
-    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-    }
-
-    @Override
-    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-    }
-
-    @Override
-    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
-    }
-
-    @Override
-    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
-    }
-
-    @Override
-    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
-    }
-
-    @Override
-    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
     }
 
     @Override
@@ -285,6 +232,13 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
             numberOfCompetitorsInRace = numberOfCompetitorsInLeaderboard;
         }
         return numberOfCompetitorsInRace;
+    }
+
+    /**
+     * The default action of this {@link RaceColumnListener} is to do nothing.
+     */
+    @Override
+    public void defaultAction() {
     }
 
 }

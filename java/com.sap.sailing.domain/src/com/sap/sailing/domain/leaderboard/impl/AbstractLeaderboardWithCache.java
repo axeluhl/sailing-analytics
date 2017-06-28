@@ -246,7 +246,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
     }
     
     protected void notifyLeaderboardChangeListeners(Consumer<LeaderboardChangeListener> notifier) {
-        for (final LeaderboardChangeListener listener : leaderboardChangeListeners) {
+        final Set<LeaderboardChangeListener> workingListeners;
+        synchronized (leaderboardChangeListeners) {
+            workingListeners = new HashSet<>(leaderboardChangeListeners);
+        }
+        for (final LeaderboardChangeListener listener : workingListeners) {
             try {
                 notifier.accept(listener);
             } catch (Exception e) {
@@ -258,12 +262,16 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
 
     @Override
     public void addLeaderboardChangeListener(LeaderboardChangeListener listener) {
-        leaderboardChangeListeners.add(listener);
+        synchronized (leaderboardChangeListeners) {
+            leaderboardChangeListeners.add(listener);
+        }
     }
 
     @Override
     public void removeLeaderboardChangeListener(LeaderboardChangeListener listener) {
-        leaderboardChangeListeners.remove(listener);
+        synchronized (leaderboardChangeListeners) {
+            leaderboardChangeListeners.remove(listener);
+        }
     }
 
     @Override
