@@ -17,7 +17,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListYearDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.partials.statistics.DesktopStatisticsBoxView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.statistics.YearStatisticsBox;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -81,6 +83,7 @@ public class EventsOverviewRecentYear extends Composite {
             }
             recentEventsTeaserPanel.add(recentEvent);
         }
+        recentEventsTeaserPanel.add(new YearStatisticsBox(new DesktopStatisticsBoxView(), yearDTO));
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
