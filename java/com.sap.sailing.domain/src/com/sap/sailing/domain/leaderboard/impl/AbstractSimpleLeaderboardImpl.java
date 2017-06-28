@@ -259,6 +259,11 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     }
 
     @Override
+    public void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnNameChanged(raceColumn, oldName, newName);
+    }
+
+    @Override
     public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
         getRaceColumnListeners().notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
     }
