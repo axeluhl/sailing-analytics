@@ -60,7 +60,8 @@ public class EventsOverviewRecentYear extends Composite {
             }
             recentEventsTeaserPanel.add(recentEvent);
         }
-        recentEventsTeaserPanel.add(new YearStatisticsBox(new DesktopStatisticsBoxView(true), yearDTO));
+        recentEventsTeaserPanel.add(new YearStatisticsBox(new DesktopStatisticsBoxView(true,
+                StringMessages.INSTANCE.statisticsFor(Integer.toString(yearDTO.getYear()))), yearDTO));
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
