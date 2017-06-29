@@ -22,7 +22,7 @@ public class YearStatisticsBoxPresenter extends AbstractStatisticsBoxPresenter {
     public void setData(EventListYearDTO statistics) {
         clear();
         addItem(ICON_REGATTAS_FOUGHT, MSG.regattas(), statistics.getNumberOfRegattas());
-        addItem(ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getNumberOfCompetitors());
+        addItemIfNotNull(ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getNumberOfCompetitors());
         addItem(ICON_RACES_COUNT, MSG.races(), statistics.getNumberOfRaces());
         addItem(ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getNumberOfTrackedRaces());
         addItemWithCompactFormat(ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());

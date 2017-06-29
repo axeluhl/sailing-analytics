@@ -29,7 +29,7 @@ public class EventStatisticsBoxPresenter extends AbstractStatisticsBoxPresenter 
         if (showRegattaInformation) {
             addItem(ICON_REGATTAS_FOUGHT, MSG.regattas(), statistics.getRegattasFoughtCount());
         }
-        addItem(ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getCompetitorsCount());
+        addItemIfNotNull(ICON_COMPATITORS_COUNT, MSG.competitors(), statistics.getCompetitorsCount());
         addItem(ICON_RACES_COUNT, MSG.races(), statistics.getRacesRunCount());
         addItem(ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getTrackedRacesCount());
         addItemWithCompactFormat(ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
