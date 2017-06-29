@@ -95,7 +95,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                         deleteRegattas = true;
                     }
                 } else {
-                    if (Window.confirm("Do you really want to remove the regattas? This will also remove all leaderboards for the regattas!")) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegattas())) {
                         deleteRegattas = true;
                     }
                 }
