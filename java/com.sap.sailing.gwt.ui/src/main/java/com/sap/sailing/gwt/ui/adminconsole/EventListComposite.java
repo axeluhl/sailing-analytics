@@ -9,10 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -156,16 +153,14 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         removeEventsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                String eventNames = "\n\n" + refreshableEventSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
-                if(itemIsSelectedThatIsNotDisplayedCurrently()){
-                    if (Window.confirm("You are also deleting events that are currently not visible in the filter perspective. The following events will be removed. Do you want to continue?"+eventNames)) {
+                if(eventIsSelectedThatIsNotDisplayedCurrently()){
+                    final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames))) {
                         removeEvents(refreshableEventSelectionModel.getSelectedSet());
                     }
                 }
-                    
                 else {
-                    
-                    if(Window.confirm(stringMessages.doYouReallyWantToRemoveEvents(eventNames))) {
+                    if(Window.confirm(stringMessages.doYouReallyWantToRemoveEvents())) {
                         removeEvents(refreshableEventSelectionModel.getSelectedSet());
                     }
                 }
@@ -774,7 +769,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         });
     }
     
-    private boolean itemIsSelectedThatIsNotDisplayedCurrently() {
+    private boolean eventIsSelectedThatIsNotDisplayedCurrently() {
         for(EventDTO eventDTO : refreshableEventSelectionModel.getSelectedSet()){
             if(!eventTable.getVisibleItems().contains(eventDTO)){
                 return true;

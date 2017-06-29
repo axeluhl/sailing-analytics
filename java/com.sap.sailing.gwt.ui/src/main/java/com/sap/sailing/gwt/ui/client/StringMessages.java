@@ -957,7 +957,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String offset();
     String line();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
-    String doYouReallyWantToRemoveEvents(String events);
+    String doYouReallyWantToRemoveNonVisibleEvents(String eventNames);
+    String doYouReallyWantToRemoveEvents();
     String doYouReallyWantToRemoveEvent(String eventName);
     String doYouReallyWantToRemoveCompetitors();
     String doYouReallyWantToRemoveCompetitor(String name);
