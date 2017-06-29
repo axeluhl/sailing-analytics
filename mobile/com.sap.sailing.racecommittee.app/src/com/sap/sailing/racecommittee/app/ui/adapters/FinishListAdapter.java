@@ -96,10 +96,8 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         // x, y --- relative from the itemView's top-left
         View containerView = holder.container;
         View dragHandleView = holder.dragHandle;
-
         int offsetX = containerView.getLeft() + (int) (ViewCompat.getTranslationX(containerView) + 0.5f);
         int offsetY = containerView.getTop() + (int) (ViewCompat.getTranslationY(containerView) + 0.5f);
-
         return dragHandleView.getVisibility() == View.VISIBLE && hitTest(dragHandleView, x - offsetX, y - offsetY);
     }
 
@@ -107,7 +105,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     public ItemDraggableRange onGetItemDraggableRange(ViewHolder viewHolder, int position) {
         final int start = 0;
         final int end = getFirstRankZeroPosition() - 1;
-
         return new GroupPositionItemDraggableRange(start, end);
     }
 
@@ -126,14 +123,14 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
      * this condition holds for all its successors. This means in particular that any in-between rank-0 item that is followed
      * by other non-zero-ranked items will <em>not</em> be returned as the first such item.<p>
      * 
-     * If no such item is found, the size of {@link #mCompetitor} is returned, thus pointing at "behind" the end of the list.
-     * @return
+     * If no such item is found, the size of {@link #mCompetitor} is returned, thus pointing "behind" the end of the list.
      */
     public int getFirstRankZeroPosition() {
         int result = getItemCount();
         for (int i = getItemCount()-1; i >= 0; i--) {
             if (mCompetitor.get(i).getOneBasedRank() == 0) {
                 result = i;
+            } else {
                 break;
             }
         }

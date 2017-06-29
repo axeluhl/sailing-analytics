@@ -49,15 +49,13 @@ public class CompetitorEditLayout extends ScrollView {
 
     private boolean mRestricted;
 
-    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor) {
-        this(context, null, competitor, 1, true);
+    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int maxPos) {
+        this(context, null, competitor, maxPos, true);
     }
 
     public CompetitorEditLayout(Context context, TimePoint startTime, CompetitorResultWithIdImpl competitor, int maxPos, boolean restrictedView) {
         super(context);
-
         mRestricted = restrictedView;
-
         int layoutId;
         if (AppUtils.with(getContext()).isPhone() && AppUtils.with(getContext()).isHDPI()) {
             layoutId = R.layout.race_tracking_list_competitor_edit_small;
@@ -82,35 +80,26 @@ public class CompetitorEditLayout extends ScrollView {
         if (finishTime != null) {
             finishTime.setVisibility(restrictedView ? GONE : VISIBLE);
         }
-
         mCompetitor = competitor;
-        if (!mCompetitor.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
-            maxPos++;
-        }
-
         mCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
         if (mCompetitor.getFinishingTime() != null) {
             mCalendar.setTimeInMillis(mCompetitor.getFinishingTime().asMillis());
         }
-
         mHours = ViewHelper.get(layout, R.id.competitor_finish_time_hours);
         if (mHours != null) {
             formatPicker(mHours, 0, 23);
             mHours.setValue(mCalendar.get(Calendar.HOUR_OF_DAY));
         }
-
         mMinutes = ViewHelper.get(layout, R.id.competitor_finish_time_minutes);
         if (mMinutes != null) {
             formatPicker(mMinutes, 0, 59);
             mMinutes.setValue(mCalendar.get(Calendar.MINUTE));
         }
-
         mSeconds = ViewHelper.get(layout, R.id.competitor_finish_time_seconds);
         if (mSeconds != null) {
             formatPicker(mSeconds, 0, 59);
             mSeconds.setValue(mCalendar.get(Calendar.SECOND));
         }
-
         mPosition = ViewHelper.get(layout, R.id.competitor_position);
         if (mPosition != null) {
             StringArraySpinnerAdapter positionAdapter = new StringArraySpinnerAdapter(getPositionList(Math.max(maxPos, competitor.getOneBasedRank())));
@@ -118,7 +107,6 @@ public class CompetitorEditLayout extends ScrollView {
             mPosition.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(positionAdapter));
             mPosition.setSelection(competitor.getOneBasedRank());
         }
-
         mPenalty = ViewHelper.get(layout, R.id.competitor_penalty);
         if (mPenalty != null) {
             StringArraySpinnerAdapter penaltyAdapter = new StringArraySpinnerAdapter(getAllMaxPointsReasons());
@@ -126,7 +114,6 @@ public class CompetitorEditLayout extends ScrollView {
             mPenalty.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(penaltyAdapter));
             mPenalty.setSelection(penaltyAdapter.getPosition(mCompetitor.getMaxPointsReason().toString()));
         }
-
         mDate = ViewHelper.get(layout, R.id.competitor_finish_date);
         if (mDate != null && startTime != null) {
             String[] dates = getDates(startTime);
@@ -138,17 +125,14 @@ public class CompetitorEditLayout extends ScrollView {
                 mDate.setVisibility(GONE);
             }
         }
-
         mScore = ViewHelper.get(layout, R.id.competitor_score);
         if (mScore != null && mCompetitor.getScore() != null) {
             mScore.setText(String.format(Locale.US, "%f", mCompetitor.getScore()));
         }
-
         mComment = ViewHelper.get(layout, R.id.competitor_comment);
         if (mComment != null) {
             mComment.setText(mCompetitor.getComment());
         }
-
         addView(layout);
     }
 

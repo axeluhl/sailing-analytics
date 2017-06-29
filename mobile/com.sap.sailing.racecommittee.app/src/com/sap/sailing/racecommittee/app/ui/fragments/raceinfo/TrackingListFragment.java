@@ -529,8 +529,8 @@ public class TrackingListFragment extends BaseFragment
     }
 
     /**
-     * The {@code fromPosition} identifies the position where the item to be moved in the underlying
-     * {@link #mFinishedData data model} shall be moved to {@code toPosition}. The item will be moved in
+     * The {@code fromPosition} identifies the position of the item to be moved in the underlying
+     * {@link #mFinishedData data model}; it shall be moved to {@code toPosition}. The item will be moved in
      * {@link #mFinishedData} as requested, and all ranks of items affected will be {@link #adjustRanks(int, int)
      * adjusted}. The item moved will only have its rank corrected if it moved to a position before the
      * {@link #getFirstRankZeroPosition()}. Four cases are possible:
@@ -549,7 +549,7 @@ public class TrackingListFragment extends BaseFragment
         mFinishedData.remove(item);
         mFinishedData.add(toPosition, item);
         adjustRanks(Math.min(getFirstRankZeroPosition(), Math.min(fromPosition, toPosition)), 
-                Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition)));
+                Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition)+1));
         mFinishedAdapter.notifyItemMoved(fromPosition, toPosition);
     }
 
@@ -630,7 +630,7 @@ public class TrackingListFragment extends BaseFragment
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState()
-            .getFinishingTime(), item, mAdapter.getFirstRankZeroPosition(), false);
+            .getFinishingTime(), item, mAdapter.getItemCount(), false);
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
