@@ -153,7 +153,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         removeEventsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if(eventIsSelectedThatIsNotDisplayedCurrently()){
+                if(refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())){
                     final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames))) {
                         removeEvents(refreshableEventSelectionModel.getSelectedSet());
@@ -767,15 +767,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 filterTextbox.updateAll(allEvents);
             }
         });
-    }
-    
-    private boolean eventIsSelectedThatIsNotDisplayedCurrently() {
-        for(EventDTO eventDTO : refreshableEventSelectionModel.getSelectedSet()){
-            if(!eventTable.getVisibleItems().contains(eventDTO)){
-                return true;
-            }
-        }
-        return false;
     }
 
     public List<EventDTO> getAllEvents() {
