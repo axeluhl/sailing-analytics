@@ -80,7 +80,7 @@ public class UserSettings extends Composite implements UserSettingsView {
         showColumn.setFieldUpdater(new FieldUpdater<UserSettingsEntry, String>() {
             @Override
             public void update(int index, UserSettingsEntry object, String value) {
-                new SettingsEntryDialog(object).show();
+                new SettingsEntryDialog(object, () -> presenter.remove(object)).show();
             }
         });
 
