@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPlace;
 import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
-import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -59,13 +58,10 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                     public void onSuccess(List<String> result) {
                         if (result.size() == 1) {
                             String overallLeaderboardName = result.get(0);
-                            String selectedLeaderboardsGroup = AutoplayHelper.getSelectedLeaderboardsGroup(
-                                    cf.getAutoPlayCtx().getEvent(),
-                                    cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
                             CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
                             SixtyInchLeaderBoard leaderboardPanel = new SixtyInchLeaderBoard(cf.getSailingService(),
                                     new AsyncActionsExecutor(), leaderboardSettings, true, null, provider, timer,
-                                    selectedLeaderboardsGroup, overallLeaderboardName, cf.getErrorReporter(),
+                                    null, overallLeaderboardName, cf.getErrorReporter(),
                                     StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false,
                                     false);
 

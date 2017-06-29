@@ -291,15 +291,11 @@ public class AutoplayHelper {
                 raceMapResources, false, provider);
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
                 serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-        // raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceboardPerspective);
+         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceboardPerspective);
         raceboardTimer.setPlayMode(PlayModes.Live);
         // wait for one update
         raceboardPerspective.onResize();
         callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider));
     }
 
-    public static String getSelectedLeaderboardsGroup(EventDTO event, String leaderboardName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

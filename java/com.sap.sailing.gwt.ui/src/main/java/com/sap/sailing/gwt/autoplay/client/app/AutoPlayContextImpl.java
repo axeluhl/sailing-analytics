@@ -101,4 +101,12 @@ public class AutoPlayContextImpl implements AutoPlayContext {
     public AutoplayPerspectiveLifecycle getAutoplayLifecycle() {
         return autoplayLifecycle;
     }
+
+    @Override
+    public RegattaAndRaceIdentifier getLifeOrPreLiveRace() {
+        if(getLiveRace() != null){
+            return getLiveRace();
+        }
+        return getPreLiveRace();
+    }
 }

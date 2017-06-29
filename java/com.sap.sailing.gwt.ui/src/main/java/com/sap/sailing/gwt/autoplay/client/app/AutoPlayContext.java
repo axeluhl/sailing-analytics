@@ -26,4 +26,6 @@ public interface AutoPlayContext {
     PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> getAutoplaySettings();
 
     AutoplayPerspectiveLifecycle getAutoplayLifecycle();
+
+    RegattaAndRaceIdentifier getLifeOrPreLiveRace();
 }

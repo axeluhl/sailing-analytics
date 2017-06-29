@@ -54,7 +54,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
     }
 
     public void onStart() {
-        raceTimesInfoProvider.addRaceIdentifier(cf.getAutoPlayCtx().getLiveRace(), true);
+        raceTimesInfoProvider.addRaceIdentifier(cf.getAutoPlayCtx().getLifeOrPreLiveRace(), true);
 
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtx().getAutoplaySettings();
         AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getAutoPlayCtx().getAutoplayLifecycle();
@@ -72,15 +72,15 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         autoplayLifecycle.getRaceboardLifecycle(), raceboardSettings, sailingService, mediaService,
                         userService, AutoplayHelper.asyncActionsExecutor, result.getCompetitorAndTheirBoats(),
                         raceboardTimer,
-                        cf.getAutoPlayCtx().getLiveRace(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(),
+                        cf.getAutoPlayCtx().getLifeOrPreLiveRace(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(),
                         /** leaderboardGroupName */
                         null, /** eventId */
                         null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true, false);
                 setPlaceToGo(new LiveRaceWithRaceboardPlace(raceboardPerspective));
                 firePlaceChangeAndStartTimer();
 
-                getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLiveRace().getRegattaName(),
-                        cf.getAutoPlayCtx().getLiveRace().getRaceName()));
+                getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtx().getLifeOrPreLiveRace().getRegattaName(),
+                        cf.getAutoPlayCtx().getLifeOrPreLiveRace().getRaceName()));
             }
 
             @Override
@@ -89,8 +89,8 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                 getBus().fireEvent(new AutoPlayHeaderEvent("", ""));
             }
         };
-        sailingService.getRaceboardData(cf.getAutoPlayCtx().getLiveRace().getRegattaName(),
-                cf.getAutoPlayCtx().getLiveRace().getRaceName(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), null,
+        sailingService.getRaceboardData(cf.getAutoPlayCtx().getLifeOrPreLiveRace().getRegattaName(),
+                cf.getAutoPlayCtx().getLifeOrPreLiveRace().getRaceName(), cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), null,
                 null, raceBoardDataCallback);
     };
 
