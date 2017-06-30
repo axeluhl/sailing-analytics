@@ -37,7 +37,7 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
     
     private final RacingEventService service;
     private final static String COMMENT_TEXT_ON_SCORE_CORRECTION_SINGLE_FLEET = "Results of race %s have been updated.";
-    private final static String COMMENT_TEXT_ON_SCORE_CORRECTION_MULTI_FLEET = "Results of race %s, s% have been updated.";
+    private final static String COMMENT_TEXT_ON_SCORE_CORRECTION_MULTI_FLEET = "Results of race %s, %s have been updated.";
     
     public RaceLogScoringReplicator(RacingEventService service) {
         this.service = service;
