@@ -400,7 +400,6 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
 
     public int setMarkerLevel(int level) {
         int retValue = LEVEL_UNKNOWN;
-
         if (mLayer != null && mMarker != null) {
             Drawable drawable = mMarker.getDrawable();
             if (drawable != null) {

@@ -138,7 +138,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         }
 
         int bgId = R.attr.sap_gray_black_30;
-        if (!mCompetitor.get(position).getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+        if (mCompetitor.get(position).getOneBasedRank() == 0) {
             bgId = R.attr.sap_gray_black_20;
         }
         viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
