@@ -51,20 +51,17 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final CompetitorResultEditableImpl item = mFiltered.get(position);
-
         int bgId = R.attr.sap_gray_black_30;
-        if (!item.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+        if (item.getOneBasedRank() == 0) {
             bgId = R.attr.sap_gray_black_20;
         }
         holder.itemView.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
         holder.mItemText.setText(item.getCompetitorDisplayName());
-
         final boolean hasReason = !MaxPointsReason.NONE.equals(item.getMaxPointsReason());
         holder.mItemPenalty.setVisibility(hasReason ? View.VISIBLE : View.GONE);
         if (hasReason) {
             holder.mItemPenalty.setText(item.getMaxPointsReason().name());
         }
-
         holder.mItemCheck.setOnCheckedChangeListener(null); // because of item recycling
         holder.mItemCheck.setChecked(item.isChecked());
         holder.mItemCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -76,7 +73,6 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
                 }
             }
         });
-
         holder.mItemEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

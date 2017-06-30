@@ -28,25 +28,29 @@ public class DefaultCompetitorResultComparator implements Comparator<CompetitorR
     @Override
     public int compare(CompetitorResultWithIdImpl lhs, CompetitorResultWithIdImpl rhs) {
         final int result;
-        MaxPointsReason lMPR = lhs.getMaxPointsReason();
-        MaxPointsReason rMPR = rhs.getMaxPointsReason();
-        if (lMPR == null || lMPR == MaxPointsReason.NONE) {
-            if (rMPR == null || rMPR == MaxPointsReason.NONE) {
-                // compare by rank
-                int lRank = lhs.getOneBasedRank() == 0 ? Integer.MAX_VALUE : lhs.getOneBasedRank();
-                int rRank = rhs.getOneBasedRank() == 0 ? Integer.MAX_VALUE : rhs.getOneBasedRank();
-                result = lRank - rRank;
-            } else {
-                result = -1; // lhs is "less" than rhs because we want to sort penalized competitors towards the end ("greater")
-            }
+        // compare by rank
+        final int lRank = lhs.getOneBasedRank() == 0 ? Integer.MAX_VALUE : lhs.getOneBasedRank();
+        final int rRank = rhs.getOneBasedRank() == 0 ? Integer.MAX_VALUE : rhs.getOneBasedRank();
+        if (lRank != rRank) {
+            result = lRank - rRank;
         } else {
-            if (rMPR == null || rMPR == MaxPointsReason.NONE) {
-                result = 1; // lhs is "greater" than lhs because we want to sort penalized competitors towards the end ("greater")
+            MaxPointsReason lMPR = lhs.getMaxPointsReason();
+            MaxPointsReason rMPR = rhs.getMaxPointsReason();
+            if (lMPR == null || lMPR == MaxPointsReason.NONE) {
+                if (rMPR == null || rMPR == MaxPointsReason.NONE) {
+                    result = 0;
+                } else {
+                    result = -1; // lhs is "less" than rhs because we want to sort penalized competitors towards the end ("greater")
+                }
             } else {
-                // both are penalized; compare by score:
-                final int preResult = lhs.getScore() == null ? rhs.getScore() == null ? 0 : -1 : rhs.getScore() == null ? 1 :
-                    lhs.getScore().compareTo(rhs.getScore());
-                result = lowPoint ? preResult : -preResult;
+                if (rMPR == null || rMPR == MaxPointsReason.NONE) {
+                    result = 1; // lhs is "greater" than lhs because we want to sort penalized competitors towards the end ("greater")
+                } else {
+                    // both are penalized; compare by score:
+                    final int preResult = lhs.getScore() == null ? rhs.getScore() == null ? 0 : -1 : rhs.getScore() == null ? 1 :
+                        lhs.getScore().compareTo(rhs.getScore());
+                    result = lowPoint ? preResult : -preResult;
+                }
             }
         }
         return result;
