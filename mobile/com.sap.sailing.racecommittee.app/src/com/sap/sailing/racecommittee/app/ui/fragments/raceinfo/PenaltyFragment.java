@@ -28,6 +28,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImp
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
+import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorResultsList;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.ItemListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.OrderBy;
@@ -78,7 +79,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
     private TextView mEntryCount;
-    private List<CompetitorResultEditableImpl> mCompetitorResults;
+    private CompetitorResultsList<CompetitorResultEditableImpl> mCompetitorResults;
     private View mListButtonLayout;
     private ImageView mListButton;
     private HeaderLayout mHeader;
@@ -94,7 +95,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_penalty_fragment, container, false);
-        mCompetitorResults = new ArrayList<>();
+        mCompetitorResults = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());
         SearchView searchView = ViewHelper.get(layout, R.id.competitor_search);
         if (searchView != null) {
             searchView.setSearchTextWatcher(this);
@@ -440,12 +441,13 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             .getFinishingTime(), competitor.getComment());
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mAdapter.getItemCount());
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition());
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 CompetitorResultWithIdImpl item = layout.getValue();
+                // no need to compare rank as long as the dialog doesn't allow the user to edit it
                 if (!Util.equalsWithNull(competitor.getMaxPointsReason(), item.getMaxPointsReason())) {
                     competitor.setMaxPointsReason(item.getMaxPointsReason());
                     competitor.setDirty(true);

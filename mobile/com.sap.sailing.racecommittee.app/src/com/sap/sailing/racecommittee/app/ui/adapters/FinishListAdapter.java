@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.List;
-
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.expandable.GroupPositionItemDraggableRange;
@@ -9,7 +7,6 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeMana
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
@@ -26,10 +23,10 @@ import android.widget.TextView;
 public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
 
     private Context mContext;
-    private List<CompetitorResultWithIdImpl> mCompetitor;
+    private CompetitorResultsList<CompetitorResultWithIdImpl> mCompetitor;
     private FinishEvents mListener;
 
-    public FinishListAdapter(Context context, List<CompetitorResultWithIdImpl> competitor) {
+    public FinishListAdapter(Context context, CompetitorResultsList<CompetitorResultWithIdImpl> competitor) {
         setHasStableIds(true);
         mContext = context;
         mCompetitor = competitor;
@@ -48,16 +45,13 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         CompetitorResultWithIdImpl item = mCompetitor.get(position);
-
-        if (item.getMaxPointsReason()==null || item.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+        if (item.getOneBasedRank() != 0) {
             holder.position.setText(String.valueOf(item.getOneBasedRank()));
         } else {
             holder.position.setText(null);
         }
         holder.competitor.setText(item.getCompetitorDisplayName());
-
         int dragState = holder.getDragStateFlags();
-
         if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0) {
             int bgColor;
             if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
@@ -69,13 +63,12 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         }
         holder.penalty.setText(item.getMaxPointsReason().name());
         holder.penalty.setVisibility(item.getMaxPointsReason().equals(MaxPointsReason.NONE) ? View.GONE : View.VISIBLE);
-
         int bgId = R.attr.sap_gray_black_30;
-        if (!mCompetitor.get(position).getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+        if (mCompetitor.get(position).getOneBasedRank() == 0) {
             bgId = R.attr.sap_gray_black_20;
         }
         holder.container.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
-        holder.dragHandle.setVisibility(item.getMaxPointsReason().equals(MaxPointsReason.NONE) ? View.VISIBLE : View.INVISIBLE);
+        holder.dragHandle.setVisibility(item.getOneBasedRank() != 0 ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
@@ -104,7 +97,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     @Override
     public ItemDraggableRange onGetItemDraggableRange(ViewHolder viewHolder, int position) {
         final int start = 0;
-        final int end = getFirstRankZeroPosition() - 1;
+        final int end = mCompetitor.getFirstRankZeroPosition() - 1;
         return new GroupPositionItemDraggableRange(start, end);
     }
 
@@ -116,25 +109,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
                 mListener.onItemMove(fromPosition, toPosition);
             }
         }
-    }
-
-    /**
-     * Determines the first position of an item in {@link #mCompetitor} for which its {@link CompetitorResult#getOneBasedRank() rank} is zero and for which
-     * this condition holds for all its successors. This means in particular that any in-between rank-0 item that is followed
-     * by other non-zero-ranked items will <em>not</em> be returned as the first such item.<p>
-     * 
-     * If no such item is found, the size of {@link #mCompetitor} is returned, thus pointing "behind" the end of the list.
-     */
-    public int getFirstRankZeroPosition() {
-        int result = getItemCount();
-        for (int i = getItemCount()-1; i >= 0; i--) {
-            if (mCompetitor.get(i).getOneBasedRank() == 0) {
-                result = i;
-            } else {
-                break;
-            }
-        }
-        return result;
     }
 
     @Override
@@ -255,5 +229,9 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             }
             return false;
         }
+    }
+
+    public int getFirstRankZeroPosition() {
+        return mCompetitor.getFirstRankZeroPosition();
     }
 }

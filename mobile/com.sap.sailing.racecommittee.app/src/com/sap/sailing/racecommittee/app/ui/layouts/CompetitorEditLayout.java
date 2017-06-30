@@ -102,7 +102,7 @@ public class CompetitorEditLayout extends ScrollView {
         }
         mPosition = ViewHelper.get(layout, R.id.competitor_position);
         if (mPosition != null) {
-            StringArraySpinnerAdapter positionAdapter = new StringArraySpinnerAdapter(getPositionList(Math.max(maxPos, competitor.getOneBasedRank())));
+            StringArraySpinnerAdapter positionAdapter = new StringArraySpinnerAdapter(getPositionList(maxPos));
             mPosition.setAdapter(positionAdapter);
             mPosition.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(positionAdapter));
             mPosition.setSelection(competitor.getOneBasedRank());
@@ -184,9 +184,6 @@ public class CompetitorEditLayout extends ScrollView {
         }
         if (mPosition != null) {
             oneBaseRank = mPosition.getSelectedItemPosition();
-            if (maxPointsReason != MaxPointsReason.NONE) { // reset if penalty
-                oneBaseRank = 0;
-            }
         }
         Double score = null;
         if (mScore != null && !TextUtils.isEmpty(mScore.getText())) {
