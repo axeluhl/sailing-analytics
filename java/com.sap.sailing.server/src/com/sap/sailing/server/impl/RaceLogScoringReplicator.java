@@ -1,9 +1,5 @@
 package com.sap.sailing.server.impl;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -116,9 +112,7 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
             // RaceLogFinishPositioningConfirmedEvent event was found in the race log
         }
         if (positioningList != null) {
-            final Map<Serializable, CompetitorResult> newResultsByCompetitorId = new HashMap<>();
             for (CompetitorResult positionedCompetitor : positioningList) {
-                newResultsByCompetitorId.put(positionedCompetitor.getCompetitorId(), positionedCompetitor);
                 final Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
                 int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
                 correctScoreInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, competitor,
