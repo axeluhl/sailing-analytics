@@ -67,7 +67,6 @@ public class AutoplayHelper {
     public static void getLiveRace(SailingServiceAsync sailingService, ErrorReporter errorReporter, EventDTO event,
             String leaderBoardName, SailingDispatchSystem dispatch,
             AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
-        raceboardTimer.reset();
         raceboardTimer.setLivePlayDelayInMillis(1000);
         raceboardTimer.setRefreshInterval(1000);
 
@@ -171,7 +170,6 @@ public class AutoplayHelper {
             UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
             RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
         GWT.log("Creating map for " + regattaAndRaceIdentifier);
-        raceboardTimer.reset();
         raceboardTimer.setLivePlayDelayInMillis(1000);
         raceboardTimer.setRefreshInterval(1000);
 
@@ -188,7 +186,7 @@ public class AutoplayHelper {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> competitors) {
                 loadRaceTimes(selectedLeaderboard, new RaceTimesInfoProviderListener() {
-
+                   boolean alreadyFired;
                     @Override
                     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
                             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
@@ -198,7 +196,8 @@ public class AutoplayHelper {
                                 clientTimeWhenResponseWasReceived);
                         raceboardTimer.play();
 
-                        if (regattaAndRaceIdentifier != null) {
+                        if (regattaAndRaceIdentifier != null && !alreadyFired) {
+                            alreadyFired = true;
                             sailingService.getCompetitorBoats(regattaAndRaceIdentifier,
                                     new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                                         @Override
@@ -291,7 +290,6 @@ public class AutoplayHelper {
                 raceMapResources, false, provider);
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
                 serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceboardPerspective);
         raceboardTimer.setPlayMode(PlayModes.Live);
         // wait for one update
         raceboardPerspective.onResize();
