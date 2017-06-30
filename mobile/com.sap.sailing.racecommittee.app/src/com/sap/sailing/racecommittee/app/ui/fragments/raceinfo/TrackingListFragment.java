@@ -627,10 +627,8 @@ public class TrackingListFragment extends BaseFragment
     }
 
     /**
-     * Four cases are possible:
+     * The following cases are possible:
      * <ol>
-     * <li>New rank is 0, MaxPointsReason is NONE --&gt; remove entry from list; if rank was non-0, decrement ranks
-     * greater than old rank</li>
      * <li>Rank set from non-0 to 0 and MaxPointsReason is not NONE: move item to the end of the list, into the
      * "penalized section"; decrement ranks greater than old rank</li>
      * <li>Rank set from 0 to non-0: move from penalized to ranked section; increment ranks greater than or equal to old
@@ -642,9 +640,9 @@ public class TrackingListFragment extends BaseFragment
     private void updateItem(final CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
         int index = mFinishedData.indexOf(item);
         mFinishedData.set(index, newItem); // update the item in the list already; then check where to move it and adjust other elements
-        if (newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() == MaxPointsReason.NONE) {
-            onItemRemove(index);
-        } else if (item.getOneBasedRank() != 0 && newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() != MaxPointsReason.NONE) {
+        if (item.getOneBasedRank() != 0 && newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() != MaxPointsReason.NONE) {
+            // move to the end of the area of "penalized" competitors; may also be an unpenalized competitor that hasn't
+            // been removed yet (e.g., in order to force a score correction reset on the server)
             onItemMove(index, mFinishedData.size()-1); // -1 because first the element is removed, so when inserting the list is one element shorter
         } else if (item.getOneBasedRank() != newItem.getOneBasedRank() && newItem.getOneBasedRank() != 0) {
             onItemMove(index, newItem.getOneBasedRank() - 1);
