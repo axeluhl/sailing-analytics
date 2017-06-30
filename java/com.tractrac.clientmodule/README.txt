@@ -16,13 +16,73 @@ It contains also some files:
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
 
+
+********************************************
+************* TracAPI 3.7.0 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds some new features.
+These features add methods to the API keeping the backward compatibility with the releases
+3.6.x. The minor version has been increased from 6 to 7 because there are some important
+changes in the implementation.
+
+This version provides a new JavaDoc version.
+
+Release date: 28/07/2017
+Build number: 14122
+
+ 1) Features
+
+ - RaceCompetitorStatusType: New race competitor status type defined: F_CONFIRMED. Represents a competitor with a
+ control passing registered for the last gate/mark that is accepted as the official result (Requested by Ugo
+ Alvazzi, 26/04/2017)
+ - WebSockets support: instead of using a TCP connection is possible to retrieve data using WebSockets (using the
+ same protocol used by the HTML Viewer). The protocol is not fully implemented and it only has to be used for testing
+ (Requested by Jorge Piera, 30/04/2017).
+ - Use an asynchronous API: the dataserver implementation has been migrated to an asynchronous API that provides
+ a better performance downloading replay data (the tests show that is 2.5 times faster). TracAPI has also adopted
+ this new asynchronous interface but at this moment it continues using the synchronous approach (Requested by Jorge
+ Piera, 03/05/2017)
+ - Adding the method ISubscriberFactory.clean to release the objects in memory (Requested by André Borud, 01/06/2017)
+ - Adding the method IPosition.isGPSTiming to know is the time of a position has been retrieved from a physical
+ GPS device (Requested by Jérome Soussens, 21/06/2017)
+
+ 2) Bugs
+
+ - When a static control is updated, the IControlPointPositionListener.gotControlPointPosition event
+ is not called if the consumer application is not registered to the IEventSubscriber (Reported by
+ Axel Uhl, 18/06/2017)
+ - The live delay sometimes is not propagated. The server always propagates the event but TracAPI can
+ filter it if the IEventSubscriber is not being used or if it has not been correctly initialized
+ using the right live-uri (Reported by Julian Mayland, 21/06/2017)
+
+********************************************
+************* TracAPI 3.6.3 ****************
+********************************************
+This is a final version. It adds support for these new features:
+
+ - IMetadataContainer: Fixed bug in IMetadataContainer implementation. Metadata received through serialized objects was not being parsed.
+
+Release date: 10/04/2017
+Build number: -
+
+********************************************
+************* TracAPI 3.6.2 ****************
+********************************************
+This is a final version. It adds support for these new features:
+
+ - IControlPoint.getId() will return null when the control point is part of a line and the related IControl do not have
+   the properties P1.UUID/P2.UUID defined.
+
+Release date: 06/04/2017
+Build number: -
+
 ********************************************
 ************* TracAPI 3.6.1 ****************
 ********************************************
 This is a final version. It adds support for these new features:
 
-- IControl and IRace now have a method getCourseArea() that returns the course area.
-- IControlPoint has a getId method that returns the UUID. It will be initialized with the value set in the P1.UUID and
+ - IControl and IRace now have a method getCourseArea() that returns the course area.
+ - IControlPoint has a getId method that returns the UUID. It will be initialized with the value set in the P1.UUID and
   P2.UUID properties defined in the parent IControl. In case these properties are not defined the UUID will fallback to
   the parent IControl UUID.
 
