@@ -1,20 +1,31 @@
 package com.sap.sailing.nmeaconnector.impl;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.sap.sailing.declination.Declination;
+import com.sap.sailing.declination.DeclinationService;
+import com.sap.sailing.domain.base.impl.PositionWithConfidenceImpl;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
@@ -32,16 +43,18 @@ import net.sf.marineapi.nmea.sentence.HeadingSentence;
 import net.sf.marineapi.nmea.sentence.MDASentence;
 import net.sf.marineapi.nmea.sentence.MWDSentence;
 import net.sf.marineapi.nmea.sentence.MWVSentence;
+import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TimeSentence;
 import net.sf.marineapi.nmea.sentence.VWRSentence;
 import net.sf.marineapi.nmea.sentence.ZDASentence;
+import net.sf.marineapi.nmea.util.CompassPoint;
 import net.sf.marineapi.nmea.util.Date;
-import net.sf.marineapi.nmea.util.Position;
 import net.sf.marineapi.nmea.util.Time;
 import net.sf.marineapi.nmea.util.Units;
 
 public class NMEAWindReceiverImpl implements NMEAWindReceiver {
+    private static final Logger logger = Logger.getLogger(NMEAWindReceiverImpl.class.getName());
     private final ConcurrentHashMap<WindListener, WindListener> listeners;
     private final DynamicTrack<TimedSpeedWithBearing> trueWind;
     private final DynamicTrack<TimedSpeedWithBearing> apparentWind;
@@ -57,6 +70,8 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
      * {@link #timeReceived} fields, respectively.
      */
     private final GregorianCalendar utcCalendar;
+    
+    private final DeclinationService declinationService = DeclinationService.INSTANCE;
     
     /**
      * Until a {@link DateSentence} has been received, the {@link #utcCalendar}'s {@link GregorianCalendar#getTime()}
@@ -94,7 +109,43 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
     private class MWDSentenceListener extends AbstractSentenceListener<MWDSentence> {
         @Override
         public void sentenceRead(MWDSentence sentence) {
-            // TODO Auto-generated method stub
+            // the message provides data about the true wind direction (TWD) and true wind speed (TWS);
+            // here, "true" means "not apparent"; the direction may still be provided in degrees true
+            // or degrees magnetic, and we need to find out which is available
+            final TimePoint timePoint = getLastTimePoint();
+            if (timePoint != null) {
+                final com.sap.sailing.domain.common.Position position = getPosition(timePoint);
+                if (position != null) {
+                    final Speed speed;
+                    if (!Double.isNaN(sentence.getWindSpeed())) {
+                        speed = new MeterPerSecondSpeedImpl(sentence.getWindSpeed());
+                    } else {
+                        speed = new KnotSpeedImpl(sentence.getWindSpeedKnots());
+                    }
+                    final Bearing direction;
+                    if (!Double.isNaN(sentence.getTrueWindDirection())) {
+                        direction = new DegreeBearingImpl(sentence.getTrueWindDirection());
+                    } else {
+                        Declination declination;
+                        try {
+                            declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds */ 1000);
+                            if (declination != null) {
+                                direction = new DegreeBearingImpl(sentence.getMagneticWindDirection()).add(declination.getBearingCorrectedTo(timePoint));
+                            } else {
+                                direction = null;
+                            }
+                            if (direction != null) {
+                                final KnotSpeedWithBearingAndTimepoint fix = new KnotSpeedWithBearingAndTimepoint(timePoint,
+                                        speed.getKnots(), direction);
+                                trueWind.add(fix);
+                                tryToCreateWindFixFromTrueWind(fix);
+                            }
+                        } catch (ParseException | IOException e) {
+                            logger.log(Level.WARNING, "Couldn't correct magnetic TWD reading by declination; ignoring", e);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -147,6 +198,28 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
             }
         }
     }
+    
+    private class PositionListener extends AbstractSentenceListener<PositionSentence> {
+        @Override
+        public void sentenceRead(PositionSentence sentence) {
+            if (sentence instanceof TimeSentence) { // all PositionSentence implementations currently also implement TimeSentence
+                TimeSentence timeSentence = (TimeSentence) sentence;
+                // now make sure we work with the latest time from this record:
+                new TimeListener().sentenceRead(timeSentence);
+                final TimePoint timePoint = getLastTimePoint();
+                if (timePoint != null) {
+                    final GPSFix fix = new GPSFixImpl(getPosition(sentence), timePoint);
+                    sensorPositions.add(fix);
+                }
+            }
+        }
+
+        private Position getPosition(PositionSentence sentence) {
+            return new DegreePosition(
+                    Math.abs(sentence.getPosition().getLatitude())*(sentence.getPosition().getLatitudeHemisphere()==CompassPoint.NORTH?1:-1),
+                    Math.abs(sentence.getPosition().getLongitude())*(sentence.getPosition().getLongitudeHemisphere()==CompassPoint.EAST?1:-1));
+        }
+    }
 
     /**
      * @param sentenceReader
@@ -172,6 +245,7 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
         sentenceReader.addSentenceListener(new HeadingSentenceListener());
         sentenceReader.addSentenceListener(new DateListener());
         sentenceReader.addSentenceListener(new TimeListener());
+        sentenceReader.addSentenceListener(new PositionListener());
     }
     
     private Speed createSpeed(Units speedUnit, double amount) {

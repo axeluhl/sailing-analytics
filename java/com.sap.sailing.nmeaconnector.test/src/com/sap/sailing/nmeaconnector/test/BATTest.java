@@ -7,7 +7,9 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.nmeaconnector.BATSentence;
 import com.sap.sailing.nmeaconnector.BATSentence.WindVaneBatteryStatus;
@@ -19,6 +21,8 @@ import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
 public class BATTest {
+
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(10 * 1000);
 
     public static final String EXAMPLE = "$WIBAT,1,5";
     BATSentence empty;
@@ -52,11 +56,26 @@ public class BATTest {
 
             @Override
             public void readingPaused() {
+                super.readingPaused();
+                setPausedAndTriggerWaiters();
+            }
+
+            private void setPausedAndTriggerWaiters() {
                 synchronized (monitor) {
-                    super.readingPaused();
                     paused[0] = true;
                     monitor.notifyAll();
                 }
+            }
+
+            /**
+             * When reading stops without having been paused before, e.g., because the stream was
+             * exhausted and closed, we will also set the {@code paused[0]} value to true and notify
+             * waiters.
+             */
+            @Override
+            public void readingStopped() {
+                super.readingStopped();
+                setPausedAndTriggerWaiters();
             }
         });
         reader.setPauseTimeout(100);
