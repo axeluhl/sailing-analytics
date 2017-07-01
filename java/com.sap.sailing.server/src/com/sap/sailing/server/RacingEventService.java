@@ -59,6 +59,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -221,6 +222,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
 
+    RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName, String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard);
+
     void removeLeaderboard(String leaderboardName);
 
     /**
@@ -318,13 +321,19 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
     /**
-     * @param series the series must not have any {@link RaceColumn}s yet
-     * @param controlTrackingFromStartAndFinishTimes TODO
+     * @param series
+     *            the series must not have any {@link RaceColumn}s yet
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
      */
     Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
-    
+
+    /**
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
+     */
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,

@@ -440,6 +440,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
+    String createRegattaLeaderboardWithEliminations();
     String editFlexibleLeaderboard();
     String editRegattaLeaderboard();
     String defaultRegatta();
@@ -603,6 +604,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSeeToolTips();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
+    String competitorNationalityColumnTooltip();
     String sailIdColumnTooltip();
     String rankColumnTooltip();
     String carryColumnTooltip();
@@ -1286,7 +1288,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     @Override
     String removeUploadedFile();
     String showCompetitorSailIdColumn();
+    String showCompetitorSailIdColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
     String showCompetitorFullNameColumn();
+    String alwaysShowCompetitorNationalityColumn();
+    String alwaysShowCompetitorNationalityColumnTooltip();
     String loadingDimensionValues();
     String runningQuery();
     String inviteBuoyTenders();
@@ -1592,6 +1597,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFixes();
     String twoXMark();
     String pagerStateInfo(int start , int end, int size, @Select boolean exact);
+    String currentHeelInDegree();
+    String currentHeelInDegreeTooltip();
+    String currentPitchInDegree();
+    String currentPitchDegreeTooltip();
     String currentRideHeightInMeters();
     String currentRideHeightInMetersTooltip();
     String currentOrAverageRideHeightInMeters();
@@ -1725,6 +1734,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String contentSapInSailing10();
     String contentSapInSailing11();
     String contentSapInSailing12();
+    String contentSapInSailing13();
     String sapSailingAnalyticsTitle();
     String contentSapSailingAnalytics1();
     String contentSapSailingAnalytics2();
@@ -1796,4 +1806,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String integer();
     String sampleColor();
     String leaderboardPage();
+    String showLiveNow();
+    String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
+    String unknownLeaderboardType(String name);
+    String selectCompetitorsToEliminate();
+    String trackedRaceAlreadyLinked();
+    String reallyRemoveSeries(String seriesName);
 }

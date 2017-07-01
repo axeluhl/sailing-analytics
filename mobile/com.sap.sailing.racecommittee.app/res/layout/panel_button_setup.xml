@@ -23,12 +23,25 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/header_margin_top"
             android:textAppearance="?attr/textPanelHeader"
+            android:visibility="visible"
+            tools:text="@string/start_mode" />
+
+        <TextView
+            android:id="@+id/panel_button_footer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/header_margin_top"
+            android:textAppearance="?attr/textPanelCaption"
+            android:visibility="gone"
             tools:text="@string/start_mode" />
 
         <RelativeLayout
             android:id="@+id/panel_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_above="@id/panel_button_footer"
             android:layout_below="@id/panel_button_header">
 
             <ImageView

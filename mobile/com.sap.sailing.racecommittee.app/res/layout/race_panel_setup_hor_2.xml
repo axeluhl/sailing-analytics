@@ -15,7 +15,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            app:buttonHeader="@string/race_factor"
+            app:buttonCaption="@string/race_factor"
             app:buttonType="typeValue"
             app:linePosition="right" />
 
@@ -24,7 +24,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            app:buttonHeader="@string/course"
+            app:buttonCaption="@string/course"
             app:buttonType="typeValue"
             app:linePosition="right" />
 
@@ -33,7 +33,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            app:buttonHeader="@string/wind"
+            app:buttonCaption="@string/wind"
             app:buttonType="typeValue" />
     </LinearLayout>
 

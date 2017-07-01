@@ -46,7 +46,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTestBase {
-    private RacingEventService service;
+    protected RacingEventService service;
     private Regatta regatta;
     private RaceColumn f1Column;
     private List<Competitor> competitors;

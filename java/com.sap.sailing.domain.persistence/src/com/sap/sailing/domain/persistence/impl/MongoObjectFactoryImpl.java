@@ -19,6 +19,8 @@ import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoCommandException;
 import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -96,6 +98,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -294,26 +297,35 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (leaderboard.getDisplayName() != null) {
             dbLeaderboard.put(FieldNames.LEADERBOARD_DISPLAY_NAME.name(), leaderboard.getDisplayName());
         }
-        BasicDBList dbSuppressedCompetitorIds = new BasicDBList();
-        for (Competitor suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
-            dbSuppressedCompetitorIds.add(suppressedCompetitor.getId());
-        }
-        dbLeaderboard.put(FieldNames.LEADERBOARD_SUPPRESSED_COMPETITOR_IDS.name(), dbSuppressedCompetitorIds);
-        if (leaderboard instanceof FlexibleLeaderboard) {
-            storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
-        } else if (leaderboard instanceof RegattaLeaderboard) {
-            storeRegattaLeaderboard((RegattaLeaderboard) leaderboard, dbLeaderboard);
+        if (leaderboard instanceof RegattaLeaderboardWithEliminations) {
+            dbLeaderboard.put(FieldNames.WRAPPED_REGATTA_LEADERBOARD_NAME.name(), ((RegattaLeaderboardWithEliminations) leaderboard).getRegatta().getName());
+            BasicDBList eliminatedCompetitorIds = new BasicDBList();
+            for (final Competitor c : ((RegattaLeaderboardWithEliminations) leaderboard).getEliminatedCompetitors()) {
+                eliminatedCompetitorIds.add(c.getId());
+            }
+            dbLeaderboard.put(FieldNames.ELMINATED_COMPETITORS.name(), eliminatedCompetitorIds);
         } else {
-            // at least store the scoring scheme
-            dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
+            BasicDBList dbSuppressedCompetitorIds = new BasicDBList();
+            for (Competitor suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
+                dbSuppressedCompetitorIds.add(suppressedCompetitor.getId());
+            }
+            dbLeaderboard.put(FieldNames.LEADERBOARD_SUPPRESSED_COMPETITOR_IDS.name(), dbSuppressedCompetitorIds);
+            if (leaderboard instanceof FlexibleLeaderboard) {
+                storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
+            } else if (leaderboard instanceof RegattaLeaderboard) {
+                storeRegattaLeaderboard((RegattaLeaderboard) leaderboard, dbLeaderboard);
+            } else {
+                // at least store the scoring scheme
+                dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
+            }
+            if (leaderboard.getDefaultCourseArea() != null) {
+                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
+            } else {
+                dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
+            }
+            storeColumnFactors(leaderboard, dbLeaderboard);
+            storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         }
-        if (leaderboard.getDefaultCourseArea() != null) {
-            dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
-        } else {
-            dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
-        }
-        storeColumnFactors(leaderboard, dbLeaderboard);
-        storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
@@ -627,8 +639,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeRegatta(Regatta regatta) {
         DBCollection regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
-        regattasCollection.createIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), 1));
-        regattasCollection.createIndex(new BasicDBObject(FieldNames.REGATTA_ID.name(), 1));
+        BasicDBObject regattaByNameIndexKey = new BasicDBObject(FieldNames.REGATTA_NAME.name(), 1);
+        try {
+            regattasCollection.createIndex(regattaByNameIndexKey, new BasicDBObject("unique", true));
+        } catch (MongoCommandException e) {
+            // the index probably existed as non-unique; remove and create again
+            regattasCollection.dropIndex(regattaByNameIndexKey);
+            regattasCollection.createIndex(regattaByNameIndexKey, new BasicDBObject("unique", true));
+        }
+        BasicDBObject regattaByIdIndexKey = new BasicDBObject(FieldNames.REGATTA_ID.name(), 1);
+        try {
+            regattasCollection.createIndex(regattaByIdIndexKey, new BasicDBObject("unique", true));
+        } catch (MongoCommandException e) {
+            regattasCollection.dropIndex(regattaByIdIndexKey);
+            regattasCollection.createIndex(regattaByIdIndexKey, new BasicDBObject("unique", true));
+        }
         DBObject dbRegatta = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
@@ -657,7 +682,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
         dbRegatta.put(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name(), regatta.isControlTrackingFromStartAndFinishTimes());
         dbRegatta.put(FieldNames.REGATTA_RANKING_METRIC.name(), storeRankingMetric(regatta));
-        regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+        boolean success = false;
+        final int MAX_TRIES = 3;
+        for (int i=0; i<MAX_TRIES && !success; i++) {
+            try {
+                regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+                success = true;
+            } catch (DuplicateKeyException e) {
+                if (i+1==MAX_TRIES) {
+                    throw e;
+                }
+            }
+        }
     }
 
     private DBObject storeRankingMetric(Regatta regatta) {
@@ -1345,12 +1381,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogIdentifier(identifier, query);
         getRaceLogCollection().remove(query);
     }
+    
+    @Override
+    public void removeAllRaceLogs() {
+        getRaceLogCollection().drop();;
+    }
 
     @Override
     public void removeRegattaLog(RegattaLikeIdentifier identifier) {
         DBObject query = new BasicDBObject();
         addRegattaLikeIdentifier(identifier, query);
         getRegattaLogCollection().remove(query);
+    }
+    
+    @Override
+    public void removeAllRegattaLogs() {
+        getRegattaLogCollection().drop();
     }
 
     @Override

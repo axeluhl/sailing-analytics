@@ -238,6 +238,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     Distance getRideHeight(TimePoint at);
 
+    Bearing getHeel(TimePoint at);
+
+    Bearing getPitch(TimePoint at);
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader
      * and competitor are in the same leg, this is simply the windward distance. If the leader is already one or more

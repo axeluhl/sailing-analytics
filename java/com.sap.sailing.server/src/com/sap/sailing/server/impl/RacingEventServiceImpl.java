@@ -119,9 +119,11 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
@@ -731,6 +733,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // TODO clear user store? See bug 2430.
         this.competitorStore.clear();
         this.windStore.clear();
+        getRaceLogStore().clear();
+        getRegattaLogStore().clear();
     }
 
     @Override
@@ -826,7 +830,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         final LeaderboardScoreCorrectionNotifier scoreCorrectionListener = new LeaderboardScoreCorrectionNotifier(leaderboard);
         scoreCorrectionListenersByLeaderboard.put(leaderboard, scoreCorrectionListener);
-        leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
+        leaderboard.addScoreCorrectionListener(scoreCorrectionListener);
     }
 
     private void loadStoredLeaderboardsAndGroups() {
@@ -880,22 +884,39 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName,
             int[] discardThresholds) {
         Regatta regatta = getRegatta(regattaIdentifier);
-        logger.info("adding regatta leaderboard for regatta "
-                + (regatta == null ? "null" : (regatta.getName() + " (" + regatta.hashCode() + ")")) + " to " + this);
-        RegattaLeaderboard result = null;
-        if (regatta != null) {
-            result = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
-            result.setDisplayName(leaderboardDisplayName);
-            if (getLeaderboardByName(result.getName()) != null) {
-                throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "
-                        + this);
-            }
-            addLeaderboard(result);
-            mongoObjectFactory.storeLeaderboard(result);
-        } else {
-            logger.warning("Cannot find regatta " + regattaIdentifier
+        if (regatta == null) {
+            throw new IllegalArgumentException("Cannot find regatta " + regattaIdentifier
                     + ". Hence, cannot create regatta leaderboard for it.");
         }
+        final RegattaLeaderboard result = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
+        result.setDisplayName(leaderboardDisplayName);
+        if (getLeaderboardByName(result.getName()) != null) {
+            throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "
+                    + this);
+        }
+        logger.info("adding regatta leaderboard for regatta "
+                + regatta.getName() + " (" + regatta.hashCode() + ")" + " to " + this);
+        addLeaderboard(result);
+        mongoObjectFactory.storeLeaderboard(result);
+        return result;
+    }
+
+    @Override
+    public RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName,
+            String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard) {
+        if (fullRegattaLeaderboard == null) {
+            throw new NullPointerException("Must provide a valid regatta leaderboard, not null");
+        }
+        if (getLeaderboardByName(leaderboardName) != null) {
+            throw new IllegalArgumentException("Leaderboard with name "+leaderboardName+" already exists in "+this);
+        }
+        final RegattaLeaderboardWithEliminations result = new DelegatingRegattaLeaderboardWithCompetitorElimination(
+                ()->(RegattaLeaderboard) fullRegattaLeaderboard, leaderboardName);
+        result.setDisplayName(leaderboardDisplayName);
+        logger.info("adding regatta leaderboard with eliminations for regatta leaderboard "
+                + fullRegattaLeaderboard.getName() + " to " + this);
+        addLeaderboard(result);
+        mongoObjectFactory.storeLeaderboard(result);
         return result;
     }
 
@@ -1286,6 +1307,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             RankingMetricConstructor rankingMetricConstructor) {
+        if (useStartTimeInference && controlTrackingFromStartAndFinishTimes) {
+            throw new IllegalArgumentException("Cannot set both of useStartTimeInference and controlTrackingFromStartAndFinishTimes to true");
+        }
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
                 fullRegattaName, boatClassName, startDate, endDate, id, series, persistent, scoringScheme,
                 defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
@@ -2228,6 +2252,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration newRegattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
+        if (useStartTimeInference && controlTrackingFromStartAndFinishTimes) {
+            throw new IllegalArgumentException("Cannot set both of useStartTimeInference and controlTrackingFromStartAndFinishTimes to true");
+        }
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);

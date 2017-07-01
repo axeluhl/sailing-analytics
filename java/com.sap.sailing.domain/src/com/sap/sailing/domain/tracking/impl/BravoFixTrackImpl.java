@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
@@ -48,6 +49,46 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         }
         // TODO interpolate if necessary
         return fixBefore.getRideHeight();
+    }
+
+    @Override
+    public Bearing getHeel(TimePoint timePoint) {
+        BravoFix fixAfter = getFirstFixAtOrAfter(timePoint);
+        if (fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
+            // exact match of timepoint -> no interpolation necessary
+            return fixAfter.getHeel();
+        }
+        BravoFix fixBefore = getLastFixAtOrBefore(timePoint);
+        if (fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
+            // exact match of timepoint -> no interpolation necessary
+            return fixBefore.getHeel();
+        }
+        if (fixAfter == null || fixBefore == null) {
+            // the fix is out of the TimeRange where we have fixes
+            return null;
+        }
+        // TODO interpolate if necessary
+        return fixBefore.getHeel();
+    }
+
+    @Override
+    public Bearing getPitch(TimePoint timePoint) {
+        BravoFix fixAfter = getFirstFixAtOrAfter(timePoint);
+        if (fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
+            // exact match of timepoint -> no interpolation necessary
+            return fixAfter.getPitch();
+        }
+        BravoFix fixBefore = getLastFixAtOrBefore(timePoint);
+        if (fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
+            // exact match of timepoint -> no interpolation necessary
+            return fixBefore.getPitch();
+        }
+        if (fixAfter == null || fixBefore == null) {
+            // the fix is out of the TimeRange where we have fixes
+            return null;
+        }
+        // TODO interpolate if necessary
+        return fixBefore.getPitch();
     }
     
     @Override

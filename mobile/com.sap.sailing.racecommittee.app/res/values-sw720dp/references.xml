@@ -12,6 +12,7 @@
     <item name="race_finishing_button" type="layout">@layout/race_finishing_button_xlarge</item>
     <item name="race_individual_recall" type="layout">@layout/race_individual_recall_xlarge</item>
     <item name="race_panel_time" type="layout">@layout/race_panel_time_xlarge</item>
+    <item name="race_penalty_button_bar" type="layout">@layout/race_penalty_button_bar_xlarge</item>
     <item name="race_positioning" type="layout">@layout/race_tracking_list_normal</item>
     <item name="race_schedule_button" type="layout">@layout/race_schedule_button_xlarge</item>
     <item name="race_column_factor" type="layout">@layout/race_column_factor_normal</item>

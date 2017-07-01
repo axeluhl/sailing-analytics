@@ -449,7 +449,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     }
                 }
             } else if (state.getStatus() == RaceLogRaceStatus.FINISHING) {
-                flag = FlagsResources.getFlagDrawable(getContext(), currentState.get(0).getUpperFlag().name(), flag_size);
+                if (!currentState.isEmpty()) {
+                    flag = FlagsResources.getFlagDrawable(getContext(), currentState.get(0).getUpperFlag().name(), flag_size);
+                } else {
+                    flag = null;
+                }
                 arrow = null;
                 timer = TimeUtils.formatDurationSince(now.minus(state.getFinishingTime().asMillis()).asMillis());
             }

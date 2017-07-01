@@ -7,6 +7,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -28,7 +29,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl
  *
  */
-public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements RaceColumn, RaceColumnListener {
+public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements RaceColumn, RaceColumnListener, LeaderboardChangeListener {
     private static final long serialVersionUID = 3092096133388262955L;
     private final Leaderboard leaderboard;
     private final Fleet metaFleet;
@@ -38,6 +39,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
         this.leaderboard = leaderboard;
         this.metaFleet = metaFleet;
         leaderboard.addRaceColumnListener(this);
+        leaderboard.addLeaderboardChangeListener(this);
     }
 
     @Override
@@ -162,6 +164,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnNameChanged(raceColumn, oldName, newName);
+    }
+
+    @Override
     public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
         getRaceColumnListeners().notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
     }
@@ -283,5 +290,26 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
 
     @Override
     public void disableCompetitorRegistrationOnRaceLog(Fleet fleetByName) {
+    }
+
+    /**
+     * When the leaderboard name changes, notify this to this object's {@link RaceColumnListener}s as a
+     * change of this race column's name, but only if no {@link Leaderboard#getDisplayName() display name}
+     * is set because that would take precedence over the regular name.
+     */
+    @Override
+    public void nameChanged(String oldName, String newName) {
+        if (leaderboard.getDisplayName() == null) {
+            getRaceColumnListeners().notifyListenersAboutRaceColumnNameChanged(this, oldName, newName);
+        }
+    }
+
+    /**
+     * When the leaderboard display name changes, notify this to this object's {@link RaceColumnListener}s as a
+     * change of this race column's name
+     */
+    @Override
+    public void displayNameChanged(String oldDisplayName, String newDisplayName) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnNameChanged(this, oldDisplayName, newDisplayName);
     }
 }

@@ -42,6 +42,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.CANOE_TAIFUN.getDisplayName(), imageResources.CanoeTaifunIcon());
         boatClassIconsMap.put(BoatClassMasterdata.CONTENDER.getDisplayName(), imageResources.ContenderIcon());
         boatClassIconsMap.put(BoatClassMasterdata.CC_30.getDisplayName(), imageResources.CC30Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.DELPHIA_24.getDisplayName(), imageResources.Delphia24Icon());
         boatClassIconsMap.put(BoatClassMasterdata.DRAGON_INT.getDisplayName(), imageResources.DragonIcon());
         boatClassIconsMap.put(BoatClassMasterdata.DYAS.getDisplayName(), imageResources.DyasIcon());
         boatClassIconsMap.put(BoatClassMasterdata.EUROPE_INT.getDisplayName(), imageResources.EuropeIcon());
@@ -59,6 +60,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.GC_32.getDisplayName(), imageResources.GC32Icon());
         boatClassIconsMap.put(BoatClassMasterdata.GP_26.getDisplayName(), imageResources.GP26Icon());
         boatClassIconsMap.put(BoatClassMasterdata.H_BOAT.getDisplayName(), imageResources.H_BoatIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.HANSA_303.getDisplayName(), imageResources.Hansa303Icon());
         boatClassIconsMap.put(BoatClassMasterdata.HOBIE_16.getDisplayName(), imageResources.HobieIcon());
         boatClassIconsMap.put(BoatClassMasterdata.HOBIE_TIGER.getDisplayName(), imageResources.HobieIcon());
         boatClassIconsMap.put(BoatClassMasterdata.HOBIE_WILD_CAT.getDisplayName(), imageResources.HobieIcon());
@@ -71,6 +73,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.J105.getDisplayName(), imageResources.J105Icon());
         boatClassIconsMap.put(BoatClassMasterdata.J111.getDisplayName(), imageResources.J111Icon());
         boatClassIconsMap.put(BoatClassMasterdata.KIELZUGVOGEL.getDisplayName(), imageResources.KielzugvogelIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.FORMULA_KITE.getDisplayName(), imageResources.FormulaKiteIcon());
         boatClassIconsMap.put(BoatClassMasterdata.LASER_2.getDisplayName(), imageResources.Laser2Icon());
         boatClassIconsMap.put(BoatClassMasterdata.LASER_SB3.getDisplayName(), imageResources.LaserSB3Icon());
         boatClassIconsMap.put(BoatClassMasterdata.LASER_INT.getDisplayName(), imageResources.LaserIcon());
@@ -99,6 +102,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.RS_AERO.getDisplayName(), imageResources.RSAEROIcon());
         boatClassIconsMap.put(BoatClassMasterdata.RS_X.getDisplayName(), imageResources.RSXIcon());
         boatClassIconsMap.put(BoatClassMasterdata.RS_FEVA.getDisplayName(), imageResources.RSFevaIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.SKUD_18.getDisplayName(), imageResources.Skud18Icon());
         boatClassIconsMap.put(BoatClassMasterdata.SONAR.getDisplayName(), imageResources.SonarIcon());
         boatClassIconsMap.put(BoatClassMasterdata.SOLING.getDisplayName(), imageResources.SolingIcon());
         boatClassIconsMap.put(BoatClassMasterdata.SPLASH_BLUE.getDisplayName(), imageResources.SplashBlueIcon());
@@ -110,9 +114,11 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.SWAN_45.getDisplayName(), imageResources.Swan45Icon());
         boatClassIconsMap.put(BoatClassMasterdata.TARTAN_10.getDisplayName(), imageResources.Tartan10Icon());
         boatClassIconsMap.put(BoatClassMasterdata.TORNADO.getDisplayName(), imageResources.TornadoIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.TOM_28_MAX.getDisplayName(), imageResources.Tom28MaxIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TRIAS.getDisplayName(), imageResources.TriasIcon());
         boatClassIconsMap.put(BoatClassMasterdata.VIPER_640.getDisplayName(), imageResources.Viper640Icon());
         boatClassIconsMap.put(BoatClassMasterdata.VX_ONE.getDisplayName(), imageResources.VXOneIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.WETA.getDisplayName(), imageResources.WetaIcon());
         boatClassIconsMap.put(BoatClassMasterdata.X_99.getDisplayName(), imageResources.X99Icon());
     }
 
