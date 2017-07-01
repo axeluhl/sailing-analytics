@@ -104,7 +104,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     private String getSignInUrl() {
-        return "https://www.igtimi.com/users/sign_in";
+        return getBaseUrl()+"/users/sign_in";
     }
 
     private String getOauthTokenUrl() {
@@ -119,7 +119,8 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * @return no trailing slash
      */
     private String getBaseUrl() {
-        return "https://www.igtimi.com";
+        int CHANGE_THIS_BACK_TO_www_igtimi_com_WHEN_DONE_WITH_TESTING; // TODO
+        return "https://staging.igtimi.com";
     }
 
     @Override
