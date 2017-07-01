@@ -119,29 +119,33 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
                     final Speed speed;
                     if (!Double.isNaN(sentence.getWindSpeed())) {
                         speed = new MeterPerSecondSpeedImpl(sentence.getWindSpeed());
-                    } else {
+                    } else if (!Double.isNaN(sentence.getWindSpeedKnots())) {
                         speed = new KnotSpeedImpl(sentence.getWindSpeedKnots());
-                    }
-                    final Bearing direction;
-                    if (!Double.isNaN(sentence.getTrueWindDirection())) {
-                        direction = new DegreeBearingImpl(sentence.getTrueWindDirection());
                     } else {
-                        Declination declination;
-                        try {
-                            declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds */ 1000);
-                            if (declination != null) {
-                                direction = new DegreeBearingImpl(sentence.getMagneticWindDirection()).add(declination.getBearingCorrectedTo(timePoint));
-                            } else {
-                                direction = null;
+                        speed = null;
+                    }
+                    if (speed != null) {
+                        final Bearing direction;
+                        if (!Double.isNaN(sentence.getTrueWindDirection())) {
+                            direction = new DegreeBearingImpl(sentence.getTrueWindDirection());
+                        } else {
+                            Declination declination;
+                            try {
+                                declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds */ 1000);
+                                if (declination != null) {
+                                    direction = new DegreeBearingImpl(sentence.getMagneticWindDirection()).add(declination.getBearingCorrectedTo(timePoint));
+                                } else {
+                                    direction = null;
+                                }
+                                if (direction != null) {
+                                    final KnotSpeedWithBearingAndTimepoint fix = new KnotSpeedWithBearingAndTimepoint(timePoint,
+                                            speed.getKnots(), direction);
+                                    trueWind.add(fix);
+                                    tryToCreateWindFixFromTrueWind(fix);
+                                }
+                            } catch (ParseException | IOException e) {
+                                logger.log(Level.WARNING, "Couldn't correct magnetic TWD reading by declination; ignoring", e);
                             }
-                            if (direction != null) {
-                                final KnotSpeedWithBearingAndTimepoint fix = new KnotSpeedWithBearingAndTimepoint(timePoint,
-                                        speed.getKnots(), direction);
-                                trueWind.add(fix);
-                                tryToCreateWindFixFromTrueWind(fix);
-                            }
-                        } catch (ParseException | IOException e) {
-                            logger.log(Level.WARNING, "Couldn't correct magnetic TWD reading by declination; ignoring", e);
                         }
                     }
                 }
