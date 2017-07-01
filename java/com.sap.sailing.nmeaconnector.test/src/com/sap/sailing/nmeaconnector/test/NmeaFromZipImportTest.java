@@ -27,8 +27,11 @@ public class NmeaFromZipImportTest {
     @Test
     public void testReadOneZipEntry() throws IOException, InterruptedException {
         ZipEntry entry;
-        while ((entry=zipInputStream.getNextEntry()) != null && entry.getName().toLowerCase().endsWith(".txt"));
-        Iterable<Wind> windFixes = NmeaFactory.INSTANCE.readWind(zipInputStream);
-        assertTrue(!Util.isEmpty(windFixes));
+        while ((entry=zipInputStream.getNextEntry()) != null) {
+            if (entry.getName().toLowerCase().endsWith(".txt")) {
+                Iterable<Wind> windFixes = NmeaFactory.INSTANCE.readWind(zipInputStream);
+                assertTrue(!Util.isEmpty(windFixes));
+            }
+        }
     }
 }
