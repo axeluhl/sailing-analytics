@@ -71,15 +71,19 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
      * <li>When no {@link CompetitorResult} object is received for a competitor, no change is applied to that
      * competitor's score corrections.</li>
      * <li>When a {@link CompetitorResult} object is received for a competitor, if it contains {@code null} for the
-     * score and 0 for the rank, any existing score correction (points) is removed for that competitor, otherwise, the
+     * score and 0 for the rank or {@code null} for the score and a valid non-{@link MaxPointsReason#NONE NONE}
+     * {@link MaxPointsReason}, any existing score correction (points) is removed for that competitor, otherwise, the
      * score correction (points) from the CompetitorResult object is applied if provided (in this case a rank provided
-     * in the {@link CompetitorResult} object is ignored); if only a rank but no score is provided in the
-     * {@link CompetitorResult}, the scoring scheme will compute the score from the rank, and that score will be applied
-     * as a score correction.</li>
+     * in the {@link CompetitorResult} object is ignored); if no {@link MaxPointsReason} is provided and only a rank but
+     * no score is provided in the {@link CompetitorResult}, the scoring scheme will compute the score from the rank,
+     * considering any {@link MaxPointsReason} provided in the result, and that score will be applied as a score
+     * correction. If a {@link MaxPointsReason} but no explicit score is provided, the rank is ignored because
+     * the scoring scheme is expected to compute the score from the {@link MaxPointsReason}; therefore, the score
+     * correction (points) is cleared in this case so that the scoring scheme will be used for score calculation.</li>
      * <li>When a {@link CompetitorResult} object is received for a competitor, if it contains {@code null} for the
      * {@link MaxPointsReason}, any existing {@link MaxPointsReason} is removed for that competitor; otherwise, the
-     * {@link MaxPointsReason} from the {@link CompetitorResult} object is applied. This is handled entirely
-     * independently of the score (points).</li>
+     * {@link MaxPointsReason} from the {@link CompetitorResult} object is applied, and if no explicit score is provided
+     * in the result, the score is computed by the scoring scheme, ignoring any rank provided in the result.</li>
      * </ul>
      * <p>
      * 
@@ -116,7 +120,7 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
                 final Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
                 int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
                 correctScoreInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, competitor,
-                        rankByRaceCommittee, positionedCompetitor.getScore());
+                        rankByRaceCommittee, positionedCompetitor.getScore(), positionedCompetitor.getMaxPointsReason());
                 setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor.getMaxPointsReason(), competitor);
             }
             // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
@@ -137,11 +141,13 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
         }
     }
 
-    private void correctScoreInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
-            final int numberOfCompetitorsInRace, 
-            Competitor competitor, int rankByRaceCommittee, Double optionalExplicitScore) {
-        final Double scoreByRaceCommittee = getScoreFromRaceCommittee(leaderboard, raceColumn, timePoint,
-                numberOfCompetitorsInRace, competitor, rankByRaceCommittee, optionalExplicitScore);
+    private void correctScoreInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn,
+            TimePoint timePoint, final int numberOfCompetitorsInRace, Competitor competitor, int rankByRaceCommittee,
+            Double optionalExplicitScore, MaxPointsReason maxPointsReason) {
+        final Double scoreByRaceCommittee = optionalExplicitScore==null && maxPointsReason != null &&
+                maxPointsReason != MaxPointsReason.NONE ? null :
+                    getScoreFromRaceCommittee(leaderboard, raceColumn, timePoint,
+                numberOfCompetitorsInRace, competitor, rankByRaceCommittee, optionalExplicitScore, maxPointsReason);
         // Apply the score correction if it will cause a change in the explicit score set for the competitor
         if (!Util.equalsWithNull(leaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, raceColumn), scoreByRaceCommittee)) {
             applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
@@ -149,19 +155,28 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
     }
 
     /**
-     * If a non-{@code null} {@code optionalExplicitScore} is provided, it it returned. Otherwise, a score is determined
-     * from the {@code oneBasedRankByRaceCommittee} using the leaderboard scoring scheme's
+     * If a non-{@code null} {@code optionalExplicitScore} is provided, it it returned. Otherwise, if a valid
+     * {@link MaxPointsReason} is provided, {@code null} is returned as the explicit score because the scoring scheme
+     * shall be used dynamically to determine the penalty score (see
+     * {@link ScoringScheme#getPenaltyScore(RaceColumn, Competitor, MaxPointsReason, Integer, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint)}).
+     * If no explicit score is provided and no {@link MaxPointsReason} is specified, a score is determined from the
+     * {@code oneBasedRankByRaceCommittee} using the leaderboard scoring scheme's
      * {@link ScoringScheme#getScoreForRank(Leaderboard, RaceColumn, Competitor, int, java.util.concurrent.Callable, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint)
      * getScoreForRank(...)} method. Usually, scoring schemes will return {@code null} as score for {@code 0} as
      * (one-based) rank.
      */
     private Double getScoreFromRaceCommittee(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
             final int numberOfCompetitorsInRace, Competitor competitor, int oneBasedRankByRaceCommittee,
-            Double optionalExplicitScore) {
+            Double optionalExplicitScore, MaxPointsReason maxPointsReason) {
         final Double scoreByRaceCommittee;
         if (optionalExplicitScore == null) {
-            scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
-                oneBasedRankByRaceCommittee, ()->numberOfCompetitorsInRace, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), timePoint);
+            if (maxPointsReason != null && maxPointsReason != MaxPointsReason.NONE) {
+                // let scoring scheme calculate the penalty score dynamically
+                scoreByRaceCommittee = null;
+            } else {
+                scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
+                    oneBasedRankByRaceCommittee, ()->numberOfCompetitorsInRace, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), timePoint);
+            }
         } else {
             scoreByRaceCommittee = optionalExplicitScore;
         }
