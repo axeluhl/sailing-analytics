@@ -20,7 +20,7 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class MultiResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
     
@@ -143,7 +143,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 

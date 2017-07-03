@@ -154,7 +154,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
 
     @Override
-    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
+    public FlexibleRaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
         FlexibleRaceColumn column = addRaceColumn(columnName, medalRace, /* logAlreadyExistingColumn */false);
         column.setTrackedRace(defaultFleet, race); // triggers listeners because this object was registered above as
                                                    // race column listener on the column

@@ -5,6 +5,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A component that contains a collection of settings components in a tabbed panel.
@@ -44,8 +45,8 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
     }
 
     @Override
-    public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent() {
-        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(lifecycle, perspectiveCompositeSettings);
+    public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent(PerspectiveCompositeSettings<PS> settings) {
+        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(lifecycle, settings);
     }
 
     @Override

@@ -87,6 +87,7 @@ public class SettingsList<T extends AbstractGenericSerializableSettings> extends
         }
     }
     
+    @Override
     public void addValue(T value) {
         ValueCollectionValue<List<Value>> valueObject = ensureValue();
         this.values.add(value);

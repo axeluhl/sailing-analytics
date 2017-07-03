@@ -36,7 +36,6 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Competitor competitor = mData.get(position);
-
         if (competitor != null) {
             String name = "";
             if (competitor instanceof CompetitorWithBoat) {

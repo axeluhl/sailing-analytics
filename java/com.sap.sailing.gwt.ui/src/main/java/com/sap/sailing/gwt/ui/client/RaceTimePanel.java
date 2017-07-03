@@ -20,7 +20,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -151,8 +151,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     @Override
-    public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent() {
-        return componentLifecycle.getSettingsDialogComponent(getSettings());
+    public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent(RaceTimePanelSettings settings) {
+        return componentLifecycle.getSettingsDialogComponent(settings);
     }
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {
