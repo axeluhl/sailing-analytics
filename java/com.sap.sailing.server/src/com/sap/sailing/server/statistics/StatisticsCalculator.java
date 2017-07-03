@@ -118,7 +118,7 @@ public class StatisticsCalculator {
         } finally {
             competitorTrack.unlockAfterRead();
         }
-        if (trackedRace.hasStarted(now)) {
+        if ((calculateDistanceTravelled || calculateMaxSpeed) && trackedRace.hasStarted(now)) {
             final NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
             MarkPassing lastMarkPassingBeforeNow = null;
             trackedRace.lockForRead(competitorMarkPassings);
