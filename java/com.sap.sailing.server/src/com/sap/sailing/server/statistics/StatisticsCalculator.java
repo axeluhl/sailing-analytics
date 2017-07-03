@@ -97,7 +97,7 @@ public class StatisticsCalculator {
             foundFixes |= doForCompetitor(trackedRace, competitor);
         }
         for (Mark mark : trackedRace.getMarks()) {
-            doForMark(trackedRace, mark);
+            foundFixes |= doForMark(trackedRace, mark);
         }
         for (WindSource windSource : trackedRace.getWindSources()) {
             foundFixes |= doForWindSource(trackedRace, windSource);
@@ -161,14 +161,20 @@ public class StatisticsCalculator {
         }
     }
 
-    private void doForMark(TrackedRace trackedRace, Mark mark) {
+    private boolean doForMark(TrackedRace trackedRace, Mark mark) {
+        boolean foundFixes = false;
         GPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
         markTrack.lockForRead();
         try {
-            numberOfGPSFixes += Util.size(markTrack.getRawFixes());
+            final int numberOfGWPFixesForMark = Util.size(markTrack.getRawFixes());
+            if(numberOfGWPFixesForMark > 0) {
+                foundFixes = true;
+                numberOfGPSFixes += numberOfGWPFixesForMark;
+            }
         } finally {
             markTrack.unlockAfterRead();
         }
+        return foundFixes;
     }
 
     private boolean doForWindSource(TrackedRace trackedRace, WindSource windSource) {
