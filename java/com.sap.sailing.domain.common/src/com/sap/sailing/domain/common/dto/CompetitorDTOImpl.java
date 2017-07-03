@@ -13,7 +13,7 @@ public class CompetitorDTOImpl extends CompetitorWithoutBoatDTOImpl implements C
     
     public CompetitorDTOImpl(String name, String shortName, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String idAsString, String imageURL, String flagImageURL, 
-            BoatDTO boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, BoatDTO boat) {
         super(name, shortName, color, email, twoLetterIsoCountryCode, threeLetterIocCountryCode,
                 countryName, idAsString, imageURL, flagImageURL, 
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);

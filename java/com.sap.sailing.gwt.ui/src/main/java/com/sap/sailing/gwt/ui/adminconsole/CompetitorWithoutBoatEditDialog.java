@@ -1,0 +1,235 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTOImpl;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.CountryCode;
+import com.sap.sse.common.CountryCodeFactory;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+
+/**
+ * The competitors produced by this dialog will have a <code>null</code>
+ * {@link CompetitorDTO#getTwoLetterIsoCountryCode() twoLetterIsoCountryCode} and a <code>null</code>
+ * {@link CompetitorDTO#getCountryName() countryName} because all of these can be derived from a valid
+ * {@link CompetitorDTO#getThreeLetterIocCountryCode() threeLetterIocCountryCode}.
+ * 
+ * @author Axel Uhl (d043530)
+ * 
+ */
+public class CompetitorWithoutBoatEditDialog<CompetitorDTOType extends CompetitorWithoutBoatDTO> extends DataEntryDialog<CompetitorDTOType> {
+    private final CompetitorDTOType competitorToEdit;
+    private final TextBox name;
+    private final TextBox shortName;
+    private final TextBox displayColorTextBox;
+    private final ListBox threeLetterIocCountryCode;
+    private final TextBox email;
+    private final TextBox searchTag;
+    private final StringMessages stringMessages;
+
+    private final URLFieldWithFileUpload flagImageURL;
+    private final URLFieldWithFileUpload imageUrlAndUploadComposite;
+    private final DoubleBox timeOnTimeFactor;
+    private final DoubleBox timeOnDistanceAllowanceInSecondsPerNauticalMile;
+    
+    protected static class CompetitorWithoutBoatValidator<T extends CompetitorWithoutBoatDTO> implements Validator<T> {
+        protected final StringMessages stringMessages;
+
+        public CompetitorWithoutBoatValidator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+        
+        @Override
+        public String getErrorMessage(T valueToValidate) {
+            String result = null;
+            if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
+                result = stringMessages.pleaseEnterAName();
+            } else if (valueToValidate.getColor() != null) {
+                Color displayColor = valueToValidate.getColor();
+                if (displayColor instanceof CompetitorWithoutBoatEditDialog.InvalidColor) {
+                    result = displayColor.getAsHtml();
+                }
+            }
+            return result;
+        }
+    }
+
+    public static CompetitorWithoutBoatEditDialog<CompetitorWithoutBoatDTO> create(final StringMessages stringMessages, CompetitorWithoutBoatDTO competitorToEdit,
+            DialogCallback<CompetitorWithoutBoatDTO> callback) {
+        return new CompetitorWithoutBoatEditDialog<CompetitorWithoutBoatDTO>(stringMessages, competitorToEdit,
+                new CompetitorWithoutBoatEditDialog.CompetitorWithoutBoatValidator<CompetitorWithoutBoatDTO>(stringMessages), callback);
+    }
+    
+    /**
+     * The class creates the UI-dialog to type in the data of a competitor.
+     * 
+     * @param competitorToEdit
+     *            The 'competitorToEdit' parameter contains the competitor which should be changed or initialized.
+     */
+    protected CompetitorWithoutBoatEditDialog(final StringMessages stringMessages, CompetitorDTOType competitorToEdit,
+            Validator<CompetitorDTOType> validator,  DialogCallback<CompetitorDTOType> callback) {
+        super(stringMessages.editCompetitor(), null, stringMessages.ok(), stringMessages.cancel(),
+                validator, /* animationEnabled */true, callback);
+        this.ensureDebugId("CompetitorEditDialog");
+        this.stringMessages = stringMessages;
+        this.competitorToEdit = competitorToEdit;
+                        
+        this.name = createTextBox(competitorToEdit.getName());
+        name.ensureDebugId("NameTextBox");
+        this.shortName = createTextBox(competitorToEdit.getShortName());
+        shortName.ensureDebugId("ShortNameTextBox");
+        this.email = createTextBox(competitorToEdit.getEmail());
+        this.searchTag = createTextBox(competitorToEdit.getSearchTag());
+        this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
+        this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
+        CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
+        int i=0;
+        List<CountryCode> ccs = new ArrayList<CountryCode>();
+        Util.addAll(ccf.getAll(), ccs);
+        ccs.add(null); // representing no nationality (NONE / white flag)
+        Collections.sort(ccs, new Comparator<CountryCode>() {
+            @Override
+            public int compare(CountryCode o1, CountryCode o2) {
+                return Util.compareToWithNull(o1 == null ? null : o1.getThreeLetterIOCCode(), o2 == null ? null : o2.getThreeLetterIOCCode(), /* nullIsLess */ true);
+            }
+        });
+        for (CountryCode cc : ccs) {
+            if (cc == null) {
+                this.threeLetterIocCountryCode.addItem("", ""); // the NONE country code that uses the empty, white flag
+                if (competitorToEdit.getThreeLetterIocCountryCode() == null || competitorToEdit.getThreeLetterIocCountryCode().isEmpty()) {
+                    this.threeLetterIocCountryCode.setSelectedIndex(i);
+                }
+                i++;
+            } else if (cc.getThreeLetterIOCCode() != null) {
+                this.threeLetterIocCountryCode.addItem(cc.getThreeLetterIOCCode() + " " + cc.getName(), cc.getThreeLetterIOCCode());
+                if (cc.getThreeLetterIOCCode().equals(competitorToEdit.getThreeLetterIocCountryCode())) {
+                    this.threeLetterIocCountryCode.setSelectedIndex(i);
+                }
+                i++;
+            }
+        }
+        this.flagImageURL = new URLFieldWithFileUpload(stringMessages);
+        this.flagImageURL.setURL(competitorToEdit.getFlagImageURL());
+        this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        this.imageUrlAndUploadComposite.setURL(competitorToEdit.getImageURL());
+        this.timeOnTimeFactor = createDoubleBox(competitorToEdit.getTimeOnTimeFactor(), 10);
+        this.timeOnDistanceAllowanceInSecondsPerNauticalMile = createDoubleBox(
+                competitorToEdit.getTimeOnDistanceAllowancePerNauticalMile() == null ? null : competitorToEdit
+                        .getTimeOnDistanceAllowancePerNauticalMile().asSeconds(), 10);
+    }
+
+    @Override
+    protected FocusWidget getInitialFocusWidget() {
+        return name;
+    }
+
+    /**
+     * Encodes an invalid color; can be used 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class InvalidColor implements Color {
+        private static final long serialVersionUID = 4012986110898149543L;
+        private final Exception exception;
+        
+        protected InvalidColor(Exception exception) {
+            this.exception = exception;
+        }
+
+        @Override
+        public com.sap.sse.common.Util.Triple<Integer, Integer, Integer> getAsRGB() {
+            return null;
+        }
+
+        @Override
+        public com.sap.sse.common.Util.Triple<Float, Float, Float> getAsHSV() {
+            return null;
+        }
+
+        @Override
+        public String getAsHtml() {
+            return stringMessages.invalidColor(exception.getMessage());
+        }
+        
+        @Override
+        public Color invert() {
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected CompetitorDTOType getResult() {
+        Color color;
+        if (displayColorTextBox.getText() == null || displayColorTextBox.getText().isEmpty()) {
+            color = null;
+        } else {
+            try {
+                color = new RGBColor(displayColorTextBox.getText());
+            } catch (IllegalArgumentException iae) {
+                color = new InvalidColor(iae);
+            }
+        }
+        CompetitorWithoutBoatDTO result = new CompetitorWithoutBoatDTOImpl(name.getText(), shortName.getText(), color, email.getText(),
+                /* twoLetterIsoCountryCode */ null,
+                threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
+                /* countryName */ null, competitorToEdit.getIdAsString(),
+                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(),
+                timeOnTimeFactor.getValue(),
+                timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue() == null ? null :
+                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue()*1000)), searchTag.getValue());
+        return (CompetitorDTOType) result;
+    }
+
+    @Override
+    protected Widget getAdditionalWidget() {
+        Grid result = new Grid(10, 2);
+        result.setWidget(0, 0, new Label(stringMessages.name()));
+        result.setWidget(0, 1, name);
+        result.setWidget(1, 0, new Label(stringMessages.shortName()));
+        result.setWidget(1, 1, shortName);
+        result.setWidget(2, 0, new Label(stringMessages.nationality()));
+        result.setWidget(2, 1, threeLetterIocCountryCode);
+        result.setWidget(3, 0, new Label(stringMessages.color()));
+        result.setWidget(3, 1, displayColorTextBox);
+        result.setWidget(4, 0, new Label(stringMessages.email()));
+        result.setWidget(4, 1, email);
+        result.setWidget(5, 0, new Label(stringMessages.searchTag()));
+        result.setWidget(5, 1, searchTag);
+        result.setWidget(6, 0, new Label(stringMessages.flagImageURL()));
+        result.setWidget(6, 1, flagImageURL);
+        result.setWidget(7, 0, new Label(stringMessages.imageURL()));
+        result.setWidget(7, 1, imageUrlAndUploadComposite);
+        result.setWidget(8, 0, new Label(stringMessages.timeOnTimeFactor()));
+        result.setWidget(8, 1, timeOnTimeFactor);
+        result.setWidget(9, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile()));
+        result.setWidget(9, 1, timeOnDistanceAllowanceInSecondsPerNauticalMile);
+        return result;
+    }
+
+    protected CompetitorDTOType getCompetitorToEdit() {
+        return competitorToEdit;
+    }
+
+    protected StringMessages getStringMessages() {
+        return stringMessages;
+    }
+
+}

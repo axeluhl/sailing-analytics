@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
@@ -590,8 +591,12 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getCompetitorsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
-    void addOrUpdateCompetitor(List<CompetitorDTO> competitors, AsyncCallback<List<CompetitorDTO>> asyncCallback);
+    void addOrUpdateCompetitors(List<CompetitorDTO> competitors, AsyncCallback<List<CompetitorDTO>> asyncCallback);
 
+    void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
+
+    void addOrUpdateCompetitorWithoutBoat(CompetitorWithoutBoatDTO competitor, AsyncCallback<CompetitorWithoutBoatDTO> asyncCallback);
+    
     void addCompetitors(List<CompetitorDescriptor> competitorsForSaving, String searchTag,
             AsyncCallback<List<CompetitorDTO>> asyncCallback);
 

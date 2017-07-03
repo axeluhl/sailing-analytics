@@ -297,14 +297,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                     boat.getBoatClass().getHullLength(), boat.getBoatClass().getHullBeam());
             boatDTO = new BoatDTO(boat.getId().toString(), boat.getName(), boatClassDTO, boat.getSailID(), boat.getColor());  
         }
-        CompetitorDTO competitorDTO = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(), c.getTwoLetterIsoCountryCode(),
-                   c.getThreeLetterIocCountryCode(),
-                   c.getCountryName(),
-                  c.getIdAsString(),
-                  c.getImageURL(),
-                  c.getFlagImageURL(),
-                boatDTO,
-                c.getTimeOnTimeFactor(), c.getTimeOnDistanceAllowancePerNauticalMile(), c.getSearchTag());
+        CompetitorDTO competitorDTO = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(),
+                c.getTwoLetterIsoCountryCode(), c.getThreeLetterIocCountryCode(), c.getCountryName(), c.getIdAsString(),
+                c.getImageURL(), c.getFlagImageURL(), c.getTimeOnTimeFactor(),
+                c.getTimeOnDistanceAllowancePerNauticalMile(), c.getSearchTag(), boatDTO);
 
         return competitorDTO;
     }
