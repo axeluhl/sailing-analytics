@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class IgnoreLocalSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -282780795782313106L;
@@ -22,6 +23,10 @@ public class IgnoreLocalSettings extends AbstractGenericSerializableSettings {
     
     public boolean isIgnoreLocalSettings() {
         return Boolean.TRUE.equals(ignoreLocalSettings.getValue());
+    }
+    
+    public static IgnoreLocalSettings getIgnoreLocalSettingsFromCurrentUrl() {
+        return new SettingsToUrlSerializer().deserializeFromCurrentLocation(new IgnoreLocalSettings());
     }
 
 }
