@@ -531,4 +531,17 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             LockUtil.unlockAfterWrite(lock);
         }
     }
+    
+    @Override
+    public void addBoats(Iterable<Boat> boats) {
+        LockUtil.lockForWrite(lock);
+        try {
+            for (Boat boat: boats) {
+                boatCache.put(boat.getId(), boat);
+                boatsByIdAsString.put(boat.getId().toString(), boat);
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
 }

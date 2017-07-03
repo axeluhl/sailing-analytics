@@ -14,6 +14,7 @@ import com.sap.sse.common.impl.NamedImpl;
 public class CompetitorDescriptor extends NamedImpl implements Named {
     private static final long serialVersionUID = -6645726854552711646L;
     
+    private final String shortName;
     private final String eventName;
     private final String regattaName;
     private final String boatClassName;
@@ -28,9 +29,10 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
     private final Duration timeOnDistanceAllowancePerNauticalMile;
 
     public CompetitorDescriptor(String eventName, String regattaName, String boatClassName, String raceName,
-            String fleetName, String sailNumber, String name, String teamName, String boatName, CountryCode countryCode,
+            String fleetName, String sailNumber, String name, String shortName, String teamName, String boatName, CountryCode countryCode,
             Iterable<PersonDTO> persons, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
         super(name);
+        this.shortName = shortName;
         this.eventName = eventName;
         this.regattaName = regattaName;
         this.boatClassName = boatClassName;
@@ -88,6 +90,10 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
 
     public String getTeamName() {
         return teamName;
+    }
+
+    public String getShortName() {
+        return shortName;
     }
 
     public Duration getTimeOnDistanceAllowancePerNauticalMile() {

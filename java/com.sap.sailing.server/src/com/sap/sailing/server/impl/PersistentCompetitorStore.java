@@ -152,4 +152,10 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo.storeBoat(result);
         return result;
     }
+    
+    @Override
+    public void addBoats(Iterable<Boat> boats) {
+        storeTo.storeBoats(boats);
+        super.addBoats(boats);
+    }
 }

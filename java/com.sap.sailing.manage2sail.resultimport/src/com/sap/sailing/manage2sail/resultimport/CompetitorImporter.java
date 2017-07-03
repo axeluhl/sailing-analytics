@@ -170,12 +170,13 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                                 nationality==null?null:nationality.getCountryCode().getThreeLetterIOCCode());
                 return person;
         }).collect(Collectors.toList());
+        // TODO bug2822: Check where the 'short name' and 'boat name' should come from
         final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(
                             event==null?null:event.getTitle(),
                             division==null?null:(division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
                             boatClassName, race != null ? race.getRaceName() : null, /* fleetName */ null, sailNumber,
-                            team.getTeamName(), team.getTeamName(), boat.getBoatName(),
-                            teamNationality[0] == null ? null : teamNationality[0].getCountryCode(),
+                            /* name */ team.getTeamName(), /* short name */ team.getTeamName(), /* team name */ team.getTeamName(), 
+                            boat.getBoatName(), teamNationality[0] == null ? null : teamNationality[0].getCountryCode(),
                             persons, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         return competitorDescriptor;
     }

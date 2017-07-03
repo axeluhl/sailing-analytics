@@ -99,6 +99,7 @@ import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.Regatt
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
@@ -136,9 +137,12 @@ import com.sap.sailing.domain.base.configuration.impl.RacingProcedureWithConfigu
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.SWCStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -455,6 +459,7 @@ import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -4875,11 +4880,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<CompetitorDTO> addCompetitors(List<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
         List<Competitor> competitorsForSaving = new ArrayList<>();
+        List<Boat> boatsForSaving = new ArrayList<>();
         for (final CompetitorDescriptor competitorDescriptor : competitorDescriptors) {
-            Competitor competitor = convertCompetitorDescriptorToCompetitor(competitorDescriptor, searchTag);
-            competitorsForSaving.add(competitor);
+            CompetitorAndBoat competitorWithBoat = convertCompetitorDescriptorToCompetitorAndBoat(competitorDescriptor, searchTag);
+            competitorsForSaving.add(competitorWithBoat.getCompetitor());
+            boatsForSaving.add(competitorWithBoat.getBoat());
         }
         getBaseDomainFactory().getCompetitorStore().addCompetitors(competitorsForSaving);
+        getBaseDomainFactory().getCompetitorStore().addBoats(boatsForSaving);
         return convertToCompetitorDTOs(competitorsForSaving);
     }
 
@@ -4889,7 +4897,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * @param searchTag
      *            set as the {@link Competitor#getSearchTag() searchTag} property of all new competitors
      */
-    private Competitor convertCompetitorDescriptorToCompetitor(CompetitorDescriptor competitorDescriptor, String searchTag) throws URISyntaxException {
+    private CompetitorAndBoat convertCompetitorDescriptorToCompetitorAndBoat(CompetitorDescriptor competitorDescriptor, String searchTag) throws URISyntaxException {
         Nationality nationality = (competitorDescriptor.getCountryCode() == null
                 || competitorDescriptor.getCountryCode().getThreeLetterIOCCode() == null
                 || competitorDescriptor.getCountryCode().getThreeLetterIOCCode().isEmpty()) ? null
@@ -4897,13 +4905,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         UUID competitorUUID = UUID.randomUUID();
         DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
         DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
+        BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
+        DynamicBoat boat = new BoatImpl(competitorUUID, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber());
         Competitor competitor = new CompetitorImpl(competitorUUID, competitorDescriptor.getName(), competitorDescriptor.getSailNumber(),
                 /* color */ null, /* eMail */ null,
                 /* flag image */ null, team,
                 competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag);
-
-        return competitor;
+        
+        return new CompetitorAndBoatImpl(competitor, boat);
     }
 
     @Override

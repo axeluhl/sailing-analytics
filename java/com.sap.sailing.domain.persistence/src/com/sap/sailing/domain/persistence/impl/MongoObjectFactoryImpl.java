@@ -1351,6 +1351,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
+    public void storeBoats(Iterable<Boat> boats) {
+        if (boats != null && !Util.isEmpty(boats)) {
+            DBCollection collection = database.getCollection(CollectionNames.BOATS.name());
+            List<DBObject> boatsDB = new ArrayList<>();
+            for (Boat boat : boats) {
+                JSONObject json = boatSerializer.serialize(boat);
+                DBObject entry = (DBObject) JSON.parse(json.toString());
+                boatsDB.add(entry);
+            }
+            collection.insert(boatsDB);
+        }
+    }
+
+    @Override
     public void removeAllBoats() {
         logger.info("Removing all persistent boats");
         DBCollection collection = database.getCollection(CollectionNames.BOATS.name());

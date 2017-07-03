@@ -132,6 +132,8 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
      */
     Boat updateBoat(String idAsString, String newName, Color newColor, String newSailId);
 
+    void addBoats(Iterable<Boat> boats);
+
     BoatDTO convertToBoatDTO(Boat boat);
     
     /**
