@@ -8,12 +8,13 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
-public class LeaderboardPanelMock extends ClassicLeaderboardPanel {
+public class LeaderboardPanelMock extends LeaderboardPanel {
 
     public LeaderboardPanelMock(SailingServiceAsync sailingService,
             String leaderboardName, ErrorReporter errorReporter,
@@ -21,7 +22,7 @@ public class LeaderboardPanelMock extends ClassicLeaderboardPanel {
         super(null, null, sailingService, new AsyncActionsExecutor(), new LeaderboardSettings(),
                 new CompetitorSelectionModel(
                         /* hasMultiSelection */true),
-                leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true);
+                leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true,new ClassicLeaderboardStyle());
     }
 
     @Override

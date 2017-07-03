@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boa
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Duration;
 
 public interface RaceEndWithBoatsView {
@@ -11,7 +11,7 @@ public interface RaceEndWithBoatsView {
     public interface NextRaceWithBoatsPresenter {
     }
 
-    void setLeaderBoard(SixtyInchLeaderBoard leaderboardPanel);
+    void setLeaderBoard(LeaderboardPanel leaderboardPanel);
 
     void setFirst(CompetitorDTO c);
 

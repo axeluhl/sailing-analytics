@@ -16,7 +16,8 @@ import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
@@ -35,7 +36,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * @author Axel Uhl (d043530)
  */
 public class EventSeriesAnalyticsDataManager {
-    private ClassicLeaderboardPanel overallLeaderboardPanel;
+    private LeaderboardPanel overallLeaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
     private MultiLeaderboardProxyPanel multiLeaderboardPanel;
 
@@ -57,18 +58,18 @@ public class EventSeriesAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public ClassicLeaderboardPanel createOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+    public LeaderboardPanel createOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if(overallLeaderboardPanel == null) {
-            overallLeaderboardPanel = new ClassicLeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
+            overallLeaderboardPanel = new LeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true,
                     /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
-                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
+                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle());
         }
         return overallLeaderboardPanel;
     }
@@ -103,7 +104,7 @@ public class EventSeriesAnalyticsDataManager {
         return multiLeaderboardPanel;
     }
 
-    public ClassicLeaderboardPanel getLeaderboardPanel() {
+    public LeaderboardPanel getLeaderboardPanel() {
         return overallLeaderboardPanel;
     }
 

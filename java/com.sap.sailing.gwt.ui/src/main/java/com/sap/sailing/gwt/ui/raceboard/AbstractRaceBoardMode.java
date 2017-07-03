@@ -16,7 +16,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -162,7 +161,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
                 getTimer().getTime(), raceColumnNameAsList, /* addOverallDetails */ false,
                 getLeaderboard(), /* fillTotalPointsUncorrected */ false,
                 /* timerToAdjustOffsetIn */ getTimer(), /* errorReporter */ null, StringMessages.INSTANCE);
-        getLeaderboardPanel().getExecutor().execute(getLeaderboardByNameAction, ClassicLeaderboardPanel.LOAD_LEADERBOARD_DATA_CATEGORY, callback);
+        getLeaderboardPanel().getExecutor().execute(getLeaderboardByNameAction, LeaderboardPanel.LOAD_LEADERBOARD_DATA_CATEGORY, callback);
     }
 
     @Override

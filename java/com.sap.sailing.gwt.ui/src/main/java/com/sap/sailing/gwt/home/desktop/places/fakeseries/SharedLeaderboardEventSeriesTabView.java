@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
@@ -29,7 +29,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
 
     protected void createSharedLeaderboardPanel(String leaderboardName,
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager, UserService userService,
-            String placeToken, final Consumer<ClassicLeaderboardPanel> consumer) {
+            String placeToken, final Consumer<LeaderboardPanel> consumer) {
         
         // FIXME remove
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils
@@ -40,7 +40,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
         componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
             @Override
             public void onSuccess(LeaderboardSettings leaderboardSettings) {
-                ClassicLeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(null,
+                LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(null,
                         componentContext, leaderboardSettings, null, "leaderboardGroupName",
                         leaderboardName, true, // this information came from place, now hard coded. check with frank
                         autoExpandLastRaceColumn);

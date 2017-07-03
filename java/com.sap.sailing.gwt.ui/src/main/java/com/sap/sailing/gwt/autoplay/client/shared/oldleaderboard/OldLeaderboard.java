@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 
 public class OldLeaderboard extends Composite implements LeaderboardUpdateListener {
@@ -32,10 +32,10 @@ public class OldLeaderboard extends Composite implements LeaderboardUpdateListen
     @UiField DivElement lastScoringCommentDiv;
     @UiField DivElement scoringSchemeDiv;
 
-    private ClassicLeaderboardPanel leaderboardPanel;
+    private LeaderboardPanel leaderboardPanel;
     private final StringMessages stringmessages;
 
-    public OldLeaderboard(ClassicLeaderboardPanel leaderboardPanel, StringMessages stringmessages) {
+    public OldLeaderboard(LeaderboardPanel leaderboardPanel, StringMessages stringmessages) {
         this.stringmessages = stringmessages;
         this.leaderboardPanel = leaderboardPanel;
 

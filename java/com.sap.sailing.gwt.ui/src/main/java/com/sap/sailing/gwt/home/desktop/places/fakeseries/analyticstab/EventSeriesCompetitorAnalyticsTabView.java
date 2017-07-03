@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEvent
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 
 /**
@@ -78,9 +78,9 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
                 }
             };
             if(eventSeriesAnalyticsManager.getLeaderboardPanel() == null) {
-                createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<ClassicLeaderboardPanel>() {
+                createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<LeaderboardPanel>() {
                     @Override
-                    public void consume(ClassicLeaderboardPanel object) {
+                    public void consume(LeaderboardPanel object) {
                         callback.run();
                     }
                 });

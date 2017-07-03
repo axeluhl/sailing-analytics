@@ -14,7 +14,6 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
-import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
@@ -22,6 +21,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderBoardStyle;
 import com.sap.sailing.gwt.ui.raceboard.QuickRanksDTOFromLeaderboardDTOProvider;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -36,7 +37,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private LiveRaceWithRacemapAndLeaderBoardView view;
     private Timer selectionTimer;
-    private SixtyInchLeaderBoard leaderboardPanel;
+    private LeaderboardPanel leaderboardPanel;
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
@@ -156,10 +157,10 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new SixtyInchLeaderBoard(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
+        leaderboardPanel = new LeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 true, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
-                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, null,
-                false, null, false, null, false, true, false, false, false);
+                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
+                false, null, false, null, false, true, false, false, false,new SixtyInchLeaderBoardStyle(true));
         
         getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), lifeRace));
         

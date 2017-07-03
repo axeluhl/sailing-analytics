@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDa
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 
 /**
@@ -62,9 +62,9 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
-            final Consumer<ClassicLeaderboardPanel> leaderboardConsumer = new Consumer<ClassicLeaderboardPanel>() {
+            final Consumer<LeaderboardPanel> leaderboardConsumer = new Consumer<LeaderboardPanel>() {
                 @Override
-                public void consume(ClassicLeaderboardPanel leaderboardPanel) {
+                public void consume(LeaderboardPanel leaderboardPanel) {
                     initWidget(ourUiBinder.createAndBindUi(EventSeriesOverallLeaderboardTabView.this));
                     leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
                     eventSeriesAnalyticsManager.hideCompetitorChart();
@@ -74,7 +74,7 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
                     }
                 }
             };
-            ClassicLeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.getLeaderboardPanel(); 
+            LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.getLeaderboardPanel(); 
             if(leaderboardPanel == null) {
                 createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), /*FIXME placeToken */ null, leaderboardConsumer);
             } else if( /*FIXME placeToken not empty */ false) {

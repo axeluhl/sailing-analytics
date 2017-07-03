@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboards
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
 public class IdleOverallLeaderBoardPlace extends Place {
     public static class Tokenizer implements PlaceTokenizer<IdleOverallLeaderBoardPlace> {
@@ -18,18 +18,18 @@ public class IdleOverallLeaderBoardPlace extends Place {
     }
 
 
-    private SixtyInchLeaderBoard leaderboardPanel;
+    private LeaderboardPanel leaderboardPanel;
 
 
     public IdleOverallLeaderBoardPlace() {
     }
 
 
-    public IdleOverallLeaderBoardPlace(SixtyInchLeaderBoard leaderboardPanel) {
+    public IdleOverallLeaderBoardPlace(LeaderboardPanel leaderboardPanel) {
         this.leaderboardPanel = leaderboardPanel;
     }
     
-    public SixtyInchLeaderBoard getLeaderboardPanel() {
+    public LeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
 }

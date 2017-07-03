@@ -35,7 +35,7 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
     
     protected static final ViewerToolbar RES = GWT.create(ViewerToolbar.class);
     protected final StringMessages stringMessages;
-    private ClassicLeaderboardPanel leaderboardPanel;
+    private LeaderboardPanel leaderboardPanel;
     protected final CompetitorSelectionModel competitorSelectionProvider;
     protected final AsyncActionsExecutor asyncActionsExecutor;
 
@@ -63,12 +63,12 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
         RES.css().ensureInjected();
     }
     
-    protected void init(ClassicLeaderboardPanel leaderboardPanel) {
+    protected void init(LeaderboardPanel leaderboardPanel) {
         addChildComponent(leaderboardPanel);
         this.leaderboardPanel = leaderboardPanel;
     }
 
-    public ClassicLeaderboardPanel getLeaderboardPanel() {
+    public LeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
 

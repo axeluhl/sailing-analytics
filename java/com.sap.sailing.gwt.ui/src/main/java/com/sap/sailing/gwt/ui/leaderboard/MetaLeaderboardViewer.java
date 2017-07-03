@@ -63,7 +63,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         /**
          * Cleanup one java8 suppliers can be used
          */
-        init(new ClassicLeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
+        init(new LeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
                         preselectedRace != null, preselectedRace, competitorSelectionModel, timer,
                 leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages,
@@ -71,7 +71,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
                         /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null,
                         settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                         /* autoApplyTopNFilter */ false,
-                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false));
+                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,new ClassicLeaderboardStyle()));
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
         

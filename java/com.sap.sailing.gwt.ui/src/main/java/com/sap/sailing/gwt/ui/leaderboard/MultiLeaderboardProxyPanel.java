@@ -42,7 +42,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  */
 public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<LeaderboardSettings> implements TimeListener, SelectedLeaderboardChangeProvider {
 
-    private ClassicLeaderboardPanel selectedLeaderboardPanel;
+    private LeaderboardPanel selectedLeaderboardPanel;
     private FlowPanel selectedLeaderboardFlowPanel;
 
     private final StringMessages stringMessages;
@@ -288,7 +288,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     }
 
     @Override
-    public void setSelectedLeaderboard(ClassicLeaderboardPanel selectedLeaderboard) {
+    public void setSelectedLeaderboard(LeaderboardPanel selectedLeaderboard) {
         if (this.selectedLeaderboardPanel != selectedLeaderboard) {
             this.selectedLeaderboardPanel = selectedLeaderboard;
             for (SelectedLeaderboardChangeListener listener : selectedLeaderboardChangeListeners) {

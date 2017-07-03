@@ -9,7 +9,8 @@ import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -24,7 +25,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * @author Frank Mittag (c163874)
  */
 public class RegattaAnalyticsDataManager {
-    private ClassicLeaderboardPanel leaderboardPanel;
+    private LeaderboardPanel leaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
 
     private final CompetitorSelectionModel competitorSelectionProvider;
@@ -44,19 +45,19 @@ public class RegattaAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public ClassicLeaderboardPanel createLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+    public LeaderboardPanel createLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if (leaderboardPanel == null) {
-            leaderboardPanel = new ClassicLeaderboardPanel(parent, context, sailingService,
+            leaderboardPanel = new LeaderboardPanel(parent, context, sailingService,
                     asyncActionsExecutor,
                     leaderboardSettings,
                     true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
-                    /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true);
+                    /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true,new ClassicLeaderboardStyle());
         }
         return leaderboardPanel;
     }
@@ -71,7 +72,7 @@ public class RegattaAnalyticsDataManager {
         return multiCompetitorChart;
     }
     
-    public ClassicLeaderboardPanel getLeaderboardPanel() {
+    public LeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
 

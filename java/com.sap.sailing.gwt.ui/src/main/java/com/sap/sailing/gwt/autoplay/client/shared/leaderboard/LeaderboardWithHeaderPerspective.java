@@ -19,7 +19,8 @@ import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -41,7 +42,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     private final DockLayoutPanel dockPanel;
     private final static int SAP_HEADER_HEIGHT = 75;
     private final Widget currentContentWidget;
-    private final ClassicLeaderboardPanel leaderboardPanel;
+    private final LeaderboardPanel leaderboardPanel;
     private final StringMessages stringMessages;
     
     public LeaderboardWithHeaderPerspective(Component<?> parent,
@@ -178,7 +179,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         leaderboardPanel.removeLeaderboardUpdateListener(listener);
     }
     
-    private ClassicLeaderboardPanel createLeaderboardPanel(LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
+    private LeaderboardPanel createLeaderboardPanel(LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, 
@@ -187,14 +188,14 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         LeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
 
-        ClassicLeaderboardPanel leaderboardPanel = new ClassicLeaderboardPanel(this, getComponentContext(), sailingService,
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(this, getComponentContext(), sailingService,
                 asyncActionsExecutor,
                 leaderboardSettings, /*isEmbedded*/true, /* preSelectedRace */null,
                 competitorSelectionProvider, timer, /* leaderboardGroupName */"",
                 leaderboardName, errorReporter, stringMessages,
                 /* showRaceDetails */false, /* competitorSearchTextBox */ null, /* showRegattaRank */
                 /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
-                /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
+                /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,new ClassicLeaderboardStyle());
 
         return leaderboardPanel;
     }

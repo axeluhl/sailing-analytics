@@ -9,8 +9,8 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayMainViewImpl;
-import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.autoplay.client.utils.LeaderBoardScaleHelper;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
@@ -37,7 +37,7 @@ public class IdleOverallLeaderBoardViewImpl extends ResizeComposite implements I
     }
 
     @Override
-    public void startingWith(Slide7Presenter p, AcceptsOneWidget panel, SixtyInchLeaderBoard leaderboardPanel) {
+    public void startingWith(Slide7Presenter p, AcceptsOneWidget panel, LeaderboardPanel leaderboardPanel) {
         panel.setWidget(this);
         leaderBoardHolder.add(leaderboardPanel);
         resizer = new Timer() {

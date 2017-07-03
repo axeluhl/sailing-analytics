@@ -7,5 +7,5 @@ public interface SelectedLeaderboardChangeProvider {
 
     void removeSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener listener);
     
-    void setSelectedLeaderboard(ClassicLeaderboardPanel selectedLeaderboard);
+    void setSelectedLeaderboard(LeaderboardPanel selectedLeaderboard);
 }

@@ -10,13 +10,14 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPlace;
-import com.sap.sailing.gwt.autoplay.client.shared.SixtyInchLeaderBoard;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderBoardStyle;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
@@ -59,11 +60,11 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                         if (result.size() == 1) {
                             String overallLeaderboardName = result.get(0);
                             CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
-                            SixtyInchLeaderBoard leaderboardPanel = new SixtyInchLeaderBoard(cf.getSailingService(),
+                            LeaderboardPanel leaderboardPanel = new LeaderboardPanel(null,null,cf.getSailingService(),
                                     new AsyncActionsExecutor(), leaderboardSettings, true, null, provider, timer,
                                     null, overallLeaderboardName, cf.getErrorReporter(),
-                                    StringMessages.INSTANCE, null, false, null, false, null, false, true, false, false,
-                                    false);
+                                    StringMessages.INSTANCE,  false, null, false, null, false, true, false, false,
+                                    false,new SixtyInchLeaderBoardStyle(true));
 
                             IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
 

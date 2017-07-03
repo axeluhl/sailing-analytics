@@ -16,7 +16,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * Represents a single Leaderboard in the Context of a MultiLeaderboard
  * 
  */
-public class MultiLeaderboardPanel extends ClassicLeaderboardPanel {
+public class MultiLeaderboardPanel extends LeaderboardPanel {
     public MultiLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
@@ -30,7 +30,7 @@ public class MultiLeaderboardPanel extends ClassicLeaderboardPanel {
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
-                showCompetitorFilterStatus, enableSyncScroller);
+                showCompetitorFilterStatus, enableSyncScroller,new ClassicLeaderboardStyle());
     }
 
 
