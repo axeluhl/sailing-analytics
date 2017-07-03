@@ -66,21 +66,27 @@ public class StatisticsCalculator {
 
     public void addLeaderboard(Leaderboard leaderboard) {
         races.addAll(LeaderboardUtil.calculateRaces(leaderboard));
-        Set<TrackedRace> trackedRacesForLeaderboardWithData = LeaderboardUtil.calculateTrackedRacesWithData(leaderboard);
         regattas.add(leaderboard.getName());
-        String disableStats = System.getenv("DISABLE_STATS");
-        if (disableStats == null || "false".equals(disableStats)) {
-            try {
-                for (TrackedRace trackedRace : trackedRacesForLeaderboardWithData) {
-                    if(!trackedRaces.contains(trackedRace)) {
-                        doForTrackedRace(trackedRace);
+        final String disableStatsString = System.getenv("DISABLE_STATS");
+        final boolean enableStats = disableStatsString == null || "false".equals(disableStatsString);
+        
+        for (RaceColumn column : leaderboard.getRaceColumns()) {
+            for (Fleet fleet : column.getFleets()) {
+                TrackedRace trackedRace = column.getTrackedRace(fleet);
+                if(trackedRace != null && !trackedRaces.contains(trackedRace)) {
+                    if(trackedRace.hasGPSData() && trackedRace.hasWindData()) {
+                        trackedRaces.add(trackedRace);
+                        if (enableStats) {
+                            try {
+                                doForTrackedRace(trackedRace);
+                            } catch (Exception e) {
+                                logger.log(Level.WARNING, "Exception during calculation of event statistics", e);
+                            }
+                        }
                     }
                 }
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Exception during calculation of event statistics", e);
             }
         }
-        trackedRaces.addAll(trackedRacesForLeaderboardWithData);
     }
 
     private void doForTrackedRace(TrackedRace trackedRace) {
