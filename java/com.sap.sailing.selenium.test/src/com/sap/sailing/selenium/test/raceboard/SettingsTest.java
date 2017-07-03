@@ -10,6 +10,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -73,12 +74,17 @@ public class SettingsTest extends AbstractSeleniumTest {
         super.setUp();
     }
 
+    // This test is currently ignored due to changes in the RaceBoardMod-based settings semantic.
+    // Modes settings were formerly patched on the user defaults but are now patched on top of the system defaults.
+    // In addition, there are now different settigns keys per mode so that settigns for one mode do not have an effect on other modes.
+    // To verify this, there are new tests below but these do not test ReceBoard's embedded Leaderboard.
     // FIXME uncomment leaderboard test code when selenium infrastructure gets an upgrade
     /**
      * Verifies the settings storage of the raceboard. Checks the precedences of url, context specific settings, mode
      * settings and global settings.
      */
     @Test
+    @Ignore
     public void testRaceBoardPageSettingsStorage() throws InterruptedException, UnsupportedEncodingException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
@@ -247,6 +253,119 @@ public class SettingsTest extends AbstractSeleniumTest {
 //        
 //         mapSettings = raceboard.openMapSettings();
 //         Assert.assertFalse(mapSettings.isWindUp());
+    }
+
+    /**
+     * Verifies that settings for different modes are distinct and do not have an effect on other modes. 
+     */
+    @Test
+    public void testThatUserDefaultsForOneModeDoNotHaveAnEffectOnAnotherMode() throws InterruptedException, UnsupportedEncodingException {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
+        
+        initTrackingForBmwCupRace(adminConsole);
+        
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+        
+        MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // Verify initial settings for mode PLAYER
+        Assert.assertFalse(mapSettings.isShowWindStreamletOverlay());
+        
+        mapSettings.setTransparentHoverlines(true);
+        mapSettings.setWindUp(false);
+        mapSettings.pressMakeDefault();
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "WINNING_LANES");
+
+        mapSettings = raceboard.openMapSettings();
+        // Verify initial settings for mode WINNING_LANES
+        Assert.assertFalse(mapSettings.isShowWindStreamletOverlay());
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+        
+        // Map settings for mode PLAYER are changed
+        mapSettings = raceboard.openMapSettings();
+        mapSettings.setShowWindStreamletOverlay(true);
+        mapSettings.pressMakeDefault();
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "WINNING_LANES");
+
+        mapSettings = raceboard.openMapSettings();
+        // Verify settings for mode WINNING_LANES are unchanged
+        Assert.assertFalse(mapSettings.isShowWindStreamletOverlay());
+    }
+    
+    /**
+     * Verifies that settings are stored for raceboard.
+     */
+    @Test
+    public void testThatSettingsAreStoredForOneMode() throws InterruptedException, UnsupportedEncodingException {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
+        
+        initTrackingForBmwCupRace(adminConsole);
+        
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+        
+        MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // Verify initial mode settings
+        Assert.assertFalse(mapSettings.isWindUp());
+        Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
+        mapSettings.setWindUp(true);
+        mapSettings.setShowOnlySelectedCompetitors(true);
+        mapSettings.pressMakeDefault();
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "PLAYER");
+        
+        mapSettings = raceboard.openMapSettings();
+        // verify default settings work
+        Assert.assertTrue(mapSettings.isWindUp());
+        Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
+    }
+    
+    /**
+     * Verifies that settings are stored for raceboard.
+     */
+    @Test
+    public void testThatModeDependentSettingsAreStoredForOneMode() throws InterruptedException, UnsupportedEncodingException {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
+        
+        initTrackingForBmwCupRace(adminConsole);
+        
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES");
+        
+        MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // The following options are false in the system default but activated by the WINNING_LANES mode
+        Assert.assertTrue(mapSettings.isWindUp());
+        Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
+        mapSettings.setWindUp(false);
+        mapSettings.setShowOnlySelectedCompetitors(false);
+        mapSettings.pressMakeDefault();
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "WINNING_LANES");
+        
+        mapSettings = raceboard.openMapSettings();
+        // verify mode settigns have been overwritten
+        Assert.assertFalse(mapSettings.isWindUp());
+        Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
     }
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {

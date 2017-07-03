@@ -65,7 +65,6 @@ import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
 import com.tractrac.subscription.lib.api.competitor.ICompetitorsListener;
-import com.tractrac.subscription.lib.api.control.IControlsListener;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
@@ -196,7 +195,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     private final IEventSubscriber eventSubscriber;
     private final IRaceSubscriber raceSubscriber;
     private final IRacesListener racesListener;
-    private final IControlsListener controlsListener;
     private final ICompetitorsListener competitorsListener;
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
@@ -335,15 +333,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         // Initialize data controller using live and stored data sources
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
         eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, effectifeStoredURI);
-        controlsListener = new IControlsListener() {
-            @Override
-            public void updateControl(IControl control) {}
-            @Override
-            public void deleteControl(UUID controlId) {}
-            @Override
-            public void addControl(IControl control) {}
-        };
-        eventSubscriber.subscribeControls(controlsListener);
         competitorsListener = new ICompetitorsListener() {
             @Override
             public void updateCompetitor(ICompetitor competitor) {
@@ -549,7 +538,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             stopped = true;
             eventSubscriber.unsubscribeRaces(racesListener);
             eventSubscriber.unsubscribeCompetitors(competitorsListener);
-            eventSubscriber.unsubscribeControls(controlsListener);
             raceSubscriber.stop();
             eventSubscriber.stop();
             raceSubscriber.unsubscribeConnectionStatus(this);
