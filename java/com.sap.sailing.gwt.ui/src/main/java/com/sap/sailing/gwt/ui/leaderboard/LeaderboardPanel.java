@@ -82,7 +82,6 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -109,6 +108,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -129,7 +129,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -554,7 +554,9 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
             competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
+                    SettingsDialog<LeaderboardSettings> settingsDialog = new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages);
+                    settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
+                    settingsDialog.show();
                 }
             });
             this.competitorFilterPanel = competitorSearchTextBox;
@@ -686,8 +688,8 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         showRaceRankColumn = newSettings.isShowRaceRankColumn();
 
         if (newSettings.getOverallDetailsToShow() != null) {
-            selectedOverallDetailColumns.clear();
-            selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
+                    selectedOverallDetailColumns);
         }
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
@@ -710,16 +712,19 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
             }
         }
         if (newSettings.getManeuverDetailsToShow() != null) {
-            selectedManeuverDetails.clear();
-            selectedManeuverDetails.addAll(newSettings.getManeuverDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getManeuverDetailsToShow(),
+                    ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
         }
         if (newSettings.getLegDetailsToShow() != null) {
-            selectedLegDetails.clear();
-            selectedLegDetails.addAll(newSettings.getLegDetailsToShow());
+            setValuesWithReferenceOrder(newSettings.getLegDetailsToShow(), LegColumn.getAvailableLegDetailColumnTypes(),
+                    selectedLegDetails);
         }
         if (newSettings.getRaceDetailsToShow() != null) {
-            selectedRaceDetails.clear();
-            selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
+            List<DetailType> allRaceDetailsTypes = new ArrayList<>();
+            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceDetailColumnTypes()));
+            allRaceDetailsTypes.addAll(Arrays.asList(getAvailableRaceStartAnalysisColumnTypes()));
+            setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), allRaceDetailsTypes.toArray(new DetailType[allRaceDetailsTypes.size()]),
+                    selectedRaceDetails);
         }
 
         addBusyTask();
@@ -804,6 +809,13 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         } else { // meaning that now the details need to be loaded from the server
             updateLeaderboardAndRun(doWhenNecessaryDetailHasBeenLoaded);
         }
+    }
+
+    private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet,
+            DetailType[] referenceOrder, List<DetailType> collectionToSetValuesTo) {
+        collectionToSetValuesTo.clear();
+        collectionToSetValuesTo.addAll(Arrays.asList(referenceOrder));
+        collectionToSetValuesTo.retainAll(valuesToSet);
     }
 
     /**
@@ -991,7 +1003,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
 
             if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
                 final ImageResource nationalityFlagImageResource;
-                if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
                     nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
                 } else {
                     nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
@@ -2496,9 +2508,10 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            currentSettings = LeaderboardSettingsFactory.getInstance()
-                                    .createNewSettingsWithCustomDefaults(
-                                            new LeaderboardSettings(result.getNamesOfRaceColumns()), currentSettings);
+                            if(preSelectedRace == null) {
+                                currentSettings = currentSettings.overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
+                            }
+                            
                             try {
                                 updateLeaderboard(result);
                                 // reapply, as columns might have changed
@@ -3401,8 +3414,8 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return new LeaderboardSettingsDialogComponent(getSettings(), leaderboard.getNamesOfRaceColumns(),
+    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent(LeaderboardSettings settings) {
+        return new LeaderboardSettingsDialogComponent(settings, leaderboard.getNamesOfRaceColumns(),
                 stringMessages);
     }
 
@@ -3423,7 +3436,8 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
                 /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 isShowCompetitorSailId(), isShowCompetitorFullName(), isShowRaceRankColumn(), isShowCompetitorNationality);
-        return LeaderboardSettingsFactory.getInstance().keepDefaults(currentSettings, leaderboardSettings);
+        SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
+        return leaderboardSettings;
     }
 
     @Override

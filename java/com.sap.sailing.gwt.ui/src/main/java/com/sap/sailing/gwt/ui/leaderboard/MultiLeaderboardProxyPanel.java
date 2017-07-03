@@ -34,8 +34,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.AbstractLazyComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A panel managing multiple {@link ClassicLeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
@@ -79,9 +78,6 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
         super(parent, context);
 
         loadedSettings = settings;
-        if (loadedSettings == null) {
-            loadedSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomDefaults(null);
-        }
 
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -155,21 +151,14 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return selectedLeaderboardPanel.getSettingsDialogComponent();
+    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent(LeaderboardSettings settings) {
+        return selectedLeaderboardPanel.getSettingsDialogComponent(settings);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void updateSettings(LeaderboardSettings newSettings) {
-        ComponentContext<?> ctx = getComponentContext();
         // store contextspecific setting in this hashmap, so they are not lost on tab change
-        if (ctx instanceof ComponentContextWithSettingsStorage) {
-            @SuppressWarnings("unchecked")
-            ComponentContextWithSettingsStorage<LeaderboardSettings> cctx = (ComponentContextWithSettingsStorage) ctx;
-            LeaderboardSettings contextSettings = cctx.extractContextSpecificSettings(this, newSettings);
-            contextStore.put(selectedLeaderboardPanel.getLeaderboardName(), contextSettings);
-        }
+        contextStore.put(selectedLeaderboardPanel.getLeaderboardName(), newSettings);
         selectedLeaderboardPanel.updateSettings(newSettings);
     }
 
