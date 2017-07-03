@@ -91,18 +91,19 @@ public class StatisticsCalculator {
     }
 
     private boolean doForTrackedRace(TrackedRace trackedRace) {
-        boolean foundFixes = false;
+        boolean foundGPSFixes = false;
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             competitors.add(competitor);
-            foundFixes |= doForCompetitor(trackedRace, competitor);
+            foundGPSFixes |= doForCompetitor(trackedRace, competitor);
         }
         for (Mark mark : trackedRace.getMarks()) {
-            foundFixes |= doForMark(trackedRace, mark);
+            foundGPSFixes |= doForMark(trackedRace, mark);
         }
+        boolean foundWindFixes = false;
         for (WindSource windSource : trackedRace.getWindSources()) {
-            foundFixes |= doForWindSource(trackedRace, windSource);
+            foundWindFixes |= doForWindSource(trackedRace, windSource);
         }
-        return foundFixes;
+        return foundGPSFixes && foundWindFixes;
     }
 
     private boolean doForCompetitor(TrackedRace trackedRace, Competitor competitor) {
