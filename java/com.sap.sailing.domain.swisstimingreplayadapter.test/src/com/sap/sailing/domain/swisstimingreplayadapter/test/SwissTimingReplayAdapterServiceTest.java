@@ -74,12 +74,11 @@ public class SwissTimingReplayAdapterServiceTest {
         assertEquals(321920, replayCountListener.rankingMarkCount);                
     }
 
-    @Ignore("According to Radek Masnica ('masnica.r@st-software.com') the OTA stuff may not be supported any longer by the SwissTiming Leipzip lab... 2017-05-19")
     @Test
     public void testRaceData_SAW005905_20120805_EqualsOnlineVersion() throws Exception {
         byte[] localCopy = read(getClass().getResourceAsStream("/SAW005905.20120805.replay"));
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://live.ota.st-sportservice.com/Replay?id=446495&_start=0").getContent());
+                "http://ota2.sportresult.com/Replay?id=446495&_start=0").getContent());
         assertArrayEquals(localCopy, onlineCopy);
     }
     
@@ -114,13 +113,12 @@ public class SwissTimingReplayAdapterServiceTest {
         assertEquals(9500, replayCountListener.rankingMarkCount);                
     }
 
-    @Ignore("According to Radek Masnica ('masnica.r@st-software.com') the OTA stuff may not be supported any longer by the SwissTiming Leipzip lab... 2017-05-19")
     @Test
     public void testRaceData_SAW005905_20120805_online() throws Exception {
         SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
         // race ID is 450053, as extracted from http://live.ota.st-sportservice.com/service?cmd=unity_race_overview&id=91
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://live.ota.st-sportservice.com/Replay?id=446495&_start=0").getContent());
+                "http://ota2.sportresult.com/Replay?id=446495&_start=0").getContent());
         new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(onlineCopy), replayCountListener);
         assertEquals(0, replayCountListener.keyFrameIndexSum);          
         assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  

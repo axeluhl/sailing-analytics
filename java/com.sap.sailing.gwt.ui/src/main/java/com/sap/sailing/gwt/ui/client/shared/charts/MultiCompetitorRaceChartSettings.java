@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.settings.client.settingtypes.converter.DetailTypeStringToEnumConverter;
 import com.sap.sse.common.settings.generic.EnumSetting;
 
 public class MultiCompetitorRaceChartSettings extends ChartSettings {
@@ -13,8 +12,8 @@ public class MultiCompetitorRaceChartSettings extends ChartSettings {
     @Override
     protected void addChildSettings() {
         super.addChildSettings();
-        firstDetailType = new EnumSetting<>("firstDetailType", this, DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, new DetailTypeStringToEnumConverter());
-        secondDetailType = new EnumSetting<>("secondDetailType", this, null, new DetailTypeStringToEnumConverter());
+        firstDetailType = new EnumSetting<>("firstDetailType", this, DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, DetailType::valueOf);
+        secondDetailType = new EnumSetting<>("secondDetailType", this, null, DetailType::valueOf);
     }
     
     public MultiCompetitorRaceChartSettings() {

@@ -68,6 +68,7 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
         ensureValue().setValues(values, getValueConverter());
     }
     
+    @Override
     public void addValue(T value) {
         ensureValue().addValue(value, getValueConverter());
     }
@@ -104,6 +105,31 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     @Override
     public Iterable<T> getDefaultValues() {
         return Collections.unmodifiableCollection(getDefaultValuesCollectionInternal());
+    }
+    
+    @Override
+    public Iterable<T> getAddedValues() {
+        Collection<T> added = createDefaultValuesCollection();
+        Util.addAll(getValues(), added);
+        Util.removeAll(getDefaultValues(), added);
+        return added;
+    }
+    
+    @Override
+    public Iterable<T> getRemovedValues() {
+        Collection<T> removed = createDefaultValuesCollection();
+        Util.addAll(getDefaultValues(), removed);
+        Util.removeAll(getValues(), removed);
+        return removed;
+    }
+    
+    @Override
+    public void setDiff(Iterable<T> removedValues, Iterable<T> addedValues) {
+        Collection<T> values = createDefaultValuesCollection();
+        Util.addAll(getValues(), values);
+        Util.removeAll(removedValues, values);
+        Util.addAll(addedValues, values);
+        setValues(values);
     }
 
     @Override

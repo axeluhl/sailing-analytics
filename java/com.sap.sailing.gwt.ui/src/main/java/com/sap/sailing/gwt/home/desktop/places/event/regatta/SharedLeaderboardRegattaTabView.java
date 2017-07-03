@@ -7,20 +7,18 @@ import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
-import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver;
 import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver.DomMutationCallback;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
-import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.settings.PlaceBasedUserSettingsStorageManager;
-import com.sap.sse.security.ui.settings.StorageDefinitionId;
+import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 /**
  * An abstract regatta tabView with some shared functions between the leaderboard tab and competitors chart tab 
@@ -41,7 +39,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
         
         final ComponentContext<LeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, userService,
                 placeToken);
-        componentContext.initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+        componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
             @Override
             public void onSuccess(LeaderboardSettings leaderboardSettings) {
                 final LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel(null, componentContext, //
@@ -82,13 +80,11 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     
     protected ComponentContext<LeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken) {
-        final LeaderboardPanelLifecycle lifeCycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
-        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForEventRegattaLeaderboard(leaderboardName);
-        final SettingsStorageManager<LeaderboardSettings> settingsStorageManager = new PlaceBasedUserSettingsStorageManager<>(
-                userService, storageDefinitionId, placeToken);
+        final LeaderboardPanelLifecycle lifecycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
+        final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForEventRegattaLeaderboard(leaderboardName);
 
-        final ComponentContext<LeaderboardSettings> componentContext = new ComponentContextWithSettingsStorage<>(
-                lifeCycle, settingsStorageManager);
+        final ComponentContext<LeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(
+                lifecycle, userService, storageDefinition, placeToken);
         return componentContext;
     }
 }

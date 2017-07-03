@@ -26,7 +26,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
     private static final LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
@@ -136,7 +136,7 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent(AbstractSettings settings) {
         return null;
     }
 

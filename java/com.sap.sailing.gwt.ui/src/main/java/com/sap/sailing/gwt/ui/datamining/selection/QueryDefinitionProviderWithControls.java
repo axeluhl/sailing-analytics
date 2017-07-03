@@ -48,7 +48,7 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings> implements WithControls {
 
@@ -265,7 +265,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
 
     @Override
-    public SettingsDialogComponent<AdvancedDataMiningSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AdvancedDataMiningSettings> getSettingsDialogComponent(AdvancedDataMiningSettings settings) {
         return new AdvancedDataMiningSettingsDialogComponent(settings, getStringMessages());
     }
 

@@ -58,12 +58,12 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
     }
 
     @Override
-    protected AutoplayPerspectiveOwnSettings extractOwnGlobalSettings(AutoplayPerspectiveOwnSettings settings) {
+    protected AutoplayPerspectiveOwnSettings extractOwnUserSettings(AutoplayPerspectiveOwnSettings settings) {
         return settings;
     }
 
     @Override
-    protected AutoplayPerspectiveOwnSettings extractOwnContextSettings(AutoplayPerspectiveOwnSettings settings) {
+    protected AutoplayPerspectiveOwnSettings extractOwnDocumentSettings(AutoplayPerspectiveOwnSettings settings) {
         return settings;
     }
 

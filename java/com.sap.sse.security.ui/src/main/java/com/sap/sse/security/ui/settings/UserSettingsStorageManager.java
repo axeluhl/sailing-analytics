@@ -2,24 +2,18 @@ package com.sap.sse.security.ui.settings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.settings.generic.GenericSerializableSettings;
-import com.sap.sse.common.settings.generic.SettingsMap;
-import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
-import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
-import com.sap.sse.gwt.client.shared.perspective.OnSettingsStoredCallback;
-import com.sap.sse.gwt.client.shared.perspective.SettingsJsons;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStrings;
-import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
-import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
+import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
+import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
+import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -30,87 +24,98 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * 
  * @author Vladislav Chumak
  *
- * @param <S>
- *            The {@link Settings} type of the settings of the root component/perspective containing all the settings
- *            for itself and its subcomponents
  * @see SettingsStorageManager
  */
-public class UserSettingsStorageManager<S extends Settings> extends SimpleSettingsStorageManager<S> {
+public class UserSettingsStorageManager implements SettingsStorageManager {
 
     /**
-     * The key which is associated with the global settings. Different keys will cause multiple/different settings
-     * instances stored in the storage.
+     * The key which is associated with the User Settings. Different keys will cause multiple/different settings
+     * instances to be stored in the storage.
      */
-    private final String storageGlobalKey;
+    private final String storageKeyForUserSettings;
 
     /**
-     * The key which is used to store the context specific settings. Each context with own context specific settings
-     * must have a unique key.
+     * The key which is associated with the Document Settings. Different keys will cause multiple/different settings
+     * instances to be stored in the storage.
      */
-    private final String storageContextSpecificKey;
+    private final String storageKeyForDocumentSettings;
 
+    /**
+     * The userService instance which is used for server communication regarding settings loading and storing
+     */
     private UserService userService;
 
-    private final SettingsToJsonSerializerGWT jsonSerializer = new SettingsToJsonSerializerGWT();
+    /**
+     * Indicates whether the settings have been already loaded for the first time in order to maintain a single
+     * attachment of {@link UserStatusEventHandler}.
+     */
+    private boolean initialized = false;
 
     /**
-     * This is used, to ensure that only once the data is loaded remote, if a user logs in later, he must refresh, to
-     * avoid "complicated problems"
+     * Indicates whether a user has been already logged in during his stay on the current page
      */
-    private boolean initialUserSetting = false;
-    
+    private boolean userWasAlreadyLoggedIn = false;
+
+    /**
+     * Handler which is currently attached for listening the user's login state
+     */
     private UserStatusEventHandler userStatusEventHandler = null;
 
     /**
-     * 
-     * @param userService
-     *            The {@link UserService} which is used for settings storage on server when the current user is logged
-     *            in
-     * @param globalDefinitionId
-     *            The key which is associated with the global settings. Different keys will cause multiple/different
-     *            settings instances stored in the storage.
-     * @param contextDefinitionId
-     *            The key which is used to store the context specific settings. Each context with own context specific
-     *            settings must have a unique key.
+     * Callbacks which are waiting to be called when persistent settings representation has loaded.
      */
-    public UserSettingsStorageManager(UserService userService, StorageDefinitionId storageDefinitionId) {
+    private Queue<OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings>> retrieveSettingsCallbacksQueue = new LinkedList<>();
+
+    /**
+     * @param userService
+     *            The service which is used for server-side settings storage
+     * @param storageDefinitionId
+     *            The definition for User Settings and Document Settings storage keys
+     */
+    public UserSettingsStorageManager(UserService userService, StoredSettingsLocation storageDefinitionId) {
         this.userService = userService;
-        this.storageGlobalKey = storageDefinitionId.generateStorageGlobalKey();
-        this.storageContextSpecificKey = storageDefinitionId.generateStorageContextSpecificKey();
-    }
-    
-    @Override
-    public boolean supportsStore() {
-        return true;
+        this.storageKeyForUserSettings = storageDefinitionId.generateStorageKeyForUserSettings();
+        this.storageKeyForDocumentSettings = storageDefinitionId.generateStorageKeyForDocumentSettings();
     }
 
-    private void storeSettingsStringsOnLocalStorage(SettingsStrings settingsStrings, boolean storeGlobalSettings, boolean storeContextSpecificSettings) {
+    @Override
+    public void storeSettingsRepresentations(StorableRepresentationOfDocumentAndUserSettings settingsRepresentations,
+            OnSettingsStoredCallback onSettingsStoredCallback) {
+        storeSettingsRepresentationsOnLocalStorage(settingsRepresentations);
+        if (userService.getCurrentUser() != null) {
+            storeSettingsRepresentationsOnServer(settingsRepresentations, onSettingsStoredCallback);
+        } else {
+            onSettingsStoredCallback.onSuccess();
+        }
+    }
+
+    private void storeSettingsRepresentationsOnLocalStorage(
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
-            if(storeGlobalSettings) {
-                localStorage.removeItem(storageGlobalKey);
-                if(settingsStrings.getGlobalSettingsString() != null) {
-                    localStorage.setItem(storageGlobalKey, settingsStrings.getGlobalSettingsString());
+            if (settingsRepresentations.hasStoredUserSettings()) {
+                localStorage.removeItem(storageKeyForUserSettings);
+                final String settingsString = settingsRepresentations.getUserSettingsRepresentation().asString();
+                if(settingsString != null) {
+                    localStorage.setItem(storageKeyForUserSettings,
+                            settingsString);
                 }
             }
-            if(storeContextSpecificSettings) {
-                localStorage.removeItem(storageContextSpecificKey);
-                if(settingsStrings.getContextSpecificSettingsString() != null) {
-                    localStorage.setItem(storageContextSpecificKey, settingsStrings.getContextSpecificSettingsString());
+            if (settingsRepresentations.hasStoredDocumentSettings()) {
+                localStorage.removeItem(storageKeyForDocumentSettings);
+                final String settingsString = settingsRepresentations.getDocumentSettingsRepresentation().asString();
+                if(settingsString != null) {
+                    localStorage.setItem(storageKeyForDocumentSettings,
+                            settingsString);
                 }
             }
         }
     }
 
-    private void storeSettingsStringsOnServer(SettingsStrings settingsStrings, final OnSettingsStoredCallback onSettingsStoredCallback, boolean storeGlobalSettings, boolean storeContextSpecificSettings) {
-        Map<String, String> keyValuePairs = new HashMap<>();
-        if(storeGlobalSettings) {
-            keyValuePairs.put(storageGlobalKey, settingsStrings.getGlobalSettingsString());
-        }
-        if(storeContextSpecificSettings) {
-            keyValuePairs.put(storageContextSpecificKey, settingsStrings.getContextSpecificSettingsString());
-        }
-        userService.setPreferences(keyValuePairs, new AsyncCallback<Void>() {
+    private void storeSettingsRepresentationsOnServer(
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations,
+            final OnSettingsStoredCallback onSettingsStoredCallback) {
+        AsyncCallback<Void> asyncCallback = new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -121,124 +126,79 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
             public void onSuccess(Void result) {
                 onSettingsStoredCallback.onSuccess();
             }
-        });
-    }
-
-    public void retrieveDefaultSettings(S defaultSettings, final OnSettingsLoadedCallback<S> callback) {
-        if(userStatusEventHandler != null) {
-            throw new IllegalStateException("The contract between ComponentContext and SettingsStorageManager enforces this method to be called only once");
-        }
-        this.userStatusEventHandler = new UserStatusEventHandler() {
-
-            @Override
-            public void onUserStatusChange(UserDTO user) {
-                //call this method always on user status change event in order to cause sync between local storage and server
-                retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        if(!initialUserSetting) {
-                            initialUserSetting = true;
-                            SettingsStrings localStorageSettings = retrieveSettingsStringsFromLocalStorage(true, true);
-                            S newDefaultSettings = convertToSettings(defaultSettings, localStorageSettings);
-                            callback.onError(caught, newDefaultSettings);
-                        }
-                    }
-
-                    @Override
-                    public void onSuccess(SettingsJsons settingsJsons) {
-                        if(!initialUserSetting) {
-                            initialUserSetting = true;
-                            callback.onSuccess(convertToSettings(defaultSettings, settingsJsons));
-                        }
-                    }
-                });
-            }
-
         };
-        userService.addUserStatusEventHandler(userStatusEventHandler, true);
+
+        if (!settingsRepresentations.hasStoredDocumentSettings() || !settingsRepresentations.hasStoredUserSettings()) {
+            if (settingsRepresentations.hasStoredDocumentSettings()) {
+                userService.setPreference(storageKeyForDocumentSettings,
+                        settingsRepresentations.getDocumentSettingsRepresentation().asString(), asyncCallback);
+            }
+            if (settingsRepresentations.hasStoredUserSettings()) {
+                userService.setPreference(storageKeyForUserSettings,
+                        settingsRepresentations.getUserSettingsRepresentation().asString(), asyncCallback);
+            }
+        } else {
+            Map<String, String> keyValuePairs = new HashMap<>();
+            if (settingsRepresentations.hasStoredUserSettings()) {
+                keyValuePairs.put(storageKeyForUserSettings,
+                        settingsRepresentations.getUserSettingsRepresentation().asString());
+            }
+            if (settingsRepresentations.hasStoredDocumentSettings()) {
+                keyValuePairs.put(storageKeyForDocumentSettings,
+                        settingsRepresentations.getDocumentSettingsRepresentation().asString());
+            }
+            userService.setPreferences(keyValuePairs, asyncCallback);
+        }
+
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void dispose() {
-        super.dispose();
-        if(userStatusEventHandler != null) {
+        if (userStatusEventHandler != null) {
             userService.removeUserStatusEventHandler(userStatusEventHandler);
         }
     }
-    
-    private SettingsStrings retrieveSettingsStringsFromLocalStorage(boolean retrieveGlobalSettings, boolean retrieveContextSpecificSettings) {
+
+    private StorableRepresentationOfDocumentAndUserSettings convertStringsToSettingsRepresentations(String userSettings,
+            String documentSettings) {
+        StorableSettingsRepresentation userSettingsRepresentation = userSettings == null ? null
+                : new StorableSettingsRepresentation(userSettings);
+        StorableSettingsRepresentation documentSettingsRepresentation = documentSettings == null ? null
+                : new StorableSettingsRepresentation(documentSettings);
+        return new StorableRepresentationOfDocumentAndUserSettings(userSettingsRepresentation,
+                documentSettingsRepresentation);
+    }
+
+    private StorableRepresentationOfDocumentAndUserSettings retrieveSettingsRepresentationsFromLocalStorage() {
         Storage localStorage = Storage.getLocalStorageIfSupported();
+        String userSettings = null;
+        String documentSettings = null;
         if (localStorage != null) {
-            String globalSettings = retrieveGlobalSettings ? localStorage.getItem(storageGlobalKey) : null;
-            String contextSpecificSettings = retrieveContextSpecificSettings ? localStorage.getItem(storageContextSpecificKey) : null;
-            return new SettingsStrings(globalSettings, contextSpecificSettings);
+            userSettings = localStorage.getItem(storageKeyForUserSettings);
+            documentSettings = localStorage.getItem(storageKeyForDocumentSettings);
         }
-        return new SettingsStrings(null, null);
-    }
-    
-    private SettingsJsons convertToSettingsJson(SettingsStrings settingsStrings) {
-        JSONObject globalSettingsJson = convertStringToJson(settingsStrings.getGlobalSettingsString());
-        JSONObject contextSpecificSettingsJson = convertStringToJson(settingsStrings.getContextSpecificSettingsString());
-        return new SettingsJsons(globalSettingsJson, contextSpecificSettingsJson);
-    }
-    
-    private JSONObject convertStringToJson(String str) {
-        return str == null ? null : jsonSerializer.parseStringToJsonObject(str);
-    }
-    
-    private String convertJsonToString(JSONObject json) {
-        return json == null ? null : jsonSerializer.jsonObjectToString(json);
-    }
-    
-    private SettingsStrings convertToSettingsStrings(SettingsJsons settingsJsons) {
-        String globalSettingsString = convertJsonToString(settingsJsons.getGlobalSettingsJson());
-        String contextSpecificSettingsString = convertJsonToString(settingsJsons.getContextSpecificSettingsJson());
-        return new SettingsStrings(globalSettingsString, contextSpecificSettingsString);
-    }
-    
-    private S convertToSettings(S defaultSettings, SettingsJsons settingsJsons) {
-        if(settingsJsons.getContextSpecificSettingsJson() != null) {
-            defaultSettings = deserializeFromJson(defaultSettings, settingsJsons.getContextSpecificSettingsJson());
-        } else if(settingsJsons.getGlobalSettingsJson() != null) {
-            defaultSettings = deserializeFromJson(defaultSettings, settingsJsons.getGlobalSettingsJson());
-        }
-        defaultSettings = retrieveDefaultSettingsFromUrl(defaultSettings);
-        return defaultSettings;
-    }
-    
-    private S convertToSettings(S defaultSettings, SettingsStrings settingsStrings) {
-        SettingsJsons settingsJsons = convertToSettingsJson(settingsStrings);
-        return convertToSettings(defaultSettings, settingsJsons);
-    }
-    
-    @SuppressWarnings("unchecked")
-    private S deserializeFromJson(S defaultSettings, JSONObject jsonToDeserialize) {
-        if (defaultSettings instanceof GenericSerializableSettings) {
-            defaultSettings = (S) jsonSerializer.deserialize((GenericSerializableSettings) defaultSettings,
-                    jsonToDeserialize);
-        } else if (defaultSettings instanceof SettingsMap) {
-            defaultSettings = (S) jsonSerializer.deserialize((SettingsMap) defaultSettings, jsonToDeserialize);
-        }
-        return defaultSettings;
+        return convertStringsToSettingsRepresentations(userSettings, documentSettings);
     }
 
-    private S retrieveDefaultSettingsFromUrl(S defaultSettings) {
-        return deserializeFromCurrentUrl(defaultSettings);
-    }
-
-    private void retrieveSettingsStringsFromServer(final AsyncCallback<SettingsStrings> asyncCallback) {
+    private void retrieveSettingsRepresentationsFromServer(
+            final AsyncCallback<StorableRepresentationOfDocumentAndUserSettings> asyncCallback) {
         List<String> keys = new ArrayList<>(2);
-        keys.add(storageGlobalKey);
-        keys.add(storageContextSpecificKey);
-        userService.getPreferences(keys, new AsyncCallback<Map<String,String>>() {
-            
+        keys.add(storageKeyForUserSettings);
+        keys.add(storageKeyForDocumentSettings);
+        userService.getPreferences(keys, new AsyncCallback<Map<String, String>>() {
+
             @Override
             public void onSuccess(Map<String, String> result) {
-                SettingsStrings settingsStrings = new SettingsStrings(result.get(storageGlobalKey), result.get(storageContextSpecificKey));
-                asyncCallback.onSuccess(settingsStrings);
+                String userSettings = result.get(storageKeyForUserSettings);
+                String documentSettings = result.get(storageKeyForDocumentSettings);
+                StorableRepresentationOfDocumentAndUserSettings settingsRepresentations = convertStringsToSettingsRepresentations(
+                        userSettings, documentSettings);
+                asyncCallback.onSuccess(settingsRepresentations);
             }
-            
+
             @Override
             public void onFailure(Throwable caught) {
                 asyncCallback.onFailure(caught);
@@ -246,140 +206,95 @@ public class UserSettingsStorageManager<S extends Settings> extends SimpleSettin
         });
     }
 
-    @Override
-    public JSONValue settingsToJSON(Settings newSettings) {
-        if (newSettings instanceof GenericSerializableSettings) {
-            return jsonSerializer.serialize((GenericSerializableSettings) newSettings);
-        }
-        throw new IllegalStateException("Requested save of settings that is not Serializable!");
-    }
-    
-    @Override
-    public void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback) {
-        storeSettingsJsons(settingsJsons, onSettingsStoredCallback, true, true);
-    }
-
-    private void storeSettingsJsons(SettingsJsons settingsJsons, OnSettingsStoredCallback onSettingsStoredCallback, boolean storeGlobalSettings, boolean storeContextSpecificSettings) {
-        SettingsStrings settingsStrings = convertToSettingsStrings(settingsJsons);
-        storeSettingsStringsOnLocalStorage(settingsStrings, storeGlobalSettings, storeContextSpecificSettings);
-        if (userService.getCurrentUser() != null) {
-            storeSettingsStringsOnServer(settingsStrings, onSettingsStoredCallback, storeGlobalSettings, storeContextSpecificSettings);
-        } else {
-            onSettingsStoredCallback.onSuccess();
-        }
-    }
-    
-    @Override
-    public void storeGlobalSettingsJson(JSONObject globalSettingsJson,
-            OnSettingsStoredCallback onSettingsStoredCallback) {
-        SettingsJsons settingsJsons = new SettingsJsons(globalSettingsJson, null);
-        storeSettingsJsons(settingsJsons, onSettingsStoredCallback, true, false);
-    }
-    
-    @Override
-    public void storeContextSpecificSettingsJson(JSONObject contextSpecificSettingsJson,
-            OnSettingsStoredCallback onSettingsStoredCallback) {
-        SettingsJsons settingsJsons = new SettingsJsons(null, contextSpecificSettingsJson);
-        storeSettingsJsons(settingsJsons, onSettingsStoredCallback, false, true);
-    }
-    
-    @Override
-    public void retrieveSettingsJsons(AsyncCallback<SettingsJsons> asyncCallback) {
-        retrieveSettingsJsons(asyncCallback, true, true);
-    }
-    
-    private void retrieveSettingsJsons(AsyncCallback<SettingsJsons> asyncCallback, boolean retrieveGlobalSettings, boolean retrieveContextSpecificSettings) {
-        if (userService.getCurrentUser() == null) {
-            SettingsStrings settingsStrings = retrieveSettingsStringsFromLocalStorage(retrieveGlobalSettings, retrieveContextSpecificSettings);
-            asyncCallback.onSuccess(convertToSettingsJson(settingsStrings));
-        } else {
-            retrieveSettingsStringsFromServer(new AsyncCallback<SettingsStrings>() {
-                
-                @Override
-                public void onSuccess(SettingsStrings serverSettingsStrings) {
-                    serverSettingsStrings = syncLocalStorageAndServer(serverSettingsStrings);
-                    asyncCallback.onSuccess(convertToSettingsJson(serverSettingsStrings));
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    asyncCallback.onFailure(caught);
-                }
-            });
-        }
-    }
-    
-    @Override
-    public void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
-        retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                asyncCallback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(SettingsJsons result) {
-                asyncCallback.onSuccess(result.getGlobalSettingsJson());
-            }
-            
-        }, true, false);
-    }
-    
-    @Override
-    public void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback) {
-        retrieveSettingsJsons(new AsyncCallback<SettingsJsons>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                asyncCallback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(SettingsJsons result) {
-                asyncCallback.onSuccess(result.getContextSpecificSettingsJson());
-            }
-            
-        }, false, true);
-    }
-    
-    private SettingsStrings syncLocalStorageAndServer(SettingsStrings serverSettingsStrings) {
-        if(serverSettingsStrings.getGlobalSettingsString() == null && serverSettingsStrings.getContextSpecificSettingsString() == null) {
-            SettingsStrings localStorageSettingsStrings = retrieveSettingsStringsFromLocalStorage(true, true);
-            if(localStorageSettingsStrings.getGlobalSettingsString() != null || localStorageSettingsStrings.getContextSpecificSettingsString() != null) {
-                storeSettingsStringsOnServer(localStorageSettingsStrings, new OnSettingsStoredCallback() {
-                    
-                    @Override
-                    public void onSuccess() {
-                        //nothing to do
-                    }
-                    
-                    @Override
-                    public void onError(Throwable caught) {
-                        //nothing to do
-                    }
-                }, true, true);
-            }
-            serverSettingsStrings = localStorageSettingsStrings;
-        } else {
-            storeSettingsStringsOnLocalStorage(serverSettingsStrings, true, true);
-        }
-        return serverSettingsStrings;
-    }
-    
     /**
-     * Creates a {@link SettingsStorageManager} instance based on the ignoreLocalSettings URL flag. if
-     * ignoreLocalSettings is set to <code>true</code>, a SimpleSettingsStorageManager is created. A
-     * UserSettingsStorageManager is created otherwise.
+     * {@inheritDoc}
      */
-    public static <S extends Settings> SettingsStorageManager<S> createSettingsStorageManager(UserService userService, StorageDefinitionId storageDefinitionId) {
-        if (getIgnoreLocalSettings().isIgnoreLocalSettings()) {
-            return new SimpleSettingsStorageManager<>();
+    @Override
+    public void retrieveSettingsRepresentation(
+            OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> callback) {
+        retrieveSettingsCallbacksQueue.add(callback);
+        if (userStatusEventHandler == null) {
+            this.userStatusEventHandler = new UserStatusEventHandler() {
+
+                // call this method always on user status change event in order to cause sync between local storage
+                // and server
+                @Override
+                public void onUserStatusChange(UserDTO user) {
+                    // trigger settings retrievement whether on the first userStatusEventHandler call, or when a user
+                    // has been logged in for the first time in order to initial local storage and server
+                    // synchronisation
+                    if (!initialized || userService.getCurrentUser() != null && !userWasAlreadyLoggedIn) {
+                        initialized = true;
+                        retrieveSettingsRepresentationsFromServerOrLocalStorage();
+                    }
+                }
+            };
+            userService.addUserStatusEventHandler(userStatusEventHandler, true);
+        } else if (initialized) {
+            retrieveSettingsRepresentationsFromServerOrLocalStorage();
         }
-        return new UserSettingsStorageManager<>(userService, storageDefinitionId);
     }
-    
-    public static IgnoreLocalSettings getIgnoreLocalSettings() {
-        return new SettingsToUrlSerializer().deserializeFromCurrentLocation(new IgnoreLocalSettings());
+
+    private void retrieveSettingsRepresentationsFromServerOrLocalStorage() {
+        if (userService.getCurrentUser() == null) {
+            StorableRepresentationOfDocumentAndUserSettings settingsRepresentations = retrieveSettingsRepresentationsFromLocalStorage();
+            OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> callback;
+            while ((callback = retrieveSettingsCallbacksQueue.poll()) != null) {
+                callback.onSuccess(settingsRepresentations);
+            }
+        } else {
+            userWasAlreadyLoggedIn = true;
+            retrieveSettingsRepresentationsFromServer(
+                    new AsyncCallback<StorableRepresentationOfDocumentAndUserSettings>() {
+
+                        @Override
+                        public void onSuccess(
+                                StorableRepresentationOfDocumentAndUserSettings serverSettingsRepresentations) {
+                            serverSettingsRepresentations = syncLocalStorageAndServer(serverSettingsRepresentations);
+                            OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> callback;
+                            while ((callback = retrieveSettingsCallbacksQueue.poll()) != null) {
+                                callback.onSuccess(serverSettingsRepresentations);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            StorableRepresentationOfDocumentAndUserSettings fallbackSettingsRepresentations = retrieveSettingsRepresentationsFromLocalStorage();
+                            OnSettingsLoadedCallback<StorableRepresentationOfDocumentAndUserSettings> callback;
+                            while ((callback = retrieveSettingsCallbacksQueue.poll()) != null) {
+                                callback.onError(caught, fallbackSettingsRepresentations);
+                            }
+                        }
+                    });
+        }
     }
+
+    private StorableRepresentationOfDocumentAndUserSettings syncLocalStorageAndServer(
+            StorableRepresentationOfDocumentAndUserSettings serverSettingsRepresentations) {
+        if (!serverSettingsRepresentations.hasStoredUserSettings()
+                && !serverSettingsRepresentations.hasStoredDocumentSettings()) {
+            StorableRepresentationOfDocumentAndUserSettings localStorageSettingsRepresentations = retrieveSettingsRepresentationsFromLocalStorage();
+            if (localStorageSettingsRepresentations.hasStoredUserSettings()
+                    || localStorageSettingsRepresentations.hasStoredDocumentSettings()) {
+                storeSettingsRepresentationsOnServer(localStorageSettingsRepresentations,
+                        new OnSettingsStoredCallback() {
+
+                            @Override
+                            public void onSuccess() {
+                                // nothing to do
+                            }
+
+                            @Override
+                            public void onError(Throwable caught) {
+                                // nothing to do
+                            }
+                        });
+            }
+            serverSettingsRepresentations = localStorageSettingsRepresentations;
+        } else {
+            storeSettingsRepresentationsOnLocalStorage(serverSettingsRepresentations);
+        }
+        return serverSettingsRepresentations;
+    }
+
 }

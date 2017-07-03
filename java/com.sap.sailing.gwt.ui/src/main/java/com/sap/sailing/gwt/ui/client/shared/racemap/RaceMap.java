@@ -145,7 +145,7 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, RequiresDataInitialization, RequiresResize, QuickRankProvider {
@@ -1400,7 +1400,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     final static Distance advantageLineLength = new MeterDistance(1000); // TODO this should probably rather scale with the visible area of the map; bug 616
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
-        if (map != null && lastRaceTimesInfo != null && quickRanksDTOProvider.getQuickRanks() != null && lastCombinedWindTrackInfoDTO != null) {
+        if (map != null && lastRaceTimesInfo != null && quickRanksDTOProvider.getQuickRanks().isEmpty()
+                && lastCombinedWindTrackInfoDTO != null) {
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
                 // find competitor with highest rank
@@ -2505,7 +2506,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     @Override
-    public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent(RaceMapSettings settings) {
         return new RaceMapSettingsDialogComponent(settings, stringMessages, this.isSimulationEnabled && this.hasPolar);
     }
 
@@ -2952,6 +2953,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public String getId() {
         return raceMapLifecycle.getComponentId();
+    }
+    
+    public RaceMapLifecycle getLifecycle() {
+        return raceMapLifecycle;
     }
 
 }

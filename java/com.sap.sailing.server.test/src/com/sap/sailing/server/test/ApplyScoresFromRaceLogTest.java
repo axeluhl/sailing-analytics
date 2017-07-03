@@ -112,7 +112,9 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now);
-        final Function<Competitor, Double> expectedPoints = (c)->scores.get(c)==null?(mprs.get(c) == null || mprs.get(c) == MaxPointsReason.NONE ? competitors.indexOf(c)+1 : competitors.size()+1):scores.get(c);
+        final Function<Competitor, Double> expectedPoints =
+                (c)->scores.get(c)==null?(mprs.get(c) == null || mprs.get(c) == MaxPointsReason.NONE ?
+                        competitors.indexOf(c)+1 : competitors.size()+1):scores.get(c);
         for (final Competitor c : competitors) {
             assertEquals(expectedPoints.apply(c), leaderboard.getTotalPoints(c, f1Column, now), 0.00000001);
         }
@@ -169,16 +171,22 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
     }
     
     /**
-     * See bug 4025: When a scoring race log event is received it may contain a partial competitor set. It shall depend on
-     * the previous state resulting from the race log, without the last event, what needs to be done with the leaderboard
-     * score corrections. If a competitor which which an earlier message did have a correction now no longer is part of
-     * the latest scoring race log event, and if the score corrections in the leaderboard match up with what the previous
-     * event had caused, remove that score correction again.
+     * See bugs 4025 and 4167: When a scoring race log event is received it may contain a partial competitor set. Before bug4167
+     * there was an implementation that reset score corrections if previous messages had a result for a competitor, and later
+     * messages did not. With bug 4167 we found that it should be possible to send in partial results, owed to the insight that
+     * multiple devices may be used for the same race, not all in sync at all times, therefore producing partial results that
+     * should not clear or overwrite valid results input by other devices.<p>
+     * 
+     * Therefore, now, with bug4167, this test has been modified such that first it ensures that a partial result
+     * does <em>not</em> clear a previous score correction. Furthermore it tests that when sending a result that
+     * has 0 as the rank and {@link MaxPointsReason#NONE} as the {@link MaxPointsReason} with no explicit score set,
+     * the score correction for the competitor will be reset in the leaderboard.
      */
     @Test
     public void testApplyingOCSThenClearingOCS() {
         TimePoint now = MillisecondsTimePoint.now();
-        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TimePoint later = now.plus(1000);
+        TimePoint yetLater = later.plus(1000);
         final int numberOfCompetitors = 2;
         setUp(numberOfCompetitors, now, ScoringSchemeType.LOW_POINT);
         final CompetitorResults results = new CompetitorResultsImpl();
@@ -202,9 +210,15 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         setResultForCompetitor(competitors.get(1), /* one-based rank */ 0, resultsWithOCSCleared, MaxPointsReason.OCS, /* explicit score */ null);
         f1RaceState.setFinishPositioningListChanged(later, resultsWithOCSCleared);
         f1RaceState.setFinishPositioningConfirmed(later);
-        // validate that it got cleared in leaderboard
+        // validate that it did not get cleared in leaderboard (changed by bug 4167):
         assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.NONE, 1, /* score is corrected */ false, later); // ranking first, one point in low-point scheme
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later); // ranking first, one point in low-point scheme
+        // now explicitly overwrite with a 0/null/null result, validating that this will clear the corrections for competitor 0:
+        setResultForCompetitor(competitors.get(0), /* one-based rank */ 0, resultsWithOCSCleared, /* maxPointsReason */ null, /* explicit score */ null);
+        f1RaceState.setFinishPositioningListChanged(yetLater, resultsWithOCSCleared);
+        f1RaceState.setFinishPositioningConfirmed(yetLater);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, yetLater);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.NONE, 1, /* score is corrected */ false, yetLater); // ranking first, one point in low-point scheme
     }
 
     private void assertScoreCorrections(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
@@ -219,7 +233,4 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
             final CompetitorResults results, MaxPointsReason maxPointsReason, Double explicitScore) {
         results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(), oneBasedRank, maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null));
     }
-    
-    
-
 }
