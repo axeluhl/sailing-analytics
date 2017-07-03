@@ -32,8 +32,8 @@ public interface SettableScoreCorrection extends ScoreCorrection {
     void uncorrectScore(Competitor competitor, RaceColumn raceColumn);
     
     /**
-     * @return <code>null</code> if not set for the competitor, e.g., because no correction was made or an explicit
-     *         {@link MaxPointsReason} was provided for the competitor.
+     * @return <code>null</code> if not set for the competitor, e.g., because no correction was made or only a
+     *         {@link MaxPointsReason} but no explicit score was provided for the competitor.
      */
     Double getExplicitScoreCorrection(Competitor competitor, RaceColumn raceColumn);
 
