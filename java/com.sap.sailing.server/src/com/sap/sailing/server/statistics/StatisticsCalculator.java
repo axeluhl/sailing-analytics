@@ -73,40 +73,48 @@ public class StatisticsCalculator {
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
                 TrackedRace trackedRace = column.getTrackedRace(fleet);
-                if(trackedRace != null && !trackedRaces.contains(trackedRace)) {
-                    if(trackedRace.hasGPSData() && trackedRace.hasWindData()) {
-                        trackedRaces.add(trackedRace);
-                        if (enableStats) {
-                            try {
-                                doForTrackedRace(trackedRace);
-                            } catch (Exception e) {
-                                logger.log(Level.WARNING, "Exception during calculation of event statistics", e);
+                if (trackedRace != null && !trackedRaces.contains(trackedRace)) {
+                    if (enableStats) {
+                        try {
+                            if(doForTrackedRace(trackedRace)) {
+                                trackedRaces.add(trackedRace);
                             }
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, "Exception during calculation of event statistics", e);
                         }
+                    } else  if (trackedRace.hasGPSData() && trackedRace.hasWindData()) {
+                        trackedRaces.add(trackedRace);
                     }
                 }
             }
         }
     }
 
-    private void doForTrackedRace(TrackedRace trackedRace) {
+    private boolean doForTrackedRace(TrackedRace trackedRace) {
+        boolean foundFixes = false;
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             competitors.add(competitor);
-            doForCompetitor(trackedRace, competitor);
+            foundFixes |= doForCompetitor(trackedRace, competitor);
         }
         for (Mark mark : trackedRace.getMarks()) {
             doForMark(trackedRace, mark);
         }
         for (WindSource windSource : trackedRace.getWindSources()) {
-            doForWindSource(trackedRace, windSource);
+            foundFixes |= doForWindSource(trackedRace, windSource);
         }
+        return foundFixes;
     }
 
-    private void doForCompetitor(TrackedRace trackedRace, Competitor competitor) {
+    private boolean doForCompetitor(TrackedRace trackedRace, Competitor competitor) {
+        boolean foundFixes = false;
         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
         competitorTrack.lockForRead();
         try {
-            numberOfGPSFixes += Util.size(competitorTrack.getRawFixes());
+            final int numberOfGPSFixesForCompetitor = Util.size(competitorTrack.getRawFixes());
+            if (numberOfGPSFixesForCompetitor > 0) {
+                foundFixes = true;
+                numberOfGPSFixes += numberOfGPSFixesForCompetitor;
+            }
         } finally {
             competitorTrack.unlockAfterRead();
         }
@@ -133,6 +141,7 @@ public class StatisticsCalculator {
                 doForCompetitorTrackAndTimeRange(competitor, competitorTrack, from, to);
             }
         }
+        return foundFixes;
     }
 
     protected void doForCompetitorTrackAndTimeRange(Competitor competitor,
@@ -162,17 +171,23 @@ public class StatisticsCalculator {
         }
     }
 
-    private void doForWindSource(TrackedRace trackedRace, WindSource windSource) {
+    private boolean doForWindSource(TrackedRace trackedRace, WindSource windSource) {
+        boolean foundFixes = false;
         // don't count the "virtual" wind sources
         if (windSource.canBeStored() || windSource.getType() == WindSourceType.RACECOMMITTEE) {
             WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
             windTrack.lockForRead();
             try {
-                numberOfWindFixes += Util.size(windTrack.getRawFixes());
+                final int numberOfFixesForWindSource = Util.size(windTrack.getRawFixes());
+                if(numberOfFixesForWindSource > 0) {
+                    foundFixes = true;
+                    numberOfWindFixes += numberOfFixesForWindSource;
+                }
             } finally {
                 windTrack.unlockAfterRead();
             }
         }
+        return foundFixes;
     }
 
     public int getNumberOfRaces() {
