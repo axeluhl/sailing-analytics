@@ -128,7 +128,7 @@ public class SensorFixStoreTest {
         List<Double> progressData = new ArrayList<>();
         store.loadFixes((fix) -> {
         }, device, new MillisecondsTimePoint(FIX_TIMESTAMP - 1), new MillisecondsTimePoint(FIX_TIMESTAMP + fixes + 1),
-                true, new ProgressCallback() {
+                true, () -> false, new ProgressCallback() {
 
                     @Override
                     public void progressChange(double progress) {

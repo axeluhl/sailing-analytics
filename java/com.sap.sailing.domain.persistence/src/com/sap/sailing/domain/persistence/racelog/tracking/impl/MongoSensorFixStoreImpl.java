@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,30 +94,34 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     @Override
     public <FixT extends Timed> boolean loadOldestFix(Consumer<FixT> consumer, DeviceIdentifier device, TimeRange timeRangeToLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, (d) -> {}, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* ascending */ 1)).limit(1));
+        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, () -> false, (d) -> {
+        }, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* ascending */ 1)).limit(1));
     }
     
     @Override
     public <FixT extends Timed> boolean loadYoungestFix(Consumer<FixT> consumer, DeviceIdentifier device, TimeRange timeRangeToLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, (d) -> {}, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* descending */ -1)).limit(1));
+        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, () -> false, (d) -> {
+        }, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* descending */ -1)).limit(1));
     }
     
     @Override
     public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
             TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        loadFixes(consumer, device, from, to, inclusive, (d) -> {
+        loadFixes(consumer, device, from, to, inclusive, () -> false, (d) -> {
         });
     }
     
     @Override
     public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
-            TimePoint to, boolean inclusive, ProgressCallback progressConsumer)
+            TimePoint to, boolean inclusive, Supplier<Boolean> isPreemptiveStopped, ProgressCallback progressConsumer)
                     throws NoCorrespondingServiceRegisteredException, TransformationException {
-        loadFixes(consumer, device, from, to, inclusive, progressConsumer, UnaryOperator.identity());
+        loadFixes(consumer, device, from, to, inclusive, isPreemptiveStopped, progressConsumer,
+                UnaryOperator.identity());
     }
 
     private <FixT extends Timed> boolean loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
-            TimePoint to, boolean inclusive, ProgressCallback progressConsumer, UnaryOperator<DBCursor> dbCursorCallback)
+            TimePoint to, boolean inclusive, Supplier<Boolean> isPreemptiveStopped, ProgressCallback progressConsumer,
+            UnaryOperator<DBCursor> dbCursorCallback)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         progressConsumer.progressChange(0);
 
@@ -145,6 +150,10 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
             if (current % reportIncrement == 0) {
                 progressConsumer.progressChange(current / max);
+                if (isPreemptiveStopped.get()) {
+                    logger.log(Level.WARNING, "Exiting because of preemtive stop requested " + fixObject);
+                    return fixLoaded;
+                }
             }
             try {
                 @SuppressWarnings("unchecked")

@@ -2,11 +2,13 @@ package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -273,10 +275,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * special handling.
      */
     private void loadFixesForNewlyCoveredTimeRanges(WithID item,
-            Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
+            Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges,
+            LoadingJobContext loadingCtx) {
         if (trackedRace.getStartOfTracking() != null) {
             TimeRange trackingTimeRange = getTrackingTimeRange();
-            loadFixesInTrackingTimeRange(newlyCoveredTimeRanges, trackingTimeRange);
+            loadFixesInTrackingTimeRange(newlyCoveredTimeRanges, trackingTimeRange, loadingCtx);
             if (item instanceof Mark) {
                 Mark mark = (Mark) item;
                 DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
@@ -300,19 +303,43 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      */
     private void loadFixesInTrackingTimeRange(
             Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges,
-            TimeRange trackingTimeRange) {
-        newlyCoveredTimeRanges.forEach((event, timeRange) -> {
-            loadFixesForMultiTimeRange(timeRange.intersection(trackingTimeRange), event);
-        });
+            TimeRange trackingTimeRange, LoadingJobContext loadingCtx) {
+        final MultiJobProgressUpdater progressUpdater = new MultiJobProgressUpdater(newlyCoveredTimeRanges.size());
+        int currentJobNr = 0;
+        for (Entry<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> e : newlyCoveredTimeRanges.entrySet()) {
+            final int jobNr = currentJobNr;
+            MultiTimeRange timeRange = e.getValue();
+            RegattaLogDeviceMappingEvent<WithID> event = e.getKey();
+            loadFixesForMultiTimeRange(timeRange.intersection(trackingTimeRange), event, p -> {
+                progressUpdater.updateProgress(jobNr, p);
+                loadingCtx.updateProgress(progressUpdater.getProgress());
+            }, loadingCtx);
+            currentJobNr++;
+        }
+        
+
     }
 
     /**
      * Loads fixes for the parts of the given {@link MultiTimeRange} using the given mapping event.
      */
     private void loadFixesForMultiTimeRange(MultiTimeRange effectiveRangeToLoad,
-            RegattaLogDeviceMappingEvent<WithID> event) {
+            RegattaLogDeviceMappingEvent<WithID> event, Consumer<Double> progressConsumer,
+            LoadingJobContext loadingCtx) {
         if (!effectiveRangeToLoad.isEmpty()) {
-            effectiveRangeToLoad.forEach(timeRange -> loadFixes(timeRange, event));
+            int currentJobNr = 0;
+            final int nrOfJobs = Util.size(effectiveRangeToLoad);
+            final MultiJobProgressUpdater progressUpdater = new MultiJobProgressUpdater(nrOfJobs);
+            
+            for (TimeRange timeRange : effectiveRangeToLoad) {
+                final int jobNr = currentJobNr;
+                loadFixes(timeRange, event, p -> {
+                    progressUpdater.updateProgress(jobNr, p);
+                    progressConsumer.accept(progressUpdater.getProgress());
+                }, loadingCtx);
+                currentJobNr++;
+            }
+        
         }
     }
     
@@ -333,7 +360,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     /**
      * Loads the fixes in the specified {@link TimeRange} using a visitor of the given mapping event.
      */
-    private void loadFixes(TimeRange timeRangeToLoad, RegattaLogDeviceMappingEvent<? extends WithID> mappingEvent) {
+    private void loadFixes(TimeRange timeRangeToLoad, RegattaLogDeviceMappingEvent<? extends WithID> mappingEvent,
+            final Consumer<Double> progressConsumer, final LoadingJobContext loadingCtx) {
         if (timeRangeToLoad != null && !preemptiveStopRequested.get()) {
             mappingEvent.accept(new MappingEventVisitor() {
                 @Override
@@ -347,7 +375,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         // competitor retrieved from the mapping event does not have a track in trackedRace
                         try {
                             sensorFixStore.<DoubleVectorFix> loadFixes(fix -> mapper.addFix(track, fix), event.getDevice(),
-                                    timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false);
+                                    timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false,
+                                    loadingCtx::isPreemptiveFinished, e -> progressConsumer.accept(e));
                         } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
                             logger.log(Level.WARNING, "Could not load track for competitor: " + event.getMappedTo()
                             + "; device: " + event.getDevice());
@@ -364,7 +393,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         // competitor retrieved from the mapping event does not have a track in trackedRace
                         try {
                             sensorFixStore.<GPSFixMoving> loadFixes(fix -> track.add(fix, true), event.getDevice(),
-                                    timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false);
+                                    timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false,
+                                    loadingCtx::isPreemptiveFinished, e -> progressConsumer.accept(e));
                         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                             logger.log(Level.WARNING, "Could not load competitor track " + event.getMappedTo() + "; device "
                                     + event.getDevice());
@@ -377,7 +407,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
                     try {
                         sensorFixStore.<GPSFix> loadFixes(fix -> track.add(fix, true), event.getDevice(),
-                                timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false);
+                                timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false,
+                                loadingCtx::isPreemptiveFinished, e -> progressConsumer.accept(e));
                     } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                         logger.log(Level.WARNING, "Could not load mark track " + event.getMappedTo());
                     }
@@ -524,8 +555,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 double progressSum = 0.0;
                 boolean allFinished = true;
                 for (AbstractLoadingJob loadingJob : loadingJobs) {
-                    allFinished &= loadingJob.finished;
-                    progressSum += loadingJob.progress;
+                    allFinished &= loadingJob.isFinished();
+                    progressSum += loadingJob.getProgress();
                 }
                 if (allFinished) {
                     loadingJobs.clear();
@@ -564,6 +595,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         return stopRequested.get();
     }
     
+    private boolean isPreemptiveStopRequested() {
+        return preemptiveStopRequested.get();
+    }
+
     private class FixLoaderDeviceMappings extends RegattaLogDeviceMappings<WithID> {
         public FixLoaderDeviceMappings(Iterable<RegattaLog> initialRegattaLogs, String raceNameForLock) {
             super(initialRegattaLogs, raceNameForLock);
@@ -593,26 +628,74 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * Subclasses are intended to be run using an executor.
      */
     private abstract class AbstractLoadingJob implements Runnable {
-        double progress = 0;
-        boolean finished = false;
+        volatile double currentProgress = 0d;
+        volatile boolean isFinished = false;
 
         @Override
         public final void run() {
-            progress = 0.5;
+
             updateStatusAndProgressWithErrorHandling();
             
             try {
-                load();
+                load(new LoadingJobContext() {
+                    @Override
+                    public void updateProgress(double progress) {
+                        currentProgress = progress;
+                    }
+
+
+
+                    @Override
+                    public boolean isPreemptiveFinished() {
+                        return FixLoaderAndTracker.this.isPreemptiveStopRequested();
+                    }
+
+                });
             } finally {
-                progress = 1.0;
-                finished = true;
+                currentProgress = 1d;
+                isFinished = true;
                 updateStatusAndProgressWithErrorHandling();
             }
         }
-        
-        protected abstract void load();
+
+        public boolean isFinished() {
+            return isFinished;
+        }
+
+        public double getProgress() {
+            return currentProgress;
+        }
+
+        protected abstract void load(LoadingJobContext ctx);
     }
     
+    interface LoadingJobContext {
+        boolean isPreemptiveFinished();
+        void updateProgress(double progress);
+    }
+    
+    public class MultiJobProgressUpdater {
+        volatile double[] currentProgress = new double[1];
+
+        public MultiJobProgressUpdater(int nrOfJobs) {
+            super();
+            currentProgress = new double[nrOfJobs];
+        }
+        
+        void updateProgress(int jobNr, double progress) {
+            if (jobNr >= 0 && jobNr < currentProgress.length) {
+                currentProgress[jobNr] = progress;
+            }
+            
+        }
+        public double getProgress() {
+            double progress = 0d;
+            for (int i = 0; i < currentProgress.length; i++) {
+                progress += currentProgress[i] / currentProgress.length;
+            }
+            return progress;
+        }
+    }
     /**
      * Loads fixes for an item's mappings in a defined tracking {@link TimeRange}. This is used when the tracking
      * {@link TimeRange} is extended. No better fixes for {@link Mark} are being loaded because if available, these must
@@ -631,8 +714,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
         
         @Override
-        protected void load() {
-            loadFixesInTrackingTimeRange(newlyCoveredTimeRanges, trackingTimeRange);
+        protected void load(LoadingJobContext loadingCtx) {
+            loadFixesInTrackingTimeRange(newlyCoveredTimeRanges, trackingTimeRange, loadingCtx);
         }
     }
     
@@ -652,8 +735,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
         
         @Override
-        protected void load() {
-            loadFixesForNewlyCoveredTimeRanges(item, newlyCoveredTimeRanges);
+        protected void load(LoadingJobContext loadingCtx) {
+            loadFixesForNewlyCoveredTimeRanges(item, newlyCoveredTimeRanges, loadingCtx);
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import java.util.function.Supplier;
+
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
@@ -36,14 +38,15 @@ public enum EmptyGPSFixStore implements GPSFixStore {
 
     @Override
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end, ProgressCallback progressReporter)
+            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end, Supplier<Boolean> isPreemptiveStopped,
+            ProgressCallback progressReporter)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
         
     }
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping, TimePoint start,
-            TimePoint end, ProgressCallback progressReport)
+            TimePoint end, Supplier<Boolean> isPreemptiveStopped, ProgressCallback progressReport)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
         
     }

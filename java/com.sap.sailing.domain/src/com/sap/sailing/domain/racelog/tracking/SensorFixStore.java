@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelog.tracking;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -48,7 +49,10 @@ public interface SensorFixStore {
      * @param inclusive true if fixes exactly at the bounds of the time range should be loaded, false otherwise.
      * @param progressReporter not allowed to be null, can be used to get reports of the approximate loading progress
      */
-    <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier, TimePoint start, TimePoint end, boolean inclusive, ProgressCallback progressReporter) throws NoCorrespondingServiceRegisteredException,
+    <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier, TimePoint start,
+            TimePoint end, boolean inclusive, Supplier<Boolean> isPreemptiveStopped,
+            ProgressCallback progressReporter)
+            throws NoCorrespondingServiceRegisteredException,
     TransformationException;
 
     /**

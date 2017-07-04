@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelog.impl;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
@@ -37,14 +38,18 @@ public class GPSFixStoreImpl implements GPSFixStore {
     private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
             TimePoint from, TimePoint to, boolean toIsInclusive)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        loadTrack(track, device, from, to, toIsInclusive, (c) -> {});
+        loadTrack(track, device, from, to, toIsInclusive, () -> {
+            return false;
+        }, (c) -> {
+        });
     }
 
     private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
-            TimePoint from, TimePoint to, boolean toIsInclusive, ProgressCallback progress)
+            TimePoint from, TimePoint to, boolean toIsInclusive, Supplier<Boolean> isPreemptiveStopped,
+            ProgressCallback progress)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         sensorFixStore.<FixT> loadFixes(fix -> track.add(fix, /* replace */ true), device, from, to, toIsInclusive,
-                progress);
+                isPreemptiveStopped, progress);
     }
 
     @Override
@@ -80,23 +85,24 @@ public class GPSFixStoreImpl implements GPSFixStore {
 
     @Override
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end, ProgressCallback progressReporter)
+            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end, Supplier<Boolean> isPreemptiveStopped,
+            ProgressCallback progressReporter)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
 
         // loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true
         // /*inclusive*/);
         final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
         final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
-        loadTrack(track, mapping.getDevice(), from, to, true /* inclusive */, progressReporter);
+        loadTrack(track, mapping.getDevice(), from, to, true /* inclusive */, isPreemptiveStopped, progressReporter);
     }
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping, TimePoint start,
-            TimePoint end, ProgressCallback progressReport)
+            TimePoint end, Supplier<Boolean> isPreemptiveStopped, ProgressCallback progressReport)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
         final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
         final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
-        loadTrack(track, mapping.getDevice(), from, to, true /* inclusive */, progressReport);
+        loadTrack(track, mapping.getDevice(), from, to, true /* inclusive */, isPreemptiveStopped, progressReport);
     }
 
     @Override
