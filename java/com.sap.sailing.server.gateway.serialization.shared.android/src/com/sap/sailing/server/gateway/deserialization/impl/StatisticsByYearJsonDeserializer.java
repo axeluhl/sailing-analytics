@@ -18,7 +18,7 @@ public class StatisticsByYearJsonDeserializer implements JsonDeserializer<Pair<I
 
     @Override
     public Pair<Integer, Statistics> deserialize(JSONObject object) throws JsonDeserializationException {
-        Integer year = (Integer) object.get(StatisticsByYearJsonSerializer.FIELD_YEAR);
+        Integer year = ((Number) object.get(StatisticsByYearJsonSerializer.FIELD_YEAR)).intValue();
         Statistics statistics = statisticsJsonDeserializer
                 .deserialize((JSONObject) object.get(StatisticsByYearJsonSerializer.FIELD_STATISTICS));
         return new Pair<Integer, Statistics>(year, statistics);
