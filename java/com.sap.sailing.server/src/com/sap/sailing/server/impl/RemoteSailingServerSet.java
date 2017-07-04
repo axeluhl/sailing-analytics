@@ -285,8 +285,7 @@ public class RemoteSailingServerSet {
     public Map<RemoteSailingServerReference, Util.Pair<Map<Integer, Statistics>, Exception>> getCachedStatisticsForRemoteSailingServers() {
         LockUtil.lockForRead(lock);
         try {
-            // TODO proper implementation
-            return new HashMap<>();
+            return Collections.unmodifiableMap(cachedStatisticsByYearForRemoteSailingServers);
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
