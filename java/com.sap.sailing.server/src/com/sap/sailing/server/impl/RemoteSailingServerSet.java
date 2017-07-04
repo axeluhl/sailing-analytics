@@ -85,6 +85,7 @@ public class RemoteSailingServerSet {
         LockUtil.executeWithWriteLock(lock, () -> {
             remoteSailingServers.clear();
             cachedEventsForRemoteSailingServers.clear();
+            cachedStatisticsByYearForRemoteSailingServers.clear();
         });
     }
 
@@ -241,6 +242,7 @@ public class RemoteSailingServerSet {
             RemoteSailingServerReference ref = remoteSailingServers.remove(name);
             if (ref != null) {
                 cachedEventsForRemoteSailingServers.remove(ref);
+                cachedStatisticsByYearForRemoteSailingServers.remove(ref);
             }
             return ref;
         }finally{
