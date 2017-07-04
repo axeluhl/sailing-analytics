@@ -16,7 +16,6 @@ import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 
 /**
  * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
@@ -26,34 +25,34 @@ import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
  * @author Axel Uhl (d043530)
  *
  */
-public class LeaderboardSettings extends AbstractGenericSerializableSettings {
+public abstract class LeaderboardSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 2625004077963291333L;
     
     /**
      * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
      * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
      */
-    private StringSetSetting namesOfRaceColumnsToShow;
+    protected StringSetSetting namesOfRaceColumnsToShow;
 
     /**
      * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
      * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
      */
-    private StringSetSetting namesOfRacesToShow;
+    protected StringSetSetting namesOfRacesToShow;
 
     /**
      * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to LAST_N
      */
-    private IntegerSetting numberOfLastRacesToShow;
+    protected IntegerSetting numberOfLastRacesToShow;
 
-    private EnumSetSetting<DetailType> maneuverDetailsToShow;
-    private EnumSetSetting<DetailType> legDetailsToShow;
-    private EnumSetSetting<DetailType> raceDetailsToShow;
-    private EnumSetSetting<DetailType> overallDetailsToShow;
-    private boolean autoExpandPreSelectedRace = false;
-    private LongSetting delayBetweenAutoAdvancesInMilliseconds;
-    private BooleanSetting updateUponPlayStateChange;
-    private BooleanSetting isShowCompetitorNationality;
+    protected EnumSetSetting<DetailType> maneuverDetailsToShow;
+    protected EnumSetSetting<DetailType> legDetailsToShow;
+    protected EnumSetSetting<DetailType> raceDetailsToShow;
+    protected EnumSetSetting<DetailType> overallDetailsToShow;
+    protected boolean autoExpandPreSelectedRace = false;
+    protected LongSetting delayBetweenAutoAdvancesInMilliseconds;
+    protected BooleanSetting updateUponPlayStateChange;
+    protected BooleanSetting isShowCompetitorNationality;
     
     /**
      * There are two ways to select race columns.
@@ -61,27 +60,27 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      */
     public static enum RaceColumnSelectionStrategies { EXPLICIT, LAST_N; }
     
-    private EnumSetting<RaceColumnSelectionStrategies> activeRaceColumnSelectionStrategy;
+    protected EnumSetting<RaceColumnSelectionStrategies> activeRaceColumnSelectionStrategy;
     
     /**
      * An optional sort column; if <code>null</code>, the leaderboard sorting won't be touched when updating the settings.
      * Otherwise, the leaderboard will be sorted by the race column (ascending if {@link #sortAscending}, descending otherwise.
      */
-    private StringSetting nameOfRaceToSort;
-    private BooleanSetting sortAscending;
+    protected StringSetting nameOfRaceToSort;
+    protected BooleanSetting sortAscending;
     
     /**
      * Shows scores sum'd up for each race column
      */
-    private BooleanSetting showAddedScores;
+    protected BooleanSetting showAddedScores;
     
-    private BooleanSetting showCompetitorSailIdColumn;
-    private BooleanSetting showCompetitorFullNameColumn;
+    protected BooleanSetting showCompetitorSailIdColumn;
+    protected BooleanSetting showCompetitorFullNameColumn;
     
     /**
      * Show a column with total number of races completed
      */
-    private BooleanSetting showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+    protected BooleanSetting showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
     
     @Override
     protected void addChildSettings() {
@@ -263,35 +262,4 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     public boolean isShowCompetitorNationality() {
         return isShowCompetitorNationality.getValue();
     }
-
-    public LeaderboardSettings overrideDefaultsForNamesOfRaceColumns(List<String> namesOfRaceColumns) {
-        LeaderboardSettings newSettings = new LeaderboardSettings();
-        newSettings.legDetailsToShow.setValues(this.getLegDetailsToShow());
-        newSettings.raceDetailsToShow.setValues(this.getRaceDetailsToShow());
-        newSettings.overallDetailsToShow.setValues(this.getOverallDetailsToShow());
-        newSettings.numberOfLastRacesToShow.setValue(this.getNumberOfLastRacesToShow());
-        newSettings.activeRaceColumnSelectionStrategy.setValue(this.getActiveRaceColumnSelectionStrategy());
-        newSettings.autoExpandPreSelectedRace = this.isAutoExpandPreSelectedRace();
-        newSettings.delayBetweenAutoAdvancesInMilliseconds.setValue(this.getDelayBetweenAutoAdvancesInMilliseconds());
-        newSettings.maneuverDetailsToShow.setValues(this.getManeuverDetailsToShow());
-        newSettings.nameOfRaceToSort.setValue(this.getNameOfRaceToSort());
-        newSettings.sortAscending.setValue(this.isSortAscending());
-        newSettings.updateUponPlayStateChange.setValue(this.isUpdateUponPlayStateChange());
-        newSettings.showAddedScores.setValue(this.isShowAddedScores());
-        newSettings.showCompetitorSailIdColumn.setValue(this.isShowCompetitorSailIdColumn());
-        newSettings.showCompetitorFullNameColumn.setValue(this.isShowCompetitorFullNameColumn());
-        newSettings.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(this.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
-        newSettings.isShowCompetitorNationality.setValue(this.isShowCompetitorNationality());
-        if(namesOfRaceColumns != null && !namesOfRaceColumns.isEmpty()) {
-            newSettings.namesOfRacesToShow.setValues(null);
-        }
-        newSettings.namesOfRaceColumnsToShow.setValues(this.getNamesOfRaceColumnsToShow());
-        SettingsDefaultValuesUtils.keepDefaults(this, newSettings);
-        if(namesOfRaceColumns != null && !namesOfRaceColumns.isEmpty()) {
-            newSettings.namesOfRacesToShow.setDefaultValues(null);
-        }
-        newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumns);
-        return newSettings;
-    }
-    
 }

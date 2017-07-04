@@ -82,7 +82,6 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -125,8 +124,6 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
-import com.sap.sse.gwt.client.shared.components.SettingsDialog;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
@@ -135,7 +132,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * @author Axel Uhl (D043530)
  * 
  */
-public abstract class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSettings>
+public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends AbstractCompositeComponent<LS>
         implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider, IsEmbeddableComponent,
         CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider, LeaderboardUpdateProvider {
     private static final LeaderboardResources RESOURCES = GWT.create(LeaderboardResources.class);
@@ -387,16 +384,15 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
             AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails) {
-        this(parent, context, sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null,
+        this(parent, context, sailingService, asyncActionsExecutor, settings, false, 
                 competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, showRaceDetails);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded,
-            RegattaAndRaceIdentifier preSelectedRace, CompetitorSelectionProvider competitorSelectionProvider,
+            AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardGroupName, String leaderboardName, ErrorReporter errorReporter,
             final StringMessages stringMessages, boolean showRaceDetails) {
-        this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
+        this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
                 competitorSelectionProvider,
                 new Timer(
                         // perform the first request as "live" but don't by default auto-play
@@ -410,8 +406,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded,
-            RegattaAndRaceIdentifier preSelectedRace, CompetitorSelectionProvider competitorSelectionProvider,
+            AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded, CompetitorSelectionProvider competitorSelectionProvider,
             Timer timer, String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
@@ -425,7 +420,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.isEmbedded = isEmbedded;
         this.competitorSelectionProvider = competitorSelectionProvider;
-        competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
+        this.competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -447,19 +442,6 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         }
         timer.addPlayStateListener(this);
         timer.addTimeListener(this);
-
-        switch (settings.getActiveRaceColumnSelectionStrategy()) {
-        case EXPLICIT:
-            if (preSelectedRace == null) {
-                raceColumnSelection = new ExplicitRaceColumnSelection();
-            } else {
-                raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
-            }
-            break;
-        case LAST_N:
-            setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
-            break;
-        }
 
         totalRankColumn = new TotalRankColumn();
         leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
@@ -523,9 +505,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
             competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    SettingsDialog<LeaderboardSettings> settingsDialog = new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages);
-                    settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
-                    settingsDialog.show();
+                    openSettingsDialog();
                 }
             });
             this.competitorFilterPanel = competitorSearchTextBox;
@@ -543,9 +523,23 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         initWidget(mainPanel);
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
+    }
+    
+    protected abstract void openSettingsDialog();
+
+    protected void initialize(LeaderboardSettings settings){
+        switch (settings.getActiveRaceColumnSelectionStrategy()) {
+        case EXPLICIT:
+            raceColumnSelection = getDefaultRaceColumnSelection();
+            break;
+        case LAST_N:
+            setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
+            break;
+        }
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
+        updateSettings(settings);
     }
 
     private Widget createToolbarPanel() {
@@ -2140,7 +2134,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     private RaceColumn<?> getRaceColumnByRaceName(String raceName) {
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
-            if (column instanceof RaceColumn<?>) {
+            if (column instanceof LeaderboardPanel.RaceColumn) {
                 RaceColumnDTO raceInLeaderboard = ((RaceColumn<?>) column).getRace();
                 for (FleetDTO fleet : raceInLeaderboard.getFleets()) {
                     final RegattaAndRaceIdentifier raceIdentifier = raceInLeaderboard.getRaceIdentifier(fleet);
@@ -2156,7 +2150,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     private RaceColumn<?> getRaceColumnByRaceColumnName(String raceColumnName) {
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
-            if (column instanceof RaceColumn<?>) {
+            if (column instanceof LeaderboardPanel.RaceColumn) {
                 if (((RaceColumn<?>) column).getRaceColumnName().equals(raceColumnName)) {
                     return (RaceColumn<?>) column;
                 }
@@ -2373,7 +2367,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         Collection<String> namesOfExpandedRaceColumns = new ArrayList<String>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
-            if (column instanceof RaceColumn<?>) {
+            if (column instanceof LeaderboardPanel.RaceColumn) {
                 RaceColumn<?> raceColumn = (RaceColumn<?>) column;
                 if (raceColumn.isExpanded()) {
                     namesOfExpandedRaceColumns.add(raceColumn.getRaceColumnName());
@@ -2441,7 +2435,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
             }
             RaceColumn<?> lastRaceColumn = null;
             for (int i = getLeaderboardTable().getColumnCount() - 1; i >= 0; i--) {
-                if (getLeaderboardTable().getColumn(i) instanceof RaceColumn<?>) {
+                if (getLeaderboardTable().getColumn(i) instanceof LeaderboardPanel.RaceColumn) {
                     lastRaceColumn = (RaceColumn<?>) getLeaderboardTable().getColumn(i);
                     break;
                 }
@@ -2532,7 +2526,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         if (selectedRaceDetails.contains(DetailType.DISPLAY_LEGS)) {
             for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
                 Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
-                if (c instanceof RaceColumn<?>) {
+                if (c instanceof LeaderboardPanel.RaceColumn) {
                     RaceColumn<?> rc = (RaceColumn<?>) c;
                     // If the new leaderboard no longer contains the column, getLegCount will return -1, causing the
                     // column
@@ -2885,7 +2879,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
      */
     private void addRaceColumn(RaceColumn<?> raceColumn) {
         if (getLeaderboardTable()
-                .getColumn(getLeaderboardTable().getColumnCount() - 1) instanceof TotalNetPointssColumn) {
+                .getColumn(getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn) {
             removeColumn(getLeaderboardTable().getColumnCount() - 1);
         }
         addColumn(raceColumn);
@@ -2960,7 +2954,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
         if (isShowCompetitorSailId()) {
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
                     || !(getLeaderboardTable()
-                            .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>)) {
+                            .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn)) {
                 insertColumn(columnIndexWhereToInsertTheNextColumn,
                         new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
                             @Override
@@ -2972,20 +2966,20 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
             columnIndexWhereToInsertTheNextColumn++;
         } else {
             if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn && getLeaderboardTable()
-                    .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>) {
+                    .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn) {
                 removeColumn(columnIndexWhereToInsertTheNextColumn);
             }
         }
         if (isShowCompetitorFullName()) {
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
                     || !(getLeaderboardTable()
-                            .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn)) {
+                            .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.CompetitorColumn)) {
                 insertColumn(columnIndexWhereToInsertTheNextColumn, createCompetitorColumn());
             }
             columnIndexWhereToInsertTheNextColumn++;
         } else {
             if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn && getLeaderboardTable()
-                    .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn) {
+                    .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.CompetitorColumn) {
                 removeColumn(columnIndexWhereToInsertTheNextColumn);
             }
         }
@@ -3005,7 +2999,7 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     private void ensureTotalsColumn() {
         // add a totals column on the right
         if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable()
-                .getColumn(getLeaderboardTable().getColumnCount() - 1) instanceof TotalNetPointssColumn)) {
+                .getColumn(getLeaderboardTable().getColumnCount() - 1) instanceof LeaderboardPanel.TotalNetPointssColumn)) {
             addColumn(new TotalNetPointssColumn(TOTAL_COLUMN_STYLE));
         }
     }
@@ -3013,14 +3007,14 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     private void ensureTotalRacesSailedColumn() {
         // add a totals column on the right
         if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable()
-                .getColumn(getLeaderboardTable().getColumnCount() - 2) instanceof TotalRacesCompletedColumn)) {
+                .getColumn(getLeaderboardTable().getColumnCount() - 2) instanceof LeaderboardPanel.TotalRacesCompletedColumn)) {
             insertColumn(getLeaderboardTable().getColumnCount() - 1, new TotalRacesCompletedColumn(TOTAL_COLUMN_STYLE));
         }
     }
 
     private void ensureNoTotalRacesSailedColumn() {
         if ((getLeaderboardTable()
-                .getColumn(getLeaderboardTable().getColumnCount() - 2) instanceof TotalRacesCompletedColumn)) {
+                .getColumn(getLeaderboardTable().getColumnCount() - 2) instanceof LeaderboardPanel.TotalRacesCompletedColumn)) {
             removeColumn(getLeaderboardTable().getColumnCount() - 2);
         }
     }
@@ -3057,14 +3051,14 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
 
     private void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
         if (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn
-                && getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof CarryColumn) {
+                && getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn) {
             removeColumn(zeroBasedIndexOfCarryColumn);
         }
     }
 
     protected void ensureCarryColumn(int zeroBasedIndexOfCarryColumn) {
         if (getLeaderboardTable().getColumnCount() <= zeroBasedIndexOfCarryColumn
-                || !(getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof CarryColumn)) {
+                || !(getLeaderboardTable().getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn)) {
             while (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn) {
                 removeColumn(zeroBasedIndexOfCarryColumn);
             }
@@ -3144,12 +3138,6 @@ public abstract class LeaderboardPanel extends AbstractCompositeComponent<Leader
     @Override
     public boolean hasToolbar() {
         return false;
-    }
-
-    @Override
-    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent(LeaderboardSettings settings) {
-        return new LeaderboardSettingsDialogComponent(settings, leaderboard.getNamesOfRaceColumns(),
-                stringMessages);
     }
 
     @Override

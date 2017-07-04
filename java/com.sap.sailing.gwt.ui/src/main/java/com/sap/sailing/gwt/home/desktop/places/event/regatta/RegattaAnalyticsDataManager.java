@@ -1,15 +1,13 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -25,7 +23,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * @author Frank Mittag (c163874)
  */
 public class RegattaAnalyticsDataManager {
-    private LeaderboardPanel leaderboardPanel;
+    private MultiRaceLeaderboardPanel leaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
 
     private final CompetitorSelectionModel competitorSelectionProvider;
@@ -45,15 +43,15 @@ public class RegattaAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createMultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
+    public MultiRaceLeaderboardPanel createMultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+            final MultiRaceLeaderboardSettings leaderboardSettings,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if (leaderboardPanel == null) {
             leaderboardPanel = new MultiRaceLeaderboardPanel(parent, context, sailingService,
                     asyncActionsExecutor,
                     leaderboardSettings,
-                    true, preselectedRace,
+                    true, 
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
@@ -72,7 +70,7 @@ public class RegattaAnalyticsDataManager {
         return multiCompetitorChart;
     }
     
-    public LeaderboardPanel getLeaderboardPanel() {
+    public MultiRaceLeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
 

@@ -1,15 +1,20 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -20,56 +25,74 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class MultiRaceLeaderboardPanel extends LeaderboardPanel {
+public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderboardSettings> {
 
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
-            boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, MultiRaceLeaderboardSettings settings,
+            boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             boolean showRaceDetails) {
-        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
+        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
                 competitorSelectionProvider, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 showRaceDetails);
-        updateSettings(settings);
+        initialize(settings);
     }
 
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
-            boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, MultiRaceLeaderboardSettings settings,
+            boolean isEmbedded, 
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
             boolean enableSyncScroller) {
-        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
+        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
                 showCompetitorFilterStatus, enableSyncScroller);
-        updateSettings(settings);
+        initialize(settings);
     }
 
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, MultiRaceLeaderboardSettings settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, competitorSelectionProvider,
                 leaderboardName, errorReporter, stringMessages, showRaceDetails);
-        updateSettings(settings);
+        initialize(settings);
     }
 
     @Override
-    public LeaderboardSettings getSettings() {
-        // TODO Auto-generated method stub
-        return null;
+    public MultiRaceLeaderboardSettings getSettings() {
+        Iterable<RaceColumnDTO> selectedRaceColumns = raceColumnSelection
+                .getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard);
+        List<String> namesOfRaceColumnsToShow = new ArrayList<>();
+        for (RaceColumnDTO raceColumn : selectedRaceColumns) {
+            namesOfRaceColumnsToShow.add(raceColumn.getName());
+        }
+        MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(
+                Collections.unmodifiableList(selectedManeuverDetails), Collections.unmodifiableList(selectedLegDetails),
+                Collections.unmodifiableList(selectedRaceDetails),
+                Collections.unmodifiableList(selectedOverallDetailColumns), namesOfRaceColumnsToShow,
+                /* namesOfRacesToShow */ null, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
+                false, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
+                /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
+                isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
+                isShowCompetitorSailId(), isShowCompetitorFullName(), isShowCompetitorNationality);
+        SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
+        return leaderboardSettings;
     }
 
     @Override
@@ -96,7 +119,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel {
     @Override
     protected LeaderboardSettings overrideDefaultsForNamesOfRaceColumns(LeaderboardSettings currentSettings,
             LeaderboardDTO result) {
-        return currentSettings.overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
+        return ((MultiRaceLeaderboardSettings) currentSettings).overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
     }
 
     @Override
@@ -113,10 +136,6 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel {
             activeFilterSet.addFilter(raceRankFilter);
             competitorSelectionProvider.setCompetitorsFilterSet(activeFilterSet);
         }
-    }
-
-    @Override
-    protected void processAutoExpands(AbstractSortableColumnWithMinMax<?, ?> c, RaceColumn<?> lastRaceColumn) {
     }
 
     @Override
@@ -140,4 +159,24 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel {
         }
         return result;
     }
+    
+    @Override
+    public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(
+            MultiRaceLeaderboardSettings useTheseSettings) {
+        return new MultiRaceLeaderboardSettingsDialogComponent((MultiRaceLeaderboardSettings) useTheseSettings, leaderboard.getNamesOfRaceColumns(),
+                stringMessages);
+    }
+
+    @Override
+    protected void openSettingsDialog() {
+        SettingsDialog<MultiRaceLeaderboardSettings> settingsDialog = new SettingsDialog<MultiRaceLeaderboardSettings>(this, stringMessages);
+        settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
+        settingsDialog.show();         
+    }
+
+    @Override
+    protected void processAutoExpands(AbstractSortableColumnWithMinMax c, RaceColumn lastRaceColumn) {
+    }
+    
+    
 }

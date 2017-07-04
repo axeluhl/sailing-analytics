@@ -6,7 +6,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
@@ -37,12 +36,12 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
+            final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, DetailType chartDetailType) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
-                preselectedRace, leaderboardGroupName, leaderboardName, errorReporter,
+                leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, chartDetailType);
     }
 
@@ -52,15 +51,15 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
+            final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, DetailType chartDetailType) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
         // FIXME: Cleanup with java8 using supplier
         init(new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
-                settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), preselectedRace != null,
-                preselectedRace, competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
+                settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), false,
+                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null,
                 settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
@@ -103,7 +102,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
                                         getComponentContext(), sailingService,
                                         asyncActionsExecutor,
                                         settings.findSettingsByComponentId(OverallLeaderboardPanelLifecycle.ID),
-                                        preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,
+                                        false,  competitorSelectionProvider, timer,
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
                                         false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,

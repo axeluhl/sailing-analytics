@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -53,7 +54,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     private Timer timer;
     private RegattaAndRaceIdentifier raceIdentifier;
     private RaceTimePanel raceTimePanel;
-    private LeaderboardPanel leaderboardPanel;
+    private SingleRaceLeaderboardPanel leaderboardPanel;
     private RaceBoardPanel raceBoardPanel;
     
     private Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo;
@@ -91,7 +92,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         return raceTimePanel;
     }
 
-    protected LeaderboardPanel getLeaderboardPanel() {
+    protected SingleRaceLeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }
 

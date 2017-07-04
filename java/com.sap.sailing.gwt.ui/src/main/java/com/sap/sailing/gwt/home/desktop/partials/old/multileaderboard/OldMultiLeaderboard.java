@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -160,7 +160,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
             final String componentName = multiLeaderboardPanel.getLocalizedShortName();
             final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
 
-            SettingsDialog<?> dialog = new SettingsDialog<LeaderboardSettings>(multiLeaderboardPanel, StringMessages.INSTANCE) {
+            SettingsDialog<?> dialog = new SettingsDialog<MultiRaceLeaderboardSettings>(multiLeaderboardPanel, StringMessages.INSTANCE) {
                 protected Widget getAdditionalWidget() {
                     Widget additionalWidget = super.getAdditionalWidget();
                     if (!oldMultiLeaderboardPanel.getElement().isOrHasChild(multiLeaderboardPanel.getElement())) {

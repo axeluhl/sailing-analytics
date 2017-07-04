@@ -15,14 +15,13 @@ import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentSetti
 import com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.common.client.CSS3Util;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -45,7 +44,7 @@ public class MultiRaceLeaderboardWithHeaderPerspective extends AbstractPerspecti
     private final DockLayoutPanel dockPanel;
     private final static int SAP_HEADER_HEIGHT = 75;
     private final Widget currentContentWidget;
-    private final LeaderboardPanel leaderboardPanel;
+    private final MultiRaceLeaderboardPanel leaderboardPanel;
     private final StringMessages stringMessages;
     
     public MultiRaceLeaderboardWithHeaderPerspective(Component<?> parent,
@@ -193,18 +192,18 @@ public class MultiRaceLeaderboardWithHeaderPerspective extends AbstractPerspecti
                 withFullscreenButton);
     }
 
-    private LeaderboardPanel createLeaderboardPanel(LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
+    private MultiRaceLeaderboardPanel createLeaderboardPanel(LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, 
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages) {
-        LeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
-        LeaderboardSettings leaderboardSettings = settings
+        MultiRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
+        MultiRaceLeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
 
-        LeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService,
+        MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService,
                 asyncActionsExecutor,
-                leaderboardSettings, /*isEmbedded*/true, /* preSelectedRace */null,
+                leaderboardSettings, /*isEmbedded*/true,
                 competitorSelectionProvider, timer, /* leaderboardGroupName */"",
                 leaderboardName, errorReporter, stringMessages,
                 /* showRaceDetails */false, /* competitorSearchTextBox */ null, /* showRegattaRank */

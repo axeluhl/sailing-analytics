@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
@@ -309,7 +309,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         if (leaderboardsTabPanel != null) {
             if (showLeaderboard) {
                 final CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-                final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(); 
+                final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(); 
                 sailingService.getLeaderboardsByEvent(eventDTO, new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
                         new AsyncCallback<List<StrippedLeaderboardDTO>>() {
                             @Override
@@ -318,7 +318,6 @@ public class RegattaOverviewPanel extends SimplePanel {
                                 for (StrippedLeaderboardDTO leaderboard : result) {
                                     LeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null, null, sailingService,
                                             new AsyncActionsExecutor(), leaderboardSettings, false, 
-                                            /*preSelectedRace*/null, 
                                             competitorSelectionProvider, 
                                             null, leaderboard.name, 
                                             errorReporter, stringMessages, /* showRaceDetails */false);

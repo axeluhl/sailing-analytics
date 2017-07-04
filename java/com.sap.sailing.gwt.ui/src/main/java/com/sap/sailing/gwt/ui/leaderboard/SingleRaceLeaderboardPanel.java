@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,8 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -29,9 +30,11 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class SingleLeaderboardPanel extends LeaderboardPanel {
+public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeaderboardSettings> {
     private boolean autoExpandPreSelectedRace;
 
     /**
@@ -41,7 +44,7 @@ public class SingleLeaderboardPanel extends LeaderboardPanel {
      */
     private final RegattaAndRaceIdentifier preSelectedRace;
 
-    public SingleLeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
+    public SingleRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded,
             RegattaAndRaceIdentifier preSelectedRace, CompetitorSelectionProvider competitorSelectionProvider,
             Timer timer, String leaderboardGroupName, String leaderboardName, ErrorReporter errorReporter,
@@ -49,7 +52,7 @@ public class SingleLeaderboardPanel extends LeaderboardPanel {
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
             boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
-        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
+        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded,
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
@@ -57,7 +60,7 @@ public class SingleLeaderboardPanel extends LeaderboardPanel {
         assert preSelectedRace != null;
         this.preSelectedRace = preSelectedRace;
         
-        updateSettings(settings);
+        initialize(settings);
     }
 
     @Override
@@ -66,17 +69,17 @@ public class SingleLeaderboardPanel extends LeaderboardPanel {
     }
 
     @Override
-    public LeaderboardSettings getSettings() {
+    public SingleRaceLeaderboardSettings getSettings() {
         Iterable<RaceColumnDTO> selectedRaceColumns = raceColumnSelection
                 .getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard);
         List<String> namesOfRaceColumnsToShow = new ArrayList<>();
         for (RaceColumnDTO raceColumn : selectedRaceColumns) {
             namesOfRaceColumnsToShow.add(raceColumn.getName());
         }
-        LeaderboardSettings leaderboardSettings = new LeaderboardSettings(
-                Collections.unmodifiableList(selectedManeuverDetails), Collections.unmodifiableList(selectedLegDetails),
-                Collections.unmodifiableList(selectedRaceDetails),
-                Collections.unmodifiableList(selectedOverallDetailColumns), namesOfRaceColumnsToShow,
+        SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
+                selectedManeuverDetails,selectedLegDetails,
+                selectedRaceDetails,
+                selectedOverallDetailColumns, namesOfRaceColumnsToShow,
                 /* namesOfRacesToShow */ null, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
                 autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
                 /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
@@ -144,7 +147,7 @@ public class SingleLeaderboardPanel extends LeaderboardPanel {
     protected void processAutoExpands(AbstractSortableColumnWithMinMax<?, ?> c, RaceColumn<?> lastRaceColumn) {
         // Toggle pre-selected race, if the setting is set and it isn't open yet, or the last race column if
         // that was requested
-        if ((!autoExpandPerformedOnce && isAutoExpandPreSelectedRace() && c instanceof RaceColumn<?>
+        if ((!autoExpandPerformedOnce && isAutoExpandPreSelectedRace() && c instanceof LeaderboardPanel.RaceColumn
                 && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace))
                 || (isAutoExpandLastRaceColumn() && c == lastRaceColumn)) {
             ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
@@ -153,8 +156,8 @@ public class SingleLeaderboardPanel extends LeaderboardPanel {
                 autoExpandPerformedOnce = true;
             }
         }
-        if (c instanceof RaceColumn && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace)) {
-            RaceColumnDTO raceColumn = ((RaceColumn<?>) c).getRace();
+        if (c instanceof RaceColumn && ((RaceColumn) c).getRace().hasTrackedRace(preSelectedRace)) {
+            RaceColumnDTO raceColumn = ((RaceColumn) c).getRace();
             informLeaderboardUpdateListenersAboutRaceSelected(preSelectedRace, raceColumn);
         }
     }
@@ -180,5 +183,27 @@ public class SingleLeaderboardPanel extends LeaderboardPanel {
             }
         }
         return result;
+    }
+
+
+    @Override
+    public void updateSettings(SingleRaceLeaderboardSettings newSettings) {
+        SettingsDialog<SingleRaceLeaderboardSettings> settingsDialog = new SettingsDialog<SingleRaceLeaderboardSettings>(this, stringMessages);
+        settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
+        settingsDialog.show();        
+    }
+    
+    @Override
+    public SettingsDialogComponent<SingleRaceLeaderboardSettings> getSettingsDialogComponent(
+            SingleRaceLeaderboardSettings useTheseSettings) {
+        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, leaderboard.getNamesOfRaceColumns(),
+                stringMessages);
+    }
+    
+    @Override
+    protected void openSettingsDialog() {
+        SettingsDialog<SingleRaceLeaderboardSettings> settingsDialog = new SettingsDialog<SingleRaceLeaderboardSettings>(this, stringMessages);
+        settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
+        settingsDialog.show();         
     }
 }

@@ -19,7 +19,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     private final StringMessages stringMessages;
     private final RaceMapLifecycle raceMapLifecycle;
     private final WindChartLifecycle windChartLifecycle;
-    private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
+    private final SingleRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle;
     private final MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
     private final RaceTimePanelLifecycle raceTimePanelLifecycle;
@@ -37,10 +37,13 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     }
     
     private RaceBoardPerspectiveLifecycle(RegattaAndRaceIdentifier raceIdentifier, AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
+        if(raceIdentifier == null){
+            throw new IllegalStateException("Started ReaceBoardPerspective without any raceidentifier");
+        }
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
-        leaderboardPanelLifecycle = raceIdentifier == null ? new LeaderboardPanelLifecycle(leaderboard, stringMessages) : new SingleRaceLeaderboardPanelLifecycle(raceIdentifier, stringMessages);
+        leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(raceIdentifier, stringMessages);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, false);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages);

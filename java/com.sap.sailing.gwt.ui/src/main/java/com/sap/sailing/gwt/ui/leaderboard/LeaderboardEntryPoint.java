@@ -163,7 +163,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                             
                             final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(null, context,
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
-                                    timer, null, leaderboardGroupName, leaderboardName,
+                                    timer, leaderboardGroupName, leaderboardName,
                                     LeaderboardEntryPoint.this, getStringMessages(), getActualChartDetailType(defaultSettings));
                             createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextDefinition);
                         }

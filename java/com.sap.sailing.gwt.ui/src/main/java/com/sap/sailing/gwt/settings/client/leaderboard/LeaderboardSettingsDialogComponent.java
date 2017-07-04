@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,32 +29,31 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LegColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ManeuverCountRaceColumn;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
-    private final Map<String, CheckBox> raceColumnCheckboxes;
-    private final List<String> raceAllRaceColumnNames;
-    private final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
-    private final Map<DetailType, CheckBox> legDetailCheckboxes;
-    private final Map<DetailType, CheckBox> raceDetailCheckboxes;
-    private final Map<DetailType, CheckBox> overallDetailCheckboxes;
-    private final StringMessages stringMessages;
-    private LongBox refreshIntervalInSecondsBox;
-    private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
+public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSettings> implements SettingsDialogComponent<T> {
+    protected final Map<String, CheckBox> raceColumnCheckboxes;
+    protected final List<String> raceAllRaceColumnNames;
+    protected final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
+    protected final Map<DetailType, CheckBox> legDetailCheckboxes;
+    protected final Map<DetailType, CheckBox> raceDetailCheckboxes;
+    protected final Map<DetailType, CheckBox> overallDetailCheckboxes;
+    protected final StringMessages stringMessages;
+    protected LongBox refreshIntervalInSecondsBox;
+    protected RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     
-    private RadioButton explicitRaceColumnSelectionRadioBtn;
-    private RadioButton lastNRacesColumnSelectionRadioBtn;
-    private IntegerBox numberOfLastRacesToShowBox;
-    private CheckBox showAddedScoresCheckBox;
-    private CheckBox showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox;
-    private CheckBox showCompetitorSailIdColumnheckBox;
-    private CheckBox showCompetitorFullNameColumnCheckBox;
-    private CheckBox isCompetitorNationalityColumnVisible;
-    private LeaderboardSettings initialSettings;
+    protected RadioButton explicitRaceColumnSelectionRadioBtn;
+    protected RadioButton lastNRacesColumnSelectionRadioBtn;
+    protected IntegerBox numberOfLastRacesToShowBox;
+    protected CheckBox showAddedScoresCheckBox;
+    protected CheckBox showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox;
+    protected CheckBox showCompetitorSailIdColumnheckBox;
+    protected CheckBox showCompetitorFullNameColumnCheckBox;
+    protected CheckBox isCompetitorNationalityColumnVisible;
+    protected LeaderboardSettings initialSettings;
 
     public LeaderboardSettingsDialogComponent(LeaderboardSettings initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages) {
         this.initialSettings = initialSettings;
@@ -357,62 +355,10 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     }
 
     @Override
-    public LeaderboardSettings getResult() {
-        List<DetailType> maneuverDetailsToShow = new ArrayList<DetailType>();
-        for (Map.Entry<DetailType, CheckBox> entry : maneuverDetailCheckboxes.entrySet()) {
-            if (entry.getValue().getValue()) {
-                maneuverDetailsToShow.add(entry.getKey());
-            }
-        }
-        List<DetailType> overallDetailsToShow = new ArrayList<DetailType>();
-        for (Map.Entry<DetailType, CheckBox> entry : overallDetailCheckboxes.entrySet()) {
-            if (entry.getValue().getValue()) {
-                overallDetailsToShow.add(entry.getKey());
-            }
-        }
-        List<DetailType> raceDetailsToShow = new ArrayList<DetailType>();
-        for (Map.Entry<DetailType, CheckBox> entry : raceDetailCheckboxes.entrySet()) {
-            if (entry.getValue().getValue()) {
-                raceDetailsToShow.add(entry.getKey());
-            }
-        }
-        List<DetailType> legDetailsToShow = new ArrayList<DetailType>();
-        for (Map.Entry<DetailType, CheckBox> entry : legDetailCheckboxes.entrySet()) {
-            if (entry.getValue().getValue()) {
-                legDetailsToShow.add(entry.getKey());
-            }
-        }
-        List<String> namesOfRaceColumnsToShow = null;
-        if (activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT) {
-            namesOfRaceColumnsToShow = new ArrayList<String>();
-            for (Map.Entry<String, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
-                if (entry.getValue().getValue()) {
-                    namesOfRaceColumnsToShow.add(entry.getKey());
-                }
-            }
-        }
-        Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
-        Integer lastNRacesToShowValue = activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N ?
-                numberOfLastRacesToShowBox.getValue() : null;
-        LeaderboardSettings newSettings = new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
-                overallDetailsToShow, namesOfRaceColumnsToShow, /* nameOfRacesToShow */null,
-                lastNRacesToShowValue,
-                initialSettings.isAutoExpandPreSelectedRace(), 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
-                null,
-                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
-                /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue(),
-                /*showOverallColumnWithNumberOfRacesSailedPerCompetitor*/ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.getValue().booleanValue(),
-                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
-                isCompetitorNationalityColumnVisible.getValue());
-        SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
-        return newSettings;
-    }
-
-    @Override
-    public Validator<LeaderboardSettings> getValidator() {
-        return new Validator<LeaderboardSettings>() {
+    public Validator<T> getValidator() {
+        return new Validator<T>() {
             @Override
-            public String getErrorMessage(LeaderboardSettings valueToValidate) {
+            public String getErrorMessage(T valueToValidate) {
                 final String result;
                 if (valueToValidate.getLegDetailsToShow().isEmpty()) {
                     result = stringMessages.selectAtLeastOneLegDetail();

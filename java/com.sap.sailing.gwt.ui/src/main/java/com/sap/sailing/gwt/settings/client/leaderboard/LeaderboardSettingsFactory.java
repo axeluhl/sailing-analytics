@@ -23,15 +23,15 @@ public class LeaderboardSettingsFactory {
         return instance;
     }
     
-    public LeaderboardSettings createNewDefaultSettingsWithRaceColumns(List<String> namesOfRaceColumns) {
-        LeaderboardSettings leaderboardSettings = new LeaderboardSettings(namesOfRaceColumns);
+    public MultiRaceLeaderboardSettings createNewDefaultSettingsWithRaceColumns(List<String> namesOfRaceColumns) {
+        MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(namesOfRaceColumns);
         SettingsUtil.copyDefaultsFromValues(leaderboardSettings, leaderboardSettings);
         return leaderboardSettings;
     }
  
-    public LeaderboardSettings createNewSettingsWithCustomRaceDetails(List<DetailType> raceDetailsToShow) {
-        LeaderboardSettings defaultSettings = new LeaderboardSettings();
-        return new LeaderboardSettings(
+    public SingleRaceLeaderboardSettings createNewSettingsWithCustomRaceDetails(List<DetailType> raceDetailsToShow) {
+        LeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();
+        return new SingleRaceLeaderboardSettings(
                 defaultSettings.getManeuverDetailsToShow(),
                 defaultSettings.getLegDetailsToShow(),
                 raceDetailsToShow, defaultSettings.getOverallDetailsToShow(),
@@ -50,8 +50,8 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.isShowCompetitorNationality());
     }
     
-    public LeaderboardSettings createSettingsWithCustomExpandPreselectedRaceState(LeaderboardSettings settings, boolean expandPreselectedRace) {
-        return new LeaderboardSettings(
+    public SingleRaceLeaderboardSettings createSettingsWithCustomExpandPreselectedRaceState(SingleRaceLeaderboardSettings settings, boolean expandPreselectedRace) {
+        return new SingleRaceLeaderboardSettings(
                 settings.getManeuverDetailsToShow(),
                 settings.getLegDetailsToShow(),
                 settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
@@ -69,14 +69,14 @@ public class LeaderboardSettingsFactory {
                 settings.isShowCompetitorNationality());
     }
     
-    public LeaderboardSettings mergeLeaderboardSettings(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
-        LeaderboardSettings newSettings = mergeLeaderboardSettingsHelper(settingsWithRaceSelection, settingsWithDetails);
-        LeaderboardSettings newDefaultSettings = mergeLeaderboardSettingsHelper(SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), settingsWithRaceSelection), SettingsDefaultValuesUtils.getDefaultSettings(new LeaderboardSettings(), settingsWithDetails));
+    public MultiRaceLeaderboardSettings mergeLeaderboardSettings(MultiRaceLeaderboardSettings settingsWithRaceSelection, MultiRaceLeaderboardSettings settingsWithDetails) {
+        MultiRaceLeaderboardSettings newSettings = mergeLeaderboardSettingsHelper(settingsWithRaceSelection, settingsWithDetails);
+        MultiRaceLeaderboardSettings newDefaultSettings = mergeLeaderboardSettingsHelper(SettingsDefaultValuesUtils.getDefaultSettings(new MultiRaceLeaderboardSettings(), settingsWithRaceSelection), SettingsDefaultValuesUtils.getDefaultSettings(new MultiRaceLeaderboardSettings(), settingsWithDetails));
         SettingsDefaultValuesUtils.keepDefaults(newDefaultSettings, newSettings);
         return newSettings;
     }
     
-    private LeaderboardSettings mergeLeaderboardSettingsHelper(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
+    private MultiRaceLeaderboardSettings mergeLeaderboardSettingsHelper(MultiRaceLeaderboardSettings settingsWithRaceSelection, MultiRaceLeaderboardSettings settingsWithDetails) {
         Collection<DetailType> maneuverDetails = settingsWithDetails.getManeuverDetailsToShow();
         Collection<DetailType> legDetails = settingsWithDetails.getLegDetailsToShow();
         Collection<DetailType> raceDetails = settingsWithDetails.getRaceDetailsToShow();
@@ -94,7 +94,7 @@ public class LeaderboardSettingsFactory {
         boolean sortAscending = settingsWithRaceSelection.isSortAscending();
         boolean updateUponPlayStateChange = settingsWithRaceSelection.isUpdateUponPlayStateChange();
 
-        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
+        return new MultiRaceLeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, namesOfRacesToShow, numberOfLastRacesToShow, autoExpandPreSelectedRace, refreshIntervalInMs,
                 nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
                 /* showOverallRacesCompleted */ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns,
