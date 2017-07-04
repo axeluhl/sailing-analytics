@@ -4,16 +4,17 @@ import java.util.Calendar;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -52,11 +53,6 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     }
     
     @Override
-    public BoatClass getBoatClass() {
-        return getRegatta().getBoatClass();
-    }
-    
-    @Override
     public TrackedRace getTrackedRace() {
         return trackedRace;
     }
@@ -83,12 +79,26 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     private Integer calculateYear() {
         TimePoint startOfRace = getTrackedRace().getStartOfRace();
         TimePoint time = startOfRace != null ? startOfRace : getTrackedRace().getStartOfTracking();
+        final Integer result;
         if (time == null) {
-            year = 0;
+            result = 0;
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(time.asDate());
+            result = calendar.get(Calendar.YEAR);
         }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(time.asDate());
-        return calendar.get(Calendar.YEAR);
+        return result;
+    }
+    
+    @Override
+    public NauticalSide getAdvantageousEndOfLine() {
+        LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
+        return startLine.getAdvantageousSideWhileApproachingLine();
+    }
+    
+    @Override
+    public Boolean isMedalRace() {
+        return getLeaderboardContext().getLeaderboard().getRaceColumnAndFleet(getTrackedRace()).getA().isMedalRace();
     }
 
     @Override
@@ -124,6 +134,21 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
             }
         }
         return number;
+    }
+    
+    // Convenience methods for race dependent calculation to avoid code duplication
+    public Double getRelativeScoreForCompetitor(Competitor competitor) {
+        Double rankAtFinish = getRankAtFinishForCompetitor(competitor);
+        if (rankAtFinish == null) {
+            return null;
+        }
+        return rankAtFinish / Util.size(getTrackedRace().getRace().getCompetitors());
+    }
+    
+    @Override
+    public Double getRankAtFinishForCompetitor(Competitor competitor) {
+        int rank = getTrackedRace().getRank(competitor, getTrackedRace().getEndOfTracking());
+        return rank == 0 ? null : Double.valueOf(rank);
     }
 
 }

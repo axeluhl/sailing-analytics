@@ -70,12 +70,6 @@
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
-      <artifactId>com.sap.sse.gwt.theme</artifactId>
-      <version>${project.version}</version>
-      <classifier>sources</classifier>
-    </dependency>
-    <dependency>
-      <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sse.gwt.adminconsole</artifactId>
       <version>${project.version}</version>
       <classifier>sources</classifier>
@@ -129,7 +123,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${gwt.version}</version>
+        <version>${gwt.plugin.version}</version>
         <executions>
           <!-- GWT version detected from dependencyManagement -->
           <execution>
@@ -189,7 +183,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>gwt-maven-plugin</artifactId>
-            <version>${gwt.version}</version>
+            <version>${gwt.plugin.version}</version>
             <executions>
               <execution>
                 <configuration combine.self="override">

@@ -29,5 +29,5 @@ public interface CompetitorFactory {
     boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
 
     Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, String email,
-            URI flagImageURI, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile);
+            URI flagImageURI, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
 }

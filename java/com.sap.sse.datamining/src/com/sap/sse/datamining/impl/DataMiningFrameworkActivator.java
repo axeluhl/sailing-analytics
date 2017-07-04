@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -26,6 +27,7 @@ import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountDistinctAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataAverageAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMaxAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMedianAggregationProcessor;
@@ -39,11 +41,12 @@ import com.sap.sse.datamining.impl.components.management.QueryDefinitionDTOManag
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class DataMiningFrameworkActivator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(DataMiningFrameworkActivator.class.getName());
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+    private static final int THREAD_POOL_SIZE = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
     
     private static DataMiningFrameworkActivator INSTANCE;
 
@@ -70,7 +73,8 @@ public class DataMiningFrameworkActivator implements BundleActivator {
                                                                                dataRetrieverChainDefinitionRegistry,
                                                                                aggregationProcessorDefinitionRegistry,
                                                                                queryDefinitionRegistry);
-        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, this.getClass().getClassLoader()));
+        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME,
+                this.getClass().getClassLoader(), StandardCharsets.UTF_8.name()));
         for (AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition : getDefaultAggregationProcessors()) {
             dataMiningServer.registerAggregationProcessor(aggregationProcessorDefinition);
         }
@@ -79,6 +83,7 @@ public class DataMiningFrameworkActivator implements BundleActivator {
 
     private Iterable<AggregationProcessorDefinition<?, ?>> getDefaultAggregationProcessors() {
         Collection<AggregationProcessorDefinition<?, ?>> defaultAggregationProcessors = new HashSet<>();
+        defaultAggregationProcessors.add(ParallelGroupedDataCountDistinctAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedDataCountAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedNumberDataAverageAggregationProcessor.getDefinition());
         defaultAggregationProcessors.add(ParallelGroupedNumberDataMaxAggregationProcessor.getDefinition());

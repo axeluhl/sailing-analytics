@@ -13,11 +13,13 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite.Resolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedurePrerequisiteAutoResolver;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 
 /**
  * Extension to the {@link ReadonlyRaceState} allowing write-access to the state of a race.
@@ -141,9 +143,9 @@ public interface RaceState extends ReadonlyRaceState {
     void setFinishedTime(TimePoint now);
 
     /**
-     * Sets the protest (start) time.
+     * Sets the protest time.
      */
-    void setProtestTime(TimePoint now, TimePoint protestStartTime);
+    void setProtestTime(TimePoint now, TimeRange protestTime);
 
     /**
      * Signals the abort of this race.
@@ -172,8 +174,14 @@ public interface RaceState extends ReadonlyRaceState {
 
     /**
      * Sets a new active course design.
+     * 
+     * @param courseDesignerMode
+     *            the type of course designer through which the course was created; this decides about whether the
+     *            waypoint specification will be considered at all. For example, the "By Marks" course designer does not
+     *            produce a valid waypoints list which therefore must be ignored instead of using it to update a
+     *            TrackedRace's course.
      */
-    void setCourseDesign(TimePoint now, CourseBase courseDesign);
+    void setCourseDesign(TimePoint now, CourseBase courseDesign, CourseDesignerMode courseDesignerMode);
 
     /**
      * Enters a new wind fix for this race.

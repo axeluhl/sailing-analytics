@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.NumberPicker;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -20,6 +19,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.Result;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
@@ -56,9 +56,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_time_change, container, false);
-
-        return layout;
+        return inflater.inflate(R.layout.race_time_change, container, false);
     }
 
     @Override
@@ -66,33 +64,38 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
         super.onActivityCreated(savedInstanceState);
 
         View layout = getView();
-
         if (layout == null) {
             return;
         }
 
         final Calendar calendar = Calendar.getInstance();
-        TextView headerText = (TextView) layout.findViewById(R.id.header_headline);
-        if (headerText != null) {
+        HeaderLayout header = (HeaderLayout) layout.findViewById(R.id.header);
+        if (header != null) {
+            header.setHeaderOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    closeFragment();
+                }
+            });
             switch (getArguments().getInt(TIME_MODE, START_TIME_MODE)) {
                 case  START_TIME_MODE:
                     calendar.setTime(getRaceState().getStartTime().asDate());
-                    headerText.setText(getString(R.string.race_summary_start));
+                    header.setHeaderText(getString(R.string.race_summary_start));
                     break;
 
                 case FINISHING_TIME_MODE:
                     calendar.setTime(getRaceState().getFinishingTime().asDate());
-                    headerText.setText(getString(R.string.race_summary_finish_begin));
+                    header.setHeaderText(getString(R.string.race_summary_finish_begin));
                     break;
 
                 case FINISHED_TIME_MODE:
                     calendar.setTime(getRaceState().getFinishedTime().asDate());
-                    headerText.setText(getString(R.string.race_summary_finish_end));
+                    header.setHeaderText(getString(R.string.race_summary_finish_end));
                     break;
             }
         }
 
-        mDatePicker = (NumberPicker) layout.findViewById(R.id.date_picker);
+        mDatePicker = ViewHelper.get(layout, R.id.date_picker);
         if (mDatePicker != null) {
             Calendar start = (Calendar) calendar.clone();
             Calendar finishing = (Calendar) calendar.clone();
@@ -129,64 +132,13 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             }
         }
 
-        mTimePicker = (TimePicker) layout.findViewById(R.id.time_picker);
-        if (mTimePicker != null) {
-            ViewHelper.disableSave(mTimePicker);
-            ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-                .getColor(getActivity(), R.attr.sap_yellow_1));
-            mTimePicker.setIs24HourView(true);
-            mTimePicker.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
-            mTimePicker.setCurrentMinute(calendar.get(Calendar.MINUTE));
-        }
-
-        mSecondPicker = (NumberPicker) layout.findViewById(R.id.second_picker);
-        if (mSecondPicker != null) {
-            ViewHelper.disableSave(mSecondPicker);
-            ThemeHelper.setPickerColor(getActivity(), mSecondPicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-                .getColor(getActivity(), R.attr.sap_yellow_1));
-            mSecondPicker.setVisibility(View.VISIBLE);
-            mSecondPicker.setMinValue(0);
-            mSecondPicker.setMaxValue(59);
-            mSecondPicker.setValue(calendar.get(Calendar.SECOND));
-            mSecondPicker.setFormatter(new NumberPicker.Formatter() {
-                @Override
-                public String format(int i) {
-                    return String.format("%02d", i);
-                }
-            });
-            mSecondPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-                @Override
-                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                    if (mTimePicker != null) {
-                        Calendar pickerTime = (Calendar) calendar.clone();
-                        pickerTime.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
-                        pickerTime.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
-                        if (oldVal == 0 && newVal == 59) {
-                            pickerTime.add(Calendar.MINUTE, -1);
-                        }
-                        if (oldVal == 59 && newVal == 0) {
-                            pickerTime.add(Calendar.MINUTE, 1);
-                        }
-                        mTimePicker.setCurrentHour(pickerTime.get(Calendar.HOUR_OF_DAY));
-                        mTimePicker.setCurrentMinute(pickerTime.get(Calendar.MINUTE));
-                    }
-                }
-            });
-        }
+        mTimePicker = ViewHelper.get(layout, R.id.time_picker);
+        mSecondPicker = ViewHelper.get(layout, R.id.second_picker);
+        TimeUtils.initTimePickerWithSeconds(getActivity(), calendar, mTimePicker, mSecondPicker);
 
         View setTime = layout.findViewById(R.id.set_date_time);
         if (setTime != null) {
             setTime.setOnClickListener(this);
-        }
-
-        View header = layout.findViewById(R.id.header);
-        if (header != null) {
-            header.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    closeFragment();
-                }
-            });
         }
     }
 

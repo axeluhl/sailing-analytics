@@ -5,10 +5,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,8 +18,15 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestI18N {
 
+    private static final Locale DEFAULT_LOCALE = new Locale("default");
     private static final String SIMPLE_TEST_MESSAGE_KEY = "SimpleTestMessage";
+    private static final String DEFAULT_TEST_MESSAGE_KEY = "DefaultTestMessage";
     private static final String TEST_MESSAGE_WITH_PARAMETERS = "TestMessageWithParameters";
+    private static final String TEST_MESSAGE_WITH_SINGLE_QUOTE = "MessageWithSingleQuote";
+    private static final String TEST_MESSAGE_WITH_OPENING_CURLY_BRACE = "MessageWithOpeningCurlyBrace";
+    private static final String TEST_MESSAGE_WITH_ESCAPED_PARAMETERS = "MessageWithEscapedParameters";
+    private static final String TEST_MESSAGE_WITH_PARAMETERS_AND_ESCAPED_SINGLE_QUOTES = "MessageWithEscapedSingleQuotesAndParameters";
+    private static final String TEST_MESSAGE_WITH_MULTIPLE_OUT_OF_ORDER_PARAMS = "MessageWithMultipleParameterOccurrencesOutOfOrder";
     
     private ResourceBundleStringMessages testStringMessages;
     
@@ -31,13 +36,55 @@ public class TestI18N {
     }
 
     @Test
+    public void testMultipleOutOfOrderParams() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_MULTIPLE_OUT_OF_ORDER_PARAMS, "First", "Second", "Third"), is("Third Third First Second First"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_MULTIPLE_OUT_OF_ORDER_PARAMS, "First", "Second", "Third"), is("Third Third First Second First"));
+    }
+    
+    @Test
+    public void testEscapedSingleQuotesWithParameters() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_PARAMETERS_AND_ESCAPED_SINGLE_QUOTES, "First", "Second"), is("'First' ' 'Second'"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_PARAMETERS_AND_ESCAPED_SINGLE_QUOTES, "First", "Second"), is("'First' ' 'Second'"));
+    }
+    
+    @Test
+    public void testSingleQuoteInString() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_SINGLE_QUOTE), is("A Single ' Quote"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_SINGLE_QUOTE), is("Ein einfaches ' Anführungszeichen"));
+    }
+    
+    @Test
+    public void testCurlyBracesInString() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_OPENING_CURLY_BRACE), is("An opening { curly brace"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_OPENING_CURLY_BRACE), is("Eine öffnende { geschweifte Klammer"));
+    }
+    
+    @Test
+    public void testEscapedParametersInString() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_ESCAPED_PARAMETERS), is("{0} {1} {2}"));
+        assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_ESCAPED_PARAMETERS), is("{0} {1} {2}"));
+    }
+    
+    @Test
     public void testGettingASimpleMessage() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, SIMPLE_TEST_MESSAGE_KEY), is("English"));
+        assertThat(testStringMessages.get(Locale.ROOT, SIMPLE_TEST_MESSAGE_KEY), is("English"));
         assertThat(testStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY), is("English"));
         assertThat(testStringMessages.get(Locale.GERMAN, SIMPLE_TEST_MESSAGE_KEY), is("Deutsch"));
     }
     
     @Test
+    public void testGettingADefaultMessage() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, DEFAULT_TEST_MESSAGE_KEY), is("Default"));
+        assertThat(testStringMessages.get(Locale.ROOT, DEFAULT_TEST_MESSAGE_KEY), is("Default"));
+        assertThat(testStringMessages.get(Locale.ENGLISH, DEFAULT_TEST_MESSAGE_KEY), is("Default"));
+        assertThat(testStringMessages.get(Locale.GERMAN, DEFAULT_TEST_MESSAGE_KEY), is("Default"));
+    }
+    
+    @Test
     public void testGettingAMessageWithParameters() {
+        assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
+        assertThat(testStringMessages.get(Locale.ROOT, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
         assertThat(testStringMessages.get(Locale.ENGLISH, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
         assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("Deutsch Param0 - Param1"));
     }
@@ -81,25 +128,13 @@ public class TestI18N {
     
     @Test
     public void testGetLocaleForLocaleInfoName() {
-        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("default"), is(Locale.ENGLISH));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("default"), is(DEFAULT_LOCALE));
         assertThat(ResourceBundleStringMessages.Util.getLocaleFor("en"), is(Locale.ENGLISH));
         assertThat(ResourceBundleStringMessages.Util.getLocaleFor("de"), is(Locale.GERMAN));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("zh"), is(Locale.CHINESE));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("ja"), is(Locale.JAPANESE));
 
-        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("Unsupported locale info name"), is(Locale.ENGLISH));
-    }
-    
-    @Test
-    public void testGetSupportedLocales() {
-        Set<Locale> supportedLocales = new HashSet<>();
-        for (Locale locale : ResourceBundleStringMessages.Util.getSupportedLocales()) {
-            supportedLocales.add(locale);
-        }
-        
-        Set<Locale> expectedSupportedLocales = new HashSet<>();
-        expectedSupportedLocales.add(Locale.GERMAN);
-        expectedSupportedLocales.add(Locale.ENGLISH);
-        
-        assertThat(supportedLocales, is(expectedSupportedLocales));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("Unsupported locale info name"), is(Locale.ROOT));
     }
     
     @Test(expected=MissingResourceException.class)

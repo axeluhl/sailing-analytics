@@ -49,7 +49,7 @@ public class RegattaDetailsComposite extends Composite {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
-    
+
     private final Label regattaId;
     private final Label regattaName;
     private final Label startDate;
@@ -59,8 +59,10 @@ public class RegattaDetailsComposite extends Composite {
     private final Label rankingMetric;
     private final Label defaultCourseArea;
     private final Label useStartTimeInference;
+    private final Label controlTrackingFromStartAndFinishTimes;
     private final Label configuration;
-
+    private final Label buoyZoneRadiusInHullLengths;
+    
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
     private ListDataProvider<SeriesDTO> seriesListDataProvider;
@@ -78,7 +80,7 @@ public class RegattaDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 10;
+        int rows = 12;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
@@ -90,10 +92,12 @@ public class RegattaDetailsComposite extends Composite {
         boatClassName = createLabelAndValueWidget(grid, currentRow++, stringMessages.boatClass(), "BoatClassLabel");
         defaultCourseArea = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
+        controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "UseStartTimeInferenceLabel");
+        buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "BuoyZoneRadiusInHullLengthsLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
-        
+
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
@@ -120,39 +124,46 @@ public class RegattaDetailsComposite extends Composite {
     private CellTable<SeriesDTO> createRegattaSeriesTable() {
         CellTable<SeriesDTO> table = new BaseCelltable<SeriesDTO>(/* pageSize */10000, tableRes);
         table.setWidth("100%");
-        
         TextColumn<SeriesDTO> seriesNameColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.getName();
             }
         };
-
         TextColumn<SeriesDTO> isMedalSeriesColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.isMedal() ? stringMessages.yes() : stringMessages.no();
             }
         };
-
         TextColumn<SeriesDTO> startsWithZeroScoreColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.isStartsWithZeroScore() ? stringMessages.yes() : stringMessages.no();
             }
         };
-
         TextColumn<SeriesDTO> hasSplitFleetContiguousScoringColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.hasSplitFleetContiguousScoring() ? stringMessages.yes() : stringMessages.no();
             }
         };
-
         TextColumn<SeriesDTO> isFirstColumnIsNonDiscardableCarryForwardColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.isFirstColumnIsNonDiscardableCarryForward() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+        TextColumn<SeriesDTO> isFleetsCanRunInParallelColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.isFleetsCanRunInParallel() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+        TextColumn<SeriesDTO> maximumNumberOfDiscardsColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.getMaximumNumberOfDiscards() == null ? "" : (""+series.getMaximumNumberOfDiscards());
             }
         };
 
@@ -227,19 +238,21 @@ public class RegattaDetailsComposite extends Composite {
                     editRacesOfRegattaSeries(regatta, series);
                 } else if (SeriesConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     RegattaIdentifier identifier = new RegattaName(regatta.getName());
-                    sailingService.removeSeries(identifier, series.getName(), new MarkedAsyncCallback<Void>(
-                            new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable cause) {
-                                    errorReporter.reportError("Error trying to remove series " + series.getName()
-                                            + ": " + cause.getMessage());
-                                }
-        
-                                @Override
-                                public void onSuccess(Void result) {
-                                    regattaRefresher.fillRegattas();
-                                }
-                    }));
+                    if (Window.confirm(stringMessages.reallyRemoveSeries(series.getName()))) {
+                        sailingService.removeSeries(identifier, series.getName(),
+                                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable cause) {
+                                        errorReporter.reportError("Error trying to remove series " + series.getName()
+                                                + ": " + cause.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        regattaRefresher.fillRegattas();
+                                    }
+                                }));
+                    }
                 }
 
             }
@@ -253,6 +266,8 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(isFirstColumnIsNonDiscardableCarryForwardColumn, stringMessages.firstRaceIsNonDiscardableCarryForward());
         table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
         table.addColumn(hasSplitFleetContiguousScoringColumn, stringMessages.hasSplitFleetContiguousScoring());
+        table.addColumn(isFleetsCanRunInParallelColumn, stringMessages.canFleetsRunInParallel());
+        table.addColumn(maximumNumberOfDiscardsColumn, stringMessages.maximumNumberOfDiscards());
         table.addColumn(seriesActionColumn, stringMessages.actions());
         
         return table;
@@ -287,11 +302,13 @@ public class RegattaDetailsComposite extends Composite {
         final SeriesDTO series = seriesDescriptor.getSeries();
         final List<RaceColumnDTO> newRaceColumns = seriesDescriptor.getRaces();
         final boolean isMedalChanged = series.isMedal() != seriesDescriptor.isMedal();
+        final boolean isFleetsCanRunInParallelChanged = series.isFleetsCanRunInParallel() != seriesDescriptor.isFleetsCanRunInParallel();
         final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean isFirstColumnIsNonDiscardableCarryForwardChanged = series.isFirstColumnIsNonDiscardableCarryForward() != seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward();
         final boolean hasSplitFleetContiguousScoringChanged = series.hasSplitFleetContiguousScoring() != seriesDescriptor.hasSplitFleetContiguousScoring();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
-                seriesDescriptor.getResultDiscardingThresholds());       
+                seriesDescriptor.getResultDiscardingThresholds());
+        final boolean maximumNumberOfDiscardsChanged = series.getMaximumNumberOfDiscards() != seriesDescriptor.getMaximumNumberOfDiscards();
         final boolean seriesNameChanged = !series.getName().equals(seriesDescriptor.getSeriesName());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
@@ -350,15 +367,15 @@ public class RegattaDetailsComposite extends Composite {
                                     });
                         }
                     });
-            if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
+            if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
-                    || seriesNameChanged) {
+                    || seriesNameChanged || maximumNumberOfDiscardsChanged) {
                 sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
-                        seriesDescriptor.isMedal(), seriesDescriptor.getResultDiscardingThresholds(),
+                        seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                         seriesDescriptor.isStartsWithZeroScore(),
                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
-                        seriesDescriptor.hasSplitFleetContiguousScoring(), series.getFleets(),
-                        new AsyncCallback<Void>() {
+                        seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.getMaximumNumberOfDiscards(),
+                        series.getFleets(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error trying to update series " + series.getName() + ": "
@@ -384,6 +401,9 @@ public class RegattaDetailsComposite extends Composite {
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
+            controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
+            buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths)); 
+
             if (regatta.configuration != null) {
                 configuration.setText(stringMessages.configured());
             } else {

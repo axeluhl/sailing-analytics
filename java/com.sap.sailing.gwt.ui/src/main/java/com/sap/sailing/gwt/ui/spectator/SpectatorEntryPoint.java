@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
@@ -8,14 +9,15 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorContextDefinition;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 /**
  * 
@@ -27,17 +29,9 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-
-        String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
-        String viewModeParamValue = Window.Location.getParameter("viewMode");
-        final boolean canReplayDuringLiveRaces = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, /* defaultValue */ false);
-        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, /* defaultValue */ true);
-        final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
-        boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
-                && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
+        
+        final String groupParamValue = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupName();
         final String groupName;
         if (groupParamValue == null || groupParamValue.isEmpty()) {
             groupName = null;
@@ -53,41 +47,24 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
                 public void onSuccess(LeaderboardGroupDTO group) {                }
             });
         }
-        String root = Window.Location.getParameter("root");
-        //Check if the root contains an allowed value
-        if (root != null) {
-            root = (root.equals("leaderboardGroupPanel") || root.equals("overview")) ? root : null;
-        }
         
+        final SpectatorSettings settings = new SettingsToUrlSerializer().deserializeFromCurrentLocation(new SpectatorSettings());
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
-        boolean embedded = Window.Location.getParameter("embedded") != null
-                && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
-        if (!embedded) {
-            String title = groupName != null ? groupName : getStringMessages().overview();
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, getStringMessages(), this, getUserService());
-            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(getStringMessages(), true, null, null, /* event */ null, null);
-            logoAndTitlePanel.add(globalNavigationPanel);
-
-            rootPanel.add(logoAndTitlePanel);
-        } else {
-            RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
-            RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
-        }
+        boolean embedded = settings.isEmbedded();
         if (groupName == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
             // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
 //            EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
 //            groupOverviewPanel.add( eventOverviewPanel);
-            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(sailingService, this, getStringMessages(), showRaceDetails);
+            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(sailingService, this, getStringMessages(), settings.isShowRaceDetails());
             groupOverviewPanel.add(leaderboardGroupOverviewPanel);
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, getStringMessages(), this,
-                    groupName, root, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces,
-                    showMapControls, showNavigationPanel);
+                    groupName, settings.getViewMode(), embedded, settings.isShowRaceDetails(), settings.isCanReplayDuringLiveRaces(),
+                    settings.isShowMapControls());
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {
                 groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(getStringMessages().welcomeToSailingAnalytics(),
@@ -104,7 +81,24 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
             }
             rootPanel.add(groupAndFeedbackPanel);
         }
+        if (!embedded) {
+            String title = groupName != null ? groupName : getStringMessages().overview();
+            SAPSailingHeaderWithAuthentication header  = getHeader(title);
+            rootPanel.add(header);
+        } else {
+            RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
+            RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
+        }
         fillRegattas();
+    }
+
+    private SAPSailingHeaderWithAuthentication getHeader(String title){
+    	SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(title);         
+        new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        header.getElement().getStyle().setPosition(Position.FIXED);
+        header.getElement().getStyle().setTop(0, Unit.PX);
+        header.getElement().getStyle().setWidth(100, Unit.PCT);
+        return header;
     }
 
     @Override

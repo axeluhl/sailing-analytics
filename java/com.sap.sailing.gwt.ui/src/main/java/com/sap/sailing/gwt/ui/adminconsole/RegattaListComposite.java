@@ -97,13 +97,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         panel.add(noRegattasLabel);
 
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
-        regattaTable = createRegattaTable();
-        regattaTable.ensureDebugId("RegattasCellTable");
-        refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
-        regattaTable.setVisible(false);
         
         filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
-                regattaTable, regattaListDataProvider) {
+                new CellTable<RegattaDTO>(), regattaListDataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(RegattaDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -115,6 +111,11 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         };
         filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
+        regattaTable = createRegattaTable();
+        regattaTable.ensureDebugId("RegattasCellTable");
+        filterablePanelRegattas.setTable(regattaTable);
+        refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
+        regattaTable.setVisible(false);
         panel.add(filterablePanelRegattas);
 
         panel.add(regattaTable);
@@ -142,7 +143,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                     public int hashCode(RegattaDTO t) {
                         return t.getRegattaIdentifier().hashCode();
                     }
-                },regattaListDataProvider, table);
+                }, filterablePanelRegattas.getAllListDataProvider(), table);
         
         ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
@@ -205,8 +206,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return regatta.rankingMetricType != null ? RankingMetricTypeFormatter.format(regatta.rankingMetricType, stringMessages) : "";
             }
         };
-        regattaBoatClassColumn.setSortable(true);
-        columnSortHandler.setComparator(regattaBoatClassColumn, new Comparator<RegattaDTO>() {
+        rankingMetricColumn.setSortable(true);
+        columnSortHandler.setComparator(rankingMetricColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
                 return new NaturalComparator(false).compare(r1.rankingMetricType.name(), r2.rankingMetricType.name());
@@ -289,7 +290,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
 
         sailingService.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate, editedRegatta.defaultCourseAreaUuid,
-                editedRegatta.configuration, editedRegatta.useStartTimeInference, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                editedRegatta.configuration, editedRegatta.buoyZoneRadiusInHullLengths, editedRegatta.useStartTimeInference, editedRegatta.controlTrackingFromStartAndFinishTimes,
+                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": "
@@ -309,9 +311,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 if (seriesIter.hasNext()) {
                     final SeriesDTO series = seriesIter.next();
                     sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
-                        series.getDiscardThresholds(), series.isStartsWithZeroScore(),
+                        series.isFleetsCanRunInParallel(), series.getDiscardThresholds(), series.isStartsWithZeroScore(),
                         series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
-                        series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                        series.getMaximumNumberOfDiscards(), series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName()

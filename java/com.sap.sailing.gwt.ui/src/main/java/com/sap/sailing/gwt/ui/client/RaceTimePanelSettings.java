@@ -1,20 +1,15 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class RaceTimePanelSettings extends TimePanelSettings {
-    private RaceTimesInfoDTO raceTimesInfo;
+    
+    private static final long serialVersionUID = 3654034562355995890L;
+
+    public RaceTimePanelSettings(long refreshInterval) {
+        super(refreshInterval);
+    }
 
     public RaceTimePanelSettings() {
         super();
     }
-
-    public RaceTimesInfoDTO getRaceTimesInfo() {
-        return raceTimesInfo;
-    }
-
-    public void setRaceTimesInfo(RaceTimesInfoDTO raceTimesInfo) {
-        this.raceTimesInfo = raceTimesInfo;
-    }
-
 }

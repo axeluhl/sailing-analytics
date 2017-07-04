@@ -8,9 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -26,6 +24,7 @@ import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.LegIdentifierImpl;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.PathType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -42,7 +41,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulationResults;
@@ -64,7 +62,7 @@ public class SimulationServiceImpl implements SimulationService {
 
     private static final Logger logger = Logger.getLogger(SimulationService.class.getName());
 
-    final private Executor executor;
+    final private ScheduledExecutorService executor;
     final private SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval> cache;
     final private RacingEventService racingEventService;
     final private ScheduledExecutorService scheduler;
@@ -72,9 +70,9 @@ public class SimulationServiceImpl implements SimulationService {
     final private HashMap<RaceIdentifier, LegChangeListener> legListeners;
     final private long WAIT_MILLIS = 20000; // milliseconds to wait until earliest cache-update for simulation
     
-    public SimulationServiceImpl(Executor executor, RacingEventService racingEventService) {
+    public SimulationServiceImpl(ScheduledExecutorService executor, RacingEventService racingEventService) {
         this.executor = executor;
-        this.scheduler = Executors.newScheduledThreadPool(1);
+        this.scheduler = executor;
         this.racingEventService = racingEventService;
         if (racingEventService != null) {
             this.raceListeners = new HashMap<String, SimulationRaceListener>();
@@ -177,18 +175,24 @@ public class SimulationServiceImpl implements SimulationService {
         }
 
         @Override
+        public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+            // relevant for simulation? for last leg?
+            // TODO: update last leg?
+        }
+
+        @Override
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
             // relevant for simulation: update all legs when wind changes overall
             // TODO: update all legs
         }
 
         @Override
-        public void startOfTrackingChanged(TimePoint startOfTracking) {
+        public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
             // irrelevant for simulation
         }
 
         @Override
-        public void endOfTrackingChanged(TimePoint endOfTracking) {
+        public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
             // irrelevant for simulation
         }
 
@@ -430,31 +434,26 @@ public class SimulationServiceImpl implements SimulationService {
         Simulator simulator = new SimulatorImpl(simulationParameters);
         Map<PathType, Path> result = new HashMap<PathType, Path>();
 
-        FutureTask<Path> taskOmniscient = null;
+        Future<Path> taskOmniscient = null;
         if (simulationParameters.showOmniscient()) {
             // schedule omniscient task
-            taskOmniscient = new FutureTask<Path>(() -> simulator.getPath(PathType.OMNISCIENT));
-            executor.execute(taskOmniscient);
+            taskOmniscient = executor.submit(() -> simulator.getPath(PathType.OMNISCIENT));
         }
 
-        FutureTask<Path> task1TurnerLeft = null;
-        FutureTask<Path> task1TurnerRight = null;
+        Future<Path> task1TurnerLeft = null;
+        Future<Path> task1TurnerRight = null;
         if (simulationParameters.getLegType() != LegType.REACHING) {
             // schedule 1-turner tasks
-            task1TurnerLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
-            task1TurnerRight = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
-            executor.execute(task1TurnerLeft);
-            executor.execute(task1TurnerRight);
+            task1TurnerLeft = executor.submit(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
+            task1TurnerRight = executor.submit(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
         }
 
-        FutureTask<Path> taskOpportunistLeft = null;
-        FutureTask<Path> taskOpportunistRight = null;
+        Future<Path> taskOpportunistLeft = null;
+        Future<Path> taskOpportunistRight = null;
         if (simulationParameters.showOpportunist()) {        
             // schedule opportunist tasks (which depend on 1-turner results)
-            taskOpportunistLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT));
-            taskOpportunistRight = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT));
-            executor.execute(taskOpportunistLeft);
-            executor.execute(taskOpportunistRight);
+            taskOpportunistLeft = executor.submit(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT));
+            taskOpportunistRight = executor.submit(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT));
         }
 
         Path path1TurnerLeft = null;

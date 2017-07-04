@@ -47,12 +47,13 @@ public final class StartAnalysisDTOFactory extends AbstractStartAnalysisCreation
         List<MarkPassing> markPassingsInOrder = convertMarkpPassingsIteratorToList(trackedRace.getMarkPassingsInOrder(secondWaypoint).iterator());
         boolean isCompetitorNullOrOneOfFirstThreeCompetitors = false;
         for (int i = 0; i < MINIMUM_MARKPASSIINGS_AT_FIRST_MARK; i++) {
-            competitors.add(createStartAnalysisCompetitorDTO(dashboardDispatchContext, trackedRace, i + 1, markPassingsInOrder.get(i).getCompetitor()));
-            if (competitor == null || markPassingsInOrder.get(i).getCompetitor().equals(competitor)) {
-                isCompetitorNullOrOneOfFirstThreeCompetitors = true;
+            if (markPassingsInOrder.size() - 1 >= i) {
+                competitors.add(createStartAnalysisCompetitorDTO(dashboardDispatchContext, trackedRace, i+1, markPassingsInOrder.get(i).getCompetitor()));
+                if (competitor == null || markPassingsInOrder.get(i).getCompetitor().equals(competitor)) {
+                    isCompetitorNullOrOneOfFirstThreeCompetitors = true;
+                }
             }
         }
-
         if (competitor != null && !isCompetitorNullOrOneOfFirstThreeCompetitors) {
             int rankOfCompetitorWhilePassingSecondWaypoint = getRankOfCompetitorWhilePassingSecondWaypoint(competitor, trackedRace);
             competitors.add(createStartAnalysisCompetitorDTO(dashboardDispatchContext, trackedRace, rankOfCompetitorWhilePassingSecondWaypoint, competitor));

@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
-
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
@@ -37,6 +34,7 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
 import com.sap.sailing.domain.base.impl.StrippedEventImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
@@ -50,12 +48,16 @@ import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbac
 import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
+import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 
 public class OfflineDataManager extends DataManager {
 
@@ -86,17 +88,17 @@ public class OfflineDataManager extends DataManager {
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", UUID.randomUUID()));
         dataStore.addEvent(newEvent);
 
-        SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
-        SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
+        SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, /* isFleetsCanRunInParallel */ true, null);
+        SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, /* isFleetsCanRunInParallel */ true, null);
         RaceGroup raceGroup = new RaceGroupImpl("ESS", /* displayName */ null, new BoatClassImpl("X40", false), null, Arrays.asList(qualifying,
                         medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.BLUE, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", Color.LIGHT_GRAY, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", Color.GREEN, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", Color.BLACK, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.BLUE, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", Color.LIGHT_GRAY, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", Color.GREEN, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", Color.BLACK, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
 
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
         final AbstractLogEventAuthor author = AppPreferences.on(context).getAuthor();
@@ -110,7 +112,8 @@ public class OfflineDataManager extends DataManager {
                 AppPreferences.on(context).getAuthor(), 1, RaceLogRaceStatus.FINISHING));
 
         ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
-            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration),
+            /* zeroBasedIndexInFleet */ 0);
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -119,7 +122,8 @@ public class OfflineDataManager extends DataManager {
          */
 
         ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup),
-            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration),
+            /* zeroBasedIndexInFleet */ 1);
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -127,7 +131,8 @@ public class OfflineDataManager extends DataManager {
          * RaceLogRaceStatus.FINISHED));
          */
         ManagedRace q3 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup),
-            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration),
+            /* zeroBasedIndexInFleet */ 2);
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);
@@ -230,6 +235,29 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createStartOrderLoader(final ManagedRace managedRace,
+        LoadClient<Collection<Competitor>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<Competitor>>(context, callback,
+            new Callable<Collection<Competitor>>() {
+                @Override
+                public Collection<Competitor> call() throws Exception {
+                    return managedRace.getCompetitors();
+                }
+            });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<LeaderboardResult>> createLeaderboardLoader(ManagedRace managedRace,
+        LoadClient<LeaderboardResult> callback) {
+        return new ImmediateDataLoaderCallbacks<>(context, callback, new Callable<LeaderboardResult>() {
+            @Override
+            public LeaderboardResult call() throws Exception {
+                return null;
+            }
+        });
+    }
+
+    @Override
     public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
             DeviceConfigurationIdentifier identifier, LoadClient<DeviceConfiguration> callback) {
         return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback,
@@ -254,4 +282,8 @@ public class OfflineDataManager extends DataManager {
         return null;
     }
 
+    @Override
+    public LoaderCallbacks<DataLoaderResult<RaceColumnFactorImpl>> createRaceColumnFactorLoader(LoadClient<RaceColumnFactorImpl> callback) {
+        return null;
+    }
 }

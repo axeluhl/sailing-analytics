@@ -36,6 +36,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -55,6 +56,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.EventListener, CourseElementAdapter.ItemClick {
 
+    private static final String EACH_WAYPOINT_NEEDS_PASSING_INSTRUCTIONS = "Each waypoint needs passing instructions";
+    private static final String MISSING_SECOND_MARK = "Missing second mark";
     private ReadonlyDataManager mDataManager;
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
@@ -72,7 +75,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
     public CourseFragmentMarks() {
         super();
-
         mId = 0;
         mHistory = new ArrayList<>();
         mElements = new ArrayList<>();
@@ -90,7 +92,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
-
         mReset = (Button) layout.findViewById(R.id.resetCourse);
         if (mReset != null) {
             mReset.setOnClickListener(new View.OnClickListener() {
@@ -128,7 +129,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                 }
             });
         }
-
         mHistoryCourse = (RecyclerView) layout.findViewById(R.id.previous_course);
         if (mHistoryCourse != null) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -137,7 +137,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory, ESSMarkImageHelper.getInstance(getActivity()), false);
             mHistoryCourse.setAdapter(mHistoryAdapter);
         }
-
         mCurrentCourse = ViewHelper.get(layout, R.id.new_course);
         if (mCurrentCourse != null) {
             mGuardManager = new RecyclerViewTouchActionGuardManager();
@@ -240,10 +239,10 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                             }
                             sendCourseDataAndDismiss(courseData);
                         } catch (IllegalStateException ex) {
-                            if (ex.getMessage().equals("Missing second mark")) {
+                            if (ex.getMessage().equals(MISSING_SECOND_MARK)) {
                                 String toastText = getString(R.string.error_missing_second_mark);
                                 Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
-                            } else if (ex.getMessage().equals("Each waypoints needs passing instructions")) {
+                            } else if (ex.getMessage().equals(EACH_WAYPOINT_NEEDS_PASSING_INSTRUCTIONS)) {
                                 String toastText = getString(R.string.error_missing_passing_instructions);
                                 Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                             }
@@ -258,7 +257,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             Button unpublish = (Button) getView().findViewById(R.id.unpublishCourse);
             if (unpublish != null) {
                 unpublish.setOnClickListener(new View.OnClickListener() {
-
                     @Override
                     public void onClick(View arg0) {
                         CourseBase emptyCourse = new CourseDataImpl(getString(R.string.unpublished_course));
@@ -331,7 +329,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     private void onLoadMarksSucceeded(Collection<Mark> data) {
         mMarks.clear();
         mMarks.addAll(data);
-        Collections.sort(mMarks, new NaturalNamedComparator());
+        Collections.sort(mMarks, new NaturalNamedComparator<Mark>());
     }
 
     private void fillCourseElement() {
@@ -342,10 +340,8 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
     protected List<CourseListDataElementWithIdImpl> convertCourseDesignToCourseElements(CourseBase courseData) {
         List<CourseListDataElementWithIdImpl> elementList = new ArrayList<>();
-
         for (Waypoint waypoint : courseData.getWaypoints()) {
             ControlPoint controlPoint = waypoint.getControlPoint();
-
             if (controlPoint instanceof Mark) {
                 CourseListDataElementWithIdImpl element = new CourseListDataElementWithIdImpl();
                 element.setId(mId);
@@ -363,7 +359,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             }
             mId++;
         }
-
         return elementList;
     }
 
@@ -451,13 +446,59 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
     private void createPassingInstructionDialog(final CourseListDataElementWithIdImpl courseElement) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-        builder.setTitle(R.string.pick_a_rounding_direction).setItems(R.array.rounding_directions, new DialogInterface.OnClickListener() {
+        final PassingInstruction[] passingInstructionsRelevantForUserEntry = PassingInstruction.relevantValues();
+        final CharSequence[] i18NPassingInstructions = getI18NPassingInstructions(passingInstructionsRelevantForUserEntry);
+        builder.setTitle(R.string.pick_a_rounding_direction).setItems(i18NPassingInstructions, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
-                PassingInstruction pickedDirection = PassingInstruction.relevantValues()[position];
+                PassingInstruction pickedDirection = passingInstructionsRelevantForUserEntry[position];
                 onPassingInstructionPicked(courseElement, pickedDirection);
             }
         });
         builder.create().show();
+    }
+
+    /**
+     * Cosntructs a message text for each of the {@link PassingIntsruction} values passed. The message strings
+     * returned correspond in their order with the {@link PassingInstruction}s passed in the array.
+     */
+    private CharSequence[] getI18NPassingInstructions(PassingInstruction[] passingInstructionsRelevantForUserEntry) {
+        final CharSequence[] result = new CharSequence[passingInstructionsRelevantForUserEntry.length];
+        int i=0;
+        for (final PassingInstruction passingInstruction : passingInstructionsRelevantForUserEntry) {
+            result[i++] = getI18NPassingInstruction(passingInstruction);
+        }
+        return result;
+    }
+
+    private CharSequence getI18NPassingInstruction(PassingInstruction passingInstruction) {
+        CharSequence result = "";
+        switch (passingInstruction) {
+        case FixedBearing:
+            result = getString(R.string.passing_instruction_fixed_bearing);
+            break;
+        case Gate:
+            result = getString(R.string.passing_instruction_gate);
+            break;
+        case Line:
+            result = getString(R.string.passing_instruction_line);
+            break;
+        case None:
+            result = getString(R.string.passing_instruction_none);
+            break;
+        case Offset:
+            result = getString(R.string.passing_instruction_offset);
+            break;
+        case Port:
+            result = getString(R.string.passing_instruction_port);
+            break;
+        case Single_Unknown:
+            result = getString(R.string.passing_instruction_single_unknown);
+            break;
+        case Starboard:
+            result = getString(R.string.passing_instruction_starboard);
+            break;
+        }
+        return result;
     }
 
     protected void onPassingInstructionPicked(CourseListDataElementWithIdImpl courseElement, PassingInstruction pickedDirection) {
@@ -526,16 +567,16 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                 if (courseElement.getRightMark() != null) {
                     String cpwtmName =
                             "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / " + courseElement.getRightMark().getName();
+                    // Not providing a UUID for the new control point; instead, the name will be used as a (temporary?) ID.
                     ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(), courseElement
                             .getRightMark(), cpwtmName);
                     Waypoint waypoint = new WaypointImpl(cpwtm, courseElement.getPassingInstructions());
-
                     waypoints.add(waypoint);
                 } else {
-                    throw new IllegalStateException("Missing second mark");
+                    throw new IllegalStateException(MISSING_SECOND_MARK);
                 }
             } else if (courseElement.getPassingInstructions().equals(PassingInstruction.None)) {
-                throw new IllegalStateException("Each waypoints needs passing instructions");
+                throw new IllegalStateException(EACH_WAYPOINT_NEEDS_PASSING_INSTRUCTIONS);
             } else {
                 Waypoint waypoint = new WaypointImpl(courseElement.getLeftMark(), courseElement.getPassingInstructions());
 
@@ -562,7 +603,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
-        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
+        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign, CourseDesignerMode.BY_MARKS);
         saveChangedCourseDesignInCache(courseDesign);
         switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
             case START_MODE_PRESETUP:

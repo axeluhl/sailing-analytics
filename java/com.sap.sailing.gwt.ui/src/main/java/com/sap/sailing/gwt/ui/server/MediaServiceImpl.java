@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -36,17 +35,17 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
     
     @Override
-    public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+    public Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return racingEventService().getMediaTracksForRace(regattaAndRaceIdentifier);
     }
     
     @Override
-    public Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+    public Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return racingEventService().getMediaTracksInTimeRange(regattaAndRaceIdentifier);
     }
 
     @Override
-    public Collection<MediaTrack> getAllMediaTracks() {
+    public Iterable<MediaTrack> getAllMediaTracks() {
         return racingEventService().getAllMediaTracks();
     }
 

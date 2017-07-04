@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.support.annotation.StyleRes;
 import android.support.v7.app.AlertDialog;
@@ -16,6 +17,8 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -53,7 +56,7 @@ public class EulaHelper {
         }
 
         builder.setTitle(R.string.eula_title);
-        builder.setMessage(getSpannableMessage());
+        builder.setMessage(getSpannableMessage(builder.getContext().getTheme()));
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.eula_confirm, new DialogInterface.OnClickListener() {
             @Override
@@ -83,7 +86,7 @@ public class EulaHelper {
         mContext.startActivity(browserIntent);
     }
 
-    private SpannableString getSpannableMessage() {
+    private SpannableString getSpannableMessage(Resources.Theme theme) {
         String message = mContext.getString(R.string.eula_message);
         String clickableText = mContext.getString(R.string.linked_eula_message_part);
 
@@ -95,7 +98,10 @@ public class EulaHelper {
             }
         };
 
-        spannableString.setSpan(clickableSpan, message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        spannableString.setSpan(clickableSpan, message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        TypedValue typedValue = new TypedValue();
+        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
+        spannableString.setSpan(new ForegroundColorSpan(typedValue.data), message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         return spannableString;
     }

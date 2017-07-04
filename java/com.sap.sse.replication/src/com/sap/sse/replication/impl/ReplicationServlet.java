@@ -17,6 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.jpountz.lz4.LZ4BlockInputStream;
 import net.jpountz.lz4.LZ4BlockOutputStream;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -77,15 +78,23 @@ public class ReplicationServlet extends AbstractHttpServlet {
 
     /**
      * The client identifies itself in the request. Two servlet operations are supported currently: registering the
-     * client with the replication service (if not already created, the JMS replication topic will be created by this
-     * registration); and obtaining an initial load stream that the replica can use to initialize its
-     * {@link RacingEventService}. The operation performed is selected by passing one of the {@link Action} enumeration
-     * values for the URL parameter named {@link #ACTION}.
+     * client with the replication service (if not already created, the message exchange will be created by this
+     * registration); and triggering sending an initial load stream through RabbitMQ that the replica can use to
+     * initialize its {@link Replicable} s. The IDs of the replicables of which the initial load is to be sent is
+     * expected as the {@link #REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED} parameter value. The servlet response
+     * consists of the name of the RabbitMQ queue name that the client can connect to and through which to receive
+     * the LZ4-compressed initial load stream per replicable, using a {@link RabbitInputStreamProvider} and
+     * an {@link LZ4BlockInputStream}..
+     * <p>
+     * 
+     * The operation performed is selected by passing one of the {@link Action} enumeration values for the URL parameter
+     * named {@link #ACTION}.
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter(ACTION);
         logger.info("Received replication request, action is "+action);
+        String[] replicableIdsAsStrings;
         switch (Action.valueOf(action)) {
         case REGISTER:
             registerClientWithReplicationService(req, resp);
@@ -94,7 +103,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
-            String[] replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
+            replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
             Channel channel = getReplicationService().createMasterChannel();
             try {
                 RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
@@ -138,13 +147,13 @@ public class ReplicationServlet extends AbstractHttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        logger.info("Received request to apply and replicate an operation from a replica");
         InputStream is = req.getInputStream();
         DataInputStream dis = new DataInputStream(is);
         String replicableIdAsString = dis.readUTF();
         try {
             Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
             if (replicable != null) {
+                logger.info("Received request to apply and replicate an operation from a replica for replicable "+replicable);
                 applyOperationToReplicable(replicable, is);
             } else {
                 logger.warning("Received operation for replicable "+replicableIdAsString+
@@ -174,17 +183,22 @@ public class ReplicationServlet extends AbstractHttpServlet {
     }
 
     private void deregisterClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        ReplicaDescriptor replica = getReplicaDescriptor(req);
-        getReplicationService().unregisterReplica(replica);
-        logger.info("Deregistered replication client with this server " + replica.getIpAddress());
-        resp.setContentType("text/plain");
-        resp.getWriter().print(replica.getUuid());
+        final UUID replicaUuid = UUID.fromString(req.getParameter(SERVER_UUID));
+        final ReplicaDescriptor replica = getReplicationService().unregisterReplica(replicaUuid);
+        if (replica != null) {
+            logger.info("Deregistered replication client with this server " + replica.getIpAddress());
+            resp.setContentType("text/plain");
+            resp.getWriter().print(replica.getUuid());
+        } else {
+            logger.warning("Couldn't find replica to de-register with ID "+replicaUuid);
+        }
     }
 
     private void registerClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        ReplicaDescriptor replica = getReplicaDescriptor(req);
+        final ReplicaDescriptor replica = getReplicaDescriptor(req);
         getReplicationService().registerReplica(replica);
+        logger.info("Registered new replica " + replica);
         resp.setContentType("text/plain");
         resp.getWriter().print(replica.getUuid());
     }
@@ -193,7 +207,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
         InetAddress ipAddress = InetAddress.getByName(req.getRemoteAddr());
         UUID uuid = UUID.fromString(req.getParameter(SERVER_UUID));
         String additional = req.getParameter(ADDITIONAL_INFORMATION);
-        logger.info("Registered new replica " + ipAddress + " " + uuid.toString() + " " + additional);
-        return new ReplicaDescriptor(ipAddress, uuid, additional);
+        final String[] replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
+        return new ReplicaDescriptor(ipAddress, uuid, additional, replicableIdsAsStrings);
     }
 }

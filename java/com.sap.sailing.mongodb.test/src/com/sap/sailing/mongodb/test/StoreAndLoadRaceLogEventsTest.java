@@ -213,7 +213,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         RaceLogRegisterCompetitorEvent expectedEvent = new RaceLogRegisterCompetitorEventImpl(expectedEventTime,
                 expectedEventTime, author, expectedId, expectedPassId, DomainFactory.INSTANCE.getOrCreateCompetitor(
                         "comp", "comp", null, null, null, null, null,
-                        /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */null));
+                        /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */null, null));
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogRegisterCompetitorEvent actualEvent = loadEvent(dbObject);

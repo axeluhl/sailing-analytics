@@ -148,7 +148,8 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
     }
 
     public synchronized void addListener(ListenerType listener, boolean validMessagesOnly) {
-        ToListenerDispatcher listenerThread = new ToListenerDispatcher(listener);
+        final ToListenerDispatcher listenerThread = new ToListenerDispatcher(listener);
+        listenerThread.setDaemon(true);
         listenerThread.start();
         listenerThreads.put(listener, listenerThread);
         listeners.put(listener, validMessagesOnly);

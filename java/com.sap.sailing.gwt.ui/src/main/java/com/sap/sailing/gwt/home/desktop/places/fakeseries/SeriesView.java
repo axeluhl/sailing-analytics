@@ -14,7 +14,9 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.security.ui.client.UserService;
 
 public interface SeriesView<PLACE extends AbstractSeriesPlace, PRES extends SeriesView.Presenter> extends IsWidget {
 
@@ -35,6 +37,10 @@ public interface SeriesView<PLACE extends AbstractSeriesPlace, PRES extends Seri
         Timer getAutoRefreshTimer();
 
         EventSeriesViewDTO getSeriesDTO();
+        
+        ErrorAndBusyClientFactory getErrorAndBusyClientFactory();
+        
+        UserService getUserService();
     }
     
     /**

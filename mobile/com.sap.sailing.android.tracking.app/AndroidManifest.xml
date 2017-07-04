@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.sap.sailing.android.tracking.app"
-          android:versionCode="1"
-          android:versionName="1 - Altitude">
+          android:versionCode="13"
+          android:versionName="1.11">
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -17,10 +17,13 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
     <uses-permission android:name="com.sap.sailing.android.tracking.app.permission.C2D_MESSAGE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
+
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="true" />
 
     <application
         android:name="com.sap.sailing.android.shared.application.LoggableApplication"
@@ -36,6 +39,7 @@
         <activity
             android:name=".ui.activities.StartActivity"
             android:label="@string/app_name"
+            android:theme="@style/launchScreenTheme"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -69,16 +73,15 @@
                 android:value=".ui.activities.LeaderboardWebViewActivity"/>
         </activity>
         <activity
-            android:name=".ui.activities.EventActivity"
-            android:label="@string/title_activity_event"
+            android:name=".ui.activities.RegattaActivity"
+            android:label="@string/title_activity_regatta"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.activities.EventActivity"/>
+                android:value=".ui.activities.StartActivity"/>
         </activity>
         <activity
-            android:name=".ui.activities.RegattaActivity"
-            android:label="@string/title_activity_regatta"
+            android:name=".ui.activities.BuoyActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -123,15 +126,6 @@
         <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".receiver.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-
-                <category android:name="com.sap.sailing.android.tracking.app"/>
             </intent-filter>
         </receiver>
         <receiver android:name=".receiver.PowerConnectionReceiver">

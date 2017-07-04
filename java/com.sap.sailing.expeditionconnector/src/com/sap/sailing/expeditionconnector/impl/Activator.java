@@ -30,7 +30,7 @@ public class Activator implements BundleActivator {
         if (instance == null) {
             instance = this;
         }
-        if(context.getProperty(EXPEDITION_UDP_PORT_PROPERTY_NAME) != null) {
+        if (context.getProperty(EXPEDITION_UDP_PORT_PROPERTY_NAME) != null) {
             port = Integer.valueOf(context.getProperty(EXPEDITION_UDP_PORT_PROPERTY_NAME));
             logger.log(Level.INFO, "found "+EXPEDITION_UDP_PORT_PROPERTY_NAME+"="+port+" in OSGi context");
         }

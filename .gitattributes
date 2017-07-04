@@ -1,0 +1,51 @@
+*                   -text
+.gitattributes      text eol=lf
+*.sh                text eol=lf
+*.bat               text eol=crlf
+*.cfg               text eol=lf
+*.conf              text eol=lf
+*.md                text
+*.jpg               -text
+*.png               -text
+*.ico               -text
+*.svg               text
+*.ttf               -text
+*.woff              -text
+*.eot               -text
+*.zip               -text
+*.jar               -text
+*.tar.gz            -text
+*.txt               text
+*.xml               text
+*.html              text
+*.css               text
+pom.xml             text
+settings.xml        text
+toolchains.xml      text eol=lf
+*.gradle            text
+*.java              text
+*.properties        text
+*.launch            text
+MANIFEST.MF         text
+.project            text
+.classpath          text
+build.properties    text
+feature.xml         text
+site.xml            text
+*.product           text eol=lf
+*.prefs             text
+*.gwt.xml           text
+*.ui.xml            text
+*.gss               text
+*.swift             text eol=lf
+*.strings           text eol=lf
+*.plist             text eol=lf
+*.h                 text eol=lf
+strings.xml         text eol=lf
+translation_v2.json text eol=lf
+*.py                text eol=lf
+*.rb                text eol=lf
+*.docx              -text
+*.pptx              -text
+*.xlsx              -text
+*.pdf               -text

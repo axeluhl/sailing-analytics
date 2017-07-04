@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,7 +35,6 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -60,6 +58,7 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
@@ -69,7 +68,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
 
-public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implements SwissTimingRaceTracker, SailMasterListener {
+public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
+        implements SwissTimingRaceTracker, SailMasterListener, TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
     
     private final SailMasterConnector connector;
@@ -81,7 +81,6 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final com.sap.sse.common.Util.Triple<String, String, Integer> id;
     private final Regatta regatta;
     private final WindStore windStore;
-    private final GPSFixStore gpsFixStore;
     private final boolean startListFromManage2Sail;
     private final boolean useInternalMarkPassingAlgorithm;
 
@@ -89,7 +88,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
      * Starts out as <code>null</code> and is set when the race definition has been created. When this happens, this object is
      * {@link Object#notifyAll() notified}.
      */
-    private RaceDefinition race;
+    private volatile RaceDefinition race;
     
     private Course course;
     private StartList startList;
@@ -111,25 +110,35 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     
     protected SwissTimingRaceTrackerImpl(String raceID, String raceName, String raceDescription, BoatClass boatClass,
             String hostname, int port, StartList startList, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            WindStore windStore, GPSFixStore gpsFixStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm) throws InterruptedException,
+            WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, long delayToLiveInMillis,
+            boolean useInternalMarkPassingAlgorithm, SwissTimingTrackingConnectivityParameters connectivityParams) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, raceID,
-                boatClass, trackedRegattaRegistry), raceID, raceName,
-                raceDescription, boatClass, hostname, port, startList, windStore, gpsFixStore, domainFactory, factory, trackedRegattaRegistry,
-                raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
+        this(/* regatta */ null, raceID, raceName, raceDescription, boatClass, hostname, port, startList, windStore,
+                domainFactory, factory, trackedRegattaRegistry, raceLogStore, regattaLogStore, raceLogResolver,
+                delayToLiveInMillis, useInternalMarkPassingAlgorithm, connectivityParams);
     }
 
     protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, WindStore windStore,
-            GPSFixStore gpsFixStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
-            long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm) throws InterruptedException, UnknownHostException, IOException,
-            ParseException {
-        super();
+            DomainFactory domainFactory, SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, RaceLogResolver raceLogResolver,
+            long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm, SwissTimingTrackingConnectivityParameters connectivityParams)
+            throws InterruptedException, UnknownHostException, IOException, ParseException {
+        super(connectivityParams);
         this.raceLogResolver = raceLogResolver;
         this.tmdMessageQueue = new TMDMessageQueue(this);
-        this.regatta = regatta;
+        final Regatta effectiveRegatta;
+        // Try to find a pre-associated event based on the Race ID
+        if (regatta == null) {
+            effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
+        } else {
+            effectiveRegatta = regatta;
+        }
+        // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
+        // found; in this case, create a default regatta based on the TracTrac event data
+        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, regattaLogStore,
+                raceID, boatClass, trackedRegattaRegistry) : effectiveRegatta;
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceName, raceDescription, boatClass);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
@@ -139,10 +148,9 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.raceDescription = raceDescription;
         this.boatClass = boatClass;
         this.windStore = windStore;
-        this.gpsFixStore = gpsFixStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(this);
-        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
+        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.competitorsByBoatId = new HashMap<String, Competitor>();
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
@@ -158,22 +166,21 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
 
     @Override
-    public void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
+    protected void onStop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
         if (isTrackedRaceStillReachable()) {
             TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
-            trackedRace.setStatus(newStatus);
+            trackedRace.onStatusChanged(this, newStatus);
         }
         connector.removeSailMasterListener(this);
     }
 
     @Override
-    public Set<RaceDefinition> getRaces() {
-        final Set<RaceDefinition> emptySet = Collections.emptySet();
-        return race==null?emptySet:Collections.singleton(race);
+    public RaceDefinition getRace() {
+        return race;
     }
 
     @Override
-    public RaceHandle getRacesHandle() {
+    public RaceHandle getRaceHandle() {
         return new RaceHandle() {
             @Override
             public Regatta getRegatta() {
@@ -236,11 +243,6 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     @Override
     public WindStore getWindStore() {
         return windStore;
-    }
-
-    @Override
-    public GPSFixStore getGPSFixStore() {
-        return gpsFixStore;
     }
 
     @Override
@@ -416,7 +418,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             } else {
                 newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
             }
-            trackedRace.setStatus(newStatus);
+            trackedRace.onStatusChanged(this, newStatus);
         }
     }
 
@@ -472,7 +474,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                 competitorsByBoatId.put(c.getBoatID(), existingCompetitor);
             }
         }
-        trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore, delayToLiveInMillis,
+        trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore,
+                delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 new DynamicRaceDefinitionSet() {
@@ -482,6 +485,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         assert SwissTimingRaceTrackerImpl.this.race == race;
                     }
                 }, useInternalMarkPassingAlgorithm, raceLogResolver);
+        notifyRaceCreationListeners();
         logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
     }
     

@@ -10,10 +10,16 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 public class DeviceConfigurationDTO implements IsSerializable {
     
     public static class RegattaConfigurationDTO implements IsSerializable {
-        public static class RRS26ConfigurationDTO extends RacingProcedureConfigurationDTO {
+        public static class RacingProcedureWithConfigurableStartModeFlagConfigurationDTO extends RacingProcedureConfigurationDTO {
             public List<Flags> startModeFlags;
         }
         
+        public static class RRS26ConfigurationDTO extends RacingProcedureWithConfigurableStartModeFlagConfigurationDTO {
+        }
+
+        public static class SWCStartConfigurationDTO extends RacingProcedureWithConfigurableStartModeFlagConfigurationDTO {
+        }
+
         public static class GateStartConfigurationDTO extends RacingProcedureConfigurationDTO {
             public Boolean hasPathfinder;
             public Boolean hasAdditionalGolfDownTime;
@@ -30,11 +36,13 @@ public class DeviceConfigurationDTO implements IsSerializable {
         public static class RacingProcedureConfigurationDTO implements IsSerializable {
             public Flags classFlag;
             public Boolean hasIndividualRecall;
+            public Boolean isResultEntryEnabled;
         }
         public RacingProcedureType defaultRacingProcedureType;
         public CourseDesignerMode defaultCourseDesignerMode;
         
         public RRS26ConfigurationDTO rrs26Configuration;
+        public SWCStartConfigurationDTO swcStartConfiguration;
         public GateStartConfigurationDTO gateStartConfiguration;
         public ESSConfigurationDTO essConfiguration;
         public RacingProcedureConfigurationDTO basicConfiguration;

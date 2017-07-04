@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -40,7 +41,7 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
                 Window.alert(stringMessages.notCapableOfGeneratingACodeForIdentifier());
             } else if (!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
                 String apkUrl = getServerUrlWithoutFinalSlash() + rcAppApkPath;
-                return DeviceConfigurationQRCodeUtils.composeQRContent(identifierBox.getValue(), apkUrl, accessToken);
+                return DeviceConfigurationQRCodeUtils.composeQRContent(URL.encodeQueryString(identifierBox.getValue()), apkUrl, URL.encodeQueryString(accessToken));
             }
             return null;
         }   

@@ -12,6 +12,11 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInView;
 
+/**
+ * Widget to be shown as replacement for the actual content if the user isn't logged in an therefore doesn't see
+ * anything. It consists of a message and a button that triggers the login that can be shown based on the given
+ * {@link NotLoggedInPresenter}.
+ */
 public class GenericNotLoggedInView extends Composite implements NotLoggedInView {
 
     private static NotLoggedInViewUiBinder uiBinder = GWT.create(NotLoggedInViewUiBinder.class);

@@ -53,6 +53,11 @@ public interface LeaderboardTableResources extends CellTable.Resources {
          * Applied to the totals columns
          */
         String cellTableTotalColumn();
+        
+        /**
+         * Applied to the SailId column
+         */
+        String cellTableSailIdColumn();
 
     }
 

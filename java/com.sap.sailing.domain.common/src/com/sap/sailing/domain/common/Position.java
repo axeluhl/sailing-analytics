@@ -20,7 +20,10 @@ public interface Position extends Serializable {
     Distance getDistance(Position p);
     
     /**
-     * The bearing from this position towards <code>p</code> on a great circle
+     * The bearing from this position towards <code>p</code> on a great circle, using the shortest path.
+     * 
+     * @return {@code null} if {@code p} is {@code null}, otherwise the bearing from {@code this} {@link Position} to
+     *         {@code p} along a great circle
      */
     Bearing getBearingGreatCircle(Position p);
 
@@ -69,8 +72,8 @@ public interface Position extends Serializable {
     Distance alongTrackDistance(Position from, Bearing bearing);
     
     /**
-     * Computes the distance from this position to the line between <code>left<code> and <code>right<code>. This distance
-     * is positive if <code>left<code> is actually the position farther to the left, as seen from this position.
+     * Computes the distance from this position to the line between <code>left</code> and <code>right</code>. This distance
+     * is positive if <code>left</code> is actually the position farther to the left, as seen from this position.
      */
     Distance getDistanceToLine(Position left, Position right);
     

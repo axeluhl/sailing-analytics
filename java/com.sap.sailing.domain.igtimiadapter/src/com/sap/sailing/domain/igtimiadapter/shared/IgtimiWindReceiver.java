@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,7 +71,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     private final Map<String, DynamicTrack<HDGM>> hdgmTrack;
     private final FixReceiver receiver;
     private final DeclinationService declinationService;
-    private final ConcurrentHashMap<IgtimiWindListener, IgtimiWindListener> listeners;
+    private final ConcurrentMap<IgtimiWindListener, IgtimiWindListener> listeners;
     
     private class FixReceiver extends IgtimiFixReceiverAdapter {
         @Override

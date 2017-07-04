@@ -3,8 +3,6 @@
     xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
-    </ui:style>
     <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
        <um:content>
             <ud:UserAccountDetails ui:field="accountDetailsUi" 

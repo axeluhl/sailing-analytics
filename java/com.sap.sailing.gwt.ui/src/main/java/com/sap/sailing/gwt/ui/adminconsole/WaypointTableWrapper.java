@@ -22,14 +22,14 @@ public class WaypointTableWrapper<S extends RefreshableSelectionModel<WaypointDT
                 return d.controlPoint.getName();
             }
         };
-        table.addColumn(nameColumn, stringMessages.controlPoint() + " " + stringMessages.name());
+        table.addColumn(nameColumn, stringMessages.controlPoint());
         
         TextColumn<WaypointDTO> typeColumn = new TextColumn<WaypointDTO>() {
             @Override
             public String getValue(WaypointDTO w) {
                 ControlPointDTO d = w.controlPoint;
                 if (d instanceof GateDTO) {
-                    return "2x " + stringMessages.mark();
+                    return stringMessages.twoXMark();
                 } else if (d instanceof MarkDTO) {
                     return stringMessages.mark();
                 } else {

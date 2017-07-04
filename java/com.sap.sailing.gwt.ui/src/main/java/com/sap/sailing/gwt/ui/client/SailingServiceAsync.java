@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -24,20 +25,26 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
+import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
+import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
@@ -48,6 +55,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -62,7 +70,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
@@ -75,9 +83,11 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -87,11 +97,12 @@ import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 
 /**
  * The async counterpart of {@link SailingService}
  */
-public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageManagementGwtServiceAsync {
+public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageManagementGwtServiceAsync, RemoteReplicationServiceAsync {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
@@ -107,19 +118,22 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     /**
      * @param regattaToAddTo
-     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
-     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
-     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
-     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
-     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     *            if <code>null</code>, the regatta into which the race has previously been loaded will be looked up; if
+     *            found, the race will be loaded into that regatta; otherwise, an existing regatta by the name of the
+     *            TracTrac event with the boat class name appended in parentheses will be looked up; if not found, a
+     *            default regatta with that name will be created, with a single default series and a single default
+     *            fleet. If a valid {@link RegattaIdentifier} is specified, a regatta lookup is performed with that
+     *            identifier; if the regatta is found, it is used to add the races to. Otherwise, a default regatta as
+     *            described above will be created and used.
      * @param liveURI
      *            may be <code>null</code> or the empty string in which case the server will use the
      *            {@link TracTracRaceRecordDTO#liveURI} from the <code>rr</code> race record.
      * @param offsetToStartTimeOfSimulatedRace
-     *            if not <code>null</code>, the connector will adjust the time stamps of all events received such that the
-     *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
-     *            events received such that they seem to be sent in "real-time" plus the <code>offsetToStartTimeOfSimulatedRace</code>. So, more or less the time points
-     *            attached to the events sent to the receivers will again approximate the wall time.
+     *            if not <code>null</code>, the connector will adjust the time stamps of all events received such that
+     *            the first mark passing for the first waypoint will be set to "now." It will delay the forwarding of
+     *            all events received such that they seem to be sent in "real-time" plus the
+     *            <code>offsetToStartTimeOfSimulatedRace</code>. So, more or less the time points attached to the events
+     *            sent to the receivers will again approximate the wall time.
      * @param useInternalMarkPassingAlgorithm
      *            whether or not to ignore the TracTrac-provided mark passings; if <code>true</code>, a separate mark
      *            passing calculator is used, and the TracTrac-provided ones are ignored.
@@ -144,8 +158,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
-
-    void stopTrackingEvent(RegattaIdentifier eventIdentifier, AsyncCallback<Void> callback);
 
     void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
 
@@ -219,14 +231,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
-            String previousLeaderboardId, boolean fillNetPointsUncorrected,
+            String previousLeaderboardId, boolean fillTotalPointsUncorrected,
             AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
     void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
-    void getLeaderboardsByRaceAndRegatta(RaceDTO race, RegattaIdentifier regattaIdentifier,
+    void getLeaderboardsByRaceAndRegatta(String raceName, RegattaIdentifier regattaIdentifier,
             AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
@@ -237,6 +249,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName,
             int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+
+    void createRegattaLeaderboardWithEliminations(String name, String displayName, String regattaName,
+            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 
@@ -309,7 +324,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getCountryCodes(AsyncCallback<String[]> callback);
 
     void getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
-            Map<CompetitorDTO, Date> to, double meters, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
+            Map<CompetitorDTO, Date> to, double meters, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>> callback);
 
     void getManeuvers(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
             Map<CompetitorDTO, Date> to, AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>> callback);
@@ -378,11 +393,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate,
             AsyncCallback<CompactBoatPositionsDTO> callback);
 
-    void getReplicaInfo(AsyncCallback<ReplicationStateDTO> callback);
-
-    void startReplicatingFromMaster(String messagingHost, String masterName, String exchangeName, int servletPort,
-            int messagingPort, AsyncCallback<Void> callback);
-
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
     void getPublicEventsOfAllSailingServers(AsyncCallback<List<EventBaseDTO>> callback);
@@ -402,13 +412,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
     void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName,
-            Iterable<ImageDTO> images, Iterable<VideoDTO> videos, AsyncCallback<EventDTO> callback);
+            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String baseURL,
+            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
+            Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIDs, AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
-            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos,
-            AsyncCallback<EventDTO> callback);
+            String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
+            Iterable<VideoDTO> videos, AsyncCallback<EventDTO> callback);
 
     void resolveImageDimensions(String imageUrlAsString, AsyncCallback<Pair<Integer, Integer>> callback);
 
@@ -434,16 +445,17 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference,
-            RankingMetrics rankingMetricType, AsyncCallback<RegattaDTO> callback);
+            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType,
+            AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
             List<Pair<String, Integer>> columnNames, AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
-            int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, List<FleetDTO> fleets,
-            AsyncCallback<Void> callback);
+            boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
+            List<FleetDTO> fleets, AsyncCallback<Void> callback);
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
@@ -454,6 +466,12 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
             Date timePointWhenResultPublished, AsyncCallback<RegattaScoreCorrectionDTO> asyncCallback);
+
+    void getCompetitorProviderNames(AsyncCallback<Iterable<String>> callback);
+
+    void getCompetitorProviderDTOByName(String providerName, AsyncCallback<CompetitorProviderDTO> callback);
+
+    void getCompetitorDescriptors(String competitorProviderName, String eventName, String regattaName, AsyncCallback<List<CompetitorDescriptor>> callback);
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
 
@@ -496,6 +514,12 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
 
+    /**
+     * Callers will be able to obtain at most {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} fixes using
+     * this method. If a finer resolution is requested based on {@code from}, {@code to}, and {@code stepSize}, the
+     * resolution will automatically be lowered so that no more than
+     * {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} are returned per competitor.
+     */
     void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
             long stepSize, DetailType detailType, String leaderboarGroupName, String leaderboardName,
             AsyncCallback<CompetitorsRaceDataDTO> callback);
@@ -514,11 +538,12 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
-            RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference, AsyncCallback<Void> callback);
+            RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes, AsyncCallback<Void> callback);
 
     /**
      * @param detailType
-     *            supports {@link DetailType#REGATTA_RANK}, {@link DetailType#REGATTA_TOTAL_POINTS_SUM} and
+     *            supports {@link DetailType#REGATTA_RANK}, {@link DetailType#REGATTA_NET_POINTS_SUM} and
      *            {@link DetailType#OVERALL_RANK}.
      * 
      * @return the first triple element is the race column name; then follows the list of competitors, and finally the
@@ -530,9 +555,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName,
             AsyncCallback<List<Util.Pair<String, String>>> callback);
 
-    void checkLeaderboardName(String leaderboardName, AsyncCallback<Util.Pair<String, LeaderboardType>> callback);
-
-    void stopReplicatingFromMaster(AsyncCallback<Void> asyncCallback);
+    void getLeaderboardType(String leaderboardName, AsyncCallback<LeaderboardType> callback);
 
     void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
     
@@ -540,15 +563,11 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas, List<String> visibleRegattas,
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
-            AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
+            Duration clientTimeZoneOffset, AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
 
     void getRaceStateEntriesForLeaderboard(String leaderboardName, boolean showOnlyCurrentlyRunningRaces,
-            boolean showOnlyRacesOfSameDay, List<String> visibleRegattas,
+            boolean showOnlyRacesOfSameDay, Duration clientTimeZoneOffset, List<String> visibleRegattas,
             AsyncCallback<List<RegattaOverviewEntryDTO>> callback);
-
-    void stopAllReplicas(AsyncCallback<Void> asyncCallback);
-
-    void stopSingleReplicaInstance(String identifier, AsyncCallback<Void> asyncCallback);
 
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<Void> asyncCallback);
@@ -571,7 +590,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getCompetitorsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
-    void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
+    void addOrUpdateCompetitor(List<CompetitorDTO> competitors, AsyncCallback<List<CompetitorDTO>> asyncCallback);
+
+    void addCompetitors(List<CompetitorDescriptor> competitorsForSaving, String searchTag,
+            AsyncCallback<List<CompetitorDTO>> asyncCallback);
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
 
@@ -602,7 +624,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
 
-    void getIgtimiAuthorizationUrl(AsyncCallback<String> callback);
+    void getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort, AsyncCallback<String> callback);
 
     void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
 
@@ -615,14 +637,21 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
+    /**
+     * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
+     *         so
+     */
     void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Void> callback);
+            AsyncCallback<Boolean> callback);
 
     void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
 
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind,
             boolean correctWindByDeclination, AsyncCallback<Void> callback);
 
+    void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
+            final boolean trackWind, final boolean correctWindByDeclination, AsyncCallback<Void> callback);
+    
     /**
      * Set the competitor registrations in the racelog. Unregisters formerly registered competitors that are not listed
      * in {@code competitors}.
@@ -647,7 +676,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<RaceCourseDTO> callback);
 
     void pingMark(String leaderboardName, MarkDTO mark,
-            Position position, AsyncCallback<Void> callback);
+            TimePoint timePoint, Position position, AsyncCallback<Void> callback);
 
     void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
 
@@ -660,6 +689,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Void> callback);
 
     void getGPSFixImporterTypes(AsyncCallback<Collection<String>> callback);
+    
+    void getSensorDataImporterTypes(AsyncCallback<Collection<String>> callback);
 
     void getTrackFileImportDeviceIds(List<String> uuids,
             AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
@@ -678,29 +709,35 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
      */
     void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
-
+    
+    /**
+     * Returns mark passings for the competitor. Using the {@code waitForCalculations} parameter callers can control
+     * whether to obtain a snapshot immediately of wait for pending updates. Waiting may be desirable, e.g., when having
+     * submitted a fixed mark passing into a race log which triggers the re-calculations asynchronously.
+     */
     void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
-            AsyncCallback<Map<Integer, Date>> callback);
+            boolean waitForCalculations, AsyncCallback<Map<Integer, Date>> callback);
 
-    void getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+    void getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName,
             CompetitorDTO competitor, AsyncCallback<Map<Integer, Date>> callback);
 
-    void updateSuppressedMarkPassings(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+    void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);
 
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames, EventDTO newEvent, AsyncCallback<Void> asyncCallback);
 
-    void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+    void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName,
             Integer indexOfWaypoint, Date dateOfMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);
 
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
-            String leaderboardName, Collection<CompetitorDTO> competitors, String localeInfo,
+            String leaderboardName, Collection<CompetitorDTO> competitors, String iOSAppUrl, String androidAppUrl,
+            String localeInfo,
             AsyncCallback<Void> callback);
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
-            String emails, String localeInfoName, AsyncCallback<Void> callback);
+            String emails, String iOSAppUrl, String androidAppUrl, String localeInfoName, AsyncCallback<Void> callback);
             
     void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
 
@@ -714,6 +751,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Void> asyncCallback);
 
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto, AsyncCallback<Void> callback);
+    
+    void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto, AsyncCallback<Void> callback);
 
     void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean> regattaLogCallBack);
 
@@ -723,7 +762,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto, AsyncCallback<Void> callback);
 
     void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Pair<TimePoint, TimePoint>> callback);
+            AsyncCallback<Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> callback);
 
     /**
      * Copies one race's competitor set to other races.
@@ -763,4 +802,40 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getCompetitorRegistrationsForLeaderboard(String leaderboardName,
             AsyncCallback<Collection<CompetitorDTO>> callback);
+
+    void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
+            GPSFixDTO newFix, AsyncCallback<Void> callback);
+
+    void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
+            GPSFixDTO oldFix, Position newPosition, AsyncCallback<Void> callback);
+
+    void removeMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
+            GPSFixDTO fix, AsyncCallback<Void> callback);
+
+    void canRemoveMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
+            GPSFixDTO fix, AsyncCallback<Boolean> callback);
+    
+    void getMarksInTrackedRace(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Iterable<MarkDTO>> callback);
+
+    void getMarkTracks(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<MarkTracksDTO> callback);
+    
+    void getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, 
+            AsyncCallback<MarkTrackDTO> callback);
+    
+    void getTrackingTimes(Collection<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
+            AsyncCallback<Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>>> asyncCallback);
+
+    void serializationDummy(PersonDTO dummy, CountryCode ccDummy,
+			PreciseCompactPosition preciseCompactPosition, AsyncCallback<Pair<PersonDTO, CountryCode>> callback);
+
+    /**
+     * @param leaderboardName
+     *            expected to match a regatta leaderboard with eliminations
+     */
+    void getEliminatedCompetitors(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> asyncCallback);
+
+    void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors,
+            AsyncCallback<Void> callback);
 }

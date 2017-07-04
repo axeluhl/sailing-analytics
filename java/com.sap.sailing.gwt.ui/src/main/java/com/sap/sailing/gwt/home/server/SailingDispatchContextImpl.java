@@ -12,6 +12,9 @@ import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.User;
+import com.sap.sse.security.UserStore;
 
 @GwtIncompatible
 public class SailingDispatchContextImpl implements SailingDispatchContext {
@@ -21,11 +24,17 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
 //    private final Date currentServerTime = new Date();
     private String clientLocaleName;
     private final HttpServletRequest request;
+    private final SecurityService securityService;
+    private final UserStore userStore;
 
-    public  SailingDispatchContextImpl(Date currentClientTime, RacingEventService racingEventService, EventNewsService eventNewsService, String clientLocaleName, HttpServletRequest request) {
+    public SailingDispatchContextImpl(Date currentClientTime, RacingEventService racingEventService,
+            EventNewsService eventNewsService, SecurityService securityService, UserStore userStore,
+            String clientLocaleName, HttpServletRequest request) {
         this.currentClientTime = currentClientTime;
         this.racingEventService = racingEventService;
         this.eventNewsService = eventNewsService;
+        this.securityService = securityService;
+        this.userStore = userStore;
         this.clientLocaleName = clientLocaleName;
         this.request = request;
     }
@@ -68,4 +77,20 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
         return HomeServiceUtil.getRequestBaseURL(request);
     }
     
+    @Override
+    public <T> T getPreferenceForCurrentUser(String preferenceKey) {
+        User currentUser = securityService.getCurrentUser();
+        if (currentUser != null) {
+            return userStore.getPreferenceObject(currentUser.getName(), preferenceKey);
+        }
+        return null;
+    }
+    
+    @Override
+    public void setPreferenceForCurrentUser(String preferenceKey, Object preference) {
+        User currentUser = securityService.getCurrentUser();
+        if (currentUser != null) {
+            securityService.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
+        }
+    }
 }

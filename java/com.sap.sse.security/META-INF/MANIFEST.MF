@@ -17,11 +17,9 @@ Import-Package: com.sap.sse.util,
  org.osgi.util.tracker;version="1.5.1"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Require-Bundle: javax.servlet;bundle-version="2.5.0",
- slf4j.api;bundle-version="1.6.4",
+Require-Bundle: javax.servlet;bundle-version="3.1.0",
  org.json.simple,
  com.sun.jersey,
- org.apache.commons.logging;bundle-version="1.1.1",
  org.apache.commons.beanutils;bundle-version="1.8.0",
  org.apache.shiro.core;bundle-version="1.2.2",
  org.apache.shiro.ehcache;bundle-version="1.2.3",
@@ -33,7 +31,8 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.sse.operationaltransformation,
  com.sap.sse.security.common,
  com.sap.sse,
- com.sap.sse.mail
+ com.sap.sse.mail,
+ com.sap.sse.shared.android
 Web-ContextPath: /security
 Export-Package: com.sap.sse.security,
  com.sap.sse.security.jaxrs

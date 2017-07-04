@@ -51,6 +51,9 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     private boolean emailChanged;
     private String oldEmail;
     private String newEmail;
+    private boolean searchTagChanged;
+    private String oldSearchTag;
+    private String newSearchTag;
     private boolean flagImageChanged;
     private URI oldFlagImageURL;
     private URI newFlagImageURL;
@@ -81,6 +84,9 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         emailChanged = false;
         oldEmail = null;
         newEmail = null;
+        searchTagChanged = false;
+        oldSearchTag = null;
+        newSearchTag = null;
         flagImageChanged = false;
         oldFlagImageURL = null;
         newFlagImageURL = null;
@@ -127,6 +133,13 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
                 emailChanged = true;
                 CompetitorListenerTest.this.oldEmail = oldEmail;
                 CompetitorListenerTest.this.newEmail = newEmail;
+            }
+
+            @Override
+            public void searchTagChanged(String oldSearchTag, String newSearchTag) {
+                searchTagChanged = true;
+                CompetitorListenerTest.this.oldSearchTag = oldSearchTag;
+                CompetitorListenerTest.this.newSearchTag = newSearchTag;
             }
 
             @Override
@@ -208,6 +221,14 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         assertTrue(emailChanged);
         assertNull(oldEmail);
         assertEquals("hasso.plattner@sap.com", newEmail);
+    }
+
+    @Test
+    public void testSearchTagChange() throws URISyntaxException {
+        competitor.setSearchTag("hasso");
+        assertTrue(searchTagChanged);
+        assertNull(oldSearchTag);
+        assertEquals("hasso", newSearchTag);
     }
 
     @Test

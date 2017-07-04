@@ -60,9 +60,19 @@ public interface Speed extends Comparable<Speed>, Serializable {
         public double getStatuteMilesPerHour() {
             return 0;
         }
+
+        @Override
+        public Distance travel(Duration duration) {
+            return Distance.NULL;
+        }
+        
+        @Override
+        public double divide(Speed speed) {
+            return 0;
+        }
     };
     
-    @Statistic(messageKey="", resultDecimals=2)
+    @Statistic(messageKey="speedInKnots", resultDecimals=2)
     double getKnots();
 
     double getMetersPerSecond();
@@ -85,4 +95,14 @@ public interface Speed extends Comparable<Speed>, Serializable {
      * line" on a sphere) with this speed.
      */
     Duration getDuration(Distance distance);
+
+    Distance travel(Duration duration);
+    
+    /**
+     * Divides this speed by the other {@code speed}.
+     * 
+     * @param speed
+     *            must not be {@code null}, or a {@link NullPointerException} will result
+     */
+    double divide(Speed speed);
 }

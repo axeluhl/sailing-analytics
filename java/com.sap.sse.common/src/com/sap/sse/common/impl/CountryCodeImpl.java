@@ -3,6 +3,8 @@ package com.sap.sse.common.impl;
 import com.sap.sse.common.CountryCode;
 
 public class CountryCodeImpl implements CountryCode {
+    private static final long serialVersionUID = 74265853281480956L;
+    
     private final String name;
     private final String threeLetterIOCCode;
     private final String twoLetterISOCode;

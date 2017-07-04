@@ -15,7 +15,9 @@ public interface DynamicCompetitor extends Competitor, Renamable {
     void setColor(Color displayColor);
 
     void setEmail(String email);
-    
+
+    void setSearchTag(String searchTag);
+
     void setFlagImage(URI flagImage);
 
     void setTimeOnTimeFactor(Double timeOnTimeFactor);

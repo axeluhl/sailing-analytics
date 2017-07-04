@@ -32,14 +32,16 @@ public class DeviceConfigurationQRCodeUtils {
             return accessToken;
         }
     }
-
-    public static String composeQRContent(String deviceIdentifier, String apkUrl, String accessToken) {
-        // poor man's uri fragment encoding: ' ' as '%20'
-        String encodedIdentifier = deviceIdentifier.replaceAll(" ", "%20");
-        return apkUrl + "#" + deviceIdentifierKey + "=" + encodedIdentifier+"&"+accessTokenKey + "=" + accessToken;
+    
+    public static interface URLDecoder {
+        String decode(String encodedURL);
     }
 
-    public static DeviceConfigurationDetails splitQRContent(String qrCodeContent) {
+    public static String composeQRContent(String urlEncodedDeviceIdentifier, String apkUrl, String accessToken) {
+        return apkUrl + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceIdentifier + "&"+accessTokenKey + "=" + accessToken;
+    }
+
+    public static DeviceConfigurationDetails splitQRContent(String qrCodeContent, URLDecoder urlDecoder) {
         int fragmentIndex = qrCodeContent.lastIndexOf('#');
         if (fragmentIndex == -1 || fragmentIndex == 0 || qrCodeContent.length() == fragmentIndex + 1) {
             throw new IllegalArgumentException("There is no server or identifier.");
@@ -50,7 +52,7 @@ public class DeviceConfigurationQRCodeUtils {
         for (String param : params) {
             final String[] keyValue = param.split("=", 2);
             if (keyValue.length == 2) {
-                paramMap.put(keyValue[0], keyValue[1].replaceAll("%20", " "));
+                paramMap.put(keyValue[0], urlDecoder.decode(keyValue[1]));
             }
         }
         if (!paramMap.containsKey(deviceIdentifierKey)) {

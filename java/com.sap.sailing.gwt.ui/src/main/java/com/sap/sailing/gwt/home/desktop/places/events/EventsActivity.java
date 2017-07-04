@@ -10,7 +10,6 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -36,7 +35,7 @@ public class EventsActivity extends AbstractActivity {
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
-        panel.setWidget(new Placeholder());
+        panel.setWidget(clientFactory.createBusyView());
         clientFactory.getDispatch().execute(new GetEventListViewAction(),
                 new ActivityCallback<EventListViewDTO>(clientFactory, panel) {
             @Override

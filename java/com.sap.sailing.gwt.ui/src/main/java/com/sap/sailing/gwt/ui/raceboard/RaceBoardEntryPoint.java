@@ -2,109 +2,133 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Collections;
-import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceWithCompetitorsDTO selectedRace;
 
-    private static final String PARAM_REGATTA_NAME = "regattaName";
-    private static final String PARAM_RACE_NAME = "raceName";
-    private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
-    private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
-    private static final String PARAM_EVENT_ID = "eventId";
-    
-    private String regattaName;
-    private String raceName;
-    private String leaderboardName;
-    private String leaderboardGroupName;
-    private UUID eventId;
-    private RaceBoardViewConfiguration raceboardViewConfig;
-
+    /**
+     * Controls the predefined mode into which to switch or configure the race viewer. 
+     */
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
+
+    private RaceboardContextDefinition raceboardContextDefinition;
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
-        // read mandatory parameters
-        regattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
-        raceName = Window.Location.getParameter(PARAM_RACE_NAME);
-        String leaderboardNameParamValue = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
-        String leaderboardGroupNameParamValue = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
-        if (leaderboardNameParamValue != null && !leaderboardNameParamValue.isEmpty()) {
-            leaderboardName = leaderboardNameParamValue;
+
+        raceboardContextDefinition = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new RaceboardContextDefinition());
+
+        final RaceBoardModes finalMode;
+        if (raceboardContextDefinition.getMode() != null) {
+            finalMode = RaceBoardModes.valueOf(raceboardContextDefinition.getMode());
+        } else {
+            finalMode = null;
         }
-        if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
-            leaderboardGroupName = leaderboardGroupNameParamValue; 
-        }
-        String eventIdParamValue = Window.Location.getParameter(PARAM_EVENT_ID);
-        if (eventIdParamValue != null && !eventIdParamValue.isEmpty()) {
-            eventId = UUID.fromString(eventIdParamValue);
-        }
-        if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
-            leaderboardGroupName = leaderboardGroupNameParamValue; 
-        }
-        if (regattaName == null || regattaName.isEmpty() || raceName == null || raceName.isEmpty() ||
-                leaderboardName == null || leaderboardName.isEmpty()) {
+
+        if (raceboardContextDefinition.getRegattaName() == null || raceboardContextDefinition.getRegattaName().isEmpty()
+                || raceboardContextDefinition.getRaceName() == null || raceboardContextDefinition.getRaceName().isEmpty()
+                || raceboardContextDefinition.getLeaderboardName() == null
+                || raceboardContextDefinition.getLeaderboardName().isEmpty()) {
             createErrorPage("This page requires a valid regatta name, race name and leaderboard name.");
             return;
         }
         
-        // read optional parameters 
-        boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
-        boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
-        boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
-        boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default*/);
-        boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default*/);        
-        boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
-        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
-        final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, true);
-        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default*/);
-        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
-        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, autoSelectMedia, defaultMedia);
-        sailingService.getRaceboardData(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, new AsyncCallback<RaceboardDataDTO>() {
+        AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
-            public void onSuccess(RaceboardDataDTO result) {
-                // Determine if the screen is large enough to display charts such as the competitor chart or the wind chart.
-                // This decision is made once based on the initial screen height. Resizing the window afterwards will have
-                // no impact on the chart support, i.e. they are available/unavailable based on the initial decision.
-                boolean isScreenLargeEnoughToOfferChartSupport = Document.get().getClientHeight() >= 600;
-                checkUrlParameters(result, showMapControls, isScreenLargeEnoughToOfferChartSupport);
+            public void onSuccess(RaceboardDataDTO raceboardData) {
+                if (!raceboardData.isValidLeaderboard()) {
+                    createErrorPage(getStringMessages().noSuchLeaderboard());
+                    return;
+                }
+                if (raceboardContextDefinition.getEventId() != null && !raceboardData.isValidEvent()) {
+                    createErrorPage(getStringMessages().noSuchEvent());
+                }
+                if (raceboardContextDefinition.getLeaderboardGroupName() != null) {
+                    if (!raceboardData.isValidLeaderboardGroup()) {
+                        createErrorPage(getStringMessages().leaderboardNotContainedInLeaderboardGroup(
+                                raceboardContextDefinition.getLeaderboardName(),
+                                raceboardContextDefinition.getLeaderboardGroupName()));
+                        return;
+                    }
+                    if (raceboardContextDefinition.getEventId() != null && raceboardData.isValidLeaderboardGroup()
+                            && !raceboardData.isValidEvent()) {
+                        createErrorPage(getStringMessages().leaderboardGroupNotContainedInEvent(
+                                raceboardContextDefinition.getLeaderboardGroupName(),
+                                raceboardContextDefinition.getEventId().toString()));
+                        return;
+                    }
+                }
+                if (raceboardData.getRace() == null) {
+                    createErrorPage("Could not obtain a race with name " + raceboardContextDefinition.getRaceName()
+                            + " for a regatta with name " + raceboardContextDefinition.getRegattaName());
+                    return;
+                }
+                
+                final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
+                final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
+                        .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition,
+                                finalMode != null ? finalMode.name() : null);
+                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(raceboardData.getRace().getRaceIdentifier(), StringMessages.INSTANCE);
+                RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(), storageDefinition);
+                
+                componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
+                    @Override
+                    public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
+                        Timer timer = new Timer(PlayModes.Replay, 1000l);
+                        final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, componentContext, initialSettings,
+                                        raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle, timer);
+                                if (finalMode != null) {
+                                    finalMode.getMode().applyTo(raceBoardPanel);
+                            }
+                        }
+                    });
             }
             
             @Override
             public void onFailure(Throwable caught) {
                 reportError("Error trying to create the raceboard: " + caught.getMessage());
             }
-        });
+        };
+        
+        sailingService.getRaceboardData(raceboardContextDefinition.getRegattaName(),
+                raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName(),
+                raceboardContextDefinition.getLeaderboardGroupName(), raceboardContextDefinition.getEventId(),
+                asyncCallback);
     }
     
     private void createErrorPage(String message) {
@@ -116,82 +140,25 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         vp.add(new Label(message));
     }
 
-    private void checkUrlParameters(RaceboardDataDTO raceboardData, boolean showMapControls,
-            boolean isScreenLargeEnoughToOfferChartSupport) {
-        if (!raceboardData.isValidLeaderboard()) {
-            createErrorPage(getStringMessages().noSuchLeaderboard());
-            return;
-        }
-        if (eventId != null && !raceboardData.isValidEvent()) {
-            createErrorPage(getStringMessages().noSuchEvent());
-        }
-        if (leaderboardGroupName != null) {
-            if(!raceboardData.isValidLeaderboardGroup()) {
-                createErrorPage(getStringMessages().leaderboardNotContainedInLeaderboardGroup(leaderboardName, leaderboardGroupName));
-                return;
-            }
-            if (eventId != null && raceboardData.isValidLeaderboardGroup() && !raceboardData.isValidEvent()) {
-                createErrorPage(getStringMessages().leaderboardGroupNotContainedInEvent(leaderboardGroupName, eventId.toString()));
-                return;
-            }
-        }
-        if (raceboardData.getRace() == null) {
-            createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaName);
-            return;
-        }
+    private RaceBoardPanel createPerspectivePage(Component<?> parent,
+            ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, RaceboardDataDTO raceboardData,
+            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle, Timer timer) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
-        Timer timer = new Timer(PlayModes.Replay, 1000l);
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, getUserService(), asyncActionsExecutor,
-                raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName, leaderboardGroupName, eventId, 
-                raceboardViewConfig, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider, showMapControls,
-                isScreenLargeEnoughToOfferChartSupport);
-
-        createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
+  
+        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(parent, context,
+                raceLifeCycle,
+                settings,
+                sailingService, mediaService, getUserService(), asyncActionsExecutor,
+                raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
+                raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
+                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo);
+        RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
+        return raceBoardPerspective;
     }  
-
-    private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
-        FlowPanel timeLineInnerBgPanel = new ResizableFlowPanel();
-        timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
-        timeLineInnerBgPanel.add(raceBoardPanel.getTimePanel());
-        
-        FlowPanel timeLineInnerPanel = new ResizableFlowPanel();
-        timeLineInnerPanel.add(timeLineInnerBgPanel);
-        timeLineInnerPanel.addStyleName("timeLineInnerPanel");
-        
-        FlowPanel timelinePanel = new ResizableFlowPanel();
-        timelinePanel.add(timeLineInnerPanel);
-        timelinePanel.addStyleName("timeLinePanel");
-        
-        return timelinePanel;
-    }
-
-    private void createRaceBoardInOneScreenMode(final RaceBoardPanel raceBoardPanel,
-            RaceBoardViewConfiguration raceboardViewConfiguration) {
-        final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
-        RootLayoutPanel.get().add(p);
-        final FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        final Button toggleButton = raceBoardPanel.getTimePanel().getAdvancedToggleButton();
-        toggleButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                boolean advancedModeShown = raceBoardPanel.getTimePanel().toggleAdvancedMode();
-                if (advancedModeShown) {
-                    p.setWidgetSize(timePanel, 96);
-                    toggleButton.removeStyleDependentName("Closed");
-                    toggleButton.addStyleDependentName("Open");
-                } else {
-                    p.setWidgetSize(timePanel, 67);
-                    toggleButton.addStyleDependentName("Closed");
-                    toggleButton.removeStyleDependentName("Open");
-                }
-            }
-        });
-        p.addSouth(timePanel, 67);
-        p.add(raceBoardPanel);
-        p.addStyleName("dockLayoutPanel");
-    }
 }

@@ -1,6 +1,8 @@
 package com.sap.sse.security.ui.client;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -8,6 +10,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
@@ -44,11 +48,13 @@ public class UserService {
      * and windows about changes in the currently logged-in user. 
      */
     private static final String LOCAL_STORAGE_UPDATE_KEY = "current-user-has-changed";
-
+    
     private final UserManagementServiceAsync userManagementService;
 
     private final Set<UserStatusEventHandler> handlers;
 
+    private boolean userInitiallyLoaded = false;
+    
     private UserDTO currentUser;
 
     private final String id;
@@ -60,7 +66,7 @@ public class UserService {
         registerStorageEventHandler();
         updateUser(/* notifyOtherInstances */ false);
     }
-    
+
     private void registerStorageEventHandler() {
         Storage.addStorageEventHandler(new Handler() {
             @Override
@@ -75,7 +81,7 @@ public class UserService {
             }
         });
     }
-    
+
     /**
      * Used to synchronize changes in the user status between all {@link UserService} instances across all browser
      * tabs/windows.
@@ -111,7 +117,7 @@ public class UserService {
             }
         }));
     }
-    
+
     /**
      * Signs in a user with username and password. If successful, the {@link #getCurrentUser() current user} will be
      * updated with the user data. Otherwise, it will remain unchanged. This means in particular that any previously
@@ -134,7 +140,7 @@ public class UserService {
             }
         }));
     }
-    
+
     public void verifySocialUser(final AsyncCallback<UserDTO> callback) throws Exception {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
         logger.info("Verifying " + authProviderName + " user ...");
@@ -177,9 +183,10 @@ public class UserService {
     public UserDTO getCurrentUser() {
         return currentUser;
     }
-    
+
     private void setCurrentUser(UserDTO result, final boolean notifyOtherInstances) {
         currentUser = result;
+        userInitiallyLoaded = true;
         logger.info("User changed to " + (result == null ? "No User" : (result.getName() + " roles: "
                 + result.getRoles())));
         notifyUserStatusEventHandlers();
@@ -189,7 +196,14 @@ public class UserService {
     }
 
     public void addUserStatusEventHandler(UserStatusEventHandler handler) {
+        addUserStatusEventHandler(handler, false);
+    }
+    
+    public void addUserStatusEventHandler(UserStatusEventHandler handler, boolean fireIfUserIsAlreadyAvailable) {
         handlers.add(handler);
+        if (userInitiallyLoaded && fireIfUserIsAlreadyAvailable) {
+            handler.onUserStatusChange(currentUser);
+        }
     }
 
     public void removeUserStatusEventHandler(UserStatusEventHandler handler) {
@@ -201,9 +215,77 @@ public class UserService {
             handler.onUserStatusChange(getCurrentUser());
         }
     }
-    
+
     public UserManagementServiceAsync getUserManagementService() {
         return userManagementService;
     }
+
+    /**
+     * Loads the {@link #getCurrentUser() current user}'s preference with the given {@link String key} from server.
+     * The preferences are passed to the {@link AsyncCallback} as serialized in {@link String}.
+     * 
+     * @param key
+     *            key of the preference to load
+     * @param callback
+     *            {@link AsyncCallback} for GWT RPC call
+     *            
+     */
+    public void getPreference(String key,
+            final AsyncCallback<String> callback) {
+        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        getUserManagementService().getPreference(username, key, callback);
+    }
     
+    public void getPreferences(List<String> keys,
+            final AsyncCallback<Map<String, String>> callback) {
+        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        getUserManagementService().getPreferences(username, keys, callback);
+    }
+    
+    public void getAllPreferences(final AsyncCallback<Map<String, String>> callback) {
+        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        getUserManagementService().getAllPreferences(username, callback);
+    }
+    
+    /**
+     * Sets the {@link #getCurrentUser() current user}'s preference with the given {@link String key} on server.
+     * 
+     * @param key
+     *            key of the preference to set
+     * @param serializedSettings
+     *            Serialized settings as {@link String} containing the preferences
+     */
+    public void setPreference(String key, String serializedSettings, final AsyncCallback<Void> callback) {
+        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        getUserManagementService().setPreference(username, key, serializedSettings, callback);
+    }
+    
+    public void setPreferences(Map<String, String> keyValuePairs,
+            final AsyncCallback<Void> callback) {
+        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        getUserManagementService().setPreferences(username, keyValuePairs, callback);
+    }
+    
+    /**
+     * Unsets the {@link #getCurrentUser() current user}'s preference with the given key on server.
+     * 
+     * @param key key of the preference to unset
+     *            
+     * @see GenericSerializableSettings
+     * @see AbstractGenericSerializableSettings
+     */
+    public void unsetPreference(String key) {
+        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        getUserManagementService().unsetPreference(username, key, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO What to do in case of failure?
+            }
+            
+            @Override
+            public void onSuccess(Void result) {
+                // TODO Do anything in case of success?
+            }
+        });
+    }
 }

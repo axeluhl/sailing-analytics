@@ -6,11 +6,11 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
-import com.sap.sse.common.Named;
-import com.sap.sse.common.WithID;
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 
-public interface Competitor extends Named, WithID, IsManagedByCache<SharedDomainFactory> {
+public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
     @Connector(messageKey="Team", ordinal=9)
     Team getTeam();
 
@@ -23,6 +23,9 @@ public interface Competitor extends Named, WithID, IsManagedByCache<SharedDomain
     
     boolean hasEmail();
 
+    @Dimension(messageKey="SearchTag", ordinal=11)
+    String getSearchTag();
+    
     /**
      * an alternative flag image (per default the nation flag
      * @return the URI of the flag image

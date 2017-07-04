@@ -32,4 +32,5 @@ public class PageArea extends PageObject {
     public WebElement getWebElement() {
         return (WebElement) this.context;
     }
+
 }

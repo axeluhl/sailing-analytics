@@ -37,9 +37,12 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class ListRetrieverChainFilterSelectionProvider implements FilterSelectionProvider {
+public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent<SerializableSettings> implements FilterSelectionProvider {
 
     private final DataMiningSession session;
     private final StringMessages stringMessages;
@@ -61,9 +64,11 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private final FilterSelectionPresenter selectionPresenter;
     private final ScrollPanel selectionPresenterScrollPanel;
 
-    public ListRetrieverChainFilterSelectionProvider(DataMiningSession session, StringMessages stringMessages,
+    public ListRetrieverChainFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
+            DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+        super(parent, context);
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -89,7 +94,8 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         selectionPanel = new ScrollPanel();
         selectionDockLayoutPanel.add(selectionPanel);
         
-        selectionPresenter = new PlainFilterSelectionPresenter(stringMessages, retrieverChainProvider, this);
+        selectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, retrieverChainProvider,
+                this);
         selectionPresenterScrollPanel = new ScrollPanel(selectionPresenter.getEntryWidget());
         
         mainPanel = new DockLayoutPanel(Unit.PX);
@@ -125,8 +131,6 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
             } else if (!isAwaitingReload) {
                 clearContent();
             }
-        } else if (retrieverChain != null && !isAwaitingReload) {
-            updateRetrievalLevels();
         }
     }
 
@@ -147,7 +151,9 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
                     if (!dimensionsEntry.getValue().isEmpty()) {
                         DataRetrieverLevelDTO retrieverLevel = dimensionsEntry.getKey();
                         RetrieverLevelFilterSelectionProvider selectionProvider =
-                                new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter,
+                                        new RetrieverLevelFilterSelectionProvider(
+                                                ListRetrieverChainFilterSelectionProvider.this, getComponentContext(),
+                                                session, dataMiningService, errorReporter,
                                                                           ListRetrieverChainFilterSelectionProvider.this,
                                                                           retrieverChain,retrieverLevel);
                         selectionProvider.setAvailableDimensions(dimensionsEntry.getValue());
@@ -322,12 +328,22 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
 
     @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
         return null;
     }
 
     @Override
     public void updateSettings(SerializableSettings newSettings) {
+        // no-op
     }
 
+    @Override
+    public SerializableSettings getSettings() {
+        return null;
+    }
+
+    @Override
+    public String getId() {
+        return "ListRetrieverChainFilterSelectionProvider";
+    }
 }

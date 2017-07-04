@@ -14,11 +14,21 @@ public enum RaceLogRaceStatus {
     RaceLogRaceStatus(int orderNumber) {
         this.orderNumber = orderNumber;
     }
+
+    public static boolean isPreRunning(RaceLogRaceStatus status) {
+        return status != null &&
+            (status.equals(SCHEDULED) || status.equals(STARTPHASE));
+    }
     
     public static boolean isActive(RaceLogRaceStatus status) {
         return status != null &&
             (status.equals(PRESCHEDULED) || status.equals(SCHEDULED) || status.equals(STARTPHASE) || status.equals(RUNNING) || status.equals(FINISHING));
 
+    }
+
+    public static boolean isRunningOrFinished(RaceLogRaceStatus status) {
+        return status != null &&
+            (status.equals(STARTPHASE) || status.equals(RUNNING) || status.equals(FINISHING) || status.equals(FINISHED));
     }
 
     public int getOrderNumber() {

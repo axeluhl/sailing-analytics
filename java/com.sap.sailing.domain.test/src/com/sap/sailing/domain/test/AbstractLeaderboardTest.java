@@ -20,7 +20,7 @@ public abstract class AbstractLeaderboardTest {
                         /* dateOfBirth */ null, "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }
 
     public static Competitor createCompetitor(String competitorName, CompetitorFactory competitorFactory) {
@@ -30,7 +30,7 @@ public abstract class AbstractLeaderboardTest {
                 new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                 /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
     }
 
     public static CompetitorImpl createCompetitor(String competitorName, Serializable id) {
@@ -39,6 +39,6 @@ public abstract class AbstractLeaderboardTest {
                         /* dateOfBirth */ null, "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }
 }

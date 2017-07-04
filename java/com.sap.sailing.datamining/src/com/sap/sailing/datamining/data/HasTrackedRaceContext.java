@@ -1,10 +1,11 @@
 package com.sap.sailing.datamining.data;
 
-import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
@@ -23,9 +24,6 @@ public interface HasTrackedRaceContext {
     @Connector(messageKey="CourseArea", ordinal=3)
     public CourseArea getCourseArea();
     
-    @Connector(messageKey="BoatClass", ordinal=1)
-    public BoatClass getBoatClass();
-    
     @Connector(messageKey="Fleet", ordinal=4)
     public Fleet getFleet();
     
@@ -35,7 +33,13 @@ public interface HasTrackedRaceContext {
     @Dimension(messageKey="Year", ordinal=2)
     public Integer getYear();
     
-    @Dimension(messageKey="IsTracked", ordinal=6)
+    @Dimension(messageKey="AdvantageousEndOfLine", ordinal=6)
+    public NauticalSide getAdvantageousEndOfLine();
+    
+    @Dimension(messageKey="MedalRace", ordinal=7)
+    public Boolean isMedalRace();
+    
+    @Dimension(messageKey="IsTracked", ordinal=7)
     public Boolean isTracked();
     
     @Statistic(messageKey="NumberOfCompetitorFixes", resultDecimals=0, ordinal=0)
@@ -43,5 +47,10 @@ public interface HasTrackedRaceContext {
     
     @Statistic(messageKey="NumberOfMarkFixes", resultDecimals=0, ordinal=1)
     public int getNumberOfMarkFixes();
+    
+    // Convenience methods for race dependent calculation to avoid code duplication
+    public Double getRelativeScoreForCompetitor(Competitor competitor);
+    
+    public Double getRankAtFinishForCompetitor(Competitor competitor);
     
 }

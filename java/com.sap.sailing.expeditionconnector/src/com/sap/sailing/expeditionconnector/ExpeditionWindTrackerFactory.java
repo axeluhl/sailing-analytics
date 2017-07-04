@@ -70,7 +70,9 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
         if (receiver == null) {
             receiver = new UDPExpeditionReceiver(port);
             windReceivers.put(port, receiver);
-            new Thread(receiver, "Expedition Wind Receiver on port "+port).start();
+            Thread t = new Thread(receiver, "Expedition Wind Receiver on port "+port);
+            t.setDaemon(true);
+            t.start();
         }
         return receiver;
     }
@@ -93,5 +95,10 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
             }
             windReceivers.remove(windTracker.getReceiver().getPort());
         }
+    }
+
+    @Override
+    public String toString() {
+        return "ExpeditionWindTrackerFactory [defaultPort=" + defaultPort + "]";
     }
 }

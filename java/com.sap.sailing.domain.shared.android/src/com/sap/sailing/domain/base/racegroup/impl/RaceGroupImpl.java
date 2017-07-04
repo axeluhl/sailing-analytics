@@ -17,6 +17,11 @@ public class RaceGroupImpl extends NamedImpl implements RaceGroup {
     private final Iterable<SeriesWithRows> series;
     private final RegattaConfiguration regattaConfiguration;
 
+    /**
+     * @param series
+     *            the series; for a regatta they are expected to be in the same order as {@code Regatta.getSeries()}
+     *            would deliver them.
+     */
     public RaceGroupImpl(String name, String displayName, BoatClass boatClass, CourseArea courseArea,
             Iterable<SeriesWithRows> series, RegattaConfiguration regattaConfiguration) {
         super(name);

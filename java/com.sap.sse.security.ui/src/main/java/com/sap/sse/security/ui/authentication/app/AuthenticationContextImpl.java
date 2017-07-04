@@ -11,7 +11,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class AuthenticationContextImpl implements AuthenticationContext {
 
     private final UserDTO currentUser;
-    private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", "", "", false, new ArrayList<AccountDTO>(),
+    private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", "", "", null, false, new ArrayList<AccountDTO>(),
             new ArrayList<String>(), new ArrayList<String>());
 
     /**

@@ -29,9 +29,12 @@ import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class SimpleStatisticProvider implements StatisticProvider {
+public class SimpleStatisticProvider extends AbstractComponent<SerializableSettings> implements StatisticProvider {
     
     private static final String STATISTIC_PROVIDER_ELEMENT_STYLE = "statisticProviderElement";
     
@@ -49,8 +52,10 @@ public class SimpleStatisticProvider implements StatisticProvider {
     private final ValueListBox<FunctionDTO> extractionFunctionListBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
 
-    public SimpleStatisticProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+    public SimpleStatisticProvider(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                    DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
@@ -269,16 +274,27 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
         return null;
     }
 
     @Override
-    public void updateSettings(SerializableSettings newSettings) { }
+    public void updateSettings(SerializableSettings newSettings) {
+        // no-op
+    }
     
     @Override
     public String getDependentCssClassName() {
         return "simpleStatisticsProvider";
     }
 
+    @Override
+    public SerializableSettings getSettings() {
+        return null;
+    }
+
+    @Override
+    public String getId() {
+        return "SimpleStatisticProvider";
+    }
 }

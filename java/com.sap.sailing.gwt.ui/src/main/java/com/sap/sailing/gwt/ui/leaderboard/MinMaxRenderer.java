@@ -3,6 +3,13 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.Comparator;
 
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Style.Position;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.safecss.shared.SafeStyles;
+import com.google.gwt.safecss.shared.SafeStylesBuilder;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 
@@ -14,10 +21,77 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
  * 
  */
 public class MinMaxRenderer {
+    
+
+    
+    protected static final String BACKGROUND_BAR_STYLE_BAD = "minMaxBackgroundBarBad";
+    protected static final String BACKGROUND_BAR_STYLE_OK = "minMaxBackgroundBar";
+    protected static final String BACKGROUND_BAR_STYLE_GOOD = "minMaxBackgroundBarGood";
+
     private final HasStringAndDoubleValue valueProvider;
     private final Comparator<LeaderboardRowDTO> comparator;
     private Double minimumValue;
     private Double maximumValue;
+
+    public static final Templates TEMPLATES = GWT.create(Templates.class);
+
+    public static class Templates {
+        protected interface MyTemplate extends SafeHtmlTemplates {
+            @Template("<div title=\"{2}\" class=\"{1}\" style='{3}'>{0}</div>")
+            SafeHtml render(String value, String cssClass, String title, SafeStyles style);
+
+            @Template("<div title=\"{2}\" style='position:relative;'>"
+                    + "<div class=\"{1}\" style=\"position:absolute;left:50%;width:1px;height:25px;background-repeat:repeat-x;\" ></div>"
+                    + "<div style='position:relative;'>{0}</div>" //
+                    + "</div>")
+            SafeHtml renderMiddle(String value, String cssClass, String title);
+
+            @Template("<div title=\"{2}\" style='position:relative;'>"
+                    + "<div class=\"{1}\" style=\"{3}\" >&nbsp;</div>"
+                    + "<div style='position:relative;'>{0}</div>" //
+                    + "</div>")
+            SafeHtml renderPositiveFromMiddle(String value, String cssClass, String title, SafeStyles style);
+
+            @Template("<div title=\"{2}\" style='position:relative;'>"
+                    + "<div class=\"{1}\" style=\"{3}\" >&nbsp;</div>"
+                    + "<div style='position:relative;'>{0}</div>" //
+                    + "</div>")
+            SafeHtml renderNegativeFromMiddle(String value, String cssClass, String title, SafeStyles style);
+        }
+
+        protected static final MyTemplate T = GWT.create(MyTemplate.class);
+
+        SafeHtml render(String value, String cssClass, String title, int percentage) {
+            SafeStylesBuilder sb = new SafeStylesBuilder();
+            sb.trustedNameAndValue("background-size", percentage + "% 25px");
+            return T.render(value, cssClass, title, sb.toSafeStyles());
+        }
+
+        SafeHtml renderMiddle(String value, String cssClass, String title) {
+            return T.renderMiddle(value, cssClass, title);
+        }
+
+        SafeHtml renderPositiveFromMiddle(String value, String cssClass, String title, double percentage) {
+            SafeStylesBuilder sb = new SafeStylesBuilder();
+            sb.width(percentage, Unit.PCT);
+            sb.position(Position.ABSOLUTE);
+            sb.left(50, Unit.PCT);
+            sb.trustedNameAndValue("background-repeat", "repeat-x");
+            return T.renderPositiveFromMiddle(value, cssClass, title, sb.toSafeStyles());
+        }
+
+        SafeHtml renderNegativeFromMiddle(String value, String cssClass, String title, double percentage) {
+            SafeStylesBuilder sb = new SafeStylesBuilder();
+            sb.width(percentage, Unit.PCT);
+            sb.position(Position.ABSOLUTE);
+            sb.right(50, Unit.PCT);
+            sb.trustedNameAndValue("left", "initial");
+            sb.trustedNameAndValue("background-repeat", "repeat-x");
+            return T.renderNegativeFromMiddle(value, cssClass, title, sb.toSafeStyles());
+        }
+    }
+
+
 
     /**
      * Renders the value and the percentage bar of the columns {@link DetailTypeColumn} and
@@ -39,15 +113,15 @@ public class MinMaxRenderer {
      * @param title
      *            tool tip title to display; if <code>null</code>, no tool tip will be rendered
      */
-    public void render(Context context, LeaderboardRowDTO row, String title, SafeHtmlBuilder sb) {
-        int percent = getPercentage(row);
+    public final void render(Context context, LeaderboardRowDTO row, String title, SafeHtmlBuilder sb) {
         String stringValue = valueProvider.getStringValueToRender(row);
-        stringValue = stringValue == null ? "" : stringValue;
-        sb.appendHtmlConstant("<div " + (title == null ? "" : "title=\"" + title + "\" ")
-        		+ "class=\"minMaxBackgroundBar\" "
-                + "style=\"background-size: " + percent + "% 25px; \">").appendEscaped(stringValue).appendHtmlConstant("</div>");
+        this.render(row, stringValue == null ? "" : stringValue, title == null ? "" : title, sb);
     }
-
+    
+    protected void render(LeaderboardRowDTO row, String nullSafeValue, String nullSafeTitle, SafeHtmlBuilder sb) {
+        sb.append(TEMPLATES.render(nullSafeValue, BACKGROUND_BAR_STYLE_OK, nullSafeTitle, getPercentage(row)));
+    }
+    
     /**
      * Gets the percentage of a {@link LeaderboardRowDTO}. If no minimum or maximum value was set by calling
      * {@link MinMaxRenderer#updateMinMax(DisplayedLeaderboardRowsProvider)} before zero is returned.

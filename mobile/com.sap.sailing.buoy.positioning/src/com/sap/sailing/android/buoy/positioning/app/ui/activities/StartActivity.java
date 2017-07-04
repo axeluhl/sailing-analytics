@@ -1,20 +1,21 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
+import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
+import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
+import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
+import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
+
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
-import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
-import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
-import com.sap.sailing.android.shared.util.EulaHelper;
-import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
-
-public class StartActivity extends AbstractStartActivity {
+public class StartActivity extends AbstractStartActivity<CheckinData> {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,11 +23,15 @@ public class StartActivity extends AbstractStartActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.title_activity_start));
             getSupportActionBar().setHomeButtonEnabled(false);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
 
         if (!EulaHelper.with(this).isEulaAccepted()) {
-            EulaHelper.with(this).showEulaDialog(R.style.Base_Theme_AppCompat_Dialog_Alert);
+            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
         }
     }
 
@@ -63,7 +68,7 @@ public class StartActivity extends AbstractStartActivity {
     }
 
     @Override
-    public void onCheckinDataAvailable(AbstractCheckinData data) {
+    public void onCheckinDataAvailable(CheckinData data) {
         if (data != null) {
             getHomeFragment().displayUserConfirmationScreen(data);
         }

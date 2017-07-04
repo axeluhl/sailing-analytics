@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.communication.start.GetStartViewAction;
 import com.sap.sailing.gwt.home.communication.start.StartViewDTO;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 
 public class StartActivity extends AbstractActivity {
@@ -21,7 +20,7 @@ public class StartActivity extends AbstractActivity {
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
-        panel.setWidget(new Placeholder());
+        panel.setWidget(clientFactory.createBusyView());
         clientFactory.getDispatch().execute(new GetStartViewAction(), new ActivityCallback<StartViewDTO>(clientFactory, panel) {
             @Override
             public void onSuccess(StartViewDTO result) {

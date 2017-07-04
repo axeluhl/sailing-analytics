@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.adminconsole;
 
+import java.util.Map;
+
 import com.google.gwt.user.client.ui.Widget;
 
 public class DefaultRefreshableAdminConsolePanel<W extends Widget> implements RefreshableAdminConsolePanel {
@@ -11,6 +13,10 @@ public class DefaultRefreshableAdminConsolePanel<W extends Widget> implements Re
     
     public DefaultRefreshableAdminConsolePanel(W widget) {
         this.widget = widget;
+    }
+
+    @Override
+    public void setupWidgetByParams(Map<String, String> params){
     }
 
     @Override

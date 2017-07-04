@@ -3,7 +3,7 @@ package com.sap.sse.common.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.impl.KeywordMatcher;
 
 /**
  * Matches a list of keywords in a list of strings. A match is recognized if each of the keywords is contained in at least
@@ -17,63 +17,34 @@ import com.sap.sse.common.Util;
  * @param <T>
  */
 public abstract class AbstractListFilter<T> {
+    
+    private final KeywordMatcher<T> matcher = new KeywordMatcher<T>() {
+        @Override
+        public Iterable<String> getStrings(T t) {
+            return AbstractListFilter.this.getStrings(t);
+        }
+    };
 
     /**
-     * Subclasses must implement this to extract the strings from an object of type <code>T</code> based on which the
-     * filter performs its filtering
-     * 
-     * @param t
-     *            the object from which to extract the searchable strings
-     * @return the searchable strings
+     * @see KeywordMatcher#getStrings(Object)
      */
     public abstract Iterable<String> getStrings(T t);
     
     /**
-     * Constructs a list based on the contents of {@link #all} and the current search phrase {@link #text}. 
+     * Constructs a list based on the contents of {@code all} using the {@link #matcher} which matches
+     * the {@code keywords} against what {@link #getStrings(Object)} returns for the respective
+     * object from {@code all}.
      */
     public Iterable<T> applyFilter(Iterable<String> keywords, Iterable<T> all) {
-        List<T> sortedList = new ArrayList<T>();
+        List<T> result = new ArrayList<T>();
         if (all != null) {
-            if (keywords != null && !Util.isEmpty(keywords)) {
-                for (T t : all) {
-                    if (containsText(t, keywords)) {
-                        sortedList.add(t);
-                    }
-                }
-            } else {
-                for (T t : all) {
-                    sortedList.add(t);
+            for (T t : all) {
+                if (matcher.matches(keywords, t)) {
+                    result.add(t);
                 }
             }
         }
-        return sortedList;
-    }
-    
-    /**
-     * Returns <code>true</code> if for each of the <code>keywords</code> any of the {@link #getStrings(Object) values
-     * to check} contains that keyword.
-     * 
-     * @param keywords
-     *            the words to filter on
-     * @return <code>true</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>,
-     *         <code>false</code> if not
-     */
-    private boolean containsText(T obj, Iterable<String> keywords) {
-        boolean failed = false;
-        for (String word : keywords) {
-            String textAsUppercase = word.toUpperCase().trim();
-            failed = true;
-            for (String s : getStrings(obj)) {
-                if (s != null && s.toUpperCase().contains(textAsUppercase)) {
-                    failed = false;
-                    break;
-                }
-            }
-            if (failed) {
-                return false;
-            }
-        }
-        return true;
+        return result;
     }
 }
 

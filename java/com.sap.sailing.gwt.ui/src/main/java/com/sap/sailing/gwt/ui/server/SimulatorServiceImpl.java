@@ -10,15 +10,13 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.PathType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -61,7 +59,6 @@ import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.simulator.BoatClassProperties;
 import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.Simulator;
@@ -86,6 +83,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
@@ -106,11 +104,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private SpeedWithBearing averageWind = null;
 
     public SimulatorServiceImpl() {
-        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-        Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
-        /* maximumPoolSize */THREAD_POOL_SIZE,
-        /* keepAliveTime */60, TimeUnit.SECONDS,
-        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, null);        
     }
@@ -949,7 +943,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
             // NOTE: pathName convention is: sort-digit + "#" + path-name
             // pathsAndNames is TreeMap which ensures sorting
-            pathDTOs[index] = new PathDTO(entry.getKey().getTxtId());
+            pathDTOs[index] = new PathDTO(entry.getKey());
 
             // fill pathDTO with path points where speed is true wind speed
             List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();

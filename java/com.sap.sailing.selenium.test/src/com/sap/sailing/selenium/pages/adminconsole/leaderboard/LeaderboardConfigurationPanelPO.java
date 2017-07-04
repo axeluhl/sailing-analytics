@@ -18,6 +18,9 @@ import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
 public class LeaderboardConfigurationPanelPO extends PageArea {
     public static class LeaderboardEntryPO extends DataEntryPO {
+
+        private static final String ACTION_NAME_CONFIGURE_URL = "ACTION_CONFIGURE_URL";
+
         public LeaderboardEntryPO(CellTablePO<?> table, WebElement element) {
             super(table, element);
         }
@@ -38,6 +41,11 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         public String getLeaderboardURL() {
             WebElement link = this.context.findElement(By.xpath(".//td/div/a"));
             return link.getAttribute("href");
+        }
+
+        public LeaderboardUrlConfigurationDialogPO getLeaderboardPageUrlConfigurationDialog() {
+            clickActionImage(ACTION_NAME_CONFIGURE_URL);
+            return waitForPO(LeaderboardUrlConfigurationDialogPO::new, "LeaderboardPageUrlConfigurationDialog", 60);
         }
     }
     
@@ -127,7 +135,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         return new LeaderboardDetailsPanelPO(this.driver, this.leaderboardDetailsPanel);
     }
     
-    private CellTablePO<LeaderboardEntryPO> getLeaderboardTable() {
+    public CellTablePO<LeaderboardEntryPO> getLeaderboardTable() {
         return new GenericCellTablePO<>(this.driver, this.leaderboardsCellTable, LeaderboardEntryPO.class);
     }
     

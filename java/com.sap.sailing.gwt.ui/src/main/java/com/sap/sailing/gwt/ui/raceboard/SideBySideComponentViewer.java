@@ -26,12 +26,11 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListen
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentViewer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -43,7 +42,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * TODO: Refactor to make sure it is really only performing operations that are related to view. Currently it is digging
  * too deep into components and setting titles or even creating video buttons.
  */
-public class SideBySideComponentViewer implements ComponentViewer, UserStatusEventHandler {
+public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
@@ -62,7 +61,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         }
     }
 
-    private final LeaderboardPanel leftComponent;
+    private Component<?> leftComponent;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
@@ -70,6 +69,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
     private final Button mediaSelectionButton;
     private final Button mediaManagementButton;
     private final EditMarkPassingsPanel markPassingsPanel;
+    private final EditMarkPositionPanel markPositionPanel;
     private final MediaPlayerManagerComponent mediaPlayerManagerComponent;
 
     private LayoutPanel mainPanel;
@@ -78,9 +78,10 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
     private int savedSplitPosition = -1;
     private boolean layoutForLeftComponentForcedOnce = false;
 
-    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP,
+    public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
-            final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel) {
+            final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel,
+            EditMarkPositionPanel markPositionPanel) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
@@ -89,6 +90,8 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         this.mediaSelectionButton = createMediaSelectionButton(mediaPlayerManagerComponent);
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
+        this.markPositionPanel = markPositionPanel;
+        markPositionPanel.setComponentViewer(this);
         userService.addUserStatusEventHandler(this);
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {
@@ -164,12 +167,18 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         List<Pair<Button, String>> additionalVerticalButtons = new ArrayList<Pair<Button, String>>();
         additionalVerticalButtons.add(new Pair<Button, String>(mediaSelectionButton,
                 mediaPlayerManagerComponent.getDependentCssClassName()));
-        additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
-                "managemedia"));
+            additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
+                    "managemedia"));
         onUserStatusChange(userService.getCurrentUser());
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
                 additionalVerticalButtons);
+    }
+    
+    public void setLeftComponent(Component<?> component) {
+        leftComponent = component;
+        leftScrollPanel.setWidget(leftComponent.getEntryWidget());
+        leftScrollPanel.setTitle(leftComponent.getEntryWidget().getTitle());
     }
 
     /**
@@ -297,18 +306,36 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
 
     @Override
     public void onUserStatusChange(UserDTO user) {
-        final Splitter associatedSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
-        if (associatedSplitter != null) { // if the panel is not present, the splitter may not be found
-            final Button toggleButton = associatedSplitter.getToggleButton();
-            if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getStringPermission(),
-                    SailingPermissionsForRoleProvider.INSTANCE)) {
-                toggleButton.setVisible(true);
-                forceLayout();
-            } else {
-                markPassingsPanel.setVisible(false);
-                toggleButton.setVisible(false);
-                forceLayout();
+        final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
+        final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
+        boolean forceLayout = false;
+        if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getStringPermission(),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
+                markPassingsSplitter.getToggleButton().setVisible(true);
             }
+            forceLayout = true;
+        } else {
+            if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
+                markPassingsPanel.setVisible(false);
+                markPassingsSplitter.getToggleButton().setVisible(false);
+            }
+        }
+        if (user != null && user.hasPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission(),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
+                markPositionSplitter.getToggleButton().setVisible(true);
+            }
+            forceLayout = true;
+        } else {
+            if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
+                markPositionPanel.setVisible(false);
+                markPositionSplitter.getToggleButton().setVisible(false);
+            }
+            forceLayout();
+        }
+        if (forceLayout) {
+            forceLayout();
         }
         mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
     }
@@ -329,6 +356,13 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
             Style drapperStyle = leftScrollPanelSplitter.getDragger().getElement().getStyle();
             if (visible) drapperStyle.clearMarginTop();
             else drapperStyle.setMarginTop(-25, Unit.PX);
+        }
+    }
+    
+    public void setLeftComponentToggleButtonVisible(boolean visible) {
+        Splitter leftScrollPanelSplitter = splitLayoutPanel.getAssociatedSplitter(leftScrollPanel);
+        if (leftScrollPanelSplitter != null) {
+            leftScrollPanelSplitter.getToggleButton().setVisible(visible);
         }
     }
 }

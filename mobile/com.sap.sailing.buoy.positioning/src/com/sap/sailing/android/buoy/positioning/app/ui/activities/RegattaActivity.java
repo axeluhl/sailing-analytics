@@ -1,15 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
@@ -19,13 +9,25 @@ import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 
-public class RegattaActivity extends AbstractRegattaActivity {
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v7.app.AlertDialog;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
+public class RegattaActivity extends AbstractRegattaActivity<CheckinData> {
 
     private String leaderboardName;
     private String checkinDigest;
@@ -42,7 +44,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
         prefs.setLastScannedQRCode(null);
         Intent intent = getIntent();
 
-
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
         leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
 
@@ -54,18 +55,18 @@ public class RegattaActivity extends AbstractRegattaActivity {
             toolbar.hideSubtitle();
             toolbar.setTitleSize(20);
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             getSupportActionBar().setTitle(leaderboardName);
         }
-        RegattaFragment regattaFragment = new RegattaFragment();
-        replaceFragment(R.id.content_frame, regattaFragment);
+        replaceFragment(R.id.content_frame, RegattaFragment.newInstance());
 
         MarkerUtils.withContext(this).startMarkerService(checkinUrl);
     }
@@ -122,7 +123,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
                 manager.callServerAndGenerateCheckinData();
                 return true;
             case R.id.check_out:
-                checkOut();
+                displayCheckoutConfirmationDialog();
                 return true;
             case R.id.about:
                 AboutHelper.showInfoActivity(this);
@@ -142,20 +143,36 @@ public class RegattaActivity extends AbstractRegattaActivity {
     }
 
     @Override
-    public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
-        CheckinData data = (CheckinData) checkinData;
-        try {
-            DatabaseHelper.getInstance().updateMarks(this, data.marks, data.getLeaderboard());
-            getRegattaFragment().getAdapter().notifyDataSetChanged();
-        } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
-            ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
-            displayDatabaseError();
-            return;
+    public void onCheckinDataAvailable(CheckinData data) {
+        if (data != null) {
+            try {
+                DatabaseHelper.getInstance().updateMarks(this, data);
+            } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+                ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
+                displayDatabaseError();
+                return;
+            }
+    
+            if (BuildConfig.DEBUG) {
+                ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
+            }
+        } else {
+            ExLog.i(this, TAG, "checkinData is null");
         }
+    }
 
-        if (BuildConfig.DEBUG) {
-            ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
-        }
+    private void displayCheckoutConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+        builder.setTitle(R.string.warning);
+        builder.setMessage(R.string.checkout_warning_message);
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                checkOut();
+            }
+        });
+        builder.setNegativeButton(android.R.string.no, null);
+        builder.show();
     }
 
     private void checkOut(){
@@ -165,10 +182,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     public String getCheckinDigest() {
         return checkinDigest;
-    }
-
-    public RegattaFragment getRegattaFragment() {
-        return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
 
     /**

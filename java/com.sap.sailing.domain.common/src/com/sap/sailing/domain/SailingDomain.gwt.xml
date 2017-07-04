@@ -9,4 +9,7 @@
   <source path='common/scalablevalue'/>
   <source path='common/racelog/tracking'/>
   <source path='common/scalablevalue/impl'/>
+    <!--   Remove Classes that fit to the remote interfaces but only cause warnings and never could be serialized anyway -->
+    <extend-configuration-property name="rpc.blacklist" value="com.sap.sailing.domain.common.quadtree.QuadTree"/>
+    <extend-configuration-property name="rpc.blacklist" value="com.google.gwt.validation.client.impl.PathImpl"/>
 </module>

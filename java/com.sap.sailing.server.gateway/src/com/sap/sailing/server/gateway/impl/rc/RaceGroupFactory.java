@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
@@ -25,14 +26,21 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.RaceRowImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Used to convert {@link Leaderboard}s to {@link RaceGroup}s.
  */
 public class RaceGroupFactory {
+    private static final Logger logger = Logger.getLogger(RaceGroupFactory.class.getName());
 
     /**
      * Convert given {@link RegattaLeaderboard} to a {@link RaceGroup}.
@@ -62,11 +70,11 @@ public class RaceGroupFactory {
         return new RaceGroupImpl(name, leaderboard.getDisplayName(), boatClass, courseArea, series, configuration);
     }
 
-    public Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {
+    private Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = getSeriesToRaceColumns(leaderboard);
         Collection<SeriesWithRows> seriesWithRows = new ArrayList<>();
         for (Series series : getSeriesIterable(leaderboard, seriesToRaceColumns)) {
-            seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), getRows(series,
+            seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), series.isFleetsCanRunInParallel(), getRows(series,
                     seriesToRaceColumns.get(series))));
         }
         return seriesWithRows;
@@ -80,6 +88,9 @@ public class RaceGroupFactory {
         return seriesToRaceColumns.keySet();
     }
 
+    /**
+     * @param raceColumns must be provided in the same order in which they appear in the series / leaderboard
+     */
     private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns) {
         Collection<RaceRow> rows = new ArrayList<>();
         for (Fleet fleet : series.getFleets()) {
@@ -94,16 +105,33 @@ public class RaceGroupFactory {
         return series.isFirstColumnIsNonDiscardableCarryForward();
     }
 
-    private Collection<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns, boolean isFirstRaceColumnVirtual) {
+    /**
+     * Delivers the race cell in the order of the {@link RaceColumn}s provided in {@code raceColumns}. The
+     * {@link RaceCell#getTargetTime() target times} are based on an
+     * {@link TrackedRace#getEstimatedTimeToComplete(TimePoint) estimation} for the current point in time, when the
+     * request is being made, using this time point to determine the wind speed and direction for each leg.
+     */
+    private List<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns, boolean isFirstRaceColumnVirtual) {
         boolean skippedFirst = false;
-        Collection<RaceCell> cells = new ArrayList<>();
+        List<RaceCell> cells = new ArrayList<>();
         if (raceColumns != null) {
-            for (RaceColumn raceColumn : raceColumns) {
+            int zeroBasedIndexOfRaceInFleet = 0;
+            final TimePoint now = MillisecondsTimePoint.now();
+            for (final RaceColumn raceColumn : raceColumns) {
                 if (isFirstRaceColumnVirtual && !skippedFirst) {
                     skippedFirst = true;
                 } else {
-                    Fleet fleet = raceColumn.getFleetByName(fleetName);
-                    cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+                    final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                    final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    TargetTimeInfo targetTime;
+                    try {
+                        targetTime = trackedRace == null ? null : trackedRace.getEstimatedTimeToComplete(now);
+                    } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
+                        logger.fine(()->"Unable to determine target time for "+trackedRace);
+                        targetTime = null;
+                    }
+                    cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet),
+                            raceColumn.getFactor(), raceColumn.getExplicitFactor(), zeroBasedIndexOfRaceInFleet++, targetTime));
                 }
             }
         }
@@ -112,7 +140,9 @@ public class RaceGroupFactory {
 
     /**
      * Returns a series to race column mapping. If there are no series all race columns will
-     * be mapped from a default series.
+     * be mapped from a default series. The race column lists that appear as values in the result
+     * maintain the order in which the race column objects appear in the original {@link Series}
+     * or leaderboard.
      */
     private Map<Series, List<RaceColumn>> getSeriesToRaceColumns(Leaderboard leaderboard) {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = new HashMap<>();
@@ -135,7 +165,7 @@ public class RaceGroupFactory {
 
     private Series createDefaultSeries(Iterable<? extends Fleet> fleets) {
         Series defaultSeries;
-        defaultSeries = new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME, false,
+        defaultSeries = new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME, false, true,
                 fleets, Collections.<String> emptyList(), null);
         return defaultSeries;
     }

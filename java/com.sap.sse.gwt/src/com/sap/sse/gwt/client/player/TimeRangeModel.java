@@ -36,12 +36,21 @@ public class TimeRangeModel implements TimeRangeProvider {
     }
 
     public void setTimeRange(final Date fromTime, final Date toTime, TimeRangeChangeListener... listenersNotToNotify) {
-        this.fromTime = fromTime != null ? new Date(fromTime.getTime()) : null;
-        this.toTime = toTime != null ? new Date(toTime.getTime()) : null;
-
-        for (TimeRangeChangeListener listener : listeners) {
-            if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
-                listener.onTimeRangeChanged(fromTime, toTime);
+        final boolean fromChanged = !Util.equalsWithNull(this.fromTime, fromTime);
+        final boolean toChanged = !Util.equalsWithNull(this.toTime, toTime);
+        if (fromChanged) {
+            // Note: java.util.Date is not immutable, therefore only a copy is really safe
+            this.fromTime = fromTime != null ? new Date(fromTime.getTime()) : null;
+        }
+        if (toChanged) {
+            // Note: java.util.Date is not immutable, therefore only a copy is really safe
+            this.toTime = toTime != null ? new Date(toTime.getTime()) : null;
+        }
+        if (fromChanged || toChanged) {
+            for (TimeRangeChangeListener listener : listeners) {
+                if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
+                    listener.onTimeRangeChanged(fromTime, toTime);
+                }
             }
         }
     }

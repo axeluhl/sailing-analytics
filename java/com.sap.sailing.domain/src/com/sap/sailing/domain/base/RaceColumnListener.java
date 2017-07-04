@@ -14,7 +14,9 @@ public interface RaceColumnListener extends Serializable {
     void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace);
     
     void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace);
-    
+
+    void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel);
+
     void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore);
     
     void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward);
@@ -30,6 +32,8 @@ public interface RaceColumnListener extends Serializable {
     void raceColumnRemovedFromContainer(RaceColumn raceColumn);
     
     void raceColumnMoved(RaceColumn raceColumn, int newIndex);
+    
+    void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName);
     
     void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor);
 

@@ -38,7 +38,7 @@ public class SearchResultItem extends AbstractSearchResultItem {
     
     @Override
     protected void configureRegattaNavigation(String eventId, String leaderboardName, String baseUrl, boolean isOnRemoteServer) {
-        navigator.getRegattaOverviewNavigation(eventId, leaderboardName, baseUrl, isOnRemoteServer).configureAnchorElement(anchorUi);
+        navigator.getRegattaNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer()).configureAnchorElement(anchorUi);
     }
     
     @Override

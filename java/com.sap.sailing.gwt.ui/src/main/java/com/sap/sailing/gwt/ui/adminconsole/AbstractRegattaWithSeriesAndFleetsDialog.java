@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,6 +9,7 @@ import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -29,6 +27,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 /**
@@ -44,13 +43,15 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
 
     protected StringMessages stringMessages;
     private final RegattaDTO regatta;
-    
+
     protected final BetterDateTimeBox startDateBox;
     protected final BetterDateTimeBox endDateBox;
     protected final ListBox scoringSchemeListBox;
     protected final ListBox courseAreaListBox;
     protected final ListBox sailingEventsListBox;
     protected final CheckBox useStartTimeInferenceCheckBox;
+    protected final CheckBox controlTrackingFromStartAndFinishTimesCheckBox;
+    protected final DoubleBox buoyZoneRadiusInHullLengthsDoubleBox;
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
 
@@ -73,8 +74,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         }
         startDateBox = createDateTimeBox(regatta.startDate);
         startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        startDateBox.ensureDebugId("StartDateTimeBox");
         endDateBox = createDateTimeBox(regatta.endDate);
         endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox.ensureDebugId("EndDateTimeBox");
         scoringSchemeListBox = createListBox(false);
         scoringSchemeListBox.ensureDebugId("ScoringSchemeListBox");
         for (ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
@@ -89,6 +92,13 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         useStartTimeInferenceCheckBox = createCheckbox(stringMessages.useStartTimeInference());
         useStartTimeInferenceCheckBox.ensureDebugId("UseStartTimeInferenceCheckBox");
         useStartTimeInferenceCheckBox.setValue(regatta.useStartTimeInference);
+        controlTrackingFromStartAndFinishTimesCheckBox = createCheckbox(stringMessages.controlTrackingFromStartAndFinishTimes());
+        controlTrackingFromStartAndFinishTimesCheckBox.ensureDebugId("ControlTrackingFromStartAndFinishTimesCheckBox");
+        controlTrackingFromStartAndFinishTimesCheckBox.setValue(regatta.controlTrackingFromStartAndFinishTimes);
+
+        buoyZoneRadiusInHullLengthsDoubleBox = createDoubleBox(regatta.buoyZoneRadiusInHullLengths, 10);
+        buoyZoneRadiusInHullLengthsDoubleBox.ensureDebugId("BuoyZoneRadiusInHullLengthsDoubleBox");
+
         courseAreaListBox = createListBox(false);
         courseAreaListBox.ensureDebugId("CourseAreaListBox");
         courseAreaListBox.setEnabled(false);
@@ -137,7 +147,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(7, 2);
+        Grid formGrid = new Grid(9, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0, 0, new Label(stringMessages.timeZone() + ":"));
@@ -154,6 +164,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(5, 1, courseAreaListBox);
         formGrid.setWidget(6, 0, new Label(stringMessages.useStartTimeInference() + ":"));
         formGrid.setWidget(6, 1, useStartTimeInferenceCheckBox);
+        formGrid.setWidget(7, 0, new Label(stringMessages.controlTrackingFromStartAndFinishTimes() + ":"));
+        formGrid.setWidget(7, 1, controlTrackingFromStartAndFinishTimesCheckBox);
+        formGrid.setWidget(8, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
+        formGrid.setWidget(8, 1, buoyZoneRadiusInHullLengthsDoubleBox);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
@@ -190,18 +204,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
         sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
-        final List<EventDTO> sortedEvents = new ArrayList<>();
-        sortedEvents.addAll(existingEvents);
-        Collections.sort(sortedEvents, new Comparator<EventDTO>() {
-            @Override
-            public int compare(EventDTO o1, EventDTO o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        for (EventDTO event : sortedEvents) {
+        for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
             sailingEventsListBox.addItem(event.getName());
-            if(defaultEvent != null){
-                if (defaultEvent.getName().equals(event.getName())){
+            if (defaultEvent != null) {
+                if (defaultEvent.getName().equals(event.getName())) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     fillCourseAreaListBox(event);
                     //select default course area, 2 elements as first is please select course area string
@@ -240,7 +246,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected void fillCourseAreaListBox(EventDTO selectedEvent) {
         courseAreaListBox.addItem(stringMessages.selectCourseArea());
         for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
-            courseAreaListBox.addItem(courseArea.getName());
+            courseAreaListBox.addItem(courseArea.getName(), courseArea.id.toString());
             if (courseArea.id.equals(regatta.defaultCourseAreaUuid)) {
                 courseAreaListBox.setSelectedIndex(courseAreaListBox.getItemCount() - 1);
             }
@@ -252,9 +258,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         EventDTO result = null;
         int selIndex = sailingEventsListBox.getSelectedIndex();
         if (selIndex > 0) { // the zero index represents the 'no selection' text
-            String itemText = sailingEventsListBox.getItemText(selIndex);
+            String itemValue = sailingEventsListBox.getValue(selIndex);
             for (EventDTO eventDTO : existingEvents) {
-                if (eventDTO.getName().equals(itemText)) {
+                if (eventDTO.getName().equals(itemValue)) {
                     result = eventDTO;
                     break;
                 }
@@ -268,9 +274,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         EventDTO event = getSelectedEvent();
         int selIndex = courseAreaListBox.getSelectedIndex();
         if (selIndex > 0 && event != null) { // the zero index represents the 'no selection' text
-            String itemText = courseAreaListBox.getItemText(selIndex);
+            String selectedCourseAreaIdAsString = courseAreaListBox.getValue(selIndex);
             for (CourseAreaDTO courseAreaDTO : event.venue.getCourseAreas()) {
-                if (courseAreaDTO.getName().equals(itemText)) {
+                if (courseAreaDTO.id.toString().equals(selectedCourseAreaIdAsString)) {
                     result = courseAreaDTO;
                     break;
                 }
@@ -285,6 +291,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         result.endDate = endDateBox.getValue();
         result.scoringScheme = getSelectedScoringSchemeType();
         result.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
+        result.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesCheckBox.getValue();
+        result.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsDoubleBox.getValue();
         setCourseAreaInRegatta(result);
         result.series = getSeriesEditor().getValue();
         return result;

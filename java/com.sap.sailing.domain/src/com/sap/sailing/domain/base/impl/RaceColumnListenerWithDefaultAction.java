@@ -44,6 +44,11 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
     }
 
     @Override
+    default void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        defaultAction(); 
+    }
+
+    @Override
     default void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         defaultAction(); 
     }
@@ -72,6 +77,11 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
     @Override
     default void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
         defaultAction(); 
+    }
+
+    @Override
+    default void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        defaultAction();
     }
 
     @Override

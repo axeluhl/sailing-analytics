@@ -11,6 +11,7 @@ import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
@@ -22,6 +23,8 @@ import com.sap.sailing.simulator.util.SailingSimulatorConstants;
  *
  */
 public class PathLegendCanvasOverlay extends FullCanvasOverlay {
+    
+    private final StringMessages stringMessages;
 
     private List<PathCanvasOverlay> pathOverlays;
 
@@ -43,13 +46,17 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
     private String algorithmTimedOutText = "out-of-bounds";
     private String mixedLegText = "ambiguous wind";
 
-    public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode, CoordinateSystem coordinateSystem) {
+    public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode, CoordinateSystem coordinateSystem,
+            StringMessages stringMessages) {
         super(map, zIndex, coordinateSystem);
+        this.stringMessages = stringMessages;
     	this.mode = mode;
     	if (this.mode == SailingSimulatorConstants.ModeEvent) {
     	    yOffset = 170;
     	}
         setPathOverlays(null);
+        this.algorithmTimedOutText = stringMessages.simulationLegendAlgorithmTimedOutText();
+        this.mixedLegText = stringMessages.simulationLegendMixedLegText();
     }
 
     @Override
@@ -138,7 +145,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 double cY = yOffset + (pathOverlays.size()-1) * rectHeight + 75.0;
                 context2d.setGlobalAlpha(0.80);
                 context2d.setFillStyle("white");
-                double bgWidth = 100.0;
+                double bgWidth = 120.0;
                 double bgHeight = 70.0;
                 if (this.curSpeed == 0.0) {
                 	bgHeight = 20.0;
@@ -148,7 +155,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 context2d.setFont(textFont);
                 context2d.setFillStyle(textColor);
                 //TextMetrics txtmet;
-                String cText = "Current: " + SimulatorMainPanel.formatSliderValue(curSpeed) + "kn";
+                String cText = stringMessages.current() + ": " + stringMessages.knotsValue(curSpeed);
                 txtmet = context2d.measureText(cText);
                 double txtwidth = txtmet.getWidth();
                 context2d.fillText(cText, cX-(txtwidth/2.0), cY-25);

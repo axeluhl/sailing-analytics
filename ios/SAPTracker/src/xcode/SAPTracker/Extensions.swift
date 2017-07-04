@@ -8,45 +8,62 @@
 
 import Foundation
 
-/* Set color to RGB hex value. See http://stackoverflow.com/a/24263296 */
-extension UIColor {
+// MARK: - Logging
+
+func logInfo(name: String, info: String) {
+    #if DEBUG
+        NSLog("\(name): \(info)")
+    #endif
+}
+
+func logError(name: String, error: ErrorType) {
+    #if DEBUG
+        NSLog("\(name): \(error)")
+    #endif
+}
+
+// MARK: - UIColor
+
+extension UIColor { // Set color to RGB hex value. See http://stackoverflow.com/a/24263296
+    
     convenience init(red: Int, green: Int, blue: Int) {
         assert(red >= 0 && red <= 255, "Invalid red component")
         assert(green >= 0 && green <= 255, "Invalid green component")
         assert(blue >= 0 && blue <= 255, "Invalid blue component")
-        
         self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: 1.0)
     }
 
     convenience init(hex:Int) {
         self.init(red:(hex >> 16) & 0xff, green:(hex >> 8) & 0xff, blue:hex & 0xff)
     }
+    
 }
 
-/* Needed for setting border color in Interface Builder. */
-extension CALayer {
-    var borderUIColor: UIColor {
-        get {
-            return UIColor(CGColor: self.borderColor!)
-        }
-        set {
-            self.borderColor = newValue.CGColor
-        }
+// MARK: - UIImage
+
+extension UIImage {
+
+    public convenience init?(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
+        let rect = CGRect(origin: .zero, size: size)
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, 0.0)
+        color.setFill()
+        UIRectFill(rect)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        guard let cgImage = image.CGImage else { return nil }
+        self.init(CGImage: cgImage)
     }
+
 }
 
-/* Needed for bottom status labels. */
-class PaddedLabel : UILabel {
-    override func drawTextInRect(rect: CGRect) {
-        let insets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-        return super.drawTextInRect(UIEdgeInsetsInsetRect(rect, insets))
+// MARK: - UITableViewCell
+
+extension UITableViewCell {
+
+    func removeSeparatorInset() {
+        preservesSuperviewLayoutMargins = false
+        layoutMargins = UIEdgeInsetsZero
+        separatorInset = UIEdgeInsetsZero
     }
-}
-
-/* Needed for programmatically setting button heights in iOS 7. */
-struct ButtonHeight {
-    static let bigButtonPortrait = CGFloat(75.0)
-    static let bigButtonLandscape = CGFloat(50.0)
-    static let smallButtonPortrait = CGFloat(50.0)
-    static let smallButtonLandscape = CGFloat(50.0)
+    
 }

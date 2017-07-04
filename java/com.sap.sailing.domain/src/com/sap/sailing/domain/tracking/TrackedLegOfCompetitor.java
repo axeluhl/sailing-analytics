@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -91,6 +90,13 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * for the entire leg (and no further) is computed.
      */
     Speed getAverageSpeedOverGround(TimePoint timePoint);
+    
+    /**
+     * Computes the competitor's average ride height for this leg from the beginning of the leg up to time
+     * <code>timePoint</code>. If the competitor already completed the leg at <code>timePoint</code> and the respective
+     * mark passing event was already received, the average ride height for the entire leg (and no further) is computed.
+     */
+    Distance getAverageRideHeight(TimePoint timePoint);
 
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was
@@ -110,7 +116,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * may be part of the respective adjacent leg, depending on the maneuver's time point which may be slightly before, at, or
      * after the corresponding mark passing event.
      */
-    List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
+    Iterable<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
      * @param waitForLatest TODO
@@ -188,6 +194,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     TimePoint getStartTime();
     
+    /**
+     * @return <code>null</code> if the competitor hasn't finished this leg yet; the time point when the competitor passed
+     * the end waypoint of this leg otherwise
+     */
     TimePoint getFinishTime();
 
     /**
@@ -220,7 +230,17 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * finished the leg, the speed over ground at the time the competitor finished the leg is returned.
      */
     SpeedWithBearing getSpeedOverGround(TimePoint at);
+    
+    /**
+     * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
+     * <code>timePoint</code>, returns the current ride height for this time point. If the competitor has already
+     * finished the leg, the ride height at the time the competitor finished the leg is returned.
+     */
+    Distance getRideHeight(TimePoint at);
 
+    Bearing getHeel(TimePoint at);
+
+    Bearing getPitch(TimePoint at);
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader
      * and competitor are in the same leg, this is simply the windward distance. If the leader is already one or more

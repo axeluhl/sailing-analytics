@@ -18,10 +18,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 
 public class FinishedButtonFragment extends BasePanelFragment {
@@ -94,6 +91,10 @@ public class FinishedButtonFragment extends BasePanelFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+
+        if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
+            mList.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -106,17 +107,17 @@ public class FinishedButtonFragment extends BasePanelFragment {
     private void uncheckMarker(View view) {
         if (isAdded() && view != null) {
             if (!view.equals(mRecord)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartProcedureFragment.class);
+                // TODO
                 setMarkerLevel(mRecord, R.id.record_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mPhoto)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), LineStartModeFragment.class);
+                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), PhotoListFragment.class);
                 setMarkerLevel(mPhoto, R.id.photo_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mList)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), CourseFragment.class);
+                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), TrackingListFragment.class);
                 setMarkerLevel(mList, R.id.list_marker, LEVEL_NORMAL);
             }
         }
@@ -180,7 +181,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
                         break;
 
                     case LEVEL_TOGGLED:
-                        replaceFragment(TrackingListFragment.newInstance(getRecentArguments()), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                        replaceFragment(TrackingListFragment.newInstance(getRecentArguments(), 0), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                         break;
 
                     default:

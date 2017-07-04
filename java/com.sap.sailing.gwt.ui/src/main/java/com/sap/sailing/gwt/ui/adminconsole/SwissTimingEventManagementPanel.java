@@ -65,7 +65,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final IntegerBox portIntegerbox;
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
 
-    public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants) {
         super(sailingService, regattaRefresher, errorReporter, true, stringConstants);
         this.errorReporter = errorReporter;
@@ -241,7 +242,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         filterPanel.setSpacing(5);
         trackableRacesPanel.add(filterPanel);
 
-        Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
+        Label lblFilterEvents = new Label(stringConstants.filterRaces() + ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         
@@ -264,27 +265,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
         raceTable.setWidth("300px");
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
-        raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingRaceRecordDTO>(
-                new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
-                    @Override
-                    public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
-                        return dto1.raceId.equals(dto2.raceId);
-                    }
-                    @Override
-                    public int hashCode(SwissTimingRaceRecordDTO t) {
-                        return t.raceId.hashCode();
-                    }
-                }, raceList) {
-        });
-
-        trackableRacesPanel.add(raceTable);
-        raceList.addDataDisplay(raceTable);
-        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), regattaNameColumn, seriesNameColumn,
-        		raceNameColumn, raceStartTimeColumn, raceIdColumn, boatClassColumn, genderColumn, raceStatusColumn);
-        raceTable.addColumnSortHandler(columnSortHandler);
-        
-        trackedRacesPanel.add(trackedRacesListComposite);
-        
         filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO>(lblFilterEvents,
                 availableSwissTimingRaces, raceTable, raceList) {
             @Override
@@ -302,6 +282,26 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 return strings;
             }
         };
+        raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingRaceRecordDTO>(
+                new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
+                    @Override
+                    public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
+                        return dto1.raceId.equals(dto2.raceId);
+                    }
+                    @Override
+                    public int hashCode(SwissTimingRaceRecordDTO t) {
+                        return t.raceId.hashCode();
+                    }
+                }, filterablePanelEvents.getAllListDataProvider()) {
+        });
+
+        trackableRacesPanel.add(raceTable);
+        raceList.addDataDisplay(raceTable);
+        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), regattaNameColumn, seriesNameColumn,
+        		raceNameColumn, raceStartTimeColumn, raceIdColumn, boatClassColumn, genderColumn, raceStatusColumn);
+        raceTable.addColumnSortHandler(columnSortHandler);
+        
+        trackedRacesPanel.add(trackedRacesListComposite);
         filterPanel.add(filterablePanelEvents);
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         trackableRacesPanel.add(racesButtonPanel);

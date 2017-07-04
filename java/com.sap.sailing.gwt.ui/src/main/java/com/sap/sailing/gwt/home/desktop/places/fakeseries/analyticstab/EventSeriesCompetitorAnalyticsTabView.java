@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -17,13 +18,14 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
+import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 
 /**
@@ -58,29 +60,48 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
 
     @Override
     public void start(EventSeriesCompetitorAnalyticsPlace myPlace, AcceptsOneWidget contentArea) {
-        contentArea.setWidget(new Placeholder());
+        contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
+            final Runnable callback = new Runnable() {
+                @Override
+                public void run() {
+                    initWidget(ourUiBinder.createAndBindUi(EventSeriesCompetitorAnalyticsTabView.this));
+                    DetailType initialDetailType = DetailType.OVERALL_RANK;
+                    if (eventSeriesAnalyticsManager.getMultiCompetitorChart() == null) {
+                        eventSeriesAnalyticsManager.createMultiCompetitorChart(null, null, leaderboardName, initialDetailType);
+                    }
+                    competitorCharts.setChart(eventSeriesAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(), initialDetailType);
+                    eventSeriesAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
+                    contentArea.setWidget(EventSeriesCompetitorAnalyticsTabView.this);
+                }
+            };
             if(eventSeriesAnalyticsManager.getLeaderboardPanel() == null) {
-                createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager);
+                createSharedLeaderboardPanel(leaderboardName, eventSeriesAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<LeaderboardPanel>() {
+                    @Override
+                    public void consume(LeaderboardPanel object) {
+                        callback.run();
+                    }
+                });
+            } else {
+                callback.run();
             }
-            initWidget(ourUiBinder.createAndBindUi(this));
-
-            DetailType initialDetailType = DetailType.OVERALL_RANK;
-            if (eventSeriesAnalyticsManager.getMultiCompetitorChart() == null) {
-                eventSeriesAnalyticsManager.createMultiCompetitorChart(leaderboardName, initialDetailType);
-            }
-            competitorCharts.setChart(eventSeriesAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(), initialDetailType);
-            eventSeriesAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
-            contentArea.setWidget(this);
+        } else {
+            contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
+            new com.google.gwt.user.client.Timer() {
+                @Override
+                public void run() {
+                    currentPresenter.getHomeNavigation().goToPlace();
+                }
+            }.schedule(3000);
         }
     }
 
     private List<DetailType> getAvailableDetailsTypes() {
         List<DetailType> availableDetailsTypes = new ArrayList<DetailType>();
         availableDetailsTypes.add(DetailType.OVERALL_RANK);
-        availableDetailsTypes.add(DetailType.REGATTA_TOTAL_POINTS_SUM);
+        availableDetailsTypes.add(DetailType.REGATTA_NET_POINTS_SUM);
         return availableDetailsTypes;
     }
 

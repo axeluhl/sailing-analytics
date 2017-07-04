@@ -21,6 +21,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     private String threeLetterIocCountryCode;
     private Color color;
     private String email;
+    private String searchTag;
     private String idAsString;
     private BoatClassDTO boatClass;
     private BoatDTO boat;
@@ -33,7 +34,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     
     public CompetitorDTOImpl(String name, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String idAsString, String imageURL, String flagImageURL, 
-            BoatDTO boat, BoatClassDTO boatClass, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
+            BoatDTO boat, BoatClassDTO boatClass, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         super(name);
         this.color = color;
         this.email = email;
@@ -47,6 +48,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         this.boatClass = boatClass;
         this.timeOnTimeFactor = timeOnTimeFactor;
         this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
+        this.searchTag = searchTag;
     }
 
     @Override
@@ -63,6 +65,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         result = prime * result + ((flagImageURL == null) ? 0 : flagImageURL.hashCode());
         result = prime * result + ((timeOnTimeFactor == null) ? 0 : timeOnTimeFactor.hashCode());
         result = prime * result + ((timeOnDistanceAllowancePerNauticalMile == null) ? 0 : timeOnDistanceAllowancePerNauticalMile.hashCode());
+        result = prime * result + ((searchTag == null) ? 0 : searchTag.hashCode());
         return result;
     }
 
@@ -125,6 +128,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
                 return false;
         } else if (!timeOnDistanceAllowancePerNauticalMile.equals(other.timeOnDistanceAllowancePerNauticalMile))
             return false;
+        if (searchTag == null) {
+            if (other.searchTag != null)
+                return false;
+        } else if (!searchTag.equals(other.searchTag))
+            return false;
         return true;
     }
 
@@ -173,18 +181,30 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         return this;
     }
 
+    @Override
     public Color getColor() {
         return color;
     }
+
+    @Override
+    public String getSearchTag() {
+        return searchTag;
+    }
     
+    @Override
+    public void addToSearchTag(String searchTag) {
+        if (this.searchTag == null) {
+            this.searchTag = searchTag;
+        } else if (!this.searchTag.contains(searchTag)) {
+            this.searchTag += " "+searchTag;
+        }
+    }
+
+    @Override
     public String getEmail() {
         return email;
     }
     
-    public String email(){
-        return email;
-    }
-
     @Override
     public boolean hasEmail() {
         return email != null && !email.isEmpty();

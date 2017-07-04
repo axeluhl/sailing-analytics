@@ -45,8 +45,13 @@ public class LiveRacesList extends Composite {
         private final SortableRaceListColumn<LiveRaceDTO, ?> raceViewStateColumn = RaceListColumnFactory.getRaceViewStateColumn();
         
         public RaceListLiveRaces(EventView.Presenter presenter, boolean showRegattaDetails) {
-            super(presenter, new RaceListColumnSet(1, 1));
+            super(presenter, new RaceListColumnSet(1, 1), false);
             this.regattaNameColumn.setShowDetails(showRegattaDetails);
+        }
+        
+        @Override
+        protected SortableRaceListColumn<LiveRaceDTO, ?> getDefaultSortColumn() {
+            return startTimeColumn;
         }
         
         @Override
@@ -85,6 +90,21 @@ public class LiveRacesList extends Composite {
             columnSet.addColumn(courseAreaColumn);
             columnSet.addColumn(courseColumn);
             columnSet.addColumn(fleetNameColumn);
+        }
+
+        @Override
+        public boolean hasWind() {
+            return false;
+        }
+
+        @Override
+        public boolean hasVideos() {
+            return false;
+        }
+
+        @Override
+        public boolean hasAudios() {
+            return false;
         }
     }
 }

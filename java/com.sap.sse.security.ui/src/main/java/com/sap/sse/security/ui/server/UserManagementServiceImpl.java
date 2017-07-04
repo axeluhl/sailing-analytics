@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,6 +27,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
@@ -35,6 +38,7 @@ import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
@@ -164,11 +168,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public void updateUserProperties(final String username, String fullName, String company) throws UserManagementException {
+    public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN or is changing own user
         if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
-            getSecurityService().updateUserProperties(username, fullName, company);
+            getSecurityService().updateUserProperties(username, fullName, company,
+                    localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
@@ -249,7 +254,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) {
         Subject currentSubject = SecurityUtils.getSubject();
-        if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename())) {
+        if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename()) || currentSubject.isPermitted(Permission.MANAGE_USERS.getStringPermissionForObjects(DefaultModes.UPDATE, username))) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
@@ -300,7 +305,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
-                user.isEmailValidated(), accountDTOs, user.getRoles(), user.getPermissions());
+                user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
+                accountDTOs, user.getRoles(), user.getPermissions());
         return userDTO;
     }
 
@@ -422,6 +428,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public void setPreference(String username, String key, String value) {
         getSecurityService().setPreference(username, key, value);
     }
+    
+    @Override
+    public void setPreferences(String username, Map<String, String> keyValuePairs) {
+        for (Entry<String, String> entry : keyValuePairs.entrySet()) {
+            getSecurityService().setPreference(username, entry.getKey(), entry.getValue());
+        }
+        
+    }
 
     @Override
     public void unsetPreference(String username, String key) {
@@ -431,6 +445,27 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public String getPreference(String username, String key) {
         return getSecurityService().getPreference(username, key);
+    }
+    
+    @Override
+    public Map<String, String> getPreferences(String username, List<String> keys) {
+        Map<String, String> requestedPreferences = new HashMap<>();
+        for (String key : keys) {
+            requestedPreferences.put(key, getPreference(username, key));
+        }
+        return requestedPreferences;
+    }
+    
+    @Override
+    public Map<String, String> getAllPreferences(String username) {
+        final Map<String, String> allPreferences = getSecurityService().getAllPreferences(username);
+        final Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, String> entry : allPreferences.entrySet()) {
+            if(!entry.getKey().startsWith("_")) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
     }
 
     @Override
@@ -442,4 +477,5 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public String getOrCreateAccessToken(String username) {
         return getSecurityService().getOrCreateAccessToken(username);
     }
+
 }

@@ -46,7 +46,7 @@ public class WaypointImpl implements Waypoint {
 
     @Override
     public String toString() {
-        return getName();
+        return (getName()==null?"":getName()) + " ("+getPassingInstructions()+")";
     }
 
     @Override

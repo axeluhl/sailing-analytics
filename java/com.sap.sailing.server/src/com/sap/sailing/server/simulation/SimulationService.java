@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.common.LegIdentifier;
+import com.sap.sailing.domain.common.PathType;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulationResults;
 

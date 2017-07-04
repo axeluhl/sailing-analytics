@@ -1,27 +1,26 @@
 package com.sap.sailing.selenium.pages.adminconsole;
 
-import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
-import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
+import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
+import com.sap.sailing.selenium.pages.adminconsole.advanced.MasterDataImportPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiAccountsManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.wind.WindPanelPO;
 
 /**
  * <p>The page object representing the administration console. The console consists of multiple tabs with its content
@@ -30,15 +29,12 @@ import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagem
  * @author
  *   D049941
  */
-public class AdminConsolePage extends HostPage {
+public class AdminConsolePage extends HostPageWithAuthentication {
     private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
-    private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
-            ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
-    
-    private static final MessageFormat VERTICAL_TAB_EXPRESSION = new MessageFormat(
-            ".//div[contains(@class, \"gwt-VerticalTabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
+    private static final String EVENTS_TAB_LABEL = "Events"; //$NON-NLS-1$
+    private static final String EVENTS_TAB_IDENTIFIER = "EventManagement"; //$NON-NLS-1$
     
     private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
     private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$
@@ -49,11 +45,17 @@ public class AdminConsolePage extends HostPage {
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
     
+    private static final String IGTIMI_ACCOUNTS_TAB_LABEL = "Igtimi Accounts"; //$NON-NLS-1$
+    private static final String IGTIMI_ACCOUNTS_TAB_IDENTIFIER = "IgtimiAccounts"; //$NON-NLS-1$
+    
     private static final String TRACKED_RACES_TAB_PARENT_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_PARENT_IDENTIFIER = "RacesPanel"; //$NON-NLS-1$
     
     private static final String TRACKED_RACES_TAB_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
+    
+    private static final String WIND_TAB_LABEL = "Wind"; //$NON-NLS-1$
+    private static final String WIND_TAB_IDENTIFIER = "WindPanel"; //$NON-NLS-1$
     
     private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL = "Leaderboards"; //$NON-NLS-1$
     private static final String LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER = "LeaderboardPanel"; //$NON-NLS-1$
@@ -69,6 +71,11 @@ public class AdminConsolePage extends HostPage {
     
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL = "Smartphone Tracking"; //$NON-NLS-1$
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER = "SmartphoneTrackingPanel"; //$NON-NLS-1$
+
+    private static final String ADVANCED_PARENT_LABEL = "Advanced";
+    private static final String ADVANCED_TAB_PARENT_IDENTIFIER = "AdvancedTab";
+    private static final String ADVANCED_MASTERDATA_LABEL = "Master Data Import";
+    private static final String ADVANCED_MASTERDATA_IDENTIFIER = "MasterDataImport";
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
@@ -80,8 +87,7 @@ public class AdminConsolePage extends HostPage {
      *   The page object for the administration console.
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
-        driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
-        return new AdminConsolePage(driver);
+        return HostPage.goToUrl(AdminConsolePage::new, driver, root + "gwt/AdminConsole.html");
     }
     
     @FindBy(how = BySeleniumId.class, using = "AdministrationTabs")
@@ -89,6 +95,10 @@ public class AdminConsolePage extends HostPage {
     
     private AdminConsolePage(WebDriver driver) {
         super(driver);
+    }
+    
+    public EventConfigurationPanelPO goToEvents() {
+        return new EventConfigurationPanelPO(this.driver, goToTab(EVENTS_TAB_LABEL, EVENTS_TAB_IDENTIFIER, true));
     }
     
     public RegattaStructureManagementPanelPO goToRegattaStructure() {
@@ -109,10 +119,22 @@ public class AdminConsolePage extends HostPage {
                 TRACTRAC_EVENTS_TAB_IDENTIFIER, false));
     }
     
+    public IgtimiAccountsManagementPanelPO goToIgtimi() {
+        goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
+        return new IgtimiAccountsManagementPanelPO(this.driver, goToTab(IGTIMI_ACCOUNTS_TAB_LABEL,
+                IGTIMI_ACCOUNTS_TAB_IDENTIFIER, false));
+    }
+    
     public TrackedRacesManagementPanelPO goToTrackedRaces() {
         goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
         return new TrackedRacesManagementPanelPO(this.driver, goToTab(TRACKED_RACES_TAB_LABEL,
                 TRACKED_RACES_TAB_IDENTIFIER, false));
+    }
+        
+    public WindPanelPO goToWind() {
+        goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
+        return new WindPanelPO(this.driver, goToTab(WIND_TAB_LABEL,
+                WIND_TAB_IDENTIFIER, false));
     }
     
     public LeaderboardConfigurationPanelPO goToLeaderboardConfiguration() {
@@ -133,6 +155,12 @@ public class AdminConsolePage extends HostPage {
                 COMPETITOR_PANEL_TAB_IDENTIFIER, false));
     }
     
+    public MasterDataImportPO goToMasterDateImport() {
+        goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
+        return new MasterDataImportPO(this.driver,
+                goToTab(ADVANCED_MASTERDATA_LABEL, ADVANCED_MASTERDATA_IDENTIFIER, false));
+    }
+
     public SmartphoneTrackingEventManagementPanelPO goToSmartphoneTrackingPanel() {
         goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
         return new SmartphoneTrackingEventManagementPanelPO(this.driver, goToTab(SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL,
@@ -155,18 +183,6 @@ public class AdminConsolePage extends HostPage {
     }
     
     private WebElement goToTab(String label, final String id, boolean isVertical) {
-        String expression = TAB_EXPRESSION.format(new Object[] {label});
-        if (isVertical) {
-            expression = VERTICAL_TAB_EXPRESSION.format(new Object[] {label});
-        }
-        WebElement tab = this.administrationTabPanel.findElement(By.xpath(expression));
-        WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
-        waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
-        tab.click();
-        // Wait for the tab to become visible due to the used animations.
-        FluentWait<WebElement> wait = createFluentWait(this.administrationTabPanel);
-        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
-        waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
-        return content;
+        return goToTab(administrationTabPanel, label, id, isVertical ? TabPanelType.VERTICAL_TAB_LAYOUT_PANEL : TabPanelType.TAB_LAYOUT_PANEL);
     }
 }

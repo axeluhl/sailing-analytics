@@ -62,7 +62,7 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
         List<Series> series = createSeriesForTestRegatta();
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), RegattaImpl.getDefaultName(regattaBaseName,
                 boatClass == null ? null : boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, series, persistent, scoringScheme, "123",
-                courseArea, /* useStartTimeInference */true, OneDesignRankingMetric::new);
+                courseArea, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         return regatta;
     }
 
@@ -71,7 +71,7 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
         // -------- qualifying series ------------
         List<String> emptyRaceColumnNames = Collections.emptyList();
         List<Fleet> qualifyingFleets = createQualifyingFleets();
-        Series qualifyingSeries = new SeriesImpl(seriesName, /* isMedal */false, qualifyingFleets,
+        Series qualifyingSeries = new SeriesImpl(seriesName, /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualifyingFleets,
                 emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(qualifyingSeries);
         return series;

@@ -36,7 +36,7 @@ public class Simulator {
     private final WindStore windStore;
     private boolean stopped;
     private Duration advanceInMillis = Duration.NULL.minus(1);
-    private Timer timer = new Timer("Timer for TracTrac Simulator");
+    private Timer timer = new Timer("Timer for TracTrac Simulator", /* isDaemon */ true);
     private final Duration offsetToStart;
     
     public Simulator(WindStore windStore, Duration offsetToStart) {
@@ -88,7 +88,8 @@ public class Simulator {
         for (final Map.Entry<? extends WindSource, ? extends WindTrack> windSourceAndTrack : windStore.loadWindTracks(
                 trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace,
                 /* millisecondsOverWhichToAverageWind doesn't matter because we only use raw fixes */ 10000).entrySet()) {
-            new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
+            Thread windSimulatorThread =
+                    new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
                 @Override
                 public void run() {
                     final WindTrack windTrack = windSourceAndTrack.getValue();
@@ -105,7 +106,9 @@ public class Simulator {
                     }
                     logger.info("Wind Track Simulator for race "+trackedRace.getRace().getName()+" finished. stopped="+stopped);
                 }
-            }.start();
+            };
+            windSimulatorThread.setDaemon(true);
+            windSimulatorThread.start();
         }
     }
     

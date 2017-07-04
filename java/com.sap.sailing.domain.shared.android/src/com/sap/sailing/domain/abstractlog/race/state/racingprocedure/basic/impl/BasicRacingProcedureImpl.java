@@ -61,6 +61,11 @@ public class BasicRacingProcedureImpl extends BaseRacingProcedure {
     }
 
     @Override
+    protected Boolean isResultEntryEnabledByDefault() {
+        return true;
+    }
+
+    @Override
     protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent>asList(new RaceStateEventImpl(startTime, RaceStateEvents.START));
     }

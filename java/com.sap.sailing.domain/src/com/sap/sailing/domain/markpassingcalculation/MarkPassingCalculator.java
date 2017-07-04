@@ -9,14 +9,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -28,13 +26,16 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.common.util.IntHolder;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using an {@link CandidateFinder} and an
  * {@link CandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}s . The
  * chooser than finds the most likely sequence of {@link Candidate}s and updates the race with new {@link MarkPassing}s
- * for this sequence. Upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean)} this
+ * for this sequence. Upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean, boolean)} this
  * happens for the current state of the race. In addition, for live races, the <code>listen</code> parameter of the
  * constructor should be true. Then a {@link MarkPassingUpdateListener} is initialized which puts new fixes into a queue
  * as {@link StorePositionUpdateStrategy}. A new thread will also be started to evaluate the new fixes (See
@@ -42,6 +43,7 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  * signals that the race is over (after {@link #stop()} is called.
  * 
  * @author Nicolas Klose
+ * @author Axel Uhl (d043530)
  * 
  */
 public class MarkPassingCalculator {
@@ -50,31 +52,142 @@ public class MarkPassingCalculator {
     private CandidateChooser chooser;
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
     private final MarkPassingUpdateListener listener;
-    private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime
-            .getRuntime().availableProcessors() - 1, 3),
-    /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
-    /* keepAliveTime */60, TimeUnit.SECONDS,
-    /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1, /* daemon */ true));
+    private final static ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+    private final LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
+    
+    /**
+     * An "end marker" that can be {@link #enqueueUpdate(StorePositionUpdateStrategy) enqueued} in order to tell the {@link Listen}
+     * thread to stop.
+     */
+    private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
+        @Override
+        public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
+                Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
+                IntHolder smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                List<Pair<Competitor, Integer>> removedMarkPassings,
+                List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
+        }
+    };
 
     private boolean suspended = false;
+    
+    /**
+     * If the constructor is called with the {@code listen} parameter set to {@code true}, this field will hold a thread
+     * when objects were added to the {@link #queue} and are being processed. When the thread has completed processing
+     * all updates from the {@link #queue} it will terminate and set this field to {@code null}. The decision to create
+     * and stop the thread goes hand in hand with setting or, respectively, clearing this field while holding this object's
+     * monitor ({@code synchronized}).<p>
+     * 
+     * The thread may not yet have been started because, depending on the
+     * constructor's {@code waitForInitialMarkPassingCalculation} argument, start-up may be asynchronous, but eventually
+     * it will be started at some point. The {@link #waitUntilStopped} method can be used to wait until the thread has
+     * started and then terminated again.
+     */
+    private Thread listenerThread;
 
-    public MarkPassingCalculator(DynamicTrackedRace race, boolean listen) {
-        if (listen) {
-            listener = new MarkPassingUpdateListener(race);
+    private final Listen listen;
+    
+    /**
+     * Synchronized using the {@link #listenerThread} as monitor object.
+     */
+    private boolean listenerThreadStarted;
+
+    public MarkPassingCalculator(DynamicTrackedRace race, boolean doListen, boolean waitForInitialMarkPassingCalculation) {
+        if (doListen) {
+            queue = new LinkedBlockingQueue<>();
+            listener = new MarkPassingUpdateListener(race, this);
         } else {
             listener = null;
+            queue = null; // no queue is needed if no change listener is in use
         }
         this.race = race;
-        finder = new CandidateFinderImpl(race);
+        finder = new CandidateFinderImpl(race, executor);
         chooser = new CandidateChooserImpl(race);
-        for (Competitor c : race.getRace().getCompetitors()) {
-            Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
-            chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
+        if (listener != null) {
+            listen = new Listen();
+        } else {
+            listen = null;
         }
-        if (listen) {
-            final Thread listenerThread = new Thread(new Listen(), "MarkPassingCalculator for race " + race.getRace().getName());
-            listenerThread.setDaemon(true);
-            listenerThread.start();
+        Thread t = new Thread(() -> {
+            final Set<Callable<Void>> tasks = new HashSet<>();
+            for (Competitor c : race.getRace().getCompetitors()) {
+                tasks.add(()->{
+                    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
+                    chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
+                    return null;
+                });
+            }
+            try {
+                executor.invokeAll(tasks);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to compute initial set of mark passings for race "+race.getRace().getName(), e);
+            }
+            if (listener != null) {
+                synchronized (MarkPassingCalculator.this) {
+                    if (listenerThread == null) {
+                        listenerThread = createAndStartListenerThread();
+                        synchronized (listenerThread) {
+                            listenerThreadStarted = true;
+                            listenerThread.notifyAll();
+                        }
+                    }
+                }
+            }
+        }, "MarkPassingCalculator for race "+race.getRace().getName()+" initialization");
+        if (waitForInitialMarkPassingCalculation) {
+            t.run();
+        } else {
+            t.start();
+        }
+    }
+
+    private Thread createAndStartListenerThread() {
+        final Thread result = new Thread(listen, "MarkPassingCalculator for race " + race.getRace().getName());
+        result.setDaemon(true);
+        result.start();
+        return result;
+    }
+    
+    /**
+     * Waits for the listening thread to terminate. If no listening thread has been requested ({@code listen} constructor
+     * parameter {@code false}), the method returns immediately. Otherwise it waits for the listening thread to have started
+     * and then joins on the thread, using the timeout specified.<p>
+     * 
+     * This method can be useful for test cases that want to wait until all calculations have terminated for sure.
+     * 
+     * @param timeoutInMillis same as for {@link Thread#join(long)}.
+     */
+    public void waitUntilStopped(final long timeoutInMillis) throws InterruptedException {
+        final long start = System.currentTimeMillis();
+        if (listenerThread != null) {
+            synchronized (listenerThread) {
+                while (!listenerThreadStarted && System.currentTimeMillis()-start < timeoutInMillis) {
+                    listenerThread.wait(timeoutInMillis);
+                }
+            }
+            listenerThread.join(timeoutInMillis);
+        }
+    }
+
+    /**
+     * It's used for locking the calculation thread for read. You will be blocked if the calculation is in progress.
+     * Make sure that you unlock the thread with the method {@link MarkPassingCalculator#unlockForRead()} once you don't
+     * need it any more, using a {@code finally} clause to ensure unlocking even with abnormal termination.
+     */
+    public void lockForRead() {
+        if (listen != null) {
+            listen.lockForRead();
+        }
+    }
+    
+    /**
+     * Unlocks the calculation thread for read.
+     * 
+     * @see #lockForRead
+     */
+    public void unlockForRead() {
+        if (listen != null) {
+            listen.unlockAfterRead();
         }
     }
 
@@ -88,80 +201,143 @@ public class MarkPassingCalculator {
      * 
      */
     private class Listen implements Runnable {
+        private final String raceName;
+        
+        /**
+         * The write lock is being held by the thread running this {@link Runnable} after successfully having
+         * waited for the next update to be pushed to the {@link MarkPassingUpdateListener#getQueue() queue},
+         * before draining the queue starts and until the processing of all events from the queue has completed.
+         * This way, trying to obtain the read lock will block until all pending updates have been processed.
+         */
+        private final NamedReentrantReadWriteLock lock;
+        
+        public Listen() {
+            this.raceName = race.getRace().getName();
+            lock = new NamedReentrantReadWriteLock("lock for calculation thread (" + Listen.class.getSimpleName() + ")", /* fair */ false);
+        }
+        
+        public void lockForRead() {
+            LockUtil.lockForRead(lock);
+        }
+        
+        public void unlockAfterRead() {
+            LockUtil.unlockAfterRead(lock);
+        }
+
         @Override
         public void run() {
             try {
-                logger.fine("MarkPassingCalculator is listening");
+                logger.fine("MarkPassingCalculator is listening on race "+raceName);
                 boolean finished = false;
-                Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
-                Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
-                List<Waypoint> addedWaypoints = new ArrayList<>();
-                List<Waypoint> removedWaypoints = new ArrayList<>();
-                Integer smallestChangedWaypointIndex = null;
-                List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings = new ArrayList<>();
-                List<Pair<Competitor, Integer>> removedFixedMarkPassings = new ArrayList<>();
-                List<Pair<Competitor, Integer>> suppressedMarkPassings = new ArrayList<>();
-                List<Competitor> unsuppressedMarkPassings = new ArrayList<>();
+                final Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
+                final Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
+                final List<Waypoint> addedWaypoints = new ArrayList<>();
+                final List<Waypoint> removedWaypoints = new ArrayList<>();
+                final IntHolder smallestChangedWaypointIndex = new IntHolder(-1);
+                final List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings = new ArrayList<>();
+                final List<Pair<Competitor, Integer>> removedFixedMarkPassings = new ArrayList<>();
+                final List<Pair<Competitor, Integer>> suppressedMarkPassings = new ArrayList<>();
+                final List<Competitor> unsuppressedMarkPassings = new ArrayList<>();
+                boolean hasUnprocessedUpdates = false;
                 while (!finished) {
                     try {
-                    logger.finer("MPC is checking the queue");
-                    List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
-                    try {
-                        allNewFixInsertions.add(listener.getQueue().take());
-                    } catch (InterruptedException e) {
-                        logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
-                                + " while waiting for new GPSFixes");
-                    }
-                    listener.getQueue().drainTo(allNewFixInsertions);
-                    logger.finer("MPC recieved "+ allNewFixInsertions.size()+" new updates.");
-                    for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
-                        if (listener.isEndMarker(fixInsertion)) {
-                            logger.info("Stopping "+MarkPassingCalculator.this+"'s listener");
-                            finished = true;
-                        } else {
-                            fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
-                                    smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
-                                    suppressedMarkPassings, unsuppressedMarkPassings);
-                        }
-                    }
-                    if (!suspended) {
-                        if (smallestChangedWaypointIndex != null) {
-                            Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
-                                    .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
-                            chooser.removeWaypoints(removedWaypoints);
-                            chooser.addWaypoints(addedWaypoints);
-                            for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
-                                    .entrySet()) {
-                                Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
-                                chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                        logger.finer("MPC for "+raceName+" is checking the queue");
+                        synchronized (MarkPassingCalculator.this) {
+                            // check if queue is empty while owning the MarkPassingCalculator's monitor;
+                            // if the queue is empty, set listenerThread to null while under the monitor
+                            // and decide to finish the thread; otherwise, take the next object
+                            if (!hasUnprocessedUpdates && queue.isEmpty()) {
+                                finished = true;
+                                listenerThread = null;
                             }
                         }
-                        updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings,
-                                unsuppressedMarkPassings);
-                        computeMarkPasses(competitorFixes, markFixes);
-                        competitorFixes.clear();
-                        markFixes.clear();
-                        addedWaypoints.clear();
-                        removedWaypoints.clear();
-                        smallestChangedWaypointIndex = null;
-                        fixedMarkPassings.clear();
-                        removedFixedMarkPassings.clear();
-                        suppressedMarkPassings.clear();
+                        LockUtil.lockForWrite(lock);
+                        if (!finished) {
+                            List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
+                            try {
+                                allNewFixInsertions.add(queue.take());
+                            } catch (InterruptedException e) {
+                                logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
+                                        + " while waiting for new GPSFixes");
+                            }
+                            queue.drainTo(allNewFixInsertions);
+                            logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
+                            for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
+                                if (isEndMarker(fixInsertion)) {
+                                    logger.fine("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
+                                    finished = true;
+                                    break;
+                                } else {
+                                    try {
+                                        fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
+                                                smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
+                                                suppressedMarkPassings, unsuppressedMarkPassings, finder, chooser);
+                                        hasUnprocessedUpdates = true;
+                                    } catch (Exception e) {
+                                        logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+
+                                                " while applying update " +fixInsertion+": "+ e.getMessage()+
+                                                ". Continuing with further updates...", e);
+                                    }
+                                }
+                            }
+                        }
+                        // in suspended mode we've stored the update contents in competitorFixes, markFixes, etc. but
+                        // haven't processed them yet with the CandidateFinder or CandidateChooser.
+                        if (!finished && !suspended) {
+                            if (smallestChangedWaypointIndex.value != -1) {
+                                final Course course = race.getRace().getCourse();
+                                final Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas;
+                                // obtain the course's read lock so that the finder creates the candidate deltas under the
+                                // premise of the same course as the chooser updates its end proxy node's index; they have
+                                // to be consistent. See also bug 3657.
+                                course.lockForRead();
+                                try {
+                                    candidateDeltas = finder.updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex.value);
+                                    chooser.updateEndProxyNodeWaypointIndex();
+                                } finally {
+                                    course.unlockAfterRead();
+                                }
+                                if (!removedWaypoints.isEmpty()) {
+                                    chooser.removeWaypoints(removedWaypoints);
+                                }
+                                Set<Callable<Void>> tasks = new HashSet<>();
+                                for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas.entrySet()) {
+                                    tasks.add(()->{
+                                        Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
+                                        chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                                        return null;
+                                    });
+                                }
+                                executor.invokeAll(tasks);
+                            }
+                            updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings, unsuppressedMarkPassings);
+                            computeMarkPasses(competitorFixes, markFixes);
+                            competitorFixes.clear();
+                            markFixes.clear();
+                            addedWaypoints.clear();
+                            removedWaypoints.clear();
+                            smallestChangedWaypointIndex.value = -1;
+                            fixedMarkPassings.clear();
+                            removedFixedMarkPassings.clear();
+                            suppressedMarkPassings.clear();
                             unsuppressedMarkPassings.clear();
+                            hasUnprocessedUpdates = false;
                         }
                     } catch (Exception e) {
-                        logger.severe("Error while calculating markpassings: " + e.getMessage());
+                        logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+": " + e.getMessage(), e);
+                    } finally {
+                        LockUtil.unlockAfterWrite(lock);
                     }
                 }
             } finally {
-                logger.info("MarkPassingCalculator Listen thread terminating");
+                logger.fine("MarkPassingCalculator Listen thread terminating for race "+raceName);
             }
         }
 
         private void updateManuallySetMarkPassings(List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                 List<Pair<Competitor, Integer>> removedMarkPassings,
                 List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unsuppressedMarkPassings) {
-            logger.finest("Updating manually edited MarkPassings");
+            logger.finest("Updating manually edited MarkPassings for race "+raceName);
             for (Pair<Competitor, Integer> pair : suppressedMarkPassings) {
                 chooser.suppressMarkPassings(pair.getA(), pair.getB());
             }
@@ -187,8 +363,8 @@ public class MarkPassingCalculator {
          */
         private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes,
                 Map<Mark, List<GPSFix>> newMarkFixes) {
-            logger.finer("Calculating markpassings with " + newCompetitorFixes.size() + " new competitor Fixes and "
-                    + newMarkFixes.size() + "new mark fixes.");
+            logger.finer("Calculating markpassings for race "+raceName+" with " + newCompetitorFixes.size() + " new competitor Fixes and "
+                    + newMarkFixes.size() + " new mark fixes.");
             Map<Competitor, Set<GPSFix>> combinedCompetitorFixes = new HashMap<>();
 
             for (Entry<Competitor, List<GPSFix>> competitorEntry : newCompetitorFixes.entrySet()) {
@@ -208,20 +384,35 @@ public class MarkPassingCalculator {
                     fixes.addAll(fixesAffectedByNewMarkFixes.getValue());
                 }
             }
-            List<Callable<Object>> tasks = new ArrayList<>();
-            for (Entry<Competitor, Set<GPSFix>> c : combinedCompetitorFixes.entrySet()) {
-                tasks.add(Executors.callable(new ComputeMarkPassings(c.getKey(), c.getValue())));
+            List<Callable<Void>> tasks = new ArrayList<>();
+            for (final Entry<Competitor, Set<GPSFix>> c : combinedCompetitorFixes.entrySet()) {
+                final Runnable runnable = new ComputeMarkPassings(c.getKey(), c.getValue());
+                tasks.add(new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        runnable.run();
+                        return null;
+                    }
+                    
+                    /**
+                     * A reasonable toString implementation helps identifying these tasks in log messages for long-running tasks
+                     */
+                    @Override
+                    public String toString() {
+                        return "Mark passing calculation for competitor "+c.getKey()+" with "+c.getValue().size()+" fixes";
+                    }
+                });
             }
             try {
                 executor.invokeAll(tasks);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.log(Level.INFO, "mark passing calculation interrupted", e);
             }
         }
 
         private class ComputeMarkPassings implements Runnable {
-            Competitor c;
-            Iterable<GPSFix> fixes;
+            final Competitor c;
+            final Iterable<GPSFix> fixes;
 
             public ComputeMarkPassings(Competitor c, Iterable<GPSFix> fixes) {
                 this.c = c;
@@ -230,12 +421,18 @@ public class MarkPassingCalculator {
 
             @Override
             public void run() {
-                logger.finer("Calculating MarkPassings for " + c + " (" + Util.size(fixes) + " new fixes)");
-                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c,
-                        fixes);
-                logger.finer("Received " + Util.size(candidateDeltas.getA()) + " new Candidates and will remove "
+                try {
+                    logger.finer(()->"Calculating MarkPassings for race "+raceName+", competitor " + c + " (" + Util.size(fixes) + " new fixes)");
+                    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
+                    logger.finer(()->"Received " + Util.size(candidateDeltas.getA()) + " new Candidates for race "+raceName+
+                        " and competitor "+c+" and will remove "
                         + Util.size(candidateDeltas.getB()) + " old Candidates for " + c);
-                chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
+                    chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
+                } catch (Exception e) {
+                    // make sure the exception is logged and not only "swallowed" and suppressed by an invokeAll(...) statement
+                    logger.log(Level.SEVERE, "Exception trying to compute mark passings for competitor "+c, e);
+                    throw e;
+                }
             }
         }
 
@@ -256,24 +453,40 @@ public class MarkPassingCalculator {
     public void resume() {
         logger.finest("Resumed MarkPassingCalculator");
         suspended = false;
-        listener.getQueue().add(new StorePositionUpdateStrategy() {
+        enqueueUpdate(new StorePositionUpdateStrategy() {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex,
+                    IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
-                    List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
+                    List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
             }
         });
     }
+    
+    private boolean isEndMarker(StorePositionUpdateStrategy endMarkerCandidate) {
+        return endMarkerCandidate == endMarker;
+    }
+
+    void enqueueUpdate(StorePositionUpdateStrategy update) {
+        // TODO bug 3908: manage listener thread here; if this is the first update to enter an empty queue, launch the thread; the thread will terminate after picking the last update from the queue
+        synchronized (this) {
+            final boolean wasQueueEmpty = queue.isEmpty();
+            queue.add(update);
+            if (wasQueueEmpty && listenerThread == null) {
+                listenerThread = createAndStartListenerThread();
+            }
+        }
+    }
 
     public void stop() {
-        listener.stop();
+        logger.info("Stopping " + this + " for race " + race.getRace().getName());
+        enqueueUpdate(endMarker);
     }
 
     public void recalculateEverything() {
-        finder = new CandidateFinderImpl(race);
+        finder = new CandidateFinderImpl(race, executor);
         chooser = new CandidateChooserImpl(race);
         for (Competitor c : race.getRace().getCompetitors()) {
             Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);

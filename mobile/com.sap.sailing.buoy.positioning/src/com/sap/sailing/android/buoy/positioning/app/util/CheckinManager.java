@@ -13,50 +13,66 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.net.Uri;
-import android.util.Log;
-import android.widget.Toast;
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
+import com.sap.sailing.android.shared.util.JsonHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
+import android.widget.Toast;
 
 public class CheckinManager {
-
     private final static String TAG = CheckinManager.class.getName();
-    private AbstractCheckinData checkinData;
-    private CheckinDataActivity activity;
-    private Context mContext;
-    private AppPreferences prefs;
+    private final CheckinDataActivity<CheckinData> activity;
+    private final Context mContext;
+    private final AppPreferences prefs;
     private String url;
     private DataChangedListner dataChangedListner;
+    private final SharedDomainFactory sharedDomainFactory;
 
-    public CheckinManager(String url, Context context){
+    public CheckinManager(String url, Context context) {
+        this(url, context, /* context is not necessarily a CheckinDataActivity */ null);
+    }
+
+    private CheckinManager(String url, Context context, CheckinDataActivity<CheckinData> activity) {
+        sharedDomainFactory = new SharedDomainFactoryImpl(/* race log resolver not needed in this app */ null);
         this.url = url;
         mContext = context;
         prefs = new AppPreferences(context);
+        this.activity = activity;
     }
 
-    public CheckinManager(String url, CheckinDataActivity activity) {
-        this.activity = activity;
-        this.url = url;
-        mContext = activity;
-        prefs = new AppPreferences(mContext);
+    public CheckinManager(String url, CheckinDataActivity<CheckinData> activity) {
+        this(url, activity, activity);
+    }
+    
+    public SharedDomainFactory getSharedDomainFactory() {
+        return sharedDomainFactory;
     }
 
     public void callServerAndGenerateCheckinData() {
@@ -99,10 +115,7 @@ public class CheckinManager {
         }
         if (urlData != null) {
             urlData.leaderboardName = leaderboardNameFromQR;
-
-            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
-                    .getUniqueId(mContext)));
-
+            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid.getUniqueId(mContext)));
             urlData.getLeaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
         }
         return urlData;
@@ -126,11 +139,11 @@ public class CheckinManager {
                             }
                             return;
                         }
-
+                        final String leaderboardDisplayName = response.optString("displayName", leaderboardName);
                         HttpGetRequest getMarksRequest;
                         try {
                             getMarksRequest = new HttpGetRequest(new URL(urlData.getMarkUrl), mContext);
-                            getMarksFromServer(leaderboardName, getMarksRequest, urlData);
+                            getMarksFromServer(leaderboardName, leaderboardDisplayName, getMarksRequest, urlData);
                         } catch (MalformedURLException e1) {
                             ExLog.e(mContext, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e1.getMessage());
                         }
@@ -147,7 +160,12 @@ public class CheckinManager {
                 });
     }
 
-    private void getMarksFromServer(final String leaderboardName, HttpGetRequest getMarksRequest, final URLData urlData) {
+    /**
+     * @param leaderboardDisplayName
+     *            the leaderboard's display name if one has been explicitly provided, otherwise the same as
+     *            {@code leaderboardName}
+     */
+    private void getMarksFromServer(final String leaderboardName, final String leaderboardDisplayName, HttpGetRequest getMarksRequest, final URLData urlData) {
         NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsync(getMarksRequest,
                 new NetworkHelperSuccessListener() {
 
@@ -155,36 +173,42 @@ public class CheckinManager {
                     public void performAction(JSONObject response) {
                         try {
                             JSONArray markArray = response.getJSONArray("marks");
-                            String checkinDigest = generateCheckindigest(urlData.uriStr);
-                            List<MarkInfo> marks = new ArrayList<MarkInfo>();
-                            List<MarkPingInfo> pings = new ArrayList<MarkPingInfo>();
+                            String checkinDigest = generateCheckinDigest(urlData.uriStr);
+                            List<MarkInfo> marks = new ArrayList<>();
+                            List<MarkPingInfo> pings = new ArrayList<>();
                             for (int i = 0; i < markArray.length(); i++) {
                                 JSONObject jsonMark = (JSONObject) markArray.get(i);
-                                MarkInfo mark = new MarkInfo();
-                                mark.setCheckinDigest(checkinDigest);
-                                mark.setClassName(jsonMark.getString("@class"));
-                                mark.setName(jsonMark.getString("name"));
-                                mark.setId(jsonMark.getString("id"));
-                                if (jsonMark.has("position")) {
-                                    if (!jsonMark.get("position").equals(null)) {
-                                        JSONObject positionJson = jsonMark.getJSONObject("position");
-                                        MarkPingInfo ping = new MarkPingInfo();
-                                        ping.setLatitude(positionJson.getString("latitude"));
-                                        ping.setLongitude(positionJson.getString("longitude"));
-                                        ping.setTimestamp(positionJson.getInt("timestamp"));
-                                        ping.setAccuracy(positionJson.getDouble("accuracy"));
-                                        ping.setMarkId(mark.getId());
-                                        pings.add(ping);
+                                org.json.simple.JSONObject simpleMark;
+                                simpleMark = JsonHelper.convertToSimple(jsonMark);
+                                MarkDeserializer markDeserializer = new MarkDeserializer(getSharedDomainFactory());
+                                MarkInfo mark = MarkInfo.create(markDeserializer.deserialize(simpleMark), jsonMark.getString(MarkJsonSerializer.FIELD_CLASS), checkinDigest);
+                                if (jsonMark.has(MarkJsonSerializerWithPosition.FIELD_POSITION)) {
+                                    if (!jsonMark.get(MarkJsonSerializerWithPosition.FIELD_POSITION).equals(null)) {
+                                        JSONObject positionJson = jsonMark.getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);
+                                        FlatGPSFixJsonDeserializer deserializer = new FlatGPSFixJsonDeserializer();
+                                        org.json.simple.JSONObject simplePosition;
+                                        simplePosition = JsonHelper.convertToSimple(positionJson);
+                                        GPSFix gpsFix = deserializer.deserialize(simplePosition);
+                                        //accepts JSON messages without accuracy and with, without will simply be displayed as "set"
+                                        final MarkPingInfo ping;
+                                        if (!positionJson.has(FlatGPSFixJsonSerializer.FIELD_ACCURACY) ||
+                                                positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY) == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER) {
+                                            ping = new MarkPingInfo(mark.getId(), gpsFix, FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER);
+                                        } else {
+                                            ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
+                                        }
+                                        if (ping != null) {
+                                            pings.add(ping);
+                                        }
                                     }
                                 }
-                                mark.setType(jsonMark.getString("type"));
                                 marks.add(mark);
                             }
                             urlData.marks = marks;
                             urlData.pings = pings;
-                            saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
+                            saveCheckinDataAndNotifyListeners(urlData, leaderboardName, leaderboardDisplayName);
 
-                        } catch (JSONException e) {
+                        } catch (JSONException | ParseException | JsonDeserializationException e) {
                             ExLog.e(mContext, TAG, "Error getting data from call on URL: " + urlData.getMarkUrl
                                     + ", Error: " + e.getMessage());
                             if (activity != null) {
@@ -208,10 +232,16 @@ public class CheckinManager {
                 });
     }
 
-    private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
+    /**
+     * @param leaderboardDisplayName
+     *            the leaderboard's display name if one has been explicitly provided, otherwise the same as
+     *            {@code leaderboardName}
+     */
+    private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName, String leaderboardDisplayName) {
         CheckinData data = new CheckinData();
         data.serverWithPort = urlData.hostWithPort;
         data.leaderboardName = leaderboardName;
+        data.leaderboardDisplayName = leaderboardDisplayName;
         data.marks = urlData.marks;
         data.pings = urlData.pings;
         data.deviceUid = urlData.deviceUuid.getStringRepresentation();
@@ -239,36 +269,30 @@ public class CheckinManager {
         }
     }
 
-    public void setCheckinData(AbstractCheckinData data) {
-        checkinData = data;
+    private void setCheckinData(CheckinData data) {
         if (activity != null) {
-            activity.onCheckinDataAvailable(getCheckinData());
-        }
-        else if (dataChangedListner != null){
+            activity.onCheckinDataAvailable(data);
+        } else if (dataChangedListner != null){
             dataChangedListner.handleData(data);
         }
     }
 
     public interface DataChangedListner{
-        void handleData(AbstractCheckinData data);
+        void handleData(CheckinData data);
     }
 
-    public void setDataChangedListner(DataChangedListner listner){
-        dataChangedListner = listner;
-    }
-
-    public AbstractCheckinData getCheckinData() {
-        return checkinData;
+    public void setDataChangedListner(DataChangedListner listener){
+        dataChangedListner = listener;
     }
 
     /**
      * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
      */
     private void displayAPIErrorRecommendRetry() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AppTheme_AlertDialog);
         builder.setMessage(mContext.getString(R.string.notify_user_api_call_failed));
         builder.setCancelable(true);
-        builder.setPositiveButton(mContext.getString(R.string.ok), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -276,12 +300,11 @@ public class CheckinManager {
             }
 
         });
-        AlertDialog alert = builder.create();
-        alert.show();
+        builder.show();
         setCheckinData(null);
     }
 
-    private String generateCheckindigest(String url) {
+    private String generateCheckinDigest(String url) {
         String checkinDigest = "";
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -311,9 +334,5 @@ public class CheckinManager {
         public DeviceIdentifier deviceUuid;
         public String getMarkUrl;
         public String getLeaderboardUrl;
-
-        public URLData() {
-
-        }
     }
 }

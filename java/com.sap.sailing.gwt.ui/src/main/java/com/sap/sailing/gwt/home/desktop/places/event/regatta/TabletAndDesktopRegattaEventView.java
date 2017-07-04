@@ -18,7 +18,6 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
@@ -56,7 +55,7 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
         
         if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
             final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
-            Anchor seriesAnchor = new Anchor(currentPresenter.getEventDTO().getSeriesName());
+            Anchor seriesAnchor = new Anchor(i18n.overallLeaderboardSelection());
             seriesAnchor.setHref(currentEventSeriesNavigation.getTargetUrl());
             seriesAnchor.addClickHandler(new ClickHandler() {
                 @Override
@@ -84,7 +83,7 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
     @Override
     public void navigateTabsTo(AbstractEventRegattaPlace place) {
         tabPanelUi.activatePlace(place);
-        StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
+        StringBuilder titleBuilder = new StringBuilder(StringMessages.INSTANCE.sapSailing()).append(" - ");
 
         titleBuilder.append(currentPresenter.showRegattaMetadata() ? currentPresenter.getRegattaMetadata()
                 .getDisplayName() : currentPresenter.getEventDTO().getDisplayName());

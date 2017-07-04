@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.impl;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 
 public class DataImportProgressImpl implements DataImportProgress {
@@ -11,7 +12,7 @@ public class DataImportProgressImpl implements DataImportProgress {
     private UUID currentImportOperationId;
     private MasterDataImportObjectCreationCount result = null;
     private double overallProgressPct = 0;
-    private String currentSubProgressName = "Initializing Import";
+    private DataImportSubProgress currentSubProgress = DataImportSubProgress.IMPORT_INIT;
     private double currentSubProgressPct = 0;
     private boolean failed = false;
     private String errorMessage;
@@ -21,17 +22,16 @@ public class DataImportProgressImpl implements DataImportProgress {
 
     public DataImportProgressImpl(final UUID currentImportOperationId) {
         this.currentImportOperationId = currentImportOperationId;
-
     }
 
     @Override
     public double getOverallProgressPct() {
         return overallProgressPct;
     }
-
+    
     @Override
-    public String getNameOfCurrentSubProgress() {
-        return currentSubProgressName;
+    public DataImportSubProgress getCurrentSubProgress() {
+        return currentSubProgress;
     }
 
     @Override
@@ -48,10 +48,10 @@ public class DataImportProgressImpl implements DataImportProgress {
     public void setOverAllProgressPct(double pct) {
         overallProgressPct = pct;
     }
-
+    
     @Override
-    public void setNameOfCurrentSubProgress(String name) {
-        currentSubProgressName = name;
+    public void setCurrentSubProgress(DataImportSubProgress subProgress) {
+        currentSubProgress = subProgress;
     }
 
     @Override

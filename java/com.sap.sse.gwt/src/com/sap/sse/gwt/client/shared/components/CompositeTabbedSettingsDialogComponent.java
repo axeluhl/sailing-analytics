@@ -2,7 +2,8 @@ package com.sap.sse.gwt.client.shared.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -11,7 +12,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
 public class CompositeTabbedSettingsDialogComponent implements SettingsDialogComponent<CompositeSettings> {
     
@@ -21,7 +21,6 @@ public class CompositeTabbedSettingsDialogComponent implements SettingsDialogCom
         public ComponentAndDialogComponent(Component<SettingsType> a, SettingsDialogComponent<SettingsType> b) {
             super(a, b);
         }
-        
     }
     
     private final Collection<ComponentAndDialogComponent<?>> components;
@@ -36,7 +35,7 @@ public class CompositeTabbedSettingsDialogComponent implements SettingsDialogCom
     }
 
     private <SettingsType extends Settings> ComponentAndDialogComponent<SettingsType> createComponentAndDialogComponent(Component<SettingsType> component) {
-        return new ComponentAndDialogComponent<SettingsType>(component, component.getSettingsDialogComponent());
+        return new ComponentAndDialogComponent<SettingsType>(component, component.getSettingsDialogComponent(component.getSettings()));
     }
 
     @Override
@@ -52,15 +51,11 @@ public class CompositeTabbedSettingsDialogComponent implements SettingsDialogCom
 
     @Override
     public CompositeSettings getResult() {
-        Collection<ComponentAndSettingsPair<?>> settings = new HashSet<>();
+        Map<String, Settings> settings = new HashMap<>();
         for (ComponentAndDialogComponent<?> component : components) {
-            settings.add(getComponentAndSettings(component));
+            settings.put(component.getA().getId(), component.getB().getResult());
         }
         return new CompositeSettings(settings);
-    }
-
-    private <SettingsType extends Settings> ComponentAndSettingsPair<SettingsType> getComponentAndSettings(ComponentAndDialogComponent<SettingsType> component) {
-        return new ComponentAndSettingsPair<SettingsType>(component.getA(), component.getB().getResult());
     }
 
     @Override

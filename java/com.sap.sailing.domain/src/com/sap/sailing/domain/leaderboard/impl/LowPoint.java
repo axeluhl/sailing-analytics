@@ -57,7 +57,7 @@ public class LowPoint extends AbstractScoringSchemeImpl {
 
     @Override
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         Double result;
         if (numberOfCompetitorsInRace == null || raceColumn.hasSplitFleetContiguousScoring()) {
             result = (double) (numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard()+1);
@@ -73,7 +73,7 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
+    public boolean isValidInNetScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         return true;
     }
 

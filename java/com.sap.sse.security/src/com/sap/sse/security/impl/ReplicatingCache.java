@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +27,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
     private static final long serialVersionUID = 6628512191363526330L;
     private transient ReplicableSecurityService securityService;
     private final String name;
-    private final ConcurrentHashMap<K, V> cache;
+    private final ConcurrentMap<K, V> cache;
 
     public ReplicatingCache(ReplicableSecurityService securityService, String name) {
         super();

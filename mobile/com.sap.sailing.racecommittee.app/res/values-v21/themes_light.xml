@@ -10,6 +10,8 @@
         <item name="android:windowTranslucentStatus">true</item>
 
         <item name="android:alertDialogTheme">@style/AppTheme.Light.AlertDialog.v21</item>
+
+        <item name="checkedItemBackground">@drawable/checked_item_background_light_ripple</item>
     </style>
 
     <style name="AppTheme.Light.AlertDialog.v21" parent="Theme.AppCompat.Light.Dialog">

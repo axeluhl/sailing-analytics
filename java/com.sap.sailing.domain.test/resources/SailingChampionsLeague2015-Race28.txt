@@ -1,0 +1,385 @@
+stored-uri:datafiles/0ce4e090-3f82-0133-c0b5-60a44ce903c3.mtb
+StartReplay:1
+
+// Input from params_static:
+
+// Input from event_parameters:
+
+EnableLadderLines:0
+LadderLineDistance:100
+DefaultPanel:
+ReCalcDirAndSpeed:1
+ws-uri:ws://event.tractrac.com:8888
+CompMarkerUUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+CodanIsSponsor:0
+DefaultTailLength:60
+DisableMarkTicker:0
+smsParams:0,tracanonym,4525720572,3,10,15
+APzoomChangeTime:2500
+disableAutoProduce:0
+autoProduce:0
+APstartLineShowOfLeg:0.25
+APsideOfStartLine:0.30
+APstartSwitch:0.8
+APwholeLegBehindMarks:0.15
+APmarkSwitch:0.13
+APmarkZoomBehindMarks:0.10
+APmarkZoomInFrontOfMarks:0.20
+PopupMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+ManualUrl:http://www.tractrac.com/files/userguide_sailing.pdf
+xrr_url_source:
+Marker1UUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+Marker1Type:RGBMarkerFactory
+Marker1Directional:1
+Marker1Image:markers/boat_FF0000_big.png
+Marker1Length:5
+Marker1MinPixelSize:30
+Startlocation:9.534699270629858,41.136595742997734
+MaxDiffTime:1200
+MaxMetersPerSecond:20
+PrecisionMeters:20
+ShortAvgTime:180
+LongAvgTime:900
+TimeZone:2
+CompMarkerTimeout:60
+FramesPerSecond:8
+replayspeedup:5
+MatchRaceClock:0
+MatchRaceClockNo:3
+MatchRaceClockSpacing:300
+Minimap:1
+MinimapUseLayers:2
+Minimapgeorect:9.524268722542502,41.145734945749545,9.552747799682606,41.13193759988942
+MinimapMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4UUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4Type:RGBmarkerFactory
+Marker4Directional:1
+Marker4Image:markers/boat_FF0000_small.png
+MetersPerPixel:18
+MetersPerPixelMax:30
+MetersPerPixelMin:0.2
+isMatchRace:0
+DefaultDistanceUnits:meters
+weatherEnabled:0
+DefaultSpeedUnits:Knots
+showRaceClock:1
+BackGroundImage:graphics/background.jpg
+DisableRotation:0
+ControlPointMarkerRadius:13
+disableselection:0
+disableleaderline:0
+StartTimeType:Race
+ResultColumn5SpeedIn:Knots
+smsProvider:0
+DisableChangeRace:0
+DisableLatestRoundings:0
+LaggingThreshold:5
+LowBatteryThreshold:5
+BatteryLevelWarn:20
+BatteryLevelDanger:13
+//live-uri:tcp://event.tractrac.com:4400
+//stored-uri:tcp://event.tractrac.com:4401
+PerformanceTableLayout:[{"key":"Pos","header":"Pos"},{"key":"Name","header":"Name"},{"key":"Short","header":"Short"},{"key":"Country","header":"Country"},{"key":"After","header":"After"},{"key":"Leg pos","header":"Leg pos"},{"key":"Leg time","header":"Leg time"},{"key":"SOG","header":"SOG"},{"key":"VMG","header":"VMG"},{"key":"Top speed","header":"Top Speed"},{"key":"Distance","header":"Distance"}]
+ResultsLayout:[{"key":"Order","header":"#","description":"Position","printable":true,"align":"right","collapsible":false},{"key":"Name","header":"Name","description":"Competitor's name","printable":true,"align":"left","collapsible":false},{"key":"ShortName","header":"Short Name","description":"Competitor's short name","printable":true,"align":"left","collapsible":true},{"key":"LegTime","header":"Leg","description":"Leg time","printable":false,"align":"right","collapsible":true},{"key":"LegPosition","header":"#","description":"Leg position","printable":false,"align":"right","collapsible":true},{"key":"Time","header":"Total","description":"Total time","printable":true,"align":"right","collapsible":false},{"key":"After","header":"Total &Delta;","description":"Total &Delta;","printable":true,"align":"right","collapsible":false}]
+DatabaseVersion:01.00.20
+PopUpRow1Name:
+PopUpRow1Type:Name
+PopUpRow2Name:Knots
+PopUpRow2Type:BoatSpeed
+PopUpRow3Name:Ranking
+PopUpRow3Type:RowNumber
+PopUpRow4Name:Sail
+PopUpRow4Type:Ini
+PopUpRow5Name:After
+PopUpRow5Type:BoatAfter
+WindEstimator:0
+MapUrl:http://tile.traclive.dk/ttm
+ResultColumn1Name:#
+ResultColumn1Size:20
+ResultColumn1Type:RowNumber
+ResultColumn2Name:sail
+ResultColumn2Size:45
+ResultColumn2Type:Ini
+ResultColumn3Name:name
+ResultColumn3Size:110
+ResultColumn3Type:Name
+ResultColumn4Name:after
+ResultColumn4Size:45
+ResultColumn4Type:BoatAfter
+ResultColumn5Name:kts
+ResultColumn5Size:40
+ResultColumn5Type:BoatSpeed
+DisableLeaderboard:0
+DisableAnalysis:0
+TableFontSize:11
+compInitialsFontSize:11
+AutoRotate:0
+MassStart:0
+SegmentFile:segments.php
+RaceHandicapSystem:NONE
+TeamCompetitionType:NONE
+LiveDelaySecs: 8
+
+//-------- AUTO GENERATED PARAMETERS START ----------------
+
+EventID:c41caa60-287e-0133-61c2-60a44ce903c3
+EventName:Sailing Champions League 2015
+EventAnalyticsName:
+EventDB:event_20150918_SailingCha
+EventStartTime:2015-09-16 23:00:00
+EventEndTime:2015-09-20 21:00:00
+EventType:a1b74ca0-fdd8-11dc-8811-005056c00008
+
+RaceID:0ce4e090-3f82-0133-c0b5-60a44ce903c3
+RaceName:Race 28
+RaceStartTime:2015-09-19 16:12:30
+RaceEndTime:
+RaceTrackingStartTime:2015-09-19 16:03:57
+RaceTrackingEndTime:2015-09-19 16:25:04
+Initialized:1
+RaceDefaultRouteUUID:0ce498b0-3f82-0133-c0b4-60a44ce903c3
+RaceHandicapSystem:NONE
+
+Class1UUID:cd64dac0-287e-0133-61c9-60a44ce903c3
+Class1Name:J/70
+
+Team1UUID:7e7a8bf0-3f6c-0133-b821-60a44ce903c3
+Team1Name:AS
+
+Team2UUID:7e6df910-3f6c-0133-b81f-60a44ce903c3
+Team2Name:BYC
+Team2Comp1UUID:7e709bb0-3f6c-0133-b820-60a44ce903c3
+
+Team3UUID:7efe7b10-3f6c-0133-b833-60a44ce903c3
+Team3Name:CCRL
+Team3Comp1UUID:7eff6460-3f6c-0133-b834-60a44ce903c3
+
+Team4UUID:7e431a50-3f6c-0133-b819-60a44ce903c3
+Team4Name:DTYC
+
+Team5UUID:7f119000-3f6c-0133-b835-60a44ce903c3
+Team5Name:ESK
+
+Team6UUID:7ea52830-3f6c-0133-b827-60a44ce903c3
+Team6Name:GKSS
+
+Team7UUID:7e6312a0-3f6c-0133-b81d-60a44ce903c3
+Team7Name:HS
+
+Team8UUID:7edafa50-3f6c-0133-b82d-60a44ce903c3
+Team8Name:JKWP
+
+Team9UUID:7e0f0de0-3f6c-0133-b80d-60a44ce903c3
+Team9Name:KDY
+
+Team10UUID:7ed27f80-3f6c-0133-b82b-60a44ce903c3
+Team10Name:KNS
+
+Team11UUID:611995d0-3f83-0133-c19f-60a44ce903c3
+Team11Name:KSSS
+Team11Comp1UUID:611b1130-3f83-0133-c1a0-60a44ce903c3
+
+Team12UUID:7f47ead0-3f6c-0133-b83f-60a44ce903c3
+Team12Name:NRV
+
+Team13UUID:7e039e20-3f6c-0133-b809-60a44ce903c3
+Team13Name:PIRYC
+
+Team14UUID:7f644330-3f6c-0133-b843-60a44ce903c3
+Team14Name:RCO
+Team14Comp1UUID:7f708860-3f6c-0133-b844-60a44ce903c3
+
+Team15UUID:7ddbd070-3f6c-0133-b801-60a44ce903c3
+Team15Name:RMYC
+Team15Comp1UUID:7dde8ae0-3f6c-0133-b802-60a44ce903c3
+
+Team16UUID:7f5a9060-3f6c-0133-b841-60a44ce903c3
+Team16Name:RTYC
+
+Team17UUID:7e363520-3f6c-0133-b815-60a44ce903c3
+Team17Name:SCTWVA
+
+Team18UUID:7e9ae350-3f6c-0133-b825-60a44ce903c3
+Team18Name:SKS
+
+Team19UUID:60fb71a0-3f83-0133-c199-60a44ce903c3
+Team19Name:SNG
+
+Team20UUID:7eedb300-3f6c-0133-b82f-60a44ce903c3
+Team20Name:SRR
+Team20Comp1UUID:7eee96c0-3f6c-0133-b830-60a44ce903c3
+
+Team21UUID:7f19dd30-3f6c-0133-b837-60a44ce903c3
+Team21Name:SSF
+
+Team22UUID:7f35b7a0-3f6c-0133-b83b-60a44ce903c3
+Team22Name:SVBG
+Team22Comp1UUID:7f36a440-3f6c-0133-b83c-60a44ce903c3
+
+Team23UUID:7ef620e0-3f6c-0133-b831-60a44ce903c3
+Team23Name:SVI
+
+Team24UUID:cd669040-287e-0133-61ca-60a44ce903c3
+Team24Name:team
+
+Team25UUID:7e8fdd90-3f6c-0133-b823-60a44ce903c3
+Team25Name:VSaW
+
+Team26UUID:7e584b10-3f6c-0133-b81b-60a44ce903c3
+Team26Name:WSVA
+
+Team27UUID:7eb9b9f0-3f6c-0133-b829-60a44ce903c3
+Team27Name:YCB
+
+Team28UUID:7e2abec0-3f6c-0133-b811-60a44ce903c3
+Team28Name:YCCS
+
+Team29UUID:7da1d9f0-3f6c-0133-b7f9-60a44ce903c3
+Team29Name:YCN
+
+Team30UUID:7dec2d00-3f6c-0133-b805-60a44ce903c3
+Team30Name:YCS
+
+Team31UUID:7dcffcb0-3f6c-0133-b7fd-60a44ce903c3
+Team31Name:ÅSS
+
+Comp1UUID:7dde8ae0-3f6c-0133-b802-60a44ce903c3
+Comp1Name:Royal Malta Yacht Club
+Comp1NameShort:RMYC
+Comp1Nationality:MLT
+Comp1Description:
+Comp1Handicap:1.0000000000
+Comp1HandicapDistance:0.00000
+Comp1StartTime:2015-09-19 16:12:30
+Comp1ClassUUID:cd64dac0-287e-0133-61c9-60a44ce903c3
+Comp1RouteUUID:0ce498b0-3f82-0133-c0b4-60a44ce903c3
+Comp1RaceObjectDataSheet:boatName=Boat 8###BREAKLINE###boatId=8###BREAKLINE###boatColor=#71c5e8
+Comp1Color:71c5e8
+
+Comp2UUID:7e709bb0-3f6c-0133-b820-60a44ce903c3
+Comp2Name:Burgenländischer Yacht-Club
+Comp2NameShort:BYC
+Comp2Nationality:AUT
+Comp2Description:
+Comp2Handicap:1.0000000000
+Comp2HandicapDistance:0.00000
+Comp2StartTime:2015-09-19 16:12:30
+Comp2ClassUUID:cd64dac0-287e-0133-61c9-60a44ce903c3
+Comp2RouteUUID:0ce498b0-3f82-0133-c0b4-60a44ce903c3
+Comp2RaceObjectDataSheet:boatName=Boat 4###BREAKLINE###boatId=4###BREAKLINE###boatColor=#78d64b
+Comp2Color:78d64b
+
+Comp3UUID:7eee96c0-3f6c-0133-b830-60a44ce903c3
+Comp3Name:Société des Régates Rochelaises
+Comp3NameShort:SRR
+Comp3Nationality:FRA
+Comp3Description:
+Comp3Handicap:1.0000000000
+Comp3HandicapDistance:0.00000
+Comp3StartTime:2015-09-19 16:12:30
+Comp3ClassUUID:cd64dac0-287e-0133-61c9-60a44ce903c3
+Comp3RouteUUID:0ce498b0-3f82-0133-c0b4-60a44ce903c3
+Comp3RaceObjectDataSheet:boatName=Boat 7###BREAKLINE###boatId=7###BREAKLINE###boatColor=#717c7d
+Comp3Color:717c7d
+
+Comp4UUID:7eff6460-3f6c-0133-b834-60a44ce903c3
+Comp4Name:Club Canottieri Roggero di Lauria
+Comp4NameShort:CCRL
+Comp4Nationality:ITA
+Comp4Description:
+Comp4Handicap:1.0000000000
+Comp4HandicapDistance:0.00000
+Comp4StartTime:2015-09-19 16:12:30
+Comp4ClassUUID:cd64dac0-287e-0133-61c9-60a44ce903c3
+Comp4RouteUUID:0ce498b0-3f82-0133-c0b4-60a44ce903c3
+Comp4RaceObjectDataSheet:boatName=Boat 3###BREAKLINE###boatId=3###BREAKLINE###boatColor=#ece81a
+Comp4Color:ece81a
+
+Comp5UUID:7f36a440-3f6c-0133-b83c-60a44ce903c3
+Comp5Name:Società Velica di Barcola e Grignano
+Comp5NameShort:SVBG
+Comp5Nationality:ITA
+Comp5Description:
+Comp5Handicap:1.0000000000
+Comp5HandicapDistance:0.00000
+Comp5StartTime:2015-09-19 16:12:30
+Comp5ClassUUID:cd64dac0-287e-0133-61c9-60a44ce903c3
+Comp5RouteUUID:0ce498b0-3f82-0133-c0b4-60a44ce903c3
+Comp5RaceObjectDataSheet:boatName=Boat 1###BREAKLINE###boatId=1###BREAKLINE###boatColor=#004c97
+Comp5Color:004c97
+
+Comp6UUID:7f708860-3f6c-0133-b844-60a44ce903c3
+Comp6Name:Regattaclub Oberhofen
+Comp6NameShort:RCO
+Comp6Nationality:SUI
+Comp6Description:
+Comp6Handicap:1.0000000000
+Comp6HandicapDistance:0.00000
+Comp6StartTime:2015-09-19 16:12:30
+Comp6ClassUUID:cd64dac0-287e-0133-61c9-60a44ce903c3
+Comp6RouteUUID:0ce498b0-3f82-0133-c0b4-60a44ce903c3
+Comp6RaceObjectDataSheet:boatName=Boat 2###BREAKLINE###boatId=2###BREAKLINE###boatColor=#cb333b
+Comp6Color:cb333b
+
+Comp7UUID:611b1130-3f83-0133-c1a0-60a44ce903c3
+Comp7Name:Kungliga Svenska Segelsällskapet
+Comp7NameShort:KSSS
+Comp7Nationality:SWE
+Comp7Description:
+Comp7Handicap:1.0000000000
+Comp7HandicapDistance:0.00000
+Comp7StartTime:2015-09-19 16:12:30
+Comp7ClassUUID:cd64dac0-287e-0133-61c9-60a44ce903c3
+Comp7RouteUUID:0ce498b0-3f82-0133-c0b4-60a44ce903c3
+Comp7RaceObjectDataSheet:boatName=Boat 5###BREAKLINE###boatId=5###BREAKLINE###boatColor=#e93cac
+Comp7Color:e93cac
+
+ControlPoint1UUID:250c0590-40cd-0133-c869-60a44ce903c3
+ControlPoint1Name:Top Replace
+ControlPoint1HasTwoPoints:0
+ControlPoint1ShortName:TR
+ControlPoint1Mark1Lon:9.552047
+ControlPoint1Mark1Lat:41.131207
+ControlPoint1Mark1Static:0
+
+ControlPoint2UUID:6d457800-3ea1-0133-5923-60a44ce903c3
+ControlPoint2Name:Start-Finish
+ControlPoint2HasTwoPoints:1
+ControlPoint2ShortName:SF
+ControlPoint2Mark1Lon:9.557379
+ControlPoint2Mark1Lat:41.129528
+ControlPoint2Mark1Static:0
+ControlPoint2Mark2Lon:9.556334
+ControlPoint2Mark2Lat:41.128544
+ControlPoint2Mark2Static:0
+
+ControlPoint3UUID:985f3620-3ea1-0133-5949-60a44ce903c3
+ControlPoint3Name:Top
+ControlPoint3HasTwoPoints:0
+ControlPoint3ShortName:T
+ControlPoint3Mark1Lon:9.551472
+ControlPoint3Mark1Lat:41.131355
+ControlPoint3Mark1Static:0
+
+ControlPoint4UUID:c8f77240-3ea1-0133-594c-60a44ce903c3
+ControlPoint4Name:Bottom gate
+ControlPoint4HasTwoPoints:1
+ControlPoint4ShortName:B
+ControlPoint4Mark1Lon:9.555827
+ControlPoint4Mark1Lat:41.129478
+ControlPoint4Mark1Static:0
+ControlPoint4Mark2Lon:9.555692
+ControlPoint4Mark2Lat:41.129150
+ControlPoint4Mark2Static:0
+
+SegmentFile:segments.php
+Route1UUID:0ce498b0-3f82-0133-c0b4-60a44ce903c3
+Route1Description:Race 28
+Route1Length:0
+Route1ControlPoint1UUID:6d457800-3ea1-0133-5923-60a44ce903c3
+Route1ControlPoint2UUID:985f3620-3ea1-0133-5949-60a44ce903c3
+Route1ControlPoint3UUID:c8f77240-3ea1-0133-594c-60a44ce903c3
+Route1ControlPoint4UUID:985f3620-3ea1-0133-5949-60a44ce903c3
+Route1ControlPoint5UUID:6d457800-3ea1-0133-5923-60a44ce903c3
+
+//-------- AUTO GENERATED PARAMETERS END ------------------

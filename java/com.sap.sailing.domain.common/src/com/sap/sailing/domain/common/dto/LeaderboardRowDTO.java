@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Duration;
+
 /**
  * Holds data about one competitor and all races represented by the owning {@link LeaderboardDTO leaderboard}.
  * 
@@ -15,7 +18,7 @@ public class LeaderboardRowDTO implements Serializable {
     public CompetitorDTO competitor;
     public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
     public Double carriedPoints;
-    public Double totalPoints;
+    public Double netPoints;
     public Double totalTimeSailedInSeconds;
     public Double totalTimeSailedDownwindInSeconds;
     public Double maximumSpeedOverGroundInKnots;
@@ -35,7 +38,7 @@ public class LeaderboardRowDTO implements Serializable {
                 + ((maximumSpeedOverGroundInKnots == null) ? 0 : maximumSpeedOverGroundInKnots.hashCode());
         result = prime * result
                 + ((totalDistanceTraveledInMeters == null) ? 0 : totalDistanceTraveledInMeters.hashCode());
-        result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
+        result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
         result = prime * result
                 + ((totalTimeSailedDownwindInSeconds == null) ? 0 : totalTimeSailedDownwindInSeconds.hashCode());
         result = prime * result + ((totalTimeSailedInSeconds == null) ? 0 : totalTimeSailedInSeconds.hashCode());
@@ -84,10 +87,10 @@ public class LeaderboardRowDTO implements Serializable {
                 return false;
         } else if (!totalDistanceTraveledInMeters.equals(other.totalDistanceTraveledInMeters))
             return false;
-        if (totalPoints == null) {
-            if (other.totalPoints != null)
+        if (netPoints == null) {
+            if (other.netPoints != null)
                 return false;
-        } else if (!totalPoints.equals(other.totalPoints))
+        } else if (!netPoints.equals(other.netPoints))
             return false;
         if (totalTimeSailedDownwindInSeconds == null) {
             if (other.totalTimeSailedDownwindInSeconds != null)
@@ -115,6 +118,28 @@ public class LeaderboardRowDTO implements Serializable {
         } else if (!whenMaximumSpeedOverGroundWasAchieved.equals(other.whenMaximumSpeedOverGroundWasAchieved))
             return false;
         return true;
+    }
+    
+    public Distance getDistanceTraveledInMeters(String raceColumnName) {
+        final Distance result;
+        LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
+        if (fieldsForRace != null) {
+            result = fieldsForRace.getDistanceTraveledInMeters();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public Duration getTimeSailed(String raceColumnName) {
+        final Duration result;
+        LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
+        if (fieldsForRace != null) {
+            result = fieldsForRace.getTimeSailedInMillis();
+        } else {
+            result = null;
+        }
+        return result;
     }
     
     @Override

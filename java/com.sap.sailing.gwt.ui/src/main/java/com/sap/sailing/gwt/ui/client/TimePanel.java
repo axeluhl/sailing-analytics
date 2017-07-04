@@ -33,11 +33,13 @@ import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
+public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeComponent<T> implements TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeProvider;
@@ -89,17 +91,24 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private static ClientResources resources = GWT.create(ClientResources.class);
     protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
+    private final boolean forcePaddingRightToAlignToCharts;
+
     /**
-     * @param isScreenLargeEnoughToOfferChartSupport
-     *            if <code>true</code>, the right padding will be set such that the time panel lines up with charts such
-     *            as the competitor chart or the wind chart shown above it
+     * @param forcePaddingRightToAlignToCharts
+     *            if <code>true</code>, the right padding will always be set such that the time panel lines up with
+     *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends
+     *            on the flag set by {@link #setLiveGenerallyPossible(boolean)}
      */
-    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport) {
+    public TimePanel(Component<?> parent, ComponentContext<?> context, Timer timer,
+            TimeRangeWithZoomProvider timeRangeProvider,
+            StringMessages stringMessages,
+            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts) {
+        super(parent, context);
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
         this.canReplayWhileLiveIsPossible = canReplayWhileLiveIsPossible;
+        this.forcePaddingRightToAlignToCharts = forcePaddingRightToAlignToCharts;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
         timeRangeProvider.addTimeRangeChangeListener(this);
@@ -111,9 +120,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timePanelSliderFlowWrapper = new FlowPanel();
         timePanelSlider.setStyleName("timePanelSlider");
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
-        if (isScreenLargeEnoughToOfferChartSupport) {
-            timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
-        }
         timePanelSliderFlowWrapper.add(timePanelSlider);
 
         playSpeedImg = resources.timesliderPlaySpeedIcon();
@@ -289,7 +295,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
        
         timePanelCss.ensureInjected();
         controlsPanel.add(createSettingsButton());
-        setWidget(timePanelInnerWrapper);
+        initWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         
         controlsPanel.add(playSpeedControlPanel);
@@ -301,6 +307,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         hideControlsPanel();
     }
     
+    public TimeRangeWithZoomProvider getTimeRangeProvider() {
+        return timeRangeProvider;
+    }
+
     private Button createSettingsButton() {
         Button settingsButton = SettingsDialog.<T>createSettingsButton(this, stringMessages);
         settingsButton.setStyleName(timePanelCss.settingsButtonStyle());
@@ -427,10 +437,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         assert min != null && max != null;
                 
         boolean changed = false;
-        if (!max.equals(timeRangeProvider.getToTime()) || !min.equals(timeRangeProvider.getFromTime())) {
-            changed = true;
-            timeSlider.setMinAndMaxValue(new Double(min.getTime()),new Double(max.getTime()), fireEvent);
-        }
+        changed = timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
         if (changed) {
             if (!timeRangeProvider.isZoomed()) {
                 timeRangeProvider.setTimeRange(min, max, this);
@@ -528,6 +535,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
+        setMinMax(fromTime, toTime, true);
     }
 
     protected boolean isLiveModeToBeMadePossible() {
@@ -557,13 +565,23 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
      */
     protected void setLiveGenerallyPossible(boolean possible) {
         backToLivePlayButton.setVisible(possible);
+        updateTimeSliderPadding(possible);
         updatePlayPauseButtonsVisibility(timer.getPlayMode());
+    }
+
+    private void updateTimeSliderPadding(boolean backToLivePlayButtonVisible) {
+        Style timePanelStyle = timePanelSlider.getElement().getStyle();
+        if (backToLivePlayButtonVisible || forcePaddingRightToAlignToCharts) {
+            timePanelStyle.setPaddingRight(66, Unit.PX);
+        } else {
+            timePanelStyle.clearPaddingRight();
+        }
+        timeSlider.onResize();
     }
 
     @SuppressWarnings("unchecked")
     public T getSettings() {
-        TimePanelSettings result = new TimePanelSettings();
-        result.setRefreshInterval(timer.getRefreshInterval());
+        TimePanelSettings result = new TimePanelSettings(timer.getRefreshInterval());
         return (T) result;
     }
 
@@ -578,8 +596,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     }
 
     @Override
-    public SettingsDialogComponent<T> getSettingsDialogComponent() {
-        return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
+    public SettingsDialogComponent<T> getSettingsDialogComponent(T settings) {
+        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages);
     }
 
     @Override
@@ -626,4 +644,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     public Button getBackToLiveButton() {
         return backToLivePlayButton;
     }
+
+    @Override
+    public String getId() {
+        return "TimePanel";
+    }
+
 }

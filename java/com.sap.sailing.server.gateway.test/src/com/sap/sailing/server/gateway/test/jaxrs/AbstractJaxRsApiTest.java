@@ -40,8 +40,7 @@ public abstract class AbstractJaxRsApiTest {
     public void setUp() {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().dropDatabase();
-
-        racingEventService = new RacingEventServiceImpl(true, new MockSmartphoneUuidServiceFinderFactory());
+        racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false);
     }
 
     protected <T extends AbstractSailingServerResource> T spyResource(T resource) {
@@ -84,7 +83,7 @@ public abstract class AbstractJaxRsApiTest {
                                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                                             /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                                    boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null); 
+                                    boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null); 
             result.add(competitor);
         }
         return result;

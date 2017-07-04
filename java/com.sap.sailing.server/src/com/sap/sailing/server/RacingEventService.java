@@ -6,18 +6,19 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
@@ -40,6 +41,8 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
+import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -56,21 +59,24 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sse.common.TimePoint;
@@ -187,8 +193,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @throws SocketException
      *             thrown, e.g., in case there is already another listener on the port requested
      */
-    void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception;
+    void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination);
 
+    /**
+     * If a {@link WindTracker} exists for {@code race}, it is stopped and the {@link RaceTrackingConnectivityParameters}
+     * through which the {@code race} was created are updated to not track wind when restoring that race upon a server
+     * restart.
+     */
     void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException;
 
     /**
@@ -210,6 +221,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId);
 
     RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
+
+    RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName, String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard);
 
     void removeLeaderboard(String leaderboardName);
 
@@ -302,19 +315,29 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
-    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, GPSFixStore gpsFixStore,
+    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator);
 
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
     /**
-     * @param series the series must not have any {@link RaceColumn}s yet
+     * @param series
+     *            the series must not have any {@link RaceColumn}s yet
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
      */
     Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId,
-            boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor);
-    
-    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration, Iterable<? extends Series> series, boolean useStartTimeInference);
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
+            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
+
+    /**
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
+     */
+    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
+            Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
+            Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -367,11 +390,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
+     * @param baseURL TODO
      * @return The new event
      */
     void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs, 
-            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos);
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL, 
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -415,7 +439,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Calling mediaTrackAdded for every entry in the specified collection. 
      * @param mediaTracks
      */
-    void mediaTracksAdded(Collection<MediaTrack> mediaTracks);
+    void mediaTracksAdded(Iterable<MediaTrack> mediaTracks);
     
     void mediaTrackTitleChanged(MediaTrack mediaTrack);
 
@@ -433,23 +457,24 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * In contrast to mediaTracksAdded, this method takes mediaTracks with a given dbId.
      * Checks if the track already exists in the library and the database and adds/stores it
      * accordingly. If a track already exists and override, its properties are checked for changes 
-     * @param mediaTrack
      * @param override If true, track properties (title, url, start time, duration, not mime type!) will be 
      * overwritten with the values from the track to be imported.
+     * @param mediaTrack
      */
-    void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
+    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCount creatingCount, boolean override) throws Exception;
     
-    Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
     
-    Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
-    Collection<MediaTrack> getAllMediaTracks();
+    Iterable<MediaTrack> getAllMediaTracks();
 
     void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
+     * @param controlTrackingFromStartAndFinishTimes TODO
      * @param rankingMetricConstructor TODO
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
@@ -457,7 +482,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
             TimePoint startDate, TimePoint endDate, Serializable id, 
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor);
+            Serializable defaultCourseAreaId, double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
 
     /**
      * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
@@ -466,8 +492,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
     Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images,
-            Iterable<VideoDescriptor> videos);
+            boolean isPublic, UUID id, URL officialWebsiteURL, URL baseURL, Map<Locale, URL> sailorsInfoWebsiteURLs,
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos);
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
@@ -530,8 +556,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     PolarDataService getPolarDataService();
 
     SimulationService getSimulationService();
-
-    GPSFixStore getGPSFixStore();
+    
+    SensorFixStore getSensorFixStore();
     
     RaceTracker getRaceTrackerById(Object id);
     
@@ -548,12 +574,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DataImportLockWithProgress getDataImportLock();
 
     DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
-            double overallProgressPct,
-            String subProgressName, double subProgressPct);
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct);
 
     DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
-            double overallProgressPct,
-            String subProgressName, double subProgressPct);
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct);
 
     void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage);
 
@@ -618,4 +642,27 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ClassLoader getCombinedMasterDataClassLoader();
 
     Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
+
+    /**
+     * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}
+     * is already available, the {@code callback} is invoked immediately. If the {@link RaceTracker} isn't available
+     * yet, the given callback will be informed asynchronously on registration of the RaceTracker in question.
+     */
+    void getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier, Consumer<RaceTracker> callback);
+
+    /**
+     * When restoring tracked races was requested upon creation of this service and after the corresponding restore records
+     * were read from the persistent store, this method returns the number of races to be restored. Otherwise, it returns 0.
+     * 
+     * @see #getNumberOfTrackedRacesRestored()
+     */
+    int getNumberOfTrackedRacesToRestore();
+
+    /**
+     * When restoring tracked races was requested upon creation of this service, this method tells the number of races
+     * whose loading process has already been triggered. Otherwise, it returns 0.
+     * 
+     * @see #getNumberOfTrackedRacesToRestore()
+     */
+    int getNumberOfTrackedRacesRestored();
 }

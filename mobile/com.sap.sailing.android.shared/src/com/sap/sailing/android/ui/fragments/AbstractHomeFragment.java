@@ -2,28 +2,28 @@ package com.sap.sailing.android.ui.fragments;
 
 import java.util.List;
 
+import com.sap.sailing.android.shared.R;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
+import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
+import com.sap.sailing.android.shared.util.BaseAppPreferences;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
-import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
-import com.sap.sailing.android.shared.util.BaseAppPreferences;
 
 public abstract class AbstractHomeFragment extends BaseFragment {
     private final static String TAG = AbstractHomeFragment.class.getName();
@@ -53,31 +53,35 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     }
 
     private void showNoQRCodeMessage() {
-        ((AbstractStartActivity) getActivity()).showErrorPopup(R.string.no_qr_code_popup_title,
+        ((AbstractStartActivity<?>) getActivity()).showErrorPopup(R.string.no_qr_code_popup_title,
                 R.string.no_qr_code_popup_message);
     }
 
     private boolean requestQRCodeScan() {
+        boolean result;
+        PackageManager manager = getActivity().getPackageManager();
         Intent intent = new Intent("com.google.zxing.client.android.SCAN");
         intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-
-        PackageManager manager = getActivity().getPackageManager();
         List<ResolveInfo> infos = manager.queryIntentActivities(intent, 0);
         if (infos.size() != 0) {
-            startActivityForResult(intent, requestCodeQRCode);
-            return true;
-        } else {
-            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            infos = manager.queryIntentActivities(marketIntent, 0);
-            if (infos.size() != 0) {
-                startActivity(marketIntent);
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.error_play_store_and_scanning_not_available),
-                        Toast.LENGTH_LONG).show();
+            try {
+                startActivityForResult(intent, requestCodeQRCode);
+                result = true;
+            } catch (Exception ex) {
+                requestQRCodeScannerInstallation();
+                result = false;
             }
-            return false;
+        } else {
+            requestQRCodeScannerInstallation();
+            result = false;
         }
+        return result;
+    }
+
+    private void requestQRCodeScannerInstallation() {
+        Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+        Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
+        startActivity(marketIntent);
     }
 
     @Override
@@ -108,7 +112,7 @@ public abstract class AbstractHomeFragment extends BaseFragment {
      *
      * @param checkinData
      */
-    public abstract void displayUserConfirmationScreen(final AbstractCheckinData data);
+    public abstract void displayUserConfirmationScreen(final BaseCheckinData data);
 
     protected void clearScannedQRCodeInPrefs() {
         prefs.setLastScannedQRCode(null);
@@ -118,10 +122,10 @@ public abstract class AbstractHomeFragment extends BaseFragment {
      * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
      */
     protected void displayAPIErrorRecommendRetry() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         builder.setMessage(getString(R.string.notify_user_api_call_failed));
         builder.setCancelable(true);
-        builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -129,8 +133,7 @@ public abstract class AbstractHomeFragment extends BaseFragment {
             }
 
         });
-        AlertDialog alert = builder.create();
-        alert.show();
+        builder.show();
     }
 
     private class ClickListener implements OnClickListener {

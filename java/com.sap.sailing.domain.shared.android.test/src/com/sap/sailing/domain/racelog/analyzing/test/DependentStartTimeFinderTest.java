@@ -83,7 +83,7 @@ public class DependentStartTimeFinderTest {
         expectedDependingOnRaces.add(new SimpleRaceLogIdentifierImpl("A", "", ""));
         assertNull(result.getStartTime());
         assertEquals(bAfterA, result.getStartTimeDiff());
-        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+        assertEquals(expectedDependingOnRaces, result.getDependingOnRaces());
         // assertEquals(5000, result.getStartTimeDiff().asMillis());
 
         finder = new StartTimeFinder(raceLogResolver, raceLogC);
@@ -96,7 +96,7 @@ public class DependentStartTimeFinderTest {
         result = finder.analyze();
         assertNull(result.getStartTime());
         assertEquals(cAfterB, result.getStartTimeDiff());
-        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+        assertEquals(expectedDependingOnRaces, result.getDependingOnRaces());
 
         TimePoint now = MillisecondsTimePoint.now();
         raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000),
@@ -175,7 +175,7 @@ public class DependentStartTimeFinderTest {
         StartTimeFinderResult result = finder.analyze();
         assertEquals(19000, result.getStartTime().asMillis());
         assertEquals(8000, result.getStartTimeDiff().asMillis());
-        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+        assertEquals(expectedDependingOnRaces, result.getDependingOnRaces());
 
         // now C -> B
         finder = new StartTimeFinder(raceLogResolver, raceLogC);
@@ -187,7 +187,7 @@ public class DependentStartTimeFinderTest {
         result = finder.analyze();
         assertEquals(11000, result.getStartTime().asMillis());
         assertEquals(6000, result.getStartTimeDiff().asMillis());
-        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+        assertEquals(expectedDependingOnRaces, result.getDependingOnRaces());
 
         // now B
         finder = new StartTimeFinder(raceLogResolver, raceLogB);
@@ -198,6 +198,6 @@ public class DependentStartTimeFinderTest {
         result = finder.analyze();
         assertEquals(5000, result.getStartTime().asMillis());
         assertNull(result.getStartTimeDiff());
-        assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
+        assertEquals(expectedDependingOnRaces, result.getDependingOnRaces());
     }
 }

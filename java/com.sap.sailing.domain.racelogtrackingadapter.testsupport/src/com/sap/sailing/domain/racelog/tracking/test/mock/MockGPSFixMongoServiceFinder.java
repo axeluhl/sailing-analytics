@@ -4,38 +4,41 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.DoubleVectorFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
-import com.sap.sse.common.TypeBasedServiceFinder;
 
-public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<GPSFixMongoHandler> {
+public class MockGPSFixMongoServiceFinder extends AbstractTypeBasedServiceFinder<FixMongoHandler<?>> {
     private final MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(null);
     private final DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(null, null);
-    private final GPSFixMongoHandler movingHandler = new GPSFixMovingMongoHandlerImpl(mof, dof);
-    private final GPSFixMongoHandler handler = new GPSFixMongoHandlerImpl(mof, dof);
+    private final FixMongoHandler<?> movingHandler = new GPSFixMovingMongoHandlerImpl(mof, dof);
+    private final FixMongoHandler<?> handler = new GPSFixMongoHandlerImpl(mof, dof);
+    private final FixMongoHandler<?> doubleVectorFixHandler = new DoubleVectorFixMongoHandlerImpl(mof, dof);
 
     @Override
-    public GPSFixMongoHandler findService(String fixType) {
+    public FixMongoHandler<?> findService(String fixType) {
         if (fixType.equals(GPSFixMovingImpl.class.getName()) ||
-                fixType.equals(CompactGPSFixMovingImpl.class.getName())) return movingHandler;
+                fixType.equals(VeryCompactGPSFixMovingImpl.class.getName())) return movingHandler;
         if (fixType.equals(GPSFixImpl.class.getName()) ||
-                fixType.equals(CompactGPSFixImpl.class.getName()))  return handler;
+                fixType.equals(VeryCompactGPSFixImpl.class.getName()))  return handler;
+        if (fixType.equals(DoubleVectorFixImpl.class.getName()))  return doubleVectorFixHandler;
         return null;
     }
 
     @Override
-    public void setFallbackService(GPSFixMongoHandler fallback) {
+    public void setFallbackService(FixMongoHandler<?> fallback) {
     }
     
     @Override
-    public Set<GPSFixMongoHandler> findAllServices() {
-        return new HashSet<GPSFixMongoHandler>(Arrays.asList(movingHandler, handler));
+    public Set<FixMongoHandler<?>> findAllServices() {
+        return new HashSet<FixMongoHandler<?>>(Arrays.asList(movingHandler, handler));
     }
 }

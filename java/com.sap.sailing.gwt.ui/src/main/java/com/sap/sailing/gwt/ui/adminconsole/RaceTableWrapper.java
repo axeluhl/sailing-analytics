@@ -1,25 +1,28 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplates;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
 extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
@@ -33,13 +36,14 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
             @Override
             public boolean representSameEntity(RaceColumnDTOAndFleetDTOWithNameBasedEquality dto1,
                     RaceColumnDTOAndFleetDTOWithNameBasedEquality dto2) {
-                return dto1.getA().getName().toString().equals(dto2.getA().getName().toString()) &&
-                        dto1.getB().getName().toString().equals(dto2.getB().getName().toString());
+                return dto1.getC().name.equals(dto2.getC().name) &&
+                        dto1.getA().getName().equals(dto2.getA().getName()) &&
+                        dto1.getB().getName().equals(dto2.getB().getName());
             }
 
             @Override
             public int hashCode(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
-                return t.getA().getName().toString().concat(t.getB().getName().toString()).hashCode();
+                return t.getA().getName().concat(t.getB().getName()).concat(t.getC().name).hashCode();
             }
         });
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceNameColumn =
@@ -49,13 +53,19 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                 if (raceInLeaderboardDTOAndFleetName.getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB()) != null) {
                     RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTOAndFleetName
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
-                    Map<String, String> params = new HashMap<>();
-                    params.put("leaderboardName", selectedLeaderboardName);
-                    params.put("regattaName", raceIdentifier.getRegattaName());
-                    params.put("raceName", raceIdentifier.getRaceName());
-                    params.put("canReplayDuringLiveRaces", "true");
-                    String link = EntryPointLinkFactory.createRaceBoardLink(params);
-                    return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
+                            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
+                                    raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
+                                    selectedLeaderboardName, null, null, null);
+                            RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
+                                    .createDefaultWithCanReplayDuringLiveRaces(true);
+                            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                                    perspectiveOwnSettings, Collections.emptyMap());
+
+                            String link = EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext,
+                                    settings);
+
+                            return ANCHORTEMPLATE.cell(UriUtils.fromString(link),
+                                    raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
                 } else {
                     return SafeHtmlUtils.fromString(raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
                 }

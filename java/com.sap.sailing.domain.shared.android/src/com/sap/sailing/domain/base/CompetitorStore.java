@@ -66,7 +66,9 @@ public interface CompetitorStore extends CompetitorFactory {
      */
     Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newEmail,
             String newSailId, Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
-            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile);
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
+
+    void addCompetitors(Iterable<Competitor> competitors);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
     

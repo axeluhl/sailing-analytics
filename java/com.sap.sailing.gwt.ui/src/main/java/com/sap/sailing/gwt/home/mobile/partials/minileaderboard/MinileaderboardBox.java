@@ -4,8 +4,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.FontStyle;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -15,6 +17,7 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeade
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.mobile.partials.toggleButton.BigButton;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,42 +33,49 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
     @UiField MobileSection itemContainerUi;
     @UiField SectionHeaderContent headerUi;
+    @UiField BigButton showLeaderboardButtonUi;
+    
+    private PlaceNavigation<?> placeNavigation = null;
 
     private boolean isOverall;
     
     public MinileaderboardBox(boolean isOverall) {
         this.isOverall = isOverall;
         initWidget(uiBinder.createAndBindUi(this));
-        headerUi.setInfoText(StringMessages.INSTANCE.details());
+    }
+    
+    @UiHandler("showLeaderboardButtonUi")
+    void onShowLeaderboardClick(ClickEvent event) {
+        if(placeNavigation != null) {
+            placeNavigation.goToPlace();
+        }
     }
     
     public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
         headerUi.setInfoText(infoText);
         headerUi.setClickAction(placeNavigation);
+        this.placeNavigation = placeNavigation;
     }
     
     @Override
     public void setData(final GetMiniLeaderboardDTO data) {
         String headerText = isOverall ? I18N.overallStandings() : I18N.results();
         int itemCount = data.getItems().size();
+        boolean showLeaderboardButton = false;
         if (itemCount > 0 && data.getTotalCompetitorCount() > itemCount) {
             headerText += " (" + StringMessages.INSTANCE.topN(itemCount) + ")";
+            showLeaderboardButton = true;
         }
         headerUi.setSectionTitle(headerText);
-        
         itemContainerUi.clearContent();
-        
-        if(data.getItems().isEmpty()) {
+        if (data.getItems().isEmpty()) {
             itemContainerUi.addContent(getNoResultsInfoWidget());
             return;
         }
-        
         headerUi.setLabelType(data.isLive() ? LabelType.LIVE : LabelType.NONE);
-        
-        if(data.getScoreCorrectionText() != null || data.getLastScoreUpdate() != null) {
+        if (data.getScoreCorrectionText() != null || data.getLastScoreUpdate() != null) {
             itemContainerUi.addContent(getScoreInformation(data));
         }
-        
         boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item, showRaceCounts));
@@ -73,6 +83,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         if (showRaceCounts) {
             itemContainerUi.addContent(new MinileaderboardBoxItemLegend());
         }
+        showLeaderboardButtonUi.setVisible(showLeaderboardButton);
     }
     
     private Widget getNoResultsInfoWidget() {
@@ -89,8 +100,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
             scoreInformation.add(new Label(data.getScoreCorrectionText()));
         }
         if (data.getLastScoreUpdate() != null) {
-            String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(data.getLastScoreUpdate()) + " "
-                    + DateAndTimeFormatterUtil.formatElapsedTime(data.getLastScoreUpdate().getTime());
+            String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(data.getLastScoreUpdate());
             scoreInformation.add(new Label(StringMessages.INSTANCE.lastScoreUpdate() + ": " + lastUpdate));
         }
         scoreInformation.getElement().getStyle().setBackgroundColor("#f2f2f2");

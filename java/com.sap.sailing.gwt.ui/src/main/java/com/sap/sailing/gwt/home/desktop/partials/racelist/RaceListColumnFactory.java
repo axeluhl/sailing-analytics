@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
-import static com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState.TRACKED_VALID_DATA;
 import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.shortTimeFormatter;
 
 import java.util.Date;
@@ -9,7 +8,6 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.TextTransform;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -22,12 +20,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -35,30 +28,25 @@ import com.sap.sailing.gwt.home.communication.race.FlagStateDTO;
 import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.RaceProgressDTO;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.communication.race.wind.AbstractWindDTO;
 import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
+import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadCell;
+import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadController;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.shared.utils.HomeSailingFlagsBuilder;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
-import com.sap.sailing.gwt.ui.shared.util.NullSafeComparatorWrapper;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.util.NaturalComparator;
 
 public class RaceListColumnFactory {
     
     private static final LocalCss CSS = RaceListResources.INSTANCE.css(); 
-    private static final MainCss MAIN_CSS = SharedResources.INSTANCE.mainCss();
     private static final StringMessages I18N = StringMessages.INSTANCE;
-    private static final TextMessages I18N_UBI = TextMessages.INSTANCE;
     private static final CellTemplates TEMPLATE = GWT.create(CellTemplates.class);
 
     interface CellTemplates extends SafeHtmlTemplates {
@@ -71,12 +59,6 @@ public class RaceListColumnFactory {
         @Template("<img style=\"{0}\" src=\"images/home/windkompass_nord.svg\"/>")
         SafeHtml windDirection(SafeStyles rotation);
 
-        @Template("<div style=\"{0}\">{1}</div>")
-        SafeHtml raceNotTracked(SafeStyles styles, String text);
-
-        @Template("<a href=\"{2}\" class=\"{0}\" target=\"_blank\">{1}</a>")
-        SafeHtml raceViewerLinkButton(String styleNames, String text, String link);
-        
         @Template("<img src=\"{3}\" class=\"{0}\" /><span class=\"{1}\">{4}</span><div class=\"{2}\" title=\"{5}\">{5}</div>")
         SafeHtml winner(String styleNamesFlag, String styleNamesSailId, String styleNamesText, SafeUri flagImageURL, String sailId, String name);
         
@@ -94,8 +76,7 @@ public class RaceListColumnFactory {
                 }
             }
         };
-        InvertibleComparator<T> comparator = null;
-        return new SortableRaceListColumn<T, FleetMetadataDTO>("", cell, comparator) {
+        return new SortableRaceListColumn<T, FleetMetadataDTO>("", cell, null) {
             @Override
             public String getColumnStyle() {
                 return CSS.race_fleetcorner();
@@ -110,9 +91,9 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getRegattaNameColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+        RaceListColumnComparator<T, String> comparator = new RaceListColumnComparator<T, String>() {
             @Override
-            protected String getComparisonValue(T object) {
+            public String getValue(T object) {
                 return object.getRegattaDisplayName();
             }
         };
@@ -136,13 +117,8 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getRaceNameColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
-            @Override
-            protected String getComparisonValue(T object) {
-                return object.getRaceName();
-            }
-        };
-        return new SortableRaceListColumn<T, String>(I18N.race(), cell, comparator) {
+        DefaultRaceListColumnComparator<T> comparator = new DefaultRaceListColumnComparator<>();
+        return new SortableRaceListColumn<T, String>(I18N.race(), cell, comparator, SortingOrder.DESCENDING) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -162,9 +138,9 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getFleetNameColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+        RaceListColumnComparator<T, String> comparator = new RaceListColumnComparator<T, String>() {
             @Override
-            protected String getComparisonValue(T object) {
+            public String getValue(T object) {
                 return object.getFleet() != null ? object.getFleet().getFleetName() : null;
             }
         };
@@ -187,9 +163,10 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListStartTimeColumn<T> getStartTimeColumn() {
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Date>(new NullSafeComparableComparator<Date>(true)) {
+        RaceListColumnComparator<T, Date> comparator = new RaceListColumnComparator<T, Date>() {
+
             @Override
-            protected Date getComparisonValue(T object) {
+            public Date getValue(T object) {
                 return object.getStart();
             }
         };
@@ -198,9 +175,10 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, String> getDurationColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Duration>(new NullSafeComparableComparator<Duration>(false)) {
+        RaceListColumnComparator<T, Duration> comparator = new RaceListColumnComparator<T, Duration>() {
+
             @Override
-            protected Duration getComparisonValue(T object) {
+            public Duration getValue(T object) {
                 return object.getDuration();
             }
         };
@@ -232,8 +210,7 @@ public class RaceListColumnFactory {
                 }
             }
         };
-        InvertibleComparator<T> comparator = null;
-        return new SortableRaceListColumn<T, FlagStateDTO>(I18N.flags(), cell, comparator) {
+        return new SortableRaceListColumn<T, FlagStateDTO>(I18N.flags(), cell, null) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -252,9 +229,9 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends LiveRaceDTO> SortableRaceListColumn<T, String> getWindSpeedColumn() {
-        InvertibleComparator<T> comparator =  new InvertibleComparatorWrapper<T, Double>( new NullSafeComparableComparator<Double>()) {
+        RaceListColumnComparator<T, Double> comparator = new RaceListColumnComparator<T, Double>() {
             @Override
-            protected Double getComparisonValue(T object) {
+            public Double getValue(T object) {
                 return object.getWind() != null ? object.getWind().getTrueWindSpeedInKnots() : null;
             }
         };
@@ -267,9 +244,9 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, String> getWindRangeColumn() {
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Double>(new NullSafeComparableComparator<Double>()) {
+        RaceListColumnComparator<T, Double> comparator = new RaceListColumnComparator<T, Double>() {
             @Override
-            protected Double getComparisonValue(T object) {
+            public Double getValue(T object) {
                 WindStatisticsDTO wind = object.getWind();
                 return wind != null ? (wind.getTrueUpperboundWindInKnots() + wind .getTrueLowerboundWindInKnots()) : null;
             }
@@ -301,9 +278,9 @@ public class RaceListColumnFactory {
                 }
             }
         };
-        InvertibleComparator<T> comparator =   new InvertibleComparatorWrapper<T, Double>( new NullSafeComparableComparator<Double>()) {
+        RaceListColumnComparator<T, Double> comparator = new RaceListColumnComparator<T, Double>() {
             @Override
-            protected Double getComparisonValue(T object) {
+            public Double getValue(T object) {
                 return object.getWind() != null ? object.getWind().getTrueWindFromDeg() : null;
             }
         };
@@ -327,9 +304,9 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getCourseAreaColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+        RaceListColumnComparator<T, String> comparator = new RaceListColumnComparator<T, String>() {
             @Override
-            protected String getComparisonValue(T object) {
+            public String getValue(T object) {
                 return object.getCourseArea();
             }
         };
@@ -353,9 +330,9 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getCourseColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+        RaceListColumnComparator<T, String> comparator = new RaceListColumnComparator<T, String>() {
             @Override
-            protected String getComparisonValue(T object) {
+            public String getValue(T object) {
                 return object.getCourse();
             }
         };
@@ -378,9 +355,9 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getWindSourcesCountColumn() {
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Integer>(new NullSafeComparableComparator<Integer>(false)) {
+        RaceListColumnComparator<T, Integer> comparator = new RaceListColumnComparator<T, Integer>() {
             @Override
-            protected Integer getComparisonValue(T object) {
+            public Integer getValue(T object) {
                 return object.getWindSourcesCount();
             }
         };
@@ -393,9 +370,9 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getVideoCountColumn() {
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Integer>(new NullSafeComparableComparator<Integer>(false)) {
+        RaceListColumnComparator<T, Integer> comparator = new RaceListColumnComparator<T, Integer>() {
             @Override
-            protected Integer getComparisonValue(T object) {
+            public Integer getValue(T object) {
                 return object.getVideoCount();
             }
         };
@@ -408,9 +385,9 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, Number> getAudioCountColumn() {
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Integer>(new NullSafeComparableComparator<Integer>(false)) {
+        RaceListColumnComparator<T, Integer> comparator = new RaceListColumnComparator<T, Integer>() {
             @Override
-            protected Integer getComparisonValue(T object) {
+            public Integer getValue(T object) {
                 return object.getAudioCount();
             }
         };
@@ -441,9 +418,9 @@ public class RaceListColumnFactory {
                 }
             }
         };
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, RaceViewState>(new NullSafeComparableComparator<RaceViewState>()) {
+        RaceListColumnComparator<T, RaceViewState> comparator = new RaceListColumnComparator<T, RaceViewState>() {
             @Override
-            protected RaceViewState getComparisonValue(T object) {
+            public RaceViewState getValue(T object) {
                 return object.getViewState();
             }
         };
@@ -476,10 +453,9 @@ public class RaceListColumnFactory {
                 }
             }
         };
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(
-                new NullSafeComparatorWrapper<String>(new NaturalComparator(false), false)) {
+        RaceListColumnComparator<T, String> comparator = new RaceListColumnComparator<T, String>() {
             @Override
-            protected String getComparisonValue(T object) {
+            public String getValue(T object) {
                 return object.getWinner() != null ? object.getWinner().getName() : null;
             }
         };
@@ -501,44 +477,21 @@ public class RaceListColumnFactory {
         };
     }
     
-    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(final EventView.Presenter presenter) {
-        Cell<T> cell = new AbstractCell<T>() {
-            private final String watchNowStyle = getButtonStyleNames(MAIN_CSS.buttonred());
-            private final String analyseRaceStyle = getButtonStyleNames(MAIN_CSS.buttonprimary());
-
-            @Override
-            public void render(Context context, T data, SafeHtmlBuilder sb) {
-                if (data.getTrackingState() != RaceTrackingState.TRACKED_VALID_DATA) {
-                    SafeStylesBuilder styles = new SafeStylesBuilder().textTransform(TextTransform.UPPERCASE);
-                    styles.trustedColor("#666").trustedNameAndValue("font-size", "0.933333333333333rem").toSafeStyles();
-                    styles.trustedNameAndValue("padding", "0.714285714285714em 1.071428571428571em");
-                    sb.append(TEMPLATE.raceNotTracked(styles.toSafeStyles(), I18N_UBI.eventRegattaRaceNotTracked()));
-                } else {
-                    String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
-                    String text = data.getViewState() == RaceViewState.FINISHED ? I18N.analyseRace() : I18N_UBI.watchNow();
-                    sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, presenter.getRaceViewerURL(data)));
-                }
-            }
-
-            private final String getButtonStyleNames(String buttonColor) {
-                return Util.join(" ", MAIN_CSS.button(), MAIN_CSS.buttonstrong(), buttonColor, MAIN_CSS.buttonarrowrightwhite());
-            }
-        };
-        InvertibleComparator<T> comparator = new InvertibleComparatorAdapter<T>() {
+    public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(
+            final EventView.Presenter presenter, final boolean showNotTracked) {
+        final RaceviewerLaunchPadController lpPresenter = new RaceviewerLaunchPadController(presenter::getRaceViewerURL);
+        final RaceviewerLaunchPadCell<T> lpadCell = new RaceviewerLaunchPadCell<T>(lpPresenter, showNotTracked);
+        DefaultRaceListColumnComparator<T> comparator = new DefaultRaceListColumnComparator<T>() {
             @Override
             public int compare(T o1, T o2) {
-                if (o1.getTrackingState() == TRACKED_VALID_DATA && o2.getTrackingState() == TRACKED_VALID_DATA) {
-                    if (o1.getViewState() == RaceViewState.FINISHED && o2.getViewState() != RaceViewState.FINISHED) {
-                        return 1;
-                    }
-                    if (o1.getViewState() != RaceViewState.FINISHED && o2.getViewState() == RaceViewState.FINISHED) {
-                        return -1;
-                    }
+                int compareResult = lpPresenter.getRenderingStyle(o1).compareTo(lpPresenter.getRenderingStyle(o2));
+                if (compareResult == 0) {
+                    compareResult = super.compare(o1, o2);
                 }
-                return -o1.getTrackingState().compareTo(o2.getTrackingState());
+                return compareResult;
             }
         };
-        return new SortableRaceListColumn<T, T>("", cell, comparator) {
+        return new SortableRaceListColumn<T, T>("", lpadCell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itembutton());
@@ -557,7 +510,7 @@ public class RaceListColumnFactory {
     }
     
     public static class SortableRaceListStartTimeColumn<T extends RaceMetadataDTO<?>> extends SortableRaceListColumn<T, Date> {
-        protected SortableRaceListStartTimeColumn(InvertibleComparator<T> comparator) {
+        protected SortableRaceListStartTimeColumn(RaceListColumnComparator<T, ?> comparator) {
             super(I18N.start(), new StartTimeCell(), comparator, SortingOrder.DESCENDING);
         }
         
@@ -594,7 +547,7 @@ public class RaceListColumnFactory {
     
     
     private static abstract class WindSpeedOrRangeColumn<T extends RaceMetadataDTO<?>> extends SortableRaceListColumn<T, String> {
-        protected WindSpeedOrRangeColumn(InvertibleComparator<T> comparator) {
+        protected WindSpeedOrRangeColumn(RaceListColumnComparator<T, ?> comparator) {
             super(I18N.wind(), new TextCell(), comparator);
         }
 
@@ -614,7 +567,7 @@ public class RaceListColumnFactory {
         private static final SafeUri ICON_VIDEO = UriUtils.fromTrustedString("images/home/icon-video.png"); 
         private static final SafeUri ICON_AUDIO = UriUtils.fromTrustedString("images/home/icon-audio.png"); 
         
-        private DataCountColumn(final SafeUri imageUri, InvertibleComparator<T> comparator) {
+        private DataCountColumn(final SafeUri imageUri, RaceListColumnComparator<T, ?> comparator) {
             super(new SafeHtmlHeader(TEMPLATE.imageHeader(CSS.raceslist_head_itemflag(), imageUri)), new AbstractCell<Number>() {
                 @Override
                 public void render(Context context, Number value, SafeHtmlBuilder sb) {

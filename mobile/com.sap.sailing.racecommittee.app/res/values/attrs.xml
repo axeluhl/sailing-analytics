@@ -21,6 +21,7 @@
     <attr name="buttonSolidXSmall" format="reference"/>
     <attr name="buttonSolidSmall" format="reference"/>
     <attr name="buttonSolidNormal" format="reference"/>
+    <attr name="checkedItemBackground" format="reference"/>
     <attr name="round" format="reference"/>
     <attr name="round_transparent" format="reference"/>
     <attr name="text" format="reference"/>
@@ -37,6 +38,8 @@
     <attr name="textPanelCaption" format="reference"/>
     <attr name="editText" format="reference"/>
     <attr name="floatLabel" format="reference"/>
+
+    <attr name="factor_background" format="reference"/>
 
     <!-- drawable -->
     <attr name="add" format="reference"/>
@@ -57,9 +60,11 @@
     <attr name="chevron_left" format="reference"/>
     <attr name="chevron_left_24dp" format="reference"/>
     <attr name="chevron_right" format="reference"/>
+    <attr name="clear_24dp" format="reference" />
     <attr name="create" format="reference"/>
     <attr name="compass_back" format="reference"/>
     <attr name="compass_needle" format="reference"/>
+    <attr name="competitor_list" format="reference"/>
     <attr name="course_triangle_48dp" format="reference"/>
     <attr name="course_triangle_64dp" format="reference"/>
     <attr name="course_updown_48dp" format="reference"/>
@@ -67,6 +72,9 @@
     <attr name="dns" format="reference"/>
     <attr name="hearing" format="reference"/>
     <attr name="link_24dp" format="reference"/>
+    <attr name="list_24dp" format="reference"/>
+    <attr name="list_both_24dp" format="reference"/>
+    <attr name="list_single_24dp" format="reference"/>
     <attr name="lock_outline" format="reference"/>
     <attr name="keyboard_control_36dp" format="reference"/>
     <attr name="marker" format="reference"/>
@@ -74,7 +82,9 @@
     <attr name="mic_48dp" format="reference"/>
     <attr name="photo_camera" format="reference"/>
     <attr name="play_arrow_36dp" format="reference"/>
+    <attr name="search_24dp" format="reference" />
     <attr name="search_24dp_invert" format="reference"/>
+    <attr name="sortby_24dp" format="reference" />
     <attr name="spinner_background" format="reference"/>
     <attr name="swipe_idle" format="reference"/>
     <attr name="swipe_left" format="reference"/>
@@ -86,14 +96,18 @@
     <attr name="wind_off" format="reference"/>
 
     <!-- flag drawables -->
-    <attr name="flag_first_blue" format="reference"/>
+    <attr name="flag_blue_first" format="reference"/>
+    <attr name="flag_blue_last" format="reference"/>
+
     <attr name="flag_ap_alpha_96dp" format="reference"/>
     <attr name="flag_ap_hotel_96dp" format="reference"/>
     <attr name="flag_november_alpha_96dp" format="reference"/>
     <attr name="flag_november_hotel_96dp" format="reference"/>
+
     <attr name="flags_abandon" format="reference"/>
+    <attr name="flags_blue_first" format="reference"/>
+    <attr name="flags_blue_last" format="reference"/>
     <attr name="flags_course" format="reference"/>
-    <attr name="flags_more" format="reference"/>
     <attr name="flags_postpone" format="reference"/>
     <attr name="flags_recall" format="reference"/>
 

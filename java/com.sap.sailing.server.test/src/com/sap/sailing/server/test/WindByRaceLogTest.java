@@ -42,7 +42,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -99,7 +99,7 @@ public class WindByRaceLogTest {
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"), /*passingInstruction*/ null));
         raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
         service.apply(new TrackRegatta(raceIdentifier));
-        trackedRace = (DynamicTrackedRace) service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */ 5000,
+        trackedRace = (DynamicTrackedRace) service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
         trackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
@@ -109,7 +109,7 @@ public class WindByRaceLogTest {
         return masterDomainFactory.getOrCreateCompetitor("GER 61", "Sailor", Color.RED, "noone@nowhere.de", null, new TeamImpl("Sailor",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Sailor 1", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null)}),
                 new PersonImpl("Sailor 2", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
-                new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
+                new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
     }
     
     private void attachTrackedRaceToRaceColumn() {
@@ -147,8 +147,22 @@ public class WindByRaceLogTest {
         
         try {
             windTrack.lockForRead();
-            assertTrue(Util.contains(windTrack.getFixes(), wind1));
-            assertTrue(Util.contains(windTrack.getFixes(), wind2));
+            boolean foundWind1 = false;
+            boolean foundWind2 = false;
+            for (Wind w : windTrack.getFixes()) {
+                try {
+                    PositionAssert.assertWindEquals(w, wind1, /* posDegDelta */ 0.000001, /* bearingDegreeDelta */ 0.01, /* knotSpeedDelta */ 0.01);
+                    foundWind1 = true;
+                } catch (AssertionError e) {
+                }
+                try {
+                    PositionAssert.assertWindEquals(w, wind2, /* posDegDelta */ 0.000001, /* bearingDegreeDelta */ 0.01, /* knotSpeedDelta */ 0.01);
+                    foundWind2 = true;
+                } catch (AssertionError e) {
+                }
+            }
+            assertTrue(foundWind1);
+            assertTrue(foundWind2);
         } finally {
             windTrack.unlockAfterRead();
         }
@@ -173,7 +187,15 @@ public class WindByRaceLogTest {
         
         try {
             windTrack.lockForRead();
-            assertTrue(Util.contains(windTrack.getFixes(), wind1));
+            boolean foundWind1 = false;
+            for (Wind w : windTrack.getFixes()) {
+                try {
+                    PositionAssert.assertWindEquals(w, wind1, /* posDegDelta */ 0.000001, /* bearingDegreeDelta */ 0.01, /* knotSpeedDelta */ 0.01);
+                    foundWind1 = true;
+                } catch (AssertionError e) {
+                }
+            }
+            assertTrue(foundWind1);
         } finally {
             windTrack.unlockAfterRead();
         }

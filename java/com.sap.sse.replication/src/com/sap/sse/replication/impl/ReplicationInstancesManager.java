@@ -1,11 +1,12 @@
 package com.sap.sse.replication.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationWithResult;
@@ -22,9 +23,10 @@ public class ReplicationInstancesManager {
 
     /**
      * The set of descriptors of all registered slaves. All broadcast operations will send the messages to all
-     * registered slaves, assuming the slaves will have subscribed for the replication topic.
+     * registered slaves, assuming the slaves will have subscribed for the replication topic. Keys are the
+     * {@link ReplicaDescriptor#getUuid() IDs of the corresponding values}.
      */
-    private Set<ReplicaDescriptor> replicaDescriptors;
+    private Map<UUID, ReplicaDescriptor> replicaDescriptors;
     
     private Map<ReplicaDescriptor, Map<Class<? extends OperationWithResult<?, ?>>, Integer>> replicationCounts;
     
@@ -53,7 +55,7 @@ public class ReplicationInstancesManager {
     private ReplicationMasterDescriptor replicationMasterDescriptor;
 
     public ReplicationInstancesManager() {
-        replicaDescriptors = new HashSet<ReplicaDescriptor>();
+        replicaDescriptors = new HashMap<>();
         replicationCounts = new HashMap<ReplicaDescriptor, Map<Class<? extends OperationWithResult<?, ?>>,Integer>>();
         totalMessageCount = new HashMap<>();
         totalNumberOfOperations = new HashMap<>();
@@ -71,21 +73,31 @@ public class ReplicationInstancesManager {
     }
     
     public Iterable<ReplicaDescriptor> getReplicaDescriptors() {
-        return Collections.unmodifiableCollection(replicaDescriptors);
+        return Collections.unmodifiableCollection(replicaDescriptors.values());
     }
 
     public ReplicationMasterDescriptor getReplicationMasterDescriptor() {
         return replicationMasterDescriptor;
     }
     
+    public Iterable<String> getAllReplicableIdsAtLeastOneReplicaIsReplicating() {
+        return replicaDescriptors.values().stream().map(replicableDescriptor->Arrays.asList(replicableDescriptor.getReplicableIdsAsStrings())).reduce(new HashSet<String>(),
+                (result, ids)->{result.addAll(ids); return result;}, (r1, r2)->{r1.addAll(r2); return r1;});
+    }
+    
     public void registerReplica(ReplicaDescriptor replica) {
-        replicaDescriptors.add(replica);
-        replicationCounts.put(replica, new HashMap<Class<? extends OperationWithResult<?, ?>>, Integer>());
+        replicaDescriptors.put(replica.getUuid(), replica);
+        replicationCounts.put(replica, new HashMap<>());
     }
 
     public void unregisterReplica(ReplicaDescriptor replica) {
-        replicaDescriptors.remove(replica);
+        unregisterReplica(replica.getUuid());
+    }
+    
+    public ReplicaDescriptor unregisterReplica(UUID replicaUuid) {
+        final ReplicaDescriptor replica = replicaDescriptors.remove(replicaUuid);
         replicationCounts.remove(replica);
+        return replica;
     }
     
     /**

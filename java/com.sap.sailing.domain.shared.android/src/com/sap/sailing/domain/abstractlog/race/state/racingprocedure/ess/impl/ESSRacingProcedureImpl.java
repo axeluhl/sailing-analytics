@@ -159,6 +159,11 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     }
 
     @Override
+    protected Boolean isResultEntryEnabledByDefault() {
+        return true;
+    }
+
+    @Override
     public ESSConfiguration getConfiguration() {
         return (ESSConfiguration) super.getConfiguration();
     }

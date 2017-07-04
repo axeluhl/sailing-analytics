@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
@@ -54,7 +55,6 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             
             @Override
             public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-                System.out.println("Received fix "+fix);
                 synchronized (semaphor) {
                     if (first) {
                         firstTracked[0] = competitor;
@@ -86,9 +86,10 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             }
                         },
                         /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
-                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false)) {
+                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS)) {
             receiver.subscribe();
             getRaceSubscriber().start();
+            addReceiverToStopDuringTearDown(receiver);
         }
         addListenersForStoredDataAndStartController(domainFactory
                 .getUpdateReceivers(trackedRegatta, /* delayToLiveInMillis */0l, null, /* simulator */
@@ -98,7 +99,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
                         }, /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
-                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false));
+                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS));
     }
 
     @Test

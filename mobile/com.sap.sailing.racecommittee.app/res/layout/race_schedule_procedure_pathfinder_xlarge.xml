@@ -37,7 +37,7 @@
             android:layout_margin="@dimen/default_margin_twice"
             android:orientation="horizontal">
 
-            <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
+            <com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -54,9 +54,9 @@
                     android:inputType="textCapCharacters"
                     android:textAppearance="?attr/textNormal"
                     android:textColor="?attr/white" />
-            </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
+            </com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout>
 
-            <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
+            <com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -73,7 +73,7 @@
                     android:inputType="number"
                     android:textAppearance="?attr/textNormal"
                     android:textColor="?attr/white" />
-            </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
+            </com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout>
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

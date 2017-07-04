@@ -63,7 +63,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     private final Grid grid;
     private final List<SwissTimingReplayRaceDTO> availableSwissTimingRaces;
 
-    public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
@@ -160,7 +161,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         // the regatta selection for a tracked race
         HorizontalPanel regattaPanel = new HorizontalPanel();
         racesPanel.add(regattaPanel);
-        Label lblRegattas = new Label("Regatta used for the tracked race:");
+        Label lblRegattas = new Label(stringMessages.regattaUsedForTheTrackedRace());
         lblRegattas.setWordWrap(false);
         regattaPanel.setCellVerticalAlignment(lblRegattas, HasVerticalAlignment.ALIGN_MIDDLE);
         regattaPanel.setSpacing(5);
@@ -172,7 +173,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         filterPanel.setSpacing(5);
         racesPanel.add(filterPanel);
         
-        Label lblFilterEvents = new Label(stringMessages.filterRacesByName()+ ":");
+        Label lblFilterEvents = new Label(stringMessages.filterRaces()+ ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         
@@ -192,6 +193,14 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         raceTable.setWidth("300px");
         raceList = new ListDataProvider<SwissTimingReplayRaceDTO>();
+        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceTable, raceList) {
+            @Override
+            public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
+                List<String> strings = new ArrayList<String>();
+                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.rsc));
+                return strings;
+            }
+        };
         raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingReplayRaceDTO>(
                 new EntityIdentityComparator<SwissTimingReplayRaceDTO>() {
                     @Override
@@ -202,7 +211,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                     public int hashCode(SwissTimingReplayRaceDTO t) {
                         return t.race_id.hashCode();
                     }
-                }, raceList) {
+                }, filterablePanelEvents.getAllListDataProvider()) {
         });
 
         racesHorizontalPanel.add(raceTable);
@@ -210,16 +219,6 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, boatClassNamesColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
-
-        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceTable, raceList) {
-            @Override
-            public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
-                List<String> strings = new ArrayList<String>();
-                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.race_id, t.rsc));
-                return strings;
-            }
-        };
-        
         filterPanel.add(filterablePanelEvents);
         
         Label lblTrackSettings = new Label(stringMessages.trackNewEvent());

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.developer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,16 +21,16 @@ import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class PredefinedQueryRunner implements Component<SerializableSettings> {
+public class PredefinedQueryRunner extends ComponentWithoutSettings {
 
     private final DataMiningSession session;
     private final StringMessages stringMessages;
@@ -43,9 +44,11 @@ public class PredefinedQueryRunner implements Component<SerializableSettings> {
     private final ValueListBox<PredefinedQueryIdentifier> selectionListBox;
     private final Button runButton;
 
-    public PredefinedQueryRunner(DataMiningSession session, StringMessages stringMessages,
+    public PredefinedQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
+            StringMessages stringMessages,
                                  DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                  ResultsPresenter<?> resultsPresenter) {
+        super(parent, context);
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -138,14 +141,15 @@ public class PredefinedQueryRunner implements Component<SerializableSettings> {
     protected void runSelectedPredefinedQuery() {
         PredefinedQueryIdentifier predefinedQueryIdentifier = selectionListBox.getValue();
         resultsPresenter.showBusyIndicator();
-        dataMiningService.runPredefinedQuery(session, predefinedQueryIdentifier, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<Object>>() {
+        dataMiningService.runPredefinedQuery(session, predefinedQueryIdentifier,
+                LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<Serializable>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running the query: " + caught.getMessage());
                 resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
             }
             @Override
-            public void onSuccess(QueryResultDTO<Object> result) {
+                    public void onSuccess(QueryResultDTO<Serializable> result) {
                 resultsPresenter.showResult(result);
             }
         });
@@ -173,22 +177,12 @@ public class PredefinedQueryRunner implements Component<SerializableSettings> {
     }
 
     @Override
-    public boolean hasSettings() {
-        return false;
-    }
-
-    @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
-        return null;
-    }
-
-    @Override
-    public void updateSettings(SerializableSettings newSettings) {
-    }
-
-    @Override
     public String getDependentCssClassName() {
         return "predefinedQueryRunner";
     }
 
+    @Override
+    public String getId() {
+        return "PredefinedQueryRunner";
+    }
 }

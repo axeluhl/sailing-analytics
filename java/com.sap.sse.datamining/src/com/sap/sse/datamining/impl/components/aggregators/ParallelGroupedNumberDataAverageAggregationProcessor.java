@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
+import org.omg.CORBA.DoubleHolder;
+import org.omg.CORBA.IntHolder;
+
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -14,24 +17,6 @@ import com.sap.sse.datamining.shared.GroupKey;
 
 public class ParallelGroupedNumberDataAverageAggregationProcessor
             extends AbstractParallelGroupedDataStoringAggregationProcessor<Number, Number> {
-    private static class IntHolder {
-        public int value;
-
-        public IntHolder(int value) {
-            super();
-            this.value = value;
-        }
-    }
-    
-    private static class DoubleHolder {
-        public double value;
-
-        public DoubleHolder(double value) {
-            super();
-            this.value = value;
-        }
-    }
-    
     private static final AggregationProcessorDefinition<Number, Number> DEFINITION =
             new SimpleAggregationProcessorDefinition<>(Number.class, Number.class, "Average", ParallelGroupedNumberDataAverageAggregationProcessor.class);
     
@@ -51,13 +36,15 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
 
     @Override
     protected void storeElement(GroupedDataEntry<Number> element) {
-        incrementElementAmount(element);
-        DoubleHolder aggregate = sumPerKey.get(element.getKey());
-        if (aggregate == null) {
-            aggregate = new DoubleHolder(element.getDataEntry().doubleValue());
-            sumPerKey.put(element.getKey(), aggregate);
-        } else {
-            aggregate.value += element.getDataEntry().doubleValue();
+        if (element.getDataEntry() != null) {
+            incrementElementAmount(element);
+            DoubleHolder aggregate = sumPerKey.get(element.getKey());
+            if (aggregate == null) {
+                aggregate = new DoubleHolder(element.getDataEntry().doubleValue());
+                sumPerKey.put(element.getKey(), aggregate);
+            } else {
+                aggregate.value += element.getDataEntry().doubleValue();
+            }
         }
     }
 

@@ -43,7 +43,7 @@ public class SignInViewImpl extends Composite implements SignInView {
         this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
+        this.ensureDebugIds();
         // TODO implement social login functionality
         socialLoginUi.removeFromParent();
     }
@@ -103,6 +103,15 @@ public class SignInViewImpl extends Composite implements SignInView {
     private void selectAll(TextBox textBox) {
         textBox.setFocus(true);
         textBox.selectAll();
+    }
+    
+    private void ensureDebugIds() {
+        ensureDebugId("signInForm");
+        loginNameUi.ensureDebugId("loginTextField");
+        passwordUi.ensureDebugId("passwordTextField");
+        signInUi.ensureDebugId("signInAnchor");
+        createAccountUi.ensureDebugId("signUpAnchor");
+        forgotPasswordUi.ensureDebugId("forgotPasswordAnchor");
     }
     
 }

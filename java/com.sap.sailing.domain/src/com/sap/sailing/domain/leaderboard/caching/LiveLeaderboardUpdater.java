@@ -169,9 +169,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                         result = currentLiveLeaderboard;
                     }
                     if (result == null) {
-                        if (logger.isLoggable(Level.FINEST)) { 
-                            logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
-                        }
+                        logger.finest(()->"waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
                         ensureRunning();
                         try {
                             this.wait();
@@ -184,18 +182,12 @@ public class LiveLeaderboardUpdater implements Runnable {
                         if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails) &&
                                 (!addOverallDetails || currentLiveLeaderboardHasOverallDetails)) {
                             result = currentLiveLeaderboard;
-                            if (logger.isLoggable(Level.FINEST)) { 
-                                logger.finest("successfully waited for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
-                            }
+                            logger.finest(()->"successfully waited for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails);
                         } else {
-                            if (logger.isLoggable(Level.FINEST)) { 
-                                logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" unsuccessful. Need to try again...");
-                            }
+                            logger.finest(()->"waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" unsuccessful. Need to try again...");
                         }
                     } else {
-                        if (logger.isLoggable(Level.FINEST)) { 
-                            logger.finest("leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" was provided in the meantime");
-                        }
+                        logger.finest(()->"leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" and addOverallDetails="+addOverallDetails+" was provided in the meantime");
                     }
                     // now we either have a result (good, we're done), or the thread stopped running (then we need to renew the request)
                     // or the thread still runs but the result may have expired and therefore be null (renew the request)
@@ -221,6 +213,7 @@ public class LiveLeaderboardUpdater implements Runnable {
     private synchronized void start() {
         running = true;
         thread = new Thread(this, "LiveLeaderboardUpdater for leaderboard "+getLeaderboard().getName());
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -296,7 +289,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                     final boolean addOverallDetails = getOverallDetails(timePoint);
                     LeaderboardDTO newCacheValue = leaderboard.computeDTO(timePoint,
                             namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                            /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
+                            /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, newCacheValue);
                 } catch (NoWindException e) {
                     logger.log(Level.SEVERE, "Exception during re-calculating the live leaderboard "+leaderboard.getName(), e);

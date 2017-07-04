@@ -40,10 +40,6 @@ public class EventListener implements IEventMessageListener,
 		IPositionSnappedListener, IConnectionStatusListener, IControlPointPositionListener,
 		IControlPassingsListener, IRaceStartStopTimesChangeListener,
 		IControlRouteChangeListener {
-	
-	long controlPositionsCount = 0;
-	long competitorPositionsCount = 0;
-	long controlPassingsCount = 0;
 
 	private static void show(Object obj) {
 		System.out.println(Thread.currentThread().getName() + ": " + obj);
@@ -61,56 +57,45 @@ public class EventListener implements IEventMessageListener,
 
 	@Override
 	public void gotRouteChange(IControlRoute controlRoute, long timeStamp) {
-		//show("New route at " + timeStamp + ": " + controlRoute.toString());		
+		show("New route at " + timeStamp + ": " + controlRoute.toString());		
 	}
 
 	@Override
 	public void gotControlPassings(IRaceCompetitor raceCompetitor,
 			IControlPassings markPassings) {
-		//show("New markpassings " + markPassings + " for the competitor " + raceCompetitor.getCompetitor().toString());	
-		controlPassingsCount++;
+		show("New markpassings " + markPassings + " for the competitor " + raceCompetitor.getCompetitor().toString());				
 	}
 
 	@Override
 	public void gotControlPointPosition(IControl control, IPosition position, int markNumber) {
-		//show("New position " + position + " for the mark " + control + ", " + markNumber);		
-		controlPositionsCount++;
+		show("New position " + position + " for the mark " + control + ", " + markNumber);			
 	}
 
 	@Override
 	public void gotPositionSnapped(IRaceCompetitor raceCompetitor,
 			IPositionSnapped positionSnapped) {
-		show("New position " + positionSnapped + " for the competitor " + raceCompetitor.getCompetitor().toString());
-		competitorPositionsCount++;
+		show("New position " + positionSnapped + " for the competitor " + raceCompetitor.getCompetitor().toString());				
 	}
 
 	@Override
 	public void gotPositionOffset(IRaceCompetitor raceCompetitor,
 			IPositionOffset position) {
-		show("New position " + position + " for the competitor " + raceCompetitor.getCompetitor().toString());		
-		competitorPositionsCount++;
+		show("New position " + position + " for the competitor " + raceCompetitor.getCompetitor().toString());						
 	}
 
 	@Override
 	public void gotPosition(IRaceCompetitor raceCompetitor, IPosition position) {
-		//show("New position " + position + " for the competitor " + raceCompetitor.getCompetitor().toString());		
-		competitorPositionsCount++;
+		show("New position " + position + " for the competitor " + raceCompetitor.getCompetitor().toString());								
 	}
 
 	@Override
 	public void gotRaceStartStopTime(IRace race, IStartStopData startStopData) {
-		//show("New race start/stop times " + startStopData.toString());										
+		show("New race start/stop times " + startStopData.toString());										
 	}
 
 	@Override
 	public void gotTrackingStartStopTime(IRace race, IStartStopData startStopData) {
-		//show("New tracking race start/stop times " + startStopData.toString());	
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		show("New tracking race start/stop times " + startStopData.toString());				
 	}
 
 	@Override
@@ -120,10 +105,7 @@ public class EventListener implements IEventMessageListener,
 
 	@Override
 	public void stopped(Object object) {
-		show("Stopping the connection with " + object.toString());
-		System.out.println("Number of control positions: " + controlPositionsCount);
-		System.out.println("Number of competitor positions: " + competitorPositionsCount);
-		System.out.println("Number of control passings: " + controlPassingsCount);
+		show("Stopping the connection with " + object.toString());		
 	}
 
 	@Override

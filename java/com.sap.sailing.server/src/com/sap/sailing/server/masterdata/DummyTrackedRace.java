@@ -27,13 +27,14 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -41,9 +42,11 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
+import com.sap.sailing.domain.tracking.SensorFixTrack;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -56,7 +59,6 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -65,22 +67,26 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
     private Regatta regatta;
 
-    public DummyTrackedRace(final Serializable raceId, final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta, final WindStore windStore) {
-        this(competitors, regatta, trackedRegatta, new RaceDefinitionImpl("DummyRace", new CourseImpl("Dummy Course", Collections.<Waypoint>emptyList()),
-                regatta.getBoatClass(), competitors, raceId), windStore);
+    public DummyTrackedRace(final Serializable raceId, final Iterable<? extends Competitor> competitors,
+            final Regatta regatta, final TrackedRegatta trackedRegatta, final WindStore windStore) {
+        this(competitors, regatta, trackedRegatta,
+                new RaceDefinitionImpl("DummyRace", new CourseImpl("Dummy Course", Collections.<Waypoint> emptyList()),
+                        regatta.getBoatClass(), competitors, raceId),
+                windStore);
     }
-    
-    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
-            RaceDefinition race, WindStore windStore) {
+
+    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta,
+            final TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore) {
         super(race, trackedRegatta, windStore, -1);
         this.regatta = regatta;
     }
-    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
-            RaceDefinition race) {
-       this(competitors, regatta, trackedRegatta, race, EmptyWindStore.INSTANCE);
-        
+
+    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta,
+            final TrackedRegatta trackedRegatta, RaceDefinition race) {
+        this(competitors, regatta, trackedRegatta, race, EmptyWindStore.INSTANCE);
+
     }
-    
+
     public DummyTrackedRace(final String raceName, final Serializable raceId) {
         super(new RaceDefinitionImpl(raceName, new CourseImpl("Dummy Course", Collections.<Waypoint> emptyList()),
                 /* boatClass */ null, new HashSet<Competitor>(), raceId), null, EmptyWindStore.INSTANCE, -1);
@@ -98,6 +104,16 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public TimePoint getStartOfRace() {
+        return null;
+    }
+
+    @Override
+    public TimePoint getStartOfRace(boolean inferred) {
+        return null;
+    }
+
+    @Override
+    public TimePoint getFinishedTime() {
         return null;
     }
 
@@ -202,7 +218,8 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
+    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint,
+            MarkPositionAtTimePointCache markPositionCache) {
         return null;
     }
 
@@ -282,7 +299,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
         return null;
     }
-    
+
     @Override
     public Tack getTack(SpeedWithBearing speedWithBearing, Wind wind, TimePoint timePoint) {
         return null;
@@ -304,7 +321,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
+    public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         return null;
     }
 
@@ -334,7 +351,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void removeListener(RaceChangeListener listener) {
-        
+
     }
 
     @Override
@@ -343,7 +360,8 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode) {
         return null;
     }
 
@@ -370,12 +388,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
-        
+
     }
 
     @Override
-    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
-            throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint timePoint,
+            boolean waitForLatestAnalysis) throws NoWindException {
         return null;
     }
 
@@ -419,8 +437,8 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
-            boolean waitForLatestAnalyses) throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
+            boolean upwindOnly, boolean waitForLatestAnalyses) throws NoWindException {
         return null;
     }
 
@@ -438,7 +456,8 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public void detachRaceLog(Serializable identifier) {
+    public RaceLog detachRaceLog(Serializable identifier) {
+        return null;
     }
 
     @Override
@@ -452,7 +471,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
-        
+
     }
 
     @Override
@@ -484,9 +503,13 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         return null;
     }
-    
+
+    @Override
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
-        
+    }
+
+    @Override
+    public void removeStartTimeChangedListener(StartTimeChangedListener listener) {
     }
 
     @Override
@@ -525,11 +548,6 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public GPSFixStore getGPSFixStore() {
-        return null;
-    }
-
-    @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
     }
 
@@ -543,7 +561,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+    public void waitForLoadingToFinish() throws InterruptedException {
     }
 
     @Override
@@ -584,13 +602,13 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
     }
-    
+
     @Override
-    public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
-            NoWindException {
+    public TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint)
+            throws NotEnoughDataHasBeenAddedException, NoWindException {
         return null;
     }
-    
+
     @Override
     public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
             WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
@@ -623,5 +641,35 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
+    }
+
+    @Override
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
+    }
+
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
+            Competitor competitor, String trackName) {
+        return null;
+    }
+
+    @Override
+    public Iterable<RegattaLog> getAttachedRegattaLogs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Iterable<RaceLog> getAttachedRaceLogs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates) {
+        return null;
+    }
+
+    @Override
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+        return null;
     }
 }

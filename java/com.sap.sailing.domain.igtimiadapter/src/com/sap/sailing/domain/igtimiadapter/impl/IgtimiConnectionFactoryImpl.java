@@ -8,7 +8,6 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +112,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     private String getOauthAuthorizeUrl() throws UnsupportedEncodingException {
-        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+URLEncoder.encode(getClient().getRedirectUri(), "UTF-8");
+        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+URLEncoder.encode(getClient().getDefaultRedirectUri(), "UTF-8");
     }
     
     /**
@@ -133,6 +132,10 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return new ArrayList<Account>(accountsByEmail.values());
     }
 
+    public IgtimiConnection getConnectionOfAccount(Account account) {
+        return connectionsByAccount.get(account);
+    }
+    
     @Override
     public IgtimiConnection connect(Account account) {
         IgtimiConnection connection;
@@ -317,8 +320,9 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public String getAuthorizationUrl() {
-        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+client.getRedirectUri();
+    public String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPort) {
+        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+
+                "&redirect_uri="+client.getRedirectUri(redirectProtocol, redirectHost, redirectPort);
     }
 
     private Client getClient() {
@@ -341,7 +345,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         urlParameters.add(new BasicNameValuePair("client_id", getClient().getId()));
         urlParameters.add(new BasicNameValuePair("client_secret", getClient().getSecret()));
         urlParameters.add(new BasicNameValuePair("code", code));
-        urlParameters.add(new BasicNameValuePair("redirect_uri", getClient().getRedirectUri()));
+        urlParameters.add(new BasicNameValuePair("redirect_uri", getClient().getDefaultRedirectUri()));
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
         HttpResponse response = client.execute(post);
         JSONObject accessTokenJson = ConnectivityUtils.getJsonFromResponse(response);
@@ -501,14 +505,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             result.add(uri);
         }
         // sort those to the front that don't do port 443 nor wss://
-        Collections.sort(result, new Comparator<URI>() {
-            @Override
-            public int compare(URI o1, URI o2) {
-                int o1Score = (o1.toString().contains("443") ? 1 : 0) + (o1.toString().contains("wss") ? 1 : 0);
-                int o2Score = (o2.toString().contains("443") ? 1 : 0) + (o2.toString().contains("wss") ? 1 : 0);
-                return o1Score - o2Score;
-            }
-        });
+        Collections.shuffle(result); // shuffle as a failover strategy
         logger.info("Trying Igtimi WebSocket servers in the following order: "+result);
         return result;
     }

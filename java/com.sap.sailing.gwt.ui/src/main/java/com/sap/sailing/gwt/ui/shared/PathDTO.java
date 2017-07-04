@@ -2,19 +2,31 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.List;
 
+import com.sap.sailing.domain.common.PathType;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 
 public class PathDTO extends NamedDTO {
-    private static final long serialVersionUID = 2381814072763342186L;
+    private static final long serialVersionUID = 4926185583314563898L;
     private List<SimulatorWindDTO> points;
     private boolean algorithmTimedOut;
     private boolean mixedLeg;
+    private PathType pathType;
 
-    public PathDTO() {
+    protected PathDTO() {
+    }
+    
+    public PathDTO(PathType pathType) {
+        super(pathType.getTxtId());
+        this.pathType = pathType;
     }
 
     public PathDTO(final String name) {
         super(name);
+        this.pathType = null;
+    }
+    
+    public PathType getPathType() {
+        return pathType;
     }
 
     public List<SimulatorWindDTO> getPoints() {

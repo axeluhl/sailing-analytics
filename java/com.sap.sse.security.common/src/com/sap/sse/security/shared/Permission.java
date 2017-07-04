@@ -25,5 +25,14 @@ public interface Permission {
         
         String getStringPermission();
     }
+    
+    public enum DefaultModes implements Mode {
+        CREATE, READ, UPDATE, DELETE;
+
+        @Override
+        public String getStringPermission() {
+            return name();
+        }
+    }
 
 }

@@ -26,7 +26,8 @@ public interface HasRegattaLike {
     
     /**
      * Determines the combined set of all competitors from all race columns that this object's {@link IsRegattaLike}
-     * has.
+     * has, as well as those coming from registrations on the {@link #getRegattaLike()}'s
+     * {@link IsRegattaLike#getRegattaLog() regatta log}.
      * 
      * @see #getRegattaLike()
      * @see IsRegattaLike#getRaceColumnByName(String)

@@ -44,20 +44,15 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure implements Le
     }
     
     @Override
-    public boolean hasIndividualRecall() {
-        boolean hasRecall = super.hasIndividualRecall();
-        if (!hasRecall) {
-            return false;
-        } else {
-            return hasRecall;
-        }
-    }
-    
-    @Override
     protected boolean hasIndividualRecallByDefault() {
         return true;
     }
     
+    @Override
+    protected Boolean isResultEntryEnabledByDefault() {
+        return true;
+    }
+
     @Override
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             FulfillmentFunction function) {

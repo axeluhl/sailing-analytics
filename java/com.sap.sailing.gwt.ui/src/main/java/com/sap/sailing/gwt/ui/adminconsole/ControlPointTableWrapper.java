@@ -36,7 +36,7 @@ public class ControlPointTableWrapper<S extends RefreshableSelectionModel<Contro
             @Override
             public String getValue(ControlPointDTO d) {
                 if (d instanceof GateDTO) {
-                    return "2x " + stringMessages.mark();
+                    return stringMessages.twoXMark();
                 } else if (d instanceof MarkDTO) {
                     return stringMessages.mark();
                 } else {

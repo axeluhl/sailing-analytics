@@ -26,6 +26,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -77,7 +78,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
                 null, /* endDate */null, /* trackedRegattaRegistry */null, new LowPoint(), UUID.randomUUID(),
                 courseArea);
         regattaLeaderboard = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
-        regatta.addSeries(new SeriesImpl("Test Series", /* isMedal */false, Arrays.asList(new FleetImpl("Yellow"),
+        regatta.addSeries(new SeriesImpl("Test Series", /* isMedal */false, /* isFleetsCanRunInParallel */ true, Arrays.asList(new FleetImpl("Yellow"),
                 new FleetImpl("Blue")), Arrays.asList("R1", "R2", "R3"), /* trackedRegattaRegistry */null));
         for (int l = 0; l < NUMBER_OF_COMP_LISTS; l++) {
             compLists[l] = new ArrayList<Competitor>();
@@ -86,6 +87,32 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
             }
         }
         competitorProviderRegattaLeaderboard = new CompetitorProviderFromRaceColumnsAndRegattaLike(regattaLeaderboard);
+    }
+    
+    /**
+     * Asserts that a regatta leaderboard provides the regatta log-registered competitors even if there
+     * is not a single race column in the regatta yet.
+     */
+    @Test
+    public void testCompetitorsFromRegattaLogForEmptyRegatta() {
+        for (final Series seriesToRemove : regatta.getSeries()) {
+            regatta.removeSeries(seriesToRemove);
+        }
+        RegattaLog regattaLog = regattaLeaderboard.getRegatta().getRegattaLog();
+        final Map<Competitor, RegattaLogRegisterCompetitorEvent> competitorOnRegattaLogRegistrationEvents = new HashMap<>();
+        final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);
+        for (Competitor c : compLists[0]) {
+            final RegattaLogRegisterCompetitorEventImpl registerCompetitorEvent = new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(), c);
+            regattaLog.add(registerCompetitorEvent);
+            competitorOnRegattaLogRegistrationEvents.put(c, registerCompetitorEvent);
+        }
+        Set<Competitor> expected = new HashSet<>(compLists[0]);
+        Set<Competitor> actual = new HashSet<>();
+        Util.addAll(competitorProviderRegattaLeaderboard.getAllCompetitors(), actual);
+        assertEquals(expected, actual);
+        Set<Competitor> actual2 = new HashSet<>();
+        Util.addAll(regatta.getAllCompetitors(), actual2);
+        assertEquals(expected, actual2);
     }
     
     @Test

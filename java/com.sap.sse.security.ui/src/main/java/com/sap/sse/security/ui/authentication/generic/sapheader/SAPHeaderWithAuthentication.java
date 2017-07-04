@@ -10,7 +10,7 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
 /**
- * {@link SAPHeader} which is decorated by a authentication control on the right side. This is typically ised to
+ * {@link SAPHeader} which is decorated by a authentication control on the right side. This is typically used to
  * integrate with {@link GenericAuthentication}.
  */
 public class SAPHeaderWithAuthentication extends SAPHeader {
@@ -20,13 +20,13 @@ public class SAPHeaderWithAuthentication extends SAPHeader {
 
     private AuthenticationMenuView authenticationMenuView;
 
-    public SAPHeaderWithAuthentication(String applicationName, String headerTitle) {
-        this(applicationName);
+    public SAPHeaderWithAuthentication(String applicationName, String applicationBaseUrl, String headerTitle) {
+        this(applicationName, applicationBaseUrl);
         setHeaderTitle(headerTitle);
     }
 
-    public SAPHeaderWithAuthentication(String applicationName) {
-        super(applicationName);
+    public SAPHeaderWithAuthentication(String applicationName, String applicationBaseUrl) {
+        super(applicationName, applicationBaseUrl);
         res.css().ensureInjected();
         
         FlowPanel rightWithAuthentication = new FlowPanel();

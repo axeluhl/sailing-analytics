@@ -9,11 +9,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class RaceMapDataDTO implements IsSerializable {
-    public Map<CompetitorDTO, List<GPSFixDTO>> boatPositions;
+    public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions;
     public CoursePositionsDTO coursePositions;
     public List<SidelineDTO> courseSidelines;
-    public LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
-    public LinkedHashMap<CompetitorDTO, Integer> competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
+    public LinkedHashMap<String, QuickRankDTO> quickRanks;
     public long simulationResultVersion;
+    
+    /**
+     * The competitor IDs in their {@link Object#toString()} representation, for all competitors in the race, including those
+     * that may be suppressed in a leaderboard.
+     */
     public HashSet<String> raceCompetitorIdsAsStrings;
 }

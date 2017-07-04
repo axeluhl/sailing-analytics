@@ -64,9 +64,9 @@ public interface EventRegattaLeaderboardResources extends ClientBundle {
         String leaderboardcompetitor_item_table();
         String leaderboardcompetitor_itemcenter_table();
         String leaderboardcompetitorshort();
-        String marginFix();
         String letItScroll();
         
         String regattaleaderboard_meta_fullscreen_button();
+        String regattaleaderboard_meta_liveraces_button();
     }
 }

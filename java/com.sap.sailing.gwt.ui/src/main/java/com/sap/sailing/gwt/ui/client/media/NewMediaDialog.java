@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -170,40 +172,38 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 
             @Override
             public void onChange(ChangeEvent event) {
-                updateFromUrl();
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        updateFromUrl();
+                    }
+                });
             }
-
         });
         return result;
     }
 
     protected void updateFromUrl() {
         String url = urlBox.getValue();
-
         String youtubeId = YoutubeApi.getIdByUrl(url);
-
         if (youtubeId != null) {
             mediaTrack.url = youtubeId;
             mediaTrack.mimeType = MimeType.youtube;
             loadYoutubeMetadata(youtubeId);
-            setUiEnabled(false);
         } else {
             mediaTrack.url = url;
             loadMediaDuration();
-
             String lastPathSegment = mediaTrack.url.substring(mediaTrack.url.lastIndexOf('/') + 1);
             int dotPos = lastPathSegment.lastIndexOf('.');
             if (dotPos >= 0) {
                 mediaTrack.title = lastPathSegment.substring(0, dotPos);
                 String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
-
                 mediaTrack.mimeType = MimeType.byName(fileEnding);
             } else {
                 mediaTrack.title = mediaTrack.url;
                 mediaTrack.mimeType = null;
             }
         }
-
         refreshUI();
     }
 
@@ -246,9 +246,12 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
 		setTimeout(
 				function() {
 					//Remove temporary script element.
-					document.body
+					if (window != null && window.youtubeMetadataCallbackScript != null) {
+					    document.body
 							.removeChild(window.youtubeMetadataCallbackScript);
-					delete window.youtubeMetadataCallbackScript;
+							
+					    delete window.youtubeMetadataCallbackScript;
+					}
 					that.@com.sap.sailing.gwt.ui.client.media.NewMediaDialog::setUiEnabled(Z)(true);
 				}, 2000);
 

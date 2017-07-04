@@ -13,7 +13,6 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.BaseControlP
  * Deserializer for controlpoints.
  */
 public class ControlPointDeserializer implements JsonDeserializer<ControlPoint> {
-
     private final MarkDeserializer markDeserializer;
     private final GateDeserializer gateDeserializer;
 
@@ -26,14 +25,11 @@ public class ControlPointDeserializer implements JsonDeserializer<ControlPoint> 
     public ControlPoint deserialize(JSONObject object) throws JsonDeserializationException {
         String classFieldValue = (String) object.get(BaseControlPointJsonSerializer.FIELD_CLASS);
         ControlPoint controlPoint = null;
-        
         if (classFieldValue.equals(ControlPointWithTwoMarks.class.getSimpleName())) {
             controlPoint = gateDeserializer.deserialize(object);
         } else if (classFieldValue.equals(Mark.class.getSimpleName())) {
             controlPoint = markDeserializer.deserialize(object);
         }
-        
         return controlPoint;
     }
-
 }

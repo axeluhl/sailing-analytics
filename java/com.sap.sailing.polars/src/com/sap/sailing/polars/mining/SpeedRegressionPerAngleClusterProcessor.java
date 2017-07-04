@@ -1,11 +1,11 @@
 package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -53,9 +53,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     /**
      * FIXME make sure listeners and replication interact correctly
      */
-    private transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
-
-    private final Set<BoatClass> availableBoatClasses = new HashSet<BoatClass>();
+    private transient ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
@@ -87,7 +85,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         regression.addData(fix.getWind().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
-        availableBoatClasses.add(boatClass);
         Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
         if (listenersForBoatClass != null) {
             for (PolarsChangedListener listener : listenersForBoatClass) {
@@ -182,12 +179,12 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         return polynomialFunction;
     }
 
-    public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+    public void setListeners(ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners) {
         this.listeners = listeners;
     }
 
     Set<BoatClass> getAvailableBoatClasses() {
-        return availableBoatClasses;
+        return Collections.unmodifiableSet(fixCountPerBoatClass.keySet());
     }
 
     @Override
@@ -233,4 +230,17 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         return angleClusterGroup;
     }
 
+    public Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> getRegressionsImpl() {
+        synchronized (regressions) {
+            Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> map = new HashMap<>();
+            regressions.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
+            return Collections.unmodifiableMap(map);
+        }
+    }
+
+    public Map<BoatClass, Long> getFixCountPerBoatClass() {
+        synchronized (fixCountPerBoatClass) {
+            return Collections.unmodifiableMap(fixCountPerBoatClass);
+        }
+    }
 }

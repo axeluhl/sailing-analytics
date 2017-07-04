@@ -14,9 +14,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sse.common.util.NaturalComparator;
 
 public class CourseNameAdapter extends BaseAdapter implements View.OnClickListener {

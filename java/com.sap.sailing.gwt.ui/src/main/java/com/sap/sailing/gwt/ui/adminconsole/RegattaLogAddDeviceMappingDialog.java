@@ -116,7 +116,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                     public void onSelectionChange(MarkDTO mark) {
                         selectedItem = mark;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_MARK_ID_AS_STRING, mark.getIdAsString());
-                        validate();
+                        validateAndUpdate();
                     }
 
                     @Override
@@ -124,7 +124,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                         selectedItem = competitor;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                                 competitor.getIdAsString());
-                        validate();
+                        validateAndUpdate();
                     }
                 }, mapping != null ? mapping.mappedTo : null);
         if (mapping != null) {
@@ -217,7 +217,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
     }
 
     private void loadCompetitorsAndMarks() {
-        sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
+        sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
         sailingService.getMarksInRegattaLog(leaderboardName, itemSelectionPanel.getSetMarksCallback());
     }
 }

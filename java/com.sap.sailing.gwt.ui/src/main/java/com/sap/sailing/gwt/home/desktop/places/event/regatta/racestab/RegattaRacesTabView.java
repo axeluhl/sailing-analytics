@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxFilter;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
 import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.AbstractActionProvider;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
@@ -105,6 +106,11 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     @Override
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
+        if(currentPresenter.getRegattaMetadata() == null) {
+            contentArea.setWidget(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
+            return;
+        }
+        
         listNavigationPanelUi = new ListNavigationPanel<Navigation>(new RegattaRacesTabViewNavigationSelectionCallback());
         listNavigationPanelUi.setAdditionalWidget(competitorFilterUi);
         liveRacesListUi = new LiveRacesList(currentPresenter, false);
@@ -190,9 +196,13 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         private final SortableRaceListColumn<RaceListRaceDTO, ?> videoCountColumn = RaceListColumnFactory.getVideoCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> audioCountColumn = RaceListColumnFactory.getAudioCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
+        private boolean hasWind;
+        private boolean hasVideos;
+        private boolean hasAudios;
+
 
         public RaceListFinishedRaces(EventView.Presenter presenter) {
-            super(presenter, new RaceListColumnSet(1, 1));
+            super(presenter, new RaceListColumnSet(1, 1), true);
         }
         
         @Override
@@ -206,12 +216,15 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             // TODO: this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
             this.startTimeColumn.setShowTimeOnly(false);
             this.durationColumn.setShowDetails(RaceListDataUtil.hasDurations(data));
-            boolean hasWind = RaceListDataUtil.hasWind(data);
+            this.hasWind = RaceListDataUtil.hasWind(data);
+            this.hasVideos = RaceListDataUtil.hasVideos(data);
+            this.hasAudios = RaceListDataUtil.hasAudios(data);
+
             this.windSpeedColumn.setShowDetails(hasWind);
             this.windDirectionColumn.setShowDetails(hasWind);
             this.windSourcesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
-            this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
-            this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
+            this.videoCountColumn.setShowDetails(hasVideos);
+            this.audioCountColumn.setShowDetails(hasAudios);
             this.winnerColumn.setShowDetails(RaceListDataUtil.hasWinner(data));
             super.setTableData(data);
         }
@@ -239,6 +252,21 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             columnSet.addColumn(audioCountColumn);
             columnSet.addColumn(fleetNameColumn);
         }
+
+        @Override
+        public boolean hasWind() {
+            return hasWind;
+        }
+
+        @Override
+        public boolean hasVideos() {
+            return hasVideos;
+        }
+
+        @Override
+        public boolean hasAudios() {
+            return hasAudios;
+        }
         
     }
     
@@ -248,8 +276,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
         
         @Override
-        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
-            return currentPresenter.getRaceViewerURL(raceMetadata);
+        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
+            return currentPresenter.getRaceViewerURL(raceMetadata, mode);
         }
     }
 

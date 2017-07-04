@@ -98,11 +98,9 @@ public class MultiRegattaListSteps extends Composite {
     }
 
     private String getLeaderboardButtonStyle(RegattaState regattaState) {
-        switch (regattaState) {
-            case UPCOMING: return SharedResources.INSTANCE.mainCss().buttoninactive();
-            case RUNNING: return SharedResources.INSTANCE.mainCss().buttonred();
-            default: return SharedResources.INSTANCE.mainCss().buttonprimary();
-        }
+        String liveStyle = SharedResources.INSTANCE.mainCss().buttonred();
+        String defaultStyle = SharedResources.INSTANCE.mainCss().buttonprimary();
+        return RegattaState.RUNNING == regattaState ? liveStyle : defaultStyle;
     }
 
 }

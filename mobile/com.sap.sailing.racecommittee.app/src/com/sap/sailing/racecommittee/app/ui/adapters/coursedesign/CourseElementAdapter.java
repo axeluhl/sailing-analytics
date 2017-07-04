@@ -3,6 +3,20 @@ package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
+import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
+import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeAdapter;
+import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
@@ -12,20 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
-import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeViewHolder;
-import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView.ViewHolder> {
 
@@ -73,33 +73,27 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemViewHolder) {
             CourseListDataElement element = mElements.get(position);
-
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
             itemHolder.dragHandle.setVisibility((mEditable) ? View.VISIBLE : View.GONE);
-
             itemHolder.leftText.setVisibility(View.GONE);
             itemHolder.leftImage.setVisibility(View.GONE);
             if (element.getLeftMark() != null) {
                 itemHolder.leftText.setText(element.getLeftMark().getName());
                 itemHolder.leftText.setVisibility(View.VISIBLE);
-
                 itemHolder.leftImage.setImageDrawable(mImageHelper.resolveMarkImage(mContext, element.getLeftMark()));
                 itemHolder.leftImage.setVisibility(View.VISIBLE);
             }
-
             itemHolder.roundingDirection.setVisibility(View.GONE);
             if (element.getPassingInstructions() != null) {
                 itemHolder.roundingDirection.setText(getDisplayValueForRounding(element.getPassingInstructions()));
                 itemHolder.roundingDirection.setVisibility(View.VISIBLE);
             }
-
             itemHolder.rightText.setVisibility(View.GONE);
             itemHolder.rightImage.setVisibility(View.GONE);
             itemHolder.addItem.setVisibility(View.GONE);
             if (element.getRightMark() != null) {
                 itemHolder.rightText.setText(element.getRightMark().getName());
                 itemHolder.rightText.setVisibility(View.VISIBLE);
-
                 itemHolder.rightImage.setImageDrawable(mImageHelper.resolveMarkImage(mContext, element.getRightMark()));
                 itemHolder.rightImage.setVisibility(View.VISIBLE);
             } else {
@@ -110,9 +104,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
                     }
                 }
             }
-
             int dragState = itemHolder.getDragStateFlags();
-
             if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0) {
                 int bgColor;
                 if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
@@ -179,6 +171,9 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         if (PassingInstruction.Port.equals(direction)) {
             return "P";
         }
+        if (PassingInstruction.Single_Unknown.equals(direction)) {
+            return "U";
+        }
         if (PassingInstruction.Starboard.equals(direction)) {
             return "S";
         }
@@ -192,7 +187,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     }
 
     @Override
-    public boolean onCheckCanStartDrag(RecyclerView.ViewHolder holder, int x, int y) {
+    public boolean onCheckCanStartDrag(RecyclerView.ViewHolder holder, int position, int x, int y) {
         if (holder instanceof ItemViewHolder) {
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
             // x, y --- relative from the itemView's top-left
@@ -209,7 +204,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     }
 
     @Override
-    public ItemDraggableRange onGetItemDraggableRange(RecyclerView.ViewHolder holder) {
+    public ItemDraggableRange onGetItemDraggableRange(RecyclerView.ViewHolder holder, int position) {
         if (mElements == null) {
             return null;
         }
@@ -230,8 +225,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     }
 
     @Override
-    public int onGetSwipeReactionType(RecyclerView.ViewHolder holder, int x, int y) {
-        if (onCheckCanStartDrag(holder, x, y)) {
+    public int onGetSwipeReactionType(RecyclerView.ViewHolder holder, int position, int x, int y) {
+        if (onCheckCanStartDrag(holder, position, x, y)) {
             return RecyclerViewSwipeManager.REACTION_CAN_NOT_SWIPE_BOTH;
         } else {
             return RecyclerViewSwipeManager.REACTION_CAN_SWIPE_BOTH;
@@ -239,7 +234,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     }
 
     @Override
-    public void onSetSwipeBackground(RecyclerView.ViewHolder holder, int type) {
+    public void onSetSwipeBackground(RecyclerView.ViewHolder holder, int position, int type) {
         if (holder instanceof ItemViewHolder) {
             int bgRes = 0;
             switch (type) {
@@ -262,7 +257,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     }
 
     @Override
-    public int onSwipeItem(RecyclerView.ViewHolder holder, int result) {
+    public int onSwipeItem(RecyclerView.ViewHolder holder, int position, int result) {
         if (holder instanceof ItemViewHolder) {
             switch (result) {
                 case RecyclerViewSwipeManager.RESULT_SWIPED_LEFT:
@@ -278,12 +273,9 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     }
 
     @Override
-    public void onPerformAfterSwipeReaction(RecyclerView.ViewHolder holder, int result, int reaction) {
+    public void onPerformAfterSwipeReaction(RecyclerView.ViewHolder holder, int position, int result, int reaction) {
         ExLog.i(mContext, TAG, "onPerformAfterSwipeReaction() called with: " + "holder = [" + holder + "], result = [" + result + "], reaction = [" + reaction + "]");
-
-        int position = holder.getAdapterPosition();
         CourseListDataElementWithIdImpl element = mElements.get(position);
-
         switch (reaction) {
             case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
                 mElements.remove(element);
@@ -332,7 +324,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         }
     }
 
-    public class ItemViewHolder extends BaseDraggableSwipeViewHolder implements View.OnClickListener {
+    public class ItemViewHolder extends AbstractDraggableSwipeableItemViewHolder implements View.OnClickListener {
 
         public ViewGroup container;
         public View dragHandle;

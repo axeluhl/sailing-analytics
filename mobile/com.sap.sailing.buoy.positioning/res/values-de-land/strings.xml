@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accuracy">Genauigkeit</string>
+    <string name="distance">Entfernung</string>
+    <string name="accuracy_detail">der GPS-Position</string>
+    <string name="distance_detail">zur alten Boje</string>
+</resources>

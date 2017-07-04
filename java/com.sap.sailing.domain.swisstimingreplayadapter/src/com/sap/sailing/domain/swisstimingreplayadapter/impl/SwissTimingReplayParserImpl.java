@@ -15,7 +15,6 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
         private static final long serialVersionUID = 1L;
         public UnknownMessageIdentificationCode(byte messageIdentificationCode, long position) {
             super("Unknown message identification code: " +  messageIdentificationCode+" at position "+position);
-            
         }
     }
 

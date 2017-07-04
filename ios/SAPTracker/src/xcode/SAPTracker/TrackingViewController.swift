@@ -10,69 +10,114 @@ import Foundation
 
 class TrackingViewController : UIViewController {
     
-    struct Color {
-        static let GpsActive = UIColor(hex: 0x8AB54D)
-        static let GpsInactive = UIColor(hex: 0x445A2F)
-        static let Green = UIColor(hex: 0x408000)
-        static let Red = UIColor(hex: 0xFF0000)
-        static let Orange = UIColor(hex: 0xFF8000)
-    }
+    var regatta: Regatta!
+    var regattaController: RegattaController!
     
-    @IBOutlet weak var gpsAccuracy: UILabel!
-    @IBOutlet weak var trackingStatusLabel: UILabel!
-    @IBOutlet weak var cachedFixesLabel: UILabel!
-    @IBOutlet weak var onlineModeLabel: UILabel!
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
+    @IBOutlet weak var stopTrackingButton: UIButton!
     
-    /* Register for notifications. Set up timer */
     override func viewDidLoad() {
         super.viewDidLoad()
-  
-        // set values
-        navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
-        cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
-        
-        // set online/buffering label
-        networkAvailabilityChanged()
-        
-        // register for notifications
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"networkAvailabilityChanged", name:APIManager.NotificationType.networkAvailabilityChanged, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"locationManagerFailed:", name:LocationManager.NotificationType.locationManagerFailed, object: nil)
-    }
-
-    // MARK:- Notifications
-    
-    deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        setup()
     }
     
-    func networkAvailabilityChanged() {
-        if (APIManager.sharedManager.networkAvailable) {
-            if !BatteryManager.sharedManager.batterySaving {
-                onlineModeLabel.text = NSLocalizedString("Online", comment: "")
-                onlineModeLabel.textColor = Color.Green
-            } else {
-                onlineModeLabel.text = NSLocalizedString("Battery Saving", comment: "")
-                onlineModeLabel.textColor = Color.Orange
-            }
-        } else {
-            onlineModeLabel.text = NSLocalizedString("Offline", comment: "")
-            onlineModeLabel.textColor = Color.Red
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+        tableViewHeight.constant = tableView.contentSize.height
+    }
+    
+    // MARK: - Setup
+    
+    private func setup() {
+        setupButtons()
+        setupLocalization()
+        setupNavigationBar()
+    }
+    
+    private func setupButtons() {
+        stopTrackingButton.setBackgroundImage(Images.RedHighlighted, forState: .Highlighted)
+    }
+    
+    private func setupLocalization() {
+        stopTrackingButton.setTitle(Translation.TrackingView.StopTrackingButton.Title.String, forState: .Normal)
+    }
+    
+    private func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+        navigationItem.titleView = TitleView(title: regatta.event.name, subtitle: regatta.leaderboard.name)
+        navigationController?.navigationBar.setNeedsLayout()
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
+        let alertController = UIAlertController(title: Translation.TrackingView.StopTrackingAlert.Title.String,
+                                                message: Translation.TrackingView.StopTrackingAlert.Message.String,
+                                                preferredStyle: .Alert
+        )
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { action in
+            LocationManager.sharedManager.stopTracking()
+            SVProgressHUD.show()
+            self.regattaController.gpsFixController.sendAll({ (withSuccess) in
+                SVProgressHUD.popActivity()
+                self.dismissViewControllerAnimated(true, completion: nil)
+            })
         }
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        presentViewController(alertController, animated: true, completion: nil)
     }
     
-    func newLocation(notification: NSNotification) {
-        let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as! Double
-        gpsAccuracy.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
-        trackingStatusLabel.text = NSLocalizedString("Tracking", comment: "")
-        trackingStatusLabel.textColor = Color.Green
-        cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
-    }
-    
-    func locationManagerFailed(notification: NSNotification) {
-        gpsAccuracy.text = NSLocalizedString("No GPS", comment: "")
-        trackingStatusLabel.text = NSLocalizedString("Not Tracking", comment: "")
-        trackingStatusLabel.textColor = Color.Red
-    }
+}
 
+// MARK: - UITableViewDataSourceDelegate
+
+extension TrackingViewController: UITableViewDataSource {
+    
+    struct CellIdentifier {
+        static let StatusCell = "StatusCell"
+        static let ModeCell = "ModeCell"
+        static let ChachedFixesCell = "CachedFixesCell"
+        static let GPSAccuracyCell = "GPSAccuracyCell"
+    }
+    
+    @nonobjc static let Rows = [
+        CellIdentifier.StatusCell,
+        CellIdentifier.ModeCell,
+        CellIdentifier.ChachedFixesCell,
+        CellIdentifier.GPSAccuracyCell
+    ]
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return TrackingViewController.Rows.count
+    }
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier(TrackingViewController.Rows[indexPath.row]) ?? UITableViewCell()
+        if let gpsFixesCell = cell as? TrackingViewGPSFixesCell {
+            gpsFixesCell.regatta = regatta
+        }
+        return cell
+    }
+    
+}
+
+// MARK: - UITableViewDelegate
+
+extension TrackingViewController: UITableViewDelegate {
+    
+    func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 52
+    }
+    
+    func tableView(tableView: UITableView, estimatedHeightForFooterInSection section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        cell.removeSeparatorInset()
+    }
+    
 }

@@ -15,6 +15,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class GateStartPathFinderFragment extends BaseFragment {
@@ -24,7 +25,6 @@ public class GateStartPathFinderFragment extends BaseFragment {
 
     private EditText mNat;
     private EditText mNum;
-    private View mHeader;
     private View mButton;
 
     public static GateStartPathFinderFragment newInstance() {
@@ -55,7 +55,6 @@ public class GateStartPathFinderFragment extends BaseFragment {
 
         mNat = ViewHelper.get(layout, R.id.pathfinder_nat);
         mNum = ViewHelper.get(layout, R.id.pathfinder_num);
-        mHeader = ViewHelper.get(layout, R.id.header_text);
         mButton = ViewHelper.get(layout, R.id.set_path_finder);
 
         if (getArguments() != null) {
@@ -104,8 +103,9 @@ public class GateStartPathFinderFragment extends BaseFragment {
             }
         }
 
-        if (mHeader != null) {
-            mHeader.setOnClickListener(new View.OnClickListener() {
+        HeaderLayout header = ViewHelper.get(layout, R.id.header);
+        if (header != null) {
+            header.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     goHome();

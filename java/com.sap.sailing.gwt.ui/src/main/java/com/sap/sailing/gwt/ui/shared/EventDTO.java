@@ -3,6 +3,9 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 
 public class EventDTO extends EventBaseDTO {
     private static final long serialVersionUID = -7100030301376959817L;
@@ -59,6 +62,25 @@ public class EventDTO extends EventBaseDTO {
 
     public List<LeaderboardGroupDTO> getLeaderboardGroups() {
         return leaderboardGroups;
+    }
+
+    public Iterable<UUID> getLeaderboardGroupIds() {
+        final List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
+        for (LeaderboardGroupDTO leaderboardGroup : this.getLeaderboardGroups()) {
+            updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
+        }
+        return updatedEventLeaderboardGroupIds;
+    }
+    
+    public AbstractLeaderboardDTO getLeaderboardByName(String leaderboardName) {
+        for (LeaderboardGroupDTO leaderboardGroup : this.getLeaderboardGroups()) {
+            for (StrippedLeaderboardDTO leaderboardDTO : leaderboardGroup.getLeaderboards()) {
+                if(leaderboardName.equals(leaderboardDTO.name)) {
+                    return leaderboardDTO;
+                }
+            }
+        }
+        return null;
     }
 
 }

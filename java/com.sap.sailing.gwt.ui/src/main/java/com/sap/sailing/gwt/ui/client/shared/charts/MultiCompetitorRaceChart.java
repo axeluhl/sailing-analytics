@@ -15,6 +15,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
@@ -32,13 +33,21 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private boolean hasOverallLeaderboard;
     
-    public MultiCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    private final MultiCompetitorRaceChartLifecycle lifecycle;
+    
+    public MultiCompetitorRaceChart(Component<?> parent, ComponentContext<?> context,
+            MultiCompetitorRaceChartLifecycle lifecycle,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
             final String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
-                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, compactChart, allowTimeAdjust, leaderboardGroupName, leaderboardName);
+        super(parent, context, sailingService, asyncActionsExecutor, competitorSelectionProvider,
+                selectedRaceIdentifier, timer,
+                timeRangeWithZoomProvider, stringMessages, errorReporter,
+                /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
+                allowTimeAdjust, leaderboardGroupName, leaderboardName);
+        this.lifecycle = lifecycle;
         if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupName, false,
                     new AsyncCallback<LeaderboardGroupDTO>() {
@@ -64,14 +73,21 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     }
 
     @Override
-    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
-        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages(), hasOverallLeaderboard);
+    public MultiCompetitorRaceChartSettings getSettings() {
+        return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
+    }
+    
+    @Override
+    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent(MultiCompetitorRaceChartSettings settings) {
+        return new MultiCompetitorRaceChartSettingsComponent(settings,
+                getStringMessages(), hasOverallLeaderboard);
     }
 
     @Override
     public void updateSettings(MultiCompetitorRaceChartSettings newSettings) {
         boolean settingsChanged = updateSettingsOnly(newSettings);
-        boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
+        boolean selectedDetailTypeChanged = setSelectedDetailTypes(newSettings.getFirstDetailType(),
+                newSettings.getSecondDetailType());
         if (selectedDetailTypeChanged || settingsChanged) {
             clearChart();
             timeChanged(timer.getTime(), null);
@@ -85,12 +101,17 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.competitorCharts();
+        return lifecycle.getLocalizedShortName();
     }
 
     @Override
     public String getDependentCssClassName() {
         return "multiCompetitorRaceChart";
+    }
+
+    @Override
+    public String getId() {
+        return lifecycle.getComponentId();
     }
 
 }

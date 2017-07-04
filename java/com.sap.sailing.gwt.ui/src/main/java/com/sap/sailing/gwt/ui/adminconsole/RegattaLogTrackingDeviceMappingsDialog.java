@@ -23,23 +23,32 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
-import com.sap.sailing.gwt.ui.adminconsole.DeviceMappingTableWrapper.FilterChangedHandler;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void> {
+    private static final int HOURS_TO_EXPAND_FOR_OPEN_END = 2;
+
     protected final String leaderboardName;
 
     public static final double PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS = 0.1;
@@ -52,6 +61,8 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     private final StringMessages stringMessages;
     private List<DeviceMappingDTO> mappings = new ArrayList<>();
     private DeviceMappingTableWrapper deviceMappingTable;
+    private LabeledAbstractFilterablePanel<DeviceMappingDTO> filterField;
+    private CheckBox showPingMappingsCb;
     
     private Point[] data;
     
@@ -89,16 +100,15 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
             }
         });
         buttonPanel.add(importBtn);
+        buttonPanel.add(new Button(stringMessages.importAdditionalSensorData(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                importFoiling();
+            }
+        }));
         mainPanel.add(buttonPanel);
         
         deviceMappingTable = new DeviceMappingTableWrapper(sailingService, stringMessages, errorReporter);
-        deviceMappingTable.addFilterChangedHandler(new FilterChangedHandler() {
-            @Override
-            public void onFilterChanged(List<DeviceMappingDTO> filteredList) {
-                mappings = filteredList;
-                updateChart();
-            }
-        });
         deviceMappingTable.getTable().addCellPreviewHandler(new CellPreviewEvent.Handler<DeviceMappingDTO>() {
             @Override
             public void onCellPreview(CellPreviewEvent<DeviceMappingDTO> event) {
@@ -112,8 +122,8 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         actionCol.setFieldUpdater(getActionColFieldUpdater());
         deviceMappingTable.getTable().addColumn(actionCol, stringMessages.actions());
         
-        final HorizontalPanel deviceMappingPannel = new HorizontalPanel();
-        mainPanel.add(deviceMappingPannel);
+        final HorizontalPanel deviceMappingPanel = new HorizontalPanel();
+        mainPanel.add(deviceMappingPanel);
         
         chart = new Chart()
         .setType(Series.Type.COLUMN_RANGE)
@@ -157,24 +167,61 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                     "<b>" + stringMessages.to() + ":</b> " + DateAndTimeFormatterUtil.formatDateAndTime(mapping.to);
             }
         }));
-
-        deviceMappingPannel.add(chart);
-        deviceMappingPannel.add(deviceMappingTable);
+        deviceMappingPanel.add(chart);
+        filterField = new LabeledAbstractFilterablePanel<DeviceMappingDTO>(
+                new Label(stringMessages.filterDeviceMappings()),
+                new ArrayList<DeviceMappingDTO>(), deviceMappingTable.getTable(), deviceMappingTable.getDataProvider()) {
+            @Override
+            public Iterable<String> getSearchableStrings(DeviceMappingDTO t) {
+                List<String> string = new ArrayList<String>();
+                string.add(t.mappedTo.toString());
+                string.add(t.deviceIdentifier.deviceType);
+                string.add(t.deviceIdentifier.deviceId);
+                return string;
+            }
+        };
+        filterField.addFilter(new Filter<DeviceMappingDTO>() {
+            @Override
+            public boolean matches(DeviceMappingDTO dm) {
+                return showPingMappingsCb.getValue() || !"PING".equals(dm.deviceIdentifier.deviceType);
+            }
+            
+            @Override
+            public String getName() {
+                return "ShowPingMappingsFilter";
+            }
+        });
         
+        deviceMappingTable.registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
+        final VerticalPanel vp = new VerticalPanel();
+        deviceMappingPanel.add(vp);
+        vp.add(filterField);
+        showPingMappingsCb = new CheckBox(stringMessages.showPingMarkMappings());
+        showPingMappingsCb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                filterField.filter();
+            }
+        });
+        vp.insert(showPingMappingsCb, 0);
+        vp.add(deviceMappingTable);
         return mainPanel;
     }
 
     void updateChart() {
-        earliest = new Date(Long.MAX_VALUE);
-        latest = new Date(Long.MIN_VALUE);
+        earliest = null;
+        latest = null;
         for (DeviceMappingDTO mapping : mappings) {
             updateExtremes(mapping);
         }
         data = new Point[mappings.size()];
+        
+        handleOpenEndedIntervalls();
+        
         long earliestMillis = earliest.getTime();
         long latestMillis = latest.getTime();
         long range = latestMillis - earliestMillis;
-        long extension = (long) (range * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS); // TODO bug 3426: open intervals dominate the chart too badly
+        long extension = (long) (range * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS);
         long yMin = earliestMillis - extension;
         long yMax = latestMillis + extension;
         int i = 0;
@@ -192,19 +239,25 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 .setPoints(data));
         chart.getYAxis().setExtremes(yMin, yMax);
     }
+
+    private void handleOpenEndedIntervalls() {
+        if (earliest == null && latest == null){
+            //allMappingsAreOpenEnded in Both directions or no mappings present
+            earliest = new Date(0);
+            latest = new Date();
+        } else if (earliest == null && latest != null){
+            earliest = new Date(latest.getTime() - HOURS_TO_EXPAND_FOR_OPEN_END*1000*60*60);
+        } else if (latest == null && earliest != null){
+            latest = new Date(earliest.getTime() + HOURS_TO_EXPAND_FOR_OPEN_END*1000*60*60);
+        }
+    }
     
     private void updateExtremes(DeviceMappingDTO mapping) {
-        if (mapping.from != null && earliest.after(mapping.from)) {
+        if (mapping.from != null && (earliest == null || earliest.after(mapping.from))) {
             earliest = mapping.from;
         }
-        if (mapping.to != null && latest.before(mapping.to)) {
+        if (mapping.to != null && (latest == null || latest.before(mapping.to))) {
             latest = mapping.to;
-        }
-        if (mapping.to != null && earliest.after(mapping.to)) {
-            earliest = mapping.to;
-        }
-        if (mapping.from != null && latest.before(mapping.from)) {
-            latest = mapping.from;
         }
     }
     
@@ -218,7 +271,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
             public void onSuccess(List<DeviceMappingDTO> result) {
                 mappings = result;
                 updateChart();
-                deviceMappingTable.refresh(mappings);
+                filterField.updateAll(mappings);
             }
 
             @Override
@@ -257,8 +310,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
 
     private void importFixes() {
         new RegattaLogImportFixesAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
-                new DataEntryDialog.DialogCallback<Collection<DeviceMappingDTO>>() {
-
+                new DialogCallback<Collection<DeviceMappingDTO>>() {
                     @Override
                     public void ok(Collection<DeviceMappingDTO> editedObject) {
                         for (DeviceMappingDTO mapping : editedObject) {
@@ -266,7 +318,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                                     new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
-                                            refresh();
+                                            RegattaLogTrackingDeviceMappingsDialog.this.refresh();
                                         }
 
                                         @Override
@@ -281,6 +333,32 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                     public void cancel() {
                     }
                 }).show();
+    }
+    
+    private void importFoiling() {
+        new RegattaLogImportSensorDataAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+                new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
+            @Override
+            public void ok(Collection<TypedDeviceMappingDTO> editedObject) {
+                for (TypedDeviceMappingDTO mapping : editedObject) {
+                    sailingService.addTypedDeviceMappingToRegattaLog(leaderboardName, mapping, new AsyncCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            RegattaLogTrackingDeviceMappingsDialog.this.refresh();
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                        }
+                    });
+                }
+            }
+            
+            @Override
+            public void cancel() {
+            }
+        }).show();
     }
 
     private FieldUpdater<DeviceMappingDTO, String> getActionColFieldUpdater() {
@@ -335,4 +413,5 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     protected Void getResult() {
         return null;
     }
+    
 }

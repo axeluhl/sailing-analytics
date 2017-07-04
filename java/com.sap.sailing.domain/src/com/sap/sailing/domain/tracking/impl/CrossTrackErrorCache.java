@@ -201,6 +201,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                     }
                 }, CrossTrackErrorCache.class.getSimpleName()+" for race "+owner.getRace().getName());
         this.owner = owner;
+        triggerUpdateForAllRaceCompetitors();
         owner.addListener(this);
     }
     
@@ -480,7 +481,13 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     
     public void resume() {
         owner.addListener(this);
-        invalidate();
+        triggerUpdateForAllRaceCompetitors();
         cachePerCompetitor.resume();
+    }
+
+    private void triggerUpdateForAllRaceCompetitors() {
+        for (Competitor competitor : owner.getRace().getCompetitors()) {
+            cachePerCompetitor.triggerUpdate(competitor, null /* meaning: from the beginning of time */);
+        }
     }
 }

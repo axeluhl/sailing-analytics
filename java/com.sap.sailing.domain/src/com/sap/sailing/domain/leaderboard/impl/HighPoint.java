@@ -64,7 +64,7 @@ public class HighPoint extends AbstractScoringSchemeImpl {
 
     @Override
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason, Integer numberOfCompetitorsInRace,
-            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         return 0.0;
     }
 
@@ -74,7 +74,7 @@ public class HighPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
+    public boolean isValidInNetScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         return true;
     }
     

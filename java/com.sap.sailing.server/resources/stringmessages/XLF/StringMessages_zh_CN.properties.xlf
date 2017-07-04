@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file datatype="javapropertyresourcebundle" date="2017-01-12T14:33:55Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.server/resources/stringmessages/StringMessages.properties" source-language="en" target-language="zh-CN">
+		<header>
+			<skl>
+				<internal-file crc="c8a799f35957b659646c59bd67421d2f" form="base64">H4sIAAAAAAAAAKVUTW/bMAy9+1cQ2CEbkAVpdwvgQ5YuWIChDZr2sKPs0A1XWTIk2VkQ5L+PkvNhtzZarBfbEh/f4yNlGZHiQt3jk3BO3GU/KlQuNrwJ+/EBSIGpQzDYXx0GoDNAD+Hl9WEQmZA9l4iun+Tz/tvhy5tUEsUaTaKFWZ8YGlsMGrdzmCJqJq02enuPtpTO/iL1/EBOYuw3WTbshmLtXYWmIty+xPgY6GMwQC+svOiAX0AeMFVC7iy90vZNEMdYFDHczaSw1qfMSZHd4HpVJn8wdbHfg0wb8ChIPSz0byMsZEcsfAWFZ0sgKkFSJBKjTzCewJn+VuQ4hKtJ0L9BmxoqHGnVXcB3vd7Ftw3ajiJ4fNxyEAYvoqOGoVWqDc60MeyEhU6emqyt3A6NPg+NIXdaeSH9ATepzgt05LRZMhJt3aCTl9k5GjgKD1kfJwOSFHpaUZ+NYOVC1zuPbsVg4V1y7KJV93+NIW0p9dbeM4de8c5BtLXePFaPBSeQevLH9WRmWv9VHWPdkpRgnTAOrObS3vdTDOF6Ao5y7JYNNuavxXzdDUFRFEb/pVw4lDtgJN9q7MSWyVloobhmBvBn/FuXwTX3CqliKVDaUUZpCHOvjM5hNV3Cirviw+GCcZTaETxocKVRfBtm7awhFDwki1CRJQc7XRooLRrg0jLiaXNZboP+9DxDglJvR5GPL+tw/Oixx0VEeWGIb+FF/Y74WYl0Fy/rd2SFLF1t5qeQUvumDKN/18D20lAGAAA=</internal-file>
+			</skl>
+			<phase-group>
+				<phase company-name="SAP AG" date="2016-11-04T21:01:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+			</phase-group>
+			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
+		</header>
+		<body>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceInRegattaOfEvent" resname="raceInRegattaOfEvent">
+				<source>race <ph id="1">{0}</ph> in regatta '<ph id="2">{1}</ph>' of event '<ph id="3">{2}</ph>'</source>
+				<target state="signed-off">活动 “<ph id="3">{2}</ph>” 的比赛 “<ph id="2">{1}</ph>” 中的比赛轮次 <ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceInFleetInRegattaOfEvent" resname="raceInFleetInRegattaOfEvent">
+				<source>race <ph id="1">{0}</ph> (<ph id="2">{3}</ph>) in regatta '<ph id="3">{1}</ph>' of event '<ph id="4">{2}</ph>'</source>
+				<target state="signed-off">活动 “<ph id="4">{2}</ph>” 的比赛 “<ph id="3">{1}</ph>” 中的比赛轮次 <ph id="1">{0}</ph> (<ph id="2">{3}</ph>)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboardOfEvent" resname="leaderboardOfEvent">
+				<source>leaderboard '<ph id="1">{0}</ph>' of event '<ph id="2">{1}</ph>'</source>
+				<target state="signed-off">活动 “<ph id="2">{1}</ph>” 的积分榜 “<ph id="1">{0}</ph>”</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboardShowResultsLinkTitle" resname="leaderboardShowResultsLinkTitle">
+				<source>Show results</source>
+				<target state="signed-off">显示结果</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="racesOverviewLinkTitle" resname="racesOverviewLinkTitle">
+				<source>Show races overview</source>
+				<target state="signed-off">显示比赛轮次总览</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceboardShowRaceLinkTitle" resname="raceboardShowRaceLinkTitle">
+				<source>Show race</source>
+				<target state="signed-off">显示比赛轮次</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceboardRaceAnalysisLinkTitle" resname="raceboardRaceAnalysisLinkTitle">
+				<source>Show race analysis</source>
+				<target state="signed-off">显示比赛轮次分析</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassRaceFinishedSubject" resname="boatClassRaceFinishedSubject">
+				<source>Race for boat class <ph id="1">{0}</ph> has finished - new results available</source>
+				<target state="signed-off">船只级别<ph id="1">{0}</ph>的比赛轮次已结束 - 新结果可用</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassRaceFinishedBody" resname="boatClassRaceFinishedBody">
+				<source>New results for boat class <ph id="1">{0}</ph> in <ph id="2">{1}</ph> are available.</source>
+				<target state="signed-off"><ph id="2">{1}</ph>中船只级别<ph id="1">{0}</ph>的新结果可用。</target>
+				<note annotates="source" from="Developer">0: boatClassName, 1: raceDescription</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassScoreCorrectionSubject" resname="boatClassScoreCorrectionSubject">
+				<source>New results are available for boat class <ph id="1">{0}</ph></source>
+				<target state="signed-off">新结果可用于船只级别<ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassScoreCorrectionBody" resname="boatClassScoreCorrectionBody">
+				<source>New results for boat class <ph id="1">{0}</ph> in <ph id="2">{1}</ph> are available.</source>
+				<target state="signed-off"><ph id="2">{1}</ph>中船只级别<ph id="1">{0}</ph>的新结果可用。</target>
+				<note annotates="source" from="Developer">0: boatClassName, 1: leaderboardDescription</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorPassesFinishSubject" resname="competitorPassesFinishSubject">
+				<source>Competitor <ph id="1">{0}</ph> passed finish line in a race</source>
+				<target state="signed-off">参赛队<ph id="1">{0}</ph>在一轮比赛中越过终点线</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorPassesFinishBody" resname="competitorPassesFinishBody">
+				<source>Competitor <ph id="1">{0}</ph> passed finish line in <ph id="2">{1}</ph>.</source>
+				<target state="signed-off">参赛队<ph id="1">{0}</ph>在<ph id="2">{1}</ph>中越过终点线。</target>
+				<note annotates="source" from="Developer">0: competitorName, 1: raceDescription</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorScoreCorrectionSubject" resname="competitorScoreCorrectionSubject">
+				<source>New results are available for competitor <ph id="1">{0}</ph></source>
+				<target state="signed-off">新结果可用于参赛队<ph id="1">{0}</ph></target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorScoreCorrectionBody" resname="competitorScoreCorrectionBody">
+				<source>New results for competitor <ph id="1">{0}</ph> in <ph id="2">{1}</ph> are available.</source>
+				<target state="signed-off"><ph id="2">{1}</ph>中参赛队<ph id="1">{0}</ph>的新结果可用。</target>
+				<note annotates="source" from="Developer">0: competitorName, 1: leaderboardDescription</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassUpcomingRaceSubject" resname="boatClassUpcomingRaceSubject">
+				<source>A race for boat class <ph id="1">{0}</ph> will start soon</source>
+				<target state="signed-off">船只级别<ph id="1">{0}</ph>的比赛轮次即将开始</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassUpcomingRaceBody" resname="boatClassUpcomingRaceBody">
+				<source>For boat class <ph id="1">{0}</ph> <ph id="2">{1}</ph> will start approximately at <ph id="3">{2}</ph>.</source>
+				<target state="signed-off">对于船只级别<ph id="1">{0}</ph>，<ph id="2">{1}</ph>约于<ph id="3">{2}</ph>开始。</target>
+				<note annotates="source" from="Developer">0: boatClassName, 1: raceDescription, 2: time</note>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="subscriptionInformation" resname="subscriptionInformation">
+				<source>You are receiving notifications from SAP Sailing Analytics. To turn off notifications, please visit your user profile at the link below.</source>
+				<target state="signed-off">您将从 SAP Sailing Analytics 接收通知。要关闭通知，请通过下方的链接访问用户参数文件。</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="userProfile" resname="userProfile">
+				<source>User Profile</source>
+				<target state="signed-off">用户参数文件</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="imprint" resname="imprint">
+				<source>Imprint</source>
+				<target state="signed-off">版本说明</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="privacy" resname="privacy">
+				<source>Privacy</source>
+				<target state="signed-off">隐私</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="salutation" resname="salutation">
+				<source>Hallo <ph id="1">{0}</ph>,</source>
+				<target state="signed-off"><ph id="1">{0}</ph>您好！</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

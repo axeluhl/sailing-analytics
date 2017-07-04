@@ -7,8 +7,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -29,7 +30,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         nameEntryField.ensureDebugId("NameTextBox");
         nameEntryField.setVisibleLength(40);
         nameEntryField.setText(regatta.getName());
-        boatClassEntryField = createSuggestBox(BoatClassMasterdata.getAllBoatClassNames(/* include alternative names */ true));
+        boatClassEntryField = createSuggestBox(new BoatClassMasterdataSuggestOracle());
         boatClassEntryField.getValueBox().ensureDebugId("BoatClassTextBox");
         if (regatta.boatClass != null) {
             boatClassEntryField.setText(regatta.boatClass.getName());
@@ -47,7 +48,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     protected RegattaDTO getResult() {
         RegattaDTO result = getRegattaDTO();
         result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
-        result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
+        result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), Distance.NULL, Distance.NULL);
         return result;
     }
     

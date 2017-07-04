@@ -11,18 +11,23 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.tractracadapter.UpdateResponse;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
@@ -31,7 +36,7 @@ public class UpdateHandler {
     private final static Logger logger = Logger.getLogger(UpdateHandler.class.getName());
     
     private JsonDeserializer<UpdateResponse> updateDeserializer;
-    private final URI updateURI;
+    private final URI baseURI;
     private final String tracTracUsername;
     private final String tracTracPassword;
     private final Serializable tracTracEventId;
@@ -49,7 +54,7 @@ public class UpdateHandler {
     private final static String UpdateUrlTemplate = "%s%s?eventid=%s&raceid=%s&username=%s&password=%s";
     
     public UpdateHandler(URI updateURI, String action, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
-        this.updateURI = updateURI;
+        this.baseURI = updateURI;
         this.action = action;
         this.tracTracUsername = tracTracUsername;
         this.tracTracPassword = tracTracPassword;
@@ -63,9 +68,34 @@ public class UpdateHandler {
             this.active = false;
         }
     }
+    
+    protected URI getBaseURI() {
+        return baseURI;
+    }
+    
+    protected URI getActionURI() throws URISyntaxException {
+        return getActionURI(action);
+    }
+    
+    protected URI getActionURI(String action) throws URISyntaxException {
+        return new URI(baseURI.getScheme(), baseURI.getHost(), baseURI.getPath()+(baseURI.getPath().endsWith("/")?"":"/")+action, baseURI.getFragment());
+    }
+    
+    /**
+     * @return a new list that the caller may extend to add more parameters; the list returned contains tbe basic
+     *         parameters {@code eventid}, {@code raceid}, {@code username} and {@code password}.
+     */
+    protected List<BasicNameValuePair> getDefaultParametersAsNewList() {
+        final List<BasicNameValuePair> result = new ArrayList<>();
+        result.add(new BasicNameValuePair("eventid", tracTracEventId.toString()));
+        result.add(new BasicNameValuePair("raceid", this.raceId.toString()));
+        result.add(new BasicNameValuePair("username", tracTracUsername));
+        result.add(new BasicNameValuePair("password", tracTracPassword));
+        return result;
+    }
 
     protected URL buildUpdateURL(Map<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
-        String serverUpdateURI = this.updateURI.toString();
+        String serverUpdateURI = this.baseURI.toString();
         // make sure that the update URI always ends with a slash
         if (!serverUpdateURI.endsWith("/")) {
             serverUpdateURI = serverUpdateURI + "/";
@@ -83,7 +113,6 @@ public class UpdateHandler {
                     URLEncoder.encode(entry.getKey(), EncodingUtf8),
                     URLEncoder.encode(entry.getValue(), EncodingUtf8));
         }
-        
         return new URL(url);
     }
     
@@ -95,6 +124,11 @@ public class UpdateHandler {
         connection.setConnectTimeout(10000/*milliseconds*/);
         connection.connect();
         BufferedReader reader = getResponseOnUpdateFromTracTrac(connection);
+        parseAndLogResponse(reader);
+    }
+
+    protected void parseAndLogResponse(BufferedReader reader)
+            throws IOException, ParseException, JsonDeserializationException {
         Object responseBody = JSONValue.parseWithException(reader);
         JSONObject responseObject = Helpers.toJSONObjectSafe(responseBody);
         UpdateResponse updateResponse = updateDeserializer.deserialize(responseObject);

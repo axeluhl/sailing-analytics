@@ -88,7 +88,7 @@ public class Activator implements BundleActivator {
                 try {
                     Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
                     logger.info("Waiting for UserStore service...");
-                    UserStore userStore = tracker.waitForService(0);
+                    final UserStore userStore = tracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);
                     createAndRegisterSecurityService(bundleContext, userStore);
                 } catch (InterruptedException e) {
@@ -104,7 +104,9 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext bundleContext) throws Exception {
-        registration.unregister();
+        if (registration != null) {
+            registration.unregister();
+        }
         Activator.context = null;
     }
 

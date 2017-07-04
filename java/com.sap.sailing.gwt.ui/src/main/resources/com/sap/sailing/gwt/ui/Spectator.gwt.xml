@@ -25,9 +25,8 @@
 	<!-- Specify the app entry point class.                         -->
 	<entry-point class='com.sap.sailing.gwt.ui.spectator.SpectatorEntryPoint'/>
 
-	<!-- Specify the paths for translatable code                    -->
-	<extend-property name="locale" values="de"/>
-	<extend-property name="locale" values="ru"/>
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 
 	<source path='spectator'/>
 	
@@ -38,6 +37,7 @@
 	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceRaceboard"/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole"/>
+    <inherits name='com.sap.sailing.gwt.settings.Settings'/>
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
 

@@ -28,7 +28,7 @@ public interface HasRegattaMetadata {
 
     String getBoatClass();
     
-    String getBoatCategory();
+    Iterable<String> getLeaderboardGroupNames();
 
     Date getStartDate();
 

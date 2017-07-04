@@ -17,6 +17,10 @@
     <dimen name="switch_height">40dp</dimen>
     <dimen name="switch_padding">16dp</dimen>
 
+    <dimen name="preference_margin">16dp</dimen>
+    <dimen name="preference_line_margin">0dp</dimen>
+    <item name="preference_columns" format="integer" type="integer">1</item>
+
     <!-- race state dependent -->
     <!-- login -->
     <dimen name="login_text_size_small">@dimen/textSize_22</dimen>

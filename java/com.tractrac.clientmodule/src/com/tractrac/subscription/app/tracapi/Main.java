@@ -13,6 +13,8 @@ import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -32,7 +34,7 @@ public class Main {
 	 */
 	public static void main(String[] args) throws URISyntaxException,
 			MalformedURLException, FileNotFoundException, IOException,
-			SubscriberInitializationException, CreateModelException {
+			SubscriberInitializationException, CreateModelException, TimeOutException {
 
 		URI paramURI = parseArguments(args);
 
@@ -59,7 +61,7 @@ public class Main {
 		raceSubscriber.subscribeRaceTimesChanges(eventListener);
 		raceSubscriber.subscribeRouteChanges(eventListener);		
 		raceSubscriber.start();		
-		//eventSubscriber.start();			
+		eventSubscriber.start();			
 		
 		// Go ahead with GUI or other stuff in main thread
 		System.out.println("Press key to cancel live data stream");
@@ -67,7 +69,7 @@ public class Main {
 		System.out.println("Cancelling data stream");
 	
 		// Stop data streams
-		//eventSubscriber.stop();		
+		eventSubscriber.stop();		
 		raceSubscriber.stop();	
 	}
 

@@ -31,22 +31,20 @@ public interface ReplicationService {
     ReplicationMasterDescriptor getReplicatingFromMaster();
     
     /**
-     * Same as {@link #startToReplicateFrom(ReplicationMasterDescriptor, Iterable)}, where the list of replicables
-     * is determined by asking this service's {@link ReplicablesProvider} which replicables are currently available.
-     * Note that this is not a good idea during the OSGi start-up phase, particularly if there is a bundle that
-     * starts after this bundle because then that {@link Replicable} will not yet be registered and won't become part
-     * of replication.
-     */
-    void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, InterruptedException;
-
-    /**
-     * Performs a servlet request to the remote master server's {@link ReplicationServlet}, first registering this
-     * replica, ensuring the message queue for replicating operations is created, then subscribing to the master's
-     * replication message queue and asking the servlet for the stream containing the initial load which will then be
-     * used to {@link Replicable#initiallyFillFrom(java.io.ObjectInputStream) replace} the {@link Replicable replicables}'
+     * Starts to replicate the {@link Replicables} that the {@code master} descriptor
+     * {@link ReplicationMasterDescriptor#getReplicables() specifies}. Performs a servlet request to the remote master
+     * server's {@link ReplicationServlet}, first registering this replica, ensuring the message queue for replicating
+     * operations is created, then subscribing to the master's replication message queue and asking the servlet for the
+     * stream containing the initial load for the specific {@link Replicables} which will then be used to
+     * {@link Replicable#initiallyFillFrom(java.io.ObjectInputStream) replace} those {@link Replicable replicables}'
      * state.
+     * <p>
+     * 
+     * Note that calling this method is not a good idea during the OSGi start-up phase, particularly if there is a
+     * bundle that starts after this bundle because then that {@link Replicable} will not yet be registered and won't
+     * become part of replication.
      */
-    void startToReplicateFrom(ReplicationMasterDescriptor master, Iterable<Replicable<?, ?>> replicables) throws IOException,
+    void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException,
             ClassNotFoundException, InterruptedException;
 
     /**
@@ -62,6 +60,11 @@ public interface ReplicationService {
      * {@link #registerReplica(ReplicaDescriptor) registered} again.
      */
     void unregisterReplica(ReplicaDescriptor replica) throws IOException;
+    
+    /**
+     * Same as {@link #unregisterReplica(ReplicaDescriptor)}, identifying the replica by its {@link ReplicaDescriptor#getUuid() ID}.
+     */
+    ReplicaDescriptor unregisterReplica(UUID replicaId) throws IOException;
 
     /**
      * For a replica replicating off this master, provides statistics in the form of number of operations sent to that
@@ -80,7 +83,7 @@ public interface ReplicationService {
     /**
      * Stops all replica currently registered with this server.
      */
-    void stopAllReplica() throws IOException;
+    void stopAllReplicas() throws IOException;
     
     /**
      * Returns an unique server identifier
@@ -94,4 +97,6 @@ public interface ReplicationService {
     long getNumberOfBytesSent(ReplicaDescriptor replica);
 
     double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica);
+
+    Iterable<Replicable<?, ?>> getAllReplicables();
 }

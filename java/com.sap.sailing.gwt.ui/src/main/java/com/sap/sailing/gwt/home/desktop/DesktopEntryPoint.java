@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopActivityManager;
 import com.sap.sailing.gwt.home.desktop.app.DesktopActivityMapper;
 import com.sap.sailing.gwt.home.desktop.app.DesktopClientFactory;
 import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
+import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationService;
@@ -21,6 +22,10 @@ import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 import com.sap.sse.gwt.resources.CommonControlsCSS;
 import com.sap.sse.gwt.resources.Highcharts;
 
+/**
+ * Desktop/tablet EntryPoint for the Home module. Be aware that this EntryPoint isn't directly started but instead the
+ * {@link SwitchingEntryPoint} decides about which version of the application will be shown.
+ */
 public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, DesktopClientFactory> {
 
 

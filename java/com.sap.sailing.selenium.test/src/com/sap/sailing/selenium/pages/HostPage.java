@@ -1,5 +1,8 @@
 package com.sap.sailing.selenium.pages;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -9,7 +12,7 @@ import org.openqa.selenium.WebDriver;
  * @author
  *   D049941
  */
-public class HostPage extends PageObject {
+public abstract class HostPage extends PageObject {
     protected static final String GWT_CODE_SERVER_PARAMETER_NAME = "gwt.codesvr"; //$NON-NLS-1$
     
     protected static final String NO_CODE_SERVER_PARAMTER_VALUE = ""; //$NON-NLS-1$
@@ -17,14 +20,30 @@ public class HostPage extends PageObject {
     /**
      * </p>The default timeout of 60 seconds for the initialization of the page object.</p>
      */
-    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 60;
+    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 120;
     
-    public static final String getGWTCodeServer() {
+    public static final String getGWTCodeServerAndLocale() {
+        StringBuilder queryBuilder = new StringBuilder("locale=en");
         String codeServer = System.getProperty(GWT_CODE_SERVER_PARAMETER_NAME);
-        if (codeServer == null) {
-            return NO_CODE_SERVER_PARAMTER_VALUE;
+        if (codeServer != null) {
+            queryBuilder.append("&").append(GWT_CODE_SERVER_PARAMETER_NAME).append("=").append(codeServer);
         }
-        return GWT_CODE_SERVER_PARAMETER_NAME + "=" + codeServer;
+        return queryBuilder.toString();
+    }
+    
+    protected final static <T extends HostPage> T goToUrl(HostPageSupplier<T> supplier, WebDriver driver, String url) {
+        try {
+            goToPage(driver, new URI(url));
+            return supplier.get(driver); 
+        } catch (URISyntaxException exc) {
+            throw new IllegalArgumentException(exc);
+        }
+    }
+    
+    private static final void goToPage(WebDriver driver, URI uri) throws URISyntaxException {
+        String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost(); 
+        String path = uri.getPath(), query = getGWTCodeServerAndLocale(), fragment = uri.getFragment();
+        driver.get(new URI(scheme, userInfo, host, uri.getPort(), path, query, fragment).toString());
     }
     
     /**
@@ -52,5 +71,13 @@ public class HostPage extends PageObject {
     
     protected int getPageLoadTimeOut() {
         return DEFAULT_PAGE_LOAD_TIMEOUT;
+    }
+    
+    protected interface HostPageSupplier<T extends HostPage> {
+        T get(WebDriver driver);
+    }
+    
+    public String getCurrentUrl() {
+        return driver.getCurrentUrl();
     }
 }

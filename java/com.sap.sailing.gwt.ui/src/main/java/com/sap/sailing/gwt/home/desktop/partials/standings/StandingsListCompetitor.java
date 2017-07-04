@@ -35,7 +35,7 @@ public class StandingsListCompetitor extends UIObject {
         rankUi.setInnerText(Integer.toString(item.getRank()));
         teamIdUi.setInnerText(competitor.getSailID());
         teamNameUi.setInnerText(competitor.getName());
-        String pointsString = i18n.pointsValue(item.getPoints());
+        String pointsString = i18n.pointsValue(item.getNetPoints());
         if(showRaceCounts) {
             pointsString += " (" + i18n.racesCount(item.getRaceCount()) + ")";
         }

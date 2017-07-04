@@ -69,7 +69,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         
         EventViewDTO getEventDTO();
 
-        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
         String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
                 RegattaAndRaceIdentifier raceIdentifier);

@@ -6,18 +6,18 @@ import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 public class MiniLeaderboardItemDTO implements DTO {
     private SimpleCompetitorDTO competitor;
     private int rank;
-    private Double points;
+    private Double netPoints;
     private int raceCount;
     
     @SuppressWarnings("unused")
     private MiniLeaderboardItemDTO() {
     }
     
-    public MiniLeaderboardItemDTO(SimpleCompetitorDTO competitor, int rank, Double points, int raceCount) {
+    public MiniLeaderboardItemDTO(SimpleCompetitorDTO competitor, int rank, Double netPoints, int raceCount) {
         super();
         this.competitor = competitor;
         this.rank = rank;
-        this.points = points;
+        this.netPoints = netPoints;
         this.raceCount = raceCount;
     }
     
@@ -25,8 +25,8 @@ public class MiniLeaderboardItemDTO implements DTO {
         return competitor;
     }
     
-    public Double getPoints() {
-        return points;
+    public Double getNetPoints() {
+        return netPoints;
     }
     
     public int getRank() {

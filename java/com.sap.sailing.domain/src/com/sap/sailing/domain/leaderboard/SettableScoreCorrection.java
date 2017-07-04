@@ -6,6 +6,10 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.common.TimePoint;
 
 public interface SettableScoreCorrection extends ScoreCorrection {
+    /**
+     * The listeners added are transient and do not need to be {@link Serializable}. When this object is
+     * de-serialized, it starts out with an empty set of listeners.
+     */
     void addScoreCorrectionListener(ScoreCorrectionListener listener);
     
     void removeScoreCorrectionListener(ScoreCorrectionListener listener);
@@ -28,8 +32,8 @@ public interface SettableScoreCorrection extends ScoreCorrection {
     void uncorrectScore(Competitor competitor, RaceColumn raceColumn);
     
     /**
-     * @return <code>null</code> if not set for the competitor, e.g., because no correction was made or an explicit
-     *         {@link MaxPointsReason} was provided for the competitor.
+     * @return <code>null</code> if not set for the competitor, e.g., because no correction was made or only a
+     *         {@link MaxPointsReason} but no explicit score was provided for the competitor.
      */
     Double getExplicitScoreCorrection(Competitor competitor, RaceColumn raceColumn);
 

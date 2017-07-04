@@ -86,6 +86,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutIsFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
+        }
+    }
+
     public void notifyListenersAboutIsStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.isStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
@@ -119,6 +125,12 @@ public class RaceColumnListeners implements Serializable {
     public void notifyListenersAboutRaceColumnMoved(RaceColumn raceColumn, int newIndex) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.raceColumnMoved(raceColumn, newIndex);
+        }
+    }
+
+    public void notifyListenersAboutRaceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceColumnNameChanged(raceColumn, oldName, newName);
         }
     }
 

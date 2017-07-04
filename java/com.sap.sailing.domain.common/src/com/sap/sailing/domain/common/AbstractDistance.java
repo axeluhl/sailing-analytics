@@ -79,4 +79,20 @@ public abstract class AbstractDistance implements Distance {
     public Distance add(Distance d) {
         return new NauticalMileDistance(getNauticalMiles()+d.getNauticalMiles());
     }
+
+    @Override
+    public double divide(Distance other) {
+        return getMeters() / other.getMeters();
+    }
+
+    @Override
+    public Distance abs() {
+        final Distance result;
+        if (getMeters() >= 0) {
+            result = this;
+        } else {
+            result = scale(-1);
+        }
+        return result;
+    }
 }

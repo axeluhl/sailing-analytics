@@ -52,9 +52,13 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
     void removeChangedListener(RacingProcedureChangedListener listener);
 
     /**
-     * Returns <code>true</code> if the start phase of this {@link ReadonlyRacingProcedure is active given the current time and start time.
-     * @param startTime start time to be used to determine whether the start phase is active or not.
-     * @param now {@link TimePoint} used as the current time on determining whether the start phase is active or not.
+     * Returns <code>true</code> if the start phase of this {@link ReadonlyRacingProcedure is active given the current
+     * time and start time.
+     * 
+     * @param startTime
+     *            start time to be used to determine whether the start phase is active or not. Must not be {@code null}
+     * @param now
+     *            {@link TimePoint} used as the current time on determining whether the start phase is active or not.
      */
     boolean isStartphaseActive(TimePoint startTime, TimePoint now);
 
@@ -62,6 +66,11 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
      * Returns <code>true</code> if this {@link ReadonlyRacingProcedure} should allow signaling individual recalls.
      */
     boolean hasIndividualRecall();
+
+    /**
+     * Returns {@code true} if this racing procedure allows users to enter scores in the app
+     */
+    boolean isResultEntryEnabled();
 
     /**
      * Returns <code>true</code> if there is an individual recall signaled in the {@link RaceLog} right now.

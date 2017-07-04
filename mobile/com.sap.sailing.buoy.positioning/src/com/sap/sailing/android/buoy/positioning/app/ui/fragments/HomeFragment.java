@@ -25,7 +25,7 @@ import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
@@ -66,10 +66,9 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     }
 
     @Override
-    public void displayUserConfirmationScreen(AbstractCheckinData data) {
+    public void displayUserConfirmationScreen(BaseCheckinData data) {
         CheckinData chData = (CheckinData) data;
         checkinWithApiAndStartRegattaActivity(chData);
-
     }
 
     private void checkinWithApiAndStartRegattaActivity(CheckinData checkinData) {
@@ -89,14 +88,15 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         if (BuildConfig.DEBUG) {
             ExLog.i(getActivity(), TAG, "Batch-insert of checkinData completed.");
         }
-        startRegatta(checkinData.leaderboardName, checkinData.checkinDigest);
+        startRegatta(checkinData.leaderboardDisplayName, checkinData.checkinDigest);
     }
-
+    
     @Override
     public void handleScannedOrUrlMatchedUri(Uri uri) {
-        CheckinManager manager = new CheckinManager(uri.toString(), (CheckinDataActivity) getActivity());
+        @SuppressWarnings("unchecked")
+        final CheckinDataActivity<CheckinData> activity = (CheckinDataActivity<CheckinData>) getActivity();
+        CheckinManager manager = new CheckinManager(uri.toString(), activity);
         manager.callServerAndGenerateCheckinData();
-
     }
 
     /**
@@ -159,9 +159,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
             // -1, because there's a header row
             Cursor cursor = (Cursor) adapter.getItem(position - 1);
-            String checkinDigest = cursor.getString(cursor.getColumnIndex("leaderboard_checkin_digest"));
-
-            String leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
+            String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_CHECKIN_DIGEST));
+            String leaderboardName = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
             startRegatta(leaderboardName, checkinDigest);
         }
     }

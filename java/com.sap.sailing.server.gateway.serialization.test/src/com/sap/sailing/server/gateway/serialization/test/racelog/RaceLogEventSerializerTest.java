@@ -29,11 +29,13 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTra
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class RaceLogEventSerializerTest {
 
@@ -149,7 +151,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesCourseDesignChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(null, author, 0, null);
+        RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(null, author, 0, null, CourseDesignerMode.ADMIN_CONSOLE);
         serializer.serialize(event);
         verify(courseDesignChangedEventSerializer).serialize(event);
     }
@@ -197,7 +199,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testProtestStartTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogProtestStartTimeEventImpl(null, author, 0, null);
+        RaceLogEvent event = new RaceLogProtestStartTimeEventImpl(null, author, 0, new TimeRangeImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now()));
         serializer.serialize(event);
         verify(protestStartTimeEventSerializer).serialize(event);
     }
@@ -241,7 +243,7 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event = new RaceLogRegisterCompetitorEventImpl(null, author, 0,
             DomainFactory.INSTANCE
                 .getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */
-                        null));
+                        null, null));
         serializer.serialize(event);
         verify(registerCompetitorEventSerializer).serialize(event);
     }

@@ -39,8 +39,10 @@ public interface RaceLogTrackingAdapter {
      * <li>Is a {@link RaceLogRaceTracker} already listening for this racelog? If not, add one.</li>
      * <li>Is a {@link RaceLogStartTrackingEvent} present in the racelog? If not, add one</li>
      * </ul>
+     * @param trackWind TODO
+     * @param correctWindDirectionByMagneticDeclination TODO
      */
-    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
+    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception;
 
     RaceLogTrackingState getRaceLogTrackingState(RacingEventService service, RaceColumn raceColumn, Fleet fleet);
@@ -53,12 +55,15 @@ public interface RaceLogTrackingAdapter {
     /**
      * Denotes the {@link RaceLog} for racelog-tracking, by inserting a {@link RaceLogDenoteForTrackingEvent}.
      * 
+     * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
+     *         so
+     * 
      * @throws NotDenotableForRaceLogTrackingException
      *             Fails, if no {@link RaceLog}, or a non-empty {@link RaceLog}, or one with attached
      *             {@link TrackedRace} is found already in place. Also fails, if the {@code leaderboard} is not a
      *             {@link RegattaLeaderboard}.
      */
-    void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
+    boolean denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
             Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException;
 
     /**
@@ -87,15 +92,17 @@ public interface RaceLogTrackingAdapter {
      * @throws MailException
      */
     void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
-            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException;
+            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, String iOSAppUrl, String androidAppUrl,
+            Locale locale) throws MailException;
 
     /**
      * Invite buoy tenders for buoy pinging via the Buoy Tender App by sending out emails.
      * 
+     * @param appUrl
      * @throws MailException
      */
     void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
-            String emails, Locale locale) throws MailException;
+            String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException;
 
     /**
      * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the {@code to}

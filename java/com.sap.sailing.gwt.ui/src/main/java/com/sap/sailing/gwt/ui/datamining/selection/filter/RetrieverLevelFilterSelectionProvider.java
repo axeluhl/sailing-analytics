@@ -21,10 +21,12 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class RetrieverLevelFilterSelectionProvider implements Component<AbstractSettings> {
+public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<AbstractSettings> {
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -38,9 +40,12 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     private final HorizontalPanel mainPanel;
     private final Collection<DimensionFilterSelectionProvider> dimensionSelectionProviders;
 
-    public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
+    public RetrieverLevelFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
+            DataMiningSession session,
+            DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
             DataRetrieverLevelDTO retrieverLevel) {
+        super(parent, context);
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         
@@ -207,12 +212,13 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent(AbstractSettings settings) {
         return null;
     }
 
     @Override
     public void updateSettings(AbstractSettings newSettings) {
+        // no-op
     }
 
     @Override
@@ -240,4 +246,13 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         return "singleRetrieverLevelSelectionPanel";
     }
 
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
+    }
+
+    @Override
+    public String getId() {
+        return "RetrieverLevelFilterSelectionProvider";
+    }
 }

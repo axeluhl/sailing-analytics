@@ -12,6 +12,12 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 
+/**
+ * Abstract server-side part of the dispatch functionality. Needs to be subclassed in modules that want to use dispatch
+ * along with a custom DispatchContext.
+ *
+ * @param <CTX> the concrete {@link DispatchContext} used by dispatch.
+ */
 public abstract class AbstractDispatchServlet<CTX extends DispatchContext> extends ProxiedRemoteServiceServlet
         implements DispatchRPC<CTX> {
     private static final long serialVersionUID = -4279307111608131857L;

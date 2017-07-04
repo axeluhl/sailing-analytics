@@ -69,14 +69,14 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         private static final long serialVersionUID = 915433462154943441L;
 
         @Override
-        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
+        public void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
             getScoreCorrection().notifyListeners(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
         }
 
         @Override
-        public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
-                MaxPointsReason newMaxPointsReason) {
-            getScoreCorrection().notifyListeners(competitor, oldMaxPointsReason, newMaxPointsReason);
+        public void maxPointsReasonChanced(Competitor competitor, RaceColumn raceColumn,
+                MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
+            getScoreCorrection().notifyListeners(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
         }
 
         @Override
@@ -194,7 +194,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         leaderboard.addRaceColumnListener(this);
         final ScoreCorrectionChangeForwarder listener = new ScoreCorrectionChangeForwarder();
         scoreCorrectionChangeForwardersByLeaderboard.put(leaderboard, listener);
-        leaderboard.getScoreCorrection().addScoreCorrectionListener(listener);
+        leaderboard.addScoreCorrectionListener(listener);
     }
     
     protected void unregisterScoreCorrectionChangeForwarder(Leaderboard leaderboard) {

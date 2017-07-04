@@ -19,16 +19,20 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 import com.sap.sailing.server.RacingEventService;
 
-public class RaceLogConnectivityParams implements RaceTrackingConnectivityParameters {
+public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityParameters {
+    /**
+     * A type identifier that needs to be unique for the 
+     */
+    public static final String TYPE = "RACE_LOG_TRACKING";
+    
     private final RacingEventService service;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
@@ -38,7 +42,9 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
     private final DomainFactory domainFactory;
 
     public RaceLogConnectivityParams(RacingEventService service, Regatta regatta, RaceColumn raceColumn, Fleet fleet,
-            Leaderboard leaderboard, long delayToLiveInMillis, DomainFactory domainFactory) throws RaceNotCreatedException {
+            Leaderboard leaderboard, long delayToLiveInMillis, DomainFactory domainFactory, boolean trackWind,
+            boolean correctWindDirectionByMagneticDeclination) throws RaceNotCreatedException {
+        super(trackWind, correctWindDirectionByMagneticDeclination);
         this.service = service;
         this.regatta = regatta;
         this.raceColumn = raceColumn;
@@ -46,21 +52,25 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
         this.leaderboard = leaderboard;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.domainFactory = domainFactory;
-
         if (!new RaceLogTrackingStateAnalyzer(getRaceLog()).analyze().isForTracking()) {
             throw new RaceNotCreatedException(String.format("Racelog (%s) is not denoted for tracking", getRaceLog()));
         }
     }
 
     @Override
+    public String getTypeIdentifier() {
+        return TYPE;
+    }
+
+    @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
-        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, gpsFixStore, raceLogResolver);
+            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) {
+        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, raceLogResolver, timeoutInMilliseconds);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
+            WindStore windStore, RaceLogResolver raceLogResolver, long timeoutInMilliseconds) {
         if (regatta == null) {
             BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();
             regatta = service.getOrCreateDefaultRegatta(
@@ -71,7 +81,7 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
             throw new RaceNotCreatedException("No regatta for race-log tracked race");
         }
         DynamicTrackedRegatta trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
-        return new RaceLogRaceTracker(trackedRegatta, this, windStore, gpsFixStore, raceLogResolver);
+        return new RaceLogRaceTracker(trackedRegatta, this, windStore, raceLogResolver, this);
     }
 
     @Override

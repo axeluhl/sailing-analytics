@@ -1,17 +1,21 @@
 package com.sap.sailing.gwt.home.server;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -31,34 +35,40 @@ import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.util.RegattaUtil;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
+/**
+ * This class aggregates {@link Leaderboard} information by preparing {@link DTO}s for different components representing
+ * a regatta in the UI and providing convenience methods for several other required information.
+ */
 public class LeaderboardContext {
     private static final Logger logger = Logger.getLogger(LeaderboardContext.class.getName());
 
     private final TimePoint now = MillisecondsTimePoint.now();
     private final Event event;
-    private final LeaderboardGroup leaderboardGroup;
+    private final Iterable<LeaderboardGroup> leaderboardGroups;
     private final Leaderboard leaderboard;
     private final RacingEventService service;
     private Boolean hasMultipleFleets = null;
 
-    public LeaderboardContext(SailingDispatchContext dispatchContext, Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+    public LeaderboardContext(SailingDispatchContext dispatchContext, Event event, Iterable<LeaderboardGroup> leaderboardGroup, Leaderboard leaderboard) {
         this.service = dispatchContext.getRacingEventService();
         this.event = event;
-        this.leaderboardGroup = leaderboardGroup;
+        this.leaderboardGroups = leaderboardGroup;
         this.leaderboard = leaderboard;
     }
     
     public void forRaces(RaceCallback callback) {
-        for(RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if(!raceColumn.isCarryForward()) {
-                for(Fleet fleet : raceColumn.getFleets()) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (!raceColumn.isCarryForward()) {
+                for (Fleet fleet : raceColumn.getFleets()) {
                     callback.doForRace(new RaceContext(service, event, this, raceColumn, fleet, service));
                 }
             }
@@ -93,12 +103,12 @@ public class LeaderboardContext {
                 int raceCount = 0;
                 if(row.fieldsByRaceColumnName != null) {
                     for(LeaderboardEntryDTO lbEntry : row.fieldsByRaceColumnName.values()) {
-                        if(lbEntry.totalPoints != null) {
+                        if(lbEntry.netPoints != null) {
                             raceCount++;
                         }
                     }
                 }
-                result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.totalPoints, raceCount));
+                result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.netPoints, raceCount));
                 if (limit > 0 && rank >= limit) break;
             }
             result.setTotalCompetitorCount(leaderboardDTO.competitors.size());
@@ -203,8 +213,12 @@ public class LeaderboardContext {
         return leaderboard.getName();
     }
     
-    public String getLeaderboardGroupName() {
-        return leaderboardGroup.getName();
+    public Iterable<String> getLeaderboardGroupNames() {
+        final List<String> result = new ArrayList<>();
+        for (final LeaderboardGroup lg : leaderboardGroups) {
+            result.add(lg.getName());
+        }
+        return result;
     }
 
     public RegattaMetadataDTO asRegattaMetadataDTO() {
@@ -217,13 +231,15 @@ public class LeaderboardContext {
     public void fillRegattaFields(RegattaMetadataDTO regattaDTO) {
         regattaDTO.setId(getLeaderboardName());
         regattaDTO.setDisplayName(leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
-        if(hasMultipleLeaderboardGroups(event)) {
-            regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
+        if (hasMultipleLeaderboardGroups(event)) {
+            for (final LeaderboardGroup lg : leaderboardGroups) {
+                regattaDTO.addLeaderboardGroupName(lg.getDisplayName() != null ? lg.getDisplayName() : lg.getName());
+            }
         }
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
         regattaDTO.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
-        if(leaderboard instanceof RegattaLeaderboard) {
+        if (leaderboard instanceof RegattaLeaderboard) {
             regattaDTO.setStartDate(getStartDateWithEventFallback());
             regattaDTO.setEndDate(getEndDateWithEventFallback());
         }
@@ -231,8 +247,19 @@ public class LeaderboardContext {
         regattaDTO.setDefaultCourseAreaName(HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard));
         regattaDTO.setDefaultCourseAreaId(HomeServiceUtil.getCourseAreaIdForRegatta(event, leaderboard));
         regattaDTO.setFlexibleLeaderboard(leaderboard instanceof FlexibleLeaderboard);
+        
+        RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();
+        forRaces(regattaRaceDataInfoCalculator);
+        regattaDTO.setRaceDataInfo(regattaRaceDataInfoCalculator.getRaceDataInfo());
+        regattaDTO.setBuoyZoneRadius(getRegattaBuoyZoneRadius());
     }
-    
+
+    private Distance getRegattaBuoyZoneRadius() {
+        Regatta regatta = service.getRegattaByName(getLeaderboardName());
+        BoatClass boatClass = HomeServiceUtil.getBoatClass(leaderboard);
+        return RegattaUtil.getCalculatedRegattaBuoyZoneRadius(regatta, boatClass);
+    }
+
     private static boolean hasMultipleLeaderboardGroups(EventBase event) {
         return Util.size(event.getLeaderboardGroups()) > 1;
     }

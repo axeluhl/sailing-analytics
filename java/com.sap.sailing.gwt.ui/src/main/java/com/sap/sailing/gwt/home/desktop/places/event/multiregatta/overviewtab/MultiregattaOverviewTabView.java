@@ -102,7 +102,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         }
         @Override
         public void onSelectFilter(String value) {
-            regattaListUi.setVisibleBoatCategory(value);
+            regattaListUi.setVisibleLeaderboardGroup(value);
         }
     }
 

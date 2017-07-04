@@ -1,10 +1,11 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.ApproximateTime;
 
 /**
@@ -26,8 +28,8 @@ import com.sap.sse.util.impl.ApproximateTime;
  */
 public class ShortTimeWindCache {
     private static final Logger logger = Logger.getLogger(ShortTimeWindCache.class.getName());
-    private final ConcurrentHashMap<Triple<Position, TimePoint, Set<WindSource>>,
-                                    WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> cache;
+    private final ConcurrentMap<Triple<Position, TimePoint, Set<WindSource>>,
+                                WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> cache;
 
     /**
      * The keys of {@link #cache} in the order in which to invalidate them, keyed by the time they were entered into the cache.
@@ -35,9 +37,12 @@ public class ShortTimeWindCache {
     private final ConcurrentLinkedDeque<Pair<Long, Triple<Position, TimePoint, Set<WindSource>>>> order;
     
     /**
-     * Creation and removal / cancellation of the timer is synchronized using {@link #order}.
+     * Creation and removal / cancellation of the timer is synchronized using {@link #order}. If this handle is
+     * {@code null}, any task that was previously scheduled by this object has been canceled. Otherwise, an uncanceled
+     * {@link CacheInvalidator} task is still scheduled to execute at a fixed rate. It can be cancelled using this
+     * future. 
      */
-    private Timer timer;
+    private ScheduledFuture<?> invalidatorHandle;
     
     private final long preserveHowManyMilliseconds;
     private final TrackedRaceImpl trackedRace;
@@ -45,7 +50,7 @@ public class ShortTimeWindCache {
     private long hits;
     private long misses;
     
-    private class CacheInvalidator extends TimerTask {
+    private class CacheInvalidator implements Runnable {
         @Override
         public void run() {
             long oldestToKeep = System.currentTimeMillis() - preserveHowManyMilliseconds;
@@ -56,9 +61,8 @@ public class ShortTimeWindCache {
             }
             synchronized (order) {
                 if (order.isEmpty()) {
-                    cancel();
-                    timer.cancel();
-                    timer = null;
+                    invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
+                    invalidatorHandle = null;
                 }
             }
         }
@@ -106,12 +110,12 @@ public class ShortTimeWindCache {
     }
     
     /**
-     * Must be called under write lock
+     * Must be called while owning the {@link #order} monitor (synchronized)
      */
     private void ensureTimerIsRunning() {
-        if (timer == null) {
-            timer = new Timer(getClass().getSimpleName()+" for "+trackedRace.getRace().getName(), /* isDaemon */ true);
-            timer.scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds, preserveHowManyMilliseconds);
+        if (invalidatorHandle == null) {
+            invalidatorHandle = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().
+                    scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds, preserveHowManyMilliseconds, TimeUnit.MILLISECONDS);
         }
     }
 }

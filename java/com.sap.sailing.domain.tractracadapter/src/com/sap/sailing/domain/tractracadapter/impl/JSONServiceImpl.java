@@ -44,6 +44,7 @@ public class JSONServiceImpl implements JSONService {
                 (String) jsonRaceEntry.get("classes"),
                 (String) jsonRaceEntry.get("status"), 
                 (String) jsonRaceEntry.get("visibility"), 
+                Boolean.valueOf((Boolean) jsonRaceEntry.get("has_replay")),
                 /*loadLiveAndStoreURI*/ loadLiveAndStoredURI);
         return raceRecord;
     }

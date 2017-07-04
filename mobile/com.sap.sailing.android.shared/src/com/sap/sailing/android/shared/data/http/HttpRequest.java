@@ -46,11 +46,11 @@ public abstract class HttpRequest {
     private boolean isCancelled;
     protected SharedPreferences pref;
 
-    public HttpRequest(URL url, Context context) {
-        this(url, null, context);
+    public HttpRequest(Context context, URL url) {
+        this(context, url, null);
     }
 
-    public HttpRequest(URL url, HttpRequestProgressListener listener, Context context) {
+    public HttpRequest(Context context, URL url, HttpRequestProgressListener listener) {
         this.url = url;
         this.listener = listener;
         this.isCancelled = false;

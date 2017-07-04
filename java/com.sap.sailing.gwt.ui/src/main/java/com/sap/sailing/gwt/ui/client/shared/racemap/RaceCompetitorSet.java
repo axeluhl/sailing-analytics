@@ -43,6 +43,15 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      * When {@link #idsAsStringOfCompetitorsParticipatingInRace} is <code>null</code> then so is this field, and vice versa.
      */
     private Iterable<CompetitorDTO> competitorsParticipatingInRace;
+
+    private Set<CompetitorsForRaceDefinedListener> competitorsForRaceDefinedListeners;
+    
+    /**
+     * Such listeners are notified whenever the response to {@link #getCompetitorsParticipatingInRace()} changes.
+     */
+    public static interface CompetitorsForRaceDefinedListener {
+        void competitorsForRaceDefined(Iterable<CompetitorDTO> competitors);
+    }
     
     RaceCompetitorSet() {} // for GWT serialization only
     
@@ -54,6 +63,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      */
     public RaceCompetitorSet(CompetitorSelectionProvider competitorSelection) {
         super();
+        this.competitorsForRaceDefinedListeners = new HashSet<>();
         this.competitorSelection = competitorSelection;
         this.competitorsParticipatingInRace = competitorSelection.getAllCompetitors();
         competitorSelection.addCompetitorSelectionChangeListener(new CompetitorSelectionChangeListener() {
@@ -76,6 +86,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
             @Override
             public void competitorsListChanged(final Iterable<CompetitorDTO> competitors) {
                 competitorsParticipatingInRace = computeCompetitorsFromIDs(competitors);
+                notifyListeners();
             }
             
             @Override
@@ -85,19 +96,37 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
         });
     }
     
+
+    public void addCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        competitorsForRaceDefinedListeners.add(listener);
+    }
+    
+    public void removeCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        competitorsForRaceDefinedListeners.remove(listener);
+    }
+
     public void setIdsAsStringsOfCompetitorsInRace(Set<String> idsAsStringsOfCompetitorsInRace) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         super.setIdsAsStringsOfCompetitorsInRace(idsAsStringsOfCompetitorsInRace);
         competitorsParticipatingInRace = computeCompetitorsFromIDs(competitorSelection.getAllCompetitors());
+        notifyListeners();
     }
     
+    private void notifyListeners() {
+        for (final CompetitorsForRaceDefinedListener listener : competitorsForRaceDefinedListeners) {
+            listener.competitorsForRaceDefined(competitorsParticipatingInRace);
+        }
+    }
+
     public Iterable<CompetitorDTO> getCompetitorsParticipatingInRace() {
         return competitorsParticipatingInRace;
     }
 
     /**
      * Tries to locate the competitors described by the IDs in {@link #idsAsStringOfCompetitorsParticipatingInRace} in
-     * <code>competitors</code> and returns them in a set. If not all competitors can be found, <code>null</code> is
-     * returned instead.
+     * <code>competitors</code> and returns them in a set. The subset of competitors found this way is returned.
+     * Note that due to the possibility of suppressing competitors it is possible that competitors are listed
+     * as entries in the race but cannot be resolved in the leaderboard's competitors which does not contain
+     * those being suppressed.
      */
     private Set<CompetitorDTO> computeCompetitorsFromIDs(Iterable<CompetitorDTO> competitors) {
         Set<CompetitorDTO> result;
@@ -111,10 +140,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
             result = new HashSet<>();
             for (String id : getIdsOfCompetitorsParticipatingInRaceAsStrings()) {
                 CompetitorDTO c = competitorsByIdAsString.get(id);
-                if (c == null) {
-                    result = null;
-                    break;
-                } else {
+                if (c != null) {
                     result.add(c);
                 }
             }

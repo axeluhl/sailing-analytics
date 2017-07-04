@@ -29,7 +29,9 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * Is able to present {@link PolarBackendData}.</br> Has one polar chart showing the perAngle regression data and two
@@ -52,8 +54,9 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     private final Chart angleChart;
     private final DockLayoutPanel speedAndAngleChart;
     
-    public PolarBackendResultsPresenter(StringMessages stringMessages) {
-        super(stringMessages);
+    public PolarBackendResultsPresenter(Component<?> parent, ComponentContext<?> context,
+            StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         
         polarChart = createPolarChart();
         polarChartWrapperPanel = new SimpleLayoutPanel() {
@@ -120,12 +123,6 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     @Override
     protected Widget getPresentationWidget() {
         return dockLayoutPanel;
-    }
-
-    @Override
-    protected void onDataSelectionValueChange() {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
@@ -229,12 +226,13 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 
     @Override
     public void updateSettings(Settings newSettings) {
+        // no-op
     }
 
     @Override
@@ -242,4 +240,14 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
         return "polarResultsPresenter";
     }
 
+    @Override
+    public Settings getSettings() {
+        return null;
+    }
+
+
+    @Override
+    public String getId() {
+        return "PolarBackendResultsPresenter";
+    }
 }

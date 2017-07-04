@@ -53,6 +53,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -62,8 +63,12 @@ import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.TripleSerializer;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStoringAndRetrievingRaceLogInRegatta {
     public TestStoringAndRetrievingRaceLogInRegatta() throws UnknownHostException, MongoException {
@@ -95,8 +100,10 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     }
     
     @Test
-    public void testStoreAndRetrieveRegattaWithRaceLogProtestStartTimeEvent() {        
-        RaceLogProtestStartTimeEvent expectedEvent = new RaceLogProtestStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
+    public void testStoreAndRetrieveRegattaWithRaceLogProtestStartTimeEvent() {
+        TimePoint now = MillisecondsTimePoint.now();
+        TimeRange protestTime = new TimeRangeImpl(now, now.plus(Duration.ONE_MINUTE.times(90)));
+        RaceLogProtestStartTimeEvent expectedEvent = new RaceLogProtestStartTimeEventImpl(now, author, 0, protestTime);
         addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
         RaceLog loadedRaceLog = retrieveRaceLog();
         loadedRaceLog.lockForRead();
@@ -106,7 +113,8 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
             assertEquals(expectedEvent.getLogicalTimePoint(), actualEvent.getLogicalTimePoint());
             assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
             assertEquals(expectedEvent.getId(), actualEvent.getId());
-            assertEquals(expectedEvent.getProtestStartTime(), actualEvent.getProtestStartTime());
+            assertEquals(expectedEvent.getProtestTime().from(), actualEvent.getProtestTime().from());
+            assertEquals(expectedEvent.getProtestTime().to(), actualEvent.getProtestTime().to());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();
@@ -200,7 +208,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningListChangeEvent() {
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, 
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
         RaceLogFinishPositioningListChangedEvent event = new RaceLogFinishPositioningListChangedEventImpl(now, author, 0, storedPositioningList);
@@ -224,7 +232,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningConfirmedEvent() {   
         Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, 
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
         RaceLogFinishPositioningConfirmedEvent event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, storedPositioningList);
@@ -387,7 +395,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogCourseDesignChangedEvent() {
         CourseBase course = createCourseBase();
-        RaceLogCourseDesignChangedEvent event = new RaceLogCourseDesignChangedEventImpl(now, author, 0, course);
+        RaceLogCourseDesignChangedEvent event = new RaceLogCourseDesignChangedEventImpl(now, author, 0, course, CourseDesignerMode.ADMIN_CONSOLE);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 

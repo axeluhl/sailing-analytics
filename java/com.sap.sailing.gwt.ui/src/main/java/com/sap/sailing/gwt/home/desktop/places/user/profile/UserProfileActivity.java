@@ -17,9 +17,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
-import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class UserProfileActivity extends AbstractActivity implements UserProfileView.Presenter {
@@ -97,8 +95,8 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     }
     
     @Override
-    public AuthenticationManager getAuthenticationManager() {
-        return clientFactory.getAuthenticationManager();
+    public UserProfileClientFactory getClientFactory() {
+        return clientFactory;
     }
     
     @Override
@@ -107,8 +105,4 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
                 .getMailVerifiedConfirmationNavigation().getTargetUrl();
     }
     
-    @Override
-    public UserManagementServiceAsync getUserManagementService() {
-        return clientFactory.getUserManagementService();
-    }
 }
