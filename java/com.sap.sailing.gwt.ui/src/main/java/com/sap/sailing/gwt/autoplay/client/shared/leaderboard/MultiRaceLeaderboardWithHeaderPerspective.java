@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -39,7 +40,7 @@ import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
  * @author Frank Mittag
  *
  */
-public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
+public class MultiRaceLeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
     LeaderboardWithHeaderPerspectiveSettings> implements LeaderboardUpdateProvider {
     private final DockLayoutPanel dockPanel;
     private final static int SAP_HEADER_HEIGHT = 75;
@@ -47,7 +48,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     private final LeaderboardPanel leaderboardPanel;
     private final StringMessages stringMessages;
     
-    public LeaderboardWithHeaderPerspective(Component<?> parent,
+    public MultiRaceLeaderboardWithHeaderPerspective(Component<?> parent,
             ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>> componentContext,
             LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
@@ -60,7 +61,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                if (LeaderboardWithHeaderPerspective.this.getPerspectiveSettings().isLeaderboardAutoZoom()) {
+                if (MultiRaceLeaderboardWithHeaderPerspective.this.getPerspectiveSettings().isLeaderboardAutoZoom()) {
                     autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 }
             }
@@ -201,7 +202,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         LeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
 
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(this, getComponentContext(), sailingService,
+        LeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService,
                 asyncActionsExecutor,
                 leaderboardSettings, /*isEmbedded*/true, /* preSelectedRace */null,
                 competitorSelectionProvider, timer, /* leaderboardGroupName */"",

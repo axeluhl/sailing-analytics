@@ -63,7 +63,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         /**
          * Cleanup one java8 suppliers can be used
          */
-        init(new LeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
+        init(new SingleLeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
                         preselectedRace != null, preselectedRace, competitorSelectionModel, timer,
                 leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages,

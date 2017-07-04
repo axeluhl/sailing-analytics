@@ -42,7 +42,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
         componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
             @Override
             public void onSuccess(LeaderboardSettings leaderboardSettings) {
-                final LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel(null, componentContext, //
+                final LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiRaceLeaderboardPanel(null, componentContext, //
                         leaderboardSettings, //
                         null, //
                         "leaderboardGroupName", // TODO: keep using magic string? ask frank!

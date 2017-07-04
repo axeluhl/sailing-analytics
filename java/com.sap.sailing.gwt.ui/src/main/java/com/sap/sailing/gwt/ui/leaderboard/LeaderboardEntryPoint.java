@@ -161,7 +161,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                 PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
                             configureWithSettings(defaultSettings, timer);
                             
-                            final LeaderboardViewer leaderboardViewer = new LeaderboardViewer(null, context,
+                            final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(null, context,
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                                     timer, null, leaderboardGroupName, leaderboardName,
                                     LeaderboardEntryPoint.this, getStringMessages(), getActualChartDetailType(defaultSettings));

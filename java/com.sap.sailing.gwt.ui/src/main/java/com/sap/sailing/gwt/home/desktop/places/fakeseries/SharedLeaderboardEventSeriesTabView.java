@@ -40,7 +40,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
         componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
             @Override
             public void onSuccess(LeaderboardSettings leaderboardSettings) {
-                LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(null,
+                LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createMultiRaceOverallLeaderboardPanel(null,
                         componentContext, leaderboardSettings, null, "leaderboardGroupName",
                         leaderboardName, true, // this information came from place, now hard coded. check with frank
                         autoExpandLastRaceColumn);

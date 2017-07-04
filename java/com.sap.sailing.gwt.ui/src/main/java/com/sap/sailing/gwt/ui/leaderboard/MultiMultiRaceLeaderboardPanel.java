@@ -16,8 +16,8 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * Represents a single Leaderboard in the Context of a MultiLeaderboard
  * 
  */
-public class MultiLeaderboardPanel extends LeaderboardPanel {
-    public MultiLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+public class MultiMultiRaceLeaderboardPanel extends MultiRaceLeaderboardPanel {
+    public MultiMultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,

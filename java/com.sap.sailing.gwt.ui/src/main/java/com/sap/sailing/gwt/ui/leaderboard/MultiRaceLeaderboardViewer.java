@@ -28,11 +28,11 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * @author Frank Mittag (c163874)
  *
  */
-public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPerspectiveLifecycle> {
+public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPerspectiveLifecycle> {
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
     private LeaderboardPanel overallLeaderboardPanel;
     
-    public LeaderboardViewer(Component<?> parent,
+    public MultiRaceLeaderboardViewer(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
@@ -46,7 +46,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                 stringMessages, chartDetailType);
     }
 
-    private LeaderboardViewer(Component<?> parent,
+    private MultiRaceLeaderboardViewer(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
@@ -58,7 +58,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
         // FIXME: Cleanup with java8 using supplier
-        init(new LeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
+        init(new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), preselectedRace != null,
                 preselectedRace, competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
@@ -99,7 +99,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                         public void onSuccess(List<String> result) {
                             if(result.size() == 1) {
                                 String overallLeaderboardName = result.get(0);
-                                overallLeaderboardPanel = new OverallLeaderboardPanel(LeaderboardViewer.this,
+                                overallLeaderboardPanel = new OverallLeaderboardPanel(MultiRaceLeaderboardViewer.this,
                                         getComponentContext(), sailingService,
                                         asyncActionsExecutor,
                                         settings.findSettingsByComponentId(OverallLeaderboardPanelLifecycle.ID),
