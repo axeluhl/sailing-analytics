@@ -1,13 +1,24 @@
 package com.sap.sailing.gwt.regattaoverview.client;
 
+import java.util.List;
+
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<RegattaRaceStatesSettings> {
     
     public static final String ID = "rrs";
+    private List<CourseAreaDTO> courseAreaDTOs;
+    private List<RaceGroupDTO> raceGroupDTOs;
     
+    public RegattaRaceStatesComponentLifecycle(List<CourseAreaDTO> courseAreaDTOs, List<RaceGroupDTO> raceGroupDTOs) {
+        this.courseAreaDTOs = courseAreaDTOs;
+        this.raceGroupDTOs = raceGroupDTOs;
+    }
+
     @Override
     public RegattaRaceStatesSettingsDialogComponent getSettingsDialogComponent(RegattaRaceStatesSettings settings) {
         // TODO implement if needed
@@ -19,7 +30,14 @@ public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<R
 
     @Override
     public RegattaRaceStatesSettings createDefaultSettings() {
-        return new RegattaRaceStatesSettings();
+        RegattaRaceStatesSettings settings = new RegattaRaceStatesSettings();
+        if(courseAreaDTOs != null) {
+            settings.setDefaultCourseAreas(courseAreaDTOs);
+        }
+        if(raceGroupDTOs != null) {
+            settings.setDefaultRegattas(raceGroupDTOs);
+        }
+        return settings;
     }
 
     @Override
@@ -38,13 +56,13 @@ public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<R
     }
 
     @Override
-    public RegattaRaceStatesSettings extractGlobalSettings(RegattaRaceStatesSettings settings) {
+    public RegattaRaceStatesSettings extractUserSettings(RegattaRaceStatesSettings settings) {
         return settings.createInstanceWithSettings(null, null, settings.isShowOnlyRacesOfSameDay(),
                 settings.isShowOnlyCurrentlyRunningRaces());
     }
 
     @Override
-    public RegattaRaceStatesSettings extractContextSpecificSettings(RegattaRaceStatesSettings settings) {
+    public RegattaRaceStatesSettings extractDocumentSettings(RegattaRaceStatesSettings settings) {
         return settings;
     }
 }

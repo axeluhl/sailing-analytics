@@ -10,6 +10,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * An abstract base class for a {@link Perspective} with a widget.
@@ -26,15 +27,14 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     private final Map<String, Component<? extends Settings>> childComponents = new HashMap<>();
     
     /**
-     * Adds the provided component as a child to this perspective and sets the {@link ComponentTreeNodeInfo}
-     * of the provided component accordingly.
+     * Adds the provided component as a child to the maintained component tree of this perspective.
      * 
      * @param childComponent The component to be added as a child to this perspective
      */
     protected void addChildComponent(Component<? extends Settings> childComponent) {
         Component<? extends Settings> old = childComponents.put(childComponent.getId(), childComponent);
         if (old != null) {
-            throw new IllegalStateException("Child with same id is allready added");
+            throw new IllegalStateException("Child with same id is already added");
         }
     }
     
@@ -106,7 +106,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     }
 
     @Override
-    public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent() {
+    public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent(PerspectiveCompositeSettings<PS> settings) {
         return new PerspectiveCompositeTabbedSettingsDialogComponent<>(this);
     }
 

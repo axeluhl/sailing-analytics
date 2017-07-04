@@ -44,13 +44,13 @@ public class MultiCompetitorLeaderboardChartLifecycle implements
     }
 
     @Override
-    public MultiCompetitorLeaderboardChartSettings extractGlobalSettings(
+    public MultiCompetitorLeaderboardChartSettings extractUserSettings(
             MultiCompetitorLeaderboardChartSettings settings) {
         return settings;
     }
 
     @Override
-    public MultiCompetitorLeaderboardChartSettings extractContextSpecificSettings(
+    public MultiCompetitorLeaderboardChartSettings extractDocumentSettings(
             MultiCompetitorLeaderboardChartSettings settings) {
         return settings;
     }

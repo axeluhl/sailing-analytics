@@ -514,7 +514,7 @@ public class Util {
      * {@link #isEmpty(Iterable) isEmpty(splitAlongWhitespaceRespectingDoubleQuotedPhrases(" \n\t  "))
      * </pre>
      * 
-     * @return if {@code s==null}, then {@code null}, else a non-{@code null} but possibly empty sequence of {@link Strings} whose iteration order corresponds with
+     * @return if {@code s==null}, then {@code null}, else a non-{@code null} but possibly empty sequence of {@link String} whose iteration order corresponds with
      *         the occurrence of the split results, left to right, in {@code s}
      */
     public static Iterable<String> splitAlongWhitespaceRespectingDoubleQuotedPhrases(String s) {
@@ -733,5 +733,15 @@ public class Util {
     @SafeVarargs
     public static <T extends Comparable<T>> T max(T... elements) {
         return Collections.max(Arrays.asList(elements));
+    }
+
+    /**
+     * Checks if the given map is null, and if, returns an empty map.
+     */
+    public static <K, V> Map<K, V> nullToEmptyMap(Map<K, V> map) {
+        if (map == null) {
+            return Collections.emptyMap();
+        }
+        return map;
     }
 }

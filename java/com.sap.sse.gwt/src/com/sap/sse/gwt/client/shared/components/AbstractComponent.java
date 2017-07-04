@@ -1,9 +1,7 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.util.ArrayList;
-
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public abstract class AbstractComponent<SettingsType extends Settings> implements Component<SettingsType> {
     private Component<?> parentComponent;
@@ -17,11 +15,6 @@ public abstract class AbstractComponent<SettingsType extends Settings> implement
     @Override
     public Component<?> getParentComponent() {
         return parentComponent;
-    }
-
-    @Override
-    public ArrayList<String> getPath() {
-        return ComponentPathDeterminer.determinePath(this);
     }
 
     @Override
