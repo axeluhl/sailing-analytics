@@ -227,9 +227,8 @@ import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
+import com.sap.sailing.server.statistics.ScheduledStatisticsUpdater;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
-import com.sap.sailing.server.statistics.StatisticsCalculator;
-import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -274,6 +273,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final ConcurrentHashMap<Serializable, Event> eventsById;
 
     private final RemoteSailingServerSet remoteSailingServerSet;
+    
+    private final ScheduledStatisticsUpdater scheduledStatisticsUpdater;
 
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
@@ -616,6 +617,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for " + this, /* fair */false);
         eventsById = new ConcurrentHashMap<Serializable, Event>();
+        scheduledStatisticsUpdater = new ScheduledStatisticsUpdater(scheduler, this);
         regattaTrackingCache = new ConcurrentHashMap<>();
         regattaTrackingCacheLock = new NamedReentrantReadWriteLock("regattaTrackingCache for " + this, /* fair */false);
         raceTrackersByRegatta = new ConcurrentHashMap<>();
@@ -3746,25 +3748,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Map<Integer, Statistics> getLocalStatisticsByYear() {
-        final Map<Integer, StatisticsCalculator> calculators = new HashMap<>();
-        getAllEvents().forEach((event) -> {
-            final Integer eventYear = EventUtil.getYearOfEvent(event);
-            final StatisticsCalculator calculator;
-            if (calculators.containsKey(eventYear)) {
-                calculator = calculators.get(eventYear);
-            } else {
-                calculator = new StatisticsCalculator();
-                calculators.put(eventYear, calculator);
-            }
-            event.getLeaderboardGroups().forEach((lg) -> {
-                lg.getLeaderboards().forEach(calculator::addLeaderboard);
-            });
-        });
-        Map<Integer, Statistics> result = new HashMap<>();
-        calculators.forEach((year, calculator) -> {
-            result.put(year, calculator.getStatistics());
-        });
-        return result;
+        return scheduledStatisticsUpdater.getStatisticsPerYear();
     }
 
     @Override
