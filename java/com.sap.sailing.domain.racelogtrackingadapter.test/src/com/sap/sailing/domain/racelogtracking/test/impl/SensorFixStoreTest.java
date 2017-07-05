@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +27,6 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
-import com.sap.sailing.domain.racelog.tracking.ProgressCallback;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
@@ -128,10 +128,10 @@ public class SensorFixStoreTest {
         List<Double> progressData = new ArrayList<>();
         store.loadFixes((fix) -> {
         }, device, new MillisecondsTimePoint(FIX_TIMESTAMP - 1), new MillisecondsTimePoint(FIX_TIMESTAMP + fixes + 1),
-                true, () -> false, new ProgressCallback() {
+                true, () -> false, new Consumer<Double>() {
 
                     @Override
-                    public void progressChange(double progress) {
+                    public void accept(Double progress) {
                         progressData.add(progress);
                     }
                 });

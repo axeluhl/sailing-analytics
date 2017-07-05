@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +31,6 @@ import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongo
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
-import com.sap.sailing.domain.racelog.tracking.ProgressCallback;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -113,17 +112,17 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     
     @Override
     public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
-            TimePoint to, boolean inclusive, Supplier<Boolean> isPreemptiveStopped, ProgressCallback progressConsumer)
+            TimePoint to, boolean inclusive, BooleanSupplier isPreemptiveStopped, Consumer<Double> progressConsumer)
                     throws NoCorrespondingServiceRegisteredException, TransformationException {
         loadFixes(consumer, device, from, to, inclusive, isPreemptiveStopped, progressConsumer,
                 UnaryOperator.identity());
     }
 
     private <FixT extends Timed> boolean loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
-            TimePoint to, boolean inclusive, Supplier<Boolean> isPreemptiveStopped, ProgressCallback progressConsumer,
+            TimePoint to, boolean inclusive, BooleanSupplier isPreemptiveStopped, Consumer<Double> progressConsumer,
             UnaryOperator<DBCursor> dbCursorCallback)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        progressConsumer.progressChange(0);
+        progressConsumer.accept(0d);
 
         final TimePoint loadFixesFrom = from == null ? TimePoint.BeginningOfTime : from;
         final TimePoint loadFixesTo = to == null ? TimePoint.EndOfTime : to;
@@ -149,8 +148,8 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             current++;
 
             if (current % reportIncrement == 0) {
-                progressConsumer.progressChange(current / max);
-                if (isPreemptiveStopped.get()) {
+                progressConsumer.accept(current / max);
+                if (isPreemptiveStopped.getAsBoolean()) {
                     logger.log(Level.WARNING, "Exiting because of preemtive stop requested " + fixObject);
                     return fixLoaded;
                 }
@@ -169,7 +168,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             }
         }
 
-        progressConsumer.progressChange(1);
+        progressConsumer.accept(1d);
         return fixLoaded;
     }
 

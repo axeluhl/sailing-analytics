@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.racelog.impl;
 
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
@@ -12,7 +13,6 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelog.tracking.ProgressCallback;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -45,8 +45,8 @@ public class GPSFixStoreImpl implements GPSFixStore {
     }
 
     private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
-            TimePoint from, TimePoint to, boolean toIsInclusive, Supplier<Boolean> isPreemptiveStopped,
-            ProgressCallback progress)
+            TimePoint from, TimePoint to, boolean toIsInclusive, BooleanSupplier isPreemptiveStopped,
+            Consumer<Double> progress)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         sensorFixStore.<FixT> loadFixes(fix -> track.add(fix, /* replace */ true), device, from, to, toIsInclusive,
                 isPreemptiveStopped, progress);
@@ -85,8 +85,8 @@ public class GPSFixStoreImpl implements GPSFixStore {
 
     @Override
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end, Supplier<Boolean> isPreemptiveStopped,
-            ProgressCallback progressReporter)
+            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end, BooleanSupplier isPreemptiveStopped,
+            Consumer<Double> progressReporter)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
 
         // loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true
@@ -98,7 +98,7 @@ public class GPSFixStoreImpl implements GPSFixStore {
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping, TimePoint start,
-            TimePoint end, Supplier<Boolean> isPreemptiveStopped, ProgressCallback progressReport)
+            TimePoint end, BooleanSupplier isPreemptiveStopped, Consumer<Double> progressReport)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
         final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
         final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());

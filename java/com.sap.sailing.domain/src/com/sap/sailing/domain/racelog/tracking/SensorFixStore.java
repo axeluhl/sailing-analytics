@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelog.tracking;
 
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -50,8 +50,8 @@ public interface SensorFixStore {
      * @param progressReporter not allowed to be null, can be used to get reports of the approximate loading progress
      */
     <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier, TimePoint start,
-            TimePoint end, boolean inclusive, Supplier<Boolean> isPreemptiveStopped,
-            ProgressCallback progressReporter)
+            TimePoint end, boolean inclusive, BooleanSupplier isPreemptiveStopped,
+            Consumer<Double> progressReporter)
             throws NoCorrespondingServiceRegisteredException,
     TransformationException;
 
