@@ -48,6 +48,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -403,8 +405,9 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         };
         durationColumn.setSortable(true);
         sortHandler.setComparator(durationColumn, new Comparator<MediaTrack>() {
+            final Comparator<Duration> durationComparator = new NullSafeComparableComparator<>(true);
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-                return mediaTrack1.duration.compareTo(mediaTrack2.duration);
+                return durationComparator.compare(mediaTrack1.duration, mediaTrack2.duration);
             }
         });
         durationColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
