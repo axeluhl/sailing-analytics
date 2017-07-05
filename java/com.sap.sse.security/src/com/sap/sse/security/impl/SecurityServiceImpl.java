@@ -887,7 +887,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Void setPreference(final String username, final String key, final String value) {
+    public void setPreference(final String username, final String key, final String value) {
         final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalSetPreference(username, key, value));
@@ -895,7 +895,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to set preference for user " + username);
         }
-        return null;
     }
 
     @Override
