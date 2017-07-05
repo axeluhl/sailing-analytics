@@ -885,28 +885,29 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public ReplicatingCacheManager getCacheManager() {
         return cacheManager;
     }
-
-    @Override
-    public void setPreference(final String username, final String key, final String value) {
+    
+    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) {
         final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            apply(s->s.internalSetPreference(username, key, value));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to set preference for user " + username);
+        if (!subject.hasRole(DefaultRoles.ADMIN.name()) && (subject.getPrincipal() == null
+                || !username.equals(subject.getPrincipal().toString()))) {
+            final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
+                    : subject.getPrincipal().toString();
+            throw new SecurityException(
+                    "User " + currentUserName + " does not have required to access data of user " + username);
         }
     }
 
     @Override
+    public void setPreference(final String username, final String key, final String value) {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        apply(s->s.internalSetPreference(username, key, value));
+    }
+
+    @Override
     public void setPreferenceObject(final String username, final String key, final Object value) {
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
-            apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to set preference object for user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
+        apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
     }
 
     @Override
@@ -922,13 +923,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void unsetPreference(String username, String key) {
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            apply(s->s.internalUnsetPreference(username, key));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to unset preference for user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        apply(s->s.internalUnsetPreference(username, key));
     }
 
     @Override
@@ -965,24 +961,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public String getPreference(String username, String key) {
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            return store.getPreference(username, key);
-        } else {
-            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to read preferences of user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return store.getPreference(username, key);
     }
     
     @Override
     public Map<String, String> getAllPreferences(String username) {
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            return store.getAllPreferences(username);
-        } else {
-            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to read preferences of user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return store.getAllPreferences(username);
     }
     
     @Override

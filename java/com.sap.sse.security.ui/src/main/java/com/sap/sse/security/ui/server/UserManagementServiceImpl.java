@@ -166,27 +166,27 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
     }
-    
-    @Override
-    public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
+
+    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN or is changing own user
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
-            getSecurityService().updateUserProperties(username, fullName, company,
-                    localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
-        } else {
+        if (!subject.hasRole(DefaultRoles.ADMIN.name()) && (subject.getPrincipal() == null
+                || !username.equals(subject.getPrincipal().toString()))) {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
     }
     
     @Override
+    public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        getSecurityService().updateUserProperties(username, fullName, company,
+                localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
+    }
+    
+    @Override
     public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
-            getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
-        } else {
-            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
     }
     
     @Override
