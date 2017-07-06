@@ -3,9 +3,11 @@ package com.sap.sse.security.ui.authentication;
 import static com.sap.sse.security.shared.UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL;
 import static com.sap.sse.security.shared.UserManagementException.USER_ALREADY_EXISTS;
 
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContextImpl;
@@ -92,6 +94,12 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                     logout();
             }
         });
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user) {
+                redirectWithLocaleForAuthenticatedUser();
+            }
+        }, true);
     }
 
     @Override
@@ -137,6 +145,8 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             public void onSuccess(SuccessInfo result) {
                 if (result.isSuccessful()) {
                     callback.onSuccess(result);
+                    // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
+                    redirectIfLocaleIsSetAndNotCurrentOne(result.getUserDTO().getLocale());
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
                         view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
@@ -159,11 +169,64 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         eventBus.fireEvent(new AuthenticationRequestEvent());
     }
     
-    @Override
+    /**
+     * Refresh information of current user.
+     */
     public void refreshUserInfo() {
         userService.updateUser(true);
     }
     
+    @Override
+    public void updateUserProperties(String fullName, String company, String localeName, final AsyncCallback<Void> callback) {
+        final UserDTO currentUser = getAuthenticationContext().getCurrentUser();
+        final String username = currentUser.getName();
+        final String locale = currentUser.getLocale();
+        userManagementService.updateUserProperties(username, fullName, company, localeName, new AsyncCallback<Void>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                refreshUserInfo();
+                callback.onSuccess(result);
+                
+                if(!Util.equalsWithNull(locale, localeName)) {
+                    redirectIfLocaleIsSetAndNotCurrentOne(localeName);
+                }
+            }
+        });
+    }
+    
+    /**
+     * Switches to the locale to the current user's locale if no locale is explicitly given by the URL.
+     */
+    private void redirectWithLocaleForAuthenticatedUser() {
+        final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
+        final AuthenticationContext authenticationContext = getAuthenticationContext();
+        if(authenticationContext.isLoggedIn() && (localeParam == null || localeParam.isEmpty())) {
+            redirectIfLocaleIsSetAndNotCurrentOne(authenticationContext.getCurrentUser().getLocale());
+        }
+    }
+    
+    private void redirectIfLocaleIsSetAndNotCurrentOne(String locale) {
+        if(!isCurrentLocale(locale)) {
+            Window.Location.assign(Window.Location.createUrlBuilder()
+                    .setParameter(LocaleInfo.getLocaleQueryParam(), locale).buildString());
+        }
+    }
+    
+    private boolean isCurrentLocale(String locale) {
+        if(locale == null || locale.isEmpty()) {
+            return true;
+        }
+        final String currentLocale = LocaleInfo.getCurrentLocale().getLocaleName();
+        final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
+        return currentLocale.equals(locale) || locale.equals(localeParam);
+    }
+
     @Override
     public AuthenticationContext getAuthenticationContext() {
         return new AuthenticationContextImpl(userService.getCurrentUser());

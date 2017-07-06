@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.authentication;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -58,10 +59,7 @@ public interface AuthenticationManager {
      */
     void logout();
     
-    /**
-     * Refresh information of current user.
-     */
-    void refreshUserInfo();
+    void updateUserProperties(String fullName, String company, String localeName, AsyncCallback<Void> callback);
     
     /**
      * Provide the {@link AuthenticationContext} for the current user 
