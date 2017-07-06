@@ -211,7 +211,7 @@ public class UserService {
     }
 
     private void notifyUserStatusEventHandlers() {
-        for (UserStatusEventHandler handler : handlers) {
+        for (UserStatusEventHandler handler : new HashSet<>(handlers)) {
             handler.onUserStatusChange(getCurrentUser());
         }
     }
