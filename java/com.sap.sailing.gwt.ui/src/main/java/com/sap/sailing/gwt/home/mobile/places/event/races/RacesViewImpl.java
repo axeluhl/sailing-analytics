@@ -47,7 +47,6 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         } else {
             setViewContent(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
         }
-        competitorFilterUi.removeFromParent();
     }
     
     @Override
