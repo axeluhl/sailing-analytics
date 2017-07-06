@@ -60,25 +60,26 @@ public interface UserManagementService extends RemoteService {
      * 
      * @param key must not be <code>null</code>
      * @param value must not be <code>null</code>
+     * @throws UserManagementException 
      */
-    void setPreference(String username, String key, String value);
+    void setPreference(String username, String key, String value) throws UserManagementException;
     
-    void setPreferences(String username, Map<String, String> keyValuePairs);
+    void setPreferences(String username, Map<String, String> keyValuePairs) throws UserManagementException;
 
     /**
      * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
      * <code>username</code>.
      */
-    void unsetPreference(String username, String key);
+    void unsetPreference(String username, String key) throws UserManagementException;
 
     /**
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
-    String getPreference(String username, String key);
+    String getPreference(String username, String key) throws UserManagementException;
     
-    Map<String, String> getPreferences(String username, List<String> keys);
+    Map<String, String> getPreferences(String username, List<String> keys) throws UserManagementException;
     
-    Map<String, String> getAllPreferences(String username);
+    Map<String, String> getAllPreferences(String username) throws UserManagementException;
 
     String getAccessToken(String username);
 

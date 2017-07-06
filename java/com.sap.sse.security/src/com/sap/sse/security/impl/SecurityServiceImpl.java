@@ -31,6 +31,7 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
@@ -892,7 +893,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 || !username.equals(subject.getPrincipal().toString()))) {
             final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
                     : subject.getPrincipal().toString();
-            throw new SecurityException(
+            throw new AuthorizationException(
                     "User " + currentUserName + " does not have required to access data of user " + username);
         }
     }
