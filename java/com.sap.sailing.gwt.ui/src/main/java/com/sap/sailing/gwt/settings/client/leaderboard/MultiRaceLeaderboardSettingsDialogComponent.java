@@ -25,7 +25,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<MultiRaceLeaderboardSettings> {
 
     MultiRaceLeaderboardSettings initialSettings;
-    
+
     public MultiRaceLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
             List<String> allRaceColumnNames, StringMessages stringMessages) {
         super(initialSettings, allRaceColumnNames, stringMessages);
@@ -72,7 +72,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
                 ? numberOfLastRacesToShowBox.getValue() : null;
         MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings(maneuverDetailsToShow,
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow, namesOfRaceColumnsToShow,
-                /* nameOfRacesToShow */null, lastNRacesToShowValue, 
+                lastNRacesToShowValue,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), null,
                 true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
@@ -83,7 +83,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
         SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
         return newSettings;
     }
-    
+
     private FlowPanel createSelectedRacesPanel(DataEntryDialog<?> dialog) {
         FlowPanel selectedRacesPanel = new FlowPanel();
         selectedRacesPanel.ensureDebugId("RaceSelectionSettingsPanel");
@@ -96,7 +96,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
         FlowPanel selectedRacesContent = new FlowPanel();
         selectedRacesContent.addStyleName("dialogInnerContent");
         selectedRacesPanel.add(selectedRacesContent);
-        
+
         // Attention: We need to consider that there are regattas with more than 30 races
         int racesCount = raceAllRaceColumnNames.size();
         if (racesCount > 0) {
@@ -104,15 +104,17 @@ public class MultiRaceLeaderboardSettingsDialogComponent
             explicitRaceSelectionContent.ensureDebugId("ExplicitRaceSelectionPanel");
             final FlowPanel lastNRacesSelectionContent = new FlowPanel();
             lastNRacesSelectionContent.ensureDebugId("MostCurrentRacesSelectionPanel");
-            
+
             String radioButtonGroupName = "raceSelectionStrategyGroup";
             Label raceSelectionWayLabel = new Label(stringMessages.chooseTheWayYouSelectRaces() + ":");
             raceSelectionWayLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
             racesSelectionStrategyPanel.add(raceSelectionWayLabel);
-            explicitRaceColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectFromAllRaces());
+            explicitRaceColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName,
+                    stringMessages.selectFromAllRaces());
             explicitRaceColumnSelectionRadioBtn.ensureDebugId("ExplicitRaceSelectionRadioButton");
             racesSelectionStrategyPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-            explicitRaceColumnSelectionRadioBtn.setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
+            explicitRaceColumnSelectionRadioBtn
+                    .setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
             explicitRaceColumnSelectionRadioBtn.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -128,7 +130,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
             int rowIndex = 0;
             int columnIndex = 0;
             int rowCount = racesCount / maxRacesPerRow;
-            if(racesCount % maxRacesPerRow != 0) {
+            if (racesCount % maxRacesPerRow != 0) {
                 rowCount++;
             }
             Grid grid = new Grid(rowCount, maxRacesPerRow);
@@ -138,18 +140,21 @@ public class MultiRaceLeaderboardSettingsDialogComponent
                         Util.contains(namesOfRaceColumnsToShow, raceColumnName), null);
                 raceColumnCheckboxes.put(raceColumnName, checkbox);
                 grid.setWidget(rowIndex, columnIndex++, checkbox);
-                if(columnIndex == maxRacesPerRow) {
+                if (columnIndex == maxRacesPerRow) {
                     rowIndex++;
                     columnIndex = 0;
                 }
             }
             explicitRaceSelectionContent.add(grid);
-            explicitRaceSelectionContent.setVisible(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
+            explicitRaceSelectionContent
+                    .setVisible(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
             selectedRacesContent.add(explicitRaceSelectionContent);
-            
-            lastNRacesColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectANumberOfRaces());
+
+            lastNRacesColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName,
+                    stringMessages.selectANumberOfRaces());
             lastNRacesColumnSelectionRadioBtn.ensureDebugId("MostCurrentRacesSelectionRadioButton");
-            lastNRacesColumnSelectionRadioBtn.setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
+            lastNRacesColumnSelectionRadioBtn
+                    .setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
             lastNRacesColumnSelectionRadioBtn.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -160,7 +165,7 @@ public class MultiRaceLeaderboardSettingsDialogComponent
             });
             racesSelectionStrategyPanel.add(lastNRacesColumnSelectionRadioBtn);
             dialog.alignAllPanelWidgetsVertically(racesSelectionStrategyPanel, HasVerticalAlignment.ALIGN_MIDDLE);
-            
+
             // content of 'number of races' selection
             HorizontalPanel hPanel = new HorizontalPanel();
             lastNRacesSelectionContent.add(hPanel);
@@ -168,11 +173,13 @@ public class MultiRaceLeaderboardSettingsDialogComponent
             numberOfLastRacesLabel.getElement().getStyle().setPaddingRight(10, Unit.PX);
             hPanel.add(numberOfLastRacesLabel);
             Integer numberOfLastRacesToShow = initialSettings.getNumberOfLastRacesToShow();
-            numberOfLastRacesToShowBox = dialog.createIntegerBox(numberOfLastRacesToShow != null ? numberOfLastRacesToShow : racesCount, 3);
+            numberOfLastRacesToShowBox = dialog
+                    .createIntegerBox(numberOfLastRacesToShow != null ? numberOfLastRacesToShow : racesCount, 3);
             numberOfLastRacesToShowBox.ensureDebugId("NumberOfMostCurrentRacesIntegerBox");
             hPanel.add(numberOfLastRacesToShowBox);
             dialog.alignAllPanelWidgetsVertically(hPanel, HasVerticalAlignment.ALIGN_MIDDLE);
-            lastNRacesSelectionContent.setVisible(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
+            lastNRacesSelectionContent
+                    .setVisible(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
             selectedRacesContent.add(lastNRacesSelectionContent);
         } else {
             selectedRacesContent.add(new Label(stringMessages.noRacesYet()));

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -78,8 +77,7 @@ public class LeaderboardSettingsFactory {
         Long refreshIntervalInMs = settingsWithDetails.getDelayBetweenAutoAdvancesInMilliseconds();
         
         RaceColumnSelectionStrategies strategy = settingsWithRaceSelection.getActiveRaceColumnSelectionStrategy();
-        List<String> namesOfRaceColumnsToShow = copyRaceNamesList(settingsWithRaceSelection.getNamesOfRaceColumnsToShow());
-        List<String> namesOfRacesToShow = copyRaceNamesList(settingsWithRaceSelection.getNamesOfRacesToShow());
+        List<String> namesOfRaceColumnsToShow = settingsWithRaceSelection.getNamesOfRaceColumnsToShow();
         Integer numberOfLastRacesToShow = settingsWithRaceSelection.getNumberOfLastRacesToShow();
         boolean showCompetitorSailIdColumn = settingsWithRaceSelection.isShowCompetitorSailIdColumn();
         boolean showCompetitorFullNameColumns = settingsWithRaceSelection.isShowCompetitorFullNameColumn();
@@ -88,18 +86,10 @@ public class LeaderboardSettingsFactory {
         boolean updateUponPlayStateChange = settingsWithRaceSelection.isUpdateUponPlayStateChange();
 
         return new MultiRaceLeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
-                namesOfRaceColumnsToShow, namesOfRacesToShow, numberOfLastRacesToShow, refreshIntervalInMs,
+                namesOfRaceColumnsToShow, numberOfLastRacesToShow, refreshIntervalInMs,
                 nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
                 /* showOverallRacesCompleted */ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns,
                 settingsWithRaceSelection.isShowCompetitorNationality());
-    }
-    
-    private List<String> copyRaceNamesList(List<String> raceNames) {
-        List<String> result = null;
-        if(raceNames != null) {
-            result = new ArrayList<String>(raceNames);
-        }
-        return result;
     }
     
 }

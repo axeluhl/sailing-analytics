@@ -38,7 +38,7 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     public MultiRaceLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,
             Collection<DetailType> legDetailsToShow, Collection<DetailType> raceDetailsToShow,
             Collection<DetailType> overallDetailsToShow, List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
+            Integer numberOfLastRacesToShow,
             Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort, boolean sortAscending,
             boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
@@ -49,7 +49,6 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
                 showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorSailIdColumn,
                 showCompetitorFullNameColumn, isCompetitorNationalityColumnVisible);
         
-        this.namesOfRacesToShow.setValues(namesOfRacesToShow);
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
         this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
