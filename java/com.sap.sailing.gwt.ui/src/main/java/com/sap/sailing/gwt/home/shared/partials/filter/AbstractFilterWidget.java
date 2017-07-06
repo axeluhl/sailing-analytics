@@ -14,7 +14,6 @@ public abstract class AbstractFilterWidget<T, C> extends Composite implements Fi
     @Override
     public HandlerRegistration addFilterValueChangeHandler(final FilterValueChangeHandler<T, C> handler) {
         valueChangeHandlers.add(handler);
-        handler.onFilterValueChanged(getFilter());
         return new HandlerRegistration() {
             @Override
             public void removeHandler() {
