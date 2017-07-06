@@ -528,14 +528,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     protected abstract void openSettingsDialog();
 
     protected void initialize(LeaderboardSettings settings){
-        switch (settings.getActiveRaceColumnSelectionStrategy()) {
-        case EXPLICIT:
-            raceColumnSelection = getDefaultRaceColumnSelection();
-            break;
-        case LAST_N:
-            setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
-            break;
-        }
+        setDefaultRaceColumnSelection(settings);
+
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
@@ -642,18 +636,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     public void updateSettings(final LeaderboardSettings newSettings) {
         this.currentSettings = newSettings;
-        boolean oldShallAddOverallDetails = shallAddOverallDetails();
-        if (newSettings.getOverallDetailsToShow() != null) {
-            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
-                    selectedOverallDetailColumns);
-        }
-
-        setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
-        setShowAddedScores(newSettings.isShowAddedScores());
-        setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
-        setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
-        setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(
-                newSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
+        
         final List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
@@ -668,6 +651,73 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
             }
         }
+        
+        boolean oldShallAddOverallDetails = applyDetailSettings(newSettings);
+
+        addBusyTask();
+        Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // avoid expansion during updateLeaderboard(...); will expand
+                    // later
+                    // if it was expanded before
+                    updateExpansionStates(null);
+                    applyRaceSelection(newSettings);
+
+                    updateLeaderboard(leaderboard);
+                    updateExpansionStates(newSettings);
+                    
+
+                    postApplySettings(newSettings, columnsToExpandAgain);
+                } finally {
+                    removeBusyTask();
+                }
+            }
+
+            
+        };
+        if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails
+                || getLeaderboard().hasOverallDetails()) {
+            doWhenNecessaryDetailHasBeenLoaded.run();
+        } else { // meaning that now the details need to be loaded from the server
+            updateLeaderboardAndRun(doWhenNecessaryDetailHasBeenLoaded);
+        }
+    }
+    
+    private void postApplySettings(final LeaderboardSettings newSettings,
+            final List<ExpandableSortableColumn<?>> columnsToExpandAgain) {
+        if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+            timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
+        }
+        for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+            expandableSortableColumn.changeExpansionState(/* expand */ true);
+        }
+        if (newSettings.getNameOfRaceToSort() != null) {
+            final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(
+                    newSettings.getNameOfRaceToSort());
+            if (raceColumnByRaceName != null) {
+                getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
+            }
+        }
+    }
+
+    protected abstract void applyRaceSelection(final LeaderboardSettings newSettings);
+
+    private boolean applyDetailSettings(final LeaderboardSettings newSettings) {
+        boolean oldShallAddOverallDetails = shallAddOverallDetails();
+        if (newSettings.getOverallDetailsToShow() != null) {
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
+                    selectedOverallDetailColumns);
+        }
+
+        setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
+        setShowAddedScores(newSettings.isShowAddedScores());
+        setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
+        setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
+        setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(
+                newSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
+
         if (newSettings.getManeuverDetailsToShow() != null) {
             setValuesWithReferenceOrder(newSettings.getManeuverDetailsToShow(),
                     ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes(), selectedManeuverDetails);
@@ -683,94 +733,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             setValuesWithReferenceOrder(newSettings.getRaceDetailsToShow(), allRaceDetailsTypes.toArray(new DetailType[allRaceDetailsTypes.size()]),
                     selectedRaceDetails);
         }
-
-        addBusyTask();
-        Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    updateExpansionStates(false);
-                    // avoid expansion during updateLeaderboard(...); will expand
-                                                         // later
-                                                         // if it was expanded before
-                    // update leaderboard after settings panel column selection change
-
-                    // update strategy for determining the race columns to show; if settings' race columns to show is
-                    // null, use the
-                    // previously selected race columns / number of race columns for the new configuration
-                    Iterable<String> oldNamesOfRaceColumnsToShow = null;
-                    if (newSettings.getNamesOfRaceColumnsToShow() == null) {
-                        oldNamesOfRaceColumnsToShow = raceColumnSelection.getSelectedRaceColumnNames();
-                    }
-                    switch (newSettings.getActiveRaceColumnSelectionStrategy()) {
-                    case EXPLICIT:
-                        raceColumnSelection = getDefaultRaceColumnSelection();
-                        if (newSettings.getNamesOfRaceColumnsToShow() != null) {
-                            raceColumnSelection.requestClear();
-                            for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
-                                RaceColumnDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
-                                if (raceColumnToShow != null) {
-                                    raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
-                                }
-                            }
-                        } else {
-                            // apply the old column selections again
-                            for (String oldNameOfRaceColumnToShow : oldNamesOfRaceColumnsToShow) {
-                                final RaceColumnDTO raceColumnByName = getLeaderboard()
-                                        .getRaceColumnByName(oldNameOfRaceColumnToShow);
-                                if (raceColumnByName != null) {
-                                    raceColumnSelection.requestRaceColumnSelection(raceColumnByName);
-                                }
-                            }
-                            if (newSettings.getNamesOfRacesToShow() != null) {
-                                raceColumnSelection.requestClear();
-                                for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
-                                    RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
-                                    if (raceColumnToShow != null) {
-                                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case LAST_N:
-                        setRaceColumnSelectionToLastNStrategy(newSettings.getNumberOfLastRacesToShow());
-                        break;
-                    }
-
-                    updateLeaderboard(leaderboard);
-                    updateExpansionStates(newSettings.isAutoExpandPreSelectedRace());
-                    
-
-                    if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-                        timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
-                    }
-                    for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
-                        expandableSortableColumn.changeExpansionState(/* expand */ true);
-                    }
-                    if (newSettings.getNameOfRaceToSort() != null) {
-                        final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(
-                                newSettings.getNameOfRaceToSort());
-                        if (raceColumnByRaceName != null) {
-                            getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
-                        }
-                    }
-                } finally {
-                    removeBusyTask();
-                }
-            }
-        };
-        if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails
-                || getLeaderboard().hasOverallDetails()) {
-            doWhenNecessaryDetailHasBeenLoaded.run();
-        } else { // meaning that now the details need to be loaded from the server
-            updateLeaderboardAndRun(doWhenNecessaryDetailHasBeenLoaded);
-        }
+        return oldShallAddOverallDetails;
     }
 
-    protected abstract void updateExpansionStates(boolean expand);
+    protected abstract void updateExpansionStates(LeaderboardSettings newSettings);
 
-    protected abstract RaceColumnSelection getDefaultRaceColumnSelection();
+    protected abstract void setDefaultRaceColumnSelection(LeaderboardSettings settings);
 
     private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet,
             DetailType[] referenceOrder, List<DetailType> collectionToSetValuesTo) {
@@ -1162,7 +1130,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         @Override
         protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-                LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
+                LeaderboardPanel<?> leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
             result.put(DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL,
@@ -2104,31 +2072,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     protected HorizontalPanel getRefreshAndSettingsPanel() {
         return refreshAndSettingsPanel;
-    }
-
-    private RaceColumnDTO getRaceByName(String raceName) {
-        if (getLeaderboard() != null) {
-            for (RaceColumnDTO race : getLeaderboard().getRaceList()) {
-                for (FleetDTO fleet : race.getFleets()) {
-                    if (race.getRaceIdentifier(fleet) != null
-                            && raceName.equals(race.getRaceIdentifier(fleet).getRaceName())) {
-                        return race;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private RaceColumnDTO getRaceByColumnName(String columnName) {
-        if (getLeaderboard() != null) {
-            for (RaceColumnDTO race : getLeaderboard().getRaceList()) {
-                if (columnName.equals(race.getRaceColumnName())) {
-                    return race;
-                }
-            }
-        }
-        return null;
     }
 
     private RaceColumn<?> getRaceColumnByRaceName(String raceName) {

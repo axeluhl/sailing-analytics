@@ -12,9 +12,7 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.EnumSetting;
-import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
-import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 
 /**
@@ -28,28 +26,10 @@ import com.sap.sse.common.settings.generic.StringSetting;
 public abstract class LeaderboardSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 2625004077963291333L;
     
-    /**
-     * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
-     * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
-     */
-    protected StringSetSetting namesOfRaceColumnsToShow;
-
-    /**
-     * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
-     * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
-     */
-    protected StringSetSetting namesOfRacesToShow;
-
-    /**
-     * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to LAST_N
-     */
-    protected IntegerSetting numberOfLastRacesToShow;
-
     protected EnumSetSetting<DetailType> maneuverDetailsToShow;
     protected EnumSetSetting<DetailType> legDetailsToShow;
     protected EnumSetSetting<DetailType> raceDetailsToShow;
     protected EnumSetSetting<DetailType> overallDetailsToShow;
-    protected boolean autoExpandPreSelectedRace = false;
     protected LongSetting delayBetweenAutoAdvancesInMilliseconds;
     protected BooleanSetting updateUponPlayStateChange;
     protected BooleanSetting isShowCompetitorNationality;
@@ -85,9 +65,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     @Override
     protected void addChildSettings() {
         isShowCompetitorNationality = new BooleanSetting("showCompetitorNationality", this, false);
-        namesOfRaceColumnsToShow = new StringSetSetting("namesOfRaceColumnsToShow", this);
-        namesOfRacesToShow = new StringSetSetting("namesOfRacesToShow", this, null);
-        numberOfLastRacesToShow = new IntegerSetting("numberOfLastRacesToShow", this, null);
         List<DetailType> maneuverDetails = new ArrayList<DetailType>();
         maneuverDetails.add(DetailType.TACK);
         maneuverDetails.add(DetailType.JIBE);
@@ -118,35 +95,22 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     public LeaderboardSettings() {
     }
     
-    public LeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow) {
-        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
-    }
-    
     /**
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
      */
     public LeaderboardSettings(Collection<DetailType> maneuverDetailsToShow, Collection<DetailType> legDetailsToShow,
             Collection<DetailType> raceDetailsToShow, Collection<DetailType> overallDetailsToShow,
-            List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
-            boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
+            Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
             boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
             boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
             boolean isCompetitorNationalityColumnVisible) {
-        if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
-            throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
-        }
         this.legDetailsToShow.setValues(legDetailsToShow);
         this.raceDetailsToShow.setValues(raceDetailsToShow);
         this.overallDetailsToShow.setValues(overallDetailsToShow);
-        this.namesOfRacesToShow.setValues(namesOfRacesToShow);
-        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
-        this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
         this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
-        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
         this.maneuverDetailsToShow.setValues(maneuverDetailsToShow);
-        this.nameOfRaceToSort.setValue(nameOfRaceToSort);
         this.sortAscending.setValue(sortAscending);
         this.updateUponPlayStateChange.setValue(updateUponPlayStateChange);
         this.showAddedScores.setValue(showAddedScores);
@@ -185,36 +149,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         return Util.createSet(overallDetailsToShow.getValues());
     }
     
-    /**
-     * If <code>null</code>, this is to mean that the race columns should not be modified by
-     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}. Otherwise a
-     * live collection that reflects the current state of the settings of a leaderboard panel
-     */
-    public List<String> getNamesOfRaceColumnsToShow() {
-        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? (namesOfRaceColumnsToShow.isValuesEmpty() ? null : Util.createList(namesOfRaceColumnsToShow.getValues())) : null;
-    }
-
-    /**
-     * If <code>null</code>, this is to mean that the race columns should not be modified by
-     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}. Otherwise
-     * a live collection that reflects the current state of the settings of a leaderboard panel
-     */
-    public List<String> getNamesOfRacesToShow() {
-        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? (namesOfRacesToShow.isValuesEmpty() ? null : Util.createList(namesOfRacesToShow.getValues())) : null;
-    }
-    
-    /**
-     * If <code>null</code>, this is to mean that the race columns should not be modified by
-     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
-     */
-    public Integer getNumberOfLastRacesToShow() {
-        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.LAST_N ? numberOfLastRacesToShow.getValue() : null;
-    }
-
-    public boolean isAutoExpandPreSelectedRace() {
-        return autoExpandPreSelectedRace;
-    }
-
     /**
      * @return if <code>null</code>, leave refresh interval alone (don't change in
      *         {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}

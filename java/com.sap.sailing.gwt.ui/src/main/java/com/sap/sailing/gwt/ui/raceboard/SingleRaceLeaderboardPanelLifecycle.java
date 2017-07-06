@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.dom.client.Document;
@@ -28,9 +27,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     @Override
     public SingleRaceLeaderboardSettings createDefaultSettings() {
-        List<String> namesOfRaceColumnsToShow = null;
-        List<String> namesOfRacesToShow = Collections.singletonList(raceIdentifier.getRaceName());
-        
         List<DetailType> raceDetails = new ArrayList<DetailType>();
         raceDetails.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetails.add(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
@@ -39,8 +35,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         raceDetails.add(DetailType.DISPLAY_LEGS);
         List<DetailType> overallDetails = new ArrayList<>();
         SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();
-        SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(), defaultSettings.getRaceDetailsToShow(), overallDetails, namesOfRaceColumnsToShow, namesOfRacesToShow,
-                defaultSettings.getNumberOfLastRacesToShow(), false, DEFAULT_REFRESH_INTERVAL, raceIdentifier.getRaceName(), defaultSettings.isSortAscending(), defaultSettings.isUpdateUponPlayStateChange(), defaultSettings.getActiveRaceColumnSelectionStrategy(), defaultSettings.isShowAddedScores(), defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
+        SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(), defaultSettings.getRaceDetailsToShow(), overallDetails, false, DEFAULT_REFRESH_INTERVAL, raceIdentifier.getRaceName(), defaultSettings.isSortAscending(), defaultSettings.isUpdateUponPlayStateChange(), defaultSettings.getActiveRaceColumnSelectionStrategy(), defaultSettings.isShowAddedScores(), defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
                 /*showCompetitorSailIdColumn*/ true,
                 /* don't showCompetitorFullNameColumn in case screen is so small that we don't
                  * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, false);
@@ -60,9 +55,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         SingleRaceLeaderboardSettings contextSpecificLeaderboardSettings = new SingleRaceLeaderboardSettings(
                 currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
-                defaultLeaderboardSettings.getNamesOfRaceColumnsToShow(),
-                defaultLeaderboardSettings.getNamesOfRacesToShow(),
-                currentLeaderboardSettings.getNumberOfLastRacesToShow(),
                 currentLeaderboardSettings.isAutoExpandPreSelectedRace(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 defaultLeaderboardSettings.getNameOfRaceToSort(), currentLeaderboardSettings.isSortAscending(),
@@ -82,9 +74,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         SingleRaceLeaderboardSettings globalLeaderboardSettings = new SingleRaceLeaderboardSettings(
                 currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
-                defaultLeaderboardSettings.getNamesOfRaceColumnsToShow(),
-                defaultLeaderboardSettings.getNamesOfRacesToShow(),
-                currentLeaderboardSettings.getNumberOfLastRacesToShow(),
                 defaultLeaderboardSettings.isAutoExpandPreSelectedRace(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 defaultLeaderboardSettings.getNameOfRaceToSort(), defaultLeaderboardSettings.isSortAscending(),

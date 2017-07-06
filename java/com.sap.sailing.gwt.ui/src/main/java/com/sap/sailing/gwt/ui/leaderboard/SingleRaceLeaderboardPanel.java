@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -64,36 +62,21 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     }
 
     @Override
-    protected RaceColumnSelection getDefaultRaceColumnSelection() {
-        return new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
+    protected void setDefaultRaceColumnSelection(LeaderboardSettings settings) {
+        raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
     }
 
     @Override
     public SingleRaceLeaderboardSettings getSettings() {
-        Iterable<RaceColumnDTO> selectedRaceColumns = raceColumnSelection
-                .getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard);
-        List<String> namesOfRaceColumnsToShow = new ArrayList<>();
-        for (RaceColumnDTO raceColumn : selectedRaceColumns) {
-            namesOfRaceColumnsToShow.add(raceColumn.getName());
-        }
         SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 selectedManeuverDetails,selectedLegDetails,
                 selectedRaceDetails,
-                selectedOverallDetailColumns, namesOfRaceColumnsToShow,
-                /* namesOfRacesToShow */ null, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
-                autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
+                selectedOverallDetailColumns, autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
                 /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 isShowCompetitorSailId(), isShowCompetitorFullName(), isShowCompetitorNationality);
         SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
         return leaderboardSettings;
-    }
-
-    private void setAutoExpandPreSelectedRace(boolean autoExpandPreSelectedRace) {
-        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
-        if (autoExpandPreSelectedRace) {
-            autoExpandPerformedOnce = false;
-        }
     }
 
     private boolean isAutoExpandPreSelectedRace() {
@@ -143,12 +126,13 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected void processAutoExpands(AbstractSortableColumnWithMinMax<?, ?> c, RaceColumn<?> lastRaceColumn) {
         // Toggle pre-selected race, if the setting is set and it isn't open yet, or the last race column if
         // that was requested
         if ((!autoExpandPerformedOnce && isAutoExpandPreSelectedRace() && c instanceof LeaderboardPanel.RaceColumn
-                && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace))
+                && ((RaceColumn) c).getRace().hasTrackedRace(preSelectedRace))
                 || (isAutoExpandLastRaceColumn() && c == lastRaceColumn)) {
             ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
             if (!expandableSortableColumn.isExpanded()) {
@@ -163,8 +147,16 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     }
 
     @Override
-    protected void updateExpansionStates(boolean expand) {
-        setAutoExpandPreSelectedRace(expand);
+    public void updateSettings(LeaderboardSettings newSettings) {
+        super.updateSettings(newSettings);
+        SingleRaceLeaderboardSettings casted = (SingleRaceLeaderboardSettings) newSettings;
+        autoExpandPreSelectedRace = casted.isAutoExpandPreSelectedRace();
+    }
+    
+    @Override
+    protected void updateExpansionStates(LeaderboardSettings expand) {
+        SingleRaceLeaderboardSettings expandS = (SingleRaceLeaderboardSettings) expand;
+        autoExpandPreSelectedRace = (expandS==null?false:expandS.isAutoExpandPreSelectedRace());
     }
 
     /**
@@ -185,14 +177,6 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         return result;
     }
 
-
-    @Override
-    public void updateSettings(SingleRaceLeaderboardSettings newSettings) {
-        SettingsDialog<SingleRaceLeaderboardSettings> settingsDialog = new SettingsDialog<SingleRaceLeaderboardSettings>(this, stringMessages);
-        settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
-        settingsDialog.show();        
-    }
-    
     @Override
     public SettingsDialogComponent<SingleRaceLeaderboardSettings> getSettingsDialogComponent(
             SingleRaceLeaderboardSettings useTheseSettings) {
@@ -205,5 +189,9 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         SettingsDialog<SingleRaceLeaderboardSettings> settingsDialog = new SettingsDialog<SingleRaceLeaderboardSettings>(this, stringMessages);
         settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
         settingsDialog.show();         
+    }
+
+    @Override
+    protected void applyRaceSelection(LeaderboardSettings newSettings) {
     }
 }

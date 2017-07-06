@@ -39,7 +39,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * A panel managing multiple {@link LeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
  * @author Frank
  */
-public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceLeaderboardSettings> implements TimeListener, SelectedLeaderboardChangeProvider {
+public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceLeaderboardSettings> implements TimeListener, SelectedLeaderboardChangeProvider<MultiRaceLeaderboardPanel> {
 
     private MultiRaceLeaderboardPanel selectedLeaderboardPanel;
     private FlowPanel selectedLeaderboardFlowPanel;
@@ -63,7 +63,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
     private final boolean isEmbedded;
 
     private final Set<LeaderboardUpdateListener> leaderboardUpdateListeners;
-    private final Set<SelectedLeaderboardChangeListener> selectedLeaderboardChangeListeners;
+    private final Set<SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel>> selectedLeaderboardChangeListeners;
     private HashMap<String, MultiRaceLeaderboardSettings> contextStore;
     private MultiRaceLeaderboardSettings loadedSettings;
 
@@ -96,7 +96,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
          * This only stores the ContextSpecific settings, as they differ for all Leaderboards
          */
         leaderboardUpdateListeners = new HashSet<LeaderboardUpdateListener>();
-        selectedLeaderboardChangeListeners = new HashSet<SelectedLeaderboardChangeListener>();
+        selectedLeaderboardChangeListeners = new HashSet<SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel>>();
 
         contextStore = new HashMap<>();
     }
@@ -277,12 +277,12 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
     }
 
     @Override
-    public void addSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener listener) {
+    public void addSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel> listener) {
         selectedLeaderboardChangeListeners.add(listener);
     }
 
     @Override
-    public void removeSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener listener) {
+    public void removeSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel> listener) {
         selectedLeaderboardChangeListeners.remove(listener);
     }
 
@@ -290,7 +290,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
     public void setSelectedLeaderboard(MultiRaceLeaderboardPanel selectedLeaderboard) {
         if (this.selectedLeaderboardPanel != selectedLeaderboard) {
             this.selectedLeaderboardPanel = selectedLeaderboard;
-            for (SelectedLeaderboardChangeListener listener : selectedLeaderboardChangeListeners) {
+            for (SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel> listener : selectedLeaderboardChangeListeners) {
                 listener.onSelectedLeaderboardChanged(selectedLeaderboardPanel);
             }
         }

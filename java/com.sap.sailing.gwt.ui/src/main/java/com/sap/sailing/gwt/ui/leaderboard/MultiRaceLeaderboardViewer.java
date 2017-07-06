@@ -29,7 +29,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  */
 public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPerspectiveLifecycle> {
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
-    private LeaderboardPanel overallLeaderboardPanel;
+    private MultiRaceLeaderboardPanel overallLeaderboardPanel;
     
     public MultiRaceLeaderboardViewer(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -37,38 +37,37 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderboardSettings> {
 
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, MultiRaceLeaderboardSettings settings,
-            boolean isEmbedded,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            MultiRaceLeaderboardSettings settings, boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             boolean showRaceDetails) {
-        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
-                competitorSelectionProvider, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
-                showRaceDetails);
+        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
+                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails);
         initialize(settings);
     }
 
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, MultiRaceLeaderboardSettings settings,
-            boolean isEmbedded, 
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            MultiRaceLeaderboardSettings settings, boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
             boolean enableSyncScroller) {
-        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
-                competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
-                optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
-                showCompetitorFilterStatus, enableSyncScroller);
+        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
+                timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
+                competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller);
         initialize(settings);
     }
 
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, MultiRaceLeaderboardSettings settings,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
-            ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails) {
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            MultiRaceLeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
+            String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
+            boolean showRaceDetails) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, competitorSelectionProvider,
                 leaderboardName, errorReporter, stringMessages, showRaceDetails);
         initialize(settings);
@@ -82,22 +81,28 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
         for (RaceColumnDTO raceColumn : selectedRaceColumns) {
             namesOfRaceColumnsToShow.add(raceColumn.getName());
         }
-        MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(
-                Collections.unmodifiableList(selectedManeuverDetails), Collections.unmodifiableList(selectedLegDetails),
-                Collections.unmodifiableList(selectedRaceDetails),
-                Collections.unmodifiableList(selectedOverallDetailColumns), namesOfRaceColumnsToShow,
+        MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(selectedManeuverDetails,
+                selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, namesOfRaceColumnsToShow,
                 /* namesOfRacesToShow */ null, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
-                false, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
-                /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
-                isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                isShowCompetitorSailId(), isShowCompetitorFullName(), isShowCompetitorNationality);
+                timer.getRefreshInterval(), /* nameOfRaceToSort */ null, /* sortAscending */ true,
+                /* updateUponPlayStateChange */ true, raceColumnSelection.getType(), isShowAddedScores(),
+                isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorSailId(),
+                isShowCompetitorFullName(), isShowCompetitorNationality);
         SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
         return leaderboardSettings;
     }
 
     @Override
-    protected RaceColumnSelection getDefaultRaceColumnSelection() {
-        return new ExplicitRaceColumnSelection();
+    protected void setDefaultRaceColumnSelection(LeaderboardSettings settings) {
+        MultiRaceLeaderboardSettings s = (MultiRaceLeaderboardSettings) settings;
+        switch (s.getActiveRaceColumnSelectionStrategy()) {
+        case EXPLICIT:
+            raceColumnSelection = new ExplicitRaceColumnSelection();
+            break;
+        case LAST_N:
+            setRaceColumnSelectionToLastNStrategy(s.getNumberOfLastRacesToShow());
+            break;
+        }
     }
 
     @Override
@@ -119,7 +124,8 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     @Override
     protected LeaderboardSettings overrideDefaultsForNamesOfRaceColumns(LeaderboardSettings currentSettings,
             LeaderboardDTO result) {
-        return ((MultiRaceLeaderboardSettings) currentSettings).overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
+        return ((MultiRaceLeaderboardSettings) currentSettings)
+                .overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
     }
 
     @Override
@@ -139,7 +145,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     }
 
     @Override
-    protected void updateExpansionStates(boolean expand) {
+    protected void updateExpansionStates(LeaderboardSettings expand) {
     }
 
     /**
@@ -159,24 +165,100 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
         }
         return result;
     }
-    
+
     @Override
     public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(
             MultiRaceLeaderboardSettings useTheseSettings) {
-        return new MultiRaceLeaderboardSettingsDialogComponent((MultiRaceLeaderboardSettings) useTheseSettings, leaderboard.getNamesOfRaceColumns(),
-                stringMessages);
+        return new MultiRaceLeaderboardSettingsDialogComponent((MultiRaceLeaderboardSettings) useTheseSettings,
+                leaderboard.getNamesOfRaceColumns(), stringMessages);
     }
 
     @Override
     protected void openSettingsDialog() {
-        SettingsDialog<MultiRaceLeaderboardSettings> settingsDialog = new SettingsDialog<MultiRaceLeaderboardSettings>(this, stringMessages);
+        SettingsDialog<MultiRaceLeaderboardSettings> settingsDialog = new SettingsDialog<MultiRaceLeaderboardSettings>(
+                this, stringMessages);
         settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
-        settingsDialog.show();         
+        settingsDialog.show();
     }
 
     @Override
-    protected void processAutoExpands(AbstractSortableColumnWithMinMax c, RaceColumn lastRaceColumn) {
+    protected void applyRaceSelection(final LeaderboardSettings ns) {
+        MultiRaceLeaderboardSettings newSettings = (MultiRaceLeaderboardSettings) ns;
+        Iterable<String> oldNamesOfRaceColumnsToShow = null;
+        if (newSettings.getNamesOfRaceColumnsToShow() == null) {
+            oldNamesOfRaceColumnsToShow = raceColumnSelection.getSelectedRaceColumnNames();
+        }
+        switch (newSettings.getActiveRaceColumnSelectionStrategy()) {
+        case EXPLICIT:
+            setDefaultRaceColumnSelection(newSettings);
+            if (newSettings.getNamesOfRaceColumnsToShow() != null) {
+                raceColumnSelection.requestClear();
+                for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
+                    RaceColumnDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
+                    if (raceColumnToShow != null) {
+                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
+                    }
+                }
+            } else {
+                // apply the old column selections again
+                for (String oldNameOfRaceColumnToShow : oldNamesOfRaceColumnsToShow) {
+                    final RaceColumnDTO raceColumnByName = getLeaderboard()
+                            .getRaceColumnByName(oldNameOfRaceColumnToShow);
+                    if (raceColumnByName != null) {
+                        raceColumnSelection.requestRaceColumnSelection(raceColumnByName);
+                    }
+                }
+                if (newSettings.getNamesOfRacesToShow() != null) {
+                    raceColumnSelection.requestClear();
+                    for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
+                        RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
+                        if (raceColumnToShow != null) {
+                            raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
+                        }
+                    }
+                }
+            }
+            break;
+        case LAST_N:
+            setRaceColumnSelectionToLastNStrategy(newSettings.getNumberOfLastRacesToShow());
+            break;
+        }
     }
-    
-    
+
+    private RaceColumnDTO getRaceByColumnName(String columnName) {
+        if (getLeaderboard() != null) {
+            for (RaceColumnDTO race : getLeaderboard().getRaceList()) {
+                if (columnName.equals(race.getRaceColumnName())) {
+                    return race;
+                }
+            }
+        }
+        return null;
+    }
+
+    private RaceColumnDTO getRaceByName(String raceName) {
+        if (getLeaderboard() != null) {
+            for (RaceColumnDTO race : getLeaderboard().getRaceList()) {
+                for (FleetDTO fleet : race.getFleets()) {
+                    if (race.getRaceIdentifier(fleet) != null
+                            && raceName.equals(race.getRaceIdentifier(fleet).getRaceName())) {
+                        return race;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected void processAutoExpands(AbstractSortableColumnWithMinMax<?, ?> c, RaceColumn<?> lastRaceColumn) {
+        // Toggle or the last race column if that was requested
+        if (isAutoExpandLastRaceColumn() && c == lastRaceColumn) {
+            ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
+            if (!expandableSortableColumn.isExpanded()) {
+                expandableSortableColumn.changeExpansionState(/* expand */ true);
+                autoExpandPerformedOnce = true;
+            }
+        }
+    }
 }

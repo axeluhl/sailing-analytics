@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimePanelLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -84,7 +83,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         return windChartLifecycle;
     }
 
-    public LeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
+    public SingleRaceLeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
         return leaderboardPanelLifecycle;
     }
 

@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SingleRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<SingleRaceLeaderboardSettings> {
@@ -44,21 +46,9 @@ public class SingleRaceLeaderboardSettingsDialogComponent
                 legDetailsToShow.add(entry.getKey());
             }
         }
-        List<String> namesOfRaceColumnsToShow = null;
-        if (activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT) {
-            namesOfRaceColumnsToShow = new ArrayList<String>();
-            for (Map.Entry<String, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
-                if (entry.getValue().getValue()) {
-                    namesOfRaceColumnsToShow.add(entry.getKey());
-                }
-            }
-        }
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
-        Integer lastNRacesToShowValue = activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N
-                ? numberOfLastRacesToShowBox.getValue() : null;
         SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(maneuverDetailsToShow,
-                legDetailsToShow, raceDetailsToShow, overallDetailsToShow, namesOfRaceColumnsToShow,
-                /* nameOfRacesToShow */null, lastNRacesToShowValue, initialSettings.isAutoExpandPreSelectedRace(),
+                legDetailsToShow, raceDetailsToShow, overallDetailsToShow, ((SingleRaceLeaderboardSettings) initialSettings).isAutoExpandPreSelectedRace(),
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), null,
                 true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
@@ -68,5 +58,18 @@ public class SingleRaceLeaderboardSettingsDialogComponent
                 isCompetitorNationalityColumnVisible.getValue());
         SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
         return newSettings;
+    }
+    
+    @Override
+    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
+        FlowPanel dialogPanel = new FlowPanel();
+        dialogPanel.ensureDebugId("LeaderboardSettingsPanel");
+        dialogPanel.add(createOverallDetailPanel(dialog));
+        dialogPanel.add(createRaceDetailPanel(dialog));
+        dialogPanel.add(createRaceStartAnalysisPanel(dialog));
+        dialogPanel.add(createLegDetailsPanel(dialog));
+        dialogPanel.add(createManeuverDetailsPanel(dialog));
+        dialogPanel.add(createTimingDetailsPanel(dialog));
+        return dialogPanel;
     }
 }

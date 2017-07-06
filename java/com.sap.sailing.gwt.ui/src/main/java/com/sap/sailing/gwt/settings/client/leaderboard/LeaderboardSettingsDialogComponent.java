@@ -7,18 +7,12 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
@@ -28,7 +22,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LegColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ManeuverCountRaceColumn;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
@@ -68,21 +61,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
     }
 
-    @Override
-    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
-        FlowPanel dialogPanel = new FlowPanel();
-        dialogPanel.ensureDebugId("LeaderboardSettingsPanel");
-        dialogPanel.add(createSelectedRacesPanel(dialog));
-        dialogPanel.add(createOverallDetailPanel(dialog));
-        dialogPanel.add(createRaceDetailPanel(dialog));
-        dialogPanel.add(createRaceStartAnalysisPanel(dialog));
-        dialogPanel.add(createLegDetailsPanel(dialog));
-        dialogPanel.add(createManeuverDetailsPanel(dialog));
-        dialogPanel.add(createTimingDetailsPanel(dialog));
-        return dialogPanel;
-    }
-    
-    private FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
+    protected FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel meneuverPanel = new FlowPanel();
         meneuverPanel.ensureDebugId("ManeuverSettingsPanel");
         meneuverPanel.add(dialog.createHeadline(stringMessages.maneuverTypes(), true));
@@ -100,7 +79,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return meneuverPanel;
     }
 
-    private FlowPanel createTimingDetailsPanel(DataEntryDialog<?> dialog) {
+    protected FlowPanel createTimingDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel timingPanel = new FlowPanel();
         timingPanel.ensureDebugId("TimingSettingsPanel");
         refreshIntervalInSecondsBox = dialog.createLongBox(
@@ -125,7 +104,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return timingPanel;
     }
 
-    private FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
+    protected FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
         FlowPanel raceDetailDialog = new FlowPanel();
         raceDetailDialog.ensureDebugId("RaceDetailsSettingsPanel");
         raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
@@ -155,7 +134,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return raceDetailDialog;
     }
 
-    private FlowPanel createRaceStartAnalysisPanel(DataEntryDialog<?> dialog) {
+    protected FlowPanel createRaceStartAnalysisPanel(DataEntryDialog<?> dialog) {
         FlowPanel raceStartAnalysisDialog = new FlowPanel();
         raceStartAnalysisDialog.ensureDebugId("RaceStartAnalysisDialog");
         raceStartAnalysisDialog.add(dialog.createHeadline(stringMessages.raceStartAnalysis(), true));
@@ -177,7 +156,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return raceStartAnalysisDialog;
     }
 
-    private FlowPanel createOverallDetailPanel(DataEntryDialog<?> dialog) {
+    protected FlowPanel createOverallDetailPanel(DataEntryDialog<?> dialog) {
         FlowPanel overallDetailDialog = new FlowPanel();
         overallDetailDialog.ensureDebugId("OverallDetailsSettingsPanel");
         overallDetailDialog.add(dialog.createHeadline(stringMessages.overallDetailsToShow(), true));
@@ -214,7 +193,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return overallDetailDialog;
     }
 
-    private FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
+    protected FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel legDetailsToShow = new FlowPanel();
         legDetailsToShow.ensureDebugId("LegDetailsSettingsPanel");
         legDetailsToShow.add(dialog.createHeadline(stringMessages.legDetailsToShow(), true));
@@ -236,101 +215,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return legDetailsToShow;
     }
 
-    private FlowPanel createSelectedRacesPanel(DataEntryDialog<?> dialog) {
-        FlowPanel selectedRacesPanel = new FlowPanel();
-        selectedRacesPanel.ensureDebugId("RaceSelectionSettingsPanel");
-        selectedRacesPanel.addStyleName("SettingsDialogComponent");
-        selectedRacesPanel.add(dialog.createHeadline(stringMessages.selectedRaces(), true));
-        // race selection strategy elements
-        HorizontalPanel racesSelectionStrategyPanel = new HorizontalPanel();
-        selectedRacesPanel.add(racesSelectionStrategyPanel);
-
-        FlowPanel selectedRacesContent = new FlowPanel();
-        selectedRacesContent.addStyleName("dialogInnerContent");
-        selectedRacesPanel.add(selectedRacesContent);
-        
-        // Attention: We need to consider that there are regattas with more than 30 races
-        int racesCount = raceAllRaceColumnNames.size();
-        if (racesCount > 0) {
-            final FlowPanel explicitRaceSelectionContent = new FlowPanel();
-            explicitRaceSelectionContent.ensureDebugId("ExplicitRaceSelectionPanel");
-            final FlowPanel lastNRacesSelectionContent = new FlowPanel();
-            lastNRacesSelectionContent.ensureDebugId("MostCurrentRacesSelectionPanel");
-            
-            String radioButtonGroupName = "raceSelectionStrategyGroup";
-            Label raceSelectionWayLabel = new Label(stringMessages.chooseTheWayYouSelectRaces() + ":");
-            raceSelectionWayLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
-            racesSelectionStrategyPanel.add(raceSelectionWayLabel);
-            explicitRaceColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectFromAllRaces());
-            explicitRaceColumnSelectionRadioBtn.ensureDebugId("ExplicitRaceSelectionRadioButton");
-            racesSelectionStrategyPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-            explicitRaceColumnSelectionRadioBtn.setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
-            explicitRaceColumnSelectionRadioBtn.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    explicitRaceSelectionContent.setVisible(true);
-                    lastNRacesSelectionContent.setVisible(false);
-                    activeRaceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
-                }
-            });
-            racesSelectionStrategyPanel.add(explicitRaceColumnSelectionRadioBtn);
-
-            // content of explicit race selection
-            int maxRacesPerRow = 10;
-            int rowIndex = 0;
-            int columnIndex = 0;
-            int rowCount = racesCount / maxRacesPerRow;
-            if(racesCount % maxRacesPerRow != 0) {
-                rowCount++;
-            }
-            Grid grid = new Grid(rowCount, maxRacesPerRow);
-            List<String> namesOfRaceColumnsToShow = initialSettings.getNamesOfRaceColumnsToShow();
-            for (String raceColumnName : raceAllRaceColumnNames) {
-                CheckBox checkbox = createCheckbox(dialog, raceColumnName,
-                        Util.contains(namesOfRaceColumnsToShow, raceColumnName), null);
-                raceColumnCheckboxes.put(raceColumnName, checkbox);
-                grid.setWidget(rowIndex, columnIndex++, checkbox);
-                if(columnIndex == maxRacesPerRow) {
-                    rowIndex++;
-                    columnIndex = 0;
-                }
-            }
-            explicitRaceSelectionContent.add(grid);
-            explicitRaceSelectionContent.setVisible(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
-            selectedRacesContent.add(explicitRaceSelectionContent);
-            
-            lastNRacesColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectANumberOfRaces());
-            lastNRacesColumnSelectionRadioBtn.ensureDebugId("MostCurrentRacesSelectionRadioButton");
-            lastNRacesColumnSelectionRadioBtn.setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
-            lastNRacesColumnSelectionRadioBtn.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    explicitRaceSelectionContent.setVisible(false);
-                    lastNRacesSelectionContent.setVisible(true);
-                    activeRaceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
-                }
-            });
-            racesSelectionStrategyPanel.add(lastNRacesColumnSelectionRadioBtn);
-            dialog.alignAllPanelWidgetsVertically(racesSelectionStrategyPanel, HasVerticalAlignment.ALIGN_MIDDLE);
-            
-            // content of 'number of races' selection
-            HorizontalPanel hPanel = new HorizontalPanel();
-            lastNRacesSelectionContent.add(hPanel);
-            Label numberOfLastRacesLabel = new Label(stringMessages.numberOfLastNRaces() + ":");
-            numberOfLastRacesLabel.getElement().getStyle().setPaddingRight(10, Unit.PX);
-            hPanel.add(numberOfLastRacesLabel);
-            Integer numberOfLastRacesToShow = initialSettings.getNumberOfLastRacesToShow();
-            numberOfLastRacesToShowBox = dialog.createIntegerBox(numberOfLastRacesToShow != null ? numberOfLastRacesToShow : racesCount, 3);
-            numberOfLastRacesToShowBox.ensureDebugId("NumberOfMostCurrentRacesIntegerBox");
-            hPanel.add(numberOfLastRacesToShowBox);
-            dialog.alignAllPanelWidgetsVertically(hPanel, HasVerticalAlignment.ALIGN_MIDDLE);
-            lastNRacesSelectionContent.setVisible(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
-            selectedRacesContent.add(lastNRacesSelectionContent);
-        } else {
-            selectedRacesContent.add(new Label(stringMessages.noRacesYet()));
-        }
-        return selectedRacesPanel;
-    }
+    
     
     private CheckBox createAndRegisterCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected,
             Map<DetailType, CheckBox> registry) {
@@ -346,7 +231,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         return checkbox;
     }
     
-    private CheckBox createCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip) {
+    protected CheckBox createCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip) {
         CheckBox checkbox = dialog.createCheckbox(label);
         checkbox.ensureDebugId(DebugIdHelper.createDebugId(label) + "CheckBox");
         checkbox.setValue(selected);
