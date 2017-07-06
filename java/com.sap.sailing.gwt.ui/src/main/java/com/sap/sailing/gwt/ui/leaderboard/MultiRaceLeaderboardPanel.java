@@ -8,7 +8,6 @@ import java.util.Map;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -208,15 +207,6 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
                         raceColumnSelection.requestRaceColumnSelection(raceColumnByName);
                     }
                 }
-                if (newSettings.getNamesOfRacesToShow() != null) {
-                    raceColumnSelection.requestClear();
-                    for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
-                        RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
-                        if (raceColumnToShow != null) {
-                            raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
-                        }
-                    }
-                }
             }
             break;
         case LAST_N:
@@ -230,20 +220,6 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             for (RaceColumnDTO race : getLeaderboard().getRaceList()) {
                 if (columnName.equals(race.getRaceColumnName())) {
                     return race;
-                }
-            }
-        }
-        return null;
-    }
-
-    private RaceColumnDTO getRaceByName(String raceName) {
-        if (getLeaderboard() != null) {
-            for (RaceColumnDTO race : getLeaderboard().getRaceList()) {
-                for (FleetDTO fleet : race.getFleets()) {
-                    if (race.getRaceIdentifier(fleet) != null
-                            && raceName.equals(race.getRaceIdentifier(fleet).getRaceName())) {
-                        return race;
-                    }
                 }
             }
         }

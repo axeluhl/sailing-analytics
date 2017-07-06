@@ -20,12 +20,6 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     protected StringSetSetting namesOfRaceColumnsToShow;
 
     /**
-     * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
-     * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
-     */
-    protected StringSetSetting namesOfRacesToShow;
-
-    /**
      * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to LAST_N
      */
     protected IntegerSetting numberOfLastRacesToShow;
@@ -51,9 +45,6 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
         this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
-        if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
-            throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
-        }
     }
 
     public MultiRaceLeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow) {
@@ -77,14 +68,8 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         newSettings.showCompetitorFullNameColumn.setValue(this.isShowCompetitorFullNameColumn());
         newSettings.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(this.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         newSettings.isShowCompetitorNationality.setValue(this.isShowCompetitorNationality());
-        if(namesOfRaceColumns != null && !namesOfRaceColumns.isEmpty()) {
-            newSettings.namesOfRacesToShow.setValues(null);
-        }
         newSettings.namesOfRaceColumnsToShow.setValues(this.getNamesOfRaceColumnsToShow());
         SettingsDefaultValuesUtils.keepDefaults(this, newSettings);
-        if(namesOfRaceColumns != null && !namesOfRaceColumns.isEmpty()) {
-            newSettings.namesOfRacesToShow.setDefaultValues(null);
-        }
         newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumns);
         return newSettings;
     }
@@ -93,7 +78,6 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     protected void addChildSettings() {
         super.addChildSettings();
         namesOfRaceColumnsToShow = new StringSetSetting("namesOfRaceColumnsToShow", this);
-        namesOfRacesToShow = new StringSetSetting("namesOfRacesToShow", this, null);
         numberOfLastRacesToShow = new IntegerSetting("numberOfLastRacesToShow", this, null);
     }
     
@@ -106,15 +90,6 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? (namesOfRaceColumnsToShow.isValuesEmpty() ? null : Util.createList(namesOfRaceColumnsToShow.getValues())) : null;
     }
 
-    /**
-     * If <code>null</code>, this is to mean that the race columns should not be modified by
-     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}. Otherwise
-     * a live collection that reflects the current state of the settings of a leaderboard panel
-     */
-    public List<String> getNamesOfRacesToShow() {
-        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? (namesOfRacesToShow.isValuesEmpty() ? null : Util.createList(namesOfRacesToShow.getValues())) : null;
-    }
-    
     /**
      * If <code>null</code>, this is to mean that the race columns should not be modified by
      * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
