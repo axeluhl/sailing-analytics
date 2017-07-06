@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.settingstab;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.cell.client.ButtonCell;
@@ -15,11 +17,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
+import com.sap.sailing.gwt.home.shared.partials.filter.UserSettingsByKeyTextBoxFilter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsEntry;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util.Function;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.util.NaturalComparator;
 
 /**
@@ -34,6 +39,8 @@ public class UserSettings extends Composite implements UserSettingsView {
 
     @UiField
     DivElement notificationsTextUi;
+    @UiField
+    UserSettingsByKeyTextBoxFilter userSettingsFilterUi;
     @UiField
     DivElement tableWrapper;
     @UiField(provided = true)
@@ -92,8 +99,23 @@ public class UserSettings extends Composite implements UserSettingsView {
         userSettingsTable.addColumn(showColumn, "", null, false);
         deleteColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         userSettingsTable.addColumn(deleteColumn, "", null, false);
+        userSettingsFilterUi.addFilterValueChangeHandler(new FilterValueChangeHandler<UserSettingsEntry, String>() {
+            @Override
+            public void onFilterValueChanged(Filter<UserSettingsEntry> filter) {
+                presenter.updateData();
+            }
 
+            @Override
+            public Collection<String> getFilterableValues() {
+                return Collections.emptyList();
+            }
+        });
         presenter.setView(this);
+    }
+
+    @Override
+    public Filter<UserSettingsEntry> getFilter() {
+        return userSettingsFilterUi.getFilter();
     }
 
     @Override
