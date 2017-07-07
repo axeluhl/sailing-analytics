@@ -141,7 +141,7 @@ public class StorableSettingsRepresentation {
     }
     
     public static JSONObject getSubSettingsRepresentation(JSONObject root, Iterator<String> subPath) {
-        if(root == null || !subPath.hasNext()) {
+        if (root == null || !subPath.hasNext()) {
             return root;
         } else {
             String current = subPath.next();
