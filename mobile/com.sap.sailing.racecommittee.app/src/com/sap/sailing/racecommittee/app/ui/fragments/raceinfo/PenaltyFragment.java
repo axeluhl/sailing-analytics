@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -27,6 +28,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImp
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorWithRaceRankImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
+import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorResultsList;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.ItemListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.PenaltyAdapter.OrderBy;
@@ -66,6 +68,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, ItemListener, SearchView.SearchTextWatcher {
+    private static final String TAG = PenaltyFragment.class.getName();
 
     private static final int COMPETITOR_LOADER = 0;
     private static final int LEADERBOARD_ORDER_LOADER = 2;
@@ -76,7 +79,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     private Button mPublishButton;
     private PenaltyAdapter mAdapter;
     private TextView mEntryCount;
-    private List<CompetitorResultEditableImpl> mCompetitorResults;
+    private CompetitorResultsList<CompetitorResultEditableImpl> mCompetitorResults;
     private View mListButtonLayout;
     private ImageView mListButton;
     private HeaderLayout mHeader;
@@ -92,16 +95,12 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_penalty_fragment, container, false);
-
-        mCompetitorResults = new ArrayList<>();
-
+        mCompetitorResults = new CompetitorResultsList<>(new ArrayList<CompetitorResultEditableImpl>());
         SearchView searchView = ViewHelper.get(layout, R.id.competitor_search);
         if (searchView != null) {
             searchView.setSearchTextWatcher(this);
         }
-
         mHeader = ViewHelper.get(layout, R.id.header);
-
         mListButtonLayout = ViewHelper.get(layout, R.id.list_button_layout);
         if (mListButtonLayout != null) {
             mListButtonLayout.setOnClickListener(new View.OnClickListener() {
@@ -114,7 +113,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                         case FINISHED:
                             viewId = getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true);
                             break;
-
                         default:
                             break;
                     }
@@ -123,7 +121,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             });
         }
         mListButton = ViewHelper.get(layout, R.id.list_button);
-
         View sortByButton = ViewHelper.get(layout, R.id.competitor_sort);
         if (sortByButton != null) {
             sortByButton.setOnClickListener(new View.OnClickListener() {
@@ -142,17 +139,14 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 }
             });
         }
-
         mButtonBar = ViewHelper.get(layout, R.id.button_bar);
         mButtonBar.setVisibility(View.GONE);
-
         mPenaltyDropDown = ViewHelper.get(layout, R.id.spinner_penalty);
         if (mPenaltyDropDown != null) {
             mPenaltyAdapter = new StringArraySpinnerAdapter(getAllMaxPointsReasons());
             mPenaltyDropDown.setAdapter(mPenaltyAdapter);
             mPenaltyDropDown.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(mPenaltyAdapter));
         }
-
         Button applyButton = ViewHelper.get(layout, R.id.button_apply);
         if (applyButton != null) {
             applyButton.setOnClickListener(new View.OnClickListener() {
@@ -189,16 +183,13 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             });
         }
         setPublishButton();
-
         mEntryCount = ViewHelper.get(layout, R.id.competitor_entry_count);
-
         mAdapter = new PenaltyAdapter(getActivity(), this);
         RecyclerView recyclerView = ViewHelper.get(layout, R.id.competitor_list);
         if (recyclerView != null) {
             recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
             recyclerView.setAdapter(mAdapter);
         }
-
         return layout;
     }
 
@@ -217,7 +208,6 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         RacingProcedure procedure = getRaceState().getRacingProcedure();
         if (procedure instanceof ConfigurableStartModeFlagRacingProcedure) {
             ConfigurableStartModeFlagRacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
@@ -225,15 +215,12 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 case PAPA:
                     mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name()));
                     break;
-
                 case BLACK:
                     mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name()));
                     break;
-
                 case UNIFORM:
                     mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name()));
                     break;
-
                 default:
                     // nothing
                     break;
@@ -263,20 +250,17 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                     mListButtonLayout.setVisibility(View.VISIBLE);
                 }
                 break;
-
             default:
                 if (mListButtonLayout != null) {
                     mListButtonLayout.setVisibility(View.GONE);
                 }
         }
-
         loadCompetitors();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
         sendUnconfirmed();
     }
 
@@ -305,10 +289,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         for (Competitor competitor : getRace().getCompetitors()) {
             domainFactory.getCompetitorStore().allowCompetitorResetToDefaults(competitor);
         }
-
         final Loader<?> competitorLoader = getLoaderManager()
             .initLoader(COMPETITOR_LOADER, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
-
                 @Override
                 public void onLoadFailed(Exception reason) {
                     Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()), Toast.LENGTH_LONG).show();
@@ -331,7 +313,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             .initLoader(LEADERBOARD_ORDER_LOADER, null, dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
                 @Override
                 public void onLoadFailed(Exception reason) {
-
+                    ExLog.ex(getActivity(), TAG, reason);
                 }
 
                 @Override
@@ -459,12 +441,15 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             .getFinishingTime(), competitor.getComment());
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item);
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition()+
+                /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
+                (item.getOneBasedRank()==0?1:0));
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 CompetitorResultWithIdImpl item = layout.getValue();
+                // no need to compare rank as long as the dialog doesn't allow the user to edit it
                 if (!Util.equalsWithNull(competitor.getMaxPointsReason(), item.getMaxPointsReason())) {
                     competitor.setMaxPointsReason(item.getMaxPointsReason());
                     competitor.setDirty(true);

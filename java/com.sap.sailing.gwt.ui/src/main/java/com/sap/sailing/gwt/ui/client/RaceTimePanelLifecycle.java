@@ -38,12 +38,12 @@ public class RaceTimePanelLifecycle implements
     }
 
     @Override
-    public RaceTimePanelSettings extractGlobalSettings(RaceTimePanelSettings settings) {
+    public RaceTimePanelSettings extractUserSettings(RaceTimePanelSettings settings) {
         return settings;
     }
 
     @Override
-    public RaceTimePanelSettings extractContextSpecificSettings(RaceTimePanelSettings settings) {
+    public RaceTimePanelSettings extractDocumentSettings(RaceTimePanelSettings settings) {
         return settings;
     }
 }

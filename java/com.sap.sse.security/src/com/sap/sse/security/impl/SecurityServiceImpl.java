@@ -976,6 +976,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
+    public Map<String, String> getAllPreferences(String username) {
+        Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
+            return store.getAllPreferences(username);
+        } else {
+            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
+                    + " does not have permission to read preferences of user " + username);
+        }
+    }
+    
+    @Override
     public String createAccessToken(String username) {
         User user = getUserByName(username);
         final String token;

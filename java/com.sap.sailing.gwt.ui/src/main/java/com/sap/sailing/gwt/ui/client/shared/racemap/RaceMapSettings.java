@@ -9,7 +9,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.settings.client.settingtypes.DistanceSetting;
-import com.sap.sailing.gwt.settings.client.settingtypes.converter.ManeuverTypeStringToEnumConverter;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
@@ -85,7 +84,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         tailLengthInMilliseconds = new LongSetting("tailLengthInMilliseconds", this, 100000l);
         showOnlySelectedCompetitors = new BooleanSetting("showOnlySelectedCompetitors", this, false);
         showSelectedCompetitorsInfo = new BooleanSetting("showSelectedCompetitorsInfo", this, true);
-        maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), new ManeuverTypeStringToEnumConverter());
+        maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), ManeuverType::valueOf);
         showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
     }
 
@@ -165,7 +164,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      * copy constructor that produces a new settings object that equals the one passed as argument but takes the zoom settings from the second parameter
      */
     public RaceMapSettings(RaceMapSettings settings, RaceMapZoomSettings zoomSettings) {
-        this.buoyZoneRadius.setDefaultValue(settings.buoyZoneRadius.getDefaultValue());
         this.buoyZoneRadius.setValue(settings.buoyZoneRadius.getValue());
         this.helpLinesSettings.init(settings.getHelpLinesSettings());
         this.transparentHoverlines.setValue(settings.transparentHoverlines.getValue());
@@ -250,33 +248,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         return buoyZoneRadius.isDefaultValue();
     }
     
-    public RaceMapSettings getDefaultSettings() {
-        RaceMapSettings newRaceMapSettings = new RaceMapSettings();
-        newRaceMapSettings.buoyZoneRadius.setDefaultValue(this.buoyZoneRadius.getDefaultValue());
-        return newRaceMapSettings;
-    }
-    
-    public RaceMapSettings keepDefaults(RaceMapSettings previousSettings) {
-        RaceMapSettings newRaceMapSettings = previousSettings.getDefaultSettings();
-        newRaceMapSettings.buoyZoneRadius.setValue(getBuoyZoneRadius());
-        newRaceMapSettings.hoverlineStrokeWeight.setValue(getHoverlineStrokeWeight());
-        newRaceMapSettings.maneuverTypesToShow.setValues(getManeuverTypesToShow());
-        newRaceMapSettings.showDouglasPeuckerPoints.setValue(isShowDouglasPeuckerPoints());
-        newRaceMapSettings.showMapControls.setValue(isShowMapControls());
-        newRaceMapSettings.showOnlySelectedCompetitors.setValue(isShowOnlySelectedCompetitors());
-        newRaceMapSettings.showSelectedCompetitorsInfo.setValue(isShowSelectedCompetitorsInfo());
-        newRaceMapSettings.showSimulationOverlay.setValue(isShowSimulationOverlay());
-        newRaceMapSettings.showWindStreamletColors.setValue(isShowWindStreamletColors());
-        newRaceMapSettings.showWindStreamletOverlay.setValue(isShowWindStreamletOverlay());
-        newRaceMapSettings.tailLengthInMilliseconds.setValue(getTailLengthInMilliseconds());
-        newRaceMapSettings.transparentHoverlines.setValue(getTransparentHoverlines());
-        newRaceMapSettings.windUp.setValue(isWindUp());
-        newRaceMapSettings.helpLinesSettings.init(this.helpLinesSettings);
-        newRaceMapSettings.zoomSettings.init(this.zoomSettings);
-        return newRaceMapSettings;
-    }
-    
-    public static RaceMapSettings createSettingsWithNewDefaultBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
+    public static RaceMapSettings createSettingsWithNewBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
         final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
                 settings.getZoomSettings(), settings.getHelpLinesSettings(),
                 settings.getTransparentHoverlines(),
@@ -289,7 +261,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(),
                 settings.getManeuverTypesToShow(),
                 settings.isShowDouglasPeuckerPoints());
-        newRaceMapSettings.buoyZoneRadius.setDefaultValue(newDefaultBuoyZoneRadius);
         return newRaceMapSettings;
     }
 

@@ -7,4 +7,6 @@ public interface CollectionSetting<T> extends Setting {
     
     Iterable<T> getValues();
 
+    void addValue(T value);
+
 }

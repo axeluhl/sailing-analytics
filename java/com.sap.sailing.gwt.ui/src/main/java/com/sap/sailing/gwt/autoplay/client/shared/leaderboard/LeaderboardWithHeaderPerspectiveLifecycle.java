@@ -64,13 +64,13 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     }
 
     @Override
-    protected LeaderboardWithHeaderPerspectiveSettings extractOwnGlobalSettings(
+    protected LeaderboardWithHeaderPerspectiveSettings extractOwnUserSettings(
             LeaderboardWithHeaderPerspectiveSettings settings) {
         return settings;
     }
 
     @Override
-    protected LeaderboardWithHeaderPerspectiveSettings extractOwnContextSettings(
+    protected LeaderboardWithHeaderPerspectiveSettings extractOwnDocumentSettings(
             LeaderboardWithHeaderPerspectiveSettings settings) {
         return settings;
     }

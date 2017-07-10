@@ -9,18 +9,16 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.IsManagedByCache;
 
@@ -41,7 +39,7 @@ import com.sap.sse.common.IsManagedByCache;
  * @author Axel Uhl (d043530)
  * 
  */
-public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections, IsManagedByCache<SharedDomainFactory> {
+public class DelayedLeaderboardCorrectionsImpl implements RaceColumnListenerWithDefaultAction, DelayedLeaderboardCorrections, IsManagedByCache<SharedDomainFactory> {
     private static final long serialVersionUID = 8824782847677232275L;
     
     // structures that key corrections by competitor ID
@@ -271,71 +269,16 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
-    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-    }
-
-    @Override
-    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-    }
-
-    @Override
-    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
-    }
-
-    @Override
-    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
-    }
-
-    @Override
-    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
-    }
-
-    @Override
-    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
-    }
-
-    @Override
-    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-        return true;
-    }
-
-    @Override
-    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-    }
-
-    @Override
-    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-    }
-
-    @Override
-    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
-    }
-
-    @Override
-    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
-    }
-
-    @Override
-    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
-    }
-
-    @Override
-    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
-    }
-
-    @Override
-    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
-    }
-
-    @Override
-    public boolean isTransient() {
-        return false;
-    }
-
-    @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         this.competitorFactory = domainFactory;
         return this;
+    }
+
+    /**
+     * The default action for {@link RaceColumnListener} callbacks is to do nothing
+     */
+    @Override
+    public void defaultAction() {
     }
 
 }
