@@ -437,6 +437,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
 
+    Iterable<CompetitorDTO> getCompetitorsOfRace(String leaderboardName, String raceColumnName, String fleetName);
+    
     List<CompetitorDTO> addOrUpdateCompetitors(List<CompetitorDTO> competitors) throws Exception;
 
     CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws Exception;
@@ -453,6 +455,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void allowBoatResetToDefaults(Iterable<BoatDTO> boats);
 
+    boolean linkBoatToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString, String boatIdAsString);
+
+    boolean unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString);
+
+    BoatDTO getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString);
+    
     List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers();
     
     DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcher);

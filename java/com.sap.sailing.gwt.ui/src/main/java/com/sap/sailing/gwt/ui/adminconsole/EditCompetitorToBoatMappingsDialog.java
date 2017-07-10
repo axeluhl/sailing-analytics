@@ -1,0 +1,56 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import java.util.List;
+
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+
+public class EditCompetitorToBoatMappingsDialog extends DataEntryDialog<List<CompetitorDTO>> {
+    private final SailingServiceAsync sailingService;
+    private final StringMessages stringMessages;
+    private final ErrorReporter errorReporter;
+    private final String leaderboardName;
+    private final String raceColumnName;
+    private final String fleetName;
+
+    protected static class CompetitorsValidator implements Validator<List<CompetitorDTO>> {
+        public CompetitorsValidator() {
+            super();
+        }
+
+        @Override
+        public String getErrorMessage(List<CompetitorDTO> valueToValidate) {
+            return null;
+        }
+    }
+        
+    public EditCompetitorToBoatMappingsDialog(final SailingServiceAsync sailingService, String leaderboardName, 
+            final String raceColumnName, final String fleetName, String raceName, final StringMessages stringMessages,
+            final ErrorReporter errorReporter, DialogCallback<List<CompetitorDTO>> callback) {
+        super(stringMessages.actionEditCompetitorToBoatAssignmentsForRace(raceName),
+                null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsValidator(), callback);
+        this.sailingService = sailingService;
+        this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
+        this.leaderboardName = leaderboardName;
+        this.raceColumnName = raceColumnName;
+        this.fleetName = fleetName;
+    }
+
+    @Override
+    protected List<CompetitorDTO> getResult() {
+        return null;
+    }
+
+    @Override
+    protected Widget getAdditionalWidget() {
+        CompetitorToBoatMappingsPanel competitorPanel = new CompetitorToBoatMappingsPanel(sailingService,
+                leaderboardName, raceColumnName, fleetName, stringMessages, errorReporter);
+
+        return competitorPanel; 
+    }
+}

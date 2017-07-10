@@ -1,11 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -13,7 +11,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
@@ -21,18 +18,16 @@ import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
-public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
+public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
     
-    public BoatTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
+    public CompactBoatTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<BoatDTO>() {
@@ -101,21 +96,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
             }
         });
         
-        TextColumn<BoatDTO> boatIdColumn = new TextColumn<BoatDTO>() {
-            @Override
-            public String getValue(BoatDTO boat) {
-                return boat.getIdAsString();
-            }
-        };
-        boatIdColumn.setSortable(true);
-        boatColumnListHandler.setComparator(boatIdColumn, new Comparator<BoatDTO>() {
-            @Override
-            public int compare(BoatDTO o1, BoatDTO o2) {
-                return new NaturalComparator(false).compare(o1.getIdAsString(), o2.getIdAsString());
-            }
-        });
-
-        filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterCompetitors()),
+        filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterBoats()),
                 new ArrayList<BoatDTO>(), table, dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(BoatDTO boat) {
@@ -123,35 +104,17 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 string.add(boat.getName());
                 string.add(boat.getSailId());
                 string.add(boat.getBoatClass().getName());
-                string.add(boat.getIdAsString());
                 return string;
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-        
-        // BoatTable edit features
-        ImagesBarColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = new ImagesBarColumn<BoatDTO, BoatConfigImagesBarCell>(
-                new BoatConfigImagesBarCell(stringMessages));
-        boatActionColumn.setFieldUpdater(new FieldUpdater<BoatDTO, String>() {
-            @Override
-            public void update(int index, final BoatDTO boat, String value) {
-                if (BoatConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    openEditBoatDialog(boat);
-                } else if (BoatConfigImagesBarCell.ACTION_REFRESH.equals(value)) {
-                    allowUpdate(Collections.singleton(boat));
-                }
-            }
-
-        });
-        
+                
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);
         table.addColumn(boatNameColumn, stringMessages.name());
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(boatColorColumn, stringMessages.color());
-        table.addColumn(boatIdColumn, stringMessages.id());
-        table.addColumn(boatActionColumn, stringMessages.actions());
         table.ensureDebugId("BoatsTable");
     }
     
@@ -166,7 +129,24 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
     public void filterBoats(Iterable<BoatDTO> boats) {
         getFilteredBoats(boats);
     }
+
+    public void refreshBoatList() {
+        refreshBoatList(null);
+    }
     
+    public void selectBoat(BoatDTO boatToSelect) {
+        for (BoatDTO boat: getAllBoats()) {
+            if (boat.getIdAsString().equals(boatToSelect.getIdAsString())) {
+                getSelectionModel().setSelected(boat, true);
+                break;
+            }
+        }
+    }
+
+    public void clearSelection() {
+        getSelectionModel().clear();
+    }
+
     public void refreshBoatList(final Callback<Iterable<BoatDTO>, Throwable> callback) {
         sailingService.getBoats(new AsyncCallback<Iterable<BoatDTO>>() {
             @Override
@@ -190,57 +170,5 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
     private void getFilteredBoats(Iterable<BoatDTO> result) {
         filterField.updateAll(result);
-    }
-    
-    void openEditBoatDialog(final BoatDTO originalBoat) {
-        final BoatEditDialog dialog = new BoatEditDialog(stringMessages, originalBoat, new DialogCallback<BoatDTO>() {
-            @Override
-            public void ok(BoatDTO boat) {
-                sailingService.addOrUpdateBoat(boat, new AsyncCallback<BoatDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to update boat: " + caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(BoatDTO updatedBoat) {
-                        //only reload selected boats reloading with refreshBoatList(leaderboardName)
-                        //would not work in case the list is not based on a leaderboard e.g. AbstractBoatRegistrationDialog
-                        int editedBoatIndex = getFilterField().indexOf(originalBoat);
-                        getFilterField().remove(originalBoat);
-                        if (editedBoatIndex >= 0){
-                            getFilterField().add(editedBoatIndex, updatedBoat);
-                        } else {
-                            //in case boat was not present --> not edit, but create
-                            getFilterField().add(updatedBoat);
-                        }
-                        getDataProvider().refresh();
-                    }  
-                });
-            }
-
-            @Override
-            public void cancel() {
-            }
-        });
-        dialog.ensureDebugId("BoatEditDialog");
-        dialog.show();
-    }
-
-    public void allowUpdate(final Iterable<BoatDTO> boats) {
-        List<BoatDTO> serializableSingletonList = new ArrayList<BoatDTO>();
-        Util.addAll(boats, serializableSingletonList);
-        sailingService.allowBoatResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to allow resetting boats " + boats
-                        + " to defaults: " + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                Window.alert(stringMessages.successfullyAllowedCompetitorReset(boats.toString()));
-            }
-        });
     }
 }

@@ -61,6 +61,11 @@ public class CompetitorDTOImpl extends CompetitorWithoutBoatDTOImpl implements C
     }
 
     @Override
+    public void setBoat(BoatDTO boat) {
+        this.boat = boat;
+    }    
+
+    @Override
     public BoatDTO getBoat() {
         return boat;
     }    

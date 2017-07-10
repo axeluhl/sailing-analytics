@@ -215,6 +215,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String actionEdit();
     String actionEditScores();
     String actionEditCompetitors();
+    String actionEditCompetitorToBoatAssignmentsForRace(String raceName);
     String actionOpenBrowser();
     String actionRemove();
     String actionEditSeries();
@@ -223,6 +224,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String actionRaceRemove();
     String actionExportXML();
     String actionOpenDashboard();
+    String actionBoatUnlink();
     String filterLeaderboardsByName();
     String actions();
     String islinked();
@@ -964,6 +966,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveCompetitors();
     String doYouReallyWantToRemoveCompetitor(String name);
     String filterCompetitors();
+    String filterBoats();
     String editCompetitor();
     String pleaseEnterASailNumber();
     String successfullyAllowedCompetitorReset(String names);
@@ -1815,6 +1818,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unknownLeaderboardType(String name);
     String selectCompetitorsToEliminate();
     String trackedRaceAlreadyLinked();
+    String boatAlreadyLinked();
     String reallyRemoveSeries(String seriesName);
     String settingsId();
     String documentSettingsId();

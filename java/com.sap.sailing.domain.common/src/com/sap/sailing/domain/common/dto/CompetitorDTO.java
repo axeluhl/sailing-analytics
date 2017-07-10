@@ -14,6 +14,8 @@ public interface CompetitorDTO extends CompetitorWithoutBoatDTO {
     
     BoatDTO getBoat();
 
+    void setBoat(BoatDTO boat);
+
     // TODO bug2822: Should we remove this?
     BoatClassDTO getBoatClass();
 

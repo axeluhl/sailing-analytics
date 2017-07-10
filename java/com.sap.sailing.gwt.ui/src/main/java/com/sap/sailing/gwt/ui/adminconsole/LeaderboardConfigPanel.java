@@ -31,6 +31,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -308,7 +309,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                         }
                     });
                     editCompetitorsDialog.show();
-
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
                     openLeaderboardUrlConfigDialog(leaderboardDTO);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
@@ -466,6 +466,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     setStartTime(object.getA(), object.getB());
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
                     showRaceLog(object.getA(), object.getB());
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS.equals(value)) {
+                    editCompetitorToBoatMappings(object.getA(), object.getB());
                 }
             }
         });
@@ -581,6 +583,25 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         SettingsDialogForLinkSharing<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> dialog = new SettingsDialogForLinkSharing<>(
                 linkWithSettingsGenerator, lifeCycle, stringMessages);
         dialog.ensureDebugId("LeaderboardPageUrlConfigurationDialog");
+        dialog.show();
+    }
+
+    private void editCompetitorToBoatMappings(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        final String raceColumnName = raceColumnDTO.getName();
+        final String fleetName = fleetDTO.getName();
+        final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName : raceColumnName + ", " + fleetName;
+        EditCompetitorToBoatMappingsDialog dialog = new EditCompetitorToBoatMappingsDialog(sailingService, 
+                selectedLeaderboardName, raceColumnName, fleetName, raceName, stringMessages, 
+                errorReporter, new DialogCallback<List<CompetitorDTO>>() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(final List<CompetitorDTO> result) {
+            }
+        });
         dialog.show();
     }
 
