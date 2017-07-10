@@ -32,7 +32,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         raceDetails.add(DetailType.DISPLAY_LEGS);
         List<DetailType> overallDetails = new ArrayList<>();
         SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();
-        SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(), defaultSettings.getRaceDetailsToShow(), overallDetails, false, DEFAULT_REFRESH_INTERVAL, defaultSettings.isUpdateUponPlayStateChange(), defaultSettings.getActiveRaceColumnSelectionStrategy(), defaultSettings.isShowAddedScores(), defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
+        SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(), defaultSettings.getRaceDetailsToShow(), overallDetails, false, DEFAULT_REFRESH_INTERVAL, defaultSettings.getActiveRaceColumnSelectionStrategy(), defaultSettings.isShowAddedScores(), defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
                 /*showCompetitorSailIdColumn*/ true,
                 /* don't showCompetitorFullNameColumn in case screen is so small that we don't
                  * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, false);
@@ -54,7 +54,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
                 currentLeaderboardSettings.isAutoExpandPreSelectedRace(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                currentLeaderboardSettings.isUpdateUponPlayStateChange(),
                 currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
                 currentLeaderboardSettings.isShowAddedScores(),
                 currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
@@ -72,7 +71,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
                 defaultLeaderboardSettings.isAutoExpandPreSelectedRace(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                currentLeaderboardSettings.isUpdateUponPlayStateChange(),
                 currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
                 currentLeaderboardSettings.isShowAddedScores(),
                 currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),

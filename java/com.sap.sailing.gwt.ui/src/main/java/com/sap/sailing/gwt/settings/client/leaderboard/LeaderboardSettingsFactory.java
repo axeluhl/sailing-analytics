@@ -35,7 +35,6 @@ public class LeaderboardSettingsFactory {
                 raceDetailsToShow, defaultSettings.getOverallDetailsToShow(),
                 defaultSettings.isAutoExpandPreSelectedRace(),
                 defaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                defaultSettings.isUpdateUponPlayStateChange(),
                 defaultSettings.getActiveRaceColumnSelectionStrategy(),
                 defaultSettings.isShowAddedScores(),
                 defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
@@ -51,7 +50,6 @@ public class LeaderboardSettingsFactory {
                 settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
                 expandPreselectedRace,
                 settings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                settings.isUpdateUponPlayStateChange(),
                 settings.getActiveRaceColumnSelectionStrategy(),
                 settings.isShowAddedScores(),
                 settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
@@ -79,11 +77,10 @@ public class LeaderboardSettingsFactory {
         Integer numberOfLastRacesToShow = settingsWithRaceSelection.getNumberOfLastRacesToShow();
         boolean showCompetitorSailIdColumn = settingsWithRaceSelection.isShowCompetitorSailIdColumn();
         boolean showCompetitorFullNameColumns = settingsWithRaceSelection.isShowCompetitorFullNameColumn();
-        boolean updateUponPlayStateChange = settingsWithRaceSelection.isUpdateUponPlayStateChange();
 
         return new MultiRaceLeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, numberOfLastRacesToShow, refreshIntervalInMs,
-                updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
+                strategy, /*showAddedScores*/ false,
                 /* showOverallRacesCompleted */ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns,
                 settingsWithRaceSelection.isShowCompetitorNationality());
     }

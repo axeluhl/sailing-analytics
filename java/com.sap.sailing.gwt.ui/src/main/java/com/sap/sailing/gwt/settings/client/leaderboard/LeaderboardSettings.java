@@ -30,7 +30,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     protected EnumSetSetting<DetailType> raceDetailsToShow;
     protected EnumSetSetting<DetailType> overallDetailsToShow;
     protected LongSetting delayBetweenAutoAdvancesInMilliseconds;
-    protected BooleanSetting updateUponPlayStateChange;
     protected BooleanSetting isShowCompetitorNationality;
     
     /**
@@ -75,7 +74,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         overallDetailsToShow = new EnumSetSetting<>("overallDetailsToShow", this, overallDetails, DetailType::valueOf);
         delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, RaceColumnSelectionStrategies::valueOf);
-        updateUponPlayStateChange = new BooleanSetting("updateUponPlayStateChange", this, true);
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
         showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this, true);
         showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);
@@ -91,7 +89,7 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     public LeaderboardSettings(Collection<DetailType> maneuverDetailsToShow, Collection<DetailType> legDetailsToShow,
             Collection<DetailType> raceDetailsToShow, Collection<DetailType> overallDetailsToShow,
             Long delayBetweenAutoAdvancesInMilliseconds, 
-            boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
+            RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
             boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
             boolean isCompetitorNationalityColumnVisible) {
@@ -101,7 +99,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
         this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
         this.maneuverDetailsToShow.setValues(maneuverDetailsToShow);
-        this.updateUponPlayStateChange.setValue(updateUponPlayStateChange);
         this.showAddedScores.setValue(showAddedScores);
         this.showCompetitorSailIdColumn.setValue(showCompetitorSailIdColumn);
         this.showCompetitorFullNameColumn.setValue(showCompetitorFullNameColumn);
@@ -144,14 +141,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
      */
     public Long getDelayBetweenAutoAdvancesInMilliseconds() {
         return delayBetweenAutoAdvancesInMilliseconds.getValue();
-    }
-
-    /**
-     * If <code>true</code>, an update of the settings will behave like a manual settings update, meaning that
-     * the settings won't automatically be replaced / adjusted when the play state changes.
-     */
-    public boolean isUpdateUponPlayStateChange() {
-        return updateUponPlayStateChange.getValue();
     }
 
     public RaceColumnSelectionStrategies getActiveRaceColumnSelectionStrategy() {

@@ -34,12 +34,12 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
             Collection<DetailType> overallDetailsToShow, List<String> namesOfRaceColumnsToShow,
             Integer numberOfLastRacesToShow,
             Long delayBetweenAutoAdvancesInMilliseconds,
-            boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
+            RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
             boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
             boolean isCompetitorNationalityColumnVisible) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow, delayBetweenAutoAdvancesInMilliseconds,
-                updateUponPlayStateChange, activeRaceColumnSelectionStrategy, showAddedScores,
+                activeRaceColumnSelectionStrategy, showAddedScores,
                 showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorSailIdColumn,
                 showCompetitorFullNameColumn, isCompetitorNationalityColumnVisible);
         
@@ -60,7 +60,6 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         newSettings.activeRaceColumnSelectionStrategy.setValue(this.getActiveRaceColumnSelectionStrategy());
         newSettings.delayBetweenAutoAdvancesInMilliseconds.setValue(this.getDelayBetweenAutoAdvancesInMilliseconds());
         newSettings.maneuverDetailsToShow.setValues(this.getManeuverDetailsToShow());
-        newSettings.updateUponPlayStateChange.setValue(this.isUpdateUponPlayStateChange());
         newSettings.showAddedScores.setValue(this.isShowAddedScores());
         newSettings.showCompetitorSailIdColumn.setValue(this.isShowCompetitorSailIdColumn());
         newSettings.showCompetitorFullNameColumn.setValue(this.isShowCompetitorFullNameColumn());

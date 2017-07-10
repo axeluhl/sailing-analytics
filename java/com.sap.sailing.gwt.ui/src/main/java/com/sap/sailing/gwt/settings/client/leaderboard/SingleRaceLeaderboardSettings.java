@@ -16,13 +16,13 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
     public SingleRaceLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,
             Collection<DetailType> legDetailsToShow, Collection<DetailType> raceDetailsToShow,
             Collection<DetailType> overallDetailsToShow, boolean autoExpandPreSelectedRace,
-            Long delayBetweenAutoAdvancesInMilliseconds, boolean updateUponPlayStateChange,
+            Long delayBetweenAutoAdvancesInMilliseconds,
             RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy, boolean showAddedScores,
             boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor, boolean showCompetitorSailIdColumn,
             boolean showCompetitorFullNameColumn, boolean isCompetitorNationalityColumnVisible) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
-                delayBetweenAutoAdvancesInMilliseconds, updateUponPlayStateChange, activeRaceColumnSelectionStrategy,
-                showAddedScores, showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorSailIdColumn,
+                delayBetweenAutoAdvancesInMilliseconds, activeRaceColumnSelectionStrategy, showAddedScores,
+                showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorSailIdColumn,
                 showCompetitorFullNameColumn, isCompetitorNationalityColumnVisible);
 
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
