@@ -23,7 +23,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with

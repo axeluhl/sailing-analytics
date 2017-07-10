@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.dispatch.shared.commands.CollectionResult;
 
 /**
@@ -88,8 +88,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel(); 
-
+            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
             final Consumer<LeaderboardPanel> leaderboardConsumer = new Consumer<LeaderboardPanel>() {
                 @Override
                 public void consume(LeaderboardPanel leaderboardPanel) {
@@ -113,18 +112,18 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
                     }
                     regattaAnalyticsManager.hideCompetitorChart();
                     contentArea.setWidget(RegattaLeaderboardTabView.this);
-                    if (leaderboardPanel.getLeaderboard() != null) {
+                    if(leaderboardPanel.getLeaderboard() != null) {
                         leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
                     }
                 }
             };
-            if (leaderboardPanel == null) {
+            if(leaderboardPanel == null) {
                 createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager,
                         currentPresenter.getUserService(), /* FIXME placeToken */ null, leaderboardConsumer);
-            } else if ( /* FIXME placeToken not empty */ false) {
+            } else if( /*FIXME placeToken not empty */ false) {
                 createLeaderboardComponentContext(leaderboardName, currentPresenter.getUserService(),
                         /* FIXME placeToken */ null)
-                                .initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+                                .getInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
                                     @Override
                                     public void onSuccess(LeaderboardSettings settings) {
                                         leaderboardPanel.updateSettings(settings);
@@ -134,7 +133,6 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             } else {
                 leaderboardConsumer.consume(leaderboardPanel);
             }
-
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
             new com.google.gwt.user.client.Timer() {

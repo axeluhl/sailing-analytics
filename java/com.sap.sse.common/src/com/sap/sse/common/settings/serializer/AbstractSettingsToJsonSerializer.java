@@ -1,10 +1,13 @@
 package com.sap.sse.common.settings.serializer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.CollectionSetting;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.Setting;
@@ -41,6 +44,8 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     protected abstract OBJECT parseStringToJsonObject(String jsonString) throws Exception;
     
     public abstract String jsonObjectToString(OBJECT jsonObject);
+    
+    public abstract boolean isArray(Object jsonValue);
     
     protected OBJECT parseStringToJsonObjectWithExceptionHandling(String jsonString) {
         try {
@@ -142,20 +147,39 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     }
 
     private <T> Object serializeListSetting(CollectionSetting<T> listSetting) {
-        List<Object> jsonValues = new ArrayList<>();
         if (listSetting instanceof ValueCollectionSetting) {
-            ValueCollectionSetting<T> valueListSetting = (ValueCollectionSetting<T>) listSetting;
-            ValueConverter<T> converter = valueListSetting.getValueConverter();
-            for (T value : valueListSetting.getValues()) {
-                jsonValues.add(converter.toJSONValue(value));
-            }
+            final ValueCollectionSetting<T> valueListSetting = (ValueCollectionSetting<T>) listSetting;
+            return serializeValueCollection(valueListSetting);
         } else if (listSetting instanceof SettingsListSetting) {
+            List<Object> jsonValues = new ArrayList<>();
             SettingsListSetting<?> settingsListSetting = (SettingsListSetting<?>) listSetting;
             for (GenericSerializableSettings value : settingsListSetting.getValues()) {
                 jsonValues.add(serialize(value));
             }
+            return ToJsonArray(jsonValues);
         } else {
             throw new IllegalStateException("Unknown ListSetting type");
+        }
+    }
+
+    private <T> Object serializeValueCollection(ValueCollectionSetting<T> valueListSetting) {
+        final ValueConverter<T> converter = valueListSetting.getValueConverter();
+        final OBJECT diffDataObject = newOBJECT();
+        Iterable<T> addedValues = valueListSetting.getAddedValues();
+        if(!Util.isEmpty(addedValues)) {
+            set(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN, serializeMultipleValues(converter, addedValues));
+        }
+        Iterable<T> removedValues = valueListSetting.getRemovedValues();
+        if(!Util.isEmpty(removedValues)) {
+            set(diffDataObject, AbstractGenericSerializableSettings.REMOVED_TOKEN, serializeMultipleValues(converter, removedValues));
+        }
+        return diffDataObject;
+    }
+
+    private <T> Object serializeMultipleValues(ValueConverter<T> converter, Iterable<T> values) {
+        List<Object> jsonValues = new ArrayList<>();
+        for (T value : values) {
+            jsonValues.add(converter.toJSONValue(value));
         }
         return ToJsonArray(jsonValues);
     }
@@ -221,21 +245,60 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     }
 
     private <T> void deserializeListSetting(Object jsonValue, CollectionSetting<T> listSetting) {
-        @SuppressWarnings("unchecked")
-        ARRAY jsonArray = (ARRAY) jsonValue;
         if (listSetting instanceof ValueCollectionSetting) {
-            ValueCollectionSetting<T> valueListSetting = (ValueCollectionSetting<T>) listSetting;
-            ValueConverter<T> converter = valueListSetting.getValueConverter();
-            List<T> values = new ArrayList<>();
+            deserializeValueListSetting(listSetting, jsonValue);
+        } else {
+            @SuppressWarnings("unchecked")
+            ARRAY jsonArray = (ARRAY) jsonValue;
+            if (listSetting instanceof SettingsListSetting) {
+                deserializeSettingsListSetting(jsonArray, (SettingsListSetting<?>) listSetting);
+            } else {
+                throw new IllegalStateException("Unknown ListSetting type");
+            }
+        }
+    }
+
+    private <T> void deserializeValueListSetting(CollectionSetting<T> listSetting, Object jsonValue) {
+        ValueCollectionSetting<T> valueListSetting = (ValueCollectionSetting<T>) listSetting;
+        ValueConverter<T> converter = valueListSetting.getValueConverter();
+        if(isArray(jsonValue)) {
+            // fallback logic to correctly deserialize values serialized before diffing was introduced
+            @SuppressWarnings("unchecked")
+            final ARRAY jsonArray = (ARRAY) jsonValue;
+            final List<T> values = deserializeMultipleValues(jsonArray, converter);
+            valueListSetting.setValues(values);
+        } else {
+            @SuppressWarnings("unchecked")
+            final OBJECT diffDataObject = (OBJECT) jsonValue;
+            final List<T> addedValues;
+            if (hasProperty(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN)) {
+                @SuppressWarnings("unchecked")
+                final ARRAY addedValuesArray = (ARRAY) get(diffDataObject, AbstractGenericSerializableSettings.ADDED_TOKEN);
+                addedValues = deserializeMultipleValues(addedValuesArray, converter);
+            } else {
+                addedValues = Collections.emptyList();
+            }
+            final List<T> removedValues;
+            if (hasProperty(diffDataObject, AbstractGenericSerializableSettings.REMOVED_TOKEN)) {
+                @SuppressWarnings("unchecked")
+                final ARRAY removedValuesArray = (ARRAY) get(diffDataObject, AbstractGenericSerializableSettings.REMOVED_TOKEN);
+                removedValues = deserializeMultipleValues(removedValuesArray, converter);
+            } else {
+                removedValues = Collections.emptyList();
+            }
+            valueListSetting.setDiff(removedValues, addedValues);
+            
+        }
+    }
+
+    private <T> List<T> deserializeMultipleValues(ARRAY jsonArray, ValueConverter<T> converter) {
+        List<T> values = new ArrayList<>();
+        if(jsonArray != null) {
             for (Object value : fromJsonArray(jsonArray)) {
                 values.add(converter.fromJSONValue(value));
             }
-            valueListSetting.setValues(values);
-        } else if (listSetting instanceof SettingsListSetting) {
-            deserializeSettingsListSetting(jsonArray, (SettingsListSetting<?>) listSetting);
-        } else {
-            throw new IllegalStateException("Unknown ListSetting type");
         }
+        return values;
     }
 
     private <T extends GenericSerializableSettings> void deserializeSettingsListSetting(ARRAY jsonArray, SettingsListSetting<T> settingsListSetting) {

@@ -10,10 +10,15 @@ public abstract class AbstractSearchResultItem extends Widget {
     protected final void init(Element element, SearchResultDTO item) {
         setElement(element);
         getResultTitleUi().setInnerText(item.getDisplayName());
+        String eventId = String.valueOf(item.getEvents().iterator().next().getId());
+        configureRegattaNavigation(eventId, item.getLeaderboardName(), item.getBaseUrl(), item.isOnRemoteServer());
         for (SearchResultEventInfoDTO event : item.getEvents()) {
             addEventInfo(event);
         }
     }
+    
+    protected abstract void configureRegattaNavigation(String eventId, 
+            String leaderboardName, String baseUrl, boolean isOnRemoteServer);
     
     protected abstract Element getResultTitleUi();
     
