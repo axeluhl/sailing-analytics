@@ -432,7 +432,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
         this.timer = timer;
         overallDetailColumnMap = createOverallDetailColumnMap();
-        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
 
         if (settings.getLegDetailsToShow() != null) {
             selectedLegDetails.addAll(settings.getLegDetailsToShow());
@@ -685,20 +684,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
     
-    private void postApplySettings(final LeaderboardSettings newSettings,
+    protected void postApplySettings(final LeaderboardSettings newSettings,
             final List<ExpandableSortableColumn<?>> columnsToExpandAgain) {
         if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
         }
         for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
             expandableSortableColumn.changeExpansionState(/* expand */ true);
-        }
-        if (newSettings.getNameOfRaceToSort() != null) {
-            final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(
-                    newSettings.getNameOfRaceToSort());
-            if (raceColumnByRaceName != null) {
-                getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
-            }
         }
     }
 
@@ -2074,7 +2066,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return refreshAndSettingsPanel;
     }
 
-    private RaceColumn<?> getRaceColumnByRaceName(String raceName) {
+    protected RaceColumn<?> getRaceColumnByRaceName(String raceName) {
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
             if (column instanceof LeaderboardPanel.RaceColumn) {

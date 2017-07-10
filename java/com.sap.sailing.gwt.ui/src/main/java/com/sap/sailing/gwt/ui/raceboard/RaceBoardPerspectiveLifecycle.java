@@ -42,7 +42,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
-        leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(raceIdentifier, stringMessages);
+        leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, false);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages);

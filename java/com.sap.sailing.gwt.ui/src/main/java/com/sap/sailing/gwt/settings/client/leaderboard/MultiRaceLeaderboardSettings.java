@@ -33,13 +33,13 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
             Collection<DetailType> legDetailsToShow, Collection<DetailType> raceDetailsToShow,
             Collection<DetailType> overallDetailsToShow, List<String> namesOfRaceColumnsToShow,
             Integer numberOfLastRacesToShow,
-            Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort, boolean sortAscending,
+            Long delayBetweenAutoAdvancesInMilliseconds,
             boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
             boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
             boolean isCompetitorNationalityColumnVisible) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow, delayBetweenAutoAdvancesInMilliseconds,
-                nameOfRaceToSort, sortAscending, updateUponPlayStateChange, activeRaceColumnSelectionStrategy, showAddedScores,
+                updateUponPlayStateChange, activeRaceColumnSelectionStrategy, showAddedScores,
                 showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorSailIdColumn,
                 showCompetitorFullNameColumn, isCompetitorNationalityColumnVisible);
         
@@ -60,8 +60,6 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         newSettings.activeRaceColumnSelectionStrategy.setValue(this.getActiveRaceColumnSelectionStrategy());
         newSettings.delayBetweenAutoAdvancesInMilliseconds.setValue(this.getDelayBetweenAutoAdvancesInMilliseconds());
         newSettings.maneuverDetailsToShow.setValues(this.getManeuverDetailsToShow());
-        newSettings.nameOfRaceToSort.setValue(this.getNameOfRaceToSort());
-        newSettings.sortAscending.setValue(this.isSortAscending());
         newSettings.updateUponPlayStateChange.setValue(this.isUpdateUponPlayStateChange());
         newSettings.showAddedScores.setValue(this.isShowAddedScores());
         newSettings.showCompetitorSailIdColumn.setValue(this.isShowCompetitorSailIdColumn());

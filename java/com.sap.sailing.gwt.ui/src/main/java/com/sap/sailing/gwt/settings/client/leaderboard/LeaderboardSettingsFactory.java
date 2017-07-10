@@ -35,7 +35,6 @@ public class LeaderboardSettingsFactory {
                 raceDetailsToShow, defaultSettings.getOverallDetailsToShow(),
                 defaultSettings.isAutoExpandPreSelectedRace(),
                 defaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                defaultSettings.getNameOfRaceToSort(), defaultSettings.isSortAscending(),
                 defaultSettings.isUpdateUponPlayStateChange(),
                 defaultSettings.getActiveRaceColumnSelectionStrategy(),
                 defaultSettings.isShowAddedScores(),
@@ -52,7 +51,6 @@ public class LeaderboardSettingsFactory {
                 settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
                 expandPreselectedRace,
                 settings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                settings.getNameOfRaceToSort(), settings.isSortAscending(),
                 settings.isUpdateUponPlayStateChange(),
                 settings.getActiveRaceColumnSelectionStrategy(),
                 settings.isShowAddedScores(),
@@ -81,13 +79,11 @@ public class LeaderboardSettingsFactory {
         Integer numberOfLastRacesToShow = settingsWithRaceSelection.getNumberOfLastRacesToShow();
         boolean showCompetitorSailIdColumn = settingsWithRaceSelection.isShowCompetitorSailIdColumn();
         boolean showCompetitorFullNameColumns = settingsWithRaceSelection.isShowCompetitorFullNameColumn();
-        String nameOfRaceToSort = settingsWithRaceSelection.getNameOfRaceToSort();
-        boolean sortAscending = settingsWithRaceSelection.isSortAscending();
         boolean updateUponPlayStateChange = settingsWithRaceSelection.isUpdateUponPlayStateChange();
 
         return new MultiRaceLeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow, numberOfLastRacesToShow, refreshIntervalInMs,
-                nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
+                updateUponPlayStateChange, strategy, /*showAddedScores*/ false,
                 /* showOverallRacesCompleted */ false, showCompetitorSailIdColumn, showCompetitorFullNameColumns,
                 settingsWithRaceSelection.isShowCompetitorNationality());
     }

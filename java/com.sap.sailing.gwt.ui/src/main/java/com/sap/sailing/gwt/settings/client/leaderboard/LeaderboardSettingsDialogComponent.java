@@ -46,9 +46,9 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected CheckBox showCompetitorSailIdColumnheckBox;
     protected CheckBox showCompetitorFullNameColumnCheckBox;
     protected CheckBox isCompetitorNationalityColumnVisible;
-    protected LeaderboardSettings initialSettings;
+    protected T initialSettings;
 
-    public LeaderboardSettingsDialogComponent(LeaderboardSettings initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages) {
+    public LeaderboardSettingsDialogComponent(T initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         this.raceAllRaceColumnNames = allRaceColumnNames;

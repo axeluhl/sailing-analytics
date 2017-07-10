@@ -24,12 +24,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class MultiRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<MultiRaceLeaderboardSettings> {
 
-    MultiRaceLeaderboardSettings initialSettings;
-
     public MultiRaceLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
             List<String> allRaceColumnNames, StringMessages stringMessages) {
         super(initialSettings, allRaceColumnNames, stringMessages);
-        this.initialSettings = initialSettings;
     }
 
     @Override
@@ -73,8 +70,8 @@ public class MultiRaceLeaderboardSettingsDialogComponent
         MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings(maneuverDetailsToShow,
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow, namesOfRaceColumnsToShow,
                 lastNRacesToShowValue,
-                1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), null,
-                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
+                1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
+                /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
                 /* showOverallColumnWithNumberOfRacesSailedPerCompetitor */ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox
                         .getValue().booleanValue(),

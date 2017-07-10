@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -42,22 +43,24 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
      */
     private final RegattaAndRaceIdentifier preSelectedRace;
 
-    public SingleRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded,
-            RegattaAndRaceIdentifier preSelectedRace, CompetitorSelectionProvider competitorSelectionProvider,
-            Timer timer, String leaderboardGroupName, String leaderboardName, ErrorReporter errorReporter,
-            StringMessages stringMessages, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
-            boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
-            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
-            boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
-        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded,
-                competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
-                optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
-                showCompetitorFilterStatus, enableSyncScroller);
+    private boolean notSortedYet = true;
+
+    public SingleRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
+            boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
+            String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
+            CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
+            RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
+            boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
+            boolean enableSyncScroller) {
+        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
+                timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
+                competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller);
         assert preSelectedRace != null;
         this.preSelectedRace = preSelectedRace;
-        
+
         initialize(settings);
     }
 
@@ -68,13 +71,12 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
 
     @Override
     public SingleRaceLeaderboardSettings getSettings() {
-        SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
-                selectedManeuverDetails,selectedLegDetails,
-                selectedRaceDetails,
-                selectedOverallDetailColumns, autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort */ null,
-                /* sortAscending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
-                isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                isShowCompetitorSailId(), isShowCompetitorFullName(), isShowCompetitorNationality);
+        SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(selectedManeuverDetails,
+                selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, autoExpandPreSelectedRace,
+                timer.getRefreshInterval(), /* updateUponPlayStateChange */ true,
+                raceColumnSelection.getType(), isShowAddedScores(),
+                isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorSailId(),
+                isShowCompetitorFullName(), isShowCompetitorNationality);
         SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
         return leaderboardSettings;
     }
@@ -152,11 +154,25 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         SingleRaceLeaderboardSettings casted = (SingleRaceLeaderboardSettings) newSettings;
         autoExpandPreSelectedRace = casted.isAutoExpandPreSelectedRace();
     }
-    
+
     @Override
     protected void updateExpansionStates(LeaderboardSettings expand) {
         SingleRaceLeaderboardSettings expandS = (SingleRaceLeaderboardSettings) expand;
-        autoExpandPreSelectedRace = (expandS==null?false:expandS.isAutoExpandPreSelectedRace());
+        autoExpandPreSelectedRace = (expandS == null ? false : expandS.isAutoExpandPreSelectedRace());
+    }
+
+    @Override
+    protected void postApplySettings(LeaderboardSettings newSettings,
+            List<ExpandableSortableColumn<?>> columnsToExpandAgain) {
+        super.postApplySettings(newSettings, columnsToExpandAgain);
+
+        if(notSortedYet ){
+            final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(preSelectedRace.getRaceName());
+            if (raceColumnByRaceName != null) {
+                getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
+                notSortedYet=false;
+            }
+        }
     }
 
     /**
@@ -183,12 +199,13 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, leaderboard.getNamesOfRaceColumns(),
                 stringMessages);
     }
-    
+
     @Override
     protected void openSettingsDialog() {
-        SettingsDialog<SingleRaceLeaderboardSettings> settingsDialog = new SettingsDialog<SingleRaceLeaderboardSettings>(this, stringMessages);
+        SettingsDialog<SingleRaceLeaderboardSettings> settingsDialog = new SettingsDialog<SingleRaceLeaderboardSettings>(
+                this, stringMessages);
         settingsDialog.ensureDebugId("LeaderboardSettingsDialog");
-        settingsDialog.show();         
+        settingsDialog.show();
     }
 
     @Override

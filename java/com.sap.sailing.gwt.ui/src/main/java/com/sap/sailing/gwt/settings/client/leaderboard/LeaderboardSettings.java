@@ -13,7 +13,6 @@ import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
-import com.sap.sse.common.settings.generic.StringSetting;
 
 /**
  * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
@@ -41,13 +40,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     public static enum RaceColumnSelectionStrategies { EXPLICIT, LAST_N; }
     
     protected EnumSetting<RaceColumnSelectionStrategies> activeRaceColumnSelectionStrategy;
-    
-    /**
-     * An optional sort column; if <code>null</code>, the leaderboard sorting won't be touched when updating the settings.
-     * Otherwise, the leaderboard will be sorted by the race column (ascending if {@link #sortAscending}, descending otherwise.
-     */
-    protected StringSetting nameOfRaceToSort;
-    protected BooleanSetting sortAscending;
     
     /**
      * Shows scores sum'd up for each race column
@@ -83,9 +75,7 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         overallDetailsToShow = new EnumSetSetting<>("overallDetailsToShow", this, overallDetails, DetailType::valueOf);
         delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, RaceColumnSelectionStrategies::valueOf);
-        nameOfRaceToSort = new StringSetting("nameOfRaceToSort", this, null);
         updateUponPlayStateChange = new BooleanSetting("updateUponPlayStateChange", this, true);
-        sortAscending = new BooleanSetting("sortAscending", this, true);
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
         showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this, true);
         showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);
@@ -100,8 +90,8 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
      */
     public LeaderboardSettings(Collection<DetailType> maneuverDetailsToShow, Collection<DetailType> legDetailsToShow,
             Collection<DetailType> raceDetailsToShow, Collection<DetailType> overallDetailsToShow,
-            Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
-            boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
+            Long delayBetweenAutoAdvancesInMilliseconds, 
+            boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
             boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
             boolean isCompetitorNationalityColumnVisible) {
@@ -111,7 +101,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
         this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
         this.maneuverDetailsToShow.setValues(maneuverDetailsToShow);
-        this.sortAscending.setValue(sortAscending);
         this.updateUponPlayStateChange.setValue(updateUponPlayStateChange);
         this.showAddedScores.setValue(showAddedScores);
         this.showCompetitorSailIdColumn.setValue(showCompetitorSailIdColumn);
@@ -155,14 +144,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
      */
     public Long getDelayBetweenAutoAdvancesInMilliseconds() {
         return delayBetweenAutoAdvancesInMilliseconds.getValue();
-    }
-
-    public String getNameOfRaceToSort() {
-        return nameOfRaceToSort.getValue();
-    }
-
-    public boolean isSortAscending() {
-        return sortAscending.getValue();
     }
 
     /**
