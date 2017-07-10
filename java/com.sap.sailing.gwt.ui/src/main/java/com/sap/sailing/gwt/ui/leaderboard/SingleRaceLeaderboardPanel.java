@@ -72,8 +72,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     @Override
     public SingleRaceLeaderboardSettings getSettings() {
         SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(selectedManeuverDetails,
-                selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, autoExpandPreSelectedRace,
-                timer.getRefreshInterval(), 
+                selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, timer.getRefreshInterval(),
                 raceColumnSelection.getType(), isShowAddedScores(),
                 isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorSailId(),
                 isShowCompetitorFullName(), isShowCompetitorNationality);
@@ -149,28 +148,15 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     }
 
     @Override
-    public void updateSettings(LeaderboardSettings newSettings) {
-        super.updateSettings(newSettings);
-        SingleRaceLeaderboardSettings casted = (SingleRaceLeaderboardSettings) newSettings;
-        autoExpandPreSelectedRace = casted.isAutoExpandPreSelectedRace();
-    }
-
-    @Override
-    protected void updateExpansionStates(LeaderboardSettings expand) {
-        SingleRaceLeaderboardSettings expandS = (SingleRaceLeaderboardSettings) expand;
-        autoExpandPreSelectedRace = (expandS == null ? false : expandS.isAutoExpandPreSelectedRace());
-    }
-
-    @Override
     protected void postApplySettings(LeaderboardSettings newSettings,
             List<ExpandableSortableColumn<?>> columnsToExpandAgain) {
         super.postApplySettings(newSettings, columnsToExpandAgain);
 
-        if(notSortedYet ){
+        if (notSortedYet) {
             final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(preSelectedRace.getRaceName());
             if (raceColumnByRaceName != null) {
                 getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
-                notSortedYet=false;
+                notSortedYet = false;
             }
         }
     }
@@ -210,5 +196,13 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
 
     @Override
     protected void applyRaceSelection(LeaderboardSettings newSettings) {
+    }
+
+    @Override
+    public void updateSettings(SingleRaceLeaderboardSettings newSettings) {
+    }
+
+    public void setAutoExpandPreSelected(boolean b) {
+        autoExpandPreSelectedRace = b;
     }
 }

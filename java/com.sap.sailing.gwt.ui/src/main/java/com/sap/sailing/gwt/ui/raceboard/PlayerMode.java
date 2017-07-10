@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
@@ -39,8 +38,7 @@ public class PlayerMode extends AbstractRaceBoardMode {
 
             @Override
             public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
-                LeaderboardSettings settingsToUse = LeaderboardSettingsFactory.getInstance().createSettingsWithCustomExpandPreselectedRaceState(patchedSettings, true);
-                leaderboardPanel.updateSettings(settingsToUse);
+                leaderboardPanel.updateSettings(patchedSettings);
             }
             
         });

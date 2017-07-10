@@ -70,6 +70,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         this.raceTimePanel.addRaceTimesInfoProviderListener(this);
         this.leaderboardPanel = raceBoardPanel.getLeaderboardPanel();
         this.leaderboardPanel.addLeaderboardUpdateListener(this);
+        leaderboardPanel.setAutoExpandPreSelected(true);
         this.timer = raceBoardPanel.getTimer();
         this.raceIdentifier = raceBoardPanel.getSelectedRaceIdentifier();
     }

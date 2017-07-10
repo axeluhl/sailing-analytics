@@ -661,13 +661,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     // avoid expansion during updateLeaderboard(...); will expand
                     // later
                     // if it was expanded before
-                    updateExpansionStates(null);
                     applyRaceSelection(newSettings);
-
                     updateLeaderboard(leaderboard);
-                    updateExpansionStates(newSettings);
-                    
-
                     postApplySettings(newSettings, columnsToExpandAgain);
                 } finally {
                     removeBusyTask();
@@ -727,8 +722,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
         return oldShallAddOverallDetails;
     }
-
-    protected abstract void updateExpansionStates(LeaderboardSettings newSettings);
 
     protected abstract void setDefaultRaceColumnSelection(LeaderboardSettings settings);
 

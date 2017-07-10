@@ -306,6 +306,7 @@ public class RaceBoardPanel
                 }
             }
         }
+
         racetimePanel = new RaceTimePanel(this, componentContext, raceTimePanelLifecycle, userService, timer,
                 timeRangeWithZoomModel,
                 stringMessages, raceTimesInfoProvider, getPerspectiveSettings().isCanReplayDuringLiveRaces(),

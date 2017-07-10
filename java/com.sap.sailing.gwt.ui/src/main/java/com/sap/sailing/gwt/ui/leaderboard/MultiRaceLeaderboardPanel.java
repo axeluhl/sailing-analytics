@@ -143,10 +143,6 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
         }
     }
 
-    @Override
-    protected void updateExpansionStates(LeaderboardSettings expand) {
-    }
-
     /**
      * Extracts the rows to display of the <code>leaderboard</code>. These are all {@link AbstractLeaderboardDTO#rows
      * rows} in case {@link #preSelectedRace} is <code>null</code>, or only the rows of the competitors who scored in

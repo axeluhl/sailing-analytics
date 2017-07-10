@@ -33,7 +33,6 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.getManeuverDetailsToShow(),
                 defaultSettings.getLegDetailsToShow(),
                 raceDetailsToShow, defaultSettings.getOverallDetailsToShow(),
-                defaultSettings.isAutoExpandPreSelectedRace(),
                 defaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 defaultSettings.getActiveRaceColumnSelectionStrategy(),
                 defaultSettings.isShowAddedScores(),
@@ -43,12 +42,11 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.isShowCompetitorNationality());
     }
     
-    public SingleRaceLeaderboardSettings createSettingsWithCustomExpandPreselectedRaceState(SingleRaceLeaderboardSettings settings, boolean expandPreselectedRace) {
+    public SingleRaceLeaderboardSettings createSettingsWithCustomExpandPreselectedRaceState(SingleRaceLeaderboardSettings settings) {
         return new SingleRaceLeaderboardSettings(
                 settings.getManeuverDetailsToShow(),
                 settings.getLegDetailsToShow(),
                 settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
-                expandPreselectedRace,
                 settings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 settings.getActiveRaceColumnSelectionStrategy(),
                 settings.isShowAddedScores(),

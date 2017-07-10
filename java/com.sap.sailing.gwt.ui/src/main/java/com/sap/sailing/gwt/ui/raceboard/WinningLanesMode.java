@@ -52,8 +52,7 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
 
             @Override
             public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
-                SingleRaceLeaderboardSettings settingsToUse = LeaderboardSettingsFactory.getInstance().createSettingsWithCustomExpandPreselectedRaceState(patchedSettings, true);
-                leaderboardPanel.updateSettings(settingsToUse);
+                leaderboardPanel.updateSettings(patchedSettings);
             }
             
         });

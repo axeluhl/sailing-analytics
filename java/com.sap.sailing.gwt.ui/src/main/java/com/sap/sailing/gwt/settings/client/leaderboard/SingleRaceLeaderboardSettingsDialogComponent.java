@@ -48,7 +48,7 @@ public class SingleRaceLeaderboardSettingsDialogComponent
         }
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(maneuverDetailsToShow,
-                legDetailsToShow, raceDetailsToShow, overallDetailsToShow, initialSettings.isAutoExpandPreSelectedRace(),
+                legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), 
                 activeRaceColumnSelectionStrategy,
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
