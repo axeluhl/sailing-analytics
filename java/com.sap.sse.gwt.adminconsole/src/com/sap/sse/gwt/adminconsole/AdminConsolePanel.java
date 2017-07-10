@@ -161,7 +161,7 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
         this.panelsByWidget = new HashMap<>();
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
-            public void onUserStatusChange(UserDTO user) {
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 updateTabDisplayForCurrentUser(user);
             }
         });

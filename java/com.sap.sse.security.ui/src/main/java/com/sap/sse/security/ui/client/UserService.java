@@ -55,6 +55,8 @@ public class UserService {
 
     private boolean userInitiallyLoaded = false;
     
+    private boolean preAuthenticated = false;
+    
     private UserDTO currentUser;
 
     private final String id;
@@ -170,7 +172,8 @@ public class UserService {
             @Override
             public void onSuccess(SuccessInfo result) {
                 currentUser = null;
-                notifyUserStatusEventHandlers();
+                preAuthenticated = false;
+                notifyUserStatusEventHandlers(false);
                 fireUserUpdateEvent();
             }
         });
@@ -186,10 +189,11 @@ public class UserService {
 
     private void setCurrentUser(UserDTO result, final boolean notifyOtherInstances) {
         currentUser = result;
+        preAuthenticated = (!userInitiallyLoaded && result != null);
         userInitiallyLoaded = true;
         logger.info("User changed to " + (result == null ? "No User" : (result.getName() + " roles: "
                 + result.getRoles())));
-        notifyUserStatusEventHandlers();
+        notifyUserStatusEventHandlers(preAuthenticated);
         if (notifyOtherInstances) {
             fireUserUpdateEvent();
         }
@@ -202,7 +206,7 @@ public class UserService {
     public void addUserStatusEventHandler(UserStatusEventHandler handler, boolean fireIfUserIsAlreadyAvailable) {
         handlers.add(handler);
         if (userInitiallyLoaded && fireIfUserIsAlreadyAvailable) {
-            handler.onUserStatusChange(currentUser);
+            handler.onUserStatusChange(currentUser, preAuthenticated);
         }
     }
 
@@ -210,9 +214,9 @@ public class UserService {
         handlers.remove(handler);
     }
 
-    private void notifyUserStatusEventHandlers() {
+    private void notifyUserStatusEventHandlers(boolean preAuthenticated) {
         for (UserStatusEventHandler handler : new HashSet<>(handlers)) {
-            handler.onUserStatusChange(getCurrentUser());
+            handler.onUserStatusChange(getCurrentUser(), preAuthenticated);
         }
     }
 

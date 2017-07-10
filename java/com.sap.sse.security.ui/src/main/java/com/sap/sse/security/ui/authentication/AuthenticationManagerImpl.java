@@ -84,7 +84,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         this.passwordResetUrl = passwordResetUrl;
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
-            public void onUserStatusChange(UserDTO user) {
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user)));
             }
         });
@@ -96,7 +96,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         });
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
-            public void onUserStatusChange(UserDTO user) {
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 redirectWithLocaleForAuthenticatedUser();
             }
         }, true);

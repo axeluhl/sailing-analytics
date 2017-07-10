@@ -219,7 +219,7 @@ public class UserSettingsStorageManager implements SettingsStorageManager {
                 // call this method always on user status change event in order to cause sync between local storage
                 // and server
                 @Override
-                public void onUserStatusChange(UserDTO user) {
+                public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                     // trigger settings retrievement whether on the first userStatusEventHandler call, or when a user
                     // has been logged in for the first time in order to initial local storage and server
                     // synchronisation
