@@ -99,7 +99,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
                 // If a user is already authenticated while opening the page, we only trigger a reload if no locale is given by the URL
-                if (!preAuthenticated || localeParam == null || localeParam.isEmpty()) {
+                if (preAuthenticated && (localeParam == null || localeParam.isEmpty())) {
                     redirectWithLocaleForAuthenticatedUser();
                 }
             }
@@ -149,6 +149,8 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             public void onSuccess(SuccessInfo result) {
                 if (result.isSuccessful()) {
                     callback.onSuccess(result);
+                    // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
+                    redirectIfLocaleIsSetAndNotCurrentOne(result.getUserDTO().getLocale());
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
                         view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
