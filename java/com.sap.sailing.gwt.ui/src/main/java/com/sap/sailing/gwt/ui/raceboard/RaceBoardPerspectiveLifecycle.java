@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimePanelLifecycle;
@@ -26,19 +25,11 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     //constructor used by Standalone RaceBoard
-    public RaceBoardPerspectiveLifecycle(RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages) {
-        this(raceIdentifier, null, stringMessages);
+    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages) {
+        this(null, stringMessages);
     }
-    
-    //constructor used by AutoPlay raceBoard
+
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
-        this(null, leaderboard, stringMessages);
-    }
-    
-    private RaceBoardPerspectiveLifecycle(RegattaAndRaceIdentifier raceIdentifier, AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
-        if(raceIdentifier == null){
-            throw new IllegalStateException("Started ReaceBoardPerspective without any raceidentifier");
-        }
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
