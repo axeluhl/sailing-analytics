@@ -97,7 +97,11 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                redirectWithLocaleForAuthenticatedUser();
+                final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
+                // If a user is already authenticated while opening the page, we only trigger a reload if no locale is given by the URL
+                if (!preAuthenticated || localeParam == null || localeParam.isEmpty()) {
+                    redirectWithLocaleForAuthenticatedUser();
+                }
             }
         }, true);
     }
@@ -145,8 +149,6 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             public void onSuccess(SuccessInfo result) {
                 if (result.isSuccessful()) {
                     callback.onSuccess(result);
-                    // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
-                    redirectIfLocaleIsSetAndNotCurrentOne(result.getUserDTO().getLocale());
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
                         view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
@@ -201,12 +203,11 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
     
     /**
-     * Switches to the locale to the current user's locale if no locale is explicitly given by the URL.
+     * Switches to the locale to the current user's locale when a user logs in.
      */
     private void redirectWithLocaleForAuthenticatedUser() {
-        final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
         final AuthenticationContext authenticationContext = getAuthenticationContext();
-        if(authenticationContext.isLoggedIn() && (localeParam == null || localeParam.isEmpty())) {
+        if(authenticationContext.isLoggedIn()) {
             redirectIfLocaleIsSetAndNotCurrentOne(authenticationContext.getCurrentUser().getLocale());
         }
     }
