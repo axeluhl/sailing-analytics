@@ -894,7 +894,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
                     : subject.getPrincipal().toString();
             throw new AuthorizationException(
-                    "User " + currentUserName + " does not have required to access data of user " + username);
+                    "User " + currentUserName + " does not have the permission required to access data of user " + username);
         }
     }
 
