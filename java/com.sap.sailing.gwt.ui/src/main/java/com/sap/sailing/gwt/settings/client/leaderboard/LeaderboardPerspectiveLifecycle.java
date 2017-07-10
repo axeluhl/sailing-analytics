@@ -7,10 +7,6 @@ public class LeaderboardPerspectiveLifecycle extends AbstractLeaderboardPerspect
     
     public static final String ID = "lbh";
     
-    public LeaderboardPerspectiveLifecycle(StringMessages stringMessages) {
-        this(stringMessages, null);
-    }
-    
     public LeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
         super(stringMessages, leaderboard, false);
         addLifeCycle(new OverallLeaderboardPanelLifecycle(null, stringMessages));

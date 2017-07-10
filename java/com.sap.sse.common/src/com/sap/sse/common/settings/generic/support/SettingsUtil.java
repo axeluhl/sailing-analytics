@@ -24,7 +24,7 @@ public final class SettingsUtil {
     private interface ValuesSetter {
         <V> void setDefaultValue(ValueSetting<V> setting, V value);
         
-        <V> void getDefaultValue(ValueCollectionSetting<V> setting, Iterable<V> values);
+        <V> void setDefaultValue(ValueCollectionSetting<V> setting, Iterable<V> values);
     }
     
     private static final ValuesExtractor defaultValuesExtractor = new ValuesExtractor() {
@@ -43,7 +43,7 @@ public final class SettingsUtil {
             setting.setDefaultValue(value);
         }
         @Override
-        public <V> void getDefaultValue(ValueCollectionSetting<V> setting, Iterable<V> values) {
+        public <V> void setDefaultValue(ValueCollectionSetting<V> setting, Iterable<V> values) {
             setting.setDefaultValues(values);
         }
     };
@@ -64,7 +64,7 @@ public final class SettingsUtil {
             setting.setValue(value);
         }
         @Override
-        public <V> void getDefaultValue(ValueCollectionSetting<V> setting, Iterable<V> values) {
+        public <V> void setDefaultValue(ValueCollectionSetting<V> setting, Iterable<V> values) {
             setting.setValues(values);
         }
     };
@@ -151,14 +151,12 @@ public final class SettingsUtil {
             if (settingToSetDefault instanceof ValueSetting) {
                 ValueSetting valueSettingToSetDefault = (ValueSetting) settingToSetDefault;
                 ValueSetting valueSettingWithDefault = (ValueSetting) childSettingsWithDefaults.get(settingKey);
-                valueSettingToSetDefault
-                        .setDefaultValue(defaultValuesExtractor.getDefaultValue(valueSettingWithDefault));
+                valuesSetter.setDefaultValue(valueSettingToSetDefault, defaultValuesExtractor.getDefaultValue(valueSettingWithDefault));
             } else if (settingToSetDefault instanceof ValueCollectionSetting) {
                 ValueCollectionSetting valueCollectionSettingToSetDefault = (ValueCollectionSetting) settingToSetDefault;
                 ValueCollectionSetting valueCollectionSettingWithDefault = (ValueCollectionSetting) childSettingsWithDefaults
                         .get(settingKey);
-                valueCollectionSettingToSetDefault
-                        .setDefaultValues(defaultValuesExtractor.getDefaultValue(valueCollectionSettingWithDefault));
+                valuesSetter.setDefaultValue(valueCollectionSettingToSetDefault, defaultValuesExtractor.getDefaultValue(valueCollectionSettingWithDefault));
             } else if (settingToSetDefault instanceof GenericSerializableSettings) {
                 GenericSerializableSettings settingsToSetDefault = (GenericSerializableSettings) settingToSetDefault;
                 GenericSerializableSettings settingsWithDefault = (GenericSerializableSettings) childSettingsWithDefaults
