@@ -6594,22 +6594,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public boolean canRemoveMarkFix(String leaderboardName, String raceColumnName, String fleetName,
             String markIdAsString, GPSFixDTO fix) {
-        final boolean result;
+        boolean result = false;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
+                final TimePoint fixTimePoint = new MillisecondsTimePoint(fix.timepoint);
+                final RegattaLog regattaLog = raceColumn.getRegattaLog();
+                final BaseRegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(regattaLog);
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
-                    result = raceColumn.getTrackedRace(fleet) == null;
-                } else {
-                    result = false;
+                    for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
+                        if (mark.getId().toString().equals(markIdAsString)) {
+                            result = mappingFinder.hasMappingFor(mark, fixTimePoint);
+                            if (result) {
+                                break;
+                            }
+                        }
+                    }
                 }
-            } else {
-                result = false;
             }
-        } else {
-            result = false;
         }
         return result;
     }
@@ -6622,8 +6626,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (raceColumn != null) {
                 final TimePoint fixTimePoint = new MillisecondsTimePoint(fix.timepoint);
                 final RegattaLog regattaLog = raceColumn.getRegattaLog();
-                final BaseRegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(
-                        regattaLog);
+                final BaseRegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(regattaLog);
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
                     for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {

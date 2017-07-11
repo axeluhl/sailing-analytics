@@ -138,7 +138,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param key must not be <code>null</code>
      * @param value must not be <code>null</code>
      */
-    Void setPreference(String username, String key, String value);
+    void setPreference(String username, String key, String value);
 
     void setPreferenceObject(String name, String preferenceKey, Object preference);
 
