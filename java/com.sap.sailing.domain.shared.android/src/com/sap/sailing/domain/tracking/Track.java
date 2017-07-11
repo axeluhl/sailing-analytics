@@ -184,4 +184,9 @@ public interface Track<FixType extends Timed> extends Serializable {
      * more than one raw fix in the track
      */
     Duration getAverageIntervalBetweenRawFixes();
+    
+    /**
+     * @return the number of raw fixes contained in the Track.
+     */
+    int size();
 }

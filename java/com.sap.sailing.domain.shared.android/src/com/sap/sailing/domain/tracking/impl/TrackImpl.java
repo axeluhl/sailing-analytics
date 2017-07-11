@@ -378,4 +378,9 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
             unlockAfterRead();
         }
     }
+    
+    @Override
+    public int size() {
+        return fixes.size();
+    }
 }
