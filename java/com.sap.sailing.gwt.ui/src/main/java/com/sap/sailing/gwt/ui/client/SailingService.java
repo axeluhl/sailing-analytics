@@ -104,6 +104,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
@@ -680,4 +681,5 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors);
 
+    Duration getEstimatedTargetTime(MillisecondsTimePoint millisecondsTimePoint, RegattaAndRaceIdentifier raceIdentifier);
 }

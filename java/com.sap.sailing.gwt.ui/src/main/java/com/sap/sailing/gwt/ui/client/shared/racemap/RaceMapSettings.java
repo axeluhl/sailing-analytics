@@ -69,6 +69,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      */
     private BooleanSetting windUp;
     
+    private BooleanSetting showEstimatedRaceEnd;
+    
     @Override
     protected void addChildSettings() {
         showMapControls = new BooleanSetting(PARAM_SHOW_MAPCONTROLS, this, true);
@@ -86,6 +88,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         showSelectedCompetitorsInfo = new BooleanSetting("showSelectedCompetitorsInfo", this, true);
         maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), ManeuverType::valueOf);
         showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
+        showEstimatedRaceEnd = new BooleanSetting("showEstimatedRaceEnd", this, false);
     }
 
     public RaceMapSettings() {
@@ -95,7 +98,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             Boolean transparentHoverlines, Integer hoverlineStrokeWeight, Long tailLengthInMilliseconds, Boolean windUp,
             Distance buoyZoneRadius, Boolean showOnlySelectedCompetitors, Boolean showSelectedCompetitorsInfo,
             Boolean showWindStreamletColors, Boolean showWindStreamletOverlay, Boolean showSimulationOverlay,
-            Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints) {
+            Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints,Boolean showEstimatedRaceEnd) {
         this.zoomSettings.init(zoomSettings);
         this.helpLinesSettings.init(helpLinesSettings);
         this.transparentHoverlines.setValue(transparentHoverlines);
@@ -111,6 +114,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.showMapControls.setValue(showMapControls);
         this.maneuverTypesToShow.setValues(maneuverTypesToShow);
         this.showDouglasPeuckerPoints.setValue(showDouglasPeuckerPoints);
+        this.showEstimatedRaceEnd.setValue(showEstimatedRaceEnd);
     }
 
     public static RaceMapSettings getDefaultWithShowMapControls(boolean showMapControlls) {
@@ -139,7 +143,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* showSimulationOverlay */ showSimulationOverlay,
                 /* showMapControls */ showMapControls,
                 /* maneuverTypesToShow */ getDefaultManeuvers(),
-                /* showDouglasPeuckerPoints */ false);
+                /* showDouglasPeuckerPoints */ false,false);
     }
     
     private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
@@ -260,7 +264,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 settings.isShowWindStreamletOverlay(),
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(),
                 settings.getManeuverTypesToShow(),
-                settings.isShowDouglasPeuckerPoints());
+                settings.isShowDouglasPeuckerPoints(),settings.isShowTargetEstimation());
         return newRaceMapSettings;
     }
 
@@ -296,5 +300,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
 
     public Set<ManeuverType> getManeuverTypesToShow() {
         return Util.createSet(maneuverTypesToShow.getValues());
+    }
+
+    public boolean isShowTargetEstimation() {
+        return showEstimatedRaceEnd.getValue();
     }
 }

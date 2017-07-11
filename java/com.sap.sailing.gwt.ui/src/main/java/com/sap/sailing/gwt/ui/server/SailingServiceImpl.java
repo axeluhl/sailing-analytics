@@ -6556,4 +6556,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         getService().apply(new UpdateEliminatedCompetitorsInLeaderboard(leaderboardName, newEliminatedCompetitors));
     }
+
+    @Override
+    public Duration getEstimatedTargetTime(MillisecondsTimePoint millisecondsTimePoint,
+            RegattaAndRaceIdentifier raceIdentifier) {
+        DynamicTrackedRace race = getTrackedRace(raceIdentifier);
+        if(race != null){
+            try {
+                return race.getEstimatedTimeToComplete(millisecondsTimePoint).getExpectedDuration();
+            } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return null;
+    }
 }

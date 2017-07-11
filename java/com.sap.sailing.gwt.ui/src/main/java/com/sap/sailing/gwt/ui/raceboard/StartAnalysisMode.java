@@ -80,7 +80,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.isShowSimulationOverlay(),
                 defaultSettings.isShowMapControls(),
                 defaultSettings.getManeuverTypesToShow(),
-                defaultSettings.isShowDouglasPeuckerPoints());
+                defaultSettings.isShowDouglasPeuckerPoints(),defaultSettings.isShowTargetEstimation());
         
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
 

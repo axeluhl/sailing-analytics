@@ -129,11 +129,13 @@ import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -157,6 +159,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
     public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
+    private static final long DELAY_ESTIMATION_UPDATE = 10000;
+    private static final DateTimeFormat TARGET_TIME_ESTIMATION_FORMAT = DateTimeFormat.getFormat("HH:mm");
     
     private AbsolutePanel rootPanel = new AbsolutePanel();
     
@@ -417,6 +421,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * {@link #showAdvantageLine(Iterable, Date, long)} drawing procedure} needs to be triggered.
      */
     private CompetitorDTO advantageLineCompetitor;
+    private Date lastUpdateOfTargetEstimation = new Date(0);
+    protected Label targetEstimationOverlay;
+    private RaceMapStyle raceMapStyle;
 
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
@@ -473,7 +480,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(settings.isShowMapControls(), showHeaderPanel);
-        RaceMapStyle raceMapStyle = raceMapResources.raceMapStyle();
+        raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
         combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
@@ -857,7 +864,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         public void onSuccess(WindInfoForRaceDTO windInfo) {
                             List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                             if (windInfo != null) {
-                                lastCombinedWindTrackInfoDTO = windInfo; 
+                                lastCombinedWindTrackInfoDTO = windInfo;
+                                updateTargetTimeEstimation(newTime);
                                 showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
                                 for (WindSource windSource : windInfo.windTrackInfoByWindSource.keySet()) {
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
@@ -888,6 +896,36 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     });
                 }
             }
+        }
+    }
+
+    protected void updateTargetTimeEstimation(Date newTime) {
+        if(settings.isShowTargetEstimation() && lastUpdateOfTargetEstimation.getTime() + DELAY_ESTIMATION_UPDATE < newTime.getTime()){
+            //we have wind, try to estimate time now
+            lastUpdateOfTargetEstimation = newTime;
+            asyncActionsExecutor.execute(new GetTargetTimeAction(sailingService,new MillisecondsTimePoint(newTime),raceIdentifier),  new AsyncCallback<Duration>(){
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error obtaining targettime: " + caught.getMessage(), true /*silentMode */);
+                }
+                
+                @Override
+                public void onSuccess(Duration result) {
+                    if(result == null){
+                        //server could not determine time
+                        return;
+                    }
+                    if(targetEstimationOverlay == null){
+                        targetEstimationOverlay = new Label("");
+                        targetEstimationOverlay.setStyleName(raceMapStyle.estimatedTargettime());
+                        map.setControls(ControlPosition.BOTTOM_LEFT, targetEstimationOverlay);
+                    }
+                    long endTime = lastRaceTimesInfo.getStartOfRace().getTime()+result.asMillis();
+                    Date endDate = new Date(endTime);
+                    targetEstimationOverlay.setText(stringMessages.estimatedEndtime() + " "+ TARGET_TIME_ESTIMATION_FORMAT.format(endDate));
+                    
+                }
+            });
         }
     }
 
@@ -2591,6 +2629,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (newSettings.isWindUp() != settings.isWindUp()) {
             requiresUpdateCoordinateSystem = true;
             requiresRedraw = true;
+        }
+        if(!newSettings.isShowTargetEstimation() && targetEstimationOverlay != null){
+            targetEstimationOverlay.removeFromParent();
         }
         this.settings = newSettings;
         

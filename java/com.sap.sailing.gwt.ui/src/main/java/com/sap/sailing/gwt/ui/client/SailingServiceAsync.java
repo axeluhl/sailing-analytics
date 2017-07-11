@@ -93,6 +93,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -838,4 +839,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors,
             AsyncCallback<Void> callback);
+
+    void getEstimatedTargetTime(MillisecondsTimePoint millisecondsTimePoint, RegattaAndRaceIdentifier raceIdentifier,
+            AsyncCallback<Duration> asyncCallback);
+
 }

@@ -60,6 +60,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private final RaceMapSettings initialSettings;
 
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
+    private CheckBox showTargetEstimation;
     
     public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean isSimulationEnabled) {
         this.isSimulationEnabled = isSimulationEnabled;
@@ -96,6 +97,11 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 showWindStreamletColorsCheckbox.setEnabled(showWindStreamletOverlayCheckbox.getValue());
             }
         });
+        
+        showTargetEstimation = dialog.createCheckbox(stringMessages.showTargetEstimation());
+        showTargetEstimation.ensureDebugId("showTargetEstimationCheckBox");
+        showTargetEstimation.setValue(initialSettings.isShowTargetEstimation());
+        vp.add(showTargetEstimation);
         
         if (isSimulationEnabled) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
@@ -291,7 +297,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 transparentHoverlines.getValue(), hoverlineStrokeWeight.getValue(), tailLengthInMilliseconds, windUpCheckbox.getValue(),
                 buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
-                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue());
+                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),showTargetEstimation.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {
