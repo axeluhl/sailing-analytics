@@ -198,10 +198,6 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     protected void applyRaceSelection(LeaderboardSettings newSettings) {
     }
 
-    @Override
-    public void updateSettings(SingleRaceLeaderboardSettings newSettings) {
-    }
-
     public void setAutoExpandPreSelected(boolean b) {
         autoExpandPreSelectedRace = b;
     }
