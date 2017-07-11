@@ -54,7 +54,7 @@ public class TrackedRaceStatisticsCacheImpl extends TrackedRegattaAndRaceObserve
         @Override
         public TrackedRaceStatistics computeCacheUpdate(TrackedRace trackedRace, EmptyUpdateInterval updateInterval)
                 throws Exception {
-            return new TrackedRaceStatisticsCalculator(trackedRace, true, true).getStatistics();
+            return new TrackedRaceStatisticsCalculator(trackedRace, false, true).getStatistics();
         }
     }
     
