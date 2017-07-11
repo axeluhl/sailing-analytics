@@ -16,7 +16,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -54,19 +53,10 @@ public class TrackedRaceStatisticsCalculator {
         }
     }
 
-    private boolean doForCompetitor(TrackedRace trackedRace, Competitor competitor) {
-        boolean foundFixes = false;
+    private void doForCompetitor(TrackedRace trackedRace, Competitor competitor) {
         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
-        competitorTrack.lockForRead();
-        try {
-            final int numberOfGPSFixesForCompetitor = Util.size(competitorTrack.getRawFixes());
-            if (numberOfGPSFixesForCompetitor > 0) {
-                foundFixes = true;
-                numberOfGPSFixes += numberOfGPSFixesForCompetitor;
-            }
-        } finally {
-            competitorTrack.unlockAfterRead();
-        }
+        numberOfGPSFixes += competitorTrack.size();
+        
         if ((calculateDistanceTravelled || calculateMaxSpeed) && trackedRace.hasStarted(now)) {
             final NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
             MarkPassing lastMarkPassingBeforeNow = null;
@@ -90,7 +80,6 @@ public class TrackedRaceStatisticsCalculator {
                 doForCompetitorTrackAndTimeRange(competitor, competitorTrack, from, to);
             }
         }
-        return foundFixes;
     }
 
     private void doForCompetitorTrackAndTimeRange(Competitor competitor,
@@ -110,39 +99,17 @@ public class TrackedRaceStatisticsCalculator {
         }
     }
 
-    private boolean doForMark(TrackedRace trackedRace, Mark mark) {
-        boolean foundFixes = false;
+    private void doForMark(TrackedRace trackedRace, Mark mark) {
         GPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
-        markTrack.lockForRead();
-        try {
-            final int numberOfGWPFixesForMark = Util.size(markTrack.getRawFixes());
-            if(numberOfGWPFixesForMark > 0) {
-                foundFixes = true;
-                numberOfGPSFixes += numberOfGWPFixesForMark;
-            }
-        } finally {
-            markTrack.unlockAfterRead();
-        }
-        return foundFixes;
+        numberOfGPSFixes += markTrack.size();
     }
 
-    private boolean doForWindSource(TrackedRace trackedRace, WindSource windSource) {
-        boolean foundFixes = false;
+    private void doForWindSource(TrackedRace trackedRace, WindSource windSource) {
         // don't count the "virtual" wind sources
         if (windSource.canBeStored() || windSource.getType() == WindSourceType.RACECOMMITTEE) {
             WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-            windTrack.lockForRead();
-            try {
-                final int numberOfFixesForWindSource = Util.size(windTrack.getRawFixes());
-                if(numberOfFixesForWindSource > 0) {
-                    foundFixes = true;
-                    numberOfWindFixes += numberOfFixesForWindSource;
-                }
-            } finally {
-                windTrack.unlockAfterRead();
-            }
+            numberOfWindFixes += windTrack.size();
         }
-        return foundFixes;
     }
 
     public long getNumberOfGPSFixes() {
