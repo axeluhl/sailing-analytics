@@ -227,8 +227,10 @@ import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
-import com.sap.sailing.server.statistics.ScheduledStatisticsUpdater;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
+import com.sap.sailing.server.statistics.StatisticsCalculator;
+import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
+import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -274,8 +276,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final RemoteSailingServerSet remoteSailingServerSet;
     
-    private final ScheduledStatisticsUpdater scheduledStatisticsUpdater;
-
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be
      * {@link Regatta} objects that exist outside this service for regattas not (yet) registered here.
@@ -456,6 +456,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
 
+    private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
+
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -495,7 +497,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
-        this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null, restoreTrackedRaces);
+        this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
     }
     
     /**
@@ -511,7 +513,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            notification service is available, e.g., in test set-ups
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
-            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
+            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService,
+            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
@@ -524,7 +527,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
             };
-        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory ,trackedRegattaListener, sailingNotificationService, restoreTrackedRaces);
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory ,trackedRegattaListener, sailingNotificationService,
+                trackedRaceStatisticsCache, restoreTrackedRaces);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -542,7 +546,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
             };
-        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null, sailingNotificationService, restoreTrackedRaces);
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null, sailingNotificationService,
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -554,7 +559,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
             };
-        }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null, restoreTrackedRaces);
+        }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null,
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
     }
 
     /**
@@ -580,7 +586,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider, MediaDB mediaDb,
             final WindStore windStore, final SensorFixStore sensorFixStore, TypeBasedServiceFinderFactory serviceFinderFactory,
-            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
+            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService,
+            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces) {
         logger.info("Created " + this);
         this.numberOfTrackedRacesRestored = new AtomicInteger();
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
@@ -617,7 +624,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         regattasByNameLock = new NamedReentrantReadWriteLock("regattasByName for " + this, /* fair */false);
         eventsById = new ConcurrentHashMap<Serializable, Event>();
-        scheduledStatisticsUpdater = new ScheduledStatisticsUpdater(scheduler, this);
         regattaTrackingCache = new ConcurrentHashMap<>();
         regattaTrackingCacheLock = new NamedReentrantReadWriteLock("regattaTrackingCache for " + this, /* fair */false);
         raceTrackersByRegatta = new ConcurrentHashMap<>();
@@ -671,6 +677,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         } else {
             getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore();
         }
+        this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
     }
 
     private void restoreTrackedRaces() {
@@ -3748,7 +3755,25 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Map<Integer, Statistics> getLocalStatisticsByYear() {
-        return scheduledStatisticsUpdater.getStatisticsPerYear();
+        final Map<Integer, StatisticsCalculator> calculators = new HashMap<>();
+        getAllEvents().forEach((event) -> {
+            final Integer eventYear = EventUtil.getYearOfEvent(event);
+            final StatisticsCalculator calculator;
+            if (calculators.containsKey(eventYear)) {
+                calculator = calculators.get(eventYear);
+            } else {
+                calculator = new StatisticsCalculator(trackedRaceStatisticsCache);
+                calculators.put(eventYear, calculator);
+            }
+            event.getLeaderboardGroups().forEach((lg) -> {
+                lg.getLeaderboards().forEach(calculator::addLeaderboard);
+            });
+        });
+        Map<Integer, Statistics> result = new HashMap<>();
+        calculators.forEach((year, calculator) -> {
+            result.put(year, calculator.getStatistics());
+        });
+        return result;
     }
 
     @Override

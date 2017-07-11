@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
@@ -26,15 +27,17 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     private final HttpServletRequest request;
     private final SecurityService securityService;
     private final UserStore userStore;
+    private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
 
     public SailingDispatchContextImpl(Date currentClientTime, RacingEventService racingEventService,
             EventNewsService eventNewsService, SecurityService securityService, UserStore userStore,
-            String clientLocaleName, HttpServletRequest request) {
+            TrackedRaceStatisticsCache trackedRaceStatisticsCache, String clientLocaleName, HttpServletRequest request) {
         this.currentClientTime = currentClientTime;
         this.racingEventService = racingEventService;
         this.eventNewsService = eventNewsService;
         this.securityService = securityService;
         this.userStore = userStore;
+        this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
         this.clientLocaleName = clientLocaleName;
         this.request = request;
     }
@@ -92,5 +95,10 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
         if (currentUser != null) {
             securityService.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
         }
+    }
+    
+    @Override
+    public TrackedRaceStatisticsCache getTrackedRaceStatisticsCache() {
+        return trackedRaceStatisticsCache;
     }
 }
