@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 
@@ -34,7 +33,6 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.getLegDetailsToShow(),
                 raceDetailsToShow, defaultSettings.getOverallDetailsToShow(),
                 defaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                defaultSettings.getActiveRaceColumnSelectionStrategy(),
                 defaultSettings.isShowAddedScores(),
                 defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 defaultSettings.isShowCompetitorSailIdColumn(),
@@ -48,7 +46,6 @@ public class LeaderboardSettingsFactory {
                 settings.getLegDetailsToShow(),
                 settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
                 settings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                settings.getActiveRaceColumnSelectionStrategy(),
                 settings.isShowAddedScores(),
                 settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 settings.isShowCompetitorSailIdColumn(),

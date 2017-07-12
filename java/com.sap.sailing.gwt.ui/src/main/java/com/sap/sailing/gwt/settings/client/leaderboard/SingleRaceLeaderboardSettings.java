@@ -14,11 +14,11 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
     public SingleRaceLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,
             Collection<DetailType> legDetailsToShow, Collection<DetailType> raceDetailsToShow,
             Collection<DetailType> overallDetailsToShow, Long delayBetweenAutoAdvancesInMilliseconds,
-            RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy, boolean showAddedScores,
+            boolean showAddedScores,
             boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor, boolean showCompetitorSailIdColumn,
             boolean showCompetitorFullNameColumn, boolean isCompetitorNationalityColumnVisible) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
-                delayBetweenAutoAdvancesInMilliseconds, activeRaceColumnSelectionStrategy, showAddedScores,
+                delayBetweenAutoAdvancesInMilliseconds, showAddedScores,
                 showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorSailIdColumn,
                 showCompetitorFullNameColumn, isCompetitorNationalityColumnVisible);
     }

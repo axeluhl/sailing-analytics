@@ -15,18 +15,21 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class MultiRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<MultiRaceLeaderboardSettings> {
+    
+    protected RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
 
     public MultiRaceLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
             List<String> allRaceColumnNames, StringMessages stringMessages) {
         super(initialSettings, allRaceColumnNames, stringMessages);
+        this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
     }
 
     @Override
@@ -196,5 +199,26 @@ public class MultiRaceLeaderboardSettingsDialogComponent
         dialogPanel.add(createManeuverDetailsPanel(dialog));
         dialogPanel.add(createTimingDetailsPanel(dialog));
         return dialogPanel;
+    }
+
+    @Override
+    public Validator<MultiRaceLeaderboardSettings> getValidator() {
+        return new Validator<MultiRaceLeaderboardSettings>() {
+            @Override
+            public String getErrorMessage(MultiRaceLeaderboardSettings valueToValidate) {
+                final String result;
+                if (valueToValidate.getLegDetailsToShow().isEmpty()) {
+                    result = stringMessages.selectAtLeastOneLegDetail();
+                } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
+                    result = stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
+                } else if (valueToValidate.getActiveRaceColumnSelectionStrategy() == RaceColumnSelectionStrategies.LAST_N
+                        && (numberOfLastRacesToShowBox.getValue() == null || numberOfLastRacesToShowBox.getValue() < 0)) {
+                    result = stringMessages.numberOfRacesMustBeNonNegativeNumber();
+                } else {
+                    result = null;
+                }
+                return result;
+            }
+        };
     }
 }

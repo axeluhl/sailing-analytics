@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class SingleRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<SingleRaceLeaderboardSettings> {
@@ -50,7 +51,6 @@ public class SingleRaceLeaderboardSettingsDialogComponent
         SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(maneuverDetailsToShow,
                 legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), 
-                activeRaceColumnSelectionStrategy,
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
                 /* showOverallColumnWithNumberOfRacesSailedPerCompetitor */ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox
                         .getValue().booleanValue(),
@@ -71,5 +71,23 @@ public class SingleRaceLeaderboardSettingsDialogComponent
         dialogPanel.add(createManeuverDetailsPanel(dialog));
         dialogPanel.add(createTimingDetailsPanel(dialog));
         return dialogPanel;
+    }
+
+    @Override
+    public Validator<SingleRaceLeaderboardSettings> getValidator() {
+        return new Validator<SingleRaceLeaderboardSettings>() {
+            @Override
+            public String getErrorMessage(SingleRaceLeaderboardSettings valueToValidate) {
+                final String result;
+                if (valueToValidate.getLegDetailsToShow().isEmpty()) {
+                    result = stringMessages.selectAtLeastOneLegDetail();
+                } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
+                    result = stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
+                } else {
+                    result = null;
+                }
+                return result;
+            }
+        };
     }
 }

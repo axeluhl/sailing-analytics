@@ -11,7 +11,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
-import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 
 /**
@@ -31,14 +30,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     protected EnumSetSetting<DetailType> overallDetailsToShow;
     protected LongSetting delayBetweenAutoAdvancesInMilliseconds;
     protected BooleanSetting isShowCompetitorNationality;
-    
-    /**
-     * There are two ways to select race columns.
-     * Either you select races from the list of all races or you select the last N races.
-     */
-    public static enum RaceColumnSelectionStrategies { EXPLICIT, LAST_N; }
-    
-    protected EnumSetting<RaceColumnSelectionStrategies> activeRaceColumnSelectionStrategy;
     
     /**
      * Shows scores sum'd up for each race column
@@ -73,7 +64,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         overallDetails.add(DetailType.REGATTA_RANK);
         overallDetailsToShow = new EnumSetSetting<>("overallDetailsToShow", this, overallDetails, DetailType::valueOf);
         delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, RaceColumnSelectionStrategies::valueOf);
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
         showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this, true);
         showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);
@@ -89,14 +79,12 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     public LeaderboardSettings(Collection<DetailType> maneuverDetailsToShow, Collection<DetailType> legDetailsToShow,
             Collection<DetailType> raceDetailsToShow, Collection<DetailType> overallDetailsToShow,
             Long delayBetweenAutoAdvancesInMilliseconds, 
-            RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
             boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
             boolean isCompetitorNationalityColumnVisible) {
         this.legDetailsToShow.setValues(legDetailsToShow);
         this.raceDetailsToShow.setValues(raceDetailsToShow);
         this.overallDetailsToShow.setValues(overallDetailsToShow);
-        this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
         this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
         this.maneuverDetailsToShow.setValues(maneuverDetailsToShow);
         this.showAddedScores.setValue(showAddedScores);
@@ -141,10 +129,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
      */
     public Long getDelayBetweenAutoAdvancesInMilliseconds() {
         return delayBetweenAutoAdvancesInMilliseconds.getValue();
-    }
-
-    public RaceColumnSelectionStrategies getActiveRaceColumnSelectionStrategy() {
-        return activeRaceColumnSelectionStrategy.getValue();
     }
 
     public boolean isShowAddedScores() {

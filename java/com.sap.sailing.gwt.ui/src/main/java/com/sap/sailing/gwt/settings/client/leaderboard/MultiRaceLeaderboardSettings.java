@@ -6,6 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
@@ -23,6 +24,8 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
      * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to LAST_N
      */
     protected IntegerSetting numberOfLastRacesToShow;
+    
+    protected EnumSetting<RaceColumnSelectionStrategies> activeRaceColumnSelectionStrategy;
 
     
     public MultiRaceLeaderboardSettings() {
@@ -39,12 +42,12 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
             boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn,
             boolean isCompetitorNationalityColumnVisible) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow, delayBetweenAutoAdvancesInMilliseconds,
-                activeRaceColumnSelectionStrategy, showAddedScores,
-                showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorSailIdColumn,
+                showAddedScores, showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorSailIdColumn,
                 showCompetitorFullNameColumn, isCompetitorNationalityColumnVisible);
         
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
         this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
+        this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
     }
 
     public MultiRaceLeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow) {
@@ -76,6 +79,7 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         super.addChildSettings();
         namesOfRaceColumnsToShow = new StringSetSetting("namesOfRaceColumnsToShow", this);
         numberOfLastRacesToShow = new IntegerSetting("numberOfLastRacesToShow", this, null);
+        activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, RaceColumnSelectionStrategies::valueOf);
     }
     
     /**
@@ -93,6 +97,10 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
      */
     public Integer getNumberOfLastRacesToShow() {
         return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.LAST_N ? numberOfLastRacesToShow.getValue() : null;
+    }
+
+    public RaceColumnSelectionStrategies getActiveRaceColumnSelectionStrategy() {
+        return activeRaceColumnSelectionStrategy.getValue();
     }
 
 }

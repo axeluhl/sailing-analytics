@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -24,7 +23,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LegColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ManeuverCountRaceColumn;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSettings> implements SettingsDialogComponent<T> {
@@ -36,7 +34,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected final Map<DetailType, CheckBox> overallDetailCheckboxes;
     protected final StringMessages stringMessages;
     protected LongBox refreshIntervalInSecondsBox;
-    protected RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     
     protected RadioButton explicitRaceColumnSelectionRadioBtn;
     protected RadioButton lastNRacesColumnSelectionRadioBtn;
@@ -52,7 +49,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         this.raceAllRaceColumnNames = allRaceColumnNames;
-        this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceColumnCheckboxes = new LinkedHashMap<>();
@@ -237,27 +233,6 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         checkbox.setValue(selected);
         dialog.addTooltip(checkbox, tooltip);
         return checkbox;
-    }
-
-    @Override
-    public Validator<T> getValidator() {
-        return new Validator<T>() {
-            @Override
-            public String getErrorMessage(T valueToValidate) {
-                final String result;
-                if (valueToValidate.getLegDetailsToShow().isEmpty()) {
-                    result = stringMessages.selectAtLeastOneLegDetail();
-                } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
-                    result = stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
-                } else if (valueToValidate.getActiveRaceColumnSelectionStrategy() == RaceColumnSelectionStrategies.LAST_N
-                        && (numberOfLastRacesToShowBox.getValue() == null || numberOfLastRacesToShowBox.getValue() < 0)) {
-                    result = stringMessages.numberOfRacesMustBeNonNegativeNumber();
-                } else {
-                    result = null;
-                }
-                return result;
-            }
-        };
     }
 
     @Override
