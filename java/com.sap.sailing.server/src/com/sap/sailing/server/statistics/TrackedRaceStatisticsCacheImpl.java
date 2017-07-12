@@ -2,6 +2,8 @@ package com.sap.sailing.server.statistics;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
@@ -22,6 +24,7 @@ import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
 public class TrackedRaceStatisticsCacheImpl extends TrackedRegattaAndRaceObserver implements TrackedRaceStatisticsCache {
+    private static final Logger logger = Logger.getLogger(TrackedRaceStatisticsCacheImpl.class.getName());
     
     private final Map<TrackedRace, Listener> listeners = new ConcurrentHashMap<>();
     private final SmartFutureCache<TrackedRace, TrackedRaceStatistics, ?> cache = new SmartFutureCache<>(new Updater(), TrackedRaceStatisticsCacheImpl.class.getSimpleName());
@@ -40,6 +43,11 @@ public class TrackedRaceStatisticsCacheImpl extends TrackedRegattaAndRaceObserve
         Listener listener = new Listener(trackedRace);
         listeners.put(trackedRace, listener);
         trackedRace.addListener(listener);
+        triggerUpdate(trackedRace);
+    }
+
+    private void triggerUpdate(DynamicTrackedRace trackedRace) {
+        logger.log(Level.FINE, "Updating Statistics for race " + trackedRace.getRaceIdentifier());
         cache.triggerUpdate(trackedRace, null);
     }
 
@@ -70,47 +78,47 @@ public class TrackedRaceStatisticsCacheImpl extends TrackedRegattaAndRaceObserve
         
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
-            cache.triggerUpdate(trackedRace, null);
+            triggerUpdate(trackedRace);
         }
         
         @Override
         public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
-            cache.triggerUpdate(trackedRace, null);
+            triggerUpdate(trackedRace);
         }
         
         @Override
         public void windDataReceived(Wind wind, WindSource windSource) {
-            cache.triggerUpdate(trackedRace, null);
+            triggerUpdate(trackedRace);
         }
         
         @Override
         public void windDataRemoved(Wind wind, WindSource windSource) {
-            cache.triggerUpdate(trackedRace, null);
+            triggerUpdate(trackedRace);
         }
         
         @Override
         public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-            cache.triggerUpdate(trackedRace, null);
+            triggerUpdate(trackedRace);
         }
         
         @Override
         public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
-            cache.triggerUpdate(trackedRace, null);
+            triggerUpdate(trackedRace);
         }
         
         @Override
         public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-            cache.triggerUpdate(trackedRace, null);
+            triggerUpdate(trackedRace);
         }
         
         @Override
         public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-            cache.triggerUpdate(trackedRace, null);
+            triggerUpdate(trackedRace);
         }
         
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
-            cache.triggerUpdate(trackedRace, null);
+            triggerUpdate(trackedRace);
         }
     }
 }
