@@ -215,6 +215,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String actionEdit();
     String actionEditScores();
     String actionEditCompetitors();
+    String actionEditCompetitorToBoatAssignments();
     String actionEditCompetitorToBoatAssignmentsForRace(String raceName);
     String actionOpenBrowser();
     String actionRemove();

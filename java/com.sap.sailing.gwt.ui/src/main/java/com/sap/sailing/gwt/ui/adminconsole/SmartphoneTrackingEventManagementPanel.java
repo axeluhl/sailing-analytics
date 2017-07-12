@@ -33,6 +33,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -388,7 +389,9 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     startTracking(Collections.singleton(raceColumnDTOAndFleetDTO), trackWind.getValue(), correctWindDirectionForDeclination.getValue());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_STOP_TRACKING.equals(value)) {
                     stopTracking(Collections.singleton(raceColumnDTOAndFleetDTO));
-                }
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS.equals(value)) {
+                    editCompetitorToBoatMappings(raceColumnDTOAndFleetDTO.getA(), raceColumnDTOAndFleetDTO.getB());
+                } 
             }
         });
         
@@ -786,6 +789,25 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         refreshTrackingActionButtons();
                     }
                 }).show();
+    }
+
+    private void editCompetitorToBoatMappings(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        final String raceColumnName = raceColumnDTO.getName();
+        final String fleetName = fleetDTO.getName();
+        final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName : raceColumnName + ", " + fleetName;
+        EditCompetitorToBoatMappingsDialog dialog = new EditCompetitorToBoatMappingsDialog(sailingService, 
+                selectedLeaderboardName, raceColumnName, fleetName, raceName, stringMessages, 
+                errorReporter, new DialogCallback<List<CompetitorDTO>>() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(final List<CompetitorDTO> result) {
+            }
+        });
+        dialog.show();
     }
 
     private String getLocaleInfo() {

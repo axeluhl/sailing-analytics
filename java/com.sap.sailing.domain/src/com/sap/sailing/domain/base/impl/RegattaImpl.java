@@ -25,7 +25,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.BoatDeregistrator;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.BoatsInLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Boat;
@@ -51,6 +54,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.AbstractLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.BoatProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -155,6 +159,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private boolean useStartTimeInference;
 
     private transient CompetitorProviderFromRaceColumnsAndRegattaLike competitorsProvider;
+    private transient BoatProviderFromRaceColumnsAndRegattaLike boatsProvider;
     private AbstractLogEventAuthor regattaLogEventAuthorForRegatta = new LogEventAuthorImpl(
             AbstractLeaderboardImpl.class.getName(), 0);
     
@@ -419,7 +424,15 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         return competitorsProvider;
     }
-    
+
+    @Override
+    public BoatProviderFromRaceColumnsAndRegattaLike getOrCreateBoatsProvider() {
+        if (boatsProvider == null) {
+            boatsProvider = new BoatProviderFromRaceColumnsAndRegattaLike(this);
+        }
+        return boatsProvider;
+    }
+
     @Override
     public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<Competitor>();
@@ -879,4 +892,42 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForRegatta);
         deregisterer.deregister(deregisterer.analyze());
     }
+    
+    // boat functions
+    @Override
+    public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
+        RegattaLog regattaLog = getRegattaLog();
+        BoatsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new BoatsInLogAnalyzer<>(
+                regattaLog);
+        return analyzer.analyze();
+    }
+    
+    @Override
+    public void registerBoat(Boat boat) {
+        registerBoats(Collections.singleton(boat));
+    }
+    
+    @Override
+    public void registerBoats(Iterable<Boat> boats) {
+        RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        TimePoint now = MillisecondsTimePoint.now();
+        
+        for (Boat boat : boats) {
+            regattaLog.add(new RegattaLogRegisterBoatEventImpl(now, now, regattaLogEventAuthorForRegatta,
+                    UUID.randomUUID(), boat));
+        }
+    }
+    
+    @Override
+    public void deregisterBoat(Boat boat) {
+        deregisterBoats(Collections.singleton(boat));
+    }
+    
+    @Override
+    public void deregisterBoats(Iterable<Boat> boats) {
+        RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        BoatDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new BoatDeregistrator<>(regattaLog, boats, regattaLogEventAuthorForRegatta);
+        deregisterer.deregister(deregisterer.analyze());
+    }
+
 }

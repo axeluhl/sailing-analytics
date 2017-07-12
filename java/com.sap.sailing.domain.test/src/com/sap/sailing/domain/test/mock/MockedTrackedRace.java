@@ -46,6 +46,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.BoatProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -549,6 +550,32 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
                         return null;
+                    }
+
+                    @Override
+                    public BoatProviderFromRaceColumnsAndRegattaLike getOrCreateBoatsProvider() {
+                        return null;
+                    }
+
+                    @Override
+                    public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
+                        return null;
+                    }
+
+                    @Override
+                    public void registerBoat(Boat boat) {
+                    }
+
+                    @Override
+                    public void registerBoats(Iterable<Boat> boat) {
+                    }
+
+                    @Override
+                    public void deregisterBoat(Boat boat) {
+                    }
+
+                    @Override
+                    public void deregisterBoats(Iterable<Boat> boat) {
                     }
 
                     @Override

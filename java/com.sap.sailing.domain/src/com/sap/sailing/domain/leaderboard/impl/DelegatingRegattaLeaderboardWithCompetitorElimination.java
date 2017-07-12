@@ -185,6 +185,10 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getOrCreateCompetitorsProvider();
     }
 
+    public BoatProviderFromRaceColumnsAndRegattaLike getOrCreateBoatsProvider() {
+        return getFullLeaderboard().getOrCreateBoatsProvider();
+    }
+
     public Regatta getRegatta() {
         return getFullLeaderboard().getRegatta();
     }
@@ -216,7 +220,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     public void deregisterCompetitors(Iterable<Competitor> competitor) {
         getFullLeaderboard().deregisterCompetitors(competitor);
     }
-
+    
     public Iterable<Competitor> getAllCompetitors() {
         return getFullLeaderboard().getAllCompetitors();
     }
@@ -459,5 +463,35 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     private void writeObject(ObjectOutputStream oos) throws IOException {
         getFullLeaderboard();
         oos.defaultWriteObject();
+    }
+
+    @Override
+    public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
+        return getFullLeaderboard().getBoatsRegisteredInRegattaLog();
+    }
+
+    @Override
+    public Iterable<Boat> getAllBoats() {
+        return getFullLeaderboard().getAllBoats();
+    }
+
+    @Override
+    public void registerBoat(Boat boat) {
+        getFullLeaderboard().registerBoat(boat);
+    }
+
+    @Override
+    public void registerBoats(Iterable<Boat> boats) {
+        getFullLeaderboard().registerBoats(boats);
+    }
+
+    @Override
+    public void deregisterBoat(Boat boat) {
+        getFullLeaderboard().deregisterBoat(boat);
+    }
+
+    @Override
+    public void deregisterBoats(Iterable<Boat> boats) {
+        getFullLeaderboard().deregisterBoats(boats);
     }
 }

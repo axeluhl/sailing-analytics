@@ -57,13 +57,16 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> denoteForTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> startTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> revokeEventSerializer;
+    private JsonSerializer<RaceLogEvent> registerBoatEventSerializer;
     private JsonSerializer<RaceLogEvent> registerCompetitorEventSerializer;
+    private JsonSerializer<RaceLogEvent> registerCompetitorAndBoatEventSerializer;
     private JsonSerializer<RaceLogEvent> additionalScoringInformationSerializer;
     private JsonSerializer<RaceLogEvent> fixedMarkPassingEventSerializer;
     private JsonSerializer<RaceLogEvent> suppressedMarkPassingsSerializer;
     private JsonSerializer<RaceLogEvent> dependentStartTimeEventSerializer;
     private JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer;
+    private JsonSerializer<RaceLogEvent> useBoatsFromRaceLogEventSerializer;
     private JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer;
 
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
@@ -87,13 +90,16 @@ public class RaceLogEventSerializerTest {
         denoteForTrackingEventSerializer = mock(JsonSerializer.class);
         startTrackingEventSerializer = mock(JsonSerializer.class);
         revokeEventSerializer = mock(JsonSerializer.class);
+        registerBoatEventSerializer = mock(JsonSerializer.class);
         registerCompetitorEventSerializer = mock(JsonSerializer.class);
+        registerCompetitorAndBoatEventSerializer = mock(JsonSerializer.class);
         additionalScoringInformationSerializer = mock(JsonSerializer.class);
         fixedMarkPassingEventSerializer = mock(JsonSerializer.class);
         suppressedMarkPassingsSerializer = mock(JsonSerializer.class);
         dependentStartTimeEventSerializer = mock(JsonSerializer.class);
         startOfTrackingEventSerializer = mock(JsonSerializer.class);
         useCompetitorsFromRaceLogEventSerializer = mock(JsonSerializer.class);
+        useBoatsFromRaceLogEventSerializer = mock(JsonSerializer.class);
         endOfTrackingEventSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
@@ -102,9 +108,10 @@ public class RaceLogEventSerializerTest {
                 pathfinderEventSerializer, gateLineOpeningTimeEventSerializer,
                 startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer, windFixEventSerializer,
                 denoteForTrackingEventSerializer, startTrackingEventSerializer, revokeEventSerializer,
-                registerCompetitorEventSerializer, fixedMarkPassingEventSerializer, suppressedMarkPassingsSerializer, 
+                registerBoatEventSerializer, registerCompetitorEventSerializer, registerCompetitorAndBoatEventSerializer, 
+                fixedMarkPassingEventSerializer, suppressedMarkPassingsSerializer, 
                 additionalScoringInformationSerializer, dependentStartTimeEventSerializer, 
-                startOfTrackingEventSerializer, useCompetitorsFromRaceLogEventSerializer,
+                startOfTrackingEventSerializer, useCompetitorsFromRaceLogEventSerializer, useBoatsFromRaceLogEventSerializer,
                 endOfTrackingEventSerializer);
     }
 
