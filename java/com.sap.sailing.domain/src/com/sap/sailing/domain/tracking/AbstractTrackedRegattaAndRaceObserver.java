@@ -1,4 +1,4 @@
-package com.sap.sailing.server.statistics;
+package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -13,22 +13,22 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
-import com.sap.sailing.server.RacingEventService;
 
 /**
- * This listener is informed about every {@link TrackedRegatta} by {@link RacingEventService} via the implemented
- * {@link TrackedRegattaListener}. For every known {@link TrackedRegatta}, added and removed TrackedRaces are observed
- * by a RaceListener. Subclasses need to implement
- * {@link #onRaceAdded(RegattaAndRaceIdentifier, DynamicTrackedRegatta, DynamicTrackedRace)} and
+ * This listener is informed about every {@link TrackedRegatta} by its implemented {@link TrackedRegattaListener}. To
+ * make this work as intended, subclasses need to be registered at the OSGi service registry by exporting
+ * {@link TrackedRegattaListener}.<br>
+ * For every known {@link TrackedRegatta}, added and removed TrackedRaces are observed by a RaceListener. Subclasses
+ * need to implement {@link #onRaceAdded(RegattaAndRaceIdentifier, DynamicTrackedRegatta, DynamicTrackedRace)} and
  * {@link #onRaceRemoved(DynamicTrackedRace)} to further process {@link TrackedRace}s.
  */
-public abstract class TrackedRegattaAndRaceObserver implements TrackedRegattaListener {
+public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRegattaListener {
 
-    private static final Logger log = Logger.getLogger(TrackedRegattaAndRaceObserver.class.getName());
+    private static final Logger log = Logger.getLogger(AbstractTrackedRegattaAndRaceObserver.class.getName());
 
     private final Map<Serializable, RegattaListener> registeredRegattaListeners = new ConcurrentHashMap<>();
 
-    public TrackedRegattaAndRaceObserver() {
+    public AbstractTrackedRegattaAndRaceObserver() {
     }
 
     @Override
@@ -108,7 +108,7 @@ public abstract class TrackedRegattaAndRaceObserver implements TrackedRegattaLis
         }
 
         /**
-         * Called by {@link TrackedRegattaAndRaceObserver} when the {@link TrackedRegatta} was removed or the
+         * Called by {@link AbstractTrackedRegattaAndRaceObserver} when the {@link TrackedRegatta} was removed or the
          * {@link TrackedRegatta} shouldn't be tracked anymore (this is e.g. the case in replication state.
          */
         public synchronized void stop() {
