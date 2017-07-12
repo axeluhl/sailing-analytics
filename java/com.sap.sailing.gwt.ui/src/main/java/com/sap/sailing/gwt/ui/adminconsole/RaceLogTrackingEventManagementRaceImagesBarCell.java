@@ -61,7 +61,10 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
                 result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
             }
         }
-        result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionEditCompetitorToBoatAssignments(), makeImagePrototype(resources.competitorsIcon())));
+        
+        if (smartphoneTrackingEventManagementPanel.getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace) {
+            result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionEditCompetitorToBoatAssignments(), makeImagePrototype(resources.competitorsIcon())));
+        }
         
         return result;
     }

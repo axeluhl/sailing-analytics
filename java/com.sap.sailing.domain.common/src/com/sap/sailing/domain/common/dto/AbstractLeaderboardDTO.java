@@ -36,6 +36,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public String defaultCourseAreaName;
     public ScoringSchemeType scoringScheme;
     public LeaderboardType type;
+    public boolean canBoatsOfCompetitorsChangePerRace;
 
     private Long delayToLiveInMillisForLatestRace;
 

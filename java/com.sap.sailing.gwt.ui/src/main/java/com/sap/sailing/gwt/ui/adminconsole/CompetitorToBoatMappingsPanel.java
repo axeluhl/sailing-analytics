@@ -45,7 +45,6 @@ public class CompetitorToBoatMappingsPanel extends SimplePanel implements BusyDi
     private final String fleetName;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final StringMessages stringMessages;
     
     private final RefreshableSelectionModel<BoatDTO> refreshableBoatSelectionModel;
     private final RefreshableSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
@@ -62,7 +61,6 @@ public class CompetitorToBoatMappingsPanel extends SimplePanel implements BusyDi
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
-        this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
 
         this.competitorTable = new CompactCompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);

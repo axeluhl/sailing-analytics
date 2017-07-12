@@ -41,7 +41,10 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
         result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
-        result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionEditCompetitorToBoatAssignments(), makeImagePrototype(resources.competitorsIcon())));
+        
+        if (selectedLeaderboardProvider.getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace) {
+            result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionEditCompetitorToBoatAssignments(), makeImagePrototype(resources.competitorsIcon())));
+        }
         
         return result;
     }

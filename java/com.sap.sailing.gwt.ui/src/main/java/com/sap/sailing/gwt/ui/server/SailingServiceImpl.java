@@ -2485,8 +2485,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Regatta regatta = regattaLeaderboard.getRegatta();
             leaderboardDTO.regattaName = regatta.getName(); 
             leaderboardDTO.scoringScheme = regatta.getScoringScheme().getType();
+            leaderboardDTO.canBoatsOfCompetitorsChangePerRace = regatta.canBoatsOfCompetitorsChangePerRace();
         } else {
             leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
+            leaderboardDTO.canBoatsOfCompetitorsChangePerRace = false;
         }
         if (leaderboard.getDefaultCourseArea() != null) {
             leaderboardDTO.defaultCourseAreaId = leaderboard.getDefaultCourseArea().getId();
