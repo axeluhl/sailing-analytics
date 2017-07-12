@@ -47,7 +47,7 @@ public class TrackedRaceStatisticsCacheImpl extends TrackedRegattaAndRaceObserve
     }
 
     private void triggerUpdate(DynamicTrackedRace trackedRace) {
-        logger.log(Level.FINE, "Updating Statistics for race " + trackedRace.getRaceIdentifier());
+        logger.log(Level.FINEST, "Triggering statistics update for race " + trackedRace.getRaceIdentifier());
         cache.triggerUpdate(trackedRace, null);
     }
 
@@ -65,6 +65,7 @@ public class TrackedRaceStatisticsCacheImpl extends TrackedRegattaAndRaceObserve
         @Override
         public TrackedRaceStatistics computeCacheUpdate(TrackedRace trackedRace, EmptyUpdateInterval updateInterval)
                 throws Exception {
+            logger.log(Level.FINE, "Updating statistics for race " + trackedRace.getRaceIdentifier());
             return new TrackedRaceStatisticsCalculator(trackedRace, false, true).getStatistics();
         }
     }
