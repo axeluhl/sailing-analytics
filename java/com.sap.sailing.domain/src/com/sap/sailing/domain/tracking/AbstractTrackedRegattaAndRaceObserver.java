@@ -32,7 +32,7 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
     }
 
     @Override
-    public final synchronized void regattaAdded(TrackedRegatta trackedRegatta) {
+    public synchronized void regattaAdded(TrackedRegatta trackedRegatta) {
         final Serializable regattaId = trackedRegatta.getRegatta().getId();
         RegattaListener tracker = new RegattaListener((DynamicTrackedRegatta) trackedRegatta);
         this.stopIfNotNull(registeredRegattaListeners.put(regattaId, tracker));
@@ -57,6 +57,10 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
                 log.log(Level.SEVERE, "Stopping of tracker failed: " + tracker, exc);
             }
         }
+    }
+    
+    protected synchronized void removeAll() {
+        registeredRegattaListeners.values().forEach(this::stopIfNotNull);
     }
 
     protected abstract void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
