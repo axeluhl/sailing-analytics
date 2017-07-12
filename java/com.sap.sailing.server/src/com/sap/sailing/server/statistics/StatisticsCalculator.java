@@ -20,7 +20,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
 /**
- * Calculates the statistics for the regatta(s) passed to the {@link #addLeaderboard(Leaderboard)} method.
+ * Calculates the statistics for all {@link Leaderboard}s passed to the {@link #addLeaderboard(Leaderboard)} method.
  */
 public class StatisticsCalculator {
 

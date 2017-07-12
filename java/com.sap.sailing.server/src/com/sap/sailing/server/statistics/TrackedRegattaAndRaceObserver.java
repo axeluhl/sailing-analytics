@@ -20,7 +20,7 @@ import com.sap.sailing.server.RacingEventService;
  * {@link TrackedRegattaListener}. For every known {@link TrackedRegatta}, added and removed TrackedRaces are observed
  * by a RaceListener. Subclasses need to implement
  * {@link #onRaceAdded(RegattaAndRaceIdentifier, DynamicTrackedRegatta, DynamicTrackedRace)} and
- * {@link #onRaceRemoved(DynamicTrackedRace)}.
+ * {@link #onRaceRemoved(DynamicTrackedRace)} to further process {@link TrackedRace}s.
  */
 public abstract class TrackedRegattaAndRaceObserver implements TrackedRegattaListener {
 

@@ -6,6 +6,9 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 
+/**
+ * Statistics for one {@link TrackedRace} that are cached by {@link TrackedRaceStatisticsCache}.
+ */
 public class TrackedRaceStatistics {
 
     private final long numberOfGPSFixes;

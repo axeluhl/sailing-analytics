@@ -17,12 +17,17 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
+/**
+ * Implementation of {@link TrackedRaceStatisticsCache} that observes all {@link TrackedRegatta} and {@link TrackedRace}
+ * instances to calculate and update the internal statistics cache.
+ */
 public class TrackedRaceStatisticsCacheImpl extends TrackedRegattaAndRaceObserver implements TrackedRaceStatisticsCache {
     private static final Logger logger = Logger.getLogger(TrackedRaceStatisticsCacheImpl.class.getName());
     

@@ -4,8 +4,11 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.statistics.impl.StatisticsImpl;
 
+/**
+ * Aggregates local and remote {@link Statistics} to get the overall statistics values.
+ */
 public class StatisticsAggregator {
-    
+
     private int competitors = 0;
     private int races = 0;
     private int trackedRaces = 0;
@@ -23,9 +26,9 @@ public class StatisticsAggregator {
         numberOfWindFixes += remoteStatisticsForYear.getNumberOfWindFixes();
         distanceTraveled = distanceTraveled.add(remoteStatisticsForYear.getDistanceTraveled());
     }
-    
+
     public Statistics getStatistics() {
-        return new StatisticsImpl(competitors, regattas, races, trackedRaces, numberOfGPSFixes,
-                numberOfWindFixes, distanceTraveled);
+        return new StatisticsImpl(competitors, regattas, races, trackedRaces, numberOfGPSFixes, numberOfWindFixes,
+                distanceTraveled);
     }
 }
