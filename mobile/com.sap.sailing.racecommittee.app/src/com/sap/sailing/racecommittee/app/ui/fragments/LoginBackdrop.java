@@ -71,6 +71,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
     private boolean useBack;
     private String server;
     private AuthCheckTask.AuthCheckTaskListener mAuthCheckTaskListener;
+    private LoginTaskListener loginTaskListener;
 
     public static LoginBackdrop newInstance() {
 
@@ -132,6 +133,23 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                 }
             }
 
+            @Override
+            public void onException(Exception exception) {
+                LoginBackdrop.this.onException(exception);
+            }
+        };
+        loginTaskListener = new LoginTaskListener() {
+            @Override
+            public void onResultReceived(String accessToken) {
+                if (LoginBackdrop.this.login != null) {
+                    LoginBackdrop.this.login.setVisibility(View.GONE);
+                }
+                if (isAdded()) {
+                    AppPreferences.on(getActivity()).setAccessToken(accessToken);
+                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
+                }
+            }
+            
             @Override
             public void onException(Exception exception) {
                 LoginBackdrop.this.onException(exception);
@@ -311,26 +329,8 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                 public void onClick(View v) {
                     LoginTask task;
                     try {
-                        task = new LoginTask(getActivity(), AppPreferences.on(getActivity()).getServerBaseURL(),
-                                new LoginTaskListener() {
-                                    @Override
-                                    public void onResultReceived(String accessToken) {
-                                        if (LoginBackdrop.this.login != null) {
-                                            LoginBackdrop.this.login.setVisibility(View.GONE);
-                                        }
-                                        if (isAdded()) {
-                                            AppPreferences.on(getActivity()).setAccessToken(accessToken);
-                                            BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
-                                        }
-                                    }
-                                    
-                                    @Override
-                                    public void onException(Exception exception) {
-                                        LoginBackdrop.this.onException(exception);
-                                    }
-                                });
-                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new LoginData(userName.getText().toString(), userPassword.getText()
-                                .toString()));
+                        task = new LoginTask(getActivity(), AppPreferences.on(getActivity()).getServerBaseURL(), loginTaskListener);
+                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new LoginData(userName.getText().toString(), userPassword.getText().toString()));
                     } catch (Exception e) {
                         ExLog.e(getActivity(), TAG, "Error: Failed to perform checkin due to a MalformedURLException: " + e.getMessage());
                     }
