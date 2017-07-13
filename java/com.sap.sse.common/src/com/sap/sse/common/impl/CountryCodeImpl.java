@@ -77,29 +77,4 @@ public class CountryCodeImpl implements CountryCode {
     public String toString() {
         return getThreeLetterIOCCode();
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((threeLetterISOCode == null) ? 0 : threeLetterISOCode.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        CountryCodeImpl other = (CountryCodeImpl) obj;
-        if (threeLetterISOCode == null) {
-            if (other.threeLetterISOCode != null)
-                return false;
-        } else if (!threeLetterISOCode.equals(other.threeLetterISOCode))
-            return false;
-        return true;
-    }
 }
