@@ -2,6 +2,12 @@ package com.sap.sse.common.impl;
 
 import com.sap.sse.common.CountryCode;
 
+/**
+ * Equality and hash are based on the {@link #threeLetterISOCode three-letter ISO code} only.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class CountryCodeImpl implements CountryCode {
     private static final long serialVersionUID = 74265853281480956L;
     
@@ -70,5 +76,30 @@ public class CountryCodeImpl implements CountryCode {
     @Override
     public String toString() {
         return getThreeLetterIOCCode();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((threeLetterISOCode == null) ? 0 : threeLetterISOCode.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CountryCodeImpl other = (CountryCodeImpl) obj;
+        if (threeLetterISOCode == null) {
+            if (other.threeLetterISOCode != null)
+                return false;
+        } else if (!threeLetterISOCode.equals(other.threeLetterISOCode))
+            return false;
+        return true;
     }
 }
