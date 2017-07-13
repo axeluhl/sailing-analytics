@@ -19,7 +19,7 @@ public abstract class AbstractAsyncJsonTask<Params, Progress, Result, ListenerTy
     private final WeakReference<ListenerType> mListener;
     private Exception mException;
 
-    public AbstractAsyncJsonTask(Context context, String baseUrl, ListenerType listener, URL url) {
+    public AbstractAsyncJsonTask(Context context, ListenerType listener, URL url) {
         mContext = context.getApplicationContext();
         mListener = new WeakReference<>(listener);
         mUrl = url;

@@ -15,7 +15,7 @@ public class AuthCheckTask extends AbstractAsyncJsonTask<Void, Void, Boolean, Au
     private final static String HELLO_REQUEST = "/security/api/restsecurity/hello";
 
     public AuthCheckTask(Context context, String baseUrl, AuthCheckTaskListener listener) throws MalformedURLException {
-        super(context, baseUrl, listener, new URL(baseUrl + HELLO_REQUEST));
+        super(context, listener, new URL(baseUrl + HELLO_REQUEST));
     }
 
     @Override

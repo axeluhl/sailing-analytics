@@ -16,7 +16,7 @@ public class LoginTask extends AbstractAsyncJsonTask<LoginData, Void, String, Lo
     private final static String TOKEN_REQUEST = "/security/api/restsecurity/access_token";
 
     public LoginTask(Context context, String baseUrl, LoginTaskListener listener) throws MalformedURLException {
-        super(context, baseUrl, listener, new URL(baseUrl + TOKEN_REQUEST));
+        super(context, listener, new URL(baseUrl + TOKEN_REQUEST));
     }
 
     @Override
