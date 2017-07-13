@@ -19,6 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.Config
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
@@ -209,20 +210,17 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (mPenaltyDropDown != null) {
+            int selection = mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name());
             RacingProcedure procedure = getRaceState().getRacingProcedure();
             if (procedure instanceof ConfigurableStartModeFlagRacingProcedure) {
                 ConfigurableStartModeFlagRacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
                 switch (racingProcedure.getStartModeFlag()) {
-                    case PAPA:
-                        mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name()));
-                        break;
-
                     case BLACK:
-                        mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name()));
+                        selection = mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name());
                         break;
 
                     case UNIFORM:
-                        mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name()));
+                        selection = mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name());
                         break;
 
                     default:
@@ -230,6 +228,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                         break;
                 }
             }
+            if (getRaceState().getStatus() == RaceLogRaceStatus.FINISHED) {
+                selection = mPenaltyAdapter.getPosition(MaxPointsReason.DNF.name());
+            }
+            mPenaltyDropDown.setSelection(selection);
         }
         switch (getRaceState().getStatus()) {
             case FINISHED:
