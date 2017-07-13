@@ -44,9 +44,14 @@ public abstract class AbstractAsyncJsonTask<Params, Progress, Result, ListenerTy
     @Override
     protected Result doInBackground(@SuppressWarnings("unchecked") Params... params) {
         Result result = null;
-        if (mUrl != null && params != null && params.length > 0) {
+        if (mUrl != null) {
             try {
-                HttpRequest request = createRequest(params[0]);
+                HttpRequest request;
+                if (params != null && params.length > 0) {
+                    request = createRequest(params[0]);
+                } else {
+                    request = createRequest(null);
+                }
                 InputStream responseStream = request.execute();
 
                 JSONParser parser = new JSONParser();
