@@ -70,6 +70,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
     private View onboarding;
     private boolean useBack;
     private String server;
+    private AuthCheckTask.AuthCheckTaskListener mAuthCheckTaskListener;
 
     public static LoginBackdrop newInstance() {
 
@@ -121,6 +122,21 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
         setupOnboarding(layout);
         setupLogin(layout);
 
+        mAuthCheckTaskListener = new AuthCheckTask.AuthCheckTaskListener() {
+            @Override
+            public void onResultReceived(Boolean authenticated) {
+                if (authenticated) {
+                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
+                } else {
+                    Toast.makeText(getActivity(), "User is not authenticated", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                LoginBackdrop.this.onException(exception);
+            }
+        };
         receiver = new IntentReceiver();
 
         return layout;
@@ -473,21 +489,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                     BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_ONBOARDING));
                 } else {
                     try {
-                        AuthCheckTask task = new AuthCheckTask(getActivity(), pref.getServerBaseURL(), new AuthCheckTask.AuthCheckTaskListener() {
-                            @Override
-                            public void onResultReceived(Boolean authenticated) {
-                                if (authenticated) {
-                                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
-                                } else {
-                                    Toast.makeText(getActivity(), "User is not authenticated", Toast.LENGTH_LONG).show();
-                                }
-                            }
-
-                            @Override
-                            public void onException(Exception exception) {
-                                LoginBackdrop.this.onException(exception);
-                            }
-                        });
+                        AuthCheckTask task = new AuthCheckTask(getActivity(), pref.getServerBaseURL(), mAuthCheckTaskListener);
                         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     } catch (MalformedURLException e) {
                         ExLog.e(getActivity(), TAG, "Error: Failed to perform check-in due to a MalformedURLException: " + e.getMessage());
