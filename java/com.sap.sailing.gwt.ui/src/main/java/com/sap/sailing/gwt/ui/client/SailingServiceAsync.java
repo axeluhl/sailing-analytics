@@ -93,7 +93,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -383,12 +382,13 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            used to decide whether the client requires an update to the race's competitor set. If the server
      *            has the same MD5 hash for the race's competitors, no competitor set is transmitted to the client.
      *            Otherwise, the full race competitor ID's as strings are sent to the client again for update.
+     * @param targetEstimationRequired 
      */
     void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
-            AsyncCallback<CompactRaceMapDataDTO> callback);
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,Date time,
+            boolean targetEstimationRequired, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<String, Date> fromPerCompetitorIdAsString,
             Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate,
@@ -839,8 +839,4 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors,
             AsyncCallback<Void> callback);
-
-    void getEstimatedTargetTime(MillisecondsTimePoint millisecondsTimePoint, RegattaAndRaceIdentifier raceIdentifier,
-            AsyncCallback<Duration> asyncCallback);
-
 }

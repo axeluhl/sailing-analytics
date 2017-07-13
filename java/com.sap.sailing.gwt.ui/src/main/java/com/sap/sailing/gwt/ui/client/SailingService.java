@@ -104,7 +104,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
@@ -169,7 +168,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<String, Date> fromPerCompetitorIdAsString,
             Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID) throws NoWindException;
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,Date time,boolean targetEstimationRequired) throws NoWindException;
     
     CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
@@ -680,6 +679,4 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName);
 
     void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors);
-
-    Duration getEstimatedTargetTime(MillisecondsTimePoint millisecondsTimePoint, RegattaAndRaceIdentifier raceIdentifier);
 }

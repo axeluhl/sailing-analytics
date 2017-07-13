@@ -135,7 +135,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -421,7 +420,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * {@link #showAdvantageLine(Iterable, Date, long)} drawing procedure} needs to be triggered.
      */
     private CompetitorDTO advantageLineCompetitor;
-    private Date lastUpdateOfTargetEstimation = new Date(0);
     protected Label targetEstimationOverlay;
     private RaceMapStyle raceMapStyle;
 
@@ -865,7 +863,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                             if (windInfo != null) {
                                 lastCombinedWindTrackInfoDTO = windInfo;
-                                updateTargetTimeEstimation(newTime);
                                 showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
                                 for (WindSource windSource : windInfo.windTrackInfoByWindSource.keySet()) {
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
@@ -896,36 +893,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     });
                 }
             }
-        }
-    }
-
-    protected void updateTargetTimeEstimation(Date newTime) {
-        if(settings.isShowTargetEstimation() && lastUpdateOfTargetEstimation.getTime() + DELAY_ESTIMATION_UPDATE < newTime.getTime()){
-            //we have wind, try to estimate time now
-            lastUpdateOfTargetEstimation = newTime;
-            asyncActionsExecutor.execute(new GetTargetTimeAction(sailingService,new MillisecondsTimePoint(newTime),raceIdentifier),  new AsyncCallback<Duration>(){
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error obtaining targettime: " + caught.getMessage(), true /*silentMode */);
-                }
-                
-                @Override
-                public void onSuccess(Duration result) {
-                    if(result == null){
-                        //server could not determine time
-                        return;
-                    }
-                    if(targetEstimationOverlay == null){
-                        targetEstimationOverlay = new Label("");
-                        targetEstimationOverlay.setStyleName(raceMapStyle.estimatedTargettime());
-                        map.setControls(ControlPosition.BOTTOM_LEFT, targetEstimationOverlay);
-                    }
-                    long endTime = lastRaceTimesInfo.getStartOfRace().getTime()+result.asMillis();
-                    Date endDate = new Date(endTime);
-                    targetEstimationOverlay.setText(stringMessages.estimatedEndtime() + " "+ TARGET_TIME_ESTIMATION_FORMAT.format(endDate));
-                    
-                }
-            });
         }
     }
 
@@ -986,7 +953,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
-                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID()),
+                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(),newTime,settings.isShowTargetEstimation()),
             GET_RACE_MAP_DATA_CATEGORY,
             getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, ++boatPositionRequestIDCounter));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
@@ -1082,12 +1049,28 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         zoomMapToNewBounds(zoomToBounds);
                         mapFirstZoomDone = true;
+                        
+                        updateTargetEstimation(raceMapDataDTO.estimatedDuration);
                     }
                 } else {
                     lastTimeChangeBeforeInitialization = newTime;
                 }
             }
         });
+    }
+
+    protected void updateTargetEstimation(Duration estimatedDuration) {
+        if(estimatedDuration == null || lastRaceTimesInfo == null){
+            return;
+        }
+        if(targetEstimationOverlay == null){
+            targetEstimationOverlay = new Label("");
+            targetEstimationOverlay.setStyleName(raceMapStyle.estimatedTargettime());
+            map.setControls(ControlPosition.BOTTOM_LEFT, targetEstimationOverlay);
+        }
+        long endTime = lastRaceTimesInfo.getStartOfRace().getTime()+estimatedDuration.asMillis();
+        Date endDate = new Date(endTime);
+        targetEstimationOverlay.setText(stringMessages.estimatedEndtime() + " "+ TARGET_TIME_ESTIMATION_FORMAT.format(endDate) + " " + stringMessages.estimatedDuration() + " " + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
     }
 
     /**

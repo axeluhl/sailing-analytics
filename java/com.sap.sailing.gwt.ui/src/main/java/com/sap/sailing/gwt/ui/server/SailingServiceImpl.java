@@ -1706,7 +1706,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID) throws NoWindException {
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date time,boolean targetEstimationRequired) throws NoWindException {
+        Duration estimatedDuration = null;
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         // if md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID is null, Arrays.equals will return false, and the
@@ -1719,6 +1720,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceCompetitorIdsAsStrings.add(c.getId().toString());
             }
         }
+        if(targetEstimationRequired){
+            estimatedDuration = getEstimationForTargetTime(time, estimatedDuration, trackedRace);
+        }
+        
         final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
@@ -1729,7 +1734,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             SimulationService simulationService = getService().getSimulationService();
             simulationResultVersion = simulationService.getSimulationResultsVersion(simulationLegIdentifier);
         }
-        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks, simulationResultVersion, raceCompetitorIdsAsStrings);
+       
+        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks, simulationResultVersion, raceCompetitorIdsAsStrings,estimatedDuration);
+    }
+
+    private Duration getEstimationForTargetTime(Date time, Duration estimatedDuration, final TrackedRace trackedRace) {
+        if(trackedRace != null){
+            try {
+                estimatedDuration = trackedRace.getEstimatedTimeToComplete(new MillisecondsTimePoint(time)).getExpectedDuration();
+            } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
+                e.printStackTrace();
+            } finally{
+            }
+        }
+        return estimatedDuration;
     }
 
     private Map<CompetitorDTO, BoatDTO> getCompetitorBoatsForRace(RaceDefinition race, List<CompetitorDTO> competitorDTOs) {
@@ -6555,20 +6573,5 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             newEliminatedCompetitors.add(getCompetitor(cDTO));
         }
         getService().apply(new UpdateEliminatedCompetitorsInLeaderboard(leaderboardName, newEliminatedCompetitors));
-    }
-
-    @Override
-    public Duration getEstimatedTargetTime(MillisecondsTimePoint millisecondsTimePoint,
-            RegattaAndRaceIdentifier raceIdentifier) {
-        DynamicTrackedRace race = getTrackedRace(raceIdentifier);
-        if(race != null){
-            try {
-                return race.getEstimatedTimeToComplete(millisecondsTimePoint).getExpectedDuration();
-            } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-        return null;
     }
 }
