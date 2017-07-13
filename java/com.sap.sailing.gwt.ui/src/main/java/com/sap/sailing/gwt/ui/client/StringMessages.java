@@ -1847,7 +1847,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorFetchingStatistics(String message);
     String errorFetchingAggregators(String message);
     String errorLoadingDataRetrieverChainDefinitions(String message);
-    String errorFetchingDimensionData(String message);
     String errorFetchingComponentsChangedTimepoint(String message);
     String errorRunningQuery(String message);
     String errorReadingWindFixes(String message);
