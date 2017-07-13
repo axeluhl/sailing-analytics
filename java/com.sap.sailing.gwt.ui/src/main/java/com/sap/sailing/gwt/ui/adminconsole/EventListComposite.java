@@ -152,26 +152,19 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         removeEventsButton.setEnabled(false);
         removeEventsButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent event) {
-                boolean deleteEvents = false;
-                
-                if(refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())){
-                    final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames))) {
-                        deleteEvents = true;
-                    }
-                }
-                else {
-                    if(Window.confirm(stringMessages.doYouReallyWantToRemoveEvents())) {
-                       deleteEvents = true;
-                    }
-                }
-                
-                if(deleteEvents){
+            public void onClick(ClickEvent event) {  
+                if(askUserForConfirmation()){
                     removeEvents(refreshableEventSelectionModel.getSelectedSet());
                 }
             }
 
+            private boolean askUserForConfirmation() {
+                if(refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())){
+                    final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
+                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames));
+                }
+                return Window.confirm(stringMessages.doYouReallyWantToRemoveEvents());
+            }
         });
         eventControlsPanel.add(removeEventsButton);
 
@@ -204,7 +197,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 final boolean somethingSelected = !refreshableEventSelectionModel.getSelectedSet().isEmpty();
                 removeEventsButton.setEnabled(somethingSelected);
                 final int numberOfItemsSelected = refreshableEventSelectionModel.getSelectedSet().size();
-                removeEventsButton.setText(numberOfItemsSelected <= 1 ? stringMessages.remove() : stringMessages.removeAndShowCount(numberOfItemsSelected));
+                removeEventsButton.setText(numberOfItemsSelected <= 1 ? stringMessages.remove() : stringMessages.removeNumber(numberOfItemsSelected));
             }
         });
         

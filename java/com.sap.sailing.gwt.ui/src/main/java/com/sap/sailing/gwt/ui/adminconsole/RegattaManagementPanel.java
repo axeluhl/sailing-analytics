@@ -87,25 +87,19 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         removeRegattaButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                boolean deleteRegattas = false;
-                
-                if (refreshableRegattaMultiSelectionModel.itemIsSelectedButNotVisible(regattaListComposite.getRegattaTable().getVisibleItems())) {
-                    final String regattaNames = refreshableRegattaMultiSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleRegattas(regattaNames))) {
-                        deleteRegattas = true;
-                    }
-                } else {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegattas())) {
-                        deleteRegattas = true;
-                    }
-                }
-                
-                if(deleteRegattas){
-                    // Creating a new Collection, because getSelectedRegattas returns an
-                    // unmodifiable collection, which can't be sent to the server.
+                if(askUserForConfirmation()){
+                    // unmodifiable collection can't be sent to the server.
                     Collection<RegattaIdentifier> regattas = createModifiableCollection();
                     removeRegattas(regattas);
                 }
+            }
+
+            private boolean askUserForConfirmation() {
+                if (refreshableRegattaMultiSelectionModel.itemIsSelectedButNotVisible(regattaListComposite.getRegattaTable().getVisibleItems())) {
+                    final String regattaNames = refreshableRegattaMultiSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
+                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleRegattas(regattaNames));
+                } 
+                return Window.confirm(stringMessages.doYouReallyWantToRemoveRegattas());
             }          
         });
         
@@ -135,7 +129,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                     regattaDetailsComposite.setVisible(false);
                 }
                 removeRegattaButton.setEnabled(!selectedRegattas.isEmpty());
-                removeRegattaButton.setText(selectedRegattas.size() <= 1 ? stringMessages.remove() : stringMessages.removeAndShowCount(selectedRegattas.size()));
+                removeRegattaButton.setText(selectedRegattas.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(selectedRegattas.size()));
             }            
         });
         regattasContentPanel.add(regattaListComposite);

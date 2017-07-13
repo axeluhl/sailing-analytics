@@ -26,7 +26,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String refresh();
     @Override
     String remove();
-    String removeAndShowCount(int count);
+    String removeNumber(int count);
     String windSource();
     String dampeningInterval();
     String map();
@@ -1032,6 +1032,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorGettingIgtimiAuthorizationUrl(String message);
     String addIgtimiUser();
     String doYouReallyWantToRemoveLeaderboards();
+    String doYouReallyWantToRemoveNonVisibleLeaderboards(String leaderboardNames);
+    String doYouReallyWantToRemoveTrackedRaces();
+    String doYouReallyWantToRemoveNonVisibleTrackedRaces(String trackedRacesName);
     String errorTryingToRemoveIgtimiAccount(String eMailOfAccountToRemove);
     String successfullyRemoveIgtimiAccount(String eMailOfAccountToRemove);
     String eMailMustNotBeEmpty();
@@ -1125,6 +1128,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboardsExceptFromSelectedGroup();
     String availableLeaderboardGroups();
     String leaderboardGroupsOfSelectedEvent();
+    String doYouReallyWantToRemoveLeaderboardGroups();
+    String doYouReallyWantToRemoveNonVisibleLeaderboardGroups(String leaderboardGroupNames);
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();

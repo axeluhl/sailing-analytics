@@ -69,7 +69,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      * @param visibleItemList
      *            can be obtained by calling {@link com.google.gwt.user.cellview.client.CellTable#getVisibleItems()}
      *            method.
-     * @return <code>true</code> if the list of does not contain every item of the current selected item set.
+     * @return <code>true</code> if the list of visible items does not contain every item of the current selected item set.
      */
     public boolean itemIsSelectedButNotVisible(List<T> visibleItemList) {
         for (T item : getSelectedSet()) {
