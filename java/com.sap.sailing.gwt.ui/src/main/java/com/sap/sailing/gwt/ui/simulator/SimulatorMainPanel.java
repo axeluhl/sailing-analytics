@@ -186,7 +186,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onFailure(Throwable message) {
-                errorReporter.reportError(stringMessages.errorRecievingWindPattern(message.getMessage()));
+                errorReporter.reportError(stringMessages.errorReceivingWindPattern(message.getMessage()));
             }
 
             @Override
@@ -453,7 +453,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onFailure(Throwable message) {
-                errorReporter.reportError(stringMessages.errorRecievingWindPattern(message.getMessage()));
+                errorReporter.reportError(stringMessages.errorReceivingWindPattern(message.getMessage()));
             }
 
             @Override

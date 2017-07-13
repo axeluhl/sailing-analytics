@@ -1829,7 +1829,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorLoadingLeaderBoardGroup(String leaderboardGroupName, String message);
     String errorLoadingLeaderBoardGroups(String message);
     String errorServletCall(String message);
-    String errorRecievingWindPattern(String message);
+    String errorReceivingWindPattern(String message);
     String errorLoadingBoatClasses(String message);
     String errorLoadingLegInformation(String message);
     String errorLoadingRaceNames(String message);

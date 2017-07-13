@@ -207,7 +207,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
-                        EditableLeaderboardPanel.this.getErrorReporter().reportError(stringMessages.errorUpdatingDisplayNames(row.competitor.getName(),getLeaderboardName(),t.getMessage()));
+                        EditableLeaderboardPanel.this.getErrorReporter().reportError(
+                                stringMessages.errorUpdatingDisplayNames(row.competitor.getName(),
+                                        getLeaderboardName(), t.getMessage()));
                     }
 
                     @Override
@@ -324,7 +326,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         @Override
                         public void onFailure(Throwable t) {
                             removeBusyTask();
-                            getErrorReporter().reportError(stringMessages.errorUpdatingMaxPointsReason(row.competitor.getName(),getLeaderboardName(),t.getMessage()));
+                            getErrorReporter().reportError(stringMessages.errorUpdatingMaxPointsReason(
+                                    row.competitor.getName(), getLeaderboardName(), t.getMessage()));
                         }
 
                         @Override
@@ -447,7 +450,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         @Override
                         public void onFailure(Throwable t) {
                             removeBusyTask();
-                            getErrorReporter().reportError(stringMessages.errorUpdatingLeaderboardScore(row.competitor.getName(),getLeaderboardName(),raceColumnName,t.getMessage()));
+                            getErrorReporter().reportError(
+                                    stringMessages.errorUpdatingLeaderboardScore(row.competitor.getName(),
+                                            getLeaderboardName(), raceColumnName, t.getMessage()));
                         }
 
                         @Override
@@ -522,7 +527,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 @Override
                                 public void onFailure(Throwable t) {
                                     removeBusyTask();
-                                    getErrorReporter().reportError(stringMessages.errorUpdatingLeaderboardScore(row.competitor.getName(),getLeaderboardName(),raceColumnName,t.getMessage()));
+                                    getErrorReporter().reportError(stringMessages.errorUpdatingLeaderboardScore(
+                                            row.competitor.getName(), getLeaderboardName(),
+                                            raceColumnName, t.getMessage()));
                                 }
 
                                 @Override
@@ -533,7 +540,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                         @Override
                                         public void onFailure(Throwable t) {
                                             removeBusyTask();
-                                            getErrorReporter().reportError(stringMessages.errorUpdatingLeaderboardScore(row.competitor.getName(),getLeaderboardName(),raceColumnName,t.getMessage()));
+                                            getErrorReporter().reportError(stringMessages.errorUpdatingLeaderboardScore(
+                                                    row.competitor.getName(), getLeaderboardName(), raceColumnName, t.getMessage()));
                                         }
 
                                         @Override
@@ -861,7 +869,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                                 new AsyncCallback<Void>() {
                                     @Override
                                     public void onFailure(Throwable t) {
-                                        EditableLeaderboardPanel.this.getErrorReporter().reportError(stringMessages.errorUpdatingDisplayNames(row.competitor.getName(),getLeaderboardName(),t.getMessage())); 
+                                        EditableLeaderboardPanel.this.getErrorReporter().reportError(
+                                                stringMessages.errorUpdatingDisplayNames(row.competitor.getName(), getLeaderboardName(), t.getMessage())); 
                                     }
 
                                     @Override
@@ -956,7 +965,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
-                EditableLeaderboardPanel.this.getErrorReporter().reportError(stringMessages.errorUpdatingCarriedPoints(row.competitor.getName(),getLeaderboardName(),t.getMessage()));
+                EditableLeaderboardPanel.this.getErrorReporter().reportError(
+                        stringMessages.errorUpdatingCarriedPoints(row.competitor.getName(), getLeaderboardName(), t.getMessage()));
             }
 
             @Override

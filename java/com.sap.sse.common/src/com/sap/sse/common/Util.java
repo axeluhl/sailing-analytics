@@ -746,7 +746,7 @@ public class Util {
     }
 
     public static String toStringOrNull(Object toStringOrNull) {
-        if(toStringOrNull == null){
+        if (toStringOrNull == null) {
             return null;
         }
         return toStringOrNull.toString();

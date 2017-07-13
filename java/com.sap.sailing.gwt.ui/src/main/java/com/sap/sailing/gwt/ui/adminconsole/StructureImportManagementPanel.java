@@ -299,7 +299,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 @Override
                 public void onFailure(Throwable caught) {
                     busyIndicator.setBusy(false);
-                    errorReporter.reportError(stringMessages.errorLoadingRegattas(jsonURL,caught.getMessage()));
+                    errorReporter.reportError(stringMessages.errorLoadingRegattas(jsonURL, caught.getMessage()));
                 }
 
                 @Override
