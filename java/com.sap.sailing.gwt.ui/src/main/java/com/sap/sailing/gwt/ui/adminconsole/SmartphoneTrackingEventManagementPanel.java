@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -130,12 +132,29 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 return leaderboard.name;
             }
         };
+        leaderboardNameColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(leaderboardNameColumn, new Comparator<StrippedLeaderboardDTO>() {
+            @Override
+            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                return new NaturalComparator(false).compare(o1.name, o2.name);
+            }
+        });
+
         TextColumn<StrippedLeaderboardDTO> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
                 return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : "";
             }
         };
+        leaderboardDisplayNameColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn,
+                new Comparator<StrippedLeaderboardDTO>() {
+                    @Override
+                    public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                        return new NaturalComparator(false).compare(o1.getDisplayName(), o2.getDisplayName());
+                    }
+                });
+
         ImagesBarColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn =
                 new ImagesBarColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell>(
                 new RaceLogTrackingEventManagementImagesBarCell(stringMessages));
@@ -427,7 +446,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to stop tracking races " + racesToStopTracking + ": " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(Util.toStringOrNull(racesToStopTracking), caught.getMessage()));
                     }
         
                     @Override
@@ -629,8 +648,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(
-                                "Error trying to update regatta " + regatta.getName() + ": " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorUpdatingRegatta(regatta.getName(),caught.getMessage()));
                     }
 
                     @Override
@@ -652,7 +670,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingRaceLog(caught.getMessage()));
             }
         });
     }
@@ -706,7 +724,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Failed to start tracking " + leaderboardRaceColumnFleetNames + ": " + caught.getMessage());
+                errorReporter.reportError(stringMessages.errorStartingTracking(Util.toStringOrNull(leaderboardRaceColumnFleetNames),caught.getMessage()));
             }
         });
     }

@@ -16,11 +16,9 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
@@ -56,30 +54,18 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         siteHeader.addWidgetToRightSide(clockLabel);
         containerPanel.addNorth(siteHeader, 75);
         
-        RegattaOverviewContextDefinition regattaOverviewSettings = serializer
+        RegattaOverviewContextDefinition regattaOverviewContextDefinition = serializer
                 .deserializeFromCurrentLocation(new RegattaOverviewContextDefinition());
 
-        if (regattaOverviewSettings.getEvent() == null) {
+        if (regattaOverviewContextDefinition.getEvent() == null) {
             Window.alert("Missing parameter");
             return;
         }
 
         createAndAddDetailPanel();
-        createAndAddRegattaPanel(regattaOverviewSettings);
+        createAndAddRegattaPanel(regattaOverviewContextDefinition);
         toggleDetailPanel(false);
         
-        regattaPanel.setEntryClickedHandler(new EntryHandler() { 
-            @Override
-            public void onEntryClicked(RegattaOverviewEntryDTO entry) {
-                detailPanel.show(entry);
-                toggleDetailPanel(true);
-            }
-
-            @Override
-            public void onEntryUpdated(RegattaOverviewEntryDTO entry) {
-                detailPanel.update(entry);
-            }
-        });
     }
     
     private void toggleDetailPanel(boolean visibile) {

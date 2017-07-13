@@ -15,7 +15,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
@@ -73,9 +73,13 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     }
 
     @Override
-    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
-        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(
-                getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType()),
+    public MultiCompetitorRaceChartSettings getSettings() {
+        return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
+    }
+    
+    @Override
+    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent(MultiCompetitorRaceChartSettings settings) {
+        return new MultiCompetitorRaceChartSettingsComponent(settings,
                 getStringMessages(), hasOverallLeaderboard);
     }
 
@@ -90,11 +94,6 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         }
     }
 
-    @Override
-    public MultiCompetitorRaceChartSettings getSettings() {
-        return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
-    }
-    
     @Override
     protected Component<MultiCompetitorRaceChartSettings> getComponent() {
         return this;

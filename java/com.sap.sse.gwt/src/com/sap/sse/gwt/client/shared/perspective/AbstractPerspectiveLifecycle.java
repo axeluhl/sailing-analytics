@@ -68,38 +68,38 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
     }
 
     @Override
-    public final PerspectiveCompositeSettings<PS> extractContextSpecificSettings(PerspectiveCompositeSettings<PS> settings) {
+    public final PerspectiveCompositeSettings<PS> extractDocumentSettings(PerspectiveCompositeSettings<PS> settings) {
         HashMap<String, Settings> settingsPerComponent = new HashMap<>();
         for (Entry<String, Settings> childSet : settings.getSettingsPerComponentId().entrySet()) {
             String childId = childSet.getKey();
             Settings childNewSettings = childSet.getValue();
             ComponentLifecycle<Settings> childLiveCycle = getLifecycleForId(childId);
-            Settings extracted = childLiveCycle.extractContextSpecificSettings(childNewSettings);
+            Settings extracted = childLiveCycle.extractDocumentSettings(childNewSettings);
             settingsPerComponent.put(childId, extracted);
         }
 
-        PS ownGlobalSettings = extractOwnContextSettings(
+        PS ownGlobalSettings = extractOwnDocumentSettings(
                 hasSettings() ? settings.getPerspectiveOwnSettings() : createPerspectiveOwnDefaultSettings());
         return new PerspectiveCompositeSettings<PS>(ownGlobalSettings, settingsPerComponent);
     }
 
     @Override
-    public final PerspectiveCompositeSettings<PS> extractGlobalSettings(PerspectiveCompositeSettings<PS> settings) {
+    public final PerspectiveCompositeSettings<PS> extractUserSettings(PerspectiveCompositeSettings<PS> settings) {
         HashMap<String, Settings> settingsPerComponent = new HashMap<>();
         for (Entry<String, Settings> childSet : settings.getSettingsPerComponentId().entrySet()) {
             String childId = childSet.getKey();
             Settings childNewSettings = childSet.getValue();
             ComponentLifecycle<Settings> childLiveCycle = getLifecycleForId(childId);
-            Settings extracted = childLiveCycle.extractGlobalSettings(childNewSettings);
+            Settings extracted = childLiveCycle.extractUserSettings(childNewSettings);
             settingsPerComponent.put(childId, extracted);
         }
 
-        PS ownGlobalSettings = extractOwnGlobalSettings(
+        PS ownGlobalSettings = extractOwnUserSettings(
                 hasSettings() ? settings.getPerspectiveOwnSettings() : createPerspectiveOwnDefaultSettings());
         return new PerspectiveCompositeSettings<PS>(ownGlobalSettings, settingsPerComponent);
     }
 
-    protected abstract PS extractOwnGlobalSettings(PS settings);
+    protected abstract PS extractOwnUserSettings(PS settings);
 
-    protected abstract PS extractOwnContextSettings(PS settings);
+    protected abstract PS extractOwnDocumentSettings(PS settings);
 }

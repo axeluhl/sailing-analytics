@@ -4,11 +4,19 @@ import java.util.ArrayList;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public interface Component<SettingsType extends Settings> {
-    ArrayList<String> getPath();
+    default Iterable<String> getPath() {
+        ArrayList<String> path = new ArrayList<>();
+        Component<?> cur = this;
+        while (cur.getParentComponent() != null) {
+            path.add(0, cur.getId());
+            cur = cur.getParentComponent();
+        }
+        return path;
+    };
 
     /**
      * Each component instance has an ID that has to be unique in the context in which the component is used
@@ -46,7 +54,7 @@ public interface Component<SettingsType extends Settings> {
      * as well as to produce a result from the widget's state when the settings dialog wants to validate or return the
      * settings.
      */
-    SettingsDialogComponent<SettingsType> getSettingsDialogComponent();
+    SettingsDialogComponent<SettingsType> getSettingsDialogComponent(SettingsType useTheseSettings);
     
     /** 
      * @return the current settings of the component or {@code null} if the component has no settings.

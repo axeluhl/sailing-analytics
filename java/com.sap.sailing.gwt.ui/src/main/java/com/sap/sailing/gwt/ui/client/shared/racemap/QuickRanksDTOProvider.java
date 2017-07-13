@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -23,6 +23,14 @@ import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
  *
  */
 public interface QuickRanksDTOProvider {
+    public interface QuickRanksListener {
+        void rankChanged(String competitorIdAsString, QuickRankDTO oldQuickRank, QuickRankDTO quickRanks);
+    }
+    
+    void addQuickRanksListener(QuickRanksListener listener);
+    
+    void removeQuickRanksListener(QuickRanksListener listener);
+    
     /**
      * The strategy may or may not use this quick ranks information provided directly from the server. This information
      * may have been provided with some delay and may be slightly inconsistent with a {@link LeaderboardDTO leaderboard}
@@ -32,11 +40,11 @@ public interface QuickRanksDTOProvider {
      * 
      * @param quickRanksFromServer keys are the competitor IDs as strings
      */
-    void quickRanksReceivedFromServer(LinkedHashMap<String, QuickRankDTO> quickRanksFromServer);
+    void quickRanksReceivedFromServer(Map<String, QuickRankDTO> quickRanksFromServer);
     
     /**
      * @return keys are the {@link CompetitorDTO#getIdAsString() competitor IDs are string}, values are the quick ranks
      *         pertaining to the competitors whose IDs are provided as keys
      */
-    LinkedHashMap<String, QuickRankDTO> getQuickRanks();
+    Map<String, QuickRankDTO> getQuickRanks();
 }

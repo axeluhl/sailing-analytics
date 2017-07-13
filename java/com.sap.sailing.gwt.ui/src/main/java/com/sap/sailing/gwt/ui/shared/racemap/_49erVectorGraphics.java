@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 
 public class _49erVectorGraphics extends BoatClassVectorGraphics {
     
@@ -11,13 +12,23 @@ public class _49erVectorGraphics extends BoatClassVectorGraphics {
     }
 
     @Override
-    protected void drawBoat(Context2d ctx, boolean isSelected, String color) {
-        if(isSelected) {
-            ctx.setFillStyle(color);
-            ctx.setStrokeStyle(color);
-        } else {
+    protected void drawBoat(Context2d ctx, DisplayMode displayMode, String color) {
+        // draw hull
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle ("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case SELECTED:
+            ctx.setFillStyle (color);
+            ctx.setStrokeStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
         }
 
         ctx.setLineJoin(LineJoin.ROUND);
@@ -61,13 +72,21 @@ public class _49erVectorGraphics extends BoatClassVectorGraphics {
         ctx.lineTo(226,68.5);
         ctx.fill();
         ctx.stroke();
-
-        if(isSelected) {
-            ctx.setFillStyle ("#FFFFFF");
-            ctx.setStrokeStyle("#FFFFFF");
-        } else {
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle(color);
             ctx.setStrokeStyle(color);
+            break;
+        case SELECTED:
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+            break;
         }
 
         ctx.beginPath();

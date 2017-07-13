@@ -35,7 +35,7 @@ public class CompositeTabbedSettingsDialogComponent implements SettingsDialogCom
     }
 
     private <SettingsType extends Settings> ComponentAndDialogComponent<SettingsType> createComponentAndDialogComponent(Component<SettingsType> component) {
-        return new ComponentAndDialogComponent<SettingsType>(component, component.getSettingsDialogComponent());
+        return new ComponentAndDialogComponent<SettingsType>(component, component.getSettingsDialogComponent(component.getSettings()));
     }
 
     @Override

@@ -22,6 +22,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -166,27 +167,27 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
     }
-    
-    @Override
-    public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
+
+    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN or is changing own user
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
-            getSecurityService().updateUserProperties(username, fullName, company,
-                    localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
-        } else {
+        if (!subject.hasRole(DefaultRoles.ADMIN.name()) && (subject.getPrincipal() == null
+                || !username.equals(subject.getPrincipal().toString()))) {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
     }
     
     @Override
+    public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        getSecurityService().updateUserProperties(username, fullName, company,
+                localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
+    }
+    
+    @Override
     public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
-            getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
-        } else {
-            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
     }
     
     @Override
@@ -425,35 +426,66 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void setPreference(String username, String key, String value) {
-        getSecurityService().setPreference(username, key, value);
-    }
-    
-    @Override
-    public void setPreferences(String username, Map<String, String> keyValuePairs) {
-        for (Entry<String, String> entry : keyValuePairs.entrySet()) {
-            getSecurityService().setPreference(username, entry.getKey(), entry.getValue());
+    public void setPreference(String username, String key, String value) throws UserManagementException {
+        try {
+            getSecurityService().setPreference(username, key, value);
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
         }
-        
-    }
-
-    @Override
-    public void unsetPreference(String username, String key) {
-        getSecurityService().unsetPreference(username, key);
-    }
-
-    @Override
-    public String getPreference(String username, String key) {
-        return getSecurityService().getPreference(username, key);
     }
     
     @Override
-    public Map<String, String> getPreferences(String username, List<String> keys) {
+    public void setPreferences(String username, Map<String, String> keyValuePairs) throws UserManagementException {
+        try {
+            for (Entry<String, String> entry : keyValuePairs.entrySet()) {
+                getSecurityService().setPreference(username, entry.getKey(), entry.getValue());
+            }
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        }
+    }
+
+    @Override
+    public void unsetPreference(String username, String key) throws UserManagementException {
+        try {
+            getSecurityService().unsetPreference(username, key);
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        }
+    }
+
+    @Override
+    public String getPreference(String username, String key) throws UserManagementException {
+        try {
+            return getSecurityService().getPreference(username, key);
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        }
+    }
+    
+    @Override
+    public Map<String, String> getPreferences(String username, List<String> keys) throws UserManagementException {
         Map<String, String> requestedPreferences = new HashMap<>();
         for (String key : keys) {
             requestedPreferences.put(key, getPreference(username, key));
         }
         return requestedPreferences;
+    }
+    
+    @Override
+    public Map<String, String> getAllPreferences(String username) throws UserManagementException {
+        try {
+            final Map<String, String> allPreferences = getSecurityService().getAllPreferences(username);
+            final Map<String, String> result = new HashMap<>();
+            for (Map.Entry<String, String> entry : allPreferences.entrySet()) {
+                if(!entry.getKey().startsWith("_")) {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            }
+            return result;
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        }
     }
 
     @Override
