@@ -446,7 +446,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(racesToStopTracking,caught.getMessage()));
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(Util.toStringOrNull(racesToStopTracking),caught.getMessage()));
                     }
         
                     @Override
@@ -724,7 +724,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorStartingTracking(leaderboardRaceColumnFleetNames,caught.getMessage()));
+                errorReporter.reportError(stringMessages.errorStartingTracking(Util.toStringOrNull(leaderboardRaceColumnFleetNames),caught.getMessage()));
             }
         });
     }

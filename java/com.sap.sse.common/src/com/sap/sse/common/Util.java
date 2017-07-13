@@ -744,4 +744,11 @@ public class Util {
         }
         return map;
     }
+
+    public static String toStringOrNull(Object toStringOrNull) {
+        if(toStringOrNull == null){
+            return null;
+        }
+        return toStringOrNull.toString();
+    }
 }

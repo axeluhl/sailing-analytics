@@ -1,17 +1,11 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.i18n.CommonStringMessages;
-import com.sap.sse.common.Util.Triple;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.DefaultRule_0_1_2_n;
 import com.sap.sse.gwt.client.DefaultRule_0_1_n;
 import com.sap.sse.gwt.client.DefaultRule_1_0n;
@@ -1849,7 +1843,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorGettingScoreCorrectionProvider(String message);
     String errorTryingToUnsupressCompetitor(String name);
     String errorLoadingReducedDimensionsMapedByLevel(String message);
-    String errorFetchingDimensionData(FunctionDTO dimension, String message);
+    String errorFetchingDimensionData(String dimension, String message);
     String errorFetchingStatistics(String message);
     String errorFetchingAggregators(String message);
     String errorLoadingDataRetrieverChainDefinitions(String message);
@@ -1857,14 +1851,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorFetchingComponentsChangedTimepoint(String message);
     String errorRunningQuery(String message);
     String errorReadingWindFixes(String message);
-    String errorAddingWindFixForRace(RegattaAndRaceIdentifier raceIdentifier, String message);
+    String errorAddingWindFixForRace(String raceIdentifier, String message);
     String errorSettingStartTime(String message);
-    String errorStoppingRaceTracking(Collection<?> races, String message);
-    String errorRemovingRace(List<RegattaNameAndRaceName> regattaNamesAndRaceNames, String message);
+    String errorStoppingRaceTracking(String races, String message);
+    String errorRemovingRace(String regattaNamesAndRaceNames, String message);
     String errorLoadingRegattas(String jsonURL, String message);
     String errorUpdatingRegatta(String name, String message);
     String errorLoadingRaceLog(String message);
-    String errorStartingTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames, String message);
+    String errorStartingTracking(String leaderboardRaceColumnFleetNames, String message);
     String errorLoadingLeaderBoardByEvent();
     String errorLoadingEvent(UUID event, String message);
     String errorLoadingRegattaStructure(UUID event, String message);
