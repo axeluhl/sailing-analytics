@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.mediumTimeFormatter;
 import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.shortTimeFormatter;
 
 import java.util.Date;
@@ -518,6 +519,10 @@ public class RaceListColumnFactory {
             ((StartTimeCell) getCell()).showTimeOnly = showTimeOnly;
         }
         
+        public void setShowSeconds(boolean showSeconds) {
+            ((StartTimeCell) getCell()).showSeconds = showSeconds;
+        }
+        
         @Override
         public String getHeaderStyle() {
             return CSS.raceslist_head_item();
@@ -536,10 +541,12 @@ public class RaceListColumnFactory {
         private static class StartTimeCell extends AbstractCell<Date> {
             private static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.MONTH_NUM_DAY);
             private boolean showTimeOnly = true;
+            private boolean showSeconds = false;
             @Override
             public void render(Context context, Date value, SafeHtmlBuilder sb) {
                 if (value != null) {
-                    sb.appendEscaped((showTimeOnly ? "" : DATE_FORMAT.format(value) + " ") + shortTimeFormatter.render(value));
+                    sb.appendEscaped((showTimeOnly ? "" : DATE_FORMAT.format(value) + " "));
+                    sb.appendEscaped(showSeconds ? mediumTimeFormatter.render(value) : shortTimeFormatter.render(value));
                 }
             }
         }
