@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.gwt.settings.client.settingtypes.converter.HelpLineTypesStringToEnumConverter;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
@@ -29,7 +28,7 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
         defaultVisibleHelpLines.add(HelpLineTypes.ADVANTAGELINE);
         defaultVisibleHelpLines.add(HelpLineTypes.BOATTAILS);
         
-        visibleHelpLines = new EnumSetSetting<>("visibleHelpLines", this, defaultVisibleHelpLines, new HelpLineTypesStringToEnumConverter());
+        visibleHelpLines = new EnumSetSetting<>("visibleHelpLines", this, defaultVisibleHelpLines, HelpLineTypes::valueOf);
     }
 
     /**

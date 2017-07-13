@@ -1,11 +1,9 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.util.ArrayList;
-
 import com.google.gwt.user.client.ui.LazyPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public abstract class AbstractLazyComponent<SettingsType extends Settings> extends LazyPanel implements LazyComponent<SettingsType> {
     private Component<?> parent;
@@ -30,11 +28,6 @@ public abstract class AbstractLazyComponent<SettingsType extends Settings> exten
     @Override
     public Component<?> getParentComponent() {
         return parent;
-    }
-
-    @Override
-    public ArrayList<String> getPath() {
-        return ComponentPathDeterminer.determinePath(this);
     }
 
     @Override

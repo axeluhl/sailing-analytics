@@ -58,4 +58,9 @@ public class SettingsToJsonSerializer extends AbstractSettingsToJsonSerializer<J
     protected Iterable<Object> fromJsonArray(JSONArray jsonArray) {
         return jsonArray;
     }
+
+    @Override
+    public boolean isArray(Object jsonValue) {
+        return jsonValue instanceof JSONArray;
+    }
 }

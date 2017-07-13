@@ -147,6 +147,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         
         ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
+        columnSortHandler.setComparator(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getComparator());
 
         TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
             @Override
