@@ -19,6 +19,12 @@ public abstract class AbstractAsyncJsonTask<Params, Progress, Result, ListenerTy
     private final WeakReference<ListenerType> mListener;
     private Exception mException;
 
+    /**
+     * @param listener
+     *            a listener to be called back when task execution has completed; the listener will only be
+     *            {@link WeakReference referenced weakly} here, so if the caller lets go of all strong references to it
+     *            then it becomes eligible for garbage collection, and no call back will take place anymore.
+     */
     public AbstractAsyncJsonTask(Context context, ListenerType listener, URL url) {
         mContext = context.getApplicationContext();
         mListener = new WeakReference<>(listener);
