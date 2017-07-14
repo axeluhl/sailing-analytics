@@ -166,7 +166,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                             
                             @Override
                             public void onFailure(Throwable t) {
-                                errorReporter.reportError("Error trying to load corresponding regattas for leaderboard group " + leaderboardGroupName + ": " + t.getMessage());
+                                errorReporter.reportError(stringMessages.errorLoadingRegattasForLeaderboardGroup(leaderboardGroupName,t.getMessage()));
                             }
                         });
                     } else {
@@ -178,7 +178,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             }
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to load the leaderboard group " + leaderboardGroupName + ": " + t.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingLeaderBoardGroup(leaderboardGroupName,t.getMessage()));
             }
         });
     }

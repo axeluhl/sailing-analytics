@@ -207,9 +207,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
-                        EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
-                                row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-                                "\nYou may have to refresh your view.");
+                        EditableLeaderboardPanel.this.getErrorReporter().reportError(
+                                stringMessages.errorUpdatingDisplayNames(row.competitor.getName(),
+                                        getLeaderboardName(), t.getMessage()));
                     }
 
                     @Override
@@ -326,10 +326,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         @Override
                         public void onFailure(Throwable t) {
                             removeBusyTask();
-                            getErrorReporter().reportError(
-                                    "Error trying to update max points reason for competitor "
-                                            + row.competitor.getName() + " in leaderboard " + getLeaderboardName()
-                                            + ": " + t.getMessage() + "\nYou may have to refresh your view.");
+                            getErrorReporter().reportError(stringMessages.errorUpdatingMaxPointsReason(
+                                    row.competitor.getName(), getLeaderboardName(), t.getMessage()));
                         }
 
                         @Override
@@ -452,10 +450,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         @Override
                         public void onFailure(Throwable t) {
                             removeBusyTask();
-                            getErrorReporter().reportError("Error trying to update score correction for competitor "+
-                                    row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
-                                    " for race "+raceColumnName+": "+t.getMessage()+
-                                    "\nYou may have to refresh your view.");
+                            getErrorReporter().reportError(
+                                    stringMessages.errorUpdatingLeaderboardScore(row.competitor.getName(),
+                                            getLeaderboardName(), raceColumnName, t.getMessage()));
                         }
 
                         @Override
@@ -530,10 +527,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 @Override
                                 public void onFailure(Throwable t) {
                                     removeBusyTask();
-                                    getErrorReporter().reportError("Error trying to update score correction for competitor "+
-                                            row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
-                                            " for race "+raceColumnName+": "+t.getMessage()+
-                                            "\nYou may have to refresh your view.");
+                                    getErrorReporter().reportError(stringMessages.errorUpdatingLeaderboardScore(
+                                            row.competitor.getName(), getLeaderboardName(),
+                                            raceColumnName, t.getMessage()));
                                 }
 
                                 @Override
@@ -544,10 +540,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                         @Override
                                         public void onFailure(Throwable t) {
                                             removeBusyTask();
-                                            getErrorReporter().reportError("Error trying to update score correction for competitor "+
-                                                    row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
-                                                    " for race "+raceColumnName+": "+t.getMessage()+
-                                                    "\nYou may have to refresh your view.");
+                                            getErrorReporter().reportError(stringMessages.errorUpdatingLeaderboardScore(
+                                                    row.competitor.getName(), getLeaderboardName(), raceColumnName, t.getMessage()));
                                         }
 
                                         @Override
@@ -605,7 +599,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error getting the score correction providers: " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorGettingScoreCorrectionProvider(caught.getMessage()));
                     }
                 });
             }
@@ -641,7 +635,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error saving score correction information: " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorUpdatingLeaderboardScoreCorrection(caught.getMessage()));
                     }
                 });
             }
@@ -708,7 +702,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         /* suppressed */ false, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        getErrorReporter().reportError("Error trying to unsuppress competitor "+object.getName());
+                        getErrorReporter().reportError(stringMessages.errorTryingToUnsupressCompetitor(object.getName()));
                     }
                     @Override
                     public void onSuccess(Void result) {
@@ -875,9 +869,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                                 new AsyncCallback<Void>() {
                                     @Override
                                     public void onFailure(Throwable t) {
-                                        EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
-                                                row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-                                                "\nYou may have to refresh your view.");
+                                        EditableLeaderboardPanel.this.getErrorReporter().reportError(
+                                                stringMessages.errorUpdatingDisplayNames(row.competitor.getName(), getLeaderboardName(), t.getMessage())); 
                                     }
 
                                     @Override
@@ -972,9 +965,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
-                EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update carry value for competitor "+
-                        row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-                        "\nYou may have to refresh your view.");
+                EditableLeaderboardPanel.this.getErrorReporter().reportError(
+                        stringMessages.errorUpdatingCarriedPoints(row.competitor.getName(), getLeaderboardName(), t.getMessage()));
             }
 
             @Override
