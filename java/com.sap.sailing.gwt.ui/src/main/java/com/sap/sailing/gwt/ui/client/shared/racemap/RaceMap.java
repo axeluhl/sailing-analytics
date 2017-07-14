@@ -2609,6 +2609,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
             requiresRedraw = true;
         }
+        if(!newSettings.isShowTargetEstimation() && targetEstimationOverlay != null){
+            targetEstimationOverlay.removeFromParent();
+        }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
         }
