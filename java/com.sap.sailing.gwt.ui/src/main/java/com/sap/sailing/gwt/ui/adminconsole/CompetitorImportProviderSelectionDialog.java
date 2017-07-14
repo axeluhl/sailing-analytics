@@ -263,10 +263,10 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
         int selectedProviderIndex = competitorProviderListBox.getSelectedIndex();
         if (selectedProviderIndex > 0) {
             String selectedProviderName = competitorProviderListBox.getItemText(selectedProviderIndex);
-            int selectedScoreCorrectionIndex = competitorListBox.getSelectedIndex();
-            if (selectedScoreCorrectionIndex > 0) {
+            int selectedDocumentIndex = competitorListBox.getSelectedIndex();
+            if (selectedDocumentIndex > 0) {
                 Pair<String, String> pair = eventRegattaNamesByCompetitorListItem
-                        .get(competitorListBox.getValue(selectedScoreCorrectionIndex));
+                        .get(competitorListBox.getValue(selectedDocumentIndex));
                 String eventName = pair.getA();
                 String regattaName = pair.getB();
                 competitorImportDialogResult = new CompetitorImportSelectionDialogResult(selectedProviderName,
