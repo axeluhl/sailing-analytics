@@ -20,7 +20,7 @@ public class StatisticsJsonDeserializer implements JsonDeserializer<Statistics> 
         int trackedRaces = getIntValue(object, StatisticsJsonSerializer.FIELD_NUMBER_OF_TRACKED_RACES);
         long gpsFixes = getLongValue(object, StatisticsJsonSerializer.FIELD_NUMBER_OF_GPS_FIXES);
         long windFixes = getLongValue(object, StatisticsJsonSerializer.FIELD_NUMBER_OF_WIND_FIXES);
-        Distance distance = new MeterDistance(getDoubleValue(object, StatisticsJsonSerializer.FIELD_DISTANCE_TRAVELED));
+        Distance distance = new MeterDistance(getDoubleValue(object, StatisticsJsonSerializer.FIELD_DISTANCE_TRAVELED_IN_METERS));
         return new StatisticsImpl(competitors, regattas, races, trackedRaces, gpsFixes, windFixes, distance);
     }
 

@@ -13,7 +13,7 @@ public class StatisticsJsonSerializer implements JsonSerializer<Statistics> {
     public static final String FIELD_NUMBER_OF_TRACKED_RACES = "numberOfTrackedRaces";
     public static final String FIELD_NUMBER_OF_GPS_FIXES = "numberOfGPSFixes";
     public static final String FIELD_NUMBER_OF_WIND_FIXES = "numberOfWindFixes";
-    public static final String FIELD_DISTANCE_TRAVELED = "distanceTraveled";
+    public static final String FIELD_DISTANCE_TRAVELED_IN_METERS = "distanceTraveledInMeters";
 
     @Override
     public JSONObject serialize(Statistics object) {
@@ -24,7 +24,7 @@ public class StatisticsJsonSerializer implements JsonSerializer<Statistics> {
         result.put(FIELD_NUMBER_OF_TRACKED_RACES, object.getNumberOfTrackedRaces());
         result.put(FIELD_NUMBER_OF_GPS_FIXES, object.getNumberOfGPSFixes());
         result.put(FIELD_NUMBER_OF_WIND_FIXES, object.getNumberOfWindFixes());
-        result.put(FIELD_DISTANCE_TRAVELED, object.getDistanceTraveled().getMeters());
+        result.put(FIELD_DISTANCE_TRAVELED_IN_METERS, object.getDistanceTraveled().getMeters());
         return result;
     }
 }
