@@ -66,7 +66,7 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
-        List<RaceColumn> result = new ArrayList<RaceColumn>();
+        final List<RaceColumn> result = new ArrayList<RaceColumn>();
         for (Series series : getRegatta().getSeries()) {
             for (RaceColumn raceColumn : series.getRaceColumns()) {
                 result.add(raceColumn);

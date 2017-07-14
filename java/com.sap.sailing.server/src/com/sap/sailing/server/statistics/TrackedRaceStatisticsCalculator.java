@@ -34,6 +34,10 @@ public class TrackedRaceStatisticsCalculator {
     private final boolean calculateDistanceTravelled;
 
     private long numberOfGPSFixes, numberOfWindFixes;
+    
+    /**
+     * Never {@code null}
+     */
     private Distance totalDistanceTraveled = Distance.NULL;
     private Triple<Competitor, Speed, TimePoint> maxSpeed = null;
     private final TimePoint now = MillisecondsTimePoint.now();
@@ -120,6 +124,9 @@ public class TrackedRaceStatisticsCalculator {
         return numberOfWindFixes;
     }
 
+    /**
+     * @return a valid, non-{@code null} distance
+     */
     public Distance getTotalDistanceTraveled() {
         return totalDistanceTraveled;
     }

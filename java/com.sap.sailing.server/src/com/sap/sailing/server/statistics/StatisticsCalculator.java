@@ -13,7 +13,6 @@ import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.statistics.impl.StatisticsImpl;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.util.LeaderboardUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -38,10 +37,19 @@ public class StatisticsCalculator {
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
     }
 
+    private Set<Pair<RaceColumn, Fleet>> calculateRaces(Leaderboard sl) {
+        final Set<Pair<RaceColumn, Fleet>> result = new HashSet<>();
+        for (RaceColumn column : sl.getRaceColumns()) {
+            if (!column.isCarryForward()) {
+                column.getFleets().forEach(fleet -> result.add(new Pair<>(column, fleet)));
+            }
+        }
+        return result;
+    }
+
     public void addLeaderboard(Leaderboard leaderboard) {
-        races.addAll(LeaderboardUtil.calculateRaces(leaderboard));
+        races.addAll(calculateRaces(leaderboard));
         regattas.add(leaderboard.getName());
-        
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
                 final TrackedRace trackedRace = column.getTrackedRace(fleet);
