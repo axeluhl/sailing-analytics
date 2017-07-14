@@ -158,7 +158,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
     public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
-    private static final long DELAY_ESTIMATION_UPDATE = 10000;
     private static final DateTimeFormat TARGET_TIME_ESTIMATION_FORMAT = DateTimeFormat.getFormat("HH:mm");
     
     private AbsolutePanel rootPanel = new AbsolutePanel();
@@ -821,7 +820,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
         timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-        this.lastRaceTimesInfo = raceTimesInfos.get(raceIdentifier);        
+        this.lastRaceTimesInfo = raceTimesInfos.get(raceIdentifier);
     }
 
     /**
@@ -1060,17 +1059,27 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     protected void updateTargetEstimation(Duration estimatedDuration) {
-        if(estimatedDuration == null || lastRaceTimesInfo == null){
+        if(estimatedDuration == null){
             return;
         }
-        if(targetEstimationOverlay == null){
+        if (targetEstimationOverlay == null) {
             targetEstimationOverlay = new Label("");
             targetEstimationOverlay.setStyleName(raceMapStyle.estimatedTargettime());
             map.setControls(ControlPosition.BOTTOM_LEFT, targetEstimationOverlay);
         }
-        long endTime = lastRaceTimesInfo.getStartOfRace().getTime()+estimatedDuration.asMillis();
-        Date endDate = new Date(endTime);
-        targetEstimationOverlay.setText(stringMessages.estimatedEndtime() + " "+ TARGET_TIME_ESTIMATION_FORMAT.format(endDate) + " " + stringMessages.estimatedDuration() + " " + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
+        Date endTime = null;
+        if(lastRaceTimesInfo != null){
+            endTime = new Date(lastRaceTimesInfo.getStartOfRace().getTime() + estimatedDuration.asMillis());
+        }
+        if(endTime == null){
+            targetEstimationOverlay.setText(stringMessages.estimatedDuration() + " "
+                    + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
+        }else{
+            targetEstimationOverlay.setText(stringMessages.estimatedEndtime() + " "
+                    + TARGET_TIME_ESTIMATION_FORMAT.format(endTime) + " " + stringMessages.estimatedDuration() + " "
+                    + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
+        }
+      
     }
 
     /**

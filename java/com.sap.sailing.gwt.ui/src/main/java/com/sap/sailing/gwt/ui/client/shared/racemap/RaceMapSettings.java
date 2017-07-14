@@ -165,26 +165,19 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     /**
-     * copy constructor that produces a new settings object that equals the one passed as argument but takes the zoom settings from the second parameter
+     * copy constructor that produces a new settings object that equals the one passed as argument but takes the zoom
+     * settings from the second parameter
      */
     public RaceMapSettings(RaceMapSettings settings, RaceMapZoomSettings zoomSettings) {
-        this.buoyZoneRadius.setValue(settings.buoyZoneRadius.getValue());
-        this.helpLinesSettings.init(settings.getHelpLinesSettings());
-        this.transparentHoverlines.setValue(settings.transparentHoverlines.getValue());
-        this.hoverlineStrokeWeight.setValue(settings.hoverlineStrokeWeight.getValue());
-        this.maneuverTypesToShow.setValues(settings.maneuverTypesToShow.getValues());
-        this.showDouglasPeuckerPoints.setValue(settings.showDouglasPeuckerPoints.getValue());
-        this.showOnlySelectedCompetitors.setValue(settings.showOnlySelectedCompetitors.getValue());
-        this.showSelectedCompetitorsInfo.setValue(settings.showSelectedCompetitorsInfo.getValue());
-        this.showSimulationOverlay.setValue(settings.showSimulationOverlay.getValue());
-        this.showWindStreamletOverlay.setValue(settings.showWindStreamletOverlay.getValue());
-        this.showWindStreamletColors.setValue(settings.showWindStreamletColors.getValue());
-        this.showMapControls.setValue(settings.showMapControls.getValue());
-        this.tailLengthInMilliseconds.setValue(settings.tailLengthInMilliseconds.getValue());
-        this.windUp.setValue(settings.windUp.getValue());
-        this.zoomSettings.init(zoomSettings);
+        this(zoomSettings, settings.getHelpLinesSettings(), settings.getTransparentHoverlines(),
+                settings.getHoverlineStrokeWeight(), settings.getTailLengthInMilliseconds(), settings.isWindUp(),
+                settings.getBuoyZoneRadius(), settings.isShowSelectedCompetitorsInfo(),
+                settings.isShowSelectedCompetitorsInfo(), settings.isShowWindStreamletColors(),
+                settings.isShowWindStreamletOverlay(), settings.isShowSimulationOverlay(), settings.isShowMapControls(),
+                settings.getManeuverTypesToShow(), settings.isShowDouglasPeuckerPoints(),
+                settings.isShowTargetEstimation());
     }
-    
+
     /**
      * @return 0 if the tails are not visible {@link #getTailLengthInMilliseconds()} otherwise
      */
