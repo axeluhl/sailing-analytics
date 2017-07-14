@@ -383,4 +383,9 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     public int size() {
         return fixes.size();
     }
+
+    @Override
+    public boolean isEmpty() {
+        return fixes.isEmpty();
+    }
 }

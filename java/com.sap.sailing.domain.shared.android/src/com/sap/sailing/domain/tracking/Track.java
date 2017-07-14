@@ -189,4 +189,9 @@ public interface Track<FixType extends Timed> extends Serializable {
      * @return the number of raw fixes contained in the Track.
      */
     int size();
+    
+    /**
+     * Tells whether the collection of {@link #getRawFixes() raw fixes} (no outliers removed) is empty
+     */
+    boolean isEmpty();
 }
