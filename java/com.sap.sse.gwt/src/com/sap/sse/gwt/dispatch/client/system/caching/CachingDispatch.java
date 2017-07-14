@@ -23,10 +23,11 @@ public final class CachingDispatch<CTX extends DispatchContext> implements Dispa
     private final CacheCleanupTask invalidationTask;
     private final HashMap<String, ResultHolder> resultsCache = new HashMap<>();
     private final DispatchSystemAsync<CTX> dispatch;
-    private final int defaultTimeToLive;
+    private final int defaultTimeToLiveMillis;
 
     /**
-     * Create new caching dispatch instance with default values.
+     * Create new caching dispatch instance with default values, in particular a default time to live
+     * for cache entries of three minutes.
      * 
      * @param service
      *            the underlying service used to make dispatch calls
@@ -47,7 +48,7 @@ public final class CachingDispatch<CTX extends DispatchContext> implements Dispa
      */
     public CachingDispatch(DispatchSystemAsync<CTX> service, boolean enableCleanup, int defaultTimeToLive) {
         this.dispatch = service;
-        this.defaultTimeToLive = defaultTimeToLive;
+        this.defaultTimeToLiveMillis = defaultTimeToLive;
         if (enableCleanup) {
             invalidationTask = new CacheCleanupTask();
         } else {
@@ -120,7 +121,7 @@ public final class CachingDispatch<CTX extends DispatchContext> implements Dispa
          * Calculate time to live fore result
          */
         private int timeToLive(A action, R result) {
-            int cacheTotalTimeToLiveMillis = defaultTimeToLive;
+            int cacheTotalTimeToLiveMillis = defaultTimeToLiveMillis;
             if (result instanceof HasClientCacheTotalTimeToLive) {
                 cacheTotalTimeToLiveMillis = ((HasClientCacheTotalTimeToLive) result).cacheTotalTimeToLiveMillis();
             } else if (action instanceof HasClientCacheTotalTimeToLive) {
