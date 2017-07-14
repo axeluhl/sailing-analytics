@@ -32,10 +32,12 @@ import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRaceObserver implements TrackedRaceStatisticsCache {
     private static final Logger logger = Logger.getLogger(TrackedRaceStatisticsCacheImpl.class.getName());
     
-    private final Map<TrackedRace, Listener> listeners = new ConcurrentHashMap<>();
-    private final SmartFutureCache<TrackedRace, TrackedRaceStatistics, ?> cache = new SmartFutureCache<>(new Updater(), TrackedRaceStatisticsCacheImpl.class.getSimpleName());
+    private final Map<TrackedRace, Listener> listeners;
+    private final SmartFutureCache<TrackedRace, TrackedRaceStatistics, ?> cache;
 
     public TrackedRaceStatisticsCacheImpl() {
+        listeners = new ConcurrentHashMap<>();
+        cache = new SmartFutureCache<>(new Updater(), TrackedRaceStatisticsCacheImpl.class.getSimpleName());
     }
     
     @Override
@@ -67,7 +69,6 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
     }
 
     private class Updater extends AbstractCacheUpdater<TrackedRace, TrackedRaceStatistics, EmptyUpdateInterval> {
-
         @Override
         public TrackedRaceStatistics computeCacheUpdate(TrackedRace trackedRace, EmptyUpdateInterval updateInterval)
                 throws Exception {
