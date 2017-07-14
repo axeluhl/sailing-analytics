@@ -8,14 +8,13 @@ import com.sap.sailing.domain.base.EventBase;
 public interface EventUtil {
 
     /**
-     * Obtains the year of the provided {@link EventBase event}'s start date.
+     * Obtains the year of the provided {@link EventBase event}'s start time point mapped to UTC, or {@code null} if the
+     * event's {@link EventBase#getStartDate()} is {@code null}.
      * 
      * @param event
      *            the {@link EventBase event} to get the year for
-     * @return the year of the {@link EventBase event}'s start date
      */
     public static Integer getYearOfEvent(EventBase event) {
-        Instant instant = Instant.ofEpochMilli(event.getStartDate().asMillis());
-        return instant.atOffset(ZoneOffset.UTC).getYear();
+        return event.getStartDate() == null ? null : Instant.ofEpochMilli(event.getStartDate().asMillis()).atOffset(ZoneOffset.UTC).getYear();
     }
 }
