@@ -62,9 +62,9 @@ public class StatisticsCalculator {
     }
 
     private void doForTrackedRace(TrackedRace trackedRace) {
-        if(trackedRaceStatisticsCache != null) {
+        if (trackedRaceStatisticsCache != null) {
             final TrackedRaceStatistics trackedRaceStatistics = trackedRaceStatisticsCache.getStatistics(trackedRace);
-            if(trackedRaceStatistics != null) {
+            if (trackedRaceStatistics != null) {
                 numberOfGPSFixes += trackedRaceStatistics.getNumberOfGPSFixes();
                 numberOfWindFixes += trackedRaceStatistics.getNumberOfWindFixes();
                 totalDistanceTraveled = totalDistanceTraveled.add(trackedRaceStatistics.getDistanceTraveled());
