@@ -113,8 +113,7 @@ public class RemoteSailingServerSet {
     }
 
     private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
-        new Thread(() -> updateRemoteServerEventCacheSynchronously(ref), "Event Cache Updater for remote server " + ref)
-                .start();
+        new Thread(() -> updateRemoteServerEventCacheSynchronously(ref), "Event Cache Updater for remote server " + ref).start();
         new Thread(() -> updateRemoteServerStatisticsCacheSynchronously(ref),
                 "Statistics by year Cache Updater for remote server " + ref).start();
     }
