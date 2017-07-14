@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.statistics.Statistics;
 
 public class EventListYearDTO implements IsSerializable {
@@ -16,17 +17,17 @@ public class EventListYearDTO implements IsSerializable {
     private int numberOfTrackedRaces;
     private long numberOfGPSFixes;
     private long numberOfWindFixes;
-    private double sailedMiles;
+    private Distance distanceTraveled;
     private ArrayList<EventListEventDTO> events = new ArrayList<>();
-    
+
     @SuppressWarnings("unused")
     private EventListYearDTO() {
     }
-    
+
     public EventListYearDTO(int year) {
         this.year = year;
     }
-    
+
     public int getYear() {
         return year;
     }
@@ -38,15 +39,15 @@ public class EventListYearDTO implements IsSerializable {
     @GwtIncompatible
     protected void addEvent(EventListEventDTO event) {
         eventCount += event.getEventSeries() == null ? 1 : event.getEventSeries().getEventsCount();
-        for(int i = 0; i < events.size(); i++) {
-            if(events.get(i).getStartDate().compareTo(event.getStartDate()) < 0) {
+        for (int i = 0; i < events.size(); i++) {
+            if (events.get(i).getStartDate().compareTo(event.getStartDate()) < 0) {
                 events.add(i, event);
                 return;
             }
         }
         events.add(event);
     }
-    
+
     @GwtIncompatible
     protected void addStatistics(Statistics statistics) {
         numberOfCompetitors = statistics.getNumberOfCompetitors();
@@ -55,9 +56,9 @@ public class EventListYearDTO implements IsSerializable {
         numberOfTrackedRaces = statistics.getNumberOfTrackedRaces();
         numberOfGPSFixes = statistics.getNumberOfGPSFixes();
         numberOfWindFixes = statistics.getNumberOfWindFixes();
-        sailedMiles = statistics.getSailedMiles();
+        distanceTraveled = statistics.getDistanceTraveled();
     }
-    
+
     public int getEventCount() {
         return eventCount;
     }
@@ -86,7 +87,7 @@ public class EventListYearDTO implements IsSerializable {
         return numberOfWindFixes;
     }
 
-    public double getSailedMiles() {
-        return sailedMiles;
+    public Distance getDistanceTraveled() {
+        return distanceTraveled;
     }
 }

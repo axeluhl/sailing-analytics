@@ -38,13 +38,7 @@ public interface Statistics {
     long getNumberOfWindFixes();
 
     /**
-     * @return the totally sailed {@link Distance}
+     * @return the totally sailed {@link Distance}; never {@code null}
      */
     Distance getDistanceTraveled();
-
-    /**
-     * @return the totally sailed distance (in sea miles)
-     */
-    double getSailedMiles();
-
 }

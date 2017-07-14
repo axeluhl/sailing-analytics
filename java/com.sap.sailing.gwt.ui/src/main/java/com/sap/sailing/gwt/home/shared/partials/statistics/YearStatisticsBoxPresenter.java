@@ -21,6 +21,6 @@ public class YearStatisticsBoxPresenter extends AbstractStatisticsBoxPresenter {
         addItem(ICON_TRACKED_COUNT, MSG.trackedRaces(), statistics.getNumberOfTrackedRaces());
         addItemWithCompactFormat(ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
         addItemWithCompactFormat(ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
-        addItemWithCompactFormat(ICON_SUM_MILES, MSG.sailedMiles(), statistics.getSailedMiles());
+        addItemWithCompactFormat(ICON_SUM_MILES, MSG.sailedMiles(), statistics.getDistanceTraveled().getNauticalMiles());
     }
 }

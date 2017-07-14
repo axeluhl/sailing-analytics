@@ -13,6 +13,12 @@ public class StatisticsImpl implements Statistics {
     private final long numberOfWindFixes;
     private final Distance distanceTraveled;
     
+    /**
+     * @param distanceTraveled
+     *            if {@code null} then {@link #getDistanceTraveled()} will return {@link Distance#NULL} instead; this
+     *            way, the distance reported by this object can easily be aggregated with other distances without
+     *            further {@code null} checks.
+     */
     public StatisticsImpl(int numberOfCompetitors, int numberOfRegattas, int numberOfRaces, int numberOfTrackedRaces,
             long numberOfGPSFixes, long numberOfWindFixes, Distance distanceTraveled) {
         super();
@@ -22,7 +28,7 @@ public class StatisticsImpl implements Statistics {
         this.numberOfTrackedRaces = numberOfTrackedRaces;
         this.numberOfGPSFixes = numberOfGPSFixes;
         this.numberOfWindFixes = numberOfWindFixes;
-        this.distanceTraveled = distanceTraveled;
+        this.distanceTraveled = distanceTraveled == null ? Distance.NULL : distanceTraveled;
     }
 
     @Override
@@ -59,13 +65,4 @@ public class StatisticsImpl implements Statistics {
     public Distance getDistanceTraveled() {
         return distanceTraveled;
     }
-
-    @Override
-    public double getSailedMiles() {
-        if(getDistanceTraveled() == null) {
-            return 0.0;
-        }
-        return getDistanceTraveled().getNauticalMiles();
-    }
-
 }
