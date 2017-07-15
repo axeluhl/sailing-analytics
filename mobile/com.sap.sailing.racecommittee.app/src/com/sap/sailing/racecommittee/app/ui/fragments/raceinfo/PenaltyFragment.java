@@ -19,6 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.Config
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
@@ -147,7 +148,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             mPenaltyDropDown.setAdapter(mPenaltyAdapter);
             mPenaltyDropDown.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(mPenaltyAdapter));
         }
-        Button applyButton = ViewHelper.get(layout, R.id.button_apply);
+        View applyButton = ViewHelper.get(layout, R.id.button_apply);
         if (applyButton != null) {
             applyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -156,7 +157,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 }
             });
         }
-        Button penaltyButton = ViewHelper.get(layout, R.id.button_penalty);
+        View penaltyButton = ViewHelper.get(layout, R.id.button_penalty);
         if (penaltyButton != null) {
             penaltyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -208,23 +209,29 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        RacingProcedure procedure = getRaceState().getRacingProcedure();
-        if (procedure instanceof ConfigurableStartModeFlagRacingProcedure) {
-            ConfigurableStartModeFlagRacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
-            switch (racingProcedure.getStartModeFlag()) {
-                case PAPA:
-                    mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name()));
-                    break;
-                case BLACK:
-                    mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name()));
-                    break;
-                case UNIFORM:
-                    mPenaltyDropDown.setSelection(mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name()));
-                    break;
-                default:
-                    // nothing
-                    break;
+        if (mPenaltyDropDown != null) {
+            int selection = mPenaltyAdapter.getPosition(MaxPointsReason.OCS.name());
+            RacingProcedure procedure = getRaceState().getRacingProcedure();
+            if (procedure instanceof ConfigurableStartModeFlagRacingProcedure) {
+                ConfigurableStartModeFlagRacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
+                switch (racingProcedure.getStartModeFlag()) {
+                    case BLACK:
+                        selection = mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name());
+                        break;
+
+                    case UNIFORM:
+                        selection = mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name());
+                        break;
+
+                    default:
+                        // nothing
+                        break;
+                }
             }
+            if (getRaceState().getStatus() == RaceLogRaceStatus.FINISHED) {
+                selection = mPenaltyAdapter.getPosition(MaxPointsReason.DNF.name());
+            }
+            mPenaltyDropDown.setSelection(selection);
         }
         switch (getRaceState().getStatus()) {
             case FINISHED:

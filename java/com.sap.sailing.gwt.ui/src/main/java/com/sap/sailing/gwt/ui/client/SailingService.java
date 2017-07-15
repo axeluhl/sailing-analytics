@@ -658,11 +658,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     MarkTrackDTO getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString);
     
     /**
-     * The service may decide whether a mark fix can be removed. It may, for example, be impossible to
-     * cleanly remove a mark fix if a tracked race already exists and the mark fixes are already part of
-     * the GPS fix track which currently does not support a remove operation. However, when only the
-     * regatta log is the basis of the service and no tracked race exists yet, mark fixes may be removed
-     * by revoking the device mappings.
+     * The service may decide whether a mark fix can be removed. This is generally possible if there
+     * is a mark device mapping that can be manipulated in such a way that the {@code fix} will no longer
+     * be mapped.
      */
     boolean canRemoveMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO fix);
     
