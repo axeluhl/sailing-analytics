@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sse.common.Base64Utils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -85,11 +84,6 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
             line = br.readLine();
         }
         return new Util.Pair<TimePoint, Map<String, List<Util.Pair<String, Double>>>>(lastModified, result);
-    }
-
-    private void authenticate(HttpURLConnection conn) {
-        String authStringEnc = new String(Base64Utils.toBase64("tempuser:ocspwd07".getBytes()));
-        conn.setRequestProperty("Authorization", "Basic "+authStringEnc);
     }
 
     @Override
