@@ -127,7 +127,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         @Override
         public void onFailure(Throwable message) {
-            errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
+            errorReporter.reportError(stringMessages.errorServletCall(message.getMessage()));
         }
 
         @Override
@@ -654,7 +654,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         simulatorService.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
             @Override
             public void onFailure(Throwable message) {
-                errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
+                errorReporter.reportError(stringMessages.errorServletCall(message.getMessage()));
             }
 
             @Override

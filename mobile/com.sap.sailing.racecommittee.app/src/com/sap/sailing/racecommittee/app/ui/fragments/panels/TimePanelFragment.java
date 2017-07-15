@@ -4,19 +4,6 @@ import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFi
 
 import java.text.SimpleDateFormat;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -40,6 +27,19 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 public class TimePanelFragment extends BasePanelFragment {
 
@@ -231,6 +231,7 @@ public class TimePanelFragment extends BasePanelFragment {
             case FINISHING:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
                 break;
+
 
             case FINISHED:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
