@@ -55,7 +55,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
         Pattern quotedCompetitorNameAndAllTheRest = Pattern.compile("^\"([^\"]*)\",(.*)$");
         Map<String, List<Util.Pair<String, Double>>> result = new HashMap<String, List<Util.Pair<String, Double>>>();
         HttpURLConnection conn = (HttpURLConnection) actUrl.openConnection();
-        authenticate(conn);
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36");
         TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
         BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) conn.getContent()));
         String line = br.readLine();
@@ -108,7 +108,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
         URL url = new URL("http://www.extremesailingseries.com/app/results/csv_uploads/");
         Pattern p = Pattern.compile("<a href=\"([^\"]*)\\.csv\">");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        authenticate(conn);
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36");
         BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         String readLine;
         while ((readLine = br.readLine()) != null) {
