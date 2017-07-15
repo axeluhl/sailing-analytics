@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionParser.TypeToC
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class QueryDefinitionViewer extends ComponentWithoutSettings implements QueryDefinitionChangedListener {
     

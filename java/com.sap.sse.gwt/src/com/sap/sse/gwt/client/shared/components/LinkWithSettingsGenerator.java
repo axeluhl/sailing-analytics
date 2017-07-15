@@ -5,8 +5,8 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.gwt.settings.UrlBuilderUtil;
 

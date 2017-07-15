@@ -518,7 +518,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to obtain the data: " + t.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingLeaderBoardGroups(t.getMessage()));
             }
         });
     }

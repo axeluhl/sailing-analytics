@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.Ent
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
-import com.sap.sailing.gwt.settings.client.utils.StorageDefinitionIdFactory;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -40,13 +40,12 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
-import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
-import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
+import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.settings.StorageDefinitionId;
-import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 public class RegattaOverviewPanel extends SimplePanel {
     
@@ -63,7 +62,6 @@ public class RegattaOverviewPanel extends SimplePanel {
     private final RegattaOverviewContextDefinition regattaOverviewContextDefinition;
     private EventDTO eventDTO;
     private List<RaceGroupDTO> raceGroupDTOs;
-    private List<EventAndRaceGroupAvailabilityListener> eventRaceGroupListeners;
     private boolean showLeaderboard = false;
     
     private RegattaRaceStatesComponent regattaRaceStatesComponent;
@@ -74,12 +72,20 @@ public class RegattaOverviewPanel extends SimplePanel {
     private final Anchor startStopUpdatingButton;
     private CheckBox leaderboardCheckBox;
     private final FlowPanel repeatedInfoLabel = new FlowPanel();
+    private VerticalPanel mainPanel;
+    private UserService userService;
+    private ComponentContext<RegattaRaceStatesSettings> componentContext;
     
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
     private final SharedResources RES = SharedResources.INSTANCE;
     
+    private EntryHandler entryClickedHandler = null;
+    
     public void setEntryClickedHandler(EntryHandler handler) {
-        regattaRaceStatesComponent.setEntryClickedHandler(handler);
+        entryClickedHandler = handler;
+        if(regattaRaceStatesComponent != null) {
+            regattaRaceStatesComponent.setEntryClickedHandler(handler);
+        }
     }
     
     public RegattaOverviewPanel(
@@ -97,12 +103,9 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRateInMs);
         this.eventDTO = null;
         this.raceGroupDTOs = new ArrayList<RaceGroupDTO>();
-        this.eventRaceGroupListeners = new ArrayList<EventAndRaceGroupAvailabilityListener>();
+        this.userService = userService;
 
-        retrieveEvent();
-        retrieveRegattaStructure();
-        
-        VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
         mainPanel.addStyleName(style.contentWrapper());
@@ -130,7 +133,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                 // TODO should we always set ignoreLocalSettings=true when creating links?
                 new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages,
                         new LinkWithSettingsGenerator<>(regattaOverviewContextDefinition,
-                                UserSettingsStorageManager.getIgnoreLocalSettings())).show();
+                                IgnoreLocalSettings.getIgnoreLocalSettingsFromCurrentUrl())).show();
             }            
         });
         
@@ -152,17 +155,65 @@ public class RegattaOverviewPanel extends SimplePanel {
             
         });
         
-        final StorageDefinitionId storageDefinitionId = StorageDefinitionIdFactory.createStorageDefinitionIdForRegattaOverview(regattaOverviewContextDefinition);
-        final RegattaRaceStatesComponentLifecycle lifecycle = new RegattaRaceStatesComponentLifecycle();
-        final SettingsStorageManager<RegattaRaceStatesSettings> settingsStorageManager = UserSettingsStorageManager
-                .createSettingsStorageManager(userService, storageDefinitionId);
-        final ComponentContext<RegattaRaceStatesSettings> componentContext = new ComponentContextWithSettingsStorage<>(
-                lifecycle, settingsStorageManager);
+        //FIXME The chained calls from here are independent from each other and should be implemented with Dispatching Framework
+        sailingService.getEventById(regattaOverviewContextDefinition.getEvent(), false, new MarkedAsyncCallback<EventDTO>(
+                new AsyncCallback<EventDTO>() {
+                    @Override
+                    public void onFailure(Throwable cause) {
+                        settingsButton.setEnabled(false);
+                        errorReporter.reportError(stringMessages.errorLoadingEvent(regattaOverviewContextDefinition.getEvent(), cause.getMessage()));
+                        continueInitAfterEventRetrieved();
+                    }
         
+                    @Override
+                    public void onSuccess(EventDTO result) {
+                        setEvent(result);
+                        continueInitAfterEventRetrieved();
+                    }
+                }));
+        
+    }
+
+    private void continueInitAfterEventRetrieved() {
+        sailingService.getRegattaStructureForEvent(regattaOverviewContextDefinition.getEvent(), new MarkedAsyncCallback<List<RaceGroupDTO>>(
+                new AsyncCallback<List<RaceGroupDTO>>() {
+                    @Override
+                    public void onFailure(Throwable cause) {
+                        errorReporter.reportError(stringMessages.errorLoadingRegattaStructure(regattaOverviewContextDefinition.getEvent(), cause.getMessage()));
+                        continueInitAfterRaceGroupsRetrieved();
+                    }
+        
+                    @Override
+                    public void onSuccess(List<RaceGroupDTO> result) {
+                        raceGroupDTOs.clear();
+                        raceGroupDTOs.addAll(result);
+                        continueInitAfterRaceGroupsRetrieved();
+                    }
+                    
+                }));
+    }
+
+    private void continueInitAfterRaceGroupsRetrieved() {
+        final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForRegattaOverview(regattaOverviewContextDefinition);
+        final RegattaRaceStatesComponentLifecycle lifecycle = new RegattaRaceStatesComponentLifecycle(eventDTO == null ? null : eventDTO.venue.getCourseAreas(), raceGroupDTOs);
+        componentContext = new ComponentContextWithSettingsStorage<>(
+                lifecycle, userService, storageDefinition);
+        
+        componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<RegattaRaceStatesSettings>() {
+            @Override
+            public void onSuccess(RegattaRaceStatesSettings defaultSettings) {
+                continueInitAfterSettingsRetrieved(defaultSettings);
+            }
+        });
+    }
+
+    private void continueInitAfterSettingsRetrieved(RegattaRaceStatesSettings defaultSettings) {
         regattaRaceStatesComponent = new RegattaRaceStatesComponent(null, componentContext, sailingService, errorReporter,
                 stringMessages,
-                regattaOverviewContextDefinition.getEvent(), lifecycle.createDefaultSettings(), uiUpdateTimer);
-        this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
+                regattaOverviewContextDefinition.getEvent(), eventDTO, raceGroupDTOs, defaultSettings, uiUpdateTimer);
+        
+        regattaRaceStatesComponent.setEntryClickedHandler(entryClickedHandler);
+        
         regattaRaceStatesComponent.setWidth("100%");
         
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
@@ -223,13 +274,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         } else {
             leaderboardsTabPanel = null;
         }
-        
-        componentContext.initInitialSettings(new DefaultOnSettingsLoadedCallback<RegattaRaceStatesSettings>() {
-            @Override
-            public void onSuccess(RegattaRaceStatesSettings defaultSettings) {
-                regattaRaceStatesComponent.updateSettings(defaultSettings);
-            }
-        });
+        checkToEnableSettingsButton();
     }
 
     private CheckBox addLeaderboardEnablerButton() {
@@ -283,7 +328,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                                     leaderboardsTabPanel.selectTab(0);
                                 } else {
                                     leaderboardCheckBox.setValue(false);
-                                    errorReporter.reportError("Error trying to load leaderboard. Either the event could not be associated to Regatta or there are no tracked races.");
+                                    errorReporter.reportError(stringMessages.errorLoadingLeaderBoardByEvent());
                                 }
                             }
                             @Override
@@ -297,80 +342,15 @@ public class RegattaOverviewPanel extends SimplePanel {
         }
     }
 
-
-    
-    private void retrieveEvent() {
-        sailingService.getEventById(regattaOverviewContextDefinition.getEvent(), false, new MarkedAsyncCallback<EventDTO>(
-                new AsyncCallback<EventDTO>() {
-                    @Override
-                    public void onFailure(Throwable cause) {
-                        settingsButton.setEnabled(false);
-                        errorReporter.reportError("Error trying to load event with id " + regattaOverviewContextDefinition.getEvent() + " : "
-                                + cause.getMessage());
-                    }
-        
-                    @Override
-                    public void onSuccess(EventDTO result) {
-                        if (result != null) {
-                            setEvent(result);
-                        }
-                    }
-                }));
-    }
-    
-
-
-    protected void setEvent(EventDTO event) {
-        eventDTO = event;
-        onEventUpdated();
-    }
-
-    private void onEventUpdated() {
-        fireEvent(new EventDTOLoadedEvent(eventDTO));
-
-        for (EventAndRaceGroupAvailabilityListener listener : this.eventRaceGroupListeners) {
-            listener.onEventUpdated(eventDTO);
-        }
-        checkToEnableSettingsButton();
-    }
-    
-    private void retrieveRegattaStructure() {
-        sailingService.getRegattaStructureForEvent(regattaOverviewContextDefinition.getEvent(), new MarkedAsyncCallback<List<RaceGroupDTO>>(
-                new AsyncCallback<List<RaceGroupDTO>>() {
-                    @Override
-                    public void onFailure(Throwable cause) {
-                        errorReporter.reportError("Error trying to load regattas for event with id " + regattaOverviewContextDefinition.getEvent() + " : "
-                                + cause.getMessage());
-                    }
-        
-                    @Override
-                    public void onSuccess(List<RaceGroupDTO> result) {
-                        if (result != null) {
-                            setRaceGroups(result);
-                        }
-                    }
-                    
-                }));
-    }
-
-    protected void setRaceGroups(List<RaceGroupDTO> result) {
-
-        raceGroupDTOs.clear();
-        raceGroupDTOs.addAll(result);
-        onRaceGroupsUpdated();
-    }
-
-    private void onRaceGroupsUpdated() {
-        for (EventAndRaceGroupAvailabilityListener listener : this.eventRaceGroupListeners) {
-            listener.onRaceGroupsUpdated(raceGroupDTOs);
-        }
-        checkToEnableSettingsButton();
-    }
-
     private void checkToEnableSettingsButton() {
         if (eventDTO != null && raceGroupDTOs.size() > 0) {
             settingsButton.setEnabled(true);
         }
     }
     
+    private void setEvent(EventDTO event) {
+        eventDTO = event;
+        fireEvent(new EventDTOLoadedEvent(eventDTO));
+    }
+        
 }

@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
@@ -1111,7 +1112,7 @@ public class PathPolyline {
 
             @Override
             public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
+                errorReporter.reportError(StringMessages.INSTANCE.errorLoadingTotalTime(error.getMessage()));
             }
 
             @Override

@@ -485,7 +485,11 @@ public class UserStoreImpl implements UserStore {
                 }
             }
         }
-        userMap.put(key, value);
+        if(value == null) {
+            userMap.remove(key);
+        } else {
+            userMap.put(key, value);
+        }
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storePreferences(username, userMap);
         }

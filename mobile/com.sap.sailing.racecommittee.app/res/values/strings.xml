@@ -552,6 +552,7 @@
     <string name="sort_by_start">by Position to Start Line</string>
     <string name="sort_by_goal">by Tracked Position</string>
 
+    <string name="apply_button">Apply</string>
     <string name="publish_button_empty">Publish</string>
     <string name="publish_button_other">Publish (%d)</string>
     <string name="publish_clicked">Results published</string>

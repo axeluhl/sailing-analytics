@@ -12,6 +12,7 @@ public class UserManagementException extends Exception implements Serializable {
     public static final String PASSWORD_DOES_NOT_MEET_REQUIREMENTS = "Password does not meet requirements";
     public static final String USERNAME_DOES_NOT_MEET_REQUIREMENTS = "Username does not meet requirements";
     public static final String CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL = "Cannot reset password without validated e-mail address";
+    public static final String USER_DOESNT_HAVE_PERMISSION = "The user does not have the required permission";
 
     private final String message;
     

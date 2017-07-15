@@ -26,7 +26,7 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public abstract class AbstractQueryDefinitionProvider<SettingsType extends Settings> extends AbstractComponent<SettingsType> implements QueryDefinitionProvider<SettingsType> {
 
@@ -55,8 +55,7 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
                 getDataMiningService().getComponentsChangedTimepoint(new AsyncCallback<Date>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        AbstractQueryDefinitionProvider.this.errorReporter.reportError("Error fetching components changed timepoint from the server: "
-                                + caught.getMessage());
+                        AbstractQueryDefinitionProvider.this.errorReporter.reportError(stringMessages.errorFetchingComponentsChangedTimepoint(caught.getMessage()));
                         dataminingComponentsChangedTimer.schedule(timerDelayInMillis);
                     }
                     @Override
@@ -78,8 +77,7 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
         getDataMiningService().getComponentsChangedTimepoint(new AsyncCallback<Date>() {
             @Override
             public void onFailure(Throwable caught) {
-                AbstractQueryDefinitionProvider.this.errorReporter.reportError("Error fetching components changed timepoint from the server: "
-                        + caught.getMessage());
+                AbstractQueryDefinitionProvider.this.errorReporter.reportError(stringMessages.errorFetchingComponentsChangedTimepoint(caught.getMessage()));
             }
             @Override
             public void onSuccess(Date componentsChangedTimepoint) {

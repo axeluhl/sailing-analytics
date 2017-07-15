@@ -28,4 +28,9 @@ public abstract class AbstractUserProfileActivity extends AbstractActivity imple
         return clientFactory.getNavigator().getUserPreferencesNavigation();
     }
     
+    @Override
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserSettingsNavigation() {
+        return clientFactory.getNavigator().getUserSettingsNavigation();
+    }
+    
 }

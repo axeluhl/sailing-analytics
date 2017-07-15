@@ -59,7 +59,7 @@ import com.sap.sse.gwt.client.controls.IntegerBox;
  */
 public abstract class DataEntryDialog<T> {
     private final DialogBox dateEntryDialog;
-    private final Validator<T> validator;
+    private Validator<T> validator;
     private final Button okButton;
     private final Button cancelButton;
     private final Label statusLabel;
@@ -67,6 +67,8 @@ public abstract class DataEntryDialog<T> {
     private final DockPanel buttonPanel;
     private final FlowPanel rightButtonPanel;
     private final FlowPanel leftButtonPanel;
+    
+    private boolean dialogInInvalidState = false;
 
     public static interface Validator<T> {
         /**
@@ -159,28 +161,40 @@ public abstract class DataEntryDialog<T> {
         });
     }
     
+    public void setValidator(Validator<T> validator) {
+        this.validator = validator;
+    }
+    
     protected boolean validateAndUpdate() {
         String errorMessage = null;
         T result = getResult();
         if (validator != null) {
             errorMessage = validator.getErrorMessage(result);
         }
-        if (errorMessage == null || errorMessage.isEmpty()) {
+        boolean invalidState = errorMessage != null && !errorMessage.isEmpty();
+        if(invalidState != dialogInInvalidState) {
+            dialogInInvalidState = invalidState;
+            onInvalidStateChanged(invalidState);
+        }
+        if (!invalidState) {
             getStatusLabel().setText("");
-            getOkButton().setEnabled(true);
             onChange(result);
         } else {
             getStatusLabel().setText(errorMessage);
             getStatusLabel().setStyleName("errorLabel");
-            getOkButton().setEnabled(false);
         }
-        return errorMessage == null;
+        
+        return !invalidState;
     }
 
     /**
      * Allows subcasses to listen to changes of the data shown in the dialog.
      */
     protected void onChange(T result) {
+    }
+    
+    protected void onInvalidStateChanged(boolean invalidState) {
+        getOkButton().setEnabled(!invalidState);
     }
 
     protected abstract T getResult();
@@ -587,7 +601,7 @@ public abstract class DataEntryDialog<T> {
             Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});
         }
     }
-
+    
     /**
      * Defines the {@link #okButton} as the default initial focus widget. Subclasses may redefine. Return
      * {@code null} to not set the focus on any widget.
