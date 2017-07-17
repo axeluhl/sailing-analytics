@@ -512,7 +512,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            a notification service to call upon events worth notifying users about, or {@code null} if no
      *            notification service is available, e.g., in test set-ups
      * @param trackedRaceStatisticsCache
-     *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, not
+     *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no
      *            detailed statistics about TrackedRaces will be calculated.
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
@@ -578,7 +578,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            a notification service to call upon events worth notifying users about, or {@code null} if no
      *            notification service is available, e.g., in test set-ups
      * @param trackedRaceStatisticsCache
-     *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, not
+     *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no
      *            detailed statistics about TrackedRaces will be calculated.
      * @param restoreTrackedRaces
      *            if {@code true}, the tracking connectivity parameters for the races last loaded in the server are

@@ -38,7 +38,7 @@ public class StatisticsCalculator {
 
     /**
      * @param trackedRaceStatisticsCache
-     *            the {@link TrackedRaceStatisticsCache} instance to use or null if none is available
+     *            the {@link TrackedRaceStatisticsCache} instance to use or {@code null} if none is available
      */
     public StatisticsCalculator(TrackedRaceStatisticsCache trackedRaceStatisticsCache) {
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
