@@ -53,7 +53,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
                         oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
                         oldRaceMapSettings.isShowWindStreamletOverlay(), oldRaceMapSettings.isShowSimulationOverlay(),
                         oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
-                        oldRaceMapSettings.isShowDouglasPeuckerPoints(),oldRaceMapSettings.isShowTargetEstimation());
+                        oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowTargetEstimation());
                 map.updateSettings(newRaceMapSettings);
             }
         });

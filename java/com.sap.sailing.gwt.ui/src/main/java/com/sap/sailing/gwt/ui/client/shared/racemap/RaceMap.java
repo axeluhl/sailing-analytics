@@ -952,7 +952,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
-                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(),newTime,settings.isShowTargetEstimation()),
+                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(), newTime, settings.isShowTargetEstimation()),
             GET_RACE_MAP_DATA_CATEGORY,
             getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, ++boatPositionRequestIDCounter));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
@@ -2609,7 +2609,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
             requiresRedraw = true;
         }
-        if(!newSettings.isShowTargetEstimation() && targetEstimationOverlay != null){
+        if (!newSettings.isShowTargetEstimation() && targetEstimationOverlay != null){
             targetEstimationOverlay.removeFromParent();
         }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
@@ -2625,7 +2625,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             requiresUpdateCoordinateSystem = true;
             requiresRedraw = true;
         }
-        if(!newSettings.isShowTargetEstimation() && targetEstimationOverlay != null){
+        if (!newSettings.isShowTargetEstimation() && targetEstimationOverlay != null){
             targetEstimationOverlay.removeFromParent();
         }
         this.settings = newSettings;
