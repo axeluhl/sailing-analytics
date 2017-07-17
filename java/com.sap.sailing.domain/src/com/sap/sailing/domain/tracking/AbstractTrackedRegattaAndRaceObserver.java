@@ -34,18 +34,23 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
     @Override
     public synchronized void regattaAdded(TrackedRegatta trackedRegatta) {
         final Serializable regattaId = trackedRegatta.getRegatta().getId();
-        RegattaListener tracker = new RegattaListener((DynamicTrackedRegatta) trackedRegatta);
-        this.stopIfNotNull(registeredRegattaListeners.put(regattaId, tracker));
+        synchronized (registeredRegattaListeners) {
+            this.stopIfNotNull(registeredRegattaListeners.remove(regattaId));
+            RegattaListener tracker = new RegattaListener((DynamicTrackedRegatta) trackedRegatta);
+            registeredRegattaListeners.put(regattaId, tracker);
+        }
         log.fine("Added sensor data tracker to tracked regatta: " + trackedRegatta.getRegatta().getName());
     }
 
     @Override
     public final synchronized void regattaRemoved(TrackedRegatta trackedRegatta) {
         final Serializable regattaId = trackedRegatta.getRegatta().getId();
-        try {
-            this.stopIfNotNull(registeredRegattaListeners.get(regattaId));
-        } finally {
-            registeredRegattaListeners.remove(regattaId);
+        synchronized (registeredRegattaListeners) {
+            try {
+                this.stopIfNotNull(registeredRegattaListeners.get(regattaId));
+            } finally {
+                registeredRegattaListeners.remove(regattaId);
+            }
         }
     }
 
@@ -60,7 +65,9 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
     }
     
     protected synchronized void removeAll() {
-        registeredRegattaListeners.values().forEach(this::stopIfNotNull);
+        synchronized (registeredRegattaListeners) {
+            registeredRegattaListeners.values().forEach(this::stopIfNotNull);
+        }
     }
 
     protected abstract void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
@@ -97,8 +104,7 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
             if (trackedRace instanceof DynamicTrackedRace) {
                 DynamicTrackedRace dynamicTrackedRace = (DynamicTrackedRace) trackedRace;
                 RegattaAndRaceIdentifier raceIdentifier = dynamicTrackedRace.getRaceIdentifier();
-                DynamicTrackedRace existingRace = knownTrackedRaces.get(raceIdentifier);
-                if (existingRace != null) {
+                if (knownTrackedRaces.containsKey(raceIdentifier)) {
                     remove(raceIdentifier);
                 }
                 knownTrackedRaces.put(raceIdentifier, dynamicTrackedRace);
