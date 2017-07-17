@@ -40,7 +40,15 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
     
     private static final Duration MINIMUM_DELAY_FOR_CACHE_RECALCULATION = Duration.ONE_SECOND.times(10);
     
+    /**
+     * Listeners added a {@link TrackedRaces} that need to be cleaned when {@link TrackedRace}s are removed. 
+     */
     private final Map<TrackedRace, Listener> listeners;
+    
+    
+    /**
+     * Cache that holds and updates {@link TrackedRaceStatistics} instances per known {@link TrackedRace}.
+     */
     private final SmartFutureCache<TrackedRace, TrackedRaceStatistics, ?> cache;
     
     private final ScheduledExecutorService executor;
