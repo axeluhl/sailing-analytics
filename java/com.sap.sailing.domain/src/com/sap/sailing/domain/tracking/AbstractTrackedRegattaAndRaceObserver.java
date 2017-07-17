@@ -26,9 +26,10 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
 
     private static final Logger log = Logger.getLogger(AbstractTrackedRegattaAndRaceObserver.class.getName());
 
-    private final Map<Serializable, RegattaListener> registeredRegattaListeners = new ConcurrentHashMap<>();
+    private final Map<Serializable, RegattaListener> registeredRegattaListeners;
 
     public AbstractTrackedRegattaAndRaceObserver() {
+        registeredRegattaListeners = new ConcurrentHashMap<>();
     }
 
     @Override
