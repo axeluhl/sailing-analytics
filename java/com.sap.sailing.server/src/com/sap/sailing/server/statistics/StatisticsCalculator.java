@@ -19,7 +19,10 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
 /**
- * Calculates the statistics for all {@link Leaderboard}s passed to the {@link #addLeaderboard(Leaderboard)} method.
+ * Calculates the statistics for all {@link Leaderboard}s passed to the {@link #addLeaderboard(Leaderboard)} method.<br>
+ * Due to the fact that {@link TrackedRaceStatisticsCache} is managed by OSGi, it's possible that no instance is
+ * available at a given point in time. In this case, no detailed statistics based on the information of a TrackedRace
+ * can be calculated.
  */
 public class StatisticsCalculator {
 
@@ -33,6 +36,10 @@ public class StatisticsCalculator {
 
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
 
+    /**
+     * @param trackedRaceStatisticsCache
+     *            the {@link TrackedRaceStatisticsCache} instance to use or null if none is available
+     */
     public StatisticsCalculator(TrackedRaceStatisticsCache trackedRaceStatisticsCache) {
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
     }
