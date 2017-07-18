@@ -161,8 +161,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                     @Override
                     public void onFailure(Throwable cause) {
                         settingsButton.setEnabled(false);
-                        errorReporter.reportError("Error trying to load event with id " + regattaOverviewContextDefinition.getEvent() + " : "
-                                + cause.getMessage());
+                        errorReporter.reportError(stringMessages.errorLoadingEvent(regattaOverviewContextDefinition.getEvent(), cause.getMessage()));
                         continueInitAfterEventRetrieved();
                     }
         
@@ -180,8 +179,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                 new AsyncCallback<List<RaceGroupDTO>>() {
                     @Override
                     public void onFailure(Throwable cause) {
-                        errorReporter.reportError("Error trying to load regattas for event with id " + regattaOverviewContextDefinition.getEvent() + " : "
-                                + cause.getMessage());
+                        errorReporter.reportError(stringMessages.errorLoadingRegattaStructure(regattaOverviewContextDefinition.getEvent(), cause.getMessage()));
                         continueInitAfterRaceGroupsRetrieved();
                     }
         
@@ -329,7 +327,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                                     leaderboardsTabPanel.selectTab(0);
                                 } else {
                                     leaderboardCheckBox.setValue(false);
-                                    errorReporter.reportError("Error trying to load leaderboard. Either the event could not be associated to Regatta or there are no tracked races.");
+                                    errorReporter.reportError(stringMessages.errorLoadingLeaderBoardByEvent());
                                 }
                             }
                             @Override

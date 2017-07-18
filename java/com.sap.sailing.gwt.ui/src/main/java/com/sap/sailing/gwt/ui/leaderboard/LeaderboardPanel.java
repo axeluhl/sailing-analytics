@@ -1975,7 +1975,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                         labelText += filter.getName() + ", ";
                     }
                 }
-                filterStatusLabel.setText("Active Filter(s): " + labelText.substring(0, labelText.length() - 2));
+                filterStatusLabel.setText(stringMessages.activeFilters(labelText.substring(0, labelText.length() - 2)));
                 filterClearButton.setVisible(true);
                 filterControlPanel.setVisible(true);
             } else {

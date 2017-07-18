@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.UUID;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
@@ -1816,4 +1818,47 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String documentSettingsId();
     String settingsForId(String id);
     String userProfileSettingsTabDescription();
+    String requiresRegattaRaceAndLeaderboard();
+    String couldNotFindRaceInRegatte(String raceName, String regattaName);
+    String algorithmTimeOutText();
+    String mixedLegText();
+    String pathCanvasOverlayTitle(int numPoints, String distance, String date);
+    String windSpeedInKnots();
+    String activeFilters(String substring);
+    String errorLoadingRegattasForLeaderboardGroup(String leaderboardGroupName, String message);
+    String errorLoadingLeaderBoardGroup(String leaderboardGroupName, String message);
+    String errorLoadingLeaderBoardGroups(String message);
+    String errorServletCall(String message);
+    String errorReceivingWindPattern(String message);
+    String errorLoadingBoatClasses(String message);
+    String errorLoadingLegInformation(String message);
+    String errorLoadingRaceNames(String message);
+    String errorLoadingCompetitors(String message);
+    String errorLoadingTotalTime(String message);
+    String errorUpdatingCarriedPoints(String name, String leaderboardName, String message);
+    String errorUpdatingLeaderboardScore(String name, String leaderboardName, String race, String message);
+    String errorUpdatingMaxPointsReason(String name, String leaderboardName, String message);
+    String errorUpdatingDisplayNames(String name, String leaderboardName, String message);
+    String errorUpdatingLeaderboardScoreCorrection(String message);
+    String errorGettingScoreCorrectionProvider(String message);
+    String errorTryingToUnsupressCompetitor(String name);
+    String errorLoadingReducedDimensionsMapedByLevel(String message);
+    String errorFetchingDimensionData(String dimension, String message);
+    String errorFetchingStatistics(String message);
+    String errorFetchingAggregators(String message);
+    String errorLoadingDataRetrieverChainDefinitions(String message);
+    String errorFetchingComponentsChangedTimepoint(String message);
+    String errorRunningQuery(String message);
+    String errorReadingWindFixes(String message);
+    String errorAddingWindFixForRace(String raceIdentifier, String message);
+    String errorSettingStartTime(String message);
+    String errorStoppingRaceTracking(String races, String message);
+    String errorRemovingRace(String regattaNamesAndRaceNames, String message);
+    String errorLoadingRegattas(String jsonURL, String message);
+    String errorUpdatingRegatta(String name, String message);
+    String errorLoadingRaceLog(String message);
+    String errorStartingTracking(String leaderboardRaceColumnFleetNames, String message);
+    String errorLoadingLeaderBoardByEvent();
+    String errorLoadingEvent(UUID event, String message);
+    String errorLoadingRegattaStructure(UUID event, String message);
 }
