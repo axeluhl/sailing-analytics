@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.settingstab;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.cell.client.ButtonCell;
@@ -17,7 +15,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
-import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.UserSettingsByKeyTextBoxFilter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsEntry;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
@@ -99,17 +96,7 @@ public class UserSettings extends Composite implements UserSettingsView {
         userSettingsTable.addColumn(showColumn, "", null, false);
         deleteColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         userSettingsTable.addColumn(deleteColumn, "", null, false);
-        userSettingsFilterUi.addFilterValueChangeHandler(new FilterValueChangeHandler<UserSettingsEntry, String>() {
-            @Override
-            public void onFilterValueChanged(Filter<UserSettingsEntry> filter) {
-                presenter.updateData();
-            }
-
-            @Override
-            public Collection<String> getFilterableValues() {
-                return Collections.emptyList();
-            }
-        });
+        userSettingsFilterUi.addFilterValueChangeHandler(filter -> presenter.updateData());
         presenter.setView(this);
     }
 
