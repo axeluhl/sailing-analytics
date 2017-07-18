@@ -288,7 +288,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     private class RegattaRacesTabViewFilterPresenter extends FilterPresenter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
 
         private final Map<Navigation, List<FilterValueProvider<SimpleCompetitorDTO>>> providersByTab = new HashMap<>();
-        private final Map<Navigation, List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>>> handlersByTab = new HashMap<>();
+        private final Map<Navigation, List<FilterValueChangeHandler<SimpleRaceMetadataDTO>>> handlersByTab = new HashMap<>();
         
         private RegattaRacesTabViewFilterPresenter(FilterWidget<SimpleRaceMetadataDTO, SimpleCompetitorDTO> filterWidget) {
             super(filterWidget);
@@ -300,7 +300,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
         
         @Override
-        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> getCurrentValueChangeHandlers() {
+        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> getCurrentValueChangeHandlers() {
             return handlersByTab.get(currentlySelectedTab);
         }
         
@@ -310,8 +310,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             list.add(provider);
         }
 
-        private void addHandler(Navigation assosiatedTab, FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> handler) {
-            List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> list = handlersByTab.get(assosiatedTab);
+        private void addHandler(Navigation assosiatedTab, FilterValueChangeHandler<SimpleRaceMetadataDTO> handler) {
+            List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> list = handlersByTab.get(assosiatedTab);
             if (list == null) this.handlersByTab.put(assosiatedTab, list = new ArrayList<>());
             list.add(handler);
             super.addHandler(handler);

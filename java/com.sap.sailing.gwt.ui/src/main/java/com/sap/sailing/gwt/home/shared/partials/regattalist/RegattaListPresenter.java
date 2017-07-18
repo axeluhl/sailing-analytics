@@ -18,7 +18,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class RegattaListPresenter<D extends DTO>
-        implements FilterValueProvider<String>, FilterValueChangeHandler<RegattaMetadataDTO, String> {
+        implements FilterValueProvider<String>, FilterValueChangeHandler<RegattaMetadataDTO> {
 
     private final RegattaListView view;
     private final Map<RegattaListItem, RegattaMetadataDTO> stucture = new HashMap<>();

@@ -8,7 +8,7 @@ import com.sap.sse.common.filter.Filter;
 
 public interface FilterWidget<T, C> extends IsWidget {
 
-    HandlerRegistration addFilterValueChangeHandler(FilterValueChangeHandler<T, C> handler);
+    HandlerRegistration addFilterValueChangeHandler(FilterValueChangeHandler<T> handler);
     
     Filter<T> getFilter();
     

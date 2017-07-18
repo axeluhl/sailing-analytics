@@ -76,11 +76,11 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     private class RacesViewImplFilterPresenter extends FilterPresenter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
 
         private final List<FilterValueProvider<SimpleCompetitorDTO>> valueProviders;
-        private final List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> valueChangeHandlers;
+        private final List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> valueChangeHandlers;
 
         public RacesViewImplFilterPresenter(FilterWidget<SimpleRaceMetadataDTO, SimpleCompetitorDTO> filterWidget,
                 FilterValueProvider<SimpleCompetitorDTO> valueProvider,
-                FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> valueChangeHandler) {
+                FilterValueChangeHandler<SimpleRaceMetadataDTO> valueChangeHandler) {
             super(filterWidget);
             this.valueProviders = Arrays.asList(valueProvider);
             this.valueChangeHandlers = Arrays.asList(valueChangeHandler);
@@ -93,7 +93,7 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         }
 
         @Override
-        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> getCurrentValueChangeHandlers() {
+        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> getCurrentValueChangeHandlers() {
             return valueChangeHandlers;
         }
     }

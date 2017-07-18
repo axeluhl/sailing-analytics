@@ -27,11 +27,11 @@ public abstract class FilterPresenter<T, C extends Comparable<C>> {
         this.filterWidget.asWidget().setVisible(false);
     }
 
-    protected abstract List<FilterValueChangeHandler<T, C>> getCurrentValueChangeHandlers();
+    protected abstract List<FilterValueChangeHandler<T>> getCurrentValueChangeHandlers();
 
     protected abstract List<FilterValueProvider<C>> getCurrentValueProviders();
 
-    protected void addHandler(FilterValueChangeHandler<T, C> handler) {
+    protected void addHandler(FilterValueChangeHandler<T> handler) {
         this.filterWidget.addFilterValueChangeHandler(handler);
     }
 

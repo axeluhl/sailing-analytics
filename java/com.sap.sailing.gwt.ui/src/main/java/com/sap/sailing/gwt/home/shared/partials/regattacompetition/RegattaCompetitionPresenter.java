@@ -22,7 +22,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
 public abstract class RegattaCompetitionPresenter
         implements RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>,
-        FilterValueProvider<SimpleCompetitorDTO>, FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
+        FilterValueProvider<SimpleCompetitorDTO>, FilterValueChangeHandler<SimpleRaceMetadataDTO> {
 
     private final RegattaCompetitionView view;
     private Filter<SimpleRaceMetadataDTO> latestRacesByCompetitorFilter;

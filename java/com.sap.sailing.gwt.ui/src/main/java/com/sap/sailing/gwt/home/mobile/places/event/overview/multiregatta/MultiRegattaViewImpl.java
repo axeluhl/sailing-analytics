@@ -50,11 +50,11 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
     private class MultiRegattaViewImplFilterPresenter extends FilterPresenter<RegattaMetadataDTO, String> {
 
         private final List<FilterValueProvider<String>> valueProviders;
-        private final List<FilterValueChangeHandler<RegattaMetadataDTO, String>> valueChangeHandlers;
+        private final List<FilterValueChangeHandler<RegattaMetadataDTO>> valueChangeHandlers;
         
         public MultiRegattaViewImplFilterPresenter(FilterWidget<RegattaMetadataDTO, String> filterWidget,
                 FilterValueProvider<String> valueProvider,
-                FilterValueChangeHandler<RegattaMetadataDTO, String> valueChangeHandler) {
+                FilterValueChangeHandler<RegattaMetadataDTO> valueChangeHandler) {
             super(filterWidget);
             this.valueProviders = Arrays.asList(valueProvider);
             this.valueChangeHandlers = Arrays.asList(valueChangeHandler);
@@ -67,7 +67,7 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
         }
 
         @Override
-        protected List<FilterValueChangeHandler<RegattaMetadataDTO, String>> getCurrentValueChangeHandlers() {
+        protected List<FilterValueChangeHandler<RegattaMetadataDTO>> getCurrentValueChangeHandlers() {
             return valueChangeHandlers;
         }
     }

@@ -30,8 +30,7 @@ import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.filter.Filter;
 
 public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends AbstractWindDTO>> extends Composite
-        implements FilterValueProvider<SimpleCompetitorDTO>,
-        FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
+        implements FilterValueProvider<SimpleCompetitorDTO>, FilterValueChangeHandler<SimpleRaceMetadataDTO> {
 
     private static final LocalCss CSS = RaceListResources.INSTANCE.css();
 
