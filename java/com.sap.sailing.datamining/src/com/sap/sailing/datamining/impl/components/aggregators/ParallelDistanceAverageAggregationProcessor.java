@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -56,7 +55,7 @@ public class ParallelDistanceAverageAggregationProcessor
         Map<GroupKey, Distance> sumAggregation = sumAggregationProcessor.getResult();
         for (Entry<GroupKey, Distance> sumAggregationEntry : sumAggregation.entrySet()) {
             GroupKey key = sumAggregationEntry.getKey();
-            result.put(key, new MeterDistance(sumAggregationEntry.getValue().getMeters() / elementAmountPerKey.get(key).doubleValue()));
+            result.put(key, sumAggregationEntry.getValue().scale(1. / elementAmountPerKey.get(key).doubleValue()));
         }
         return result;
     }

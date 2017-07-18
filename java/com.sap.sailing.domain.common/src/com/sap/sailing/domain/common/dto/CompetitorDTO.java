@@ -20,6 +20,11 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
 
     String getSearchTag();
 
+    /**
+     * If the {@code searchTag} is not contained in {@link #getSearchTag()}, appends it to the search tag, separated by a space character 
+     */
+    void addToSearchTag(String searchTag);
+    
     BoatDTO getBoat();
 
     BoatClassDTO getBoatClass();
@@ -45,5 +50,5 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
     Double getTimeOnTimeFactor();
     
     Duration getTimeOnDistanceAllowancePerNauticalMile();
-    
+
 }

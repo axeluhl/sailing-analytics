@@ -27,9 +27,13 @@ public class RaceTrackerListeners implements RaceTracker.Listener {
     }
 
     @Override
-    public synchronized void onTrackerWillStop(boolean preemptive) {
-        isStopped.set(true);
-        isStoppedPreemptive.set(preemptive);
-        registeredListeners.forEach(l -> l.onTrackerWillStop(preemptive));
+    public void onTrackerWillStop(boolean preemptive) {
+        Iterable<RaceTracker.Listener> listenersToInform;
+        synchronized (this) {
+            isStopped.set(true);
+            isStoppedPreemptive.set(preemptive);
+            listenersToInform = new HashSet<>(registeredListeners);
+        }
+        listenersToInform.forEach(l -> l.onTrackerWillStop(preemptive));
     }
 }

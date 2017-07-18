@@ -126,7 +126,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                                         widthInPxBox.setValue(imageSize.getA());
                                         heightInPxBox.setValue(imageSize.getB());
                                     }
-                                    validate();
+                                    validateAndUpdate();
                                 }
 
                                 @Override
@@ -135,7 +135,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                                 }
                             });
                 }
-                validate();
+                validateAndUpdate();
             }
         });
         
@@ -145,7 +145,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         tagsListEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                validate();
+                validateAndUpdate();
             }
         });
     }

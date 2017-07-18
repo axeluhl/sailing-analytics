@@ -20,6 +20,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -94,7 +96,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
-        SafeHtml cell(String url, String displayName);
+        SafeHtml cell(SafeUri safeUri, String displayName);
     }
 
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
@@ -228,7 +230,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 if(event != null && event.id != null){
                     link = EntryPointLinkFactory.createEventPlaceLink(event.id.toString(), new HashMap<String, String>());
                 }
-                return ANCHORTEMPLATE.cell(link, event.getName());
+                return ANCHORTEMPLATE.cell(UriUtils.fromString(link), event.getName());
             }
         };
 
@@ -375,18 +377,21 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(eventActionColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
 
-        table.addColumnSortHandler(getEventTableColumnSortHandler(eventListDataProvider.getList(), eventNameColumn,
-                venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn, leaderboardGroupsColumn));
+        table.addColumnSortHandler(getEventTableColumnSortHandler(eventListDataProvider.getList(),
+                eventSelectionCheckboxColumn, eventNameColumn, venueNameColumn, startEndDateColumn, isPublicColumn,
+                courseAreasColumn, leaderboardGroupsColumn));
         table.getColumnSortList().push(startEndDateColumn);
 
         return table;
     }
 
     private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
-            Column<EventDTO, SafeHtml> eventNameColumn, TextColumn<EventDTO> venueNameColumn,
-            TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn, Column<EventDTO, SafeHtml> courseAreasColumn,
+            SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn, Column<EventDTO, SafeHtml> eventNameColumn,
+            TextColumn<EventDTO> venueNameColumn, TextColumn<EventDTO> startEndDateColumn,
+            TextColumn<EventDTO> isPublicColumn, Column<EventDTO, SafeHtml> courseAreasColumn,
             Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn) {
         ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
+        result.setComparator(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getComparator());
         result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {

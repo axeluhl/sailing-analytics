@@ -70,4 +70,9 @@ public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore
         }
         return result;
     }
+    
+    @Override
+    public void clear() {
+        db.getCollection(CollectionNames.WIND_TRACKS.name()).drop();
+    }
 }

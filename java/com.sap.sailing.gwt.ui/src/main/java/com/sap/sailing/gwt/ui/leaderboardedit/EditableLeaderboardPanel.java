@@ -52,6 +52,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -61,8 +62,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorColumnBase;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -143,7 +142,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public Header<String> getHeader() {
-            return new TextHeader(getStringMessages().competitor());
+            return new TextHeader(stringMessages.competitor());
         }
 
         @Override
@@ -208,9 +207,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
-                        EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
-                                row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-                                "\nYou may have to refresh your view.");
+                        EditableLeaderboardPanel.this.getErrorReporter().reportError(
+                                stringMessages.errorUpdatingDisplayNames(row.competitor.getName(),
+                                        getLeaderboardName(), t.getMessage()));
                     }
 
                     @Override
@@ -327,10 +326,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         @Override
                         public void onFailure(Throwable t) {
                             removeBusyTask();
-                            getErrorReporter().reportError(
-                                    "Error trying to update max points reason for competitor "
-                                            + row.competitor.getName() + " in leaderboard " + getLeaderboardName()
-                                            + ": " + t.getMessage() + "\nYou may have to refresh your view.");
+                            getErrorReporter().reportError(stringMessages.errorUpdatingMaxPointsReason(
+                                    row.competitor.getName(), getLeaderboardName(), t.getMessage()));
                         }
 
                         @Override
@@ -453,10 +450,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         @Override
                         public void onFailure(Throwable t) {
                             removeBusyTask();
-                            getErrorReporter().reportError("Error trying to update score correction for competitor "+
-                                    row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
-                                    " for race "+raceColumnName+": "+t.getMessage()+
-                                    "\nYou may have to refresh your view.");
+                            getErrorReporter().reportError(
+                                    stringMessages.errorUpdatingLeaderboardScore(row.competitor.getName(),
+                                            getLeaderboardName(), raceColumnName, t.getMessage()));
                         }
 
                         @Override
@@ -531,10 +527,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 @Override
                                 public void onFailure(Throwable t) {
                                     removeBusyTask();
-                                    getErrorReporter().reportError("Error trying to update score correction for competitor "+
-                                            row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
-                                            " for race "+raceColumnName+": "+t.getMessage()+
-                                            "\nYou may have to refresh your view.");
+                                    getErrorReporter().reportError(stringMessages.errorUpdatingLeaderboardScore(
+                                            row.competitor.getName(), getLeaderboardName(),
+                                            raceColumnName, t.getMessage()));
                                 }
 
                                 @Override
@@ -545,10 +540,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                         @Override
                                         public void onFailure(Throwable t) {
                                             removeBusyTask();
-                                            getErrorReporter().reportError("Error trying to update score correction for competitor "+
-                                                    row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
-                                                    " for race "+raceColumnName+": "+t.getMessage()+
-                                                    "\nYou may have to refresh your view.");
+                                            getErrorReporter().reportError(stringMessages.errorUpdatingLeaderboardScore(
+                                                    row.competitor.getName(), getLeaderboardName(), raceColumnName, t.getMessage()));
                                         }
 
                                         @Override
@@ -577,17 +570,16 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return getStringMessages().edit();
+            return stringMessages.edit();
         }
     }
 
     public EditableLeaderboardPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent) {
-        super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true),
+        super(null, null, sailingService, asyncActionsExecutor, new LeaderboardSettings(),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
-                leaderboardName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
+                leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true);
         suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         ImageResource importIcon = resources.importIcon();
@@ -601,13 +593,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
                         ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(EditableLeaderboardPanel.this, providerNames, getSailingService(), 
-                                getStringMessages(), getErrorReporter());
+                                stringMessages, getErrorReporter());
                         dialog.show();
                     }
                     
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error getting the score correction providers: " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorGettingScoreCorrectionProvider(caught.getMessage()));
                     }
                 });
             }
@@ -643,7 +635,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error saving score correction information: " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorUpdatingLeaderboardScoreCorrection(caught.getMessage()));
                     }
                 });
             }
@@ -668,7 +660,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
         getContentPanel().insert(scoreCorrectionInfoGrid, 0);
-        getContentPanel().add(new Label(getStringMessages().suppressedCompetitors()+":"));
+        getContentPanel().add(new Label(stringMessages.suppressedCompetitors() + ":"));
         getContentPanel().add(suppressedCompetitorsTable);
 
         // add a dedicated settings button that allows users to remove columns if needed; the settings
@@ -689,7 +681,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         suppressedSailIDColumn.setSortable(true);
         result.addColumn(suppressedSailIDColumn, suppressedSailIDColumn.getHeader());
         final SuppressedCompetitorColumn suppressedCompetitorColumn = new SuppressedCompetitorColumn(
-                new CompetitorColumnBase<CompetitorDTO>(this, getStringMessages(), new CompetitorFetcher<CompetitorDTO>() {
+                new CompetitorColumnBase<CompetitorDTO>(this, stringMessages, new CompetitorFetcher<CompetitorDTO>() {
                     @Override
                     public CompetitorDTO getCompetitor(CompetitorDTO t) {
                         return t;
@@ -700,7 +692,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         final Column<CompetitorDTO, String> unsuppressButtonColumn = new Column<CompetitorDTO, String>(new ButtonCell()) {
             @Override
             public String getValue(CompetitorDTO object) {
-                return getStringMessages().unsuppress();
+                return stringMessages.unsuppress();
             }
         };
         unsuppressButtonColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
@@ -710,7 +702,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         /* suppressed */ false, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        getErrorReporter().reportError("Error trying to unsuppress competitor "+object.getName());
+                        getErrorReporter().reportError(stringMessages.errorTryingToUnsupressCompetitor(object.getName()));
                     }
                     @Override
                     public void onSuccess(Void result) {
@@ -754,7 +746,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     @Override
     protected CompetitorColumn createCompetitorColumn() {
         return new EditableCompetitorColumn(getCellListForEditableCompetitorColumn(),
-                new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(), new CompetitorFetcher<LeaderboardRowDTO>() {
+                new CompetitorColumnBase<LeaderboardRowDTO>(this, stringMessages,
+                        new CompetitorFetcher<LeaderboardRowDTO>() {
                     @Override
                     public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
                         return t.competitor;
@@ -797,7 +790,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return getStringMessages().suppress();
+                return stringMessages.suppress();
             }
         });
         final class OptionalBoldRenderer implements SafeHtmlRenderer<String> {
@@ -867,7 +860,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 return new FieldUpdater<LeaderboardRowDTO, String>() {
                     @Override
                     public void update(int index, final LeaderboardRowDTO row, String valueToUpdate) {
-                        new EditCompetitorNameDialog(getStringMessages(), row.competitor.getName(), new DialogCallback<String>() {
+                        new EditCompetitorNameDialog(stringMessages, row.competitor.getName(),
+                                new DialogCallback<String>() {
                             @Override
                             public void ok(final String value) {
                                 getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
@@ -875,9 +869,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                                 new AsyncCallback<Void>() {
                                     @Override
                                     public void onFailure(Throwable t) {
-                                        EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
-                                                row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-                                                "\nYou may have to refresh your view.");
+                                        EditableLeaderboardPanel.this.getErrorReporter().reportError(
+                                                stringMessages.errorUpdatingDisplayNames(row.competitor.getName(), getLeaderboardName(), t.getMessage())); 
                                     }
 
                                     @Override
@@ -902,7 +895,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return getStringMessages().edit();
+                return stringMessages.edit();
             }
         });
         return result;
@@ -922,7 +915,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 return new FieldUpdater<LeaderboardRowDTO, String>() {
                     @Override
                     public void update(int index, final LeaderboardRowDTO row, String value) {
-                        new EditCarryValueDialog(getStringMessages(), row.competitor.getName(), row.carriedPoints, new DialogCallback<Double>() {
+                        new EditCarryValueDialog(stringMessages, row.competitor.getName(), row.carriedPoints,
+                                new DialogCallback<Double>() {
                             @Override
                             public void ok(final Double value) {
                                 updateCarriedPoints(EditableLeaderboardPanel.this.getData().getList().indexOf(row), row, value);
@@ -937,7 +931,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return getStringMessages().edit();
+                return stringMessages.edit();
             }
         });
         final EditTextCell carryTextCell = new EditTextCell();
@@ -971,9 +965,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
-                EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update carry value for competitor "+
-                        row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-                        "\nYou may have to refresh your view.");
+                EditableLeaderboardPanel.this.getErrorReporter().reportError(
+                        stringMessages.errorUpdatingCarriedPoints(row.competitor.getName(), getLeaderboardName(), t.getMessage()));
             }
 
             @Override
@@ -998,7 +991,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         list.add(totalPointsEditCellProvider);
         final UncorrectedTotalPointsViewProvider uncorrectedViewProvider = new UncorrectedTotalPointsViewProvider(race.getRaceColumnName());
         list.add(uncorrectedViewProvider);
-        list.add(new MaxPointsReasonAndTotalPointsEditButtonCell(getStringMessages(), race.getRaceColumnName(),
+        list.add(new MaxPointsReasonAndTotalPointsEditButtonCell(stringMessages, race.getRaceColumnName(),
                 maxPointsDropDownCellProvider, totalPointsEditCellProvider));
         return list;
     }

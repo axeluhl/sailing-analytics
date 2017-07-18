@@ -18,7 +18,7 @@ public class StartActivity extends AbstractActivity {
 
     public static final String LOAD_EVENTS_DATA_CATEGORY = "loadEventsData";
 
-    public StartActivity(StartPlace place, StartClientFactory clientFactory) {
+    public StartActivity(StartClientFactory clientFactory) {
         this.clientFactory = clientFactory;
     }
 

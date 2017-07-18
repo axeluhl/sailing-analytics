@@ -8,24 +8,24 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A viewer for an overall series leaderboard. Additionally the viewer can render a chart for the series leaderboard and
@@ -37,60 +37,69 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 public class EventSeriesAnalyticsDataManager {
     private LeaderboardPanel overallLeaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
-    private MultiLeaderboardPanel multiLeaderboardPanel;
+    private MultiLeaderboardProxyPanel multiLeaderboardPanel;
 
     private final CompetitorSelectionModel competitorSelectionProvider;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ErrorReporter errorReporter;
-    private final UserAgentDetails userAgent;
     private final SailingServiceAsync sailingService;
     private final Timer timer;
     private final int MAX_COMPETITORS_IN_CHART = 30; 
 
-    public EventSeriesAnalyticsDataManager(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
+    public EventSeriesAnalyticsDataManager(final SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter) {
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.timer = timer;
         this.errorReporter = errorReporter;
-        this.userAgent = userAgent;
         this.overallLeaderboardPanel = null;
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createOverallLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
+    public LeaderboardPanel createOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+            final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if(overallLeaderboardPanel == null) {
-            overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
+            overallLeaderboardPanel = new LeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
+                    leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                    StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
-                    /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, false, false);
+                    StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
+                    /* showSelectionCheckbox */ true,
+                    /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
+                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
         }
         return overallLeaderboardPanel;
     }
 
-    public MultiCompetitorLeaderboardChart createMultiCompetitorChart(String leaderboardName, DetailType chartDetailType) {
+    public MultiCompetitorLeaderboardChart createMultiCompetitorChart(Component<?> parent,
+            ComponentContext<?> context, String leaderboardName,
+            DetailType chartDetailType) {
         if(multiCompetitorChart == null) {
-            multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, leaderboardName, chartDetailType,
-                    competitorSelectionProvider, timer, StringMessages.INSTANCE, errorReporter);
+            multiCompetitorChart = new MultiCompetitorLeaderboardChart(parent, context, sailingService,
+                    asyncActionsExecutor,
+                    leaderboardName, chartDetailType,
+                    competitorSelectionProvider, timer, StringMessages.INSTANCE, true, errorReporter);
             multiCompetitorChart.setVisible(false); 
         }
         return multiCompetitorChart;
     }
 
-    public MultiLeaderboardPanel createMultiLeaderboardPanel(LeaderboardSettings leaderboardSettings,
+    public MultiLeaderboardProxyPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+            LeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         if(multiLeaderboardPanel == null) {
-            multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer, true /*isEmbedded*/,
+            multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
+                    asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, preselectedRace, errorReporter, StringMessages.INSTANCE,
-                    userAgent, showRaceDetails, autoExpandLastRaceColumn);
+                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings);
         }
         return multiLeaderboardPanel;
     }
 
-    public MultiLeaderboardPanel getMultiLeaderboardPanel() {
+    public MultiLeaderboardProxyPanel getMultiLeaderboardPanel() {
         return multiLeaderboardPanel;
     }
 
@@ -151,7 +160,7 @@ public class EventSeriesAnalyticsDataManager {
         showComponentSettingsDialog(multiCompetitorChart, null);
     }
     
-    protected <SettingsType extends AbstractSettings> void showComponentSettingsDialog(final Component<SettingsType> component, String componentDisplayName) {
+    protected <SettingsType extends Settings> void showComponentSettingsDialog(final Component<SettingsType> component, String componentDisplayName) {
         String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();
         String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
         SettingsDialog<SettingsType> dialog = new SettingsDialog<SettingsType>(component, StringMessages.INSTANCE);

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -75,9 +76,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                 }
             }
         });
-
         windSpeedSourcesPanel.add(showWindSpeedSeriesCheckbox);
-
         showWindDirectionsSeriesCheckbox = dialog.createCheckbox(stringMessages.showWindDirectionSeries());
         showWindDirectionsSeriesCheckbox.setTitle(stringMessages.showWindDirectionSeriesTooltip());
         showWindDirectionsSeriesCheckbox.setValue(initialSettings.isShowWindDirectionsSeries());
@@ -92,7 +91,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
 
         windDirectionSourcesPanel.add(showWindDirectionsSeriesCheckbox);
 
-        for (WindSourceType windSourceType : WindSourceType.values()) {
+        for (WindSourceType windSourceType : getWindSourceTypesToOffer()) {
             CheckBox checkbox = dialog.createCheckbox(WindSourceTypeFormatter.format(windSourceType, stringMessages));
             checkbox.setTitle(WindSourceTypeFormatter.tooltipFor(windSourceType, stringMessages));
             checkbox.setEnabled(initialSettings.isShowWindDirectionsSeries());
@@ -102,7 +101,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
             windDirectionSourcesPanel.add(checkbox);
         }
         
-        for (WindSourceType windSourceType : WindSourceType.values()) {
+        for (WindSourceType windSourceType : getWindSourceTypesToOffer()) {
             CheckBox checkbox = dialog.createCheckbox(WindSourceTypeFormatter.format(windSourceType, stringMessages));
             checkbox.setTitle(WindSourceTypeFormatter.tooltipFor(windSourceType, stringMessages));
             checkbox.setEnabled(initialSettings.isShowWindSpeedSeries() && windSourceType.useSpeed());
@@ -113,6 +112,12 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
         }
         
         return vp;
+    }
+
+    private Iterable<WindSourceType> getWindSourceTypesToOffer() {
+        final Set<WindSourceType> result = new HashSet<>();
+        result.addAll(Arrays.asList(WindSourceType.values()));
+        return result;
     }
 
     @Override

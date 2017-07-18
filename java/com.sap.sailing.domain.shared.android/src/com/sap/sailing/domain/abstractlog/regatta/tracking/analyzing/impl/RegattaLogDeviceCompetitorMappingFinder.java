@@ -25,8 +25,8 @@ public class RegattaLogDeviceCompetitorMappingFinder extends BaseRegattaLogDevic
 
     @Override
     protected RegattaLogDeviceCompetitorMappingEvent createDeviceMappingEvent(Competitor item, AbstractLogEventAuthor author,
-            TimePoint from, TimePoint to, DeviceIdentifier deviceId) {
+            TimePoint from, TimePoint toInclusive, DeviceIdentifier deviceId) {
         final TimePoint now = MillisecondsTimePoint.now();
-        return new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(), item, deviceId, from, to);
+        return new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(), item, deviceId, from, toInclusive);
     }
 }

@@ -33,6 +33,7 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -74,7 +75,7 @@ public class BuoyFragment extends BaseFragment
         setUpSetPositionButton(layout, clickListener);
 
         signalQualityIndicatorView = ViewHelper.get(layout, R.id.signal_quality_indicator);
-        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
+        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal);
 
         mReceiver = new IntentReceiver();
         mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
@@ -101,7 +102,7 @@ public class BuoyFragment extends BaseFragment
         mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         initialLocationUpdate = true;
         MarkInfo mark = positioningActivity.getMarkInfo();
-        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
+        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal);
         if (mark != null) {
             setUpTextUI(lastKnownLocation);
             GoogleMap map = mapFragment.getMap();
@@ -217,7 +218,7 @@ public class BuoyFragment extends BaseFragment
         //provider (GPS) disabled by the user while tracking
         disablePositionButton();
         setUpTextUI(null);
-        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
+        signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal);
         
         LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
     }
@@ -257,7 +258,7 @@ public class BuoyFragment extends BaseFragment
         } else if (gpsAccuracy <= 10) {
             quality = GPSQuality.great;
         }
-        signalQualityIndicatorView.setSignalQuality(quality.toInt());
+        signalQualityIndicatorView.setSignalQuality(quality);
     }
 
     private void handleSuccessfulResponse() {
@@ -266,20 +267,6 @@ public class BuoyFragment extends BaseFragment
 
     public void setPingListener(pingListener listener) {
         pingListener = listener;
-    }
-
-    private enum GPSQuality {
-        noSignal(0), poor(2), good(3), great(4);
-
-        private final int gpsQuality;
-
-        GPSQuality(int quality) {
-            this.gpsQuality = quality;
-        }
-
-        public int toInt() {
-            return this.gpsQuality;
-        }
     }
 
     public interface pingListener {

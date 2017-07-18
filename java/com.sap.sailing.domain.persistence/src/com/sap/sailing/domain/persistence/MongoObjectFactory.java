@@ -19,6 +19,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 
@@ -125,6 +126,12 @@ public interface MongoObjectFactory {
      */
     void storeCompetitor(Competitor competitor);
 
+    /**
+     * Like {@link #storeCompetitor(Competitor)}, but for a collection of competitors that are all
+     * expected to be new, having a unique {@link Competitor#getId() ID}.
+     */
+    void storeCompetitors(Iterable<Competitor> competitors);
+
     void removeAllCompetitors();
 
     void removeCompetitor(Competitor competitor);
@@ -137,10 +144,41 @@ public interface MongoObjectFactory {
     
     void removeRaceLog(RaceLogIdentifier identifier);
     
+    void removeAllRaceLogs();
+    
     void removeRegattaLog(RegattaLikeIdentifier identifier);
+    
+    void removeAllRegattaLogs();
 
     void storeResultUrl(String resultProviderName, URL url);
 
     void removeResultUrl(String resultProviderName, URL url);
 
+    
+    /**
+     * Updates the database such that the next call to
+     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)} won't return an object equivalent to
+     * {@code params} anymore; in other words, the race whose connectivity parameters are described by {@code params}
+     * will no longer be considered as to be restored.
+     * 
+     * @see #addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
+     */
+    void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params);
+    
+    /**
+     * Updates the database such that the next call to
+     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)} will return an object equivalent to
+     * {@code params}; in other words, the race whose connectivity parameters are described by {@code params} will be
+     * considered as to be restored.
+     * 
+     * @see #removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
+     */
+    void addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params);
+
+    /**
+     * Removes all {@link RaceTrackingConnectivityParameters} objects from those to restore; short for calling
+     * {@link #removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)} for all parameter
+     * objects obtained through {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)}.
+     */
+    void removeAllConnectivityParametersForRacesToRestore();
 }

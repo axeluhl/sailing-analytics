@@ -11,5 +11,6 @@ public interface UserProfileViewBase extends IsWidget, NeedsAuthenticationContex
     public interface Presenter extends NotLoggedInPresenter {
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation();
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserPreferencesNavigation();
+        PlaceNavigation<? extends AbstractUserProfilePlace> getUserSettingsNavigation();
     }
 }

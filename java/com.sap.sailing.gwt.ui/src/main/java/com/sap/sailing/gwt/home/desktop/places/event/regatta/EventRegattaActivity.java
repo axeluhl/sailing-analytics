@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -30,7 +29,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Base Activity for all desktop single-regatta-event/series-event pages as well as the pages for one regatta of a
@@ -41,7 +40,6 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  */
 public class EventRegattaActivity extends AbstractEventActivity<AbstractEventRegattaPlace> implements EventRegattaView.Presenter {
     private EventRegattaView currentView = new TabletAndDesktopRegattaEventView();
-    private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS;
 
@@ -53,8 +51,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
                     clientFactory.getSailingService(),
                     asyncActionsExecutor,
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds),
-                    clientFactory.getErrorReporter(),
-                    userAgent));
+                    clientFactory.getErrorReporter()));
         }
         
         initNavigationPath(navigationPathDisplay);
@@ -153,5 +150,10 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
             }
         }
         return super.isEventOrRegattaLive();
+    }
+
+    @Override
+    public UserService getUserService() {
+        return clientFactory.getUserService();
     }
 }

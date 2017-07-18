@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import java.io.Serializable;
-
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings, WindChartSettingsDialogComponent> {
+public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings> {
     private final StringMessages stringMessages;
     
+    public static final String ID = "wc";
+
     public WindChartLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
     }
@@ -23,13 +23,6 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings,
     }
 
     @Override
-    public WindChartSettings cloneSettings(WindChartSettings settings) {
-        return new WindChartSettings(settings.isShowWindSpeedSeries(), settings.getWindSpeedSourcesToDisplay(),
-                settings.isShowWindDirectionsSeries(), settings.getWindDirectionSourcesToDisplay(),
-                settings.getResolutionInMilliseconds());
-    }
-
-    @Override
     public String getLocalizedShortName() {
         return stringMessages.wind();
     }
@@ -40,7 +33,17 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings,
     }
 
     @Override
-    public Serializable getComponentId() {
-        return getLocalizedShortName();
+    public String getComponentId() {
+        return ID;
+    }
+
+    @Override
+    public WindChartSettings extractUserSettings(WindChartSettings settings) {
+        return settings;
+    }
+
+    @Override
+    public WindChartSettings extractDocumentSettings(WindChartSettings settings) {
+        return settings;
     }
 }

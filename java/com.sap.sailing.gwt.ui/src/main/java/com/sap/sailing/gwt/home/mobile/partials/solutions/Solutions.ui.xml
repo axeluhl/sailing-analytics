@@ -67,7 +67,10 @@
 							<li>
 								<ui:text from='{i18n.contentSapInSailing12}' />
 							</li>
-						</ul>
+                                                        <li>
+                                                                <ui:text from='{i18n.contentSapInSailing13}' />
+                                                        </li>
+              						</ul>
 					</div>
 				</div>
 				<div ui:field="sapSailingAnalyticsUi"
@@ -110,13 +113,10 @@
                             class="{style.storeBadgesContainer}"
                             >
                             <a  ui:field="raceManagerPlayStoreLinkUi"
-                                href="{i18n.playstoreRacecommitteeApp}"
                                 target="_blank"
                                 ><img
                                     ui:field="raceManagerPlayStoreImgUi" 
-                                    alt="Get it on Google Play" 
-                                    src="{i18n.playstoreBadge}" 
-                                    /></a>
+                                    alt="Get it on Google Play" /></a>
                         </div>
                         <a class="{res.mainCss.button}" ui:field="raceManagerAppDetailsAnchor">
                            <ui:text from="{i18n.sapSailingRaceManagerReadMore}"/>
@@ -139,25 +139,20 @@
 						</p>
                         <div class="{style.storeBadgesContainer}">
 							<a  ui:field="inSightAppStoreLinkUi"
-								href="{i18n.appstoreSapSailInsight}"
 								target="_blank"
 							><img
 								ui:field="inSightAppStoreImgUi"
 								alt="Get it on AppStore"
-								src="images/home/appstore{i18n.appstoreBadgeSuffix}.svg"
 							/></a>
 						</div>
 						<div
                             class="{style.storeBadgesContainer}"
                             >
                             <a  ui:field="inSightPlayStoreLinkUi"
-                                href="{i18n.playstoreInsightApp}"
                                 target="_blank"
                                 ><img
                                     ui:field="inSightPlayStoreImgUi"
-                                    alt="Get it on Google Play"
-                                    src="{i18n.playstoreBadge}"
-                                    /></a>
+                                    alt="Get it on Google Play"/></a>
                         </div>
                         <a class="{res.mainCss.button}" ui:field="sailInSightAppDetailsAnchor">
                            <ui:text from="{i18n.sapSailInSightReadMore}"/>
@@ -182,13 +177,10 @@
                             class="{style.storeBadgesContainer}"
                             >
                             <a  ui:field="buoyPingerPlayStoreLinkUi"
-                                href="{i18n.playStoreBuoyPingerApp}"
                                 target="_blank"
                                 ><img
                                     ui:field="buoyPingerPlayStoreImgUi"
-                                    alt="Get it on Google Play"
-                                    src="{i18n.playstoreBadge}"
-                                    /></a>
+                                    alt="Get it on Google Play"/></a>
                         </div>
                         <a class="{res.mainCss.button}" ui:field="buoyPingerAppDetailsAnchor">
                            <ui:text from="{i18n.sapSailingBuoyPingerReadMore}"/>

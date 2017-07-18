@@ -15,4 +15,16 @@ public class KnotSpeedImpl extends AbstractSpeedImpl implements Speed {
     public double getKnots() {
         return knots;
     }
+
+    /**
+     * Saves extra work by only converting the other object's speed to knots; useful in particular
+     * if both speeds are knot-based speeds
+     */
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || !(object instanceof Speed)) {
+            return false;
+        }
+        return getKnots() == ((Speed) object).getKnots();
+    }
 }

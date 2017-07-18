@@ -8,6 +8,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 
 public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
     @Connector(messageKey="Team", ordinal=9)
@@ -22,6 +23,7 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
     
     boolean hasEmail();
 
+    @Dimension(messageKey="SearchTag", ordinal=11)
     String getSearchTag();
     
     /**

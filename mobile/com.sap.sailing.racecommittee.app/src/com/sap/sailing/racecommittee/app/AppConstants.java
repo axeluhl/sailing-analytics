@@ -41,8 +41,9 @@ public class AppConstants {
 
     // Inner process events
     public final static String INTENT_ACTION_TOGGLE = PACKAGE_NAME + ".action.toggle";
-
+    public final static String INTENT_ACTION_CLICK = PACKAGE_NAME + ".action.click";
     public final static String INTENT_ACTION_EXTRA = PACKAGE_NAME + ".extra";
+
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE = "procedure";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE = "more_mode";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER = "more_pathfinder";
@@ -56,6 +57,7 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_RECALL = "recall";
     public final static String INTENT_ACTION_TOGGLE_BLUE_FIRST = "more";
     public final static String INTENT_ACTION_TOGGLE_BLUE_LAST = "blue_last";
+    public final static String INTENT_ACTION_TOGGLE_COMPETITOR = "competitor";
 
     public final static String INTENT_ACTION_TOGGLE_REPLAY = "replay";
     public final static String INTENT_ACTION_TOGGLE_PHOTOS = "photos";
@@ -64,6 +66,8 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_EVENT = "event";
     public final static String INTENT_ACTION_TOGGLE_AREA = "area";
     public final static String INTENT_ACTION_TOGGLE_POSITION = "position";
+
+    public final static String INTENT_ACTION_CLICK_COMPETITOR = "competitor";
 
     private final static String INTENT_ACTION_TIME = PACKAGE_NAME + "action.time";
     public final static String INTENT_ACTION_TIME_HIDE = INTENT_ACTION_TIME + ".hide";

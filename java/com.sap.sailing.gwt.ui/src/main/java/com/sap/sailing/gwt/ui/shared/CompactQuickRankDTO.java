@@ -28,7 +28,7 @@ public class CompactQuickRankDTO implements IsSerializable {
         return competitorIdAsString;
     }
 
-    public int getRank() {
+    public int getOneBasedRank() {
         return rank;
     }
 

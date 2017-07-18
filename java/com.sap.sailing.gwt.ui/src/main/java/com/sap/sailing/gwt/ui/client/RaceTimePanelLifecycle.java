@@ -1,13 +1,12 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
-
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class RaceTimePanelLifecycle implements
-        ComponentLifecycle<RaceTimePanelSettings, RaceTimePanelSettingsDialogComponent> {
+        ComponentLifecycle<RaceTimePanelSettings> {
     private final StringMessages stringMessages;
+    
+    public static final String ID = "rt";
 
     public RaceTimePanelLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -15,17 +14,12 @@ public class RaceTimePanelLifecycle implements
 
     @Override
     public RaceTimePanelSettingsDialogComponent getSettingsDialogComponent(RaceTimePanelSettings settings) {
-        return new RaceTimePanelSettingsDialogComponent(cloneSettings(settings), stringMessages);
+        return new RaceTimePanelSettingsDialogComponent(settings, stringMessages);
     }
 
     @Override
     public RaceTimePanelSettings createDefaultSettings() {
-        return new RaceTimePanelSettings(1000);
-    }
-
-    @Override
-    public RaceTimePanelSettings cloneSettings(RaceTimePanelSettings settings) {
-        return new RaceTimePanelSettings(settings.getRefreshInterval());
+        return new RaceTimePanelSettings();
     }
 
     @Override
@@ -34,12 +28,22 @@ public class RaceTimePanelLifecycle implements
     }
 
     @Override
-    public Serializable getComponentId() {
-        return getLocalizedShortName();
+    public String getComponentId() {
+        return ID;
     }
 
     @Override
     public boolean hasSettings() {
         return true;
+    }
+
+    @Override
+    public RaceTimePanelSettings extractUserSettings(RaceTimePanelSettings settings) {
+        return settings;
+    }
+
+    @Override
+    public RaceTimePanelSettings extractDocumentSettings(RaceTimePanelSettings settings) {
+        return settings;
     }
 }

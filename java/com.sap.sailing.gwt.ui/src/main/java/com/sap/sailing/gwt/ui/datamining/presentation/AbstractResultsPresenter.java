@@ -3,23 +3,21 @@ package com.sap.sailing.gwt.ui.datamining.presentation;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public abstract class AbstractResultsPresenter<SettingsType extends Settings> extends AbstractComponent<SettingsType>
 implements ResultsPresenterWithControls<SettingsType> {
@@ -31,7 +29,6 @@ implements ResultsPresenterWithControls<SettingsType> {
     
     private final DockLayoutPanel mainPanel;
     private final HorizontalPanel controlsPanel;
-    protected final ValueListBox<String> dataSelectionListBox;
     protected final DeckLayoutPanel presentationPanel;
     
     private final HTML errorLabel;
@@ -39,8 +36,11 @@ implements ResultsPresenterWithControls<SettingsType> {
     
     private QueryResultDTO<?> currentResult;
     private boolean isCurrentResultSimple;
+    private boolean isCurrentResultTwoDimensional;
     
-    public AbstractResultsPresenter(StringMessages stringMessages) {
+    public AbstractResultsPresenter(Component<?> parent, ComponentContext<?> context,
+            StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         mainPanel = new DockLayoutPanel(Unit.PX);
         
@@ -59,21 +59,6 @@ implements ResultsPresenterWithControls<SettingsType> {
             }
         });
 //        addControl(exportButton);
-        
-        dataSelectionListBox = new ValueListBox<>(new AbstractObjectRenderer<String>() {
-            @Override
-            protected String convertObjectToString(String nonNullObject) {
-                // TODO I18N
-                return nonNullObject;
-            }
-        });
-        dataSelectionListBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                onDataSelectionValueChange();
-            }
-        });
-        addControl(dataSelectionListBox);
 
         presentationPanel = new DeckLayoutPanel();
         mainPanel.add(presentationPanel);
@@ -87,8 +72,6 @@ implements ResultsPresenterWithControls<SettingsType> {
         showError(getStringMessages().runAQuery());
     }
     
-    abstract protected void onDataSelectionValueChange();
-
     @Override
     public void addControl(Widget controlWidget) {
         controlsPanel.add(controlWidget);
@@ -109,12 +92,12 @@ implements ResultsPresenterWithControls<SettingsType> {
             }
             
             this.currentResult = result;
-            updateIsCurrentResultSimple();
+            updateCurrentResultInfo();
             
             internalShowResults(getCurrentResult());
         } else {
             this.currentResult = null;
-            updateIsCurrentResultSimple();
+            updateCurrentResultInfo();
             showError(getStringMessages().noDataFound() + ".");
         }
     }
@@ -132,7 +115,7 @@ implements ResultsPresenterWithControls<SettingsType> {
         }
         
         currentResult = null;
-        updateIsCurrentResultSimple();
+        updateCurrentResultInfo();
         presentationPanel.setWidget(errorLabel);
     }
     
@@ -154,25 +137,41 @@ implements ResultsPresenterWithControls<SettingsType> {
         }
         
         currentResult = null;
-        updateIsCurrentResultSimple();
+        updateCurrentResultInfo();
     }
     
-    private void updateIsCurrentResultSimple() {
+    private void updateCurrentResultInfo() {
         boolean isSimple = false;
+        boolean isTwoDimensional = false;
         if (currentResult != null) {
             isSimple = true;
+            isTwoDimensional = true;
             for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
-                if (groupKey.hasSubKeys()) {
+                int size = groupKey.size();
+                if (size != 1) {
                     isSimple = false;
-                    break;
+                    if (!isTwoDimensional) {
+                        break;
+                    }
+                }
+                if (size != 2) {
+                    isTwoDimensional = false;
+                    if (!isSimple) {
+                        break;
+                    }
                 }
             }
         }
         isCurrentResultSimple = isSimple;
+        isCurrentResultTwoDimensional = isTwoDimensional;
     }
 
     protected boolean isCurrentResultSimple() {
         return isCurrentResultSimple;
+    }
+    
+    protected boolean isCurrentResultTwoDimensional() {
+        return isCurrentResultTwoDimensional;
     }
     
     protected StringMessages getStringMessages() {

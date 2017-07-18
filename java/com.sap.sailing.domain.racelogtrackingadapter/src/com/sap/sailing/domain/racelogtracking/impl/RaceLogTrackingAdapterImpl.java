@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -11,17 +10,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
 
 import org.osgi.framework.ServiceReference;
 
-import com.google.zxing.WriterException;
 import com.sap.sailing.domain.abstractlog.impl.LastEventOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -73,7 +65,9 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.mail.MailService;
-import com.sap.sse.qrcode.QRCodeGenerationUtil;
+import com.sap.sse.mail.QRCodeMimeBodyPartSupplier;
+import com.sap.sse.mail.SerializableDefaultMimeBodyPartSupplier;
+import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.util.impl.NonGwtUrlHelper;
 
@@ -96,7 +90,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet) throws NotDenotedForRaceLogTrackingException, Exception {
+            Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
+            throws NotDenotedForRaceLogTrackingException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
         if (!raceLogTrackingState.isForTracking()) {
@@ -110,7 +105,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         }
         final RaceHandle result;
         if (!isRaceLogRaceTrackerAttached(service, raceLog)) {
-            result = addTracker(service, regatta, leaderboard, raceColumn, fleet, -1);
+            result = addTracker(service, regatta, leaderboard, raceColumn, fleet, -1, trackWind, correctWindDirectionByMagneticDeclination);
         } else {
             result = null;
         }
@@ -123,21 +118,20 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
      * and tracking begins. Otherwise, the {@code RaceLogRaceTracker} waits until a {@code StartTrackingEvent} is added
      * to perform these actions. The race first has to be denoted for racelog tracking.
      */
-    private RaceHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo,
-            Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds)
-            throws RaceLogRaceTrackerExistsException, Exception {
+    private RaceHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
+            RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds, boolean trackWind,
+            boolean correctWindDirectionByMagneticDeclination) throws RaceLogRaceTrackerExistsException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         assert !isRaceLogRaceTrackerAttached(service, raceLog) : new RaceLogRaceTrackerExistsException(
                 leaderboard.getName() + " - " + raceColumn.getName() + " - " + fleet.getName());
-
         Regatta regatta = regattaToAddTo == null ? null : service.getRegatta(regattaToAddTo);
         RaceLogConnectivityParams params = new RaceLogConnectivityParams(service, regatta, raceColumn, fleet,
-                leaderboard, delayToLiveInMillis, domainFactory);
+                leaderboard, delayToLiveInMillis, domainFactory, trackWind, correctWindDirectionByMagneticDeclination);
         return service.addRace(regattaToAddTo, params, timeoutInMilliseconds);
     }
 
     @Override
-    public void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard,
+    public boolean denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException {
         final BoatClass boatClass;
         if (leaderboard instanceof RegattaLeaderboard) {
@@ -154,17 +148,23 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
             }
         }
+        final boolean result;
         if (raceName == null) {
             raceName = leaderboard.getName() + " " + raceColumn.getName() + " " + fleet.getName();
         }
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        assert raceLog != null : new NotDenotableForRaceLogTrackingException("No RaceLog found in place");
-        if (new RaceLogTrackingStateAnalyzer(raceLog).analyze().isForTracking()) {
-            throw new NotDenotableForRaceLogTrackingException("Already denoted for tracking");
+        if (raceLog == null) {
+            throw new NotDenotableForRaceLogTrackingException("No RaceLog found in place");
         }
-        RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(MillisecondsTimePoint.now(),
-                service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
-        raceLog.add(event);
+        if (new RaceLogTrackingStateAnalyzer(raceLog).analyze().isForTracking()) {
+            result = false;
+        } else {
+            RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(MillisecondsTimePoint.now(),
+                    service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
+            raceLog.add(event);
+            result = true;
+        }
+        return result;
     }
     
     private BoatClass findDominatingBoatClass(Iterable<Competitor> allCompetitors) {
@@ -316,9 +316,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
         String subject = String.format("%s %s", B.get(locale, "trackingInvitationFor"), invitee);
 
-        // taken from http://www.tutorialspoint.com/javamail_api/javamail_api_send_inlineimage_in_email.htm
-        BodyPart messageTextPart = new MimeBodyPart();
-
         boolean hasIOSAppUrl = iOSAppUrl != null && !iOSAppUrl.isEmpty();
         boolean hasAndroidAppUrl = androidAppUrl != null && !androidAppUrl.isEmpty();
         boolean hasLogoUrl = logoUrl != null && !logoUrl.isEmpty();
@@ -367,26 +364,16 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         htmlText.append("</html>");
 
         try {
-            messageTextPart.setContent(htmlText.toString(), "text/html");
-
-            BodyPart messageImagePart = new MimeBodyPart();
-            InputStream imageIs = QRCodeGenerationUtil.create(url, 250);
-            DataSource imageDs = new ByteArrayDataSource(imageIs, "image/png");
-            messageImagePart.setDataHandler(new DataHandler(imageDs));
-            messageImagePart.setHeader("Content-ID", "<image>");
-            messageImagePart.setHeader("Content-Disposition", "inline;filename=\"qr.png\"");
-
-            MimeMultipart multipart = new MimeMultipart();
-            multipart.addBodyPart(messageTextPart);
-            multipart.addBodyPart(messageImagePart);
-
-            getMailService().sendMail(toAddress, subject, multipart);
-        } catch (MessagingException | MailException | WriterException | IOException e) {
+            final SerializableMultipartSupplier multipartSupplier = new SerializableMultipartSupplier("Invite",
+                    new SerializableDefaultMimeBodyPartSupplier(htmlText.toString(), "text/html"),
+                    new QRCodeMimeBodyPartSupplier(url));
+            getMailService().sendMail(toAddress, subject, multipartSupplier);
+        } catch (MessagingException | MailException | IOException e) {
             logger.log(Level.SEVERE, "Error trying to send mail to " + invitee + " with e-mail address " + toAddress, e);
             throw new MailException(e.getMessage());
         }
     }
-
+    
     @Override
     public void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
             String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException {

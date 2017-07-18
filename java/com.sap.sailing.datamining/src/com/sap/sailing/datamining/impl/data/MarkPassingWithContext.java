@@ -5,20 +5,20 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;
 
 public class MarkPassingWithContext implements HasMarkPassingContext {
-
+    private static final long serialVersionUID = -337042113749307686L;
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitor;
     private final MarkPassingManeuver maneuver;
     
     private Double absoluteRank;
     private boolean rankHasBeenInitialized;
+    private Wind wind;
 
     public MarkPassingWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, MarkPassingManeuver maneuver) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
@@ -34,11 +34,6 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     public MarkPassingManeuver getManeuver() {
         return maneuver;
     }
-
-    @Override
-    public Tack getTack() {
-        return getManeuver().getNewTack();
-    }
     
     @Override
     public Waypoint getWaypoint() {
@@ -48,21 +43,6 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     @Override
     public NauticalSide getPassingSide() {
         return getManeuver().getSide();
-    }
-
-    @Override
-    public SpeedWithBearing getSpeedBefore() {
-        return getManeuver().getSpeedWithBearingBefore();
-    }
-
-    @Override
-    public SpeedWithBearing getSpeedAfter() {
-        return getManeuver().getSpeedWithBearingAfter();
-    }
-
-    @Override
-    public Double getDirectionChangeInDegrees() {
-        return getManeuver().getDirectionChangeInDegrees();
     }
 
     @Override
@@ -84,4 +64,13 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
         return absoluteRank;
     }
 
+    @Override
+    public Wind getWindInternal() {
+        return wind;
+    }
+
+    @Override
+    public void setWindInternal(Wind wind) {
+        this.wind = wind;
+    }
 }

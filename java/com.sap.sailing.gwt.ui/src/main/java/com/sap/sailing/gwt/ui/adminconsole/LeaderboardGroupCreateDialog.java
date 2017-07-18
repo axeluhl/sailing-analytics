@@ -31,6 +31,6 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
         } else {
             descriptionEntryField.setText(name); // make a valid default entry if possible
         }
-        validate();
+        validateAndUpdate();
     }
 }

@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,11 +16,15 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSetti
  *      the type of the perspective own settings
  **/
 public class PerspectiveCompositeValidator<PS extends Settings> implements Validator<PerspectiveCompositeSettings<PS>> {
-    private final Map<Serializable, Validator<?>> validatorsMappedByComponent;
+    private final Map<String, Validator<?>> validatorsMappedByComponent;
     private final Validator<PS> perspectiveValidator;
 
     public PerspectiveCompositeValidator(PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveAndDialogComponent, Iterable<ComponentIdWithSettingsAndDialogComponent<?>> componentsAndDialogComponents) {
-        this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialog().getValidator();
+        if (perspectiveAndDialogComponent.getSettingsDialogComponent() != null) {
+            this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialogComponent().getValidator();
+        } else {
+            perspectiveValidator = null;
+        }
         validatorsMappedByComponent = new HashMap<>();
         for (ComponentIdWithSettingsAndDialogComponent<?> componentsAndSettingsDialog : componentsAndDialogComponents) {
             validatorsMappedByComponent.put(componentsAndSettingsDialog.getComponentId(), componentsAndSettingsDialog.getSettingsDialog().getValidator());
@@ -31,7 +34,7 @@ public class PerspectiveCompositeValidator<PS extends Settings> implements Valid
     @Override
     public String getErrorMessage(PerspectiveCompositeSettings<PS> valueToValidate) {
         StringBuilder result = new StringBuilder();
-        for (Entry<Serializable, Settings> componentAndSettings : valueToValidate.getSettingsPerComponentId().entrySet()) {
+        for (Entry<String, Settings> componentAndSettings : valueToValidate.getSettingsPerComponentId().entrySet()) {
             final String errorMessage = getComponentErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);
@@ -52,7 +55,7 @@ public class PerspectiveCompositeValidator<PS extends Settings> implements Valid
         return errorMessage;
     }
     
-    private <SettingsType extends Settings> String getComponentErrorMessage(Entry<Serializable, SettingsType> componentIdAndSettings) {
+    private <SettingsType extends Settings> String getComponentErrorMessage(Entry<String, SettingsType> componentIdAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
         Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentIdAndSettings.getKey());

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
-public interface Bearing extends Serializable {
+public interface Bearing extends Serializable, Comparable<Bearing> {
     Bearing NORTH = new DegreeBearingImpl(0);
     Bearing EAST = new DegreeBearingImpl(90);
     Bearing SOUTH = new DegreeBearingImpl(180);
@@ -41,5 +41,10 @@ public interface Bearing extends Serializable {
      * resulting bearing. Otherwise, the reverse of the arithmetic mean is returned.
      */
     Bearing middle(Bearing other);
+
+    /**
+     * If this bearing has a negative signum, reverts the signum. For example, {@code new DegreeBearingImpl(-10).abs().equals(new DegreeBearingImpl(10)}.
+     */
+    Bearing abs();
 
 }

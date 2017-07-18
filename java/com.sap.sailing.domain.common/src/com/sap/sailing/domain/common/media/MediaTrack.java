@@ -69,7 +69,6 @@ public class MediaTrack implements Serializable {
             Set<RegattaAndRaceIdentifier> assignedRaces) {
         this(title, url, startTime, duration, mimeType, assignedRaces);
         this.dbId = dbId;
-        
     }
 
     public String toString() {

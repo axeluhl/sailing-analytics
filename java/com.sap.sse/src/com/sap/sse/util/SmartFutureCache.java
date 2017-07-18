@@ -421,9 +421,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             logger.finest("resuming cache "+nameForLocks);
             for (Iterator<Entry<K, Pair<U, Set<SettableFuture<Future<V>>>>>> i=triggeredAndNotYetScheduled.entrySet().iterator(); i.hasNext(); ) {
                 Entry<K, Pair<U, Set<SettableFuture<Future<V>>>>> e = i.next();
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("while resuming "+nameForLocks+", triggering update for key "+e.getKey()+" with update interval "+e.getValue());
-                }
+                logger.finest(()->"while resuming "+nameForLocks+", triggering update for key "+e.getKey()+" with update interval "+e.getValue());
                 triggerUpdate(e.getKey(), e.getValue().getA());
                 i.remove();
             }

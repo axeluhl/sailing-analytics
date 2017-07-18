@@ -14,6 +14,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -176,10 +181,12 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.DelayedLeaderboardCorrectionsImpl;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
@@ -199,6 +206,8 @@ import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
@@ -218,6 +227,7 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
@@ -227,6 +237,7 @@ import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -235,8 +246,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private final DB database;
    
     private final DomainFactory baseDomainFactory;
-    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinderFactory serviceFinderFactory;
+    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
+    private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
     
     /**
      * Uses <code>null</code> as the {@link TypeBasedServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
@@ -252,8 +264,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
             this.deviceIdentifierServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierMongoHandler());
+            this.raceTrackingConnectivityParamsServiceFinder = serviceFinderFactory.createServiceFinder(RaceTrackingConnectivityParametersHandler.class);
         } else {
             this.deviceIdentifierServiceFinder = null;
+            this.raceTrackingConnectivityParamsServiceFinder = null;
         }
         this.baseDomainFactory = baseDomainFactory;
         this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
@@ -356,14 +370,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry) {
+    public Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Leaderboard result = null;
         try {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.LEADERBOARD_NAME.name(), name);
             for (DBObject o : leaderboardCollection.find(query)) {
-                result = loadLeaderboard(o, regattaRegistry, /* leaderboardRegistry */ null, /* groupForMetaLeaderboard */ null);
+                result = loadLeaderboard(o, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
             }
         } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
@@ -374,27 +388,28 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
-        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        Set<Leaderboard> result = new HashSet<Leaderboard>();
-        try {
-            for (DBObject o : leaderboardCollection.find()) {
-                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
-                if (loadedLeaderboard != null) {
-                    result.add(loadedLeaderboard);
-                }
+    public RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(DBObject dbLeaderboard,
+            String leaderboardName, String wrappedRegattaLeaderboardName, LeaderboardRegistry leaderboardRegistry) {
+        final RegattaLeaderboardWithEliminations result;
+        BasicDBList eliminatedCompetitorIds = (BasicDBList) dbLeaderboard.get(FieldNames.ELMINATED_COMPETITORS.name());
+        result = new DelegatingRegattaLeaderboardWithCompetitorElimination(()->
+            (RegattaLeaderboard) leaderboardRegistry.getLeaderboardByName(wrappedRegattaLeaderboardName), leaderboardName);
+        for (Object eliminatedCompetitorId : eliminatedCompetitorIds) {
+            Competitor eliminatedCompetitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById((Serializable) eliminatedCompetitorId);
+            if (eliminatedCompetitor == null) {
+                logger.warning("Couldn't find eliminated competitor with ID "+eliminatedCompetitorId);
+            } else {
+                result.setEliminated(eliminatedCompetitor, true);
             }
-        } catch (Exception e) {
-            // something went wrong during DB access; report, then use empty new wind track
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
-            logger.log(Level.SEVERE, "getAllLeaderboards", e);
         }
         return result;
     }
 
     /**
-     * If the DBObject has a field {@link FieldNames#REGATTA_NAME} then the object represents a
-     * {@link RegattaLeaderboard}. Otherwise, a {@link FlexibleLeaderboard} will be loaded.
+     * If the DBObject has a field {@link FieldNames#WRAPPED_REGATTA_LEADERBOARD_NAME} then the object represents a
+     * {@link RegattaLeaderboardWithEliminations}. Otherwise, if the DBObject has a field
+     * {@link FieldNames#REGATTA_NAME} then the object represents a {@link RegattaLeaderboard}. Otherwise, a
+     * {@link FlexibleLeaderboard} will be loaded.
      * 
      * @param leaderboardRegistry
      *            if not <code>null</code>, then before creating and loading the leaderboard it is looked up in this
@@ -418,24 +433,34 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result = leaderboardRegistry.getLeaderboardByName(leaderboardName);
         }
         if (result == null) {
-            ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbLeaderboard, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS);
-            String regattaName = (String) dbLeaderboard.get(FieldNames.REGATTA_NAME.name());
-            if (groupForMetaLeaderboard != null) {
-                result = new LeaderboardGroupMetaLeaderboard(groupForMetaLeaderboard,
-                        loadScoringScheme(dbLeaderboard), resultDiscardingRule);
-                groupForMetaLeaderboard.setOverallLeaderboard(result);
-            } else if (regattaName == null) {
-                result = loadFlexibleLeaderboard(dbLeaderboard, resultDiscardingRule);
+            String wrappedRegattaLeaderboardName = (String) dbLeaderboard.get(FieldNames.WRAPPED_REGATTA_LEADERBOARD_NAME.name());
+            if (wrappedRegattaLeaderboardName != null) {
+                result = loadRegattaLeaderboardWithEliminations(dbLeaderboard, leaderboardName, wrappedRegattaLeaderboardName, leaderboardRegistry);
             } else {
-                result = loadRegattaLeaderboard(leaderboardName, regattaName, dbLeaderboard, resultDiscardingRule, regattaRegistry);
+                if (groupForMetaLeaderboard != null) {
+                    result = new LeaderboardGroupMetaLeaderboard(groupForMetaLeaderboard,
+                            loadScoringScheme(dbLeaderboard), loadResultDiscardingRule(dbLeaderboard, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS));
+                    groupForMetaLeaderboard.setOverallLeaderboard(result);
+                } else {
+                    String regattaName = (String) dbLeaderboard.get(FieldNames.REGATTA_NAME.name());
+                    ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbLeaderboard, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS);
+                    if (regattaName == null) {
+                        result = loadFlexibleLeaderboard(dbLeaderboard, resultDiscardingRule);
+                    } else {
+                        result = loadRegattaLeaderboard(leaderboardName, regattaName, dbLeaderboard,
+                                resultDiscardingRule, regattaRegistry);
+                    }
+                }
+                if (result != null) {
+                    DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result, baseDomainFactory);
+                    loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, result.getScoreCorrection());
+                    loadSuppressedCompetitors(dbLeaderboard, loadedLeaderboardCorrections);
+                    loadColumnFactors(dbLeaderboard, result);
+                }
             }
             if (result != null) {
                 final Leaderboard finalResult = result;
                 finalResult.setDisplayName((String) dbLeaderboard.get(FieldNames.LEADERBOARD_DISPLAY_NAME.name()));
-                DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result, baseDomainFactory);
-                loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, result.getScoreCorrection());
-                loadSuppressedCompetitors(dbLeaderboard, loadedLeaderboardCorrections);
-                loadColumnFactors(dbLeaderboard, result);
                 // add the leaderboard to the registry
                 if (leaderboardRegistry != null) {
                     leaderboardRegistry.addLeaderboard(result);
@@ -503,7 +528,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.info("Couldn't find regatta "+regattaName+" for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
             result = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
-            result.setName(leaderboardName);
+            result.setName(leaderboardName); // this will temporarily set the display name; it will be adjusted later if a display name is found
         }
         return result;
     }
@@ -1464,7 +1489,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogProtestStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         TimePoint protestStartTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_PROTEST_START_TIME);
-        return new RaceLogProtestStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, protestStartTime);
+        TimePoint protestEndTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_PROTEST_END_TIME);
+        if (protestEndTime == null) {
+            // fallback old data
+            protestEndTime = protestStartTime.plus(Duration.ONE_MINUTE.times(90));
+        }
+        TimeRange protestTime = new TimeRangeImpl(protestStartTime, protestEndTime);
+        return new RaceLogProtestStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, protestTime);
     }
 
     private RaceLogEvent loadRaceLogStartProcedureChangedEvent(TimePoint createdAt, AbstractLogEventAuthor author,
@@ -1748,9 +1779,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
         Serializable deviceMappingEventId = Helpers.tryUuidConversion((Serializable) dbObject.get(
                 FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name()));
-        TimePoint closingTimePoint = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
+        TimePoint closingTimePointInclusive = loadTimePoint(dbObject, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
         return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(createdAt, author, logicalTimePoint, id,
-                deviceMappingEventId, closingTimePoint);
+                deviceMappingEventId, closingTimePointInclusive);
     }
 
     private RegattaLogDeviceMarkMappingEvent loadRegattaLogDeviceMarkMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
@@ -1945,7 +1976,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (controlPointClass.equals(Mark.class.getSimpleName())) {
                 Mark mark = loadMark((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = mark;
-            } else if(controlPointClass.equals("Gate")) {
+            } else if (controlPointClass.equals("Gate")) {
                 ControlPointWithTwoMarks cpwtm = loadControlPointWithTwoMarks((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 dbObject.put(FieldNames.CONTROLPOINT_CLASS.name(), ControlPointWithTwoMarks.class.getSimpleName());
                 controlPoint = cpwtm;
@@ -2000,7 +2031,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Mark loadMark(DBObject dbObject) {
         Serializable markId = (Serializable) dbObject.get(FieldNames.MARK_ID.name());
-        String markColor = (String) dbObject.get(FieldNames.MARK_COLOR.name());
+        String markColorAsString = (String) dbObject.get(FieldNames.MARK_COLOR.name());
+        Color markColor = AbstractColor.getCssColor(markColorAsString);
         String markName = (String) dbObject.get(FieldNames.MARK_NAME.name());
         String markPattern = (String) dbObject.get(FieldNames.MARK_PATTERN.name());
         String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());
@@ -2269,5 +2301,69 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             modified = false;
         }
         return modified;
+    }
+
+    @Override
+    public ConnectivityParametersLoadingResult loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) {
+        final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
+        final DBCursor cursor = collection.find();
+        final int count = cursor.count();
+        logger.info("Restoring "+count+" races");
+        final List<DBObject> restoreParameters = new ArrayList<>();
+        // consume all elements quickly to avoid cursor/DB timeouts while restoring many races;
+        // MongoDB cursors by default time out after ten minutes if no more batch (of by default 100 elements)
+        // has been requested during this time.
+        Util.addAll(cursor, restoreParameters);
+        logger.info("Obtained "+restoreParameters.size()+" race parameters to restore");
+        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+        final Set<FutureTask<Void>> waiters = new HashSet<>();
+        logger.info("Starting to restore races");
+        final AtomicInteger i = new AtomicInteger();
+        for (final DBObject o : restoreParameters) {
+            final FutureTask<Void> waiter = new FutureTask<>(() -> {
+                final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
+                final int finalI = i.incrementAndGet();
+                logger.info("Applying to restore race #"+ finalI +"/"+count+" of type "+type);
+                raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
+                    logger.info("Restoring race #"+ finalI +"/"+count+" of type "+type);
+                    final Map<String, Object> map = new HashMap<>();
+                    for (final String key : o.keySet()) {
+                        if (!key.equals(TypeBasedServiceFinder.TYPE)) {
+                            map.put(key, o.get(key));
+                        }
+                    }
+                    try {
+                        final RaceTrackingConnectivityParameters params = connectivityParamsPersistenceService.mapTo(map);
+                        if (params != null) {
+                        	callback.accept(params);
+                        	logger.info("Done restoring race #"+ finalI +"/"+count+" of type "+type);
+                        } else {
+                        	logger.warning("Couldn't restore race #"+ finalI +"/"+count+" of type "+type+
+                        			" because the parameters loaded from the DB couldn't be mapped. Maybe the owning leaderboard was removed?");
+                        }
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Exception trying to load race #"+ finalI +"/"+count+" of type "+type+
+                                " from restore connectivity parameters "
+                                + o + " with handler " + connectivityParamsPersistenceService, e);
+                    }
+                });
+            }, /* void result */ null);
+            waiters.add(waiter);
+            backgroundExecutor.execute(waiter);
+        }
+        logger.info("Done restoring races; restored "+i+" of "+count+" races");
+        return new ConnectivityParametersLoadingResult() {
+            @Override
+            public int getNumberOfParametersToLoad() {
+                return count;
+            }
+
+            @Override
+            public void waitForCompletionOfCallbacksForAllParameters() throws InterruptedException, ExecutionException {
+                for (final FutureTask<Void> waiter : waiters) {
+                    waiter.get();
+                }
+            }
+        };
     }
 }

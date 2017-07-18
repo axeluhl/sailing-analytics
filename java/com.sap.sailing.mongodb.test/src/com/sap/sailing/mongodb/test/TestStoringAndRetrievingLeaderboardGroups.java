@@ -318,7 +318,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         // the leaderboard named leaderboardNames[2] occurs in both groups
         RacingEventService racingEventService = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE); // expected to load leaderboard groups
+                .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false); // expected to load leaderboard groups
         final LeaderboardGroup loadedLeaderboardGroup1 = racingEventService.getLeaderboardGroupByName(groupName1);
         final LeaderboardGroup loadedLeaderboardGroup2 = racingEventService.getLeaderboardGroupByName(groupName2);
 
@@ -457,7 +457,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         mongoObjectFactory.storeLeaderboard(leaderboard);
 
         //Check if the leaderboard updated correctly
-        final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName(), /* regattaRegistry */ null);
+        final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName(), /* regattaRegistry */ null, /* leaderboardRegistry */ null);
         final RaceColumn loadedRaceColumnByName = loadedLeaderboard.getRaceColumnByName(columnName);
         Fleet loadedFleet = loadedRaceColumnByName.getFleetByName(fleet.getName());
         Assert.assertEquals(race.getRaceIdentifier(fleet), loadedRaceColumnByName.getRaceIdentifier(loadedFleet));

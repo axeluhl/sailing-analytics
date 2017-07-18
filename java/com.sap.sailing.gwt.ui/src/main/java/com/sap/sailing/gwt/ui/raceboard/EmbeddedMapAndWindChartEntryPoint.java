@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
@@ -36,6 +37,8 @@ import com.sap.sailing.gwt.ui.client.TimePanelSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.DefaultQuickRanksDTOProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
@@ -86,7 +89,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         
         // read optional parameters
-        final RaceBoardPerspectiveSettings raceboardPerspectiveSettings = RaceBoardPerspectiveSettings
+        final RaceBoardPerspectiveOwnSettings raceboardPerspectiveSettings = RaceBoardPerspectiveOwnSettings
                 .readSettingsFromURL(/* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ true,
                         /* defaultForViewShowCompetitorsChart */ false, /* defaultForViewCompetitorFilter */ null,
                         /* defaultForCanReplayDuringLiveRaces */ false);
@@ -154,7 +157,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     }
 
     private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier, Map<CompetitorDTO, BoatDTO> competitorBoats,
-            final RaceBoardPerspectiveSettings raceboardPerspectiveSettings, final RaceMapSettings raceMapSettings, 
+            final RaceBoardPerspectiveOwnSettings raceboardPerspectiveSettings, final RaceMapSettings raceMapSettings, 
             final boolean showCompetitors, final boolean play) {
         final StringBuilder title = new StringBuilder(regattaLikeName);
         title.append('/');
@@ -170,7 +173,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         final TimeRangeWithZoomProvider timeRangeWithZoomProvider = new TimeRangeWithZoomModel();
         // Use a TimePanel to manage wind chart zoom, although the TimePanel itself is not being displayed;
         // let the time panel always return to "live" mode.
-        final TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(
+        final TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(null, null,
                 timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false,
                 /* isScreenLargeEnoughToOfferChartSupport set to true iff wind chart will be displayed */ raceboardPerspectiveSettings.isShowWindChart()) {
             protected boolean isLiveModeToBeMadePossible() {
@@ -197,9 +200,10 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         } else {
             competitorSelection = createEmptyFilterCompetitorModel(colorProvider); // show no competitors
         }
-        final RaceMap raceMap = new RaceMap(new RaceMapLifecycle(getStringMessages()), raceMapSettings, sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
-                competitorSelection, getStringMessages(), selectedRaceIdentifier, raceMapResources,
-                /* showHeaderPanel */ false) {
+        final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages()), raceMapSettings,
+                sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
+                competitorSelection, new RaceCompetitorSet(competitorSelection), getStringMessages(), selectedRaceIdentifier,
+                raceMapResources, /* showHeaderPanel */ false, new DefaultQuickRanksDTOProvider()) {
             @Override
             protected void showAdditionalControls(MapWidget map) {
                 backToLivePlayButton.removeFromParent();
@@ -208,7 +212,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         };
         final WindChart windChart;
         if (raceboardPerspectiveSettings.isShowWindChart()) {
-            windChart = new WindChart(new WindChartLifecycle(getStringMessages()), sailingService, selectedRaceIdentifier, timer,
+            windChart = new WindChart(null, null, new WindChartLifecycle(getStringMessages()), sailingService,
+                    selectedRaceIdentifier, timer,
                     timeRangeWithZoomProvider, new WindChartSettings(), getStringMessages(),
                     asyncActionsExecutor, /* errorReporter */
                     EmbeddedMapAndWindChartEntryPoint.this, /* compactChart */ true);

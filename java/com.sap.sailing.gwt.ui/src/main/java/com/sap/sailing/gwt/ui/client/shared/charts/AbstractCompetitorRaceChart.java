@@ -63,6 +63,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * AbstractCompetitorChart is a chart that can show one sort of competitor data (e.g. current speed over ground,
@@ -101,13 +102,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final TimingHolder primary = new TimingHolder();
     private final TimingHolder secondary = new TimingHolder();
 
-    AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    AbstractCompetitorRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType firstDetailType, DetailType secondDetailType, boolean compactChart,
             boolean allowTimeAdjust,
             String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
+                asyncActionsExecutor, errorReporter);
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
@@ -221,7 +224,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     private void loadData(final Date from, final Date to, final List<CompetitorDTO> competitors, final boolean append) {
         if (isVisible()) {
-            showLoading(stringMessages.loadingCompetitorData());
+            // if no data is loaded yet, or if it is not playing and not live (append loading every second) show loading
+            // indicator
+            if (shouldShowLoading(primary.timeOfLatestRequestInMillis)) {
+                showLoading(stringMessages.loadingCompetitorData());
+            }
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
             for (CompetitorDTO competitorDTO : competitors) {
                 competitorsToLoad.add(competitorDTO);
@@ -243,31 +250,42 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, stepSize, selectedDataTypeToRetrieve,
                 leaderboardGroupName, leaderboardName);
-        asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
-                new AsyncCallback<CompetitorsRaceDataDTO>() {
-                    @Override
-                    public void onSuccess(final CompetitorsRaceDataDTO result) {
-                        hideLoading();
-                        if (result != null) {
-                            if (result.isEmpty() && chartContainsNoData()) {
-                                setWidget(noDataFoundLabel);
-                            } else {
-                                updateChartSeries(result, selectedDataTypeToRetrieve, append,tholder);
-                            }
-                        } else {
-                            if (!append) {
-                                clearChart();
-                            }
-                        }
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        hideLoading();
-                        errorReporter.reportError(stringMessages.errorFetchingChartData(caught.getMessage()),
-                                timer.getPlayMode() == PlayModes.Live);
+        AsyncCallback<CompetitorsRaceDataDTO> dataLoadedCallback = new AsyncCallback<CompetitorsRaceDataDTO>() {
+            @Override
+            public void onSuccess(final CompetitorsRaceDataDTO result) {
+                hideLoading();
+                if (result != null) {
+                    if (result.isEmpty() && chartContainsNoData()) {
+                        setWidget(noDataFoundLabel);
+                    } else {
+                        updateChartSeries(result, selectedDataTypeToRetrieve, append, tholder);
                     }
-                });
+                } else {
+                    if (!append) {
+                        clearChart();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                hideLoading();
+                errorReporter.reportError(stringMessages.errorFetchingChartData(caught.getMessage()),
+                        timer.getPlayMode() == PlayModes.Live);
+            }
+        };
+
+        if (append) {
+            // this call is repeated, allow it to be throttled and dropped
+            asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
+                    dataLoadedCallback);
+        } else {
+            // ensure that non appending only once loading is reliable and cannot be dropped by not using
+            // asyncActionExecutor
+            getCompetitorsRaceDataAction.execute(dataLoadedCallback);
+        }
+
     }
     
     private boolean chartContainsNoData() {
@@ -282,6 +300,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
         if (isVisible()) {
+            showLoading(stringMessages.loadingCompetitorData());
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
             competitorsToLoad.add(competitor);
             

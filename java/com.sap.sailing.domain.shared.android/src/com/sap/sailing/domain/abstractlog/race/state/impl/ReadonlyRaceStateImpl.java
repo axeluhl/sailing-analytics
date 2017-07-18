@@ -18,7 +18,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastWindFixFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
@@ -42,6 +42,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 
 /**
@@ -116,7 +117,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private final StartTimeFinder startTimeAnalyzer;
     private final FinishingTimeFinder finishingTimeAnalyzer;
     private final FinishedTimeFinder finishedTimeAnalyzer;
-    private final ProtestStartTimeFinder protestTimeAnalyzer;
+    private final ProtestTimeFinder protestTimeAnalyzer;
 
     private final FinishPositioningListFinder finishPositioningListAnalyzer;
     private final ConfirmedFinishPositioningListFinder confirmedFinishPositioningListAnalyzer;
@@ -141,7 +142,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private StartTimeFinderResult cachedStartTimeFinderResult;
     private TimePoint cachedFinishingTime;
     private TimePoint cachedFinishedTime;
-    private TimePoint cachedProtestTime;
+    private TimeRange cachedProtest;
     private CompetitorResults cachedPositionedCompetitors;
     private CompetitorResults cachedConfirmedPositionedCompetitors;
     private CourseBase cachedCourseDesign;
@@ -172,7 +173,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     protected ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog,
             SimpleRaceLogIdentifier forRaceLogIdentifier, Clock analyzersClock,
             RacingProcedureFactory procedureFactory,
-            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates, boolean update) {
+            final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates, boolean update) {
         this.raceLog = raceLog;
         this.raceLogResolver = raceLogResolver;
         this.procedureFactory = procedureFactory;
@@ -184,7 +185,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.startTimeAnalyzer = new StartTimeFinder(raceLogResolver, raceLog);
         this.finishingTimeAnalyzer = new FinishingTimeFinder(raceLog);
         this.finishedTimeAnalyzer = new FinishedTimeFinder(raceLog);
-        this.protestTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
+        this.protestTimeAnalyzer = new ProtestTimeFinder(raceLog);
         this.finishPositioningListAnalyzer = new FinishPositioningListFinder(raceLog);
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ false);
@@ -211,7 +212,6 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.raceLog.addListener(new WeakRaceLogChangedVisitor(this.raceLog, this));
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
-        recreateRacingProcedure();
         final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStatesAndMe;
         if (forRaceLogIdentifier != null) {
             dependentRaceStatesAndMe = new HashMap<>(dependentRaceStates);
@@ -219,9 +219,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         } else {
             dependentRaceStatesAndMe = dependentRaceStates;
         }
+        recreateRacingProcedure(dependentRaceStatesAndMe);
         // Check whether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
         // dependent startTime setup listeners
-        adjustObserverForRelativeStartTime();
+        adjustObserverForRelativeStartTime(dependentRaceStatesAndMe);
     }
     
     protected ReadonlyRaceState getRaceStateToObserve() {
@@ -318,8 +319,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     @Override
-    public TimePoint getProtestTime() {
-        return cachedProtestTime;
+    public TimeRange getProtestTime() {
+        return cachedProtest;
     }
 
     @Override
@@ -371,13 +372,17 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     private void adjustObserverForRelativeStartTime() {
-        final StartTimeFinderResult startTimeAnalysisResult = startTimeAnalyzer.analyze();
-        adjustObserverForRelativeStartTime(startTimeAnalysisResult);
+        adjustObserverForRelativeStartTime(Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
     }
     
-    private void adjustObserverForRelativeStartTime(final StartTimeFinderResult startTimeAnalysisResult) {
+    private void adjustObserverForRelativeStartTime(final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        final StartTimeFinderResult startTimeAnalysisResult = startTimeAnalyzer.analyze();
+        adjustObserverForRelativeStartTime(startTimeAnalysisResult, dependentRaceStates);
+    }
+    
+    private void adjustObserverForRelativeStartTime(final StartTimeFinderResult startTimeAnalysisResult, Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         if (startTimeAnalysisResult.isDependentStartTime()) {
-            setupListenersOnDependentRace(startTimeAnalysisResult, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
+            setupListenersOnDependentRace(startTimeAnalysisResult, dependentRaceStates);
         } else if (raceStateToObserve != null) {
             raceStateToObserve.removeChangedListener(raceStateToObserveListener);
             raceStateToObserve = null;
@@ -417,11 +422,15 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     protected void update() {
+        update(/* dependentRaceStates */ Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
+    }
+    
+    protected void update(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         RacingProcedureType type = racingProcedureAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedRacingProcedureType, type) && type != RacingProcedureType.UNKNOWN) {
             cachedRacingProcedureType = type;
             cachedRacingProcedureTypeNoFallback = determineInitialProcedureType(type);
-            recreateRacingProcedure();
+            recreateRacingProcedure(dependentRaceStates);
             changedListeners.onRacingProcedureChanged(this);
         }
 
@@ -445,7 +454,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedStartTimeFinderResult = startTimeFinderResult;
             changedListeners.onStartTimeChanged(this);
         }
-        adjustObserverForRelativeStartTime(startTimeFinderResult);
+        adjustObserverForRelativeStartTime(startTimeFinderResult, dependentRaceStates);
 
         TimePoint finishingTime = finishingTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedFinishingTime, finishingTime)) {
@@ -459,9 +468,9 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             changedListeners.onFinishedTimeChanged(this);
         }
 
-        TimePoint protestTime = protestTimeAnalyzer.analyze();
-        if (!Util.equalsWithNull(cachedProtestTime, protestTime)) {
-            cachedProtestTime = protestTime;
+        TimeRange protest = protestTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedProtest, protest)) {
+            cachedProtest = protest;
             changedListeners.onProtestTimeChanged(this);
         }
 
@@ -492,7 +501,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         }
     }
 
-    private void recreateRacingProcedure() {
+    private void recreateRacingProcedure(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         if (racingProcedure != null) {
             removeChangedListener(racingProcedure);
             racingProcedure.detach();
@@ -503,7 +512,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
         statusAnalyzer = new RaceStatusAnalyzer(raceLogResolver, raceLog, statusAnalyzerClock, racingProcedure);
         // let's do an update because status might have changed with new procedure
-        update();
+        update(dependentRaceStates);
     }
 
 }

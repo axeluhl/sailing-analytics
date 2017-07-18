@@ -48,6 +48,7 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.tracking.RaceLogWindFixDeclinationHelper;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -65,6 +66,7 @@ import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
@@ -287,8 +289,8 @@ public class RaceContext {
         }
         switch (state.getStatus()) {
         case FINISHED:
-            TimePoint protestStartTime = state.getProtestTime();
-            if (protestStartTime != null) {
+            TimeRange protestTime = state.getProtestTime();
+            if (protestTime != null) {
                 lastUpperFlag = Flags.BRAVO;
                 lastLowerFlag = Flags.NONE;
                 lastFlagsAreDisplayed = true;
@@ -474,12 +476,12 @@ public class RaceContext {
         // TODO do not calculate the winner if the blue flag is currently shown.
         try {
             TimePoint finishTime = getLiveTimePoint();
-            List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
-            if (competitors == null || competitors.isEmpty()) {
+            Iterable<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
+            if (competitors == null || Util.isEmpty(competitors)) {
                 return null;
             }
             if (Util.size(raceColumn.getFleets()) == 1) {
-                return new SimpleCompetitorDTO(competitors.get(0));
+                return new SimpleCompetitorDTO(competitors.iterator().next());
             }
             for (Competitor competitor : competitors) {
                 if (isCompetitorInFleet(competitor)) {
@@ -521,6 +523,9 @@ public class RaceContext {
     }
 
     public boolean isLiveOrOfPublicInterest() {
+        if (HomeServiceUtil.calculateEventState(event) == EventState.FINISHED) {
+            return false;
+        }
         boolean isLive = false;
         boolean isOfPublicInterest = false;
         if (trackedRace != null) {
@@ -589,6 +594,11 @@ public class RaceContext {
         TimePoint finishTime = getFinishTime();
         if (startTime != null && now.before(startTime)) {
             return RaceViewState.SCHEDULED;
+        }
+        if (state != null && state.getStatus() == RaceLogRaceStatus.FINISHING) {
+            // someone pulled up the blue flag; it's pretty likely that we'll also see the blue flag down
+            // event for the transition into the FINISHED state, so we can report FINISHING for now:
+            return RaceViewState.FINISHING;
         }
         if (finishTime != null && now.after(finishTime)) {
             return RaceViewState.FINISHED;

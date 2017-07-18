@@ -13,17 +13,20 @@
   border-bottom: 1px solid #ddd;
 }
 .regattaheaderpadding {
+  padding-left: 4em;
   padding-right: 9.666667em;
 }
 .regattaheader_logo {
-  float: left;
+  position: absolute;
   width: 3.333333333333333em;
   height: 3.333333333333333em;
+  margin: 0.666666666666667em 0.666666666666667em 1em;
   text-align: center;
   line-height: 3.333333333333333em;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
+  left: 1em;
 }
 .regattaheader_logo img {
   display: inline-block;

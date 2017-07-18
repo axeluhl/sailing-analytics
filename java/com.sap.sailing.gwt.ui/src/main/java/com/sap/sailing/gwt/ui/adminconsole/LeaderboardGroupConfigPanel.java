@@ -15,6 +15,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -31,6 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
@@ -44,7 +47,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -62,7 +64,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
-        SafeHtml cell(String url, String displayName);
+        SafeHtml cell(SafeUri url, String displayName);
     }
 
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
@@ -506,9 +508,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.getName()
-                        + "&showRaceDetails=true&"+RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
+                        + "&showRaceDetails=true&"+RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.cell(link, group.getName());
+                return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
             }
         };
         groupNameColumn.setSortable(true);
@@ -525,6 +527,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 return group.description.length() <= 100 ? group.description : group.description.substring(0, 98) + "...";
             }
         };
+        groupDescriptionColumn.setSortable(true);
+        leaderboardGroupsListHandler.setComparator(groupDescriptionColumn, new Comparator<LeaderboardGroupDTO>() {
+            @Override
+            public int compare(LeaderboardGroupDTO group1, LeaderboardGroupDTO group2) {
+                return new NaturalComparator(false).compare(group1.description, group2.description);
+            }
+        });
+
         TextColumn<LeaderboardGroupDTO> groupDisplayNameColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
@@ -532,6 +542,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     group.getDisplayName().length() <= 100 ? group.getDisplayName() : group.getDisplayName().substring(0, 98) + "...";
             }
         };
+        groupDisplayNameColumn.setSortable(true);
+        leaderboardGroupsListHandler.setComparator(groupDisplayNameColumn, new Comparator<LeaderboardGroupDTO>() {
+            @Override
+            public int compare(LeaderboardGroupDTO group1, LeaderboardGroupDTO group2) {
+                return new NaturalComparator(false).compare(group1.getDisplayName(), group2.getDisplayName());
+            }
+        });
+
         TextColumn<LeaderboardGroupDTO> hasOverallLeaderboardColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
@@ -542,6 +560,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 return  result;
             }
         };
+        hasOverallLeaderboardColumn.setSortable(true);
+        leaderboardGroupsListHandler.setComparator(hasOverallLeaderboardColumn, new Comparator<LeaderboardGroupDTO>() {
+            @Override
+            public int compare(LeaderboardGroupDTO group1, LeaderboardGroupDTO group2) {
+                return new NaturalComparator(false).compare(hasOverallLeaderboardColumn.getValue(group1),
+                        hasOverallLeaderboardColumn.getValue(group2));
+            }
+        });
 
         ImagesBarColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> groupActionsColumn = new ImagesBarColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell>(
                 new LeaderboardGroupConfigImagesBarCell(stringMessages));

@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -117,7 +116,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * may be part of the respective adjacent leg, depending on the maneuver's time point which may be slightly before, at, or
      * after the corresponding mark passing event.
      */
-    List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
+    Iterable<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
      * @param waitForLatest TODO
@@ -239,6 +238,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     Distance getRideHeight(TimePoint at);
 
+    Bearing getHeel(TimePoint at);
+
+    Bearing getPitch(TimePoint at);
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader
      * and competitor are in the same leg, this is simply the windward distance. If the leader is already one or more

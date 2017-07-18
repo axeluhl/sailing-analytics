@@ -31,6 +31,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
+/**
+ * The view responsible for manipulating an instance of RaceMapSettings, is handled by the RaceMapLifecycle
+ */
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
     private static final Distance MAX_BUOY_ZONE_RADIUS = new MeterDistance(100);
     private static final int MAX_STROKE_WEIGHT = 33;
@@ -67,22 +70,24 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-
         Label generalLabel = dialog.createHeadlineLabel(stringMessages.general());
         vp.add(generalLabel);
        
         windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
         windUpCheckbox.setValue(initialSettings.isWindUp());
+        windUpCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isWindUp()));
+        windUpCheckbox.ensureDebugId("windUpCheckBox");
         vp.add(windUpCheckbox);
 
         showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
+        showWindStreamletOverlayCheckbox.ensureDebugId("showWindStreamletOverlayCheckBox");
         showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
         
         showWindStreamletColorsCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletColors());
         showWindStreamletColorsCheckbox.setEnabled(initialSettings.isShowWindStreamletOverlay());
         showWindStreamletColorsCheckbox.setValue(initialSettings.isShowWindStreamletColors());
-        showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckboxIntended");
+        showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckBoxIntended");
         vp.add(showWindStreamletColorsCheckbox);
 
         showWindStreamletOverlayCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -94,6 +99,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         
         if (isSimulationEnabled) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
+            showSimulationOverlayCheckbox.ensureDebugId("showSimulationOverlayCheckBox");
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
             vp.add(showSimulationOverlayCheckbox);
         }
@@ -102,6 +108,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(competitorsLabel);
 
         showOnlySelectedCompetitorsCheckBox = dialog.createCheckbox(stringMessages.showOnlySelectedCompetitors());
+        showOnlySelectedCompetitorsCheckBox.ensureDebugId("showOnlySelectedCompetitorsCheckBox");
         showOnlySelectedCompetitorsCheckBox.setValue(initialSettings.isShowOnlySelectedCompetitors());
         vp.add(showOnlySelectedCompetitorsCheckBox);
 
@@ -220,6 +227,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEGEOMETRY));
         
         transparentHoverlines = dialog.createCheckbox(stringMessages.transparentBufferLineOnHover());
+        transparentHoverlines.ensureDebugId("transparentHoverlinesCheckBox");
         transparentHoverlines.setValue(initialSettings.getTransparentHoverlines());
         vp.add(transparentHoverlines);
         

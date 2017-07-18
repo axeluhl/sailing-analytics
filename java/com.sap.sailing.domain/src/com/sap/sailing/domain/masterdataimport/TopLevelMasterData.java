@@ -134,7 +134,7 @@ public class TopLevelMasterData implements Serializable {
             relevantFixes.put(device, new HashSet<>());
         }
         Set<Timed> fixes = relevantFixes.get(device);
-        sensorFixStore.loadFixes(fixes::add, mappingEvent.getDevice(), mappingEvent.getFrom(), mappingEvent.getTo(),
+        sensorFixStore.loadFixes(fixes::add, mappingEvent.getDevice(), mappingEvent.getFrom(), mappingEvent.getToInclusive(),
                 true);
     }
 
@@ -286,7 +286,6 @@ public class TopLevelMasterData implements Serializable {
             for (RegattaAndRaceIdentifier raceIdentifier : mediaTrack.assignedRaces) {
                 if (raceIdentitifiersForMediaExport.contains(raceIdentifier)) {
                     filteredMediaTracks.add(mediaTrack);
-                    continue;
                 }
             }
         }
