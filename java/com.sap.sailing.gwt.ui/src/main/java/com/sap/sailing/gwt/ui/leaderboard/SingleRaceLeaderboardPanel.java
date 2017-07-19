@@ -33,6 +33,10 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * This type of {@link LeaderboardPanel} shows a single race. When the leaderboard uses fleet racing, this will cause
+ * only those competitors to be shown that are part of the specific race.
+ */
 public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeaderboardSettings> {
     private boolean autoExpandPreSelectedRace;
 

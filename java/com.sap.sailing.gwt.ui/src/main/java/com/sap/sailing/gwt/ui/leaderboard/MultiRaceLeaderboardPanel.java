@@ -33,6 +33,10 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
+/**
+ * This type of {@link LeaderboardPanel} shows a customizable set of leaderboard columns. In case of fleet racing it's
+ * not possible to only show a physical race.
+ */
 public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderboardSettings> {
 
     public MultiRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
