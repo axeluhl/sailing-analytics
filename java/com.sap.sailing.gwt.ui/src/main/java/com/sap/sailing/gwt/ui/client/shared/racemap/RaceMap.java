@@ -1059,7 +1059,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     protected void updateTargetEstimation(Duration estimatedDuration) {
-        if(estimatedDuration == null){
+        if (estimatedDuration == null) {
             return;
         }
         if (targetEstimationOverlay == null) {
@@ -1067,19 +1067,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             targetEstimationOverlay.setStyleName(raceMapStyle.estimatedTargettime());
             map.setControls(ControlPosition.BOTTOM_LEFT, targetEstimationOverlay);
         }
-        Date endTime = null;
-        if(lastRaceTimesInfo != null){
-            endTime = new Date(lastRaceTimesInfo.getStartOfRace().getTime() + estimatedDuration.asMillis());
-        }
-        if(endTime == null){
-            targetEstimationOverlay.setText(stringMessages.estimatedDuration() + " "
-                    + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
-        }else{
-            targetEstimationOverlay.setText(stringMessages.estimatedEndtime() + " "
-                    + TARGET_TIME_ESTIMATION_FORMAT.format(endTime) + " " + stringMessages.estimatedDuration() + " "
-                    + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
-        }
-      
+        targetEstimationOverlay.setText(stringMessages.estimatedDuration()
+                + " " + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
+
     }
 
     /**
