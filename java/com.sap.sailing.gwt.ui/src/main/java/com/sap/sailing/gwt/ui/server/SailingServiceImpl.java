@@ -59,7 +59,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -100,7 +99,6 @@ import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.Regatt
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsAndBoatsInLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -4832,20 +4830,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Iterable<CompetitorDTO> getCompetitorsOfRace(String leaderboardName, String raceColumnName, String fleetName) {
         List<CompetitorDTO> result = null;
+        Map<Competitor, Boat> competitorAndBoats = getService().getCompetitorToBoatMappingsForRace(leaderboardName, raceColumnName, fleetName);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if (leaderboard != null && raceLog != null) {
-            result = new ArrayList<>();
+        if (leaderboard != null) {
             RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             Fleet fleet = leaderboard.getFleet(fleetName);
-            Map<Competitor, Boat> competitorAndBoats = new CompetitorsAndBoatsInLogAnalyzer<>(raceLog).analyze();
-            for (Competitor competitor: leaderboard.getCompetitors(raceColumn, fleet)) {
-                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-                Boat boatOfCompetitor = competitorAndBoats.get(competitor);
-                if (boatOfCompetitor != null) {
-                    competitorDTO.setBoat(baseDomainFactory.convertToBoatDTO(boatOfCompetitor));
+            if (raceColumn != null && fleet != null) {
+                result = new ArrayList<>();
+                for (Competitor competitor: leaderboard.getCompetitors(raceColumn, fleet)) {
+                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+                    Boat boatOfCompetitor = competitorAndBoats.get(competitor);
+                    if (boatOfCompetitor != null) {
+                        competitorDTO.setBoat(baseDomainFactory.convertToBoatDTO(boatOfCompetitor));
+                    }
+                    result.add(competitorDTO);
                 }
-                result.add(competitorDTO);
             }
         }
         return result;
@@ -5030,16 +5029,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public BoatDTO getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString) {
         BoatDTO result = null;
         Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if (raceLog != null && existingCompetitor != null) {
-            Map<Competitor, Boat> competitorAndBoats = new CompetitorsAndBoatsInLogAnalyzer<>(raceLog).analyze();
-            Boat boatOfCompetitor = competitorAndBoats.get(existingCompetitor);
+        Map<Competitor, Boat> competitorToBoatMappingsForRace = getService().getCompetitorToBoatMappingsForRace(leaderboardName, raceColumnName, fleetName);
+        if (existingCompetitor != null) {
+            Boat boatOfCompetitor = competitorToBoatMappingsForRace.get(existingCompetitor);
             if (boatOfCompetitor != null) {
                 result = baseDomainFactory.convertToBoatDTO(boatOfCompetitor);
             }
-        }        
+        }
         return result;
-        
     }
 
     @Override

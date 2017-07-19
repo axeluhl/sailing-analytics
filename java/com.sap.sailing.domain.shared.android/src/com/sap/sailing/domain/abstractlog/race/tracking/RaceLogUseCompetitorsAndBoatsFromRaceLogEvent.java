@@ -14,5 +14,5 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
  * @author Frank Mittag
  *
  */
-public interface RaceLogUseBoatsFromRaceLogEvent extends RaceLogEvent, Revokable {
+public interface RaceLogUseCompetitorsAndBoatsFromRaceLogEvent extends RaceLogEvent, Revokable {
 }

@@ -25,11 +25,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseBoatsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -86,7 +85,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogDependentStartTimeEventSerializer(competitorSerializer),
                 new RaceLogStartOfTrackingEventSerializer(competitorSerializer),
                 new RaceLogUseCompetitorsFromRaceLogEventSerializer(competitorSerializer),
-                new RaceLogUseBoatsFromRaceLogEventSerializer(competitorSerializer),
+                new RaceLogUseCompetitorsAndBoatsFromRaceLogEventSerializer(competitorSerializer),
                 new RaceLogEndOfTrackingEventSerializer(competitorSerializer));
     }
 
@@ -106,7 +105,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> denoteForTrackingSerializer;
     private final JsonSerializer<RaceLogEvent> startTrackingSerializer;
     private final JsonSerializer<RaceLogEvent> revokeSerializer;
-    private final JsonSerializer<RaceLogEvent> registerBoatSerializer;
     private final JsonSerializer<RaceLogEvent> registerCompetitorSerializer;
     private final JsonSerializer<RaceLogEvent> registerCompetitorAndBoatSerializer;
     private final JsonSerializer<RaceLogEvent> additionalScoringInformationSerializer;
@@ -116,7 +114,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer;
     private final JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer;
     private final JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer;
-    private final JsonSerializer<RaceLogEvent> useBoatsFromRaceLogEventSerializer;
+    private final JsonSerializer<RaceLogEvent> useCompetitorsAndBoatsFromRaceLogEventSerializer;
 
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -148,7 +146,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer,
             JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer,
             JsonSerializer<RaceLogEvent> useCompetitorsFromRaceLogEventSerializer,
-            JsonSerializer<RaceLogEvent> useBoatsFromRaceLogEventSerializer) {
+            JsonSerializer<RaceLogEvent> useCompetitorsAndBoatsFromRaceLogEventSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
@@ -165,7 +163,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.denoteForTrackingSerializer = denoteForTrackingSerializer;
         this.startTrackingSerializer = createRaceSerializer;
         this.revokeSerializer = revokeSerializer;
-        this.registerBoatSerializer = registerBoatSerializer;
         this.registerCompetitorSerializer = registerCompetitorSerializer;
         this.registerCompetitorAndBoatSerializer = registerCompetitorAndBoatSerializer;
         this.additionalScoringInformationSerializer = additionalScoringInformationSerializer;
@@ -175,7 +172,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.startOfTrackingEventSerializer = startOfTrackingEventSerializer;
         this.endOfTrackingEventSerializer = endOfTrackingEventSerializer;
         this.useCompetitorsFromRaceLogEventSerializer = useCompetitorsFromRaceLogEventSerializer;
-        this.useBoatsFromRaceLogEventSerializer = useBoatsFromRaceLogEventSerializer;
+        this.useCompetitorsAndBoatsFromRaceLogEventSerializer = useCompetitorsAndBoatsFromRaceLogEventSerializer;
         
         this.chosenSerializer = null;
     }
@@ -275,11 +272,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     }
 
     @Override
-    public void visit(RaceLogRegisterBoatEvent event) {
-        chosenSerializer = registerBoatSerializer;
-    }
-
-    @Override
     public void visit(RaceLogRegisterCompetitorEvent event) {
         chosenSerializer = registerCompetitorSerializer;
     }
@@ -325,7 +317,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     }
 
     @Override
-    public void visit(RaceLogUseBoatsFromRaceLogEvent event) {
-        chosenSerializer = useBoatsFromRaceLogEventSerializer;
+    public void visit(RaceLogUseCompetitorsAndBoatsFromRaceLogEvent event) {
+        chosenSerializer = useCompetitorsAndBoatsFromRaceLogEventSerializer;
     }
 }

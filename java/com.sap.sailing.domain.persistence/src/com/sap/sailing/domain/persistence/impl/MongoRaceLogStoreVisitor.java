@@ -25,11 +25,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseBoatsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -144,12 +143,6 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
     }
 
     @Override
-    public void visit(RaceLogRegisterBoatEvent event) {
-        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        mongoObjectFactory.storeRaceLogEventEvent(object);
-    }
-
-    @Override
     public void visit(RaceLogRegisterCompetitorEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
@@ -204,7 +197,7 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
     }
     
     @Override
-    public void visit(RaceLogUseBoatsFromRaceLogEvent event) {
+    public void visit(RaceLogUseCompetitorsAndBoatsFromRaceLogEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }

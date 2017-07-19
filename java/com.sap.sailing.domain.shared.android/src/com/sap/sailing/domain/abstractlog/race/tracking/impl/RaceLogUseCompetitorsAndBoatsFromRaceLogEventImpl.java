@@ -5,14 +5,14 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseBoatsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogUseBoatsFromRaceLogEventImpl extends RaceLogEventImpl implements
-    RaceLogUseBoatsFromRaceLogEvent {
+public class RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl extends RaceLogEventImpl implements
+    RaceLogUseCompetitorsAndBoatsFromRaceLogEvent {
     private static final long serialVersionUID = -1859200551195623389L;
 
-    public RaceLogUseBoatsFromRaceLogEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
+    public RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, int passId)
             throws IllegalArgumentException {
         super(createdAt, logicalTimePoint, author, id, null, passId);
@@ -20,7 +20,7 @@ public class RaceLogUseBoatsFromRaceLogEventImpl extends RaceLogEventImpl implem
 
     @Override
     public String toString() {
-        return "This RaceLog uses the boats registered on the RaceLog instead of the boats on the RegattaLog";
+        return "This RaceLog uses the competitors and boats registered on the RaceLog instead of the boats on the RegattaLog";
     }
 
     @Override

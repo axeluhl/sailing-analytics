@@ -385,7 +385,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (result == null) {
                     result = new RegattaImpl(raceLogStore, regattaLogStore, RegattaImpl.getDefaultName(
                             defaultRegattaNameAndBoatClass.getA(), boatClass.getName()), boatClass, 
-                            /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
+                            /* canBoatsOfCompetitorsChangePerRace */ false, /*startDate*/ null, /*endDate*/ null,
                             trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
                             getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null);
@@ -520,9 +520,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-	public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-			String raceName, Iterable<Competitor> competitors, BoatClass boatClass,
-			Map<Competitor, Boat> competitorsAndBoats, Course course, Iterable<Sideline> sidelines, WindStore windStore,
+    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
+			String raceName, BoatClass boatClass, Map<Competitor, Boat> competitorsAndBoats, Course course, Iterable<Sideline> sidelines, WindStore windStore,
 			long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
 			DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI tracTracUpdateURI, UUID tracTracEventUuid,
 			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver,
@@ -646,20 +645,28 @@ public class DomainFactoryImpl implements DomainFactory {
      * 2. Races without any boat information
      */
     @Override
-    public Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(IRace race, BoatClass defaultBoatClass) {
+    public Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, IRace race, BoatClass defaultBoatClass) {
         
         final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         getCompetingCompetitors(race).forEach(rc->{
             BoatMetaData competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
+            boolean isSeparateBoat = competitorBoatInfo != null;
             Boat boatOfCompetitor;
             
             // Case 1
-            if (competitorBoatInfo != null) {
-                // create an unique for such a boot an search in the boat store for it
+            if (isSeparateBoat) {
+                // create an unique identifier for such a boot and search in the boat store for it
                 Serializable boatId = createUniqueBoatIdentifierFromBoatMetadata(race, competitorBoatInfo);
                 String sailId = competitorBoatInfo.getId(); // we take here the boatId as sailID which is a number like 1, 2, 3
                 boatOfCompetitor = getOrCreateBoat(boatId, competitorBoatInfo.getName(), 
                         defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()));
+                
+                // If the tractrac race contains boat metadata we assume the regatta can have changing boats per race.
+                // As the attribute 'canBoatsOfCompetitorsChangePerRace' is new we need to set it's value to true for the regatta (default is false)
+                if (trackedRegatta.getRegatta().canBoatsOfCompetitorsChangePerRace() == false) {
+                    // we need to set this to true for the regatta to make it possible to edit the boat/competitor mappings
+                    trackedRegatta.getRegatta().setCanBoatsOfCompetitorsChangePerRace(true);
+                }
             } else {
                 // Case 2
                 Serializable boatId = createUniqueBoatIdentifierFromCompetitor(race, rc);

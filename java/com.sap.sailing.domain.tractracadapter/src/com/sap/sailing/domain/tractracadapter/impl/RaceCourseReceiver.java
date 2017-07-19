@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
@@ -157,9 +158,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             logger.log(Level.INFO, "Received course for non-existing race "+tractracRace.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
             com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(tractracRace);
-            Map<Competitor, Boat> competitorAndBoats = getDomainFactory().getOrCreateCompetitorsAndTheirBoats(tractracRace, competitorsAndDominantBoatClass.getB());
+            Map<Competitor, Boat> competitorAndBoats = getDomainFactory().getOrCreateCompetitorsAndTheirBoats(getTrackedRegatta(), tractracRace, competitorsAndDominantBoatClass.getB());
             trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
-                    getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(), competitorsAndDominantBoatClass.getA(),
+                    getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(),
                     competitorsAndDominantBoatClass.getB(), competitorAndBoats, course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver, tr->updateRaceTimes(tractracRace, tr), tractracRace);

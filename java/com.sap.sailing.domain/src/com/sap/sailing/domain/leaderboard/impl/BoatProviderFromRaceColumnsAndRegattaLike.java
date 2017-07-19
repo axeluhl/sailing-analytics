@@ -11,8 +11,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterBoatEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseBoatsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatEvent;
@@ -37,8 +37,8 @@ import com.sap.sse.common.Util.Pair;
  * <li>a boat is registered with or unregistered from a race log of any of the race columns or the regatta log</li>
  * <li>a race column is added or removed</li>
  * <li>a tracked race is linked to or unlinked from any of the race columns</li>
- * <li>the racelog is marked as providing it's own boats via the {@link RaceLogUseBoatsFromRaceLogEvent}</li>
- * <li>the racelog is marked as no longer providing it's own boats by revoking an event of type {@link RaceLogUseBoatsFromRaceLogEvent}</li>
+ * <li>the racelog is marked as providing it's own boats via the {@link RaceLogUseCompetitorsAndBoatsFromRaceLogEvent}</li>
+ * <li>the racelog is marked as no longer providing it's own boats by revoking an event of type {@link RaceLogUseCompetitorsAndBoatsFromRaceLogEvent}</li>
  * </ul>
  * 
  * Note that objects of this type are not serializable. Classes using such objects shall not assign them to non-transient
@@ -94,13 +94,9 @@ public class BoatProviderFromRaceColumnsAndRegattaLike {
             }
         };
         raceLogBoatsCacheInvalidationListener = new BaseRaceLogEventVisitor() {
-            @Override
-            public void visit(RaceLogRegisterBoatEvent event) {
-                invalidateAllBoatsCaches();
-            }
 
             @Override
-            public void visit(RaceLogUseBoatsFromRaceLogEvent event) {
+            public void visit(RaceLogUseCompetitorsAndBoatsFromRaceLogEvent event) {
                 invalidateAllBoatsCaches();
             }
 
@@ -109,8 +105,8 @@ public class BoatProviderFromRaceColumnsAndRegattaLike {
                 try {
                     final Class<?> revokedEventClass = Class.forName(event.getRevokedEventType());
                     // 
-                    if (RaceLogRegisterBoatEvent.class.isAssignableFrom(revokedEventClass) ||
-                            RaceLogUseBoatsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass)) {
+                    if (RaceLogRegisterCompetitorAndBoatEvent.class.isAssignableFrom(revokedEventClass) ||
+                            RaceLogUseCompetitorsAndBoatsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass)) {
                         invalidateAllBoatsCaches();
                     }
                 } catch (ClassNotFoundException e) {

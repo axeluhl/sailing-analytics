@@ -6,7 +6,7 @@ import java.util.Set;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseBoatsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterBoatEvent;
 import com.sap.sailing.domain.base.Boat;
 
@@ -20,7 +20,7 @@ import com.sap.sailing.domain.base.Boat;
  * 
  * This is the case as by default the boats registered on the RegattaLog are used for each race of the regatta
  * ignoring the ones in the RaceLog (if present). The RaceLog may override this behavior with the
- * {@link RaceLogUseBoatsFromRaceLogEvent}. Is an event of this type present, the boats written into the
+ * {@link RaceLogUseCompetitorsAndBoatsFromRaceLogEvent}. Is an event of this type present, the boats written into the
  * RaceLog are used instead of the boats in the RegattaLog.
  *
  */

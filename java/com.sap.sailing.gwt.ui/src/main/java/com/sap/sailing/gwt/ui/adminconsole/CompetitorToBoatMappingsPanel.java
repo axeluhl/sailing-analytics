@@ -93,8 +93,6 @@ public class CompetitorToBoatMappingsPanel extends SimplePanel implements BusyDi
                         }
                     } else {
                         BoatDTO selectedBoat = selectedBoats.iterator().next();
-                        boolean a = hasLink(selectedCompetitor);
-                        boolean b = isLinkedToBoat(selectedCompetitor, selectedBoat);
                         if (hasLink(selectedCompetitor) && !isLinkedToBoat(selectedCompetitor, selectedBoat)) {
                             if (Window.confirm(stringMessages.boatAlreadyLinked())) {
                                 linkBoatToSelectedCompetitor(selectedCompetitor, selectedBoat);

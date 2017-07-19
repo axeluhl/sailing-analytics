@@ -295,6 +295,14 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void enableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleetByName) {
+    }
+
+    @Override
+    public void disableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleetByName) {
+    }
+
+    @Override
     public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats() {
         // TODO bug2822: What should we do here? Returning a boat makes only sense when the competitors keep their boats through all regattas
         return Collections.emptyMap();

@@ -23,11 +23,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseBoatsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 
 public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisitor {
@@ -108,11 +107,6 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     }
 
     @Override
-    public void visit(RaceLogRegisterBoatEvent event) {
-        notifyListenerAboutEventAdded(event);
-    }
-
-    @Override
     public void visit(RaceLogRegisterCompetitorEvent event) {
         notifyListenerAboutEventAdded(event);
     }
@@ -158,7 +152,7 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     }
     
     @Override
-    public void visit(RaceLogUseBoatsFromRaceLogEvent event) {
+    public void visit(RaceLogUseCompetitorsAndBoatsFromRaceLogEvent event) {
         notifyListenerAboutEventAdded(event);
     }
 }

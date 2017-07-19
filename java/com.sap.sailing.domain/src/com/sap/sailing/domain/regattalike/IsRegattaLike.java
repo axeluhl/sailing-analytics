@@ -31,7 +31,7 @@ public interface IsRegattaLike extends Serializable {
      * @return true when the competitors change their boats, false otherwise
      */
     boolean canBoatsOfCompetitorsChangePerRace(); 
-    
+
     RaceColumn getRaceColumnByName(String raceColumnName);
     
     RegattaLikeIdentifier getRegattaLikeIdentifier();

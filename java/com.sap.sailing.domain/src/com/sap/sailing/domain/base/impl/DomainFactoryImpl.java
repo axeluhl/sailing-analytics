@@ -76,7 +76,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
     /**
-     * Uses a transient competitor store
+     * Uses a transient competitor and boat store
      */
     public DomainFactoryImpl(RaceLogResolver raceLogResolver) {
         super(new TransientCompetitorStoreImpl(), raceLogResolver);

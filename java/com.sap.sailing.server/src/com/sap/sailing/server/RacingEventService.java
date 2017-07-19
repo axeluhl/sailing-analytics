@@ -19,6 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
@@ -473,6 +474,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
+    Map<Competitor, Boat> getCompetitorToBoatMappingsForRace(String leaderboardName, String raceColumnName, String fleetName);
+    
     /**
      * @param controlTrackingFromStartAndFinishTimes TODO
      * @param rankingMetricConstructor TODO

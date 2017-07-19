@@ -48,11 +48,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseBoatsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -913,13 +912,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogRegisterBoatEvent event) {
-        BasicDBObject result = new BasicDBObject();
-        storeRaceLogIdentifier(raceLogIdentifier, result);
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRegisterBoatEvent(event));
-        return result;
-    }
-
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogRegisterCompetitorEvent event) {
         BasicDBObject result = new BasicDBObject();
         storeRaceLogIdentifier(raceLogIdentifier, result);
@@ -1067,14 +1059,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private Object storeRaceLogRegisterBoatEvent(RaceLogRegisterBoatEvent event) {
-        DBObject result = new BasicDBObject();
-        storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogRegisterBoatEvent.class.getSimpleName());
-        result.put(FieldNames.RACE_LOG_BOAT_ID.name(), event.getBoat().getId());
-        return result;
-    }
-
     private Object storeRaceLogRegisterCompetitorEvent(RaceLogRegisterCompetitorEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
@@ -1099,10 +1083,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogUseBoatsFromRaceLogEvent event) {
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogUseCompetitorsAndBoatsFromRaceLogEvent event) {
         BasicDBObject result = new BasicDBObject();
         storeRaceLogIdentifier(raceLogIdentifier, result);
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogUseBoatsFromRaceLogEvent(event));
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogUseCompetitorsAndBoatsFromRaceLogEvent(event));
         return result;
     }
 
@@ -1113,10 +1097,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeRaceLogUseBoatsFromRaceLogEvent(RaceLogUseBoatsFromRaceLogEvent event) {
+    public DBObject storeRaceLogUseCompetitorsAndBoatsFromRaceLogEvent(RaceLogUseCompetitorsAndBoatsFromRaceLogEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogUseBoatsFromRaceLogEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogUseCompetitorsAndBoatsFromRaceLogEvent.class.getSimpleName());
         return result;
     }
 

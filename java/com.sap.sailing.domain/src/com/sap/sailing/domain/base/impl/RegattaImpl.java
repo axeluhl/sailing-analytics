@@ -151,7 +151,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      */
     private boolean controlTrackingFromStartAndFinishTimes;
 
-    private final boolean canBoatsOfCompetitorsChangePerRace;
+    private boolean canBoatsOfCompetitorsChangePerRace;
 
     /**
      * Defaults to <code>true</code>. See {@link Regatta#useStartTimeInference()}.
@@ -730,6 +730,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public boolean canBoatsOfCompetitorsChangePerRace() {
         return canBoatsOfCompetitorsChangePerRace;
+    }
+
+    @Override
+    public void setCanBoatsOfCompetitorsChangePerRace(boolean canBoatsOfCompetitorsChangePerRace) {
+        this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
     }
 
     @Override

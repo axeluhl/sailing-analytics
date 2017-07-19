@@ -57,6 +57,8 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsAndBoatsInLogAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -3269,7 +3271,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public String toString() {
         return "RacingEventService: " + this.hashCode() + " Build: " + ServerInfo.getBuildVersion();
     }
-
+    
     @Override
     public void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
@@ -3283,7 +3285,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     logger.info("Reloaded race log for fleet " + fleetImpl + " for race column " + raceColumn.getName()
                             + " for leaderboard " + leaderboard.getName());
                 }
-            }
+            } 
         }
     }
 
@@ -3354,6 +3356,36 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return null;
     }
 
+    public Map<Competitor, Boat> getCompetitorToBoatMappingsForRace(String leaderboardName, String raceColumnName, String fleetName) {
+        Map<Competitor, Boat> result = new HashMap<>();
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            Fleet fleet = leaderboard.getFleet(fleetName);
+            if (raceColumn != null && fleet != null) {
+                RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                // take the boats first from the racelog
+                if (raceLog != null) { 
+                    Map<Competitor, Boat> competitorAndBoatsInRacelog = new CompetitorsAndBoatsInLogAnalyzer<>(raceLog).analyze();
+                    result.putAll(competitorAndBoatsInRacelog);
+                }
+                // now look into the tracked race for mappings of competitors without a boat 
+                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                if (trackedRace != null) {
+                    Map<Competitor, Boat> competitorsAndBoatsFromRaceDef = trackedRace.getRace().getCompetitorsAndTheirBoats();
+                    for (Competitor competitor: competitorsAndBoatsFromRaceDef.keySet()) {
+                        if (!result.containsKey(competitor)) {
+                            result.put(competitor, competitorsAndBoatsFromRaceDef.get(competitor));  
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
+
+    
     @Override
     public com.sap.sse.common.Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(
             String leaderboardName, String raceColumnName, String fleetName) {

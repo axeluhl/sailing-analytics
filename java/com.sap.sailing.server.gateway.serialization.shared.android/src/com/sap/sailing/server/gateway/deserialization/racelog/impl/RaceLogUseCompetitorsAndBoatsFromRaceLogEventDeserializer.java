@@ -7,16 +7,16 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseBoatsFromRaceLogEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogUseBoatsFromRaceLogEventDeserializer extends BaseRaceLogEventDeserializer implements
+public class RaceLogUseCompetitorsAndBoatsFromRaceLogEventDeserializer extends BaseRaceLogEventDeserializer implements
         JsonDeserializer<RaceLogEvent> {
 
-    public RaceLogUseBoatsFromRaceLogEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
+    public RaceLogUseCompetitorsAndBoatsFromRaceLogEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
         super(competitorDeserializer);
     }
 
@@ -24,7 +24,7 @@ public class RaceLogUseBoatsFromRaceLogEventDeserializer extends BaseRaceLogEven
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        return new RaceLogUseBoatsFromRaceLogEventImpl(createdAt, author, timePoint, id, passId);
+        return new RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl(createdAt, author, timePoint, id, passId);
     }
 
 }

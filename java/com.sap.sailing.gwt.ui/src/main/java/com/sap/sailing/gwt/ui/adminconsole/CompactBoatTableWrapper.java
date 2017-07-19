@@ -95,7 +95,24 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 return t.getColor();
             }
         });
-        
+
+        Column<BoatDTO, SafeHtml> boatIdColumn = new Column<BoatDTO, SafeHtml>(new SafeHtmlCell()) {
+            @Override
+            public SafeHtml getValue(BoatDTO competitor) {
+                SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                sb.appendEscaped(competitor.getIdAsString());
+                return sb.toSafeHtml();
+            }
+        };
+        boatIdColumn.setSortable(true);
+        boatColumnListHandler.setComparator(boatIdColumn, new Comparator<BoatDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
+            @Override
+            public int compare(BoatDTO o1, BoatDTO o2) {
+                return comparator.compare(o1.getIdAsString(), o2.getIdAsString());
+            }
+        });
+
         filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterBoats()),
                 new ArrayList<BoatDTO>(), table, dataProvider) {
             @Override
@@ -103,6 +120,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 List<String> string = new ArrayList<String>();
                 string.add(boat.getName());
                 string.add(boat.getSailId());
+                string.add(boat.getIdAsString());
                 string.add(boat.getBoatClass().getName());
                 return string;
             }
@@ -115,6 +133,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(boatColorColumn, stringMessages.color());
+        table.addColumn(boatIdColumn, stringMessages.id());
         table.ensureDebugId("BoatsTable");
     }
     

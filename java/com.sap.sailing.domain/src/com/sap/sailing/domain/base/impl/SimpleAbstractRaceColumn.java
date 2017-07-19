@@ -5,6 +5,7 @@ import java.util.Collections;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogRegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAndBoatsAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -141,4 +142,16 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
             return analyzer.analyze();
         }
     }
+    
+    @Override
+    public boolean isCompetitorAndBoatRegistrationInRacelogEnabled(final Fleet fleet) {
+        RaceLog raceLog = getRaceLog(fleet);
+        if (raceLog == null) {
+            return false;
+        } else {
+            RaceLogUsesOwnCompetitorsAndBoatsAnalyzer analyzer = new RaceLogUsesOwnCompetitorsAndBoatsAnalyzer(raceLog);
+            return analyzer.analyze();
+        }
+    }
+
 }

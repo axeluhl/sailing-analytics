@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorAndBoatRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -330,6 +331,17 @@ public interface RaceColumn extends Named {
     boolean isCompetitorRegistrationInRacelogEnabled(Fleet fleet);
 
     /**
+     * Checks whether competitor and boat registration on RaceLog is enabled.
+     * 
+     * @return boolean if competitor and boat registration on the RaceLog is enabled, false in case this column belongs to a
+     *         {@link MetaLeaderboard}
+     *         
+     * @see #enableCompetitorAndBoatRegistrationOnRaceLog(Fleet)
+     * @see #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet)
+     */
+    boolean isCompetitorAndBoatRegistrationInRacelogEnabled(Fleet fleet);
+
+    /**
      * Activates competitor registration on the race column's race log associated to the passed fleet. As a result,
      * competitor registrations that were added to the race log before this was disabled by
      * {@link #disableCompetitorRegistrationOnRaceLog(Fleet)} will again be honored.<p>
@@ -349,7 +361,28 @@ public interface RaceColumn extends Named {
      * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
      */
     void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException;
+
+    /**
+     * Activates competitor and boat registration on the race column's race log associated to the passed fleet. As a result,
+     * competitor and boat registrations that were added to the race log before this was disabled by
+     * {@link #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet)} will again be honored.<p>
+     * 
+     * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
+     */
+    void enableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleet);
     
+    /**
+     * Disables competitor and boat registration on the race column's race log associated to the passed fleet. Performs nothing
+     * in case this column belongs to a {@link MetaLeaderboard}. If there are already competitor and boat registrations on the
+     * race log, those will not be removed from the log but they will be ignored, and the regatta log's competitor and boat
+     * registrations will be used instead. Re-{@link #enableCompetitorAndBoatRegistrationOnRaceLog(Fleet) enabling} competitor and boat
+     * registrations in the race log will cause such existing registrations to be honored again.
+     * <p>
+     * 
+     * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
+     */
+    void disableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException;
+
     /**
      * Registers a competitor on the the race column's race log associated to the passed fleet.
      * 
@@ -386,4 +419,6 @@ public interface RaceColumn extends Named {
      */
     void deregisterCompetitors(Iterable<Competitor> currentlyRegisteredCompetitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
 
+    void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException;
+    void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException;
 }

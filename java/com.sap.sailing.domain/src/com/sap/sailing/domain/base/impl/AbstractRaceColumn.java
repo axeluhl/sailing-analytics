@@ -20,10 +20,13 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAndBoatsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorAndBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
@@ -37,6 +40,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorAndBoatRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -321,7 +325,29 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                     UUID.randomUUID(), passId, competitor));
         }
     }
-    
+
+    @Override
+    public void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException {
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(competitor, boat);
+        registerCompetitorsAndBoats(competitorsAndBoats, fleet);
+    }
+
+    @Override
+    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
+            throws CompetitorAndBoatRegistrationOnRaceLogDisabledException {
+        if (!isCompetitorAndBoatRegistrationInRacelogEnabled(fleet)) {
+            throw new CompetitorAndBoatRegistrationOnRaceLogDisabledException("Competitor and boat registration not allowed  for fleet "+fleet+" in column "+this);
+        }
+        TimePoint now = MillisecondsTimePoint.now();
+        RaceLog raceLog = getRaceLog(fleet);
+        int passId = raceLog.getCurrentPassId();
+        for (Entry<Competitor, Boat> competitorAndBoat : competitorsAndBoats.entrySet()) {
+            raceLog.add(new RaceLogRegisterCompetitorAndBoatEventImpl(now, now, raceLogEventAuthorForRaceColumn, 
+                    UUID.randomUUID(), passId, competitorAndBoat.getKey(), competitorAndBoat.getValue()));
+        }
+    }
+
     @Override
     public void deregisterCompetitor(Competitor competitor, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
@@ -434,4 +460,30 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
         }
     }
+    
+    @Override
+    public void enableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleet) {
+        TimePoint now = MillisecondsTimePoint.now();
+        RaceLog raceLog = getRaceLog(fleet);
+        int passId = raceLog.getCurrentPassId();
+        raceLog.add(new RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl(now, raceLogEventAuthorForRaceColumn, now, UUID.randomUUID(), passId));
+    }
+    
+    @Override
+    public void disableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException {
+        RaceLog raceLog = getRaceLog(fleet);
+        List<RaceLogEvent> events = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogUseCompetitorsAndBoatsFromRaceLogEvent.class).analyze();
+        for (RaceLogEvent event : events) {
+            raceLog.lockForRead();
+            try {
+                event = raceLog.getEventById(event.getId());
+            } finally {
+                raceLog.unlockAfterRead();
+            }
+            if (event != null) {
+                raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, event, "revoke triggered by GWT user action");
+            }
+        }
+    }
+
 }
