@@ -158,7 +158,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
     public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
-    private static final DateTimeFormat TARGET_TIME_ESTIMATION_FORMAT = DateTimeFormat.getFormat("HH:mm");
     
     private AbsolutePanel rootPanel = new AbsolutePanel();
     
