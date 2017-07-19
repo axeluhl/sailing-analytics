@@ -60,7 +60,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private final RaceMapSettings initialSettings;
 
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
-    private CheckBox showTargetEstimation;
+    private CheckBox showEstimatedDuration;
     
     public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean isSimulationEnabled) {
         this.isSimulationEnabled = isSimulationEnabled;
@@ -98,12 +98,12 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             }
         });
         
-        showTargetEstimation = dialog.createCheckbox(stringMessages.showTargetEstimation());
-        showTargetEstimation.ensureDebugId("showTargetEstimationCheckBox");
-        showTargetEstimation.setValue(initialSettings.isShowEstimatedDuration());
-        vp.add(showTargetEstimation);
-        
         if (isSimulationEnabled) {
+            showEstimatedDuration = dialog.createCheckbox(stringMessages.showTargetEstimation());
+            showEstimatedDuration.ensureDebugId("showEstimatedDurationCheckBox");
+            showEstimatedDuration.setValue(initialSettings.isShowEstimatedDuration());
+            vp.add(showEstimatedDuration);
+        
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
             showSimulationOverlayCheckbox.ensureDebugId("showSimulationOverlayCheckBox");
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
@@ -282,6 +282,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         RaceMapHelpLinesSettings helpLinesSettings = getHelpLinesSettings();
         RaceMapZoomSettings zoomSettings = getZoomSettings();
 
+        boolean estimatedDuration = isSimulationEnabled ? showEstimatedDuration.getValue() : false;
         boolean showSimulationOverlay = isSimulationEnabled ? showSimulationOverlayCheckbox.getValue() : false;
         long tailLengthInMilliseconds = initialSettings.getTailLengthInMilliseconds(); 
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
@@ -297,7 +298,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 transparentHoverlines.getValue(), hoverlineStrokeWeight.getValue(), tailLengthInMilliseconds, windUpCheckbox.getValue(),
                 buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
-                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),showTargetEstimation.getValue());
+                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration);
     }
     
     private RaceMapZoomSettings getZoomSettings() {
