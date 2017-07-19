@@ -1065,7 +1065,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (targetEstimationOverlay == null) {
             targetEstimationOverlay = new Label("");
             targetEstimationOverlay.setStyleName(raceMapStyle.estimatedTargettime());
-            map.setControls(ControlPosition.BOTTOM_LEFT, targetEstimationOverlay);
+            map.setControls(ControlPosition.TOP_CENTER, targetEstimationOverlay);
         }
         targetEstimationOverlay.setText(stringMessages.estimatedDuration()
                 + " " + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
