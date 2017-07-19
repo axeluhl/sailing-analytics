@@ -29,18 +29,6 @@ public class EventHeader extends Composite {
     @UiField DivElement eventDateUi;
     @UiField DivElement eventLocationUi;
 
-    public EventHeader(EventViewDTO event) {
-        this(event, (String)null);
-    }
-    
-    public EventHeader(EventViewDTO event, String optionalRegattaDisplayName) {
-        this(event, optionalRegattaDisplayName, null);
-    }
-    
-    public EventHeader(EventViewDTO event, PlaceNavigation<?> logoNavigation) {
-        this(event, null, logoNavigation);
-    }
-    
     public EventHeader(EventViewDTO event, String optionalRegattaDisplayName, PlaceNavigation<?> logoNavigation) {
         EventHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
