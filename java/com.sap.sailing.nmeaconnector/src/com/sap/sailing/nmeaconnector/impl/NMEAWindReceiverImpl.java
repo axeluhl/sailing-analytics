@@ -15,14 +15,18 @@ import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeedWithBearing;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -61,7 +65,6 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
     private final DynamicTrack<TimedSpeedWithBearing> apparentWind;
     private final DynamicTrack<GPSFix> sensorPositions;
     private final DynamicTrack<TimedSpeedWithBearing> sensorSpeeds;
-    private final DynamicTrack<TimedBearing> magneticHeadings;
     private final DynamicTrack<TimedBearing> trueHeadings;
     
     /**
@@ -156,7 +159,11 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
     private class VTGSentenceListener extends AbstractSentenceListener<VTGSentence> {
         @Override
         public void sentenceRead(VTGSentence sentence) {
-            sensorSpeeds.add(new KnotSpeedWithBearingAndTimepoint(getLastTimePoint(), sentence.getSpeedKnots(), new DegreeBearingImpl(sentence.getTrueCourse())));
+            try {
+                sensorSpeeds.add(new KnotSpeedWithBearingAndTimepoint(getLastTimePoint(), sentence.getSpeedKnots(), new DegreeBearingImpl(sentence.getTrueCourse())));
+            } catch (DataNotAvailableException e) {
+                // no sensor speed will be recorded if data is not available
+            }
         }
     }
     
@@ -186,10 +193,31 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
     private class HeadingSentenceListener extends AbstractSentenceListener<HeadingSentence> {
         @Override
         public void sentenceRead(HeadingSentence sentence) {
-            if (sentence.isTrue()) {
-                trueHeadings.add(new DegreeBearingWithTimepoint(getLastTimePoint(), sentence.getHeading()));
-            } else {
-                magneticHeadings.add(new DegreeBearingWithTimepoint(getLastTimePoint(), sentence.getHeading()));
+            if (getLastTimePoint() != null) {
+                if (sentence.isTrue()) {
+                    try {
+                        trueHeadings.add(new DegreeBearingWithTimepoint(getLastTimePoint(), sentence.getHeading()));
+                    } catch (DataNotAvailableException e) {
+                        // ignore; in this case, no true heading will be recorded
+                    }
+                } else {
+                    final Position position = getPosition(getLastTimePoint());
+                    if (position != null) {
+                        try {
+                            final Declination declination = declinationService.getDeclination(getLastTimePoint(), position, /* timeoutForOnlineFetchInMilliseconds */ 1000);
+                            if (declination != null) {
+                                try {
+                                    trueHeadings.add(new DegreeBearingWithTimepoint(getLastTimePoint(),
+                                        new DegreeBearingImpl(sentence.getHeading()).add(declination.getBearingCorrectedTo(getLastTimePoint())).getDegrees()));
+                                } catch (DataNotAvailableException e) {
+                                    // no true heading will be created if data is not available
+                                }
+                            }
+                        } catch (IOException | ParseException e) {
+                            logger.log(Level.WARNING, "Error trying to obtain magnetic declination while converting magnetic heading to true heading", e);
+                        }
+                    }
+                }
             }
         }
     }
@@ -232,13 +260,17 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
                 new TimeListener().sentenceRead(timeSentence);
                 final TimePoint timePoint = getLastTimePoint();
                 if (timePoint != null) {
-                    final GPSFix fix = new GPSFixImpl(getPosition(sentence), timePoint);
-                    sensorPositions.add(fix);
+                    try {
+                        final GPSFix fix = new GPSFixImpl(getPosition(sentence), timePoint);
+                        sensorPositions.add(fix);
+                    } catch (DataNotAvailableException e) {
+                        // no sensor position is recorded in this case
+                    }
                 }
             }
         }
 
-        private Position getPosition(PositionSentence sentence) {
+        private Position getPosition(PositionSentence sentence) throws DataNotAvailableException {
             return new DegreePosition(
                     Math.abs(sentence.getPosition().getLatitude())*(sentence.getPosition().getLatitudeHemisphere()==CompassPoint.NORTH?1:-1),
                     Math.abs(sentence.getPosition().getLongitude())*(sentence.getPosition().getLongitudeHemisphere()==CompassPoint.EAST?1:-1));
@@ -259,7 +291,6 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
         this.apparentWind = new DynamicTrackImpl<>("apparentWind in "+getClass().getName());
         this.sensorPositions = new DynamicTrackImpl<>("measurementPositions in "+getClass().getName());
         this.sensorSpeeds = new DynamicTrackImpl<>("sensorSpeeds in "+getClass().getName());
-        this.magneticHeadings = new DynamicTrackImpl<>("headings in "+getClass().getName());
         this.trueHeadings = new DynamicTrackImpl<>("trueHeadings in "+getClass().getName());
         sentenceReader.addSentenceListener(new MWVSentenceListener(), SentenceId.MWV);
         sentenceReader.addSentenceListener(new MWDSentenceListener(), SentenceId.MWD);
@@ -305,13 +336,25 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
 
     /**
      * To be called when new apparent wind evidence has been received for {@code timePoint}. Creates a {@link Wind} fix
-     * when enough data is available, such as motion and heading data required to turn the apparent wind fixe into a
-     * true wind fix, as well as position data. If this is the case, the wind fix generated will be passed to
-     * {@link #notifyListeners(Wind)}.
+     * when enough data is available, such as motion and heading data required to turn the apparent wind fix into a true
+     * wind fix, as well as position data, motion and heading. If this is the case, the wind fix generated will be
+     * passed to {@link #notifyListeners(Wind)}.
      */
     private void tryToCreateWindFixFromApparentWind(TimedSpeedWithBearing apparentWind) {
-        
-        // TODO tryToCreateWindFixFromApparentWind
+        final com.sap.sailing.domain.common.Position position = getPosition(apparentWind.getTimePoint());
+        if (position != null) {
+            final SpeedWithBearing sensorSpeed = sensorSpeeds.getInterpolatedValue(getLastTimePoint(), fix->new ScalableSpeedWithBearing(fix));
+            if (sensorSpeed != null) {
+                final Bearing trueHeading = trueHeadings.getInterpolatedValue(getLastTimePoint(), fix->new ScalableBearing(fix));
+                if (trueHeading != null) {
+                    final SpeedWithBearing apparentWindTrue = new KnotSpeedWithBearingImpl(apparentWind.getKnots(), apparentWind.getBearing().add(trueHeading));
+                    final SpeedWithBearing inducedWind = new KnotSpeedWithBearingImpl(sensorSpeed.getKnots(), sensorSpeed.getBearing().reverse());
+                    final SpeedWithBearing trueWind = apparentWindTrue.add(inducedWind);
+                    final Wind wind = new WindImpl(position, apparentWind.getTimePoint(), trueWind);
+                    notifyListeners(wind);
+                }
+            }
+        }
     }
 
     /**
