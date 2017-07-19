@@ -1706,7 +1706,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date time,boolean targetEstimationRequired) throws NoWindException {
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
+            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired) throws NoWindException {
         Duration estimatedDuration = null;
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
@@ -1720,8 +1721,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceCompetitorIdsAsStrings.add(c.getId().toString());
             }
         }
-        if(targetEstimationRequired){
-            estimatedDuration = getEstimationForTargetTime(time, estimatedDuration, trackedRace);
+        if(estimatedDurationRequired){
+            estimatedDuration = getEstimationForTargetTime(timeToGetTheEstimatedDurationFor, estimatedDuration, trackedRace);
         }
         
         final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
@@ -1735,7 +1736,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             simulationResultVersion = simulationService.getSimulationResultsVersion(simulationLegIdentifier);
         }
        
-        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks, simulationResultVersion, raceCompetitorIdsAsStrings,estimatedDuration);
+        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks,
+                simulationResultVersion, raceCompetitorIdsAsStrings, estimatedDuration);
     }
 
     private Duration getEstimationForTargetTime(Date time, Duration estimatedDuration, final TrackedRace trackedRace) {

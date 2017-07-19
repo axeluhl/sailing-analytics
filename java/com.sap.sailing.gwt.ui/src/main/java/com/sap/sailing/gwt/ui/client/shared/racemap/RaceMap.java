@@ -1063,7 +1063,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         if (estimatedDurationOverlay == null) {
             estimatedDurationOverlay = new Label("");
-            estimatedDurationOverlay.setStyleName(raceMapStyle.estimatedTargettime());
+            estimatedDurationOverlay.setStyleName(raceMapStyle.estimatedDuration());
             map.setControls(ControlPosition.TOP_CENTER, estimatedDurationOverlay);
         }
         estimatedDurationOverlay.setText(stringMessages.estimatedDuration()
