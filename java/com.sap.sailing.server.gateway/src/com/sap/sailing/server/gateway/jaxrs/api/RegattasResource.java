@@ -1193,10 +1193,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONArray jsonCompetitors = new JSONArray();
                 List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
                 Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
-                if(leaderboard != null) {
-                    List<Competitor> overallRanking= leaderboard.getCompetitorsFromBestToWorst(timePoint);
+                if (leaderboard != null) {
+                    List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint);
                     Integer overallRank = 1;
-                    for (Competitor competitor: overallRanking) {
+                    for (Competitor competitor : overallRanking) {
                         overallRankPerCompetitor.put(competitor, overallRank++);
                     }
                 }
