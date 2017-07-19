@@ -99,7 +99,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         });
         
         if (isSimulationEnabled) {
-            showEstimatedDuration = dialog.createCheckbox(stringMessages.showTargetEstimation());
+            showEstimatedDuration = dialog.createCheckbox(stringMessages.showEstimatedDuration());
             showEstimatedDuration.ensureDebugId("showEstimatedDurationCheckBox");
             showEstimatedDuration.setValue(initialSettings.isShowEstimatedDuration());
             vp.add(showEstimatedDuration);
