@@ -52,7 +52,6 @@ public class RegattaOverviewPanel extends SimplePanel {
     private final RegattaOverviewContextDefinition regattaOverviewContextDefinition;
     private EventDTO eventDTO;
     private List<RaceGroupDTO> raceGroupDTOs;
-    private boolean showLeaderboard = false;
     
     private RegattaRaceStatesComponent regattaRaceStatesComponent;
     
@@ -222,7 +221,6 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.uiUpdateTimer.play();
         
 
-        // TODO create a perspective and add this parameter to the perspectiveOwnSettings
         FlowPanel flowPanelLeft = new FlowPanel();
         flowPanelLeft.addStyleName(style.functionBarLeft());
         flowPanelLeft.add(repeatedInfoLabel);
@@ -257,5 +255,4 @@ public class RegattaOverviewPanel extends SimplePanel {
         eventDTO = event;
         fireEvent(new EventDTOLoadedEvent(eventDTO));
     }
-        
 }
