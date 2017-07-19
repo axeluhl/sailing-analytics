@@ -523,6 +523,7 @@
     <string name="sort_by_start">nach Abstand zur Startlinie</string>
     <string name="sort_by_goal">nach getracktem Zieldurchgang</string>
 
+    <string name="apply_button">Zuordnen</string>
     <string name="publish_button_empty">Veröffentlichen</string>
     <string name="publish_button_other">Veröffentlichen (%d)</string>
     <string name="publish_clicked">Ergebnisliste veröffentlicht</string>

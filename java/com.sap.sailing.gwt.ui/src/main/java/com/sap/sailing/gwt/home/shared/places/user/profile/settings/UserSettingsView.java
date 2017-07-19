@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider;
+import com.sap.sse.common.filter.Filter;
 
 /**
  * Interface for the user preferences UI. To support desktop as well as mobile version, an
@@ -11,6 +12,8 @@ import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSel
  * requirements.
  */
 public interface UserSettingsView extends IsWidget {
+
+    Filter<UserSettingsEntry> getFilter();
 
     void setEntries(List<UserSettingsEntry> entries);
 
@@ -20,6 +23,8 @@ public interface UserSettingsView extends IsWidget {
      */
     public interface Presenter {
         void loadData();
+
+        void updateData();
 
         void remove(UserSettingsEntry entry);
         

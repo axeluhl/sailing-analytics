@@ -449,7 +449,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to stop tracking races " + racesToStopTracking + ": " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(Util.toStringOrNull(racesToStopTracking), caught.getMessage()));
                     }
         
                     @Override
@@ -651,8 +651,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(
-                                "Error trying to update regatta " + regatta.getName() + ": " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorUpdatingRegatta(regatta.getName(),caught.getMessage()));
                     }
 
                     @Override
@@ -674,7 +673,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingRaceLog(caught.getMessage()));
             }
         });
     }
@@ -728,7 +727,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Failed to start tracking " + leaderboardRaceColumnFleetNames + ": " + caught.getMessage());
+                errorReporter.reportError(stringMessages.errorStartingTracking(Util.toStringOrNull(leaderboardRaceColumnFleetNames),caught.getMessage()));
             }
         });
     }
