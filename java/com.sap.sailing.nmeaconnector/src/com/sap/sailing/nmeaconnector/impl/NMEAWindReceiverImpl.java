@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.base.impl.PositionWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -46,10 +45,12 @@ import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TimeSentence;
+import net.sf.marineapi.nmea.sentence.VTGSentence;
 import net.sf.marineapi.nmea.sentence.VWRSentence;
 import net.sf.marineapi.nmea.sentence.ZDASentence;
 import net.sf.marineapi.nmea.util.CompassPoint;
 import net.sf.marineapi.nmea.util.Date;
+import net.sf.marineapi.nmea.util.Direction;
 import net.sf.marineapi.nmea.util.Time;
 import net.sf.marineapi.nmea.util.Units;
 
@@ -58,7 +59,6 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
     private final ConcurrentHashMap<WindListener, WindListener> listeners;
     private final DynamicTrack<TimedSpeedWithBearing> trueWind;
     private final DynamicTrack<TimedSpeedWithBearing> apparentWind;
-    private final DynamicTrack<TimedSpeedWithBearing> magneticWind;
     private final DynamicTrack<GPSFix> sensorPositions;
     private final DynamicTrack<TimedSpeedWithBearing> sensorSpeeds;
     private final DynamicTrack<TimedBearing> magneticHeadings;
@@ -153,24 +153,44 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
         }
     }
 
+    private class VTGSentenceListener extends AbstractSentenceListener<VTGSentence> {
+        @Override
+        public void sentenceRead(VTGSentence sentence) {
+            sensorSpeeds.add(new KnotSpeedWithBearingAndTimepoint(getLastTimePoint(), sentence.getSpeedKnots(), new DegreeBearingImpl(sentence.getTrueCourse())));
+        }
+    }
+    
     private class VWRSentenceListener extends AbstractSentenceListener<VWRSentence> {
         @Override
         public void sentenceRead(VWRSentence sentence) {
-            // TODO Auto-generated method stub
+            apparentWind.add(new KnotSpeedWithBearingAndTimepoint(getLastTimePoint(), sentence.getSpeedKnots(),
+                    new DegreeBearingImpl(sentence.getWindAngle() * (sentence.getDirectionLeftRight()==Direction.LEFT ? -1 : 1))));
         }
     }
 
     private class MDASentenceListener extends AbstractSentenceListener<MDASentence> {
         @Override
         public void sentenceRead(MDASentence sentence) {
-            // TODO Auto-generated method stub
+            if (!Double.isNaN(sentence.getTrueWindDirection())) {
+                if (!Double.isNaN(sentence.getWindSpeed())) {
+                    trueWind.add(new KnotSpeedWithBearingAndTimepoint(getLastTimePoint(), new MeterPerSecondSpeedImpl(sentence.getWindSpeed()).getKnots(),
+                            new DegreeBearingImpl(sentence.getTrueWindDirection())));
+                } else if (!Double.isNaN(sentence.getWindSpeedKnots())) {
+                    trueWind.add(new KnotSpeedWithBearingAndTimepoint(getLastTimePoint(), sentence.getWindSpeedKnots(),
+                            new DegreeBearingImpl(sentence.getTrueWindDirection())));
+                }
+            }
         }
     }
 
     private class HeadingSentenceListener extends AbstractSentenceListener<HeadingSentence> {
         @Override
         public void sentenceRead(HeadingSentence sentence) {
-            // TODO Auto-generated method stub
+            if (sentence.isTrue()) {
+                trueHeadings.add(new DegreeBearingWithTimepoint(getLastTimePoint(), sentence.getHeading()));
+            } else {
+                magneticHeadings.add(new DegreeBearingWithTimepoint(getLastTimePoint(), sentence.getHeading()));
+            }
         }
     }
     
@@ -237,7 +257,6 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
         this.listeners = new ConcurrentHashMap<>();
         this.trueWind = new DynamicTrackImpl<>("trueWind in "+getClass().getName());
         this.apparentWind = new DynamicTrackImpl<>("apparentWind in "+getClass().getName());
-        this.magneticWind = new DynamicTrackImpl<>("magneticWindDirection in "+getClass().getName());
         this.sensorPositions = new DynamicTrackImpl<>("measurementPositions in "+getClass().getName());
         this.sensorSpeeds = new DynamicTrackImpl<>("sensorSpeeds in "+getClass().getName());
         this.magneticHeadings = new DynamicTrackImpl<>("headings in "+getClass().getName());
@@ -246,6 +265,7 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
         sentenceReader.addSentenceListener(new MWDSentenceListener(), SentenceId.MWD);
         sentenceReader.addSentenceListener(new VWRSentenceListener(), SentenceId.VWR);
         sentenceReader.addSentenceListener(new MDASentenceListener(), SentenceId.MDA);
+        sentenceReader.addSentenceListener(new VTGSentenceListener(), SentenceId.VTG);
         sentenceReader.addSentenceListener(new HeadingSentenceListener());
         sentenceReader.addSentenceListener(new DateListener());
         sentenceReader.addSentenceListener(new TimeListener());
@@ -290,6 +310,7 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
      * {@link #notifyListeners(Wind)}.
      */
     private void tryToCreateWindFixFromApparentWind(TimedSpeedWithBearing apparentWind) {
+        
         // TODO tryToCreateWindFixFromApparentWind
     }
 
