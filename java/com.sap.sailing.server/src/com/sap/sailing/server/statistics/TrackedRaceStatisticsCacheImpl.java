@@ -119,7 +119,7 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
         // As first step, a potentially existing scheduled job needs to be cancelled or waited for to finish.
         Future<?> updateFuture = null;
         synchronized (scheduledTriggers) {
-            updateFuture = scheduledTriggers.get(trackedRace);
+            updateFuture = scheduledTriggers.remove(trackedRace);
         }
         if (updateFuture != null && !updateFuture.cancel(false)) {
             try {
