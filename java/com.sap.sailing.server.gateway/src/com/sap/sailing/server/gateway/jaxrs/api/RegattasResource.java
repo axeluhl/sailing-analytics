@@ -1213,8 +1213,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                     jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml()
                             : null);
                     jsonCompetitorInLeg.put("rank", rank++);
-                    if (overallRankPerCompetitor.containsKey(competitor)) {
-                        jsonCompetitorInLeg.put("overallRank", overallRankPerCompetitor.get(competitor));
+                    final Integer overallRank = overallRankPerCompetitor.get(competitor);
+                    if (overallRank != null) {
+                        jsonCompetitorInLeg.put("overallRank", overallRank);
                     }
                     TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
                     if (currentLegOfCompetitor != null) {
