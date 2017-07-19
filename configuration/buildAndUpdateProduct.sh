@@ -547,7 +547,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             echo "INFO: Activating proxy profile"
             extra="$extra -P no-debug.with-proxy"
             MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
-	    ANDROID_OPTIONS="--proxy-host proxy --proxy-port 8080"
+	    ANDROID_OPTIONS="--proxy_host=proxy --proxy_port=8080"
         else
             extra="$extra -P no-debug.without-proxy"
 	    ANDROID_OPTIONS=""
@@ -629,9 +629,9 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools
         PATH=$PATH:$ANDROID_HOME/platform-tools
-        ANDROID="$ANDROID_HOME/tools/android"
-        if [ \! -x "$ANDROID" ]; then
-            ANDROID="$ANDROID_HOME/tools/android.bat"
+        SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
+        if [ \! -x "$SDK_MANAGER" ]; then
+            SDK_MANAGER="$SDK_MANAGER/tools/bin/sdkmanager.bat"
         fi
         
         mobile_extra="-P -with-not-android-relevant -P with-mobile"
@@ -662,18 +662,16 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         TEST_API=18
         ANDROID_ABI=armeabi-v7a
         AVD_NAME="androidTest-${NOW}"
-        echo "Updating Android SDK (tools)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter tools --no-ui --force --all > /dev/null
-        echo "Updating Android SDK (platform-tools)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter platform-tools --no-ui --force --all > /dev/null
+        echo "Updating Android SDK..." | tee -a $START_DIR/build.log
+        "$SDK_MANAGER" --update $ANDROID_OPTIONS
         echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter build-tools-${BUILD_TOOLS} --no-ui --force --all > /dev/null
+        "$SDK_MANAGER" $ANDROID_OPTIONS "build-tools;${BUILD_TOOLS}"
         echo "Updating Android SDK (android-${TARGET_API})..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter android-${TARGET_API} --no-ui --force --all > /dev/null
+        "$SDK_MANAGER" $ANDROID_OPTIONS "platforms;android-${TARGET_API}"
         echo "Updating Android SDK (extra-android-m2repository)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-android-m2repository --no-ui --force --all > /dev/null
+        "$SDK_MANAGER" $ANDROID_OPTIONS "extras;android;m2repository"
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
+        "$SDK_MANAGER" $ANDROID_OPTIONS "extras;google;m2repository"
 
         echo "Using following command for apps build: mvn $mobile_extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"

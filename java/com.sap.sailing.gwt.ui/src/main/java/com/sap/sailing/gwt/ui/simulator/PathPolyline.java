@@ -1109,7 +1109,6 @@ public class PathPolyline {
                 USE_REAL_AVERAGE_WIND);
 
         this.simulatorService.getTotalTime(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
-
             @Override
             public void onFailure(Throwable error) {
                 errorReporter.reportError(StringMessages.INSTANCE.errorLoadingTotalTime(error.getMessage()));
@@ -1122,12 +1121,10 @@ public class PathPolyline {
                     errorReporter.reportError(notificationMessage, true);
                     warningAlreadyShown = true;
                 }
-
                 if (getTotalTimeFactor) {
                     totalTimeFactor = receiveData.factorSim2GPS;
                 }
                 long totalTime = Math.round(receiveData.totalTimeSeconds / totalTimeFactor);
-
                 simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
                 simulatorMap.redrawLegendCanvasOverlay();
             }
