@@ -100,7 +100,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         
         showTargetEstimation = dialog.createCheckbox(stringMessages.showTargetEstimation());
         showTargetEstimation.ensureDebugId("showTargetEstimationCheckBox");
-        showTargetEstimation.setValue(initialSettings.isShowTargetEstimation());
+        showTargetEstimation.setValue(initialSettings.isShowEstimatedDuration());
         vp.add(showTargetEstimation);
         
         if (isSimulationEnabled) {

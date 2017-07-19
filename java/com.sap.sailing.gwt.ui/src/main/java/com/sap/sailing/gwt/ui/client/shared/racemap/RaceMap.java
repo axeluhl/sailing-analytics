@@ -419,7 +419,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * {@link #showAdvantageLine(Iterable, Date, long)} drawing procedure} needs to be triggered.
      */
     private CompetitorDTO advantageLineCompetitor;
-    protected Label targetEstimationOverlay;
+    protected Label estimatedDurationOverlay;
     private RaceMapStyle raceMapStyle;
 
     private class AdvantageLineUpdater implements QuickRanksListener {
@@ -952,7 +952,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
-                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(), newTime, settings.isShowTargetEstimation()),
+                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(), newTime, settings.isShowEstimatedDuration()),
             GET_RACE_MAP_DATA_CATEGORY,
             getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, ++boatPositionRequestIDCounter));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
@@ -1049,7 +1049,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         zoomMapToNewBounds(zoomToBounds);
                         mapFirstZoomDone = true;
                         
-                        updateTargetEstimation(raceMapDataDTO.estimatedDuration);
+                        updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
                     }
                 } else {
                     lastTimeChangeBeforeInitialization = newTime;
@@ -1058,16 +1058,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
     }
 
-    protected void updateTargetEstimation(Duration estimatedDuration) {
+    protected void updateEstimatedDuration(Duration estimatedDuration) {
         if (estimatedDuration == null) {
             return;
         }
-        if (targetEstimationOverlay == null) {
-            targetEstimationOverlay = new Label("");
-            targetEstimationOverlay.setStyleName(raceMapStyle.estimatedTargettime());
-            map.setControls(ControlPosition.TOP_CENTER, targetEstimationOverlay);
+        if (estimatedDurationOverlay == null) {
+            estimatedDurationOverlay = new Label("");
+            estimatedDurationOverlay.setStyleName(raceMapStyle.estimatedTargettime());
+            map.setControls(ControlPosition.TOP_CENTER, estimatedDurationOverlay);
         }
-        targetEstimationOverlay.setText(stringMessages.estimatedDuration()
+        estimatedDurationOverlay.setText(stringMessages.estimatedDuration()
                 + " " + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
 
     }
@@ -2599,8 +2599,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
             requiresRedraw = true;
         }
-        if (!newSettings.isShowTargetEstimation() && targetEstimationOverlay != null){
-            targetEstimationOverlay.removeFromParent();
+        if (!newSettings.isShowEstimatedDuration() && estimatedDurationOverlay != null){
+            estimatedDurationOverlay.removeFromParent();
         }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
@@ -2615,8 +2615,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             requiresUpdateCoordinateSystem = true;
             requiresRedraw = true;
         }
-        if (!newSettings.isShowTargetEstimation() && targetEstimationOverlay != null){
-            targetEstimationOverlay.removeFromParent();
+        if (!newSettings.isShowEstimatedDuration() && estimatedDurationOverlay != null){
+            estimatedDurationOverlay.removeFromParent();
         }
         this.settings = newSettings;
         
