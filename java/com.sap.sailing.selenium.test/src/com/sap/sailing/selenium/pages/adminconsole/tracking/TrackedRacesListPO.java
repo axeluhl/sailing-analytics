@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
-import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
@@ -195,22 +194,25 @@ public class TrackedRacesListPO extends PageArea {
     
     public void remove(List<TrackedRaceDescriptor> races) {
         selectRaces(races);
+        
         removeSelectedTrackedRacesAndWaitForAjaxRequests();
     }
     
     public void removeAll() {
         getTrackedRacesTable().selectAllEntries();
+        
         removeSelectedTrackedRacesAndWaitForAjaxRequests();
     }
 
     private void removeSelectedTrackedRacesAndWaitForAjaxRequests() {
         this.removeButton.click();
-        ActionsHelper.acceptAlert(driver);
+        
         waitForAjaxRequests();
     }
     
     public void refresh() {
         this.refreshButton.click();
+        
         waitForAjaxRequests();
     }
     
