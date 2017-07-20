@@ -574,39 +574,39 @@ public class DomainFactoryImpl implements DomainFactory {
     public Iterable<IControlPoint> getControlPointsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName) {
     	final Set<IControlPoint> result = new HashSet<>();
     	for (final IControl control : getControlsForCourseArea(tracTracEvent, tracTracCourseAreaName)) {
-    		result.addAll(control.getControlPoints());
+    	    result.addAll(control.getControlPoints());
     	}
     	return result;
     }
     
     @Override
     public Iterable<IControl> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName) {
-    	final Set<IControl> result = new HashSet<>();
-		if (tracTracCourseAreaName != null) {
-			for (final IControl control : tracTracEvent.getControls()) {
-				if (control.getCourseArea() != null && control.getCourseArea().equals(tracTracCourseAreaName)) {
-					result.add(control);
-				}
-			}
-		}
-    	return result;
+        final Set<IControl> result = new HashSet<>();
+        if (tracTracCourseAreaName != null) {
+            for (final IControl control : tracTracEvent.getControls()) {
+                if (control.getCourseArea() != null && control.getCourseArea().equals(tracTracCourseAreaName)) {
+                    result.add(control);
+                }
+            }
+        }
+        return result;
     }
-    
+
     @Override
     public ControlPoint getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second) {
-    	final Set<Mark> pairOfMarksToFind = new HashSet<>();
-    	pairOfMarksToFind.add(first);
-    	pairOfMarksToFind.add(second);
-    	for (final IControl control : candidates) {
-    		TracTracControlPoint cp = new ControlPointAdapter(control);
-    		Set<Mark> marksInExistingControlPoint = new HashSet<>();
-    		final ControlPoint controlPoint = getOrCreateControlPoint(cp);
-			Util.addAll(controlPoint.getMarks(), marksInExistingControlPoint);
-    		if (marksInExistingControlPoint.equals(pairOfMarksToFind)) {
-    			return controlPoint;
-    		}
-    	}
-    	return null;
+        final Set<Mark> pairOfMarksToFind = new HashSet<>();
+        pairOfMarksToFind.add(first);
+        pairOfMarksToFind.add(second);
+        for (final IControl control : candidates) {
+            TracTracControlPoint cp = new ControlPointAdapter(control);
+            Set<Mark> marksInExistingControlPoint = new HashSet<>();
+            final ControlPoint controlPoint = getOrCreateControlPoint(cp);
+            Util.addAll(controlPoint.getMarks(), marksInExistingControlPoint);
+            if (marksInExistingControlPoint.equals(pairOfMarksToFind)) {
+                return controlPoint;
+            }
+        }
+        return null;
     }
     
     @Override
