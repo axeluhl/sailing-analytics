@@ -3764,16 +3764,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         final Map<Integer, StatisticsCalculator> calculators = new HashMap<>();
         getAllEvents().forEach((event) -> {
             final Integer eventYear = EventUtil.getYearOfEvent(event);
-            final StatisticsCalculator calculator;
-            if (calculators.containsKey(eventYear)) {
-                calculator = calculators.get(eventYear);
-            } else {
-                calculator = new StatisticsCalculator(trackedRaceStatisticsCache);
-                calculators.put(eventYear, calculator);
+            // The year may be null if the event has no start date set
+            // In this case the event is ignored for the yearly 
+            if (eventYear != null) {
+                final StatisticsCalculator calculator;
+                if (calculators.containsKey(eventYear)) {
+                    calculator = calculators.get(eventYear);
+                } else {
+                    calculator = new StatisticsCalculator(trackedRaceStatisticsCache);
+                    calculators.put(eventYear, calculator);
+                }
+                event.getLeaderboardGroups().forEach((lg) -> {
+                    lg.getLeaderboards().forEach(calculator::addLeaderboard);
+                });
             }
-            event.getLeaderboardGroups().forEach((lg) -> {
-                lg.getLeaderboards().forEach(calculator::addLeaderboard);
-            });
         });
         Map<Integer, Statistics> result = new HashMap<>();
         calculators.forEach((year, calculator) -> {
