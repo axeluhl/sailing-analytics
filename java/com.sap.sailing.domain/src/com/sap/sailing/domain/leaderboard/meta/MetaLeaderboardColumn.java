@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.SimpleAbstractRaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorAndBoatRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
@@ -272,6 +273,19 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public void registerCompetitors(Iterable<Competitor> competitor, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         throw new CompetitorRegistrationOnRaceLogDisabledException();
+    }
+
+
+    @Override
+    public void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet)
+            throws CompetitorAndBoatRegistrationOnRaceLogDisabledException {
+        throw new CompetitorAndBoatRegistrationOnRaceLogDisabledException();
+    }
+
+    @Override
+    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
+            throws CompetitorAndBoatRegistrationOnRaceLogDisabledException {
+        throw new CompetitorAndBoatRegistrationOnRaceLogDisabledException();
     }
 
     @Override
