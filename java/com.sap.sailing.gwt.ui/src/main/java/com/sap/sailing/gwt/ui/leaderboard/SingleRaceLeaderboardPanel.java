@@ -186,8 +186,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     @Override
     public SettingsDialogComponent<SingleRaceLeaderboardSettings> getSettingsDialogComponent(
             SingleRaceLeaderboardSettings useTheseSettings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, leaderboard.getNamesOfRaceColumns(),
-                stringMessages);
+        return new SingleRaceLeaderboardSettingsDialogComponent(useTheseSettings, stringMessages);
     }
 
     @Override

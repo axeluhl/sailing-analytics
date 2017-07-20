@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,13 +24,17 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class MultiRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<MultiRaceLeaderboardSettings> {
-    
-    protected RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
+
+    private final Map<String, CheckBox> raceColumnCheckboxes;
+    private final List<String> raceAllRaceColumnNames;
+    private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
 
     public MultiRaceLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
             List<String> allRaceColumnNames, StringMessages stringMessages) {
-        super(initialSettings, allRaceColumnNames, stringMessages);
+        super(initialSettings, stringMessages);
         this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
+        this.raceAllRaceColumnNames = allRaceColumnNames;
+        raceColumnCheckboxes = new LinkedHashMap<>();
     }
 
     @Override

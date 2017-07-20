@@ -17,8 +17,8 @@ public class SingleRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<SingleRaceLeaderboardSettings> {
 
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
-            List<String> allRaceColumnNames, StringMessages stringMessages) {
-        super(initialSettings, allRaceColumnNames, stringMessages);
+            StringMessages stringMessages) {
+        super(initialSettings, stringMessages);
     }
 
     @Override

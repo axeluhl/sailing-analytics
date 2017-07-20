@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Style.Float;
@@ -26,8 +25,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSettings> implements SettingsDialogComponent<T> {
-    protected final Map<String, CheckBox> raceColumnCheckboxes;
-    protected final List<String> raceAllRaceColumnNames;
     protected final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
     protected final Map<DetailType, CheckBox> legDetailCheckboxes;
     protected final Map<DetailType, CheckBox> raceDetailCheckboxes;
@@ -45,13 +42,11 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected CheckBox isCompetitorNationalityColumnVisible;
     protected T initialSettings;
 
-    public LeaderboardSettingsDialogComponent(T initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages) {
+    public LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
-        this.raceAllRaceColumnNames = allRaceColumnNames;
         
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        raceColumnCheckboxes = new LinkedHashMap<>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();

@@ -18,7 +18,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     private final boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard;
 
     public SingleRaceLeaderboardPanelLifecycle(StringMessages stringMessages) {
-        super(null, stringMessages);
+        super(stringMessages);
         this.isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
     }
     
@@ -78,7 +78,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
 
     @Override
     public SingleRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(SingleRaceLeaderboardSettings settings) {
-        return new SingleRaceLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages);
+        return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages);
     }
 
 }
