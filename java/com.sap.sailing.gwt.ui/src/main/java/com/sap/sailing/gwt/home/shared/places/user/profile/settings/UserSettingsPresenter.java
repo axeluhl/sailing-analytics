@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -51,6 +52,11 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
         }
     }
     
+    @Override
+    public void updateData() {
+        view.setEntries(currentlyShownEntries.stream().filter(view.getFilter()::matches).collect(Collectors.toList()));
+    }
+
     private void loadSettingsFromLocalStorage(final Map<String, String> userSettings) {
         final Map<String, String> localSettings = loadSettingsFromLocalStorage();
         final Set<String> allKeys = new TreeSet<>((a, b) -> a.compareTo(b));
@@ -60,7 +66,7 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
         for(String key : allKeys) {
             currentlyShownEntries.add(new UserSettingsEntry(key, userSettings.get(key), localSettings.get(key)));
         }
-        view.setEntries(currentlyShownEntries);
+        this.updateData();
     }
     
     private Map<String, String> loadSettingsFromLocalStorage() {

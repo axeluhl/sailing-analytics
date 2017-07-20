@@ -25,6 +25,24 @@ public class LeaderboardSettingsFactory {
         SettingsUtil.copyDefaultsFromValues(leaderboardSettings, leaderboardSettings);
         return leaderboardSettings;
     }
+    
+
+    public MultiRaceLeaderboardSettings createNewDefaultSettingsWithLastN(int numberOfLastRacesToShow) {
+        MultiRaceLeaderboardSettings defaultSettings = new MultiRaceLeaderboardSettings();
+        return new MultiRaceLeaderboardSettings(
+                defaultSettings.getManeuverDetailsToShow(),
+                defaultSettings.getLegDetailsToShow(),
+                defaultSettings.getRaceDetailsToShow(), defaultSettings.getOverallDetailsToShow(),
+                defaultSettings.getNamesOfRaceColumnsToShow(),
+                numberOfLastRacesToShow,
+                defaultSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
+                RaceColumnSelectionStrategies.LAST_N,
+                defaultSettings.isShowAddedScores(),
+                defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
+                defaultSettings.isShowCompetitorSailIdColumn(),
+                defaultSettings.isShowCompetitorFullNameColumn(),
+                defaultSettings.isShowCompetitorNationality());
+    }
  
     public SingleRaceLeaderboardSettings createNewSettingsWithCustomRaceDetails(List<DetailType> raceDetailsToShow) {
         SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();

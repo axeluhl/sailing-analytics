@@ -135,9 +135,10 @@ public class MultiRaceLeaderboardSettingsDialogComponent
             }
             Grid grid = new Grid(rowCount, maxRacesPerRow);
             List<String> namesOfRaceColumnsToShow = initialSettings.getNamesOfRaceColumnsToShow();
+            final boolean noRaceSelected = namesOfRaceColumnsToShow == null || Util.isEmpty(namesOfRaceColumnsToShow);
             for (String raceColumnName : raceAllRaceColumnNames) {
                 CheckBox checkbox = createCheckbox(dialog, raceColumnName,
-                        Util.contains(namesOfRaceColumnsToShow, raceColumnName), null);
+                        noRaceSelected || Util.contains(namesOfRaceColumnsToShow, raceColumnName), null);
                 raceColumnCheckboxes.put(raceColumnName, checkbox);
                 grid.setWidget(rowIndex, columnIndex++, checkbox);
                 if (columnIndex == maxRacesPerRow) {

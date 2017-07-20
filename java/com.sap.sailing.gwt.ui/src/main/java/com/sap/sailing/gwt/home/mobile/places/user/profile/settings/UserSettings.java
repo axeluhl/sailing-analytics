@@ -9,9 +9,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.partials.filter.UserSettingsByKeyTextBoxFilter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsEntry;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.filter.Filter;
 
 /**
  * Implementation of {@link UserSettingsView} where users can change their preferred selections and notifications.
@@ -26,6 +28,8 @@ public class UserSettings extends Composite implements UserSettingsView {
     @UiField
     DivElement notificationsTextUi;
     @UiField
+    UserSettingsByKeyTextBoxFilter userSettingsFilterUi;
+    @UiField
     FlowPanel settingsContainerUi;
 
     private final Presenter presenter;
@@ -33,7 +37,13 @@ public class UserSettings extends Composite implements UserSettingsView {
     public UserSettings(UserSettingsView.Presenter presenter) {
         this.presenter = presenter;
         initWidget(uiBinder.createAndBindUi(this));
+        userSettingsFilterUi.addFilterValueChangeHandler(filter -> presenter.updateData());
         presenter.setView(this);
+    }
+
+    @Override
+    public Filter<UserSettingsEntry> getFilter() {
+        return userSettingsFilterUi.getFilter();
     }
 
     @Override
