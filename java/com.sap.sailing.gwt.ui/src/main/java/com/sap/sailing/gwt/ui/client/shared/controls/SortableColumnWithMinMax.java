@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.ui.client.shared.controls;
 
 public interface SortableColumnWithMinMax<T, C> {
     /**
