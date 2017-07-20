@@ -1217,16 +1217,16 @@ public class RegattasResource extends AbstractSailingServerResource {
                     if (overallRank != null) {
                         jsonCompetitorInLeg.put("overallRank", overallRank);
                     }
+                    if (trackedRace.getEndOfTracking() == null || trackedRace.getEndOfTracking().after(timePoint)) {
+                        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
+                        if (competitorTrack != null) {
+                            jsonCompetitorInLeg.put("speedOverGround-kts", roundDouble(competitorTrack.getEstimatedSpeed(timePoint).getKnots(), 2));
+                        }
+                    }
                     TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
                     if (currentLegOfCompetitor != null) {
                         int indexOfWaypoint = course.getIndexOfWaypoint(currentLegOfCompetitor.getLeg().getFrom());
                         jsonCompetitorInLeg.put("leg", indexOfWaypoint + 1);
-
-                        Speed speedOverGround = currentLegOfCompetitor.getSpeedOverGround(timePoint);
-                        if (speedOverGround != null) {
-                            jsonCompetitorInLeg.put("speedOverGround-kts", roundDouble(speedOverGround.getKnots(), 2));
-                        }
-
                         Distance distanceTraveled = currentLegOfCompetitor.getDistanceTraveled(timePoint);
                         if (distanceTraveled != null) {
                             jsonCompetitorInLeg.put("distanceTraveled-m", roundDouble(distanceTraveled.getMeters(), 2));
