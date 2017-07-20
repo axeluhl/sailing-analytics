@@ -72,6 +72,18 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
             super.setSelected(item, selected);
         }
     }
+    
+    /**
+     * Checks if the currently selected object is also visible.
+     * 
+     * @param visibleItemList
+     *            can be obtained by calling {@link com.google.gwt.user.cellview.client.CellTable#getVisibleItems()}
+     *            method.
+     * @return <code>true</code> if the list of visible items does not contain the selected item.
+     */
+    public boolean itemIsSelectedButNotVisible(List<T> visibleItemList) {
+       return !visibleItemList.contains(getSelectedObject());
+    }
 
     /**
      * Refreshes the {@link RefreshableSingleSelectionModel} with the <code>newObjects</code>. If the current selected
