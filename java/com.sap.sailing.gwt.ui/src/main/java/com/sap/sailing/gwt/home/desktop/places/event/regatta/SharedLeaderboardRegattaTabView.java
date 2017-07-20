@@ -67,22 +67,22 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                     ElementSizeMutationObserver observer = new ElementSizeMutationObserver(new DomMutationCallback() {
                         @Override
                         public void onSizeChanged(int newWidth, int newHeight) {
-                            if(!initialLeaderboardSizeCalculated && leaderboardPanel.getLeaderboard()!=null){
-                                initialLeaderboardSizeCalculated =true;
-                                if(newWidth > 0 && newHeight > 0 && newWidth > 1500) {
-                                    int numberOfLastRacesToShow = (1500 - 600) / 50;
-                                    LeaderboardSettings newSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettingsWithLastN(numberOfLastRacesToShow);
-                                    
-                                    componentContext.addAdditionalSettingsLayerForComponent(leaderboardPanel, PipelineLevel.SYSTEM_DEFAULTS, newSettings,
-                                            new OnSettingsReloadedCallback<LeaderboardSettings>() {
+                            if (!initialLeaderboardSizeCalculated && leaderboardPanel.getLeaderboard() != null) {
+                                initialLeaderboardSizeCalculated = true;
+                                if (newWidth > 0 && newHeight > 0 && newWidth > 1500) {
+                                    final int numberOfLastRacesToShow = (1500 - 600) / 50;
+                                    final LeaderboardSettings newSettings = LeaderboardSettingsFactory.getInstance()
+                                            .createNewDefaultSettingsWithLastN(numberOfLastRacesToShow);
 
-                                        @Override
-                                        public void onSettingsReloaded(LeaderboardSettings patchedSettings) {
-                                            GWT.log("New combined settings are " + patchedSettings);
-                                            leaderboardPanel.updateSettings(patchedSettings);
-                                            
-                                        }
-                                    });
+                                    componentContext.addAdditionalSettingsLayerForComponent(leaderboardPanel,
+                                            PipelineLevel.SYSTEM_DEFAULTS, newSettings,
+                                            new OnSettingsReloadedCallback<LeaderboardSettings>() {
+                                                @Override
+                                                public void onSettingsReloaded(LeaderboardSettings patchedSettings) {
+                                                    GWT.log("Switching to last_n mode with settings" + patchedSettings);
+                                                    leaderboardPanel.updateSettings(patchedSettings);
+                                                }
+                                            });
                                 }
                             }
                         }
