@@ -10,7 +10,6 @@ import java.net.URL;
 import java.text.ParseException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -42,7 +41,6 @@ public class NonCompetingCompetitorTest extends AbstractManeuverDetectionTestCas
     /**
      * Asserts that the "Ump..." competitors are considered non-competing and therefore don't show up
      */
-    @Ignore("Ignored until the dev.tractrac.com infrastructure has been restored; Jorge implies this will happen before end of August, 2017")
     @Test
     public void testNoNonCompetingCompetitors() throws ParseException, NoWindException {
     	for (final Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
