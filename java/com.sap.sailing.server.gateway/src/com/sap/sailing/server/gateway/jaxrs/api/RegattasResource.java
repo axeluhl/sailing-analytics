@@ -1193,10 +1193,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONArray jsonCompetitors = new JSONArray();
                 List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
                 Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
-                if(leaderboard != null) {
-                    List<Competitor> overallRanking= leaderboard.getCompetitorsFromBestToWorst(timePoint);
+                if (leaderboard != null) {
+                    List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint);
                     Integer overallRank = 1;
-                    for (Competitor competitor: overallRanking) {
+                    for (Competitor competitor : overallRanking) {
                         overallRankPerCompetitor.put(competitor, overallRank++);
                     }
                 }
@@ -1213,19 +1213,20 @@ public class RegattasResource extends AbstractSailingServerResource {
                     jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml()
                             : null);
                     jsonCompetitorInLeg.put("rank", rank++);
-                    if (overallRankPerCompetitor.containsKey(competitor)) {
-                        jsonCompetitorInLeg.put("overallRank", overallRankPerCompetitor.get(competitor));
+                    final Integer overallRank = overallRankPerCompetitor.get(competitor);
+                    if (overallRank != null) {
+                        jsonCompetitorInLeg.put("overallRank", overallRank);
+                    }
+                    if (trackedRace.getEndOfTracking() == null || trackedRace.getEndOfTracking().after(timePoint)) {
+                        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
+                        if (competitorTrack != null) {
+                            jsonCompetitorInLeg.put("speedOverGround-kts", roundDouble(competitorTrack.getEstimatedSpeed(timePoint).getKnots(), 2));
+                        }
                     }
                     TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
                     if (currentLegOfCompetitor != null) {
                         int indexOfWaypoint = course.getIndexOfWaypoint(currentLegOfCompetitor.getLeg().getFrom());
                         jsonCompetitorInLeg.put("leg", indexOfWaypoint + 1);
-
-                        Speed speedOverGround = currentLegOfCompetitor.getSpeedOverGround(timePoint);
-                        if (speedOverGround != null) {
-                            jsonCompetitorInLeg.put("speedOverGround-kts", roundDouble(speedOverGround.getKnots(), 2));
-                        }
-
                         Distance distanceTraveled = currentLegOfCompetitor.getDistanceTraveled(timePoint);
                         if (distanceTraveled != null) {
                             jsonCompetitorInLeg.put("distanceTraveled-m", roundDouble(distanceTraveled.getMeters(), 2));

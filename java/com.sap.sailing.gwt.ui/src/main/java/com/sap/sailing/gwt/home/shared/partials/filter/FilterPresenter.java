@@ -27,23 +27,21 @@ public abstract class FilterPresenter<T, C extends Comparable<C>> {
         this.filterWidget.asWidget().setVisible(false);
     }
 
-    protected abstract List<FilterValueChangeHandler<T, C>> getCurrentValueChangeHandlers();
+    protected abstract List<FilterValueChangeHandler<T>> getCurrentValueChangeHandlers();
 
-    protected void addHandler(FilterValueChangeHandler<T, C> handler) {
+    protected abstract List<FilterValueProvider<C>> getCurrentValueProviders();
+
+    protected void addHandler(FilterValueChangeHandler<T> handler) {
         this.filterWidget.addFilterValueChangeHandler(handler);
     }
 
     public void update() {
         Set<C> filterableValues = new TreeSet<>();
-        for (FilterValueChangeHandler<T, C> valueChangeHandler : getCurrentValueChangeHandlers()) {
-            filterableValues.addAll(valueChangeHandler.getFilterableValues());
-        }
+        getCurrentValueProviders().forEach(provider -> filterableValues.addAll(provider.getFilterableValues()));
         this.filterWidget.asWidget().setVisible(!filterableValues.isEmpty());
         this.filterWidget.setSelectableValues(filterableValues);
         Filter<T> filter = filterableValues.isEmpty() ? alwaysMatchingFilter : this.filterWidget.getFilter();
-        for (FilterValueChangeHandler<T, C> valueChangeHandler : getCurrentValueChangeHandlers()) {
-            valueChangeHandler.onFilterValueChanged(filter);
-        }
+        getCurrentValueChangeHandlers().forEach(handler -> handler.onFilterValueChanged(filter));
     }
     
     public <D extends DTO> RefreshableWidget<D> getRefreshableWidgetWrapper(final RefreshableWidget<D> wrappedWidget) {
