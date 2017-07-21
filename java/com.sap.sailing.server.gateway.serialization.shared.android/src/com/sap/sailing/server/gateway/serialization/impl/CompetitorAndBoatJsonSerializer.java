@@ -8,19 +8,19 @@ import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public class CompetitorWithBoatJsonSerializer implements JsonSerializer<CompetitorAndBoat> {
+public class CompetitorAndBoatJsonSerializer implements JsonSerializer<CompetitorAndBoat> {
     private final JsonSerializer<Boat> boatJsonSerializer;
     private final JsonSerializer<Competitor> competitorJsonSerializer;
 
-    public static CompetitorWithBoatJsonSerializer create() {
-        return new CompetitorWithBoatJsonSerializer(CompetitorJsonSerializer.create(), BoatJsonSerializer.create());
+    public static CompetitorAndBoatJsonSerializer create() {
+        return new CompetitorAndBoatJsonSerializer(CompetitorJsonSerializer.create(), BoatJsonSerializer.create());
     }
 
-    public CompetitorWithBoatJsonSerializer() {
+    public CompetitorAndBoatJsonSerializer() {
         this(null, null);
     }
 
-    public CompetitorWithBoatJsonSerializer(JsonSerializer<Competitor> competitorJsonSerializer, JsonSerializer<Boat> boatJsonSerializer) {
+    public CompetitorAndBoatJsonSerializer(JsonSerializer<Competitor> competitorJsonSerializer, JsonSerializer<Boat> boatJsonSerializer) {
         this.competitorJsonSerializer = competitorJsonSerializer;
         this.boatJsonSerializer = boatJsonSerializer;
     }

@@ -67,7 +67,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.AbstractTrackedRaceDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
@@ -211,7 +211,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                CompetitorWithBoatJsonSerializer competitorJsonSerializer = CompetitorWithBoatJsonSerializer.create();
+                CompetitorAndBoatJsonSerializer competitorJsonSerializer = CompetitorAndBoatJsonSerializer.create();
                 JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(competitorJsonSerializer);
                 JSONObject serializedRaceEntries = raceEntriesSerializer.serialize(race);
     
@@ -861,7 +861,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(new CompetitorWithBoatJsonSerializer(),
+                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(new CompetitorAndBoatJsonSerializer(),
                         new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
@@ -930,7 +930,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         return result;
                     });
                 }
-                CompetitorWithBoatJsonSerializer serializer = new CompetitorWithBoatJsonSerializer();
+                CompetitorAndBoatJsonSerializer serializer = new CompetitorAndBoatJsonSerializer();
                 JSONArray result = new JSONArray();
                 for (final Competitor c : competitors) {
                     Boat boat = trackedRace.getBoatOfCompetitor(c);

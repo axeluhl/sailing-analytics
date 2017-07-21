@@ -16,10 +16,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class ManeuversJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
     public final static String MANEUVERS = "maneuvers";
     
-    private final CompetitorWithBoatJsonSerializer competitorSerializer;
+    private final CompetitorAndBoatJsonSerializer competitorSerializer;
     private final ManeuverJsonSerializer maneuverSerializer;
 
-    public ManeuversJsonSerializer(CompetitorWithBoatJsonSerializer competitorSerializer, ManeuverJsonSerializer maneuverSerializer) {
+    public ManeuversJsonSerializer(CompetitorAndBoatJsonSerializer competitorSerializer, ManeuverJsonSerializer maneuverSerializer) {
         super();
         this.competitorSerializer = competitorSerializer;
         this.maneuverSerializer = maneuverSerializer;
