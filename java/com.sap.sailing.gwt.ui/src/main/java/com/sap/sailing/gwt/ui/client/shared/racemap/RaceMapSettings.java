@@ -144,7 +144,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* showSimulationOverlay */ showSimulationOverlay,
                 /* showMapControls */ showMapControls,
                 /* maneuverTypesToShow */ getDefaultManeuvers(),
-                /* showDouglasPeuckerPoints */ false,false);
+                /* showDouglasPeuckerPoints */ false,
+                /* showEstimatedDuration*/ false);
     }
     
     private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
@@ -170,13 +171,22 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      * settings from the second parameter
      */
     public RaceMapSettings(RaceMapSettings settings, RaceMapZoomSettings zoomSettings) {
-        this(zoomSettings, settings.getHelpLinesSettings(), settings.getTransparentHoverlines(),
-                settings.getHoverlineStrokeWeight(), settings.getTailLengthInMilliseconds(), settings.isWindUp(),
-                settings.getBuoyZoneRadius(), settings.isShowSelectedCompetitorsInfo(),
-                settings.isShowSelectedCompetitorsInfo(), settings.isShowWindStreamletColors(),
-                settings.isShowWindStreamletOverlay(), settings.isShowSimulationOverlay(), settings.isShowMapControls(),
-                settings.getManeuverTypesToShow(), settings.isShowDouglasPeuckerPoints(),
-                settings.isShowEstimatedDuration());
+        this(/* zoomSettings */ zoomSettings,
+             /* helpLinesSettings */ settings.getHelpLinesSettings(),
+             /* transparentHoverlines */ settings.getTransparentHoverlines(),
+             /* hoverlineStrokeWeight */ settings.getHoverlineStrokeWeight(),
+             /* tailLengthInMilliseconds */ settings.getTailLengthInMilliseconds(),
+             /* windUp */ settings.isWindUp(),
+             /* buoyZoneRadius */ settings.getBuoyZoneRadius(),
+             /* showOnlySelectedCompetitors */ settings.isShowOnlySelectedCompetitors(),
+             /* showSelectedCompetitorsInfo */ settings.isShowSelectedCompetitorsInfo(),
+             /* showWindStreamletColors */ settings.isShowWindStreamletColors(),
+             /* showWindStreamletOverlay */ settings.isShowWindStreamletOverlay(),
+             /* showSimulationOverlay */ settings.isShowSimulationOverlay(),
+             /* showMapControls */ settings.isShowMapControls(),
+             /* maneuverTypesToShow */ settings.getManeuverTypesToShow(),
+             /* showDouglasPeuckerPoints */ settings.isShowDouglasPeuckerPoints(),
+             /* showEstimatedDuration */ settings.isShowEstimatedDuration());
     }
 
     /**
