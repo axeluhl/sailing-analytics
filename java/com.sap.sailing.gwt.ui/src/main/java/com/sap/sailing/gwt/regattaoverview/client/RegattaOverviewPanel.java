@@ -70,7 +70,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     
     public void setEntryClickedHandler(EntryHandler handler) {
         entryClickedHandler = handler;
-        if(regattaRaceStatesComponent != null) {
+        if (regattaRaceStatesComponent != null) {
             regattaRaceStatesComponent.setEntryClickedHandler(handler);
         }
     }

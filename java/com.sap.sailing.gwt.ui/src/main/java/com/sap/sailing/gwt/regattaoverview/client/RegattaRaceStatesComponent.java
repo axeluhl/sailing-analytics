@@ -519,7 +519,9 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         raceStatusColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                entryClickedHandler.onEntryClicked(object);
+                if(entryClickedHandler != null) {
+                    entryClickedHandler.onEntryClicked(object);
+                }
             }
         });
         raceStatusColumn.setSortable(true);
