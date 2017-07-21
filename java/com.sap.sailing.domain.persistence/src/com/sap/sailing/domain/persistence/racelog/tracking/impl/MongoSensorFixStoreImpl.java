@@ -127,7 +127,9 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         final TimePoint loadFixesFrom = from == null ? TimePoint.BeginningOfTime : from;
         final TimePoint loadFixesTo = to == null ? TimePoint.EndOfTime : to;
 
-        Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
+        DBObject dbDeviceId = storeDeviceId(deviceServiceFinder, device);
+//        dbDeviceId.removeField(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name());
+//        dbDeviceId.markAsPartialObject();
         final QueryBuilder queryBuilder = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
                 .and(FieldNames.TIME_AS_MILLIS.name());
         if (inclusive) {
@@ -140,15 +142,20 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         DBObject query = queryBuilder.get();
         DBCursor result = dbCursorCallback.apply(fixesCollection.find(query));
         boolean fixLoaded = false;
-        double max = result.size();
-        // update roughly every percent, but at not more often than every 100th entry
-        int reportIncrement = (int) Math.max(max / 100, 100);
+        // TODO commented out due to bad performance of DBCursor.size()
+//        double max = result.size();
+//        // update roughly every percent, but at not more often than every 100th entry
+//        int reportIncrement = (int) Math.max(max / 100, 100);
+        int reportIncrement = 100;
         int current = 0;
+        // TODO temporary solution to report progress at least in 2 steps
+        progressConsumer.accept(0.5d);
         for (DBObject fixObject : result) {
             current++;
 
             if (current % reportIncrement == 0) {
-                progressConsumer.accept(current / max);
+             // TODO commented out due to bad performance of DBCursor.size()
+//                progressConsumer.accept(current / max);
                 if (isPreemptiveStopped.getAsBoolean()) {
                     logger.log(Level.WARNING, "Exiting because of preemtive stop requested " + fixObject);
                     return fixLoaded;
