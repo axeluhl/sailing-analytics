@@ -10,6 +10,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -54,8 +55,8 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
             storeTo.removeAllBoats();
         } else {
             // TODO bug2822: How to migrate the competitors with contained boats to competitors with separate boat
-            Collection<Competitor> allCompetitors = loadFrom.loadAllCompetitors();
-            for (Competitor competitor : allCompetitors) {
+            Collection<CompetitorWithBoat> allCompetitors = loadFrom.loadAllCompetitors();
+            for (CompetitorWithBoat competitor : allCompetitors) {
                 addCompetitorToTransientStore(competitor.getId(), competitor);
             }
             Collection<Boat> allBoats = loadFrom.loadAllBoats();
@@ -86,7 +87,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
     }
     
-    private void addCompetitorToTransientStore(Serializable id, Competitor competitor) {
+    private void addCompetitorToTransientStore(Serializable id, CompetitorWithBoat competitor) {
         super.addNewCompetitor(id, competitor);
     }
 

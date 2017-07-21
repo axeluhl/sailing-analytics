@@ -15,7 +15,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
@@ -64,7 +64,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         c.setFlagImage(flagImageURI1);
         mongoObjectFactory.storeCompetitor(c);
         
-        Collection<Competitor> allCompetitors = domainObjectFactory.loadAllCompetitors();
+        Collection<CompetitorWithBoat> allCompetitors = domainObjectFactory.loadAllCompetitors();
         assertEquals(1, Util.size(allCompetitors));
         DynamicCompetitor loadedCompetitor = (DynamicCompetitor) allCompetitors.iterator().next();
         assertEquals(flagImageURI1, loadedCompetitor.getFlagImage());

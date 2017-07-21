@@ -9,10 +9,10 @@ import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.base.CompetitorFactory;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
@@ -23,7 +23,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 
-public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<CompetitorAndBoat> {
+public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<CompetitorWithBoat> {
     protected final CompetitorFactory competitorFactory;
     protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
@@ -45,7 +45,7 @@ public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<Comp
     }
 
     @Override
-    public CompetitorAndBoat deserialize(JSONObject object) throws JsonDeserializationException {
+    public CompetitorWithBoat deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
         try {
             Class<?> idClass = Class.forName((String) object.get(CompetitorJsonConstants.FIELD_ID_TYPE));
@@ -97,7 +97,7 @@ public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<Comp
                     timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null :
                         new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
             
-            return new CompetitorAndBoatImpl(competitor, boat);
+            return new CompetitorWithBoatImpl(competitor, boat);
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
         }

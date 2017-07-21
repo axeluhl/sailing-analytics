@@ -675,7 +675,7 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             
             Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
-            if (competitorBoatInfo != null && existingCompetitor.getShortName() != rc.getCompetitor().getShortName()) {
+            if (isSeparateBoat && existingCompetitor.getShortName() != rc.getCompetitor().getShortName()) {
                 // in case we find a boat info we only want to update the shortName field of the competitor (instead of using sailID)
                 CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
                 boolean isOldCompetitorToUpdateDuringGetOrCreate = competitorStore.isCompetitorToUpdateDuringGetOrCreate(existingCompetitor);

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.URI;
 
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
@@ -18,6 +19,12 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements Competitor
         super(id, name, shortName, color, email, flagImage, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile,
                 searchTag);
         this.boat = boat;
+    }
+
+    public CompetitorWithBoatImpl(Competitor competitor, Boat boat) {
+        this(competitor.getId(), competitor.getName(), competitor.getShortName(), competitor.getColor(), competitor.getEmail(), 
+                competitor.getFlagImage(), (DynamicTeam) competitor.getTeam(), competitor.getTimeOnTimeFactor(),
+                competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(), boat);
     }
 
     @Override
