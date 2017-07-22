@@ -1827,6 +1827,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String documentSettingsId();
     String settingsForId(String id);
     String userProfileSettingsTabDescription();
+    String userSettingsFilter();
     String requiresRegattaRaceAndLeaderboard();
     String couldNotFindRaceInRegatte(String raceName, String regattaName);
     String algorithmTimeOutText();
