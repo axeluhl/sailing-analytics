@@ -21,6 +21,11 @@ import com.sap.sse.common.Util;
  * detail information about the race, only the order "from best to worst" is used, and ranks are determined based on it,
  * whereas the {@link QuickRankDTO#legNumberOneBased leg numbers} will continue to be accepted from the quick ranks
  * coming from the server.
+ * <p>
+ * 
+ * When the leaderboard DTO is still empty of {@link #leaderboardNotCurrentlyUpdating not currently being updated}, the
+ * quick ranks coming from the server will be accepted. Otherwise, once a {@link LeaderboardDTO} has been received, its
+ * ranking information will take precedence over quick ranks delivered asynchronously from the server.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -31,15 +36,20 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
     private final RaceIdentifier selectedRace;
     private boolean lastLeaderboardProvidedLegNumbers;
     private String raceColumnName;
+    private boolean leaderboardNotCurrentlyUpdating;
     
     public QuickRanksDTOFromLeaderboardDTOProvider(RaceCompetitorSet raceCompetitorSet, RaceIdentifier selectedRace) {
         this.raceCompetitorSet = raceCompetitorSet;
         this.selectedRace = selectedRace;
     }
 
+    public void setLeaderboardNotCurrentlyUpdating(boolean leaderboardNotCurrentlyUpdating) {
+        this.leaderboardNotCurrentlyUpdating = leaderboardNotCurrentlyUpdating;
+    }
+
     @Override
     public void quickRanksReceivedFromServer(Map<String, QuickRankDTO> quickRanksFromServer) {
-        if (quickRanks.isEmpty()) {
+        if (quickRanks.isEmpty() || leaderboardNotCurrentlyUpdating) {
             for (final Entry<String, QuickRankDTO> e : quickRanksFromServer.entrySet()) {
                 quickRanks.put(e.getKey(), e.getValue());
                 notifyListeners(e.getKey(), /* oldQuickRank */ null, e.getValue());
@@ -56,7 +66,6 @@ public class QuickRanksDTOFromLeaderboardDTOProvider extends AbstractQuickRanksD
     }
     
     public void updateQuickRanks(final LeaderboardDTO leaderboard) {
-
         RaceColumnDTO raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null || !raceColumn.containsRace(selectedRace)) {
             raceColumnName = getRaceColumnName(leaderboard, selectedRace);
