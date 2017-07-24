@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,13 +93,13 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     @Override
     public <FixT extends Timed> boolean loadOldestFix(Consumer<FixT> consumer, DeviceIdentifier device, TimeRange timeRangeToLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
         return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, () -> false, (d) -> {
-        }, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* ascending */ 1)).limit(1));
+        }, true, true);
     }
     
     @Override
     public <FixT extends Timed> boolean loadYoungestFix(Consumer<FixT> consumer, DeviceIdentifier device, TimeRange timeRangeToLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
         return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, () -> false, (d) -> {
-        }, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* descending */ -1)).limit(1));
+        }, false, true);
     }
     
     @Override
@@ -115,12 +114,12 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             TimePoint to, boolean inclusive, BooleanSupplier isPreemptiveStopped, Consumer<Double> progressConsumer)
                     throws NoCorrespondingServiceRegisteredException, TransformationException {
         loadFixes(consumer, device, from, to, inclusive, isPreemptiveStopped, progressConsumer,
-                UnaryOperator.identity());
+                true, false);
     }
 
     private <FixT extends Timed> boolean loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
             TimePoint to, boolean inclusive, BooleanSupplier isPreemptiveStopped, Consumer<Double> progressConsumer,
-            UnaryOperator<DBCursor> dbCursorCallback)
+            boolean ascending, boolean onlyOneResult)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         progressConsumer.accept(0d);
 
@@ -138,7 +137,11 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                     .lessThan(loadFixesTo.asMillis());
         }
         DBObject query = queryBuilder.get();
-        DBCursor result = dbCursorCallback.apply(fixesCollection.find(query));
+        DBCursor result = fixesCollection.find(query);
+        result.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
+        if (onlyOneResult) {
+            result.limit(1);
+        }
         boolean fixLoaded = false;
         // TODO commented out due to bad performance of DBCursor.size()
 //        double max = result.size();
