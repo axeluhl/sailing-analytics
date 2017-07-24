@@ -59,6 +59,7 @@ public class StatisticsCalculator {
     public void addLeaderboard(Leaderboard leaderboard) {
         races.addAll(calculateRaces(leaderboard));
         regattas.add(leaderboard.getName());
+        Util.addAll(leaderboard.getCompetitors(), competitors);
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
                 final TrackedRace trackedRace = column.getTrackedRace(fleet);
@@ -90,7 +91,6 @@ public class StatisticsCalculator {
                 }
             }
         }
-        Util.addAll(trackedRace.getRace().getCompetitors(), competitors);
     }
 
     public int getNumberOfRaces() {
