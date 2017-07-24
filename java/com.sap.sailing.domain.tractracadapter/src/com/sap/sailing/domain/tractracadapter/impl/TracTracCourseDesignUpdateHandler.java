@@ -82,27 +82,28 @@ public class TracTracCourseDesignUpdateHandler extends UpdateHandler implements 
     }
     
     private CourseBase replaceControlPointsByMatchingExistingControlPoints(CourseBase courseDesign) {
-    	final Iterable<IControl> candidates = domainFactory.getControlsForCourseArea(tractracRace.getEvent(), tractracRace.getCourseArea());
-    	final CourseBase result = new CourseDataImpl(courseDesign.getName());
-    	int zeroBasedPosition = 0;
-    	boolean changed = false;
-    	for (final Waypoint waypoint : courseDesign.getWaypoints()) {
-    		if (Util.size(waypoint.getMarks()) > 1) {
-    			final Iterator<Mark> markIter = waypoint.getMarks().iterator();
-    			final Mark first = markIter.next();
-    			final Mark second = markIter.next();
-    			final ControlPoint existingControlPoint = domainFactory.getExistingControlWithTwoMarks(candidates, first, second);
-    			if (existingControlPoint == null) {
-    				result.addWaypoint(zeroBasedPosition++, waypoint);
-    			} else {
-    				result.addWaypoint(zeroBasedPosition++,
-    						domainFactory.getBaseDomainFactory().createWaypoint(existingControlPoint, waypoint.getPassingInstructions()));
-    				changed = true;
-    			}
-    		} else {
-    			result.addWaypoint(zeroBasedPosition++, waypoint);
-    		}
-    	}
-    	return changed ? result : courseDesign;
+        final Iterable<IControl> candidates = domainFactory.getControlsForCourseArea(tractracRace.getEvent(), tractracRace.getCourseArea());
+        final CourseBase result = new CourseDataImpl(courseDesign.getName());
+        int zeroBasedPosition = 0;
+        boolean changed = false;
+        for (final Waypoint waypoint : courseDesign.getWaypoints()) {
+            if (Util.size(waypoint.getMarks()) > 1) {
+                final Iterator<Mark> markIter = waypoint.getMarks().iterator();
+                final Mark first = markIter.next();
+                final Mark second = markIter.next();
+                final ControlPoint existingControlPoint = domainFactory.getExistingControlWithTwoMarks(candidates,
+                        first, second);
+                if (existingControlPoint == null) {
+                    result.addWaypoint(zeroBasedPosition++, waypoint);
+                } else {
+                    result.addWaypoint(zeroBasedPosition++, domainFactory.getBaseDomainFactory()
+                            .createWaypoint(existingControlPoint, waypoint.getPassingInstructions()));
+                    changed = true;
+                }
+            } else {
+                result.addWaypoint(zeroBasedPosition++, waypoint);
+            }
+        }
+        return changed ? result : courseDesign;
     }
 }
