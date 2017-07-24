@@ -223,6 +223,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     editRegatta(regatta);
                 } else if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                    
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
                         removeRegatta(regatta);
                     }
@@ -359,4 +360,10 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     public RefreshableMultiSelectionModel<RegattaDTO> getRefreshableMultiSelectionModel() {
         return refreshableRegattaMultiSelectionModel;
     }
+
+    public CellTable<RegattaDTO> getRegattaTable() {
+        return regattaTable;
+    }
+    
+    
 }

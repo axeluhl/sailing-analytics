@@ -61,7 +61,7 @@ public class CourseFragmentName extends CourseFragment {
 
         if (mListView != null) {
             final List<String> courses = preferences.getByNameCourseDesignerCourseNames();
-            Collections.sort(courses, new NaturalComparator());
+            Collections.sort(courses);
             String courseName = "";
 
             CourseBase courseDesign = getRaceState().getCourseDesign();
