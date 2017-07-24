@@ -152,13 +152,11 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                 : loadFixesTo.minus(minimumDurationBetweenProgressUpdates);
         for (DBObject fixObject : result) {
             try {
-                @SuppressWarnings("unchecked")
-                FixT fix = (FixT) loadFix(fixObject);
+                FixT fix = loadFix(fixObject);
                 consumer.accept(fix);
                 fixLoaded = true;
-                
                 TimePoint fixTimePoint = fix.getTimePoint();
-                if(ascending ? fixTimePoint.after(nextProgressUpdateAt) : fixTimePoint.before(nextProgressUpdateAt)) {
+                if (ascending ? fixTimePoint.after(nextProgressUpdateAt) : fixTimePoint.before(nextProgressUpdateAt)) {
                     final Duration durationAlreadyLoaded = ascending ? loadFixesFrom.until(fixTimePoint) : fixTimePoint.until(loadFixesTo);
                     progressConsumer.accept(durationAlreadyLoaded.divide(totalDurationToLoad));
                     nextProgressUpdateAt = ascending
