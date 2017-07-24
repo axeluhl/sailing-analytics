@@ -163,7 +163,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         authorNameBox = createTextBox("Shore");
         content.setWidget(2, 0, createLabel(stringMessages.authorName()));
         content.setWidget(2, 1, authorNameBox);
-        authorPriorityBox = createIntegerBox(4, 2);
+        authorPriorityBox = createIntegerBox(0, 2);
         content.setWidget(3, 0, createLabel(stringMessages.authorPriority()));
         content.setWidget(3, 1, authorPriorityBox);
 
