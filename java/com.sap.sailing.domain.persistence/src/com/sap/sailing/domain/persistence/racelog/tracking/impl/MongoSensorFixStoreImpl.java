@@ -128,8 +128,6 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         final TimePoint loadFixesTo = to == null ? TimePoint.EndOfTime : to;
 
         DBObject dbDeviceId = storeDeviceId(deviceServiceFinder, device);
-//        dbDeviceId.removeField(FieldNames.DEVICE_TYPE_SPECIFIC_ID.name());
-//        dbDeviceId.markAsPartialObject();
         final QueryBuilder queryBuilder = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
                 .and(FieldNames.TIME_AS_MILLIS.name());
         if (inclusive) {
