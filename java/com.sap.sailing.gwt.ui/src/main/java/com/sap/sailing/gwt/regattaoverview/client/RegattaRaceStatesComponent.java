@@ -889,9 +889,9 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
     }
 
     private String createRaceLink(RegattaOverviewEntryDTO entryDTO) {
-        if (entryDTO.raceInfo.regattaAndRaceIdentifier != null && entryDTO.raceInfo.isTracked) {
-            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(entryDTO.raceInfo.regattaAndRaceIdentifier.getRegattaName(),
-                    entryDTO.raceInfo.regattaAndRaceIdentifier.getRaceName(), entryDTO.regattaName, null, null, null);
+        if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
+            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(entryDTO.raceInfo.raceIdentifier.getRegattaName(),
+                    entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.regattaName, null, null, null);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(true);
             ;
