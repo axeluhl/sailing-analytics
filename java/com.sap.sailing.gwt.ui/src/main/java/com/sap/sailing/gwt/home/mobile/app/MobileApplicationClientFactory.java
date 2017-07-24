@@ -1,13 +1,20 @@
 package com.sap.sailing.gwt.home.mobile.app;
 
+import java.util.Date;
+
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.storage.client.Storage;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
+import com.sap.sailing.gwt.home.desktop.partials.header.LoginPopup;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorViewImpl;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -31,7 +38,9 @@ import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * 
@@ -69,7 +78,64 @@ public class MobileApplicationClientFactory extends
         this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, getNavigator()
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
+        
+        
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
+
+                    @Override
+                    public void onUserStatusChange(UserDTO user) {
+                        checkNewUserPopup(user,navigator);
+                    }
+                }, true);
+            }
+        });
     }
+    
+    
+    private void checkNewUserPopup(UserDTO user, MobilePlacesNavigator placesNavigator) {
+        Storage storage = Storage.getLocalStorageIfSupported();
+        if (storage != null) {
+            Date currentTime = new Date();
+            if (user != null) {
+                storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
+            } else {
+                Date lastLoginOrSupression = null;
+                try {
+                    String value = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+                    if (value != null) {
+                        lastLoginOrSupression = new Date(Long.parseLong(value));
+                    }
+                } catch (Exception e) {
+                    GWT.log("Error parsing localstore value!");
+                    storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+                }
+                if (lastLoginOrSupression == null
+                        || lastLoginOrSupression.getTime() + SUPRESSION_DELAY < currentTime.getTime()) {
+                    new LoginPopup(false).doShow(new Runnable() {
+                        @Override
+                        public void run() {
+                            storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
+                        }
+                    },new Runnable() {
+                        @Override
+                        public void run() {
+                            storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
+                            placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo());
+                        }
+                    });
+                } else {
+                    GWT.log("No logininfo required, user was logged in recently, or clicked dismiss "
+                            + lastLoginOrSupression + " cur " + currentTime);
+                }
+            }
+
+        }
+    }
+
 
     public MobilePlacesNavigator getNavigator() {
         return navigator;

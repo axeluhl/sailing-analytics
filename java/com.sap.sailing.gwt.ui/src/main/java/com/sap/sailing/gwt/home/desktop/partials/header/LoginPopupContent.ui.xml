@@ -1,0 +1,58 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+	.more {
+		display: inline-block;
+	}
+	
+	.dismiss {
+		display: inline-block;
+		right: 7px;
+		position: absolute;
+	}
+	
+	.main {
+		float: right;
+		padding: 1.333333333333333em;
+		background-color: #fff;
+		border-radius: .2em;
+		box-shadow: 0 0 0.533333333333333em rgba(0, 0, 0, .15);
+		border: 1px solid rgba(0, 0, 0, .1);
+	}
+	
+	.main:before {
+	    content: '';
+		width: 1.333333333333333em;
+		height: 1.333333333333333em;
+		display: block;
+		background-color: #fff;
+		-webkit-transform: rotate(45deg);
+		-moz-transform: rotate(45deg);
+		-ms-transform: rotate(45deg);
+		transform: rotate(45deg);
+		margin: 0 1em 0 1.333333333333333em;
+		position: absolute;
+		top: -.666666666666667em;
+		right: 1.333333333333333em;
+		border-top: 1px solid rgba(0, 0, 0, .1);
+		border-left: 1px solid rgba(0, 0, 0, .1);
+	}
+	
+	.btns {
+		display: block;
+	}
+	
+	.lbl {
+		display: block;
+	}
+	</ui:style>
+	<g:FlowPanel styleName="{style.main}">
+		<g:Label ui:field="txt" styleName="{style.lbl}">More function if you login,
+			learn more:</g:Label>
+		<g:FlowPanel styleName="{style.btns}">
+			<g:Anchor styleName="{style.more}" ui:field="moreInfo" />
+			<g:Anchor styleName="{style.dismiss}" ui:field="dismiss" />
+		</g:FlowPanel>
+	</g:FlowPanel>
+</ui:UiBinder> 

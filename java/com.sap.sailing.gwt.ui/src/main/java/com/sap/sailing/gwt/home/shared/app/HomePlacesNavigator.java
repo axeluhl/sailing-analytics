@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.app;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
@@ -12,6 +13,7 @@ import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
+import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -35,6 +37,11 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<EventsPlace> getEventsNavigation() {
         return createGlobalPlaceNavigation(new EventsPlace());
+    }
+    
+
+    public PlaceNavigation<MoreLoginInformationPlace> getMoreLoginInfo() {
+        return createGlobalPlaceNavigation(new MoreLoginInformationPlace());
     }
 
     public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
