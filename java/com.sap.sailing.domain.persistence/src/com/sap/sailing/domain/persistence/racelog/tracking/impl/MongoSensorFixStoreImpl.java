@@ -31,6 +31,7 @@ import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -143,30 +144,31 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             result.limit(1);
         }
         boolean fixLoaded = false;
-        // TODO commented out due to bad performance of DBCursor.size()
-//        double max = result.size();
-//        // update roughly every percent, but at not more often than every 100th entry
-//        int reportIncrement = (int) Math.max(max / 100, 100);
-        int reportIncrement = 100;
-        int current = 0;
-        // TODO temporary solution to report progress at least in 2 steps
-        progressConsumer.accept(0.5d);
+        final Duration totalDurationToLoad = loadFixesFrom.until(loadFixesTo);
+        // Given that fixes are recorded with a rate of 10/s we update the progress every 10*60*5=3000 fixes.
+        final Duration minimumDurationBetweenProgressUpdates = Util.max(totalDurationToLoad.divide(20), Duration.ONE_MINUTE.times(5));
+        TimePoint nextProgressUpdateAt = ascending
+                ? loadFixesFrom.plus(minimumDurationBetweenProgressUpdates)
+                : loadFixesTo.minus(minimumDurationBetweenProgressUpdates);
         for (DBObject fixObject : result) {
-            current++;
-
-            if (current % reportIncrement == 0) {
-             // TODO commented out due to bad performance of DBCursor.size()
-//                progressConsumer.accept(current / max);
-                if (isPreemptiveStopped.getAsBoolean()) {
-                    logger.log(Level.WARNING, "Exiting because of preemtive stop requested " + fixObject);
-                    return fixLoaded;
-                }
-            }
             try {
                 @SuppressWarnings("unchecked")
                 FixT fix = (FixT) loadFix(fixObject);
                 consumer.accept(fix);
                 fixLoaded = true;
+                
+                TimePoint fixTimePoint = fix.getTimePoint();
+                if(ascending ? fixTimePoint.after(nextProgressUpdateAt) : fixTimePoint.before(nextProgressUpdateAt)) {
+                    final Duration durationAlreadyLoaded = ascending ? loadFixesFrom.until(fixTimePoint) : fixTimePoint.until(loadFixesTo);
+                    progressConsumer.accept(durationAlreadyLoaded.divide(totalDurationToLoad));
+                    nextProgressUpdateAt = ascending
+                            ? fixTimePoint.plus(minimumDurationBetweenProgressUpdates)
+                            : fixTimePoint.minus(minimumDurationBetweenProgressUpdates);
+                    if (isPreemptiveStopped.getAsBoolean()) {
+                        logger.log(Level.WARNING, "Exiting because of preemtive stop requested " + fixObject);
+                        return fixLoaded;
+                    }
+                }
             } catch (TransformationException e) {
                 logger.log(Level.WARNING, "Could not read fix from MongoDB: " + fixObject);
             } catch (ClassCastException e) {
