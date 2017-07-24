@@ -28,6 +28,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String refresh();
     @Override
     String remove();
+    String removeNumber(int count);
     String windSource();
     String dampeningInterval();
     String map();
@@ -362,6 +363,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSelectARegatta();
     String addFleet();
     String doYouReallyWantToRemoveRegatta(String name);
+    String doYouReallyWantToRemoveRegattas();
+    String doYouReallyWantToRemoveNonVisibleRegattas(String regattaNames);
     String errorLoadingScoreCorrectionProviders(String message);
     String selectResultListToImportFrom();
     String of();
@@ -958,6 +961,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String offset();
     String line();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
+    String doYouReallyWantToRemoveNonVisibleEvents(String eventNames);
     String doYouReallyWantToRemoveEvents();
     String doYouReallyWantToRemoveEvent(String eventName);
     String doYouReallyWantToRemoveCompetitors();
@@ -1030,6 +1034,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorGettingIgtimiAuthorizationUrl(String message);
     String addIgtimiUser();
     String doYouReallyWantToRemoveLeaderboards();
+    String doYouReallyWantToRemoveNonVisibleLeaderboards(String leaderboardNames);
+    String doYouReallyWantToRemoveTrackedRaces();
+    String doYouReallyWantToRemoveNonVisibleTrackedRaces(String trackedRacesName);
     String errorTryingToRemoveIgtimiAccount(String eMailOfAccountToRemove);
     String successfullyRemoveIgtimiAccount(String eMailOfAccountToRemove);
     String eMailMustNotBeEmpty();
@@ -1123,6 +1130,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboardsExceptFromSelectedGroup();
     String availableLeaderboardGroups();
     String leaderboardGroupsOfSelectedEvent();
+    String doYouReallyWantToRemoveLeaderboardGroups();
+    String doYouReallyWantToRemoveNonVisibleLeaderboardGroups(String leaderboardGroupNames);
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
@@ -1818,6 +1827,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String documentSettingsId();
     String settingsForId(String id);
     String userProfileSettingsTabDescription();
+    String userSettingsFilter();
     String requiresRegattaRaceAndLeaderboard();
     String couldNotFindRaceInRegatte(String raceName, String regattaName);
     String algorithmTimeOutText();
