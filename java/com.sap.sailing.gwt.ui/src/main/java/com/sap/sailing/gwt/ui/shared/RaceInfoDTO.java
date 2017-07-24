@@ -37,7 +37,7 @@ public class RaceInfoDTO implements IsSerializable {
         }
     }
     
-    public RaceIdentifier raceIdentifier;
+    public RaceIdentifier regattaAndRaceIdentifier;
     public String raceName;
     public String fleetName;
     public int fleetOrdering;
