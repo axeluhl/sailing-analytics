@@ -18,7 +18,7 @@
 }
 
 .mobileLayout {
-	left: 0px;
+	right: 0px;
 	top: 70px !important;
 	position: absolute;
 	overflow: visible;
