@@ -3153,7 +3153,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new IllegalArgumentException("The leaderboard " + metaLeaderboardName + " is not a metaleaderboard");
         }
         MetaLeaderboard metaLeaderboard = (MetaLeaderboard) leaderboard;
-        LeaderboardGroup groupOrNull = getService().getLeaderboardGroupByName(metaLeaderboardName.replace(" Overall", ""));
+        LeaderboardGroup groupOrNull = getService().getLeaderboardGroupByName(metaLeaderboardName.replace(" " + LeaderboardNameConstants.OVERALL, ""));
         Iterable<Leaderboard> leaderBoards = metaLeaderboard.getLeaderboards();
         boolean ascending = true;
         List<com.sap.sse.common.Util.Pair<String, String>> result = new ArrayList<com.sap.sse.common.Util.Pair<String, String>>();
