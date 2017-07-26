@@ -53,7 +53,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     
     private void setupEventListContent(EventSeriesViewDTO series) {
         boolean first = true;
-        for(EventMetadataDTO eventOfSeries : series.getEventsDescending()) {
+        for(EventMetadataDTO eventOfSeries : series.getEventsSorted()) {
             if(eventOfSeries.getState() == EventState.PLANNED) {
                 continue;
             }

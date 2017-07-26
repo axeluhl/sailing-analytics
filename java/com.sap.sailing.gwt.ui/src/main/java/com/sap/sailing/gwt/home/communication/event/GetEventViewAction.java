@@ -90,6 +90,8 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
             LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
             dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(overallLeaderboardGroup));
             
+            dto.setAscending(!overallLeaderboardGroup.isDisplayGroupsInReverseOrder());
+            
             for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(overallLeaderboardGroup,
                     context.getRacingEventService())) {
                 String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getRacingEventService());
@@ -97,7 +99,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                     displayName = eventInSeries.getName();
                 }
                 EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
-                dto.getEventsOfSeries().add(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
+                dto.addEventToSeries(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
             }
         } else {
             dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);

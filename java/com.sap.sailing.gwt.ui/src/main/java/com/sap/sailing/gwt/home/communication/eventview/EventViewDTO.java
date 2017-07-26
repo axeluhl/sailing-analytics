@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.eventview;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -27,6 +28,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private ImageDTO logoImage;
     private String officialWebsiteURL;
     private String sailorsInfoWebsiteURL;
+    private boolean ascending;
 
     public EventType getType() {
         return type;
@@ -40,7 +42,16 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
         return regattas;
     }
 
-    public List<EventReferenceWithStateDTO> getEventsOfSeries() {
+    public void addEventToSeries(EventReferenceWithStateDTO eventRef) {
+        eventsOfSeries.add(eventRef);
+    }
+
+    public List<EventReferenceWithStateDTO> getEventsOfSeriesSorted() {
+        if (ascending) {
+            ArrayList<EventReferenceWithStateDTO> eventsAscending = new ArrayList<>(eventsOfSeries);
+            Collections.reverse(eventsAscending);
+            return eventsAscending;
+        }
         return eventsOfSeries;
     }
 
@@ -115,5 +126,9 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
             return venue + ", " + getVenueCountry();
         }
         return venue;
+    }
+
+    public void setAscending(boolean ascending) {
+        this.ascending = ascending;
     }
 }

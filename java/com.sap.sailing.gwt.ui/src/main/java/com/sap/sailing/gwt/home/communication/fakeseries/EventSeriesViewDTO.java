@@ -18,7 +18,7 @@ public class EventSeriesViewDTO implements Result, HasLogo {
     private ImageDTO logoImage;
     private boolean hasMedia;
     private boolean hasAnalytics;
-
+    boolean ascending;
     private String leaderboardId;
 
     public enum EventSeriesState {
@@ -52,16 +52,20 @@ public class EventSeriesViewDTO implements Result, HasLogo {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+    
+    public void setAscending(boolean ascending) {
+        this.ascending = ascending;
+    }
 
-    public List<EventMetadataDTO> getEventsDescending() {
+    public List<EventMetadataDTO> getEventsSorted() {
+        if(ascending){
+            ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>(eventsDescending);
+            Collections.reverse(eventsAscending);
+            return eventsAscending;
+        }
         return eventsDescending;
     }
     
-    public List<EventMetadataDTO> getEventsAscending() {
-        ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>(eventsDescending);
-        Collections.reverse(eventsAscending);
-        return eventsAscending;
-    }
 
     public void addEvent(EventMetadataDTO event) {
         this.eventsDescending.add(event);

@@ -48,7 +48,7 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
 
     private void initUi(AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesMiniOverallLeaderboardView view = new SeriesMiniOverallLeaderboardViewImpl(this);
-        view.setQuickFinderValues(series.getDisplayName(), series.getEventsDescending());
+        view.setQuickFinderValues(series.getDisplayName(), series.getEventsSorted());
         panel.setWidget(view.asWidget());
         
         initNavigationPath();

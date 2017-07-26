@@ -45,7 +45,7 @@ public class SeriesHeader extends Composite {
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
         StringBuilder locationsBuilder = new StringBuilder();
         boolean first = true;
-        for (EventMetadataDTO eventOfSeries : event.getEventsAscending()) {
+        for (EventMetadataDTO eventOfSeries : event.getEventsSorted()) {
             if(!first) {
                 locationsBuilder.append(", ");
             }
