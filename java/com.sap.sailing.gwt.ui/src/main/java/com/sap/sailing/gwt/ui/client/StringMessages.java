@@ -1829,7 +1829,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String userProfileSettingsTabDescription();
     String userSettingsFilter();
     String requiresRegattaRaceAndLeaderboard();
-    String couldNotFindRaceInRegatte(String raceName, String regattaName);
+    String couldNotFindRaceInRegatta(String raceName, String regattaName);
     String algorithmTimeOutText();
     String mixedLegText();
     String pathCanvasOverlayTitle(int numPoints, String distance, String date);
