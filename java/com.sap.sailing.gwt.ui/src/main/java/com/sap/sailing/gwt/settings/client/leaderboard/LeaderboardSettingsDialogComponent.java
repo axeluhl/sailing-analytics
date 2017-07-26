@@ -26,9 +26,9 @@ import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LegColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ManeuverCountRaceColumn;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.util.SettingsDefaultValuesUtils;
 import com.sap.sse.gwt.client.controls.IntegerBox;
@@ -154,7 +154,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         dialog.addTooltip(showAddedScoresCheckBox, stringMessages.showAddedScores());
         showAddedScoresCheckBox.setValue(initialSettings.isShowAddedScores());
         addedScoresFlowPanel.add(showAddedScoresCheckBox);
-        showRaceRankColumnCheckBox = dialog.createCheckbox(stringMessages.showRacePlaceColumn());
+        showRaceRankColumnCheckBox = dialog.createCheckbox(stringMessages.showRaceRankColumn());
         showRaceRankColumnCheckBox.setValue(initialSettings.isShowRaceRankColumn());
         addedScoresFlowPanel.add(showRaceRankColumnCheckBox);
         

@@ -54,7 +54,7 @@ public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
     public void setData(ArrayList<Pair<RegattaAndRaceIdentifier, Date>> data) {
         dataPanel.clear();
         if(data == null){
-            dataPanel.add(new Label(StringMessages.INSTANCE.noData()));
+            dataPanel.add(new Label(StringMessages.INSTANCE.noUpcomingRaceDataAvailable()));
         }
         else if ( data.isEmpty()) {
             dataPanel.add(new Label(StringMessages.INSTANCE.nothingUpcoming()));

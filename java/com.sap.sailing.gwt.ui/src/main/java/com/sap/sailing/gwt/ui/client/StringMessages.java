@@ -1823,12 +1823,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String estimatedTime();
     String nothingUpcoming();
 
-    String chooseAConfiguration();
+    String chooseAAutoplayConfiguration();
     String raceRankShort();
-    String showRacePlaceColumn();
+    String showRaceRankColumn();
     String unknownLeaderboardType(String name);
     String selectCompetitorsToEliminate();
-    String noData();
+    String noUpcomingRaceDataAvailable();
     String trackedRaceAlreadyLinked();
     String reallyRemoveSeries(String seriesName);
     String settingsId();

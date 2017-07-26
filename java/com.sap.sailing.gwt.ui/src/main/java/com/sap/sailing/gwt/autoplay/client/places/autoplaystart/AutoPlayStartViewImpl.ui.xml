@@ -31,7 +31,7 @@
         </div>
         <div class="{res.mediaCss.grid} {style.row}">
             <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-                <span><ui:text from='{i18n.chooseAConfiguration}' />:</span>
+                <span><ui:text from='{i18n.chooseAAutoplayConfiguration}' />:</span>
             </div>
             <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
                 <g:ListBox ui:field="configurationSelectionBox" />
