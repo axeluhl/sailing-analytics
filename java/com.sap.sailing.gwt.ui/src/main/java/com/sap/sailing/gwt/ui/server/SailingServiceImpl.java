@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -303,6 +304,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
@@ -3141,19 +3143,53 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<com.sap.sse.common.Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName) {
+    public List<com.sap.sse.common.Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(
+            String metaLeaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(metaLeaderboardName);
         if (leaderboard == null) {
-            throw new IllegalArgumentException("Couldn't find leaderboard named "+metaLeaderboardName);
+            throw new IllegalArgumentException("Couldn't find leaderboard named " + metaLeaderboardName);
         }
         if (!(leaderboard instanceof MetaLeaderboard)) {
-            throw new IllegalArgumentException("The leaderboard "+metaLeaderboardName + " is not a metaleaderboard");
+            throw new IllegalArgumentException("The leaderboard " + metaLeaderboardName + " is not a metaleaderboard");
         }
-        List<com.sap.sse.common.Util.Pair<String, String>> result = new ArrayList<com.sap.sse.common.Util.Pair<String, String>>();
         MetaLeaderboard metaLeaderboard = (MetaLeaderboard) leaderboard;
-        for (Leaderboard containedLeaderboard: metaLeaderboard.getLeaderboards()) {
+        LeaderboardGroup groupOrNull = getService().getLeaderboardGroupByName(metaLeaderboardName.replace(" Overall", ""));
+        Iterable<Leaderboard> leaderBoards = metaLeaderboard.getLeaderboards();
+        boolean ascending = true;
+        List<com.sap.sse.common.Util.Pair<String, String>> result = new ArrayList<com.sap.sse.common.Util.Pair<String, String>>();
+        for (Leaderboard containedLeaderboard : leaderBoards) {
             result.add(new com.sap.sse.common.Util.Pair<String, String>(containedLeaderboard.getName(),
-                    containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName() : containedLeaderboard.getName()));
+                    containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName()
+                            : containedLeaderboard.getName()));
+        }
+        if (groupOrNull != null) {
+            //group found determine sorting
+            ascending = !groupOrNull.isDisplayGroupsInReverseOrder();
+            List<Event> sortedEvents = HomeServiceUtil.getEventsForSeriesInDescendingOrder(groupOrNull, getService());
+            if (ascending) {
+                Collections.reverse(sortedEvents);
+            }
+            Collections.sort(result, new Comparator<com.sap.sse.common.Util.Pair<String, String>>() {
+
+                @Override
+                public int compare(Pair<String, String> o1, Pair<String, String> o2) {
+                    int rank1 = 0;
+                    int rank2 = 0;
+                    for(int i = 0;i<sortedEvents.size();i++){
+                        Event event = sortedEvents.get(i);
+                        if(event.getName().contains(o1.getB())){
+                            rank1 = i;
+                        }
+                        if(event.getName().contains(o2.getB())){
+                            rank2 = i;
+                        }
+                    }
+                    if(rank1 == 0 && rank2 == 0){
+                        logger.warning("Could not find corresponding event for leaderboard with name " + o1.getA() + " " + o2.getA());
+                    }
+                    return rank1-rank2;
+                }
+            });
         }
         return result;
     }
