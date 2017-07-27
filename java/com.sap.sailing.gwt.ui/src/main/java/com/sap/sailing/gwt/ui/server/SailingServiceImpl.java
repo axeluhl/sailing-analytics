@@ -4551,7 +4551,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         entry.boatClassName = boatClassName;
         entry.regattaDisplayName = regattaName;
-        entry.regattaName = leaderboard.getName();
+        entry.leaderboardName = leaderboard.getName();
         entry.raceInfo = createRaceInfoDTO(seriesName, raceColumn, fleet);
         entry.currentServerTime = new Date();
         entry.buyZoneRadius = buyZoneRadius;
