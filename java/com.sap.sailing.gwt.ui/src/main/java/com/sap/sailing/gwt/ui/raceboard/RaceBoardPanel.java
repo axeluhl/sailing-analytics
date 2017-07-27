@@ -287,6 +287,9 @@ public class RaceBoardPanel
         leaderboardPanel = createLeaderboardPanel(lifecycle, settings, leaderboardName, leaderboardGroupName,
                 competitorSearchTextBox);
         addChildComponent(leaderboardPanel);
+        leaderboardPanel.addVisibilityListener(visible->{
+            quickRanksDTOProvider.setLeaderboardNotCurrentlyUpdating(!visible);
+        });
 
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);

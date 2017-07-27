@@ -24,13 +24,12 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
-import com.sap.sse.common.Duration;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 
 public class TracTracStartTimeUpdateHandler extends UpdateHandler implements StartTimeChangedListener {
     private final static Logger logger = Logger.getLogger(TracTracStartTimeUpdateHandler.class.getName());
 
-    private final static Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
     private final static String ACTION = "update_race_start_time";
     private final static String ACTION_START_TRACKING = "start_tracking";
     private final static String FIELD_RACE_START_TIME = "race_start_time";
@@ -93,7 +92,8 @@ public class TracTracStartTimeUpdateHandler extends UpdateHandler implements Sta
                     final URI startTrackingURI = getActionURI(ACTION_START_TRACKING);
                     final HttpPost request = new HttpPost(startTrackingURI);
                     final List<BasicNameValuePair> params = getDefaultParametersAsNewList();
-                    params.add(new BasicNameValuePair(FIELD_TRACKING_START_TIME, String.valueOf(newStartTime.minus(START_TRACKING_THIS_MUCH_BEFORE_RACE_START).asMillis())));
+                    params.add(new BasicNameValuePair(FIELD_TRACKING_START_TIME, String.valueOf(newStartTime.minus(
+                            TrackedRace.START_TRACKING_THIS_MUCH_BEFORE_RACE_START).asMillis())));
                     request.setEntity(new UrlEncodedFormEntity(params));
                     final HttpClient client = new SystemDefaultHttpClient();
                     logger.info("Using " + startTrackingURI.toString() + " to start tracking");

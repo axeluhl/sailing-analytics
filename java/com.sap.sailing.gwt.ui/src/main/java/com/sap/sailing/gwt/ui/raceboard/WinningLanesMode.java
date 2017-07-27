@@ -75,7 +75,8 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.isShowSimulationOverlay(),
                 defaultSettings.isShowMapControls(),
                 defaultSettings.getManeuverTypesToShow(),
-                defaultSettings.isShowDouglasPeuckerPoints());
+                defaultSettings.isShowDouglasPeuckerPoints(),
+                defaultSettings.isShowEstimatedDuration());
         
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
 
