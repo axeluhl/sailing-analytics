@@ -276,7 +276,7 @@ public class AutoplayHelper {
 
         RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
-                RaceMapSettings.getDefaultManeuvers(), false);
+                RaceMapSettings.getDefaultManeuvers(), false, false);
 
         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE);
 
