@@ -15,7 +15,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
  * register it self as a display on the {@link ListDataProvider} and reacts on the changes of {@link ListDataProvider}.
  * When the {@link ListDataProvider} is changed this {@link RefreshableMultiSelectionModel selection model} will refresh
  * the selection according to the {@link ListDataProvider} changes. To make this class work correct it is very important
- * to set the {@link ListDataProvider}, otherwise it won´t work.
+ * to set the {@link ListDataProvider}, otherwise it won't work.
  * <p>
  * For more details on the update process read the {@link RefreshableSelectionModel} Javadoc and see the methods
  * {@link RefreshableMultiSelectionModel#refreshSelectionModel(Iterable)} and
@@ -61,6 +61,23 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     @Override
     public EntityIdentityComparator<T> getEntityIdentityComparator() {
         return comp;
+    }
+    
+    /**
+     * Checks if all items that are currently selected also appear in the visible items list.
+     * 
+     * @param visibleItemList
+     *            can be obtained by calling {@link com.google.gwt.user.cellview.client.CellTable#getVisibleItems()}
+     *            method.
+     * @return <code>true</code> if the list of visible items does not contain every item of the current selected item set.
+     */
+    public boolean itemIsSelectedButNotVisible(List<T> visibleItemList) {
+        for (T item : getSelectedSet()) {
+            if (!visibleItemList.contains(item)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

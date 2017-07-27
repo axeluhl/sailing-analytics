@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -151,10 +152,18 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         removeEventsButton.setEnabled(false);
         removeEventsButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent event) {
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvents())) {
+            public void onClick(ClickEvent event) {  
+                if(askUserForConfirmation()){
                     removeEvents(refreshableEventSelectionModel.getSelectedSet());
                 }
+            }
+
+            private boolean askUserForConfirmation() {
+                if(refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())){
+                    final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
+                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames));
+                }
+                return Window.confirm(stringMessages.doYouReallyWantToRemoveEvents());
             }
         });
         eventControlsPanel.add(removeEventsButton);
@@ -187,6 +196,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public void onSelectionChange(SelectionChangeEvent event) {
                 final boolean somethingSelected = !refreshableEventSelectionModel.getSelectedSet().isEmpty();
                 removeEventsButton.setEnabled(somethingSelected);
+                final int numberOfItemsSelected = refreshableEventSelectionModel.getSelectedSet().size();
+                removeEventsButton.setText(numberOfItemsSelected <= 1 ? stringMessages.remove() : stringMessages.removeNumber(numberOfItemsSelected));
             }
         });
         

@@ -771,13 +771,6 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                     for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
                         expandableSortableColumn.changeExpansionState(/* expand */ true);
                     }
-                    if (newSettings.getNameOfRaceToSort() != null) {
-                        final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(
-                                newSettings.getNameOfRaceToSort());
-                        if (raceColumnByRaceName != null) {
-                            getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
-                        }
-                    }
                 } finally {
                     removeBusyTask();
                 }
