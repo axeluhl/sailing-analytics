@@ -14,11 +14,10 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
 public class EventSeriesViewDTO implements Result, HasLogo {
     private UUID id;
     private String displayName;
-    private ArrayList<EventMetadataDTO> eventsDescending = new ArrayList<>();
+    private ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>();
     private ImageDTO logoImage;
     private boolean hasMedia;
     private boolean hasAnalytics;
-    boolean ascending;
     private String leaderboardId;
 
     public enum EventSeriesState {
@@ -52,23 +51,19 @@ public class EventSeriesViewDTO implements Result, HasLogo {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
-    
-    public void setAscending(boolean ascending) {
-        this.ascending = ascending;
-    }
 
-    public List<EventMetadataDTO> getEventsSorted() {
-        if(ascending){
-            ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>(eventsDescending);
-            Collections.reverse(eventsAscending);
-            return eventsAscending;
-        }
+    public List<EventMetadataDTO> getEventsAscending() {
+        return eventsAscending;
+    }
+    
+    public List<EventMetadataDTO> getEventsDescending() {
+        ArrayList<EventMetadataDTO> eventsDescending = new ArrayList<>(eventsAscending);
+        Collections.reverse(eventsDescending);
         return eventsDescending;
     }
-    
 
     public void addEvent(EventMetadataDTO event) {
-        this.eventsDescending.add(event);
+        this.eventsAscending.add(event);
     }
 
     public ImageDTO getLogoImage() {

@@ -90,8 +90,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
             LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
             dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(overallLeaderboardGroup));
             
-            dto.setAscending(!overallLeaderboardGroup.isDisplayGroupsInReverseOrder());
-            
             for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(overallLeaderboardGroup,
                     context.getRacingEventService())) {
                 String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getRacingEventService());

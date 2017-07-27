@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -3153,43 +3152,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new IllegalArgumentException("The leaderboard " + metaLeaderboardName + " is not a metaleaderboard");
         }
         MetaLeaderboard metaLeaderboard = (MetaLeaderboard) leaderboard;
-        LeaderboardGroup groupOrNull = getService().getLeaderboardGroupByName(metaLeaderboardName.replace(" " + LeaderboardNameConstants.OVERALL, ""));
-        Iterable<Leaderboard> leaderBoards = metaLeaderboard.getLeaderboards();
-        boolean ascending = true;
+        LeaderboardGroup groupOrNull = null;
+        for (LeaderboardGroup lg : getService().getLeaderboardGroups().values()) {
+            if (metaLeaderboard.equals(lg.getOverallLeaderboard())) {
+                groupOrNull = lg;
+                break;
+            }
+        }
+        // If we could identify the associated LeaderboardGroup the Leaderboards can be sorted based on that group
+        Iterable<Leaderboard> leaderBoards = groupOrNull != null
+                ? HomeServiceUtil.getLeaderboardsForSeriesInOrder(groupOrNull) : metaLeaderboard.getLeaderboards();
         List<com.sap.sse.common.Util.Pair<String, String>> result = new ArrayList<com.sap.sse.common.Util.Pair<String, String>>();
         for (Leaderboard containedLeaderboard : leaderBoards) {
             result.add(new com.sap.sse.common.Util.Pair<String, String>(containedLeaderboard.getName(),
                     containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName()
                             : containedLeaderboard.getName()));
-        }
-        if (groupOrNull != null) {
-            //group found determine sorting
-            ascending = !groupOrNull.isDisplayGroupsInReverseOrder();
-            List<Event> sortedEvents = HomeServiceUtil.getEventsForSeriesInDescendingOrder(groupOrNull, getService());
-            if (ascending) {
-                Collections.reverse(sortedEvents);
-            }
-            Collections.sort(result, new Comparator<com.sap.sse.common.Util.Pair<String, String>>() {
-
-                @Override
-                public int compare(Pair<String, String> o1, Pair<String, String> o2) {
-                    int rank1 = 0;
-                    int rank2 = 0;
-                    for(int i = 0;i<sortedEvents.size();i++){
-                        Event event = sortedEvents.get(i);
-                        if(event.getName().contains(o1.getB())){
-                            rank1 = i;
-                        }
-                        if(event.getName().contains(o2.getB())){
-                            rank2 = i;
-                        }
-                    }
-                    if(rank1 == 0 && rank2 == 0){
-                        logger.warning("Could not find corresponding event for leaderboard with name " + o1.getA() + " " + o2.getA());
-                    }
-                    return rank1-rank2;
-                }
-            });
         }
         return result;
     }

@@ -60,14 +60,13 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
         boolean allFinished = true;
         if (HomeServiceUtil.isFakeSeries(o)) {
             LeaderboardGroup overallLeaderboardGroup = o.getLeaderboardGroups().iterator().next();
-            dto.setAscending(!overallLeaderboardGroup.isDisplayGroupsInReverseOrder());
             dto.setDisplayName(overallLeaderboardGroup.getDisplayName() != null ? overallLeaderboardGroup.getDisplayName() : overallLeaderboardGroup.getName());
 
             if (overallLeaderboardGroup.getOverallLeaderboard() != null) {
                 dto.setLeaderboardId(overallLeaderboardGroup.getOverallLeaderboard().getName());
             }
 
-            for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(overallLeaderboardGroup,
+            for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesOrdered(overallLeaderboardGroup,
                     ctx.getRacingEventService())) {
                 EventMetadataDTO eventOfSeries = HomeServiceUtil.convertToMetadataDTO(eventInSeries, ctx.getRacingEventService());
                 dto.addEvent(eventOfSeries);
