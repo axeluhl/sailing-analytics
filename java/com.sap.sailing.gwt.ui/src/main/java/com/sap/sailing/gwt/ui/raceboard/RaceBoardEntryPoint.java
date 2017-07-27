@@ -94,7 +94,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     }
                 }
                 if (raceboardData.getRace() == null) {
-                    createErrorPage(getStringMessages().couldNotFindRaceInRegatta( raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getRegattaName()));
+                    createErrorPage(getStringMessages().couldNotFindRaceInRegatta(raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getRegattaName()));
                     return;
                 }
                 
