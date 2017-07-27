@@ -420,6 +420,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private CompetitorDTO advantageLineCompetitor;
     protected Label estimatedDurationOverlay;
     private RaceMapStyle raceMapStyle;
+    private final boolean showHeaderPanel;
 
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
@@ -439,6 +440,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
         super(parent, context);
+        this.showHeaderPanel = showHeaderPanel;
         this.quickRanksDTOProvider = quickRanksDTOProvider;
         this.raceMapLifecycle = raceMapLifecycle;
         this.stringMessages = stringMessages;
@@ -446,7 +448,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.raceIdentifier = raceIdentifier;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
-       this.timer = timer;
+        this.timer = timer;
         this.isSimulationEnabled = true;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
@@ -1064,6 +1066,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (estimatedDurationOverlay == null) {
             estimatedDurationOverlay = new Label("");
             estimatedDurationOverlay.setStyleName(raceMapStyle.estimatedDuration());
+            if(showHeaderPanel) {
+                estimatedDurationOverlay.addStyleName(raceMapStyle.estimatedDurationWithHeader());
+            }
             map.setControls(ControlPosition.TOP_CENTER, estimatedDurationOverlay);
         }
         estimatedDurationOverlay.setText(stringMessages.estimatedDuration()
