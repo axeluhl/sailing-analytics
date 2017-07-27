@@ -1,66 +1,78 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.logging.Level;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 
-import com.sap.sailing.domain.statistics.Statistics;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sailing.server.gateway.serialization.impl.AnniversaryConflictResolver;
+import com.sap.sailing.server.gateway.serialization.impl.AnniversaryRaceInfo;
+import com.sap.sailing.server.gateway.serialization.impl.AnniversaryRaceInfoJsonSerializer;
 
 @Path("/v1/anniversary")
 public class AnniversaryListResource extends AbstractSailingServerResource {
-    
     private static final Logger logger = Logger.getLogger(AnniversaryListResource.class.getName());
-
     private static final String HEADER_NAME_CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_TYPE_JSON_UTF8 = MediaType.APPLICATION_JSON + ";charset=UTF-8";
 
-    private final StatisticsByYearJsonSerializer statisticsByYearJsonSerializer = new StatisticsByYearJsonSerializer(
-            new StatisticsJsonSerializer());
+    private static final AnniversaryConflictResolver resolver = new AnniversaryConflictResolver();
+    
+    private final AnniversaryRaceInfoJsonSerializer anniversaryRaceListJsonSerializer = new AnniversaryRaceInfoJsonSerializer();
 
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
-    @Path("years")
-    public Response getStatisticsByYear(@QueryParam("years") final List<String> years) {
+    @Path("races")
+    public Response getStatisticsByYear() {
         JSONArray json = new JSONArray();
-        final Map<Integer, Statistics> statisticsByYear = getService().getLocalStatisticsByYear();
-        final Predicate<Map.Entry<Integer, Statistics>> filterPredicate;
-        if (years != null && !years.isEmpty()) {
-            final Set<Integer> yearsToReturn = toIntegerYears(years);
-            filterPredicate = entry -> yearsToReturn.contains(entry.getKey());
-        } else {
-            filterPredicate = entry -> true;
-        }
-        statisticsByYear.entrySet().stream().filter(filterPredicate).forEach(
-                entry -> json.add(statisticsByYearJsonSerializer.serialize(new Pair<>(entry.getKey(), entry.getValue()))));
-        return getJsonResponse(json);
-    }
 
-    private Set<Integer> toIntegerYears(final List<String> years) {
-        final Set<Integer> integerYears = new HashSet<>();
-        for (String yearString : years) {
-            try {
-                integerYears.add(Integer.valueOf(yearString.trim()));
-            } catch (Exception e) {
-                logger.log(Level.WARNING, e, () -> "error while parsing year '" + yearString + "'");
+        HashMap<RegattaAndRaceIdentifier, AnniversaryRaceInfo> anniversaryRaceList = new HashMap<RegattaAndRaceIdentifier, AnniversaryRaceInfo>();
+        for (Event event : getService().getAllEvents()) {
+            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+                for (Leaderboard leaderboard : group.getLeaderboards()) {
+                    for (RaceColumn race : leaderboard.getRaceColumns()) {
+                        for (Fleet fleet : race.getFleets()) {
+                            TrackedRace trackedRace = race.getTrackedRace(fleet);
+                            if (trackedRace != null) {
+                                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                                AnniversaryRaceInfo current = anniversaryRaceList.get(raceIdentifier);
+                                AnniversaryRaceInfo raceInfo = new AnniversaryRaceInfo(raceIdentifier,
+                                        leaderboard.getName(), trackedRace.getStartOfRace().asDate(),
+                                        event.getId().toString(),null);
+                                if(current == null){
+                                    anniversaryRaceList.put(raceIdentifier, raceInfo);
+                                }else{
+                                    AnniversaryRaceInfo prefered = resolver.resolve(current,raceInfo);
+                                    if(prefered != current){
+                                        anniversaryRaceList.put(prefered.getIdentifier(), prefered);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-        return integerYears;
+
+        for (AnniversaryRaceInfo entry : anniversaryRaceList.values()) {
+            json.add(anniversaryRaceListJsonSerializer.serialize(entry));
+
+        }
+        return getJsonResponse(json);
     }
 
     private Response getJsonResponse(JSONAware json) {
