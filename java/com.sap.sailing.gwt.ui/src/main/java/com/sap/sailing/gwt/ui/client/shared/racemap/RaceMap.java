@@ -129,6 +129,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -417,6 +418,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * {@link #showAdvantageLine(Iterable, Date, long)} drawing procedure} needs to be triggered.
      */
     private CompetitorDTO advantageLineCompetitor;
+    protected Label estimatedDurationOverlay;
+    private RaceMapStyle raceMapStyle;
+    private final boolean showHeaderPanel;
 
     private class AdvantageLineUpdater implements QuickRanksListener {
         @Override
@@ -436,6 +440,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
         super(parent, context);
+        this.showHeaderPanel = showHeaderPanel;
         this.quickRanksDTOProvider = quickRanksDTOProvider;
         this.raceMapLifecycle = raceMapLifecycle;
         this.stringMessages = stringMessages;
@@ -473,7 +478,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(settings.isShowMapControls(), showHeaderPanel);
-        RaceMapStyle raceMapStyle = raceMapResources.raceMapStyle();
+        raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
         combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
@@ -822,7 +827,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
         timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-        this.lastRaceTimesInfo = raceTimesInfos.get(raceIdentifier);        
+        this.lastRaceTimesInfo = raceTimesInfos.get(raceIdentifier);
     }
 
     /**
@@ -863,7 +868,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         public void onSuccess(WindInfoForRaceDTO windInfo) {
                             List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                             if (windInfo != null) {
-                                lastCombinedWindTrackInfoDTO = windInfo; 
+                                lastCombinedWindTrackInfoDTO = windInfo;
                                 showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
                                 for (WindSource windSource : windInfo.windTrackInfoByWindSource.keySet()) {
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
@@ -957,7 +962,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
-                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID()),
+                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(), newTime, settings.isShowEstimatedDuration()),
             GET_RACE_MAP_DATA_CATEGORY,
             getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, ++boatPositionRequestIDCounter));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
@@ -1053,12 +1058,31 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         zoomMapToNewBounds(zoomToBounds);
                         mapFirstZoomDone = true;
+                        
+                        updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
                     }
                 } else {
                     lastTimeChangeBeforeInitialization = newTime;
                 }
             }
         });
+    }
+
+    protected void updateEstimatedDuration(Duration estimatedDuration) {
+        if (estimatedDuration == null) {
+            return;
+        }
+        if (estimatedDurationOverlay == null) {
+            estimatedDurationOverlay = new Label("");
+            estimatedDurationOverlay.setStyleName(raceMapStyle.estimatedDuration());
+            if(showHeaderPanel) {
+                estimatedDurationOverlay.addStyleName(raceMapStyle.estimatedDurationWithHeader());
+            }
+            map.setControls(ControlPosition.TOP_CENTER, estimatedDurationOverlay);
+        }
+        estimatedDurationOverlay.setText(stringMessages.estimatedDuration()
+                + " " + DateAndTimeFormatterUtil.formatElapsedTime(estimatedDuration.asMillis()));
+
     }
 
     /**
@@ -2589,6 +2613,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
             requiresRedraw = true;
         }
+        if (!newSettings.isShowEstimatedDuration() && estimatedDurationOverlay != null){
+            estimatedDurationOverlay.removeFromParent();
+        }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
         }
@@ -2601,6 +2628,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (newSettings.isWindUp() != settings.isWindUp()) {
             requiresUpdateCoordinateSystem = true;
             requiresRedraw = true;
+        }
+        if (!newSettings.isShowEstimatedDuration() && estimatedDurationOverlay != null){
+            estimatedDurationOverlay.removeFromParent();
         }
         this.settings = newSettings;
         
