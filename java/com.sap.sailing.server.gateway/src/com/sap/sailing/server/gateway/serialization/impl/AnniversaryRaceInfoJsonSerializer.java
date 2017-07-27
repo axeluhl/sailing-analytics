@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.anniversary.AnniversaryRaceInfo;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class AnniversaryRaceInfoJsonSerializer implements JsonSerializer<AnniversaryRaceInfo> {

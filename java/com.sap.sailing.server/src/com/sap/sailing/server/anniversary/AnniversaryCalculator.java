@@ -1,16 +1,10 @@
-package com.sap.sailing.server.gateway.jaxrs.api;
+package com.sap.sailing.server.anniversary;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.logging.Logger;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.domain.anniversary.AnniversaryConflictResolver;
 import com.sap.sailing.domain.anniversary.AnniversaryRaceInfo;
@@ -21,27 +15,49 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.serialization.impl.AnniversaryRaceInfoJsonSerializer;
+import com.sap.sailing.server.RacingEventService;
 
-@Path("/v1/anniversary")
-public class AnniversaryListResource extends AbstractSailingServerResource {
-    private static final Logger logger = Logger.getLogger(AnniversaryListResource.class.getName());
-    private static final String HEADER_NAME_CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_TYPE_JSON_UTF8 = MediaType.APPLICATION_JSON + ";charset=UTF-8";
-
-    private static final AnniversaryConflictResolver resolver = new AnniversaryConflictResolver();
+public class AnniversaryCalculator implements Runnable {
+    private static final long INITIAL_DELAY = 1000;
+    private static final long DELAY = 5000;
+    private RacingEventService racingEventService;
+    private AnniversaryConflictResolver resolver = new AnniversaryConflictResolver();
+    private int lastAmount = -1;
+    private CopyOnWriteArraySet<ChangeListener> listeners = new CopyOnWriteArraySet<>();
     
-    private final AnniversaryRaceInfoJsonSerializer anniversaryRaceListJsonSerializer = new AnniversaryRaceInfoJsonSerializer();
+    interface ChangeListener{
+        void onChange(Collection<AnniversaryRaceInfo> collection);
+    }
+    
+    public AnniversaryCalculator(ScheduledExecutorService scheduledExecutorService) {
+        scheduledExecutorService.scheduleWithFixedDelay(this,INITIAL_DELAY ,DELAY, TimeUnit.MILLISECONDS);
+    }
 
-    @GET
-    @Produces(CONTENT_TYPE_JSON_UTF8)
-    @Path("races")
-    public Response getStatisticsByYear() {
-        JSONArray json = new JSONArray();
-
+    public void addListener(ChangeListener listener){
+        listeners.add(listener);
+    }
+    
+    public void removeListener(ChangeListener listener){
+        listeners.remove(listener);
+    }
+    
+    @Override
+    public void run() {
+        if(racingEventService==null || listeners.isEmpty()){
+            return;
+        }
+        HashMap<RegattaAndRaceIdentifier, AnniversaryRaceInfo> local = getLocalResults();
+        //add remotes with resolver checking
+        if(lastAmount < local.size()){
+            for(ChangeListener listener:listeners){
+                listener.onChange(local.values());
+            }
+        }
+    }
+    
+    private HashMap<RegattaAndRaceIdentifier, AnniversaryRaceInfo> getLocalResults() {
         HashMap<RegattaAndRaceIdentifier, AnniversaryRaceInfo> anniversaryRaceList = new HashMap<RegattaAndRaceIdentifier, AnniversaryRaceInfo>();
-        for (Event event : getService().getAllEvents()) {
+        for (Event event : racingEventService.getAllEvents()) {
             for (LeaderboardGroup group : event.getLeaderboardGroups()) {
                 for (Leaderboard leaderboard : group.getLeaderboards()) {
                     for (RaceColumn race : leaderboard.getRaceColumns()) {
@@ -67,15 +83,11 @@ public class AnniversaryListResource extends AbstractSailingServerResource {
                 }
             }
         }
-
-        for (AnniversaryRaceInfo entry : anniversaryRaceList.values()) {
-            json.add(anniversaryRaceListJsonSerializer.serialize(entry));
-
-        }
-        return getJsonResponse(json);
+        return anniversaryRaceList;
     }
 
-    private Response getJsonResponse(JSONAware json) {
-        return Response.ok(json.toJSONString()).header(HEADER_NAME_CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8).build();
+    public void setRacingEventService(RacingEventService racingEventService) {
+        this.racingEventService = racingEventService;
     }
+
 }
