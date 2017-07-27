@@ -106,17 +106,17 @@ public class SensorFixStoreTest {
     }
     
     @Test
-    public void testFew() throws Exception {
+    public void testProgressFew() throws Exception {
         testProgress(80);
     }
     
     @Test
-    public void testLittle() throws Exception {
+    public void testProgressLittle() throws Exception {
         testProgress(109);
     }
 
     @Test
-    public void testProgressMay() throws Exception {
+    public void testProgressMany() throws Exception {
         testProgress(2000);
     }
 

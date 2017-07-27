@@ -1872,4 +1872,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorLoadingLeaderBoardByEvent();
     String errorLoadingEvent(UUID event, String message);
     String errorLoadingRegattaStructure(UUID event, String message);
+    String showEstimatedDuration();
+    String estimatedDuration();
 }

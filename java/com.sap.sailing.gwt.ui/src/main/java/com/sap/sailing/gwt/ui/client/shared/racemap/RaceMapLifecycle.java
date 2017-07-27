@@ -47,12 +47,24 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
     @Override
     public RaceMapSettings extractUserSettings(RaceMapSettings settings) {
         RaceMapSettings defaultSettings = createDefaultSettings();
-        return new RaceMapSettings(settings.getZoomSettings(), settings.getHelpLinesSettings(), settings.getTransparentHoverlines(), settings.getHoverlineStrokeWeight(), settings.getTailLengthInMilliseconds(), settings.isWindUp(), defaultSettings.getBuoyZoneRadius(), settings.isShowOnlySelectedCompetitors(), settings.isShowSelectedCompetitorsInfo(), settings.isShowWindStreamletColors(), settings.isShowWindStreamletOverlay(), settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(), settings.isShowDouglasPeuckerPoints());
+        return new RaceMapSettings(settings.getZoomSettings(), settings.getHelpLinesSettings(),
+                settings.getTransparentHoverlines(), settings.getHoverlineStrokeWeight(),
+                settings.getTailLengthInMilliseconds(), settings.isWindUp(), defaultSettings.getBuoyZoneRadius(),
+                settings.isShowOnlySelectedCompetitors(), settings.isShowSelectedCompetitorsInfo(),
+                settings.isShowWindStreamletColors(), settings.isShowWindStreamletOverlay(),
+                settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(),
+                settings.isShowDouglasPeuckerPoints(), settings.isShowEstimatedDuration());
     }
 
     @Override
     public RaceMapSettings extractDocumentSettings(RaceMapSettings settings) {
         RaceMapSettings defaultSettings = createDefaultSettings();
-        return new RaceMapSettings(settings.getZoomSettings(), settings.getHelpLinesSettings(), settings.getTransparentHoverlines(), settings.getHoverlineStrokeWeight(), settings.getTailLengthInMilliseconds(), settings.isWindUp(), defaultSettings.getBuoyZoneRadius(), settings.isShowOnlySelectedCompetitors(), settings.isShowSelectedCompetitorsInfo(), settings.isShowWindStreamletColors(), settings.isShowWindStreamletOverlay(), settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(), settings.isShowDouglasPeuckerPoints());
+        return new RaceMapSettings(settings.getZoomSettings(), settings.getHelpLinesSettings(),
+                settings.getTransparentHoverlines(), settings.getHoverlineStrokeWeight(),
+                settings.getTailLengthInMilliseconds(), settings.isWindUp(), defaultSettings.getBuoyZoneRadius(),
+                settings.isShowOnlySelectedCompetitors(), settings.isShowSelectedCompetitorsInfo(),
+                settings.isShowWindStreamletColors(), settings.isShowWindStreamletOverlay(),
+                settings.isShowSimulationOverlay(), settings.isShowMapControls(), settings.getManeuverTypesToShow(),
+                settings.isShowDouglasPeuckerPoints(), settings.isShowEstimatedDuration());
     }
 }

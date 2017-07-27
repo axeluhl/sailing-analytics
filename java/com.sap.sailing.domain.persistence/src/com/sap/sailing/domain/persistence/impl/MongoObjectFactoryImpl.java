@@ -230,11 +230,27 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public DBCollection getGPSFixCollection() {
         DBCollection gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
+        
+        // Removes an old index not needed anymore
+        dropIndexSafe(gpsFixCollection, "DEVICE_ID.DEVICE_TYPE_SPECIFIC_ID_1_GPSFIX.TIME_AS_MILLIS_1");
+        
         DBObject index = new BasicDBObject();
-        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name(), 1);
         index.put(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name(), 1);
         gpsFixCollection.createIndex(index);
         return gpsFixCollection;
+    }
+    
+    /**
+     * Dropping an index that does not exist causes an exception. This method first checks if the index exist to prevent
+     * an exception from occurring.
+     */
+    private void dropIndexSafe(DBCollection collection, String indexName) {
+        collection.getIndexInfo().forEach(indexInfo -> {
+            if (indexName.equals(indexInfo.get("name"))) {
+                collection.dropIndex(indexName);
+            }
+        });
     }
 
     public DBCollection getGPSFixMetadataCollection() {
