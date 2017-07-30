@@ -1135,7 +1135,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
-    String upcommingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
+    String upcomingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
     String sharingMailTooltip();
     String sharingTwitterTooltip();
     String sharingFacebookTooltip();
