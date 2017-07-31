@@ -7,10 +7,10 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * This is a special lifecycle that uses a different ID, which is required to allow a MultiLeaderboard and a normal
  * Leaderboard to coexist.
  */
-public class MultiLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
+public class MultipleMultiLeaderboardPanelLifecycle extends MultiRaceLeaderboardPanelLifecycle {
     public static final String MID = "mlb";
 
-    public MultiLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
+    public MultipleMultiLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         super(leaderboard, stringMessages);
     }
 
@@ -20,7 +20,7 @@ public class MultiLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
     }
 
     @Override
-    public LeaderboardSettings extractDocumentSettings(LeaderboardSettings leaderboardSettings) {
+    public MultiRaceLeaderboardSettings extractDocumentSettings(MultiRaceLeaderboardSettings leaderboardSettings) {
         return createDefaultSettings();
     }
 
