@@ -2,9 +2,11 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.tracking.BravoFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
@@ -66,4 +68,9 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
      * The time spent foiling during the time range provided
      */
     Duration getTimeSpentFoiling(TimePoint from, TimePoint to);
+
+    /**
+     * The distance sailed foiling during the time range provided
+     */
+    Distance getDistanceSpentFoiling(GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TimePoint startOfRace, TimePoint end);
 }

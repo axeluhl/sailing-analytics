@@ -2,11 +2,14 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.tracking.BravoFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -134,6 +137,27 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                 final boolean fixFoils = isFoiling(fix);
                 if (isFoiling && fixFoils) {
                     result = result.plus(last.until(fix.getTimePoint()));
+                }
+                last = fix.getTimePoint();
+                isFoiling = fixFoils;
+            }
+        } finally {
+            unlockAfterRead();
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getDistanceSpentFoiling(GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TimePoint from, TimePoint to) {
+        Distance result = Distance.NULL;
+        lockForRead();
+        try {
+            TimePoint last = from;
+            boolean isFoiling = false;
+            for (final BravoFix fix : getFixes(from, true, to, true)) {
+                final boolean fixFoils = isFoiling(fix);
+                if (isFoiling && fixFoils) {
+                    result = result.add(gpsFixTrack.getDistanceTraveled(last, fix.getTimePoint()));
                 }
                 last = fix.getTimePoint();
                 isFoiling = fixFoils;
