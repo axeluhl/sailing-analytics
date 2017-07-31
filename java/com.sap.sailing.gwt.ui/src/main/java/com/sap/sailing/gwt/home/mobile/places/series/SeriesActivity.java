@@ -47,7 +47,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     
     private void initUi(final AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesView view = new SeriesViewImpl(this);
-        view.setQuickFinderValues(series.getDisplayName(), series.getEvents());
+        view.setQuickFinderValues(series.getDisplayName(), series.getEventsDescending());
         panel.setWidget(view.asWidget());
         
         initNavigationPath();
