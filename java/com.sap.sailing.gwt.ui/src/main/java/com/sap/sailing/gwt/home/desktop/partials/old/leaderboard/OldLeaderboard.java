@@ -29,12 +29,12 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
@@ -63,7 +63,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
-    private LeaderboardPanel leaderboardPanel;
+    private MultiRaceLeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldLeaderboardDelegate delegate;
     
@@ -182,7 +182,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
             final String componentName = leaderboardPanel.getLocalizedShortName();
             final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
 
-            SettingsDialog<?> dialog = new SettingsDialog<LeaderboardSettings>(leaderboardPanel, StringMessages.INSTANCE) {
+            SettingsDialog<MultiRaceLeaderboardSettings> dialog = new SettingsDialog<MultiRaceLeaderboardSettings>(leaderboardPanel, StringMessages.INSTANCE) {
                 protected Widget getAdditionalWidget() {
                     Widget additionalWidget = super.getAdditionalWidget();
                     if (!oldLeaderboardPanel.getElement().isOrHasChild(leaderboardPanel.getElement())) {
@@ -223,7 +223,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         return fullscreenAnchor;
     }
 
-    public void setLeaderboard(LeaderboardPanel leaderboardPanel, final Timer timer) {
+    public void setLeaderboard(MultiRaceLeaderboardPanel leaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
         if (leaderboardPanel.getComponentContext() == null) {

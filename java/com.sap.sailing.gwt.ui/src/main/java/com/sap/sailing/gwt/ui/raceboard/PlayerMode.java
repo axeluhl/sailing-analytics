@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -28,18 +28,17 @@ public class PlayerMode extends AbstractRaceBoardMode {
     private boolean timerAdjusted;
     
     private void adjustLeaderboardSettings() {
-        final LeaderboardPanel leaderboardPanel = getLeaderboardPanel();
+        final SingleRaceLeaderboardPanel leaderboardPanel = getLeaderboardPanel();
         final List<DetailType> raceDetailsToShow = new ArrayList<>();
         raceDetailsToShow.add(DetailType.DISPLAY_LEGS);
         raceDetailsToShow.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
-        final LeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
-        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<LeaderboardSettings>() {
+        final SingleRaceLeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
+        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
 
             @Override
-            public void onSettingsReloaded(LeaderboardSettings patchedSettings) {
-                LeaderboardSettings settingsToUse = LeaderboardSettingsFactory.getInstance().createSettingsWithCustomExpandPreselectedRaceState(patchedSettings, true);
-                leaderboardPanel.updateSettings(settingsToUse);
+            public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
+                leaderboardPanel.updateSettings(patchedSettings);
             }
             
         });

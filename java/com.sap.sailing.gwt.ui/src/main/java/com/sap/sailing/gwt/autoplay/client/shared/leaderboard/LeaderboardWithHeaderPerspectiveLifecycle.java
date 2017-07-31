@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.shared.leaderboard;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
@@ -14,14 +14,14 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings> {
     
     private final SAPHeaderComponentLifecycle sapHeaderLifecycle;
-    private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
+    private final MultiRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle;
     private final StringMessages stringMessages;
     
     public static final String ID = "lbwh";
 
     public LeaderboardWithHeaderPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        this.leaderboardPanelLifecycle = new LeaderboardPanelLifecycle(leaderboard, stringMessages);
+        this.leaderboardPanelLifecycle = new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages);
         this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " +
                 (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName()),
                         stringMessages);
@@ -54,7 +54,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
         return sapHeaderLifecycle;
     }
 
-    public LeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
+    public MultiRaceLeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
         return leaderboardPanelLifecycle;
     }
 
