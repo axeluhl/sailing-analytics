@@ -1135,7 +1135,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
-    String upcommingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
+    String upcomingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
     String sharingMailTooltip();
     String sharingTwitterTooltip();
     String sharingFacebookTooltip();
@@ -1829,7 +1829,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String userProfileSettingsTabDescription();
     String userSettingsFilter();
     String requiresRegattaRaceAndLeaderboard();
-    String couldNotFindRaceInRegatte(String raceName, String regattaName);
+    String couldNotFindRaceInRegatta(String raceName, String regattaName);
     String algorithmTimeOutText();
     String mixedLegText();
     String pathCanvasOverlayTitle(int numPoints, String distance, String date);
@@ -1871,4 +1871,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorLoadingLeaderBoardByEvent();
     String errorLoadingEvent(UUID event, String message);
     String errorLoadingRegattaStructure(UUID event, String message);
+    String showEstimatedDuration();
+    String estimatedDuration();
 }

@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.place.start.AutoplayPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.place.start.AutoplayPerspectiveOwnSettings;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspective;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.MultiRaceLeaderboardWithHeaderPerspective;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -105,7 +105,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings = settings
                     .findSettingsByComponentId(autoplayLifecycle.getLeaderboardLifecycle().getComponentId());
 
-            LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(null,
+            MultiRaceLeaderboardWithHeaderPerspective leaderboardPerspective = new MultiRaceLeaderboardWithHeaderPerspective(null,
                     null, autoplayLifecycle.getLeaderboardLifecycle(), leaderboardSettings, 
                     sailingService, userService, asyncActionsExecutor,
                     new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,

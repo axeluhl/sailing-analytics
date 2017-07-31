@@ -17,6 +17,34 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.7.5 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 25/07/2017
+Build number: 14214
+
+ 1) Bugs
+
+ - When the library calls the IRaceStartStopTimesChangeListener methods,
+   the IRace object can be not updated (Reported By Axel Uhl, 25/07/2017)
+
+********************************************
+************* TracAPI 3.7.4 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 25/07/2017
+Build number: 14207
+
+ 1) Bugs
+
+ - It is not possible to connect a second time to the ISubscriber object to receive
+ live notifications if it has been closed before (Reported By Axel Uhl, 24/07/2017)
+
+********************************************
 ************* TracAPI 3.7.3 ****************
 ********************************************
 This is a final version. It fixes bugs in the implementation
