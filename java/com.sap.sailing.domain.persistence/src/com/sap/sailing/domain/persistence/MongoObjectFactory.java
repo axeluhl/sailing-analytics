@@ -2,9 +2,11 @@ package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.Map;
 
 import com.mongodb.DB;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.anniversary.AnniversaryRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -181,4 +183,8 @@ public interface MongoObjectFactory {
      * objects obtained through {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)}.
      */
     void removeAllConnectivityParametersForRacesToRestore();
+
+    void storeAnniversaryData(Map<Integer, AnniversaryRaceInfo> data);
+
+    Map<Integer, AnniversaryRaceInfo> getAnniversaryData();
 }

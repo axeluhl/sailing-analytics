@@ -117,7 +117,7 @@ public class Activator implements BundleActivator {
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
                 trackedRegattaListener, notificationService, restoreTrackedRaces,anniversaryCalculator);
         notificationService.setRacingEventService(racingEventService);
-        anniversaryCalculator.addListener(new AnniversaryDeterminator());
+        anniversaryCalculator.addListener(new AnniversaryDeterminator(racingEventService.getMongoObjectFactory()));
         anniversaryCalculator.setRacingEventService(racingEventService);
 
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(

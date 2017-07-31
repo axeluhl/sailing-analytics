@@ -19,7 +19,7 @@ import com.sap.sailing.server.RacingEventService;
 
 public class AnniversaryCalculator implements Runnable {
     private static final long INITIAL_DELAY = 1000;
-    private static final long DELAY = 5000;
+    private static final long DELAY = 50000;
     private RacingEventService racingEventService;
     private AnniversaryConflictResolver resolver = new AnniversaryConflictResolver();
     private int lastAmount = -1;
@@ -68,7 +68,7 @@ public class AnniversaryCalculator implements Runnable {
                                 AnniversaryRaceInfo current = anniversaryRaceList.get(raceIdentifier);
                                 AnniversaryRaceInfo raceInfo = new AnniversaryRaceInfo(raceIdentifier,
                                         leaderboard.getName(), trackedRace.getStartOfRace().asDate(),
-                                        event.getId().toString(),null);
+                                        event.getId().toString(),"todo remoteurl");
                                 if(current == null){
                                     anniversaryRaceList.put(raceIdentifier, raceInfo);
                                 }else{
