@@ -1,10 +1,6 @@
 package com.sap.sailing.gwt.home.communication.event;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,27 +89,15 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
             
             LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
             dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(overallLeaderboardGroup));
-            List<Event> fakeSeriesEvents = new ArrayList<Event>();
             
-            for (Event eventOfSeries : context.getRacingEventService().getAllEvents()) {
-                for (LeaderboardGroup leaderboardGroup : eventOfSeries.getLeaderboardGroups()) {
-                    if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                        fakeSeriesEvents.add(eventOfSeries);
-                    }
-                }
-            }
-            Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
-                public int compare(Event e1, Event e2) {
-                    return e1.getStartDate().compareTo(e2.getEndDate());
-                }
-            });
-            for(Event eventInSeries: fakeSeriesEvents) {
+            for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(overallLeaderboardGroup,
+                    context.getRacingEventService())) {
                 String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getRacingEventService());
                 if(displayName == null) {
                     displayName = eventInSeries.getName();
                 }
                 EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
-                dto.getEventsOfSeries().add(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
+                dto.addEventToSeries(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
             }
         } else {
             dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
