@@ -28,13 +28,6 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private String officialWebsiteURL;
     private String sailorsInfoWebsiteURL;
 
-    public EventViewDTO() {
-    }
-
-    public EventViewDTO(String name) {
-        setDisplayName(name);
-    }
-
     public EventType getType() {
         return type;
     }
@@ -47,7 +40,11 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
         return regattas;
     }
 
-    public List<EventReferenceWithStateDTO> getEventsOfSeries() {
+    public void addEventToSeries(EventReferenceWithStateDTO eventRef) {
+        eventsOfSeries.add(eventRef);
+    }
+
+    public List<EventReferenceWithStateDTO> getEventsOfSeriesSorted() {
         return eventsOfSeries;
     }
 
