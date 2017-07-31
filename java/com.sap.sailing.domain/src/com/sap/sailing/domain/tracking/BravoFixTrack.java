@@ -72,5 +72,5 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
     /**
      * The distance sailed foiling during the time range provided
      */
-    Distance getDistanceSpentFoiling(GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TimePoint startOfRace, TimePoint end);
+    Distance getDistanceSpentFoiling(GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack, TimePoint from, TimePoint to);
 }
