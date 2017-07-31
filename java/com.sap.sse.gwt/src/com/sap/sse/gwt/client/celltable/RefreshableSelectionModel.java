@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.List;
+
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
@@ -37,6 +39,8 @@ public interface RefreshableSelectionModel<T> extends SetSelectionModel<T> {
      *         <code>&ltT&gt</code>.
      */
     EntityIdentityComparator<T> getEntityIdentityComparator();
-
+    
+    boolean itemIsSelectedButNotVisible(List<T> visibleItemList);
+    
     void refreshSelectionModel(Iterable<T> newObjects);
 }

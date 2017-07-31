@@ -32,7 +32,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
     private String headerStyle;
     private MinMaxRenderer minmaxRenderer;
 
-    public TimeTraveledRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider, StringMessages stringMessages, String headerStyle, String columnStyle,
+    public TimeTraveledRaceColumn(LeaderboardPanel<?> leaderboardPanel, RaceNameProvider raceNameProvider, StringMessages stringMessages, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true, new TextCell(), DETAIL_TYPE.getDefaultSortingOrder(), 
                 stringMessages, detailHeaderStyle, detailColumnStyle,
@@ -82,7 +82,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
     
     @Override
     protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
+            LeaderboardPanel<?> leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
 
