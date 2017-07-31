@@ -57,17 +57,18 @@ public class StatisticsCalculator {
     }
 
     public void addLeaderboard(Leaderboard leaderboard) {
-        races.addAll(calculateRaces(leaderboard));
-        regattas.add(leaderboard.getName());
-        Util.addAll(leaderboard.getCompetitors(), competitors);
-        for (RaceColumn column : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : column.getFleets()) {
-                final TrackedRace trackedRace = column.getTrackedRace(fleet);
-                if (trackedRace != null && !trackedRaces.contains(trackedRace) && trackedRace.hasGPSData()) {
-                    TimePoint startOfRace = trackedRace.getStartOfRace();
-                    if(startOfRace != null && startOfRace.before(now)) {
-                        trackedRaces.add(trackedRace);
-                        doForTrackedRace(trackedRace);
+        if (regattas.add(leaderboard.getName())) {
+            races.addAll(calculateRaces(leaderboard));
+            Util.addAll(leaderboard.getCompetitors(), competitors);
+            for (RaceColumn column : leaderboard.getRaceColumns()) {
+                for (Fleet fleet : column.getFleets()) {
+                    final TrackedRace trackedRace = column.getTrackedRace(fleet);
+                    if (trackedRace != null && !trackedRaces.contains(trackedRace) && trackedRace.hasGPSData()) {
+                        TimePoint startOfRace = trackedRace.getStartOfRace();
+                        if(startOfRace != null && startOfRace.before(now)) {
+                            trackedRaces.add(trackedRace);
+                            doForTrackedRace(trackedRace);
+                        }
                     }
                 }
             }
