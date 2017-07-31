@@ -31,6 +31,8 @@ public class NmeaUtilImpl implements NmeaUtil {
         proprietaryParsers.put("BAT", BATParser.class);
         proprietaryParsers.put("AAM", AAMParser.class);
         proprietaryParsers.put("GLC", GLCParser.class);
+        proprietaryParsers.put("BWC", BWCParser.class);
+        proprietaryParsers.put("BWR", BWRParser.class);
     }
     
     @Override
