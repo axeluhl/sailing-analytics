@@ -9,6 +9,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Wind;
@@ -21,11 +22,24 @@ public class NmeaFromZipImportTest {
     @Before
     public void setUp() throws FileNotFoundException {
         NmeaFactory.INSTANCE.getUtil().registerAdditionalParsers();
-        zipInputStream = new ZipInputStream(new FileInputStream("resources/LogSS.txt.zip"));
     }
     
     @Test
     public void testReadOneZipEntry() throws IOException, InterruptedException {
+        zipInputStream = new ZipInputStream(new FileInputStream("resources/LogSS.txt.zip"));
+        ZipEntry entry;
+        while ((entry=zipInputStream.getNextEntry()) != null) {
+            if (entry.getName().toLowerCase().endsWith(".txt")) {
+                Iterable<Wind> windFixes = NmeaFactory.INSTANCE.readWind(zipInputStream);
+                assertTrue(!Util.isEmpty(windFixes));
+            }
+        }
+    }
+
+    @Ignore("This test only makes sense if the large file resources/Log210417.zip is present locally")
+    @Test
+    public void testOtherZipFile() throws IOException, InterruptedException {
+        zipInputStream = new ZipInputStream(new FileInputStream("resources/Log210417.zip"));
         ZipEntry entry;
         while ((entry=zipInputStream.getNextEntry()) != null) {
             if (entry.getName().toLowerCase().endsWith(".txt")) {
