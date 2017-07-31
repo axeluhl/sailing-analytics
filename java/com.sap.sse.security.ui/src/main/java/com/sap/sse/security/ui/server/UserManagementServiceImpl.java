@@ -171,7 +171,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN or is changing own user
-        if (!subject.hasRole(DefaultRoles.ADMIN.name()) && (subject.getPrincipal() == null
+        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
                 || !username.equals(subject.getPrincipal().toString()))) {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
