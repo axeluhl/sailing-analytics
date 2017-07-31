@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimePanelLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -19,7 +17,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     private final StringMessages stringMessages;
     private final RaceMapLifecycle raceMapLifecycle;
     private final WindChartLifecycle windChartLifecycle;
-    private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
+    private final SingleRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle;
     private final MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
     private final RaceTimePanelLifecycle raceTimePanelLifecycle;
@@ -27,20 +25,15 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     //constructor used by Standalone RaceBoard
-    public RaceBoardPerspectiveLifecycle(RegattaAndRaceIdentifier raceIdentifier, StringMessages stringMessages) {
-        this(raceIdentifier, null, stringMessages);
+    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages) {
+        this(null, stringMessages);
     }
-    
-    //constructor used by AutoPlay raceBoard
+
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
-        this(null, leaderboard, stringMessages);
-    }
-    
-    private RaceBoardPerspectiveLifecycle(RegattaAndRaceIdentifier raceIdentifier, AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
-        leaderboardPanelLifecycle = raceIdentifier == null ? new LeaderboardPanelLifecycle(leaderboard, stringMessages) : new SingleRaceLeaderboardPanelLifecycle(raceIdentifier, stringMessages);
+        leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, false);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages);
@@ -81,7 +74,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         return windChartLifecycle;
     }
 
-    public LeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
+    public SingleRaceLeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
         return leaderboardPanelLifecycle;
     }
 

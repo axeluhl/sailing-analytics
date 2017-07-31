@@ -102,7 +102,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                         .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition,
                                 finalMode != null ? finalMode.name() : null);
-                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(raceboardData.getRace().getRaceIdentifier(), StringMessages.INSTANCE);
+                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(StringMessages.INSTANCE);
                 RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(), storageDefinition);
                 
                 componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {

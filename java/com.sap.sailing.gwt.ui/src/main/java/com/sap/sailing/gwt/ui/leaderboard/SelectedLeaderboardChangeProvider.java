@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 
-public interface SelectedLeaderboardChangeProvider {
+public interface SelectedLeaderboardChangeProvider <T extends LeaderboardPanel<?>> {
 
-    void addSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener listener);
+    void addSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener<T> listener);
 
-    void removeSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener listener);
+    void removeSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener<T> listener);
     
-    void setSelectedLeaderboard(LeaderboardPanel selectedLeaderboard);
+    void setSelectedLeaderboard(MultiRaceLeaderboardPanel selectedLeaderboard);
 }
