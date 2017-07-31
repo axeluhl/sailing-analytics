@@ -45,7 +45,7 @@ public class BATParser extends SentenceParser implements BATSentence {
     /**
      * Creates a new instance of BATParser.
      * 
-     * @param nmea MWV sentence String
+     * @param nmea BAT sentence String
      */
     public BATParser(String nmea) {
         super(nmea, /* Proprietary extension for SailTimer WindVane's battery indicator message */ "BAT");
