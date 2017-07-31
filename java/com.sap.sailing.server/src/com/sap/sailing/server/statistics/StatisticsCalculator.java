@@ -17,6 +17,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Calculates the statistics for all {@link Leaderboard}s passed to the {@link #addLeaderboard(Leaderboard)} method.<br>
@@ -26,6 +27,7 @@ import com.sap.sse.common.Util.Triple;
  */
 public class StatisticsCalculator {
 
+    private final TimePoint now = MillisecondsTimePoint.now();
     private Set<Competitor> competitors = new HashSet<>();
     private Set<Pair<RaceColumn, Fleet>> races = new HashSet<>();
     private Set<TrackedRace> trackedRaces = new HashSet<>();
@@ -55,14 +57,19 @@ public class StatisticsCalculator {
     }
 
     public void addLeaderboard(Leaderboard leaderboard) {
-        races.addAll(calculateRaces(leaderboard));
-        regattas.add(leaderboard.getName());
-        for (RaceColumn column : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : column.getFleets()) {
-                final TrackedRace trackedRace = column.getTrackedRace(fleet);
-                if (trackedRace != null && !trackedRaces.contains(trackedRace) && trackedRace.hasGPSData()) {
-                    trackedRaces.add(trackedRace);
-                    doForTrackedRace(trackedRace);
+        if (regattas.add(leaderboard.getName())) {
+            races.addAll(calculateRaces(leaderboard));
+            Util.addAll(leaderboard.getCompetitors(), competitors);
+            for (RaceColumn column : leaderboard.getRaceColumns()) {
+                for (Fleet fleet : column.getFleets()) {
+                    final TrackedRace trackedRace = column.getTrackedRace(fleet);
+                    if (trackedRace != null && !trackedRaces.contains(trackedRace) && trackedRace.hasGPSData()) {
+                        TimePoint startOfRace = trackedRace.getStartOfRace();
+                        if(startOfRace != null && startOfRace.before(now)) {
+                            trackedRaces.add(trackedRace);
+                            doForTrackedRace(trackedRace);
+                        }
+                    }
                 }
             }
         }
@@ -85,7 +92,6 @@ public class StatisticsCalculator {
                 }
             }
         }
-        Util.addAll(trackedRace.getRace().getCompetitors(), competitors);
     }
 
     public int getNumberOfRaces() {

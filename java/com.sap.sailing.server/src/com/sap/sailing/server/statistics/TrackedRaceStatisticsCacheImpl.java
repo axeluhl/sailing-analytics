@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
@@ -40,7 +41,14 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
     
     private static final Duration MINIMUM_DELAY_FOR_CACHE_RECALCULATION = Duration.ONE_SECOND.times(10);
     
+    /**
+     * Listeners added a {@link TrackedRaces} that need to be cleaned when {@link TrackedRace}s are removed. 
+     */
     private final Map<TrackedRace, Listener> listeners;
+    
+    /**
+     * Cache that holds and updates {@link TrackedRaceStatistics} instances per known {@link TrackedRace}.
+     */
     private final SmartFutureCache<TrackedRace, TrackedRaceStatistics, ?> cache;
     
     private final ScheduledExecutorService executor;
@@ -53,16 +61,9 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
      */
     private final WeakHashMap<TrackedRace, Future<?>> scheduledTriggers;
     
-    /**
-     * The first call is to be made fast to compute the cache contents quickly upon the first trigger. After that,
-     * triggering the cache re-calculation shall be delayed by {@link #MINIMUM_DELAY_FOR_CACHE_RECALCULATION}.
-     */
-    private final WeakHashMap<TrackedRace, Boolean> scheduleDelayed;
-    
     public TrackedRaceStatisticsCacheImpl() {
         executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         scheduledTriggers = new WeakHashMap<>();
-        scheduleDelayed = new WeakHashMap<>();
         listeners = new ConcurrentHashMap<>();
         cache = new SmartFutureCache<>(new Updater(), TrackedRaceStatisticsCacheImpl.class.getSimpleName());
     }
@@ -78,34 +79,62 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
         Listener listener = new Listener(trackedRace);
         listeners.put(trackedRace, listener);
         trackedRace.addListener(listener);
-        triggerUpdate(trackedRace);
+        triggerUpdateDirect(trackedRace);
     }
 
-    private void triggerUpdate(final DynamicTrackedRace trackedRace) {
+    private void triggerUpdateScheduled(final DynamicTrackedRace trackedRace) {
         synchronized (scheduledTriggers) {
             if (scheduledTriggers.get(trackedRace) == null) {
-                final long delay = scheduleDelayed.containsKey(trackedRace) ? MINIMUM_DELAY_FOR_CACHE_RECALCULATION.asMillis() : 0l;
+                final long delay = MINIMUM_DELAY_FOR_CACHE_RECALCULATION.asMillis();
                 logger.log(Level.FINEST, ()->"Scheduling statistics update trigger for race " + trackedRace.getRaceIdentifier()+
                         " in "+delay+"ms");
                 scheduledTriggers.put(trackedRace, executor.schedule(()->{
                     synchronized (scheduledTriggers) {
                         scheduledTriggers.remove(trackedRace);
+                        // This line needs to be executed in the synchronized block.
+                        // In onRaceRemoved we get the future to ensure, that no scheduled job is running.
+                        // When this line wouldn't get executed in the synchronized block there would be a chance that
+                        // a job isn't found but one is already running and will trigger an update afterwards
+                        triggerUpdateDirect(trackedRace);
                     }
-                    cache.triggerUpdate(trackedRace, null);
-                    logger.log(Level.FINEST, ()->"Triggering statistics update for race "+trackedRace.getRaceIdentifier());
                 }, delay, TimeUnit.MILLISECONDS));
-                scheduleDelayed.put(trackedRace, true);
-                // delay the triggering when we have triggered it at least once before
             }
         }
+    }
+
+    private void triggerUpdateDirect(final DynamicTrackedRace trackedRace) {
+        cache.triggerUpdate(trackedRace, null);
+        logger.log(Level.FINEST, ()->"Triggering statistics update for race " + trackedRace.getRaceIdentifier());
     }
 
     @Override
     protected void onRaceRemoved(DynamicTrackedRace trackedRace) {
         Listener listener = listeners.get(trackedRace);
-        if(listener != null) {
+        if (listener != null) {
             trackedRace.removeListener(listener);
         }
+
+        // To prevent leakage of TrackedRace instances as keys in the cache,
+        // it must be ensured that no scheduled job or cache update is waiting/running.
+        // As first step, a potentially existing scheduled job needs to be cancelled or waited for to finish.
+        Future<?> updateFuture = null;
+        synchronized (scheduledTriggers) {
+            updateFuture = scheduledTriggers.remove(trackedRace);
+        }
+        if (updateFuture != null && !updateFuture.cancel(false)) {
+            try {
+                // If cancel doesn't work, due to the update being calculated right now,
+                // it needs to waited for the job to finish
+                updateFuture.get();
+            } catch (Exception e) {
+                logger.log(Level.FINEST, () -> "Error while waiting for statistics cache update to finish for race: "
+                        + trackedRace.getRaceIdentifier());
+            }
+        }
+        // We can be sure that either a cache update was triggered or no further updated will be triggered
+        // We now wait for any result to be updated so that no new entry is generated after removing the entry
+        cache.get(trackedRace, true);
+        // it's now safe to remove the entry without the risk that it is added again later
         cache.remove(trackedRace);
     }
 
@@ -127,47 +156,47 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
         
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
-            triggerUpdate(trackedRace);
+            triggerUpdateScheduled(trackedRace);
         }
         
         @Override
         public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
-            triggerUpdate(trackedRace);
+            triggerUpdateScheduled(trackedRace);
         }
         
         @Override
         public void windDataReceived(Wind wind, WindSource windSource) {
-            triggerUpdate(trackedRace);
+            triggerUpdateScheduled(trackedRace);
         }
         
         @Override
         public void windDataRemoved(Wind wind, WindSource windSource) {
-            triggerUpdate(trackedRace);
+            triggerUpdateScheduled(trackedRace);
         }
         
         @Override
         public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-            triggerUpdate(trackedRace);
+            triggerUpdateScheduled(trackedRace);
         }
         
         @Override
         public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
-            triggerUpdate(trackedRace);
+            triggerUpdateScheduled(trackedRace);
         }
         
         @Override
         public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-            triggerUpdate(trackedRace);
+            triggerUpdateScheduled(trackedRace);
         }
         
         @Override
         public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-            triggerUpdate(trackedRace);
+            triggerUpdateScheduled(trackedRace);
         }
         
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
-            triggerUpdate(trackedRace);
+            triggerUpdateScheduled(trackedRace);
         }
     }
 }
