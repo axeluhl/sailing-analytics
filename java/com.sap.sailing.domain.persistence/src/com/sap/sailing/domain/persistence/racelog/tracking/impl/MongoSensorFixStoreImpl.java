@@ -129,17 +129,17 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
         DBObject dbDeviceId = storeDeviceId(deviceServiceFinder, device);
         final QueryBuilder queryBuilder = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
-                .and(FieldNames.TIME_AS_MILLIS.name());
+                .and(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name());
         if (inclusive) {
-            queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name())
+            queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name())
                     .lessThanEquals(loadFixesTo.asMillis());
         } else {
-            queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name())
+            queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name())
                     .lessThan(loadFixesTo.asMillis());
         }
         DBObject query = queryBuilder.get();
         DBCursor result = fixesCollection.find(query);
-        result.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
+        result.sort(new BasicDBObject(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name(), ascending ? 1 : -1));
         if (onlyOneResult) {
             result.limit(1);
         }
