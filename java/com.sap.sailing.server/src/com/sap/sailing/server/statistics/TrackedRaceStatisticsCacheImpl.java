@@ -73,6 +73,13 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
         return cache.get(trackedRace, false);
     }
     
+    /**
+     * For testing purposes only!
+     */
+    public TrackedRaceStatistics getStatisticsWaitingForLatest(TrackedRace trackedRace) {
+        return cache.get(trackedRace, true);
+    }
+    
     @Override
     protected void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
             DynamicTrackedRace trackedRace) {
