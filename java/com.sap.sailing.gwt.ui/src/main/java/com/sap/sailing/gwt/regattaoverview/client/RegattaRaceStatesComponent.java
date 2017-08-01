@@ -217,7 +217,6 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                             .equals(loopRaceInfo.lastCourseDesign)) {
                     canRemoveCourse = false;
             }
-            canRemoveCourse = false;
 
             if (lastBoatClass == null) {
                 lastBoatClass = loopEntryDTO.boatClassName;
