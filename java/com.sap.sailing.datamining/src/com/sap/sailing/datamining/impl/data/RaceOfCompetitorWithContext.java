@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -181,7 +182,8 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         Course course = getTrackedRace().getRace().getCourse();
         Waypoint firstMark = course.getFirstLeg().getTo();
         Competitor competitor = getCompetitor();
-        int rank = getTrackedRace().getRank(competitor, getTrackedRace().getMarkPassing(competitor, firstMark).getTimePoint());
+        final MarkPassing markPassing = getTrackedRace().getMarkPassing(competitor, firstMark);
+        int rank = markPassing == null ? 0 : getTrackedRace().getRank(competitor, markPassing.getTimePoint());
         return rank == 0 ? null : Double.valueOf(rank);
     }
     
