@@ -418,17 +418,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<Competitor>();
         if (competitorsProvider == null) {
             competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
         }
-        Util.addAll(competitorsProvider.getAllCompetitors(), result);
-        for (RaceDefinition race : getAllRaces()) {
-            for (Competitor c : race.getCompetitors()) {
-                result.add(c);
-            }
-        }
-        return result;
+        return competitorsProvider.getAllCompetitors();
     }
 
     @Override
