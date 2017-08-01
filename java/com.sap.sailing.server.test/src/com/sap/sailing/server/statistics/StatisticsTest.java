@@ -1,25 +1,29 @@
 package com.sap.sailing.server.statistics;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -33,9 +37,11 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StatisticsTest {
@@ -43,11 +49,16 @@ public class StatisticsTest {
     private static final long START_OF_RACE = 200;
     private static final long END_OF_TRACKING = 400;
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
-    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null,
-            null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-    protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
-    protected final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
-    protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
+    private final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null,
+            new BoatImpl("boat", boatClass, "DE 12345"), /* timeOnTimeFactor */ null,
+            /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+    private final Mark mark1 = DomainFactory.INSTANCE.getOrCreateMark("mark1");
+    private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
+    private final Mark mark3 = DomainFactory.INSTANCE.getOrCreateMark("mark3");
+    private final ControlPoint gate = new ControlPointWithTwoMarksImpl(mark1, mark2, "gate");
+    private final Waypoint waypoint1 = new WaypointImpl(gate);
+    private final Waypoint waypoint2 = new WaypointImpl(mark3);
+    private final Waypoint waypoint3 = new WaypointImpl(gate);
     private DynamicTrackedRegatta regatta;
     private DynamicTrackedRace trackedRace;
 
@@ -57,8 +68,8 @@ public class StatisticsTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
                 /* startDate */ null, /* endDate */null, null, null, "a", null));
 
-        Course course = new CourseImpl("course",
-                Arrays.asList(new Waypoint[] { new WaypointImpl(mark), new WaypointImpl(mark2) }));
+        final Course course = new CourseImpl("course",
+                Arrays.asList(new Waypoint[] { waypoint1, waypoint2, waypoint3 }));
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp));
 
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline>emptyList(),
@@ -108,12 +119,45 @@ public class StatisticsTest {
                 new GPSFixMovingImpl(new DegreePosition(49.295785, 8.639057),
                         new MillisecondsTimePoint(START_OF_RACE + 40),
                         new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+        trackedRace.recordFix(comp,
+                new GPSFixMovingImpl(new DegreePosition(49.295768, 8.639108),
+                        new MillisecondsTimePoint(START_OF_RACE + 50),
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+        trackedRace.recordFix(comp,
+                new GPSFixMovingImpl(new DegreePosition(49.295761, 8.639180),
+                        new MillisecondsTimePoint(START_OF_RACE + 60),
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+        trackedRace.recordFix(comp,
+                new GPSFixMovingImpl(new DegreePosition(49.295765, 8.639278),
+                        new MillisecondsTimePoint(START_OF_RACE + 70),
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+        trackedRace.recordFix(comp,
+                new GPSFixMovingImpl(new DegreePosition(49.295785, 8.639353),
+                        new MillisecondsTimePoint(START_OF_RACE + 80),
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+        trackedRace.recordFix(comp,
+                new GPSFixMovingImpl(new DegreePosition(49.295817, 8.639406),
+                        new MillisecondsTimePoint(START_OF_RACE + 90),
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+        trackedRace.recordFix(comp,
+                new GPSFixMovingImpl(new DegreePosition(49.295861, 8.639449),
+                        new MillisecondsTimePoint(START_OF_RACE + 100),
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+
+        List<MarkPassing> markPassings = new ArrayList<>();
+        markPassings.add(new MarkPassingImpl(new MillisecondsTimePoint(START_OF_RACE), waypoint1, comp));
+        markPassings.add(new MarkPassingImpl(new MillisecondsTimePoint(START_OF_RACE + 50), waypoint2, comp));
+        markPassings.add(new MarkPassingImpl(new MillisecondsTimePoint(START_OF_RACE + 100), waypoint3, comp));
+
+        trackedRace.updateMarkPassings(comp, markPassings);
 
         TrackedRaceStatisticsCacheImpl trackedRaceStatisticsCache = getStatisticsCacheWithRegattaAdded();
 
         TrackedRaceStatistics statisticsForRace = trackedRaceStatisticsCache.getStatisticsWaitingForLatest(trackedRace);
 
-        assertEquals(5, statisticsForRace.getNumberOfGPSFixes());
+        assertEquals(11, statisticsForRace.getNumberOfGPSFixes());
+        double distanceInMeters = statisticsForRace.getDistanceTraveled().getMeters();
+        assertTrue(distanceInMeters > 53 && distanceInMeters < 57);
     }
 
 }
