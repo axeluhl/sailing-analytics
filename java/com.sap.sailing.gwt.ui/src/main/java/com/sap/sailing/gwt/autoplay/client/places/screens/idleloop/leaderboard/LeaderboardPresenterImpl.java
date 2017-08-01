@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspective;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.MultiRaceLeaderboardWithHeaderPerspective;
 
 public class LeaderboardPresenterImpl extends AutoPlayPresenterConfigured<LeaderboardPlace>
         implements LeaderboardView.Presenter {
@@ -19,7 +19,7 @@ public class LeaderboardPresenterImpl extends AutoPlayPresenterConfigured<Leader
 
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
-        LeaderboardWithHeaderPerspective leaderboardWithHeaderPerspective = getPlace().getLeaderboardPerspective();
+        MultiRaceLeaderboardWithHeaderPerspective leaderboardWithHeaderPerspective = getPlace().getLeaderboardPerspective();
 
         view.startingWith(this, panel, leaderboardWithHeaderPerspective);
     }

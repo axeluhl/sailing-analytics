@@ -13,13 +13,12 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderBoardStyle;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -32,7 +31,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private int selected = -1;
     private PreLeaderboardWithImageView view;
-    private LeaderboardPanel leaderboardPanel;
+    private SingleRaceLeaderboardPanel leaderboardPanel;
     private Timer selectionTimer;
     private CompetitorSelectionModel competitorSelectionProvider;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
@@ -93,18 +92,10 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
         view.nextRace(getSlideCtx().getPreLiveRace());
 
         RegattaAndRaceIdentifier liveRace = getSlideCtx().getPreLiveRace();
-        ArrayList<String> racesToShow = null;
-        if (liveRace != null) {
-            racesToShow = new ArrayList<>();
-            // racesToShow.add(lifeRace.getRaceName());
-        } else {
-            return;
-        }
 
-        final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, null, null, null,
-                racesToShow, null, false, null, liveRace.getRaceName(), /* ascending */ true,
-                /* updateUponPlayStateChange */ true, RaceColumnSelectionStrategies.EXPLICIT,
-                /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true, false, false, true);
+        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null,
+                false, /* ascending */ true,
+                /* updateUponPlayStateChange */ true, /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true);
 
         GWT.log("event " + getSlideCtx().getEvent());
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
@@ -113,7 +104,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new LeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(),
+        leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(),
                 leaderboardSettings, true, liveRace, competitorSelectionProvider, timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false,new SixtyInchLeaderBoardStyle(false));

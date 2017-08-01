@@ -23,12 +23,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.SelectedLeaderboardChangeListener;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
@@ -38,7 +38,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
-public class OldMultiLeaderboard extends Composite implements SelectedLeaderboardChangeListener, BusyStateChangeListener {
+public class OldMultiLeaderboard extends Composite implements SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel>, BusyStateChangeListener {
     private static OldMultiLeaderboardUiBinder uiBinder = GWT.create(OldMultiLeaderboardUiBinder.class);
 
     interface OldMultiLeaderboardUiBinder extends UiBinder<Widget, OldMultiLeaderboard> {
@@ -59,7 +59,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     private MultiLeaderboardProxyPanel multiLeaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldMultiLeaderboardDelegate delegate;
-    private LeaderboardPanel lastSelectedLeaderboardPanel;
+    private MultiRaceLeaderboardPanel lastSelectedLeaderboardPanel;
 
     public OldMultiLeaderboard() {
         this(null);
@@ -160,7 +160,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
             final String componentName = multiLeaderboardPanel.getLocalizedShortName();
             final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
 
-            SettingsDialog<?> dialog = new SettingsDialog<LeaderboardSettings>(multiLeaderboardPanel, StringMessages.INSTANCE) {
+            SettingsDialog<?> dialog = new SettingsDialog<MultiRaceLeaderboardSettings>(multiLeaderboardPanel, StringMessages.INSTANCE) {
                 protected Widget getAdditionalWidget() {
                     Widget additionalWidget = super.getAdditionalWidget();
                     if (!oldMultiLeaderboardPanel.getElement().isOrHasChild(multiLeaderboardPanel.getElement())) {
@@ -232,7 +232,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     }
 
     @Override
-    public void onSelectedLeaderboardChanged(LeaderboardPanel selectedLeaderboard) {
+    public void onSelectedLeaderboardChanged(MultiRaceLeaderboardPanel selectedLeaderboard) {
         if(lastSelectedLeaderboardPanel != null) {
             lastSelectedLeaderboardPanel.removeBusyStateChangeListener(this);
         }

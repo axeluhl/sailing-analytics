@@ -9,18 +9,21 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponent;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentSettings;
 import com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.common.client.CSS3Util;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -37,15 +40,15 @@ import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
  * @author Frank Mittag
  *
  */
-public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
+public class MultiRaceLeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
     LeaderboardWithHeaderPerspectiveSettings> implements LeaderboardUpdateProvider {
     private final DockLayoutPanel dockPanel;
     private final static int SAP_HEADER_HEIGHT = 75;
     private final Widget currentContentWidget;
-    private final LeaderboardPanel leaderboardPanel;
+    private final MultiRaceLeaderboardPanel leaderboardPanel;
     private final StringMessages stringMessages;
     
-    public LeaderboardWithHeaderPerspective(Component<?> parent,
+    public MultiRaceLeaderboardWithHeaderPerspective(Component<?> parent,
             ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>> componentContext,
             LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
@@ -58,18 +61,22 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                if (LeaderboardWithHeaderPerspective.this.getPerspectiveSettings().isLeaderboardAutoZoom()) {
+                if (MultiRaceLeaderboardWithHeaderPerspective.this.getPerspectiveSettings().isLeaderboardAutoZoom()) {
                     autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 }
             }
         });
-
+        SAPHeaderComponentLifecycle sapHeaderLifecycle = getPerspectiveLifecycle().getSapHeaderLifecycle();
+        SAPHeaderComponent sapHeader = createSAPHeader(sapHeaderLifecycle, userService,
+                settings.findSettingsByComponentId(sapHeaderLifecycle.getComponentId()),
+                stringMessages, startInFullScreenMode);
         leaderboardPanel = createLeaderboardPanel(lifecycle, settings, sailingService, asyncActionsExecutor,
                 competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages);
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
-
+        addChildComponent(sapHeader);
         addChildComponent(leaderboardPanel);
         dockPanel = new DockLayoutPanel(Unit.PX);
+        dockPanel.addNorth(sapHeader, SAP_HEADER_HEIGHT);
         OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel, stringMessages);
         leaderboardPanel.addLeaderboardUpdateListener(oldLeaderboard);
         currentContentWidget = oldLeaderboard.getContentWidget();
@@ -179,18 +186,25 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         leaderboardPanel.removeLeaderboardUpdateListener(listener);
     }
     
-    private LeaderboardPanel createLeaderboardPanel(LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
+    private SAPHeaderComponent createSAPHeader(SAPHeaderComponentLifecycle componentLifecycle, UserService userService, SAPHeaderComponentSettings settings, 
+            final StringMessages stringMessages, boolean withFullscreenButton) {
+        return new SAPHeaderComponent(this, getComponentContext(), componentLifecycle, userService, settings,
+                stringMessages,
+                withFullscreenButton);
+    }
+
+    private MultiRaceLeaderboardPanel createLeaderboardPanel(LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, 
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages) {
-        LeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
-        LeaderboardSettings leaderboardSettings = settings
+        MultiRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
+        MultiRaceLeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
 
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(this, getComponentContext(), sailingService,
+        MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService,
                 asyncActionsExecutor,
-                leaderboardSettings, /*isEmbedded*/true, /* preSelectedRace */null,
+                leaderboardSettings, /*isEmbedded*/true,
                 competitorSelectionProvider, timer, /* leaderboardGroupName */"",
                 leaderboardName, errorReporter, stringMessages,
                 /* showRaceDetails */false, /* competitorSearchTextBox */ null, /* showRegattaRank */
@@ -209,7 +223,6 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     public boolean hasPerspectiveOwnSettings() {
         return true;
     }
-
 
     @Override
     public String getId() {

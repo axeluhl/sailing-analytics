@@ -62,7 +62,7 @@ public class ClassicLeaderboardStyle implements LeaderBoardStyle {
     }
 
     @Override
-    public void afterConstructorHook(FlowPanel contentPanel, LeaderboardPanel leaderboardPanel) {
+    public void afterConstructorHook(FlowPanel contentPanel, LeaderboardPanel<?> leaderboardPanel) {
     }
 
     @Override

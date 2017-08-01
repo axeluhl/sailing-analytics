@@ -6,7 +6,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
@@ -28,44 +27,44 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
  * @author Frank Mittag (c163874)
  *
  */
-public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPerspectiveLifecycle> {
+public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPerspectiveLifecycle> {
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
-    private LeaderboardPanel overallLeaderboardPanel;
+    private MultiRaceLeaderboardPanel overallLeaderboardPanel;
     
-    public LeaderboardViewer(Component<?> parent,
+    public MultiRaceLeaderboardViewer(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
+            final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, DetailType chartDetailType) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
-                preselectedRace, leaderboardGroupName, leaderboardName, errorReporter,
+                leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, chartDetailType);
     }
 
-    private LeaderboardViewer(Component<?> parent,
+    private MultiRaceLeaderboardViewer(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
+            final Timer timer, 
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, DetailType chartDetailType) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
         // FIXME: Cleanup with java8 using supplier
-        init(new LeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
-                settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), preselectedRace != null,
-                preselectedRace, competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
+        init(new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
+                settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), false,
+                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null,
                 settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                 /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
-                /* enableSyncScroller */ false,new ClassicLeaderboardStyle()));
+                /* enableSyncScroller */ false, new ClassicLeaderboardStyle()));
 
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
@@ -99,11 +98,11 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                         public void onSuccess(List<String> result) {
                             if(result.size() == 1) {
                                 String overallLeaderboardName = result.get(0);
-                                overallLeaderboardPanel = new OverallLeaderboardPanel(LeaderboardViewer.this,
+                                overallLeaderboardPanel = new OverallLeaderboardPanel(MultiRaceLeaderboardViewer.this,
                                         getComponentContext(), sailingService,
                                         asyncActionsExecutor,
                                         settings.findSettingsByComponentId(OverallLeaderboardPanelLifecycle.ID),
-                                        preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,
+                                        false,  competitorSelectionProvider, timer,
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
                                         false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,

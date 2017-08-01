@@ -255,8 +255,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
         
-    public LegColumn(LeaderboardPanel leaderboardPanel, String raceColumnName, int legIndex,
-            SortingOrder preferredSortingOrder, StringMessages stringMessages,
+    public LegColumn(LeaderboardPanel<?> leaderboardPanel, String raceColumnName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringMessages,
             List<DetailType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), preferredSortingOrder,
@@ -283,7 +282,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
     @Override
     protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
+            LeaderboardPanel<?> leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
         result.put(DetailType.DISTANCE_TRAVELED,

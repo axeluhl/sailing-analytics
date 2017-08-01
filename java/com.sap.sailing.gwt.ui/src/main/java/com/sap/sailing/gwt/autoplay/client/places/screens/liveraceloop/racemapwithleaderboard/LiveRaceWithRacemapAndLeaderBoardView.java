@@ -4,11 +4,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 
 public interface LiveRaceWithRacemapAndLeaderBoardView {
     void startingWith(Slide7Presenter p, AcceptsOneWidget panel, RaceMap raceMap,
-            LeaderboardPanel leaderboardPanel);
+            SingleRaceLeaderboardPanel leaderboardPanel);
 
     public interface Slide7Presenter {
     }

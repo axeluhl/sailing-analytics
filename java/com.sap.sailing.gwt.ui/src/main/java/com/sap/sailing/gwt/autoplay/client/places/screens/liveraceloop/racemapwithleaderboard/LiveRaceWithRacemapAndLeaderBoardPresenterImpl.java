@@ -15,13 +15,12 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderBoardStyle;
 import com.sap.sailing.gwt.ui.raceboard.QuickRanksDTOFromLeaderboardDTOProvider;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -37,7 +36,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
     protected static final int SWITCH_COMPETITOR_DELAY = 2000;
     private LiveRaceWithRacemapAndLeaderBoardView view;
     private Timer selectionTimer;
-    private LeaderboardPanel leaderboardPanel;
+    private SingleRaceLeaderboardPanel leaderboardPanel;
     private int selected = -1;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
@@ -149,15 +148,14 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             view.showErrorNoLive(this, panel, new IllegalStateException("No race is live"));
             return;
         }
-        final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, null, null, null,
-                racesToShow, null, false, null, lifeRace.getRaceName(), /* ascending */ true,
-                /* updateUponPlayStateChange */ true, RaceColumnSelectionStrategies.EXPLICIT,
-                /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true, false, true, true);
+        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null,
+                false, /* ascending */ true,
+                /* updateUponPlayStateChange */ true, /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true);
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new LeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(), leaderboardSettings,
+        leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(), leaderboardSettings,
                 true, lifeRace, getPlace().getRaceMapSelectionProvider(), timer, null,
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false,new SixtyInchLeaderBoardStyle(true));

@@ -10,13 +10,12 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPlace;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderBoardStyle;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -42,10 +41,10 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
         List<DetailType> raceDetails = new ArrayList<>();
         // raceDetails.add(DetailType.RACE_RANK);
 
-        final LeaderboardSettings leaderboardSettings = new LeaderboardSettings(null, null, raceDetails, overallDetails,
-                null, null, null, false, null, null, /* ascending */ true, /* updateUponPlayStateChange */ true,
-                RaceColumnSelectionStrategies.EXPLICIT, /* showAddedScores */ true,
-                /* showOverallRacesCompleted */ false, true, false, false, true);
+        final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(null, null, raceDetails, overallDetails,
+                null, null, null, null, /* ascending */ true, /* updateUponPlayStateChange */ true,
+                /* showAddedScores */ true,
+                /* showOverallRacesCompleted */ false, true);
 
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
@@ -60,11 +59,9 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                         if (result.size() == 1) {
                             String overallLeaderboardName = result.get(0);
                             CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
-                            LeaderboardPanel leaderboardPanel = new LeaderboardPanel(null,null,cf.getSailingService(),
-                                    new AsyncActionsExecutor(), leaderboardSettings, true, null, provider, timer,
-                                    null, overallLeaderboardName, cf.getErrorReporter(),
-                                    StringMessages.INSTANCE,  false, null, false, null, false, true, false, false,
-                                    false,new SixtyInchLeaderBoardStyle(true));
+                            MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null,null,cf.getSailingService(),
+                                    new AsyncActionsExecutor(), leaderboardSettings, provider, overallLeaderboardName, cf.getErrorReporter(),
+                                    StringMessages.INSTANCE,  false,new SixtyInchLeaderBoardStyle(true));
 
                             IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
 

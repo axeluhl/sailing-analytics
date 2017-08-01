@@ -6,8 +6,8 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPlace;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspective;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.MultiRaceLeaderboardWithHeaderPerspective;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -45,7 +45,7 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
 
         StringMessages stringMessages = StringMessages.INSTANCE;
 
-        LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(null, null,
+        MultiRaceLeaderboardWithHeaderPerspective leaderboardPerspective = new MultiRaceLeaderboardWithHeaderPerspective(null, null,
                 autoplayLifecycle.getLeaderboardLifecycle(), leaderboardSettings, cf.getSailingService(),
                 cf.getUserService(), AutoplayHelper.asyncActionsExecutor,
                 new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,

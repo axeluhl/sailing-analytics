@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite implements LiveRaceWithRacemapAndLeaderBoardView {
@@ -71,7 +71,7 @@ public class LiveRaceWithRacemapAndLeaderBoardViewImpl extends ResizeComposite i
 
     @Override
     public void startingWith(Slide7Presenter p, AcceptsOneWidget panel, RaceMap raceMap,
-            LeaderboardPanel leaderboardPanel) {
+            SingleRaceLeaderboardPanel leaderboardPanel) {
         panel.setWidget(this);
         rawRaceMap = raceMap;
         racemap.add(raceMap);

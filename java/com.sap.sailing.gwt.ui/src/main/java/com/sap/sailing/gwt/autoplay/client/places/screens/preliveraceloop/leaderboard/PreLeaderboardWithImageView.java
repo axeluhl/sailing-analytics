@@ -3,14 +3,14 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leade
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 
 public interface PreLeaderboardWithImageView {
     void startingWith(Slide1Presenter p, AcceptsOneWidget panel);
     public interface Slide1Presenter {
     }
 
-    void setLeaderBoard(LeaderboardPanel leaderboardPanel);
+    void setLeaderBoard(SingleRaceLeaderboardPanel leaderboardPanel);
 
     void onCompetitorSelect(CompetitorDTO marked);
 

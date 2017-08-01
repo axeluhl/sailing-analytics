@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class PreLiveRaceLeaderBoardWithImageViewImpl extends ResizeComposite implements PreLeaderboardWithImageView {
@@ -58,7 +58,7 @@ public class PreLiveRaceLeaderBoardWithImageViewImpl extends ResizeComposite imp
     }
 
     @Override
-    public void setLeaderBoard(LeaderboardPanel leaderboardPanel) {
+    public void setLeaderBoard(SingleRaceLeaderboardPanel leaderboardPanel) {
         leaderBoardHolder.add(leaderboardPanel);
     }
 

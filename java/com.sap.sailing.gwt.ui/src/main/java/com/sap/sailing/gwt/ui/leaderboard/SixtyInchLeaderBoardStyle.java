@@ -25,7 +25,7 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     private static final FlagRendererTemplate FLAG_RENDERER = GWT.create(FlagRendererTemplate.class);
     
     private LeaderboardDTO laterInit;
-    private LeaderboardPanel leaderBoardPanel;
+    private LeaderboardPanel<?> leaderBoardPanel;
     private boolean showRaceColumns;
     private boolean ready;
     
@@ -84,7 +84,7 @@ public class SixtyInchLeaderBoardStyle implements LeaderBoardStyle {
     }
 
     @Override
-    public void afterConstructorHook(FlowPanel contentPanel, LeaderboardPanel leaderboardPanel) {
+    public void afterConstructorHook(FlowPanel contentPanel, LeaderboardPanel<?> leaderboardPanel) {
         this.leaderBoardPanel = leaderboardPanel;
         leaderboardPanel.getLeaderboardTable().getElement().getStyle().setMarginTop(0, Unit.PX);
         Widget toolbarPanel = leaderboardPanel.createToolbarPanel();

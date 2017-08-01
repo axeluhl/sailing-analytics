@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leaderboard.PreLiveRaceLeaderBoardWithImageViewImpl.ImageProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
@@ -70,7 +70,7 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     }
 
     @Override
-    public void setLeaderBoard(LeaderboardPanel leaderboardPanel) {
+    public void setLeaderBoard(SingleRaceLeaderboardPanel leaderboardPanel) {
         leaderBoardHolder.add(leaderboardPanel);
     }
 
