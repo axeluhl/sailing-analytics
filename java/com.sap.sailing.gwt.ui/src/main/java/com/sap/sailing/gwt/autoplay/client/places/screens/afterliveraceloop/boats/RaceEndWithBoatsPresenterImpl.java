@@ -58,7 +58,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getContextDefinition().getLeaderboardName(),
                 getPlace().getLastRace().getRaceName()));
 
-        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null, false, true, true,
+        final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null, false, false, true,
                  false,
                  false, true);
 

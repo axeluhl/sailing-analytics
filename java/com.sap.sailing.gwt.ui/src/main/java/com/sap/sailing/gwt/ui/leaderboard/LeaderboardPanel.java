@@ -400,7 +400,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private final boolean enableSyncedScroller;
     public boolean isShowCompetitorNationality;
 
-    private LeaderBoardStyle style;
+    protected LeaderBoardStyle style;
 
     private FlowPanel informationPanel;
 

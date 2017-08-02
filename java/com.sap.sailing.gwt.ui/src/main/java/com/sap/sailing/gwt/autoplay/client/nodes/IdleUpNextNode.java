@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 
-import com.google.gwt.core.shared.GWT;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -111,7 +110,6 @@ public class IdleUpNextNode extends FiresPlaceNode {
         for (RaceColumnDTO race : currentLeaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
-                GWT.log("Checking starts " + raceIdentifier);
                 if (raceIdentifier != null) {
                     RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
                     if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.getStartOfRace() != null

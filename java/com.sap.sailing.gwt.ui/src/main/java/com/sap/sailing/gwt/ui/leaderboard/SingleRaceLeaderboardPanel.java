@@ -140,7 +140,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         boolean showBoatColor = !isShowCompetitorFullName() && isEmbedded;
         if (showBoatColor) {
             String competitorColor = competitorSelectionProvider.getColor(competitor, preSelectedRace).getAsHtml();
-            sb.appendHtmlConstant("<div style=\"border-bottom: 2px solid " + competitorColor + ";\">");
+            sb.appendHtmlConstant("<div style=\" "+style.determineBoatColorDivStyle(competitorColor)+ "\">");
         }
         return showBoatColor;
     }
@@ -262,6 +262,9 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
 
         private int getRacePlace(LeaderboardRowDTO object) {
             RaceColumn<?> raceColumn = getRaceColumnByRaceName(preSelectedRace.getRaceName());
+            if(raceColumn.race == null){
+                return -1;
+            }
             List<CompetitorDTO> competitorsSorted = getLeaderboard().getCompetitorsFromBestToWorst(raceColumn.race);
             int raceRank = -1;
             for (int i = 0; i < competitorsSorted.size(); i++) {
