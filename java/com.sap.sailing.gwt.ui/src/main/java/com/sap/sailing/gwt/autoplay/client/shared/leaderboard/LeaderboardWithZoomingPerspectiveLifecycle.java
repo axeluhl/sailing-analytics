@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
  * A special stand alone Leaderboard with an SAP Header is handled by this lifecycle
  *
  */
-public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings> {
+public class LeaderboardWithZoomingPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithZoomingPerspectiveSettings> {
     
     private final SAPHeaderComponentLifecycle sapHeaderLifecycle;
     private final MultiRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle;
@@ -19,7 +19,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     
     public static final String ID = "lbwh";
 
-    public LeaderboardWithHeaderPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
+    public LeaderboardWithZoomingPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.leaderboardPanelLifecycle = new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages);
         this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " +
@@ -31,12 +31,12 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     }
     
     @Override
-    public LeaderboardWithHeaderPerspectiveSettings createPerspectiveOwnDefaultSettings() {
-        return new LeaderboardWithHeaderPerspectiveSettings();
+    public LeaderboardWithZoomingPerspectiveSettings createPerspectiveOwnDefaultSettings() {
+        return new LeaderboardWithZoomingPerspectiveSettings();
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> getPerspectiveOwnSettingsDialogComponent(LeaderboardWithHeaderPerspectiveSettings perspectiveSettings) {
+    public SettingsDialogComponent<LeaderboardWithZoomingPerspectiveSettings> getPerspectiveOwnSettingsDialogComponent(LeaderboardWithZoomingPerspectiveSettings perspectiveSettings) {
         return new LeaderboardPerspectiveSettingsDialogComponent(perspectiveSettings, stringMessages);
     }
 
@@ -64,14 +64,14 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     }
 
     @Override
-    protected LeaderboardWithHeaderPerspectiveSettings extractOwnUserSettings(
-            LeaderboardWithHeaderPerspectiveSettings settings) {
+    protected LeaderboardWithZoomingPerspectiveSettings extractOwnUserSettings(
+            LeaderboardWithZoomingPerspectiveSettings settings) {
         return settings;
     }
 
     @Override
-    protected LeaderboardWithHeaderPerspectiveSettings extractOwnDocumentSettings(
-            LeaderboardWithHeaderPerspectiveSettings settings) {
+    protected LeaderboardWithZoomingPerspectiveSettings extractOwnDocumentSettings(
+            LeaderboardWithZoomingPerspectiveSettings settings) {
         return settings;
     }
 }

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.MultiRaceLeaderboardWithHeaderPerspective;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.MultiRaceLeaderboardWithZoomingPerspective;
 
 public class LeaderboardPlace extends Place {
     public static class Tokenizer implements PlaceTokenizer<LeaderboardPlace> {
@@ -17,16 +17,16 @@ public class LeaderboardPlace extends Place {
         }
     }
 
-    private MultiRaceLeaderboardWithHeaderPerspective leaderboardPerspective;
+    private MultiRaceLeaderboardWithZoomingPerspective leaderboardPerspective;
 
-    public LeaderboardPlace(MultiRaceLeaderboardWithHeaderPerspective leaderboardPerspective) {
+    public LeaderboardPlace(MultiRaceLeaderboardWithZoomingPerspective leaderboardPerspective) {
         this.leaderboardPerspective = leaderboardPerspective;
     }
 
     private LeaderboardPlace() {
     }
 
-    public MultiRaceLeaderboardWithHeaderPerspective getLeaderboardPerspective() {
+    public MultiRaceLeaderboardWithZoomingPerspective getLeaderboardPerspective() {
         return leaderboardPerspective;
     }
 

@@ -7,7 +7,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.MultiRaceLeaderboardWithHeaderPerspective;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.MultiRaceLeaderboardWithZoomingPerspective;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class LeaderboardViewImpl extends ResizeComposite implements LeaderboardView {
@@ -31,7 +31,7 @@ public class LeaderboardViewImpl extends ResizeComposite implements LeaderboardV
 
     @Override
     public void startingWith(Presenter p, AcceptsOneWidget panel,
-            MultiRaceLeaderboardWithHeaderPerspective leaderboardWithHeaderPerspective) {
+            MultiRaceLeaderboardWithZoomingPerspective leaderboardWithHeaderPerspective) {
         holderUi.add(leaderboardWithHeaderPerspective);
         leaderboardWithHeaderPerspective.getElement().getStyle().setHeight(100, Unit.PCT);
         panel.setWidget(this);

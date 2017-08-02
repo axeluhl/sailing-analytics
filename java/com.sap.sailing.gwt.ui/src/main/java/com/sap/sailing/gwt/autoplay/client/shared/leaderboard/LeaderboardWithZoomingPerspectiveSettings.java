@@ -10,7 +10,7 @@ import com.sap.sse.common.settings.generic.DoubleSetting;
  * @author Frank
  *
  */
-public class LeaderboardWithHeaderPerspectiveSettings extends AbstractGenericSerializableSettings {
+public class LeaderboardWithZoomingPerspectiveSettings extends AbstractGenericSerializableSettings {
     
     private static final long serialVersionUID = 69425582611507634L;
     
@@ -26,10 +26,10 @@ public class LeaderboardWithHeaderPerspectiveSettings extends AbstractGenericSer
         leaderboardZoomFactor = new DoubleSetting("leaderboardZoomFactor", this, 1.0);
     }
 
-    public LeaderboardWithHeaderPerspectiveSettings() {
+    public LeaderboardWithZoomingPerspectiveSettings() {
     }
 
-    public LeaderboardWithHeaderPerspectiveSettings(boolean leaderboardAutoZoom, Double leaderboardZoomFactor) {
+    public LeaderboardWithZoomingPerspectiveSettings(boolean leaderboardAutoZoom, Double leaderboardZoomFactor) {
         this.leaderboardAutoZoom.setValue(leaderboardAutoZoom);
         this.leaderboardZoomFactor.setValue(leaderboardZoomFactor);
     }

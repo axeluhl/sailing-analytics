@@ -9,9 +9,6 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponent;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentSettings;
 import com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.common.client.CSS3Util;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
@@ -40,18 +37,18 @@ import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
  * @author Frank Mittag
  *
  */
-public class MultiRaceLeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
-    LeaderboardWithHeaderPerspectiveSettings> implements LeaderboardUpdateProvider {
+public class MultiRaceLeaderboardWithZoomingPerspective extends AbstractPerspectiveComposite<LeaderboardWithZoomingPerspectiveLifecycle,
+    LeaderboardWithZoomingPerspectiveSettings> implements LeaderboardUpdateProvider {
     private final DockLayoutPanel dockPanel;
     private final static int SAP_HEADER_HEIGHT = 75;
     private final Widget currentContentWidget;
     private final MultiRaceLeaderboardPanel leaderboardPanel;
     private final StringMessages stringMessages;
     
-    public MultiRaceLeaderboardWithHeaderPerspective(Component<?> parent,
-            ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>> componentContext,
-            LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
-            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
+    public MultiRaceLeaderboardWithZoomingPerspective(Component<?> parent,
+            ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<LeaderboardWithZoomingPerspectiveSettings>> componentContext,
+            LeaderboardWithZoomingPerspectiveLifecycle lifecycle,
+            PerspectiveCompositeSettings<LeaderboardWithZoomingPerspectiveSettings> settings,
             SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
@@ -61,22 +58,17 @@ public class MultiRaceLeaderboardWithHeaderPerspective extends AbstractPerspecti
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                if (MultiRaceLeaderboardWithHeaderPerspective.this.getPerspectiveSettings().isLeaderboardAutoZoom()) {
+                if (MultiRaceLeaderboardWithZoomingPerspective.this.getPerspectiveSettings().isLeaderboardAutoZoom()) {
                     autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 }
             }
         });
-        SAPHeaderComponentLifecycle sapHeaderLifecycle = getPerspectiveLifecycle().getSapHeaderLifecycle();
-        SAPHeaderComponent sapHeader = createSAPHeader(sapHeaderLifecycle, userService,
-                settings.findSettingsByComponentId(sapHeaderLifecycle.getComponentId()),
-                stringMessages, startInFullScreenMode);
+        
         leaderboardPanel = createLeaderboardPanel(lifecycle, settings, sailingService, asyncActionsExecutor,
                 competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages);
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        addChildComponent(sapHeader);
         addChildComponent(leaderboardPanel);
         dockPanel = new DockLayoutPanel(Unit.PX);
-        dockPanel.addNorth(sapHeader, SAP_HEADER_HEIGHT);
         OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel, stringMessages);
         leaderboardPanel.addLeaderboardUpdateListener(oldLeaderboard);
         currentContentWidget = oldLeaderboard.getContentWidget();
@@ -186,15 +178,8 @@ public class MultiRaceLeaderboardWithHeaderPerspective extends AbstractPerspecti
         leaderboardPanel.removeLeaderboardUpdateListener(listener);
     }
     
-    private SAPHeaderComponent createSAPHeader(SAPHeaderComponentLifecycle componentLifecycle, UserService userService, SAPHeaderComponentSettings settings, 
-            final StringMessages stringMessages, boolean withFullscreenButton) {
-        return new SAPHeaderComponent(this, getComponentContext(), componentLifecycle, userService, settings,
-                stringMessages,
-                withFullscreenButton);
-    }
-
-    private MultiRaceLeaderboardPanel createLeaderboardPanel(LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
-            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
+    private MultiRaceLeaderboardPanel createLeaderboardPanel(LeaderboardWithZoomingPerspectiveLifecycle lifecycle,
+            PerspectiveCompositeSettings<LeaderboardWithZoomingPerspectiveSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, 
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages) {
@@ -215,7 +200,7 @@ public class MultiRaceLeaderboardWithHeaderPerspective extends AbstractPerspecti
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> getPerspectiveOwnSettingsDialogComponent() {
+    public SettingsDialogComponent<LeaderboardWithZoomingPerspectiveSettings> getPerspectiveOwnSettingsDialogComponent() {
         return new LeaderboardPerspectiveSettingsDialogComponent(getPerspectiveSettings(), stringMessages);
     }
 
@@ -226,7 +211,7 @@ public class MultiRaceLeaderboardWithHeaderPerspective extends AbstractPerspecti
 
     @Override
     public String getId() {
-        return LeaderboardWithHeaderPerspectiveLifecycle.ID;
+        return LeaderboardWithZoomingPerspectiveLifecycle.ID;
     }
 
 }

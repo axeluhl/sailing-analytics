@@ -6,13 +6,14 @@ import com.sap.sailing.gwt.autoplay.client.app.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboard.LeaderboardPlace;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.MultiRaceLeaderboardWithHeaderPerspective;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentSettings;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithZoomingPerspectiveSettings;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.MultiRaceLeaderboardWithZoomingPerspective;
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
@@ -40,23 +41,23 @@ public class IdleRaceLeaderboard extends FiresPlaceNode {
                 .getAutoplaySettings();
         AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getAutoPlayCtx().getAutoplayLifecycle();
         boolean withFullscreenButton = settings.getPerspectiveOwnSettings().isFullscreen();
-        PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings = settings
+        PerspectiveCompositeSettings<LeaderboardWithZoomingPerspectiveSettings> leaderboardSettings = settings
                 .findSettingsByComponentId(autoplayLifecycle.getLeaderboardLifecycle().getComponentId());
 
         StringMessages stringMessages = StringMessages.INSTANCE;
 
-        MultiRaceLeaderboardWithHeaderPerspective leaderboardPerspective = new MultiRaceLeaderboardWithHeaderPerspective(null, null,
+        SAPHeaderComponentLifecycle sapHeaderLifecycle = autoplayLifecycle.getLeaderboardLifecycle().getSapHeaderLifecycle();
+        SAPHeaderComponentSettings headerSettings = leaderboardSettings.findSettingsByComponentId(sapHeaderLifecycle.getComponentId());
+        
+        MultiRaceLeaderboardWithZoomingPerspective leaderboardPerspective = new MultiRaceLeaderboardWithZoomingPerspective(null, null,
                 autoplayLifecycle.getLeaderboardLifecycle(), leaderboardSettings, cf.getSailingService(),
                 cf.getUserService(), AutoplayHelper.asyncActionsExecutor,
                 new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
                 cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName(), cf.getErrorReporter(), stringMessages,
                 withFullscreenButton);
+
         setPlaceToGo(new LeaderboardPlace(leaderboardPerspective));
-        StrippedLeaderboardDTO leaderboard = AutoplayHelper.getSelectedLeaderboard(cf.getAutoPlayCtx().getEvent(),
-                cf.getAutoPlayCtx().getContextDefinition().getLeaderboardName());
-        String title = stringMessages.leaderboard() + ": "
-                + (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName());
-        getBus().fireEvent(new AutoPlayHeaderEvent(title, ""));
+        getBus().fireEvent(new AutoPlayHeaderEvent(headerSettings.getTitle(), ""));
         firePlaceChangeAndStartTimer();
     };
 

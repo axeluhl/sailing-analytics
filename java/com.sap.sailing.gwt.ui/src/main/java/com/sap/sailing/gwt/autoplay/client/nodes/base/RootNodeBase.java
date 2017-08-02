@@ -20,6 +20,8 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     private String leaderBoardName;
     private int errorCount = 0;;
     private RootNodeState currentState;
+    boolean firstTimeEventLoaded = true;
+
     private Timer checkTimer = new Timer() {
         @Override
         public void run() {
@@ -59,7 +61,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
         checkTimer.schedule(UPDATE_STATE_TIMER);
         final UUID eventUUID = cf.getAutoPlayCtx().getContextDefinition().getEventId();
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
-            boolean firstTimeEventLoaded = true;
 
             @Override
             public void onSuccess(final EventDTO event) {
