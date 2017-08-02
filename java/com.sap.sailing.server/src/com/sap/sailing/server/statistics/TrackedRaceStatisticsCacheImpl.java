@@ -116,7 +116,7 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
 
     @Override
     protected void onRaceRemoved(DynamicTrackedRace trackedRace) {
-        Listener listener = listeners.get(trackedRace);
+        Listener listener = listeners.remove(trackedRace);
         if (listener != null) {
             trackedRace.removeListener(listener);
         }
