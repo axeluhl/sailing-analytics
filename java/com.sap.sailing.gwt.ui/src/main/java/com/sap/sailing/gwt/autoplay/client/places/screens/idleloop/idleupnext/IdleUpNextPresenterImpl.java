@@ -64,7 +64,7 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
         }
         ArrayList<Pair<RegattaAndRaceIdentifier, Date>> filteredData = new ArrayList<>();
         for (Pair<RegattaAndRaceIdentifier, Date> raw : data) {
-            if (DateUtil.isToday(raw.getB()) || DateUtil.daysFromNow(raw.getB()) < 2) {
+            if (DateUtil.isToday(raw.getB())) {
                 Date now = new Date();
                 long diffInMillis = raw.getB().getTime() - now.getTime();
                 if (diffInMillis > 0 || diffInMillis < SHOW_RACES_STARTED) {

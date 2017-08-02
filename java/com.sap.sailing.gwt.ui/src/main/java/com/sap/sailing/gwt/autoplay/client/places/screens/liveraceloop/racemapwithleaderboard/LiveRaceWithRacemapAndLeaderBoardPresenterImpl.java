@@ -149,8 +149,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             return;
         }
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(null, null, null, null, null,
-                false, /* ascending */ true,
-                /* updateUponPlayStateChange */ true, /* showAddedScores */ false, /* showOverallRacesCompleted */ false, true);
+                false, false, true, false, false, true);
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,

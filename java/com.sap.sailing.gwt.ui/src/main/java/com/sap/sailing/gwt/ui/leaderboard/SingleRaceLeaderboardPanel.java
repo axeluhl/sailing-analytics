@@ -100,6 +100,9 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     }
 
     private AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> getRaceRankColumn() {
+        if(raceRankColumn == null){
+            raceRankColumn = new RaceRankColumn(preSelectedRace);
+        }
         return raceRankColumn;
     }
 

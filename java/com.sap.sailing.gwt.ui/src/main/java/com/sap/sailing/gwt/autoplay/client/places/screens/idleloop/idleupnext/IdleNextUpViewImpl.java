@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
 
@@ -53,10 +52,9 @@ public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
     @Override
     public void setData(ArrayList<Pair<RegattaAndRaceIdentifier, Date>> data) {
         dataPanel.clear();
-        if(data == null){
+        if (data == null) {
             dataPanel.add(new Label(StringMessages.INSTANCE.noUpcomingRaceDataAvailable()));
-        }
-        else if ( data.isEmpty()) {
+        } else if (data.isEmpty()) {
             dataPanel.add(new Label(StringMessages.INSTANCE.nothingUpcoming()));
         } else {
             dataPanel.add(new Label(StringMessages.INSTANCE.upcoming()));
@@ -67,16 +65,11 @@ public class IdleNextUpViewImpl extends Composite implements IdleUpNextView {
                     return;
                 }
                 String formatedDate;
-                boolean today = DateUtil.isToday(race.getB());
-                Date now = new Date();
-                boolean past = race.getB().before(now);
-                if (today && !past) {
-                    index++;
-                    DateTimeFormat simpleFormat = DateTimeFormat.getFormat("HH:mm");
-                    formatedDate = simpleFormat.format(race.getB());
-                    String raceName = race.getA().getRaceName();
-                    dataPanel.add(new NextUpEntry(formatedDate, raceName));
-                }
+                index++;
+                DateTimeFormat simpleFormat = DateTimeFormat.getFormat("HH:mm");
+                formatedDate = simpleFormat.format(race.getB());
+                String raceName = race.getA().getRaceName();
+                dataPanel.add(new NextUpEntry(formatedDate, raceName));
             }
         }
     }

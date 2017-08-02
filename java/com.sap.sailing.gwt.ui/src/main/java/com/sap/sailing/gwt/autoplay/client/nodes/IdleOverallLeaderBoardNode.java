@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.autoplay.client.events.AutoPlayHeaderEvent;
 import com.sap.sailing.gwt.autoplay.client.nodes.base.FiresPlaceNode;
 import com.sap.sailing.gwt.autoplay.client.places.screens.idleloop.leaderboardsixty.IdleOverallLeaderBoardPlace;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -42,9 +43,9 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
         // raceDetails.add(DetailType.RACE_RANK);
 
         final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(null, null, raceDetails, overallDetails,
-                null, null, null, null, /* ascending */ true, /* updateUponPlayStateChange */ true,
-                /* showAddedScores */ true,
-                /* showOverallRacesCompleted */ false, true);
+                null, null, null, RaceColumnSelectionStrategies.EXPLICIT,true, false,
+                true,
+                false, true);
 
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
@@ -59,9 +60,10 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
                         if (result.size() == 1) {
                             String overallLeaderboardName = result.get(0);
                             CompetitorSelectionProvider provider = new CompetitorSelectionModel(true);
+                            
                             MultiRaceLeaderboardPanel leaderboardPanel = new MultiRaceLeaderboardPanel(null,null,cf.getSailingService(),
-                                    new AsyncActionsExecutor(), leaderboardSettings, provider, overallLeaderboardName, cf.getErrorReporter(),
-                                    StringMessages.INSTANCE,  false,new SixtyInchLeaderBoardStyle(true));
+                                    new AsyncActionsExecutor(), leaderboardSettings,false, provider,timer,null, overallLeaderboardName, cf.getErrorReporter(),
+                                    StringMessages.INSTANCE,  false,null,false,null,false,true,false,false,false,new SixtyInchLeaderBoardStyle(true));
 
                             IdleOverallLeaderBoardPlace place = new IdleOverallLeaderBoardPlace(leaderboardPanel);
 
