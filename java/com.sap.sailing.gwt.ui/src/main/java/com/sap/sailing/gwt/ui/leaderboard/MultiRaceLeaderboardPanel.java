@@ -95,14 +95,13 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     }
 
     @Override
-    protected void setDefaultRaceColumnSelection(LeaderboardSettings settings) {
-        MultiRaceLeaderboardSettings s = (MultiRaceLeaderboardSettings) settings;
-        switch (s.getActiveRaceColumnSelectionStrategy()) {
+    protected void setDefaultRaceColumnSelection(MultiRaceLeaderboardSettings settings) {
+        switch (settings.getActiveRaceColumnSelectionStrategy()) {
         case EXPLICIT:
             raceColumnSelection = new ExplicitRaceColumnSelection();
             break;
         case LAST_N:
-            setRaceColumnSelectionToLastNStrategy(s.getNumberOfLastRacesToShow());
+            setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
             break;
         }
     }

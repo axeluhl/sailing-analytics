@@ -771,7 +771,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return oldShallAddOverallDetails;
     }
 
-    protected abstract void setDefaultRaceColumnSelection(LeaderboardSettings settings);
+    protected abstract void setDefaultRaceColumnSelection(LS settings);
 
     private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet,
             DetailType[] referenceOrder, List<DetailType> collectionToSetValuesTo) {

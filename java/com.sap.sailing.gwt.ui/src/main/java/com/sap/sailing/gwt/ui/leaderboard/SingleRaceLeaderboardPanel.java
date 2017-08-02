@@ -108,7 +108,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     }
 
     @Override
-    protected void setDefaultRaceColumnSelection(LeaderboardSettings settings) {
+    protected void setDefaultRaceColumnSelection(SingleRaceLeaderboardSettings settings) {
         raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
     }
 
