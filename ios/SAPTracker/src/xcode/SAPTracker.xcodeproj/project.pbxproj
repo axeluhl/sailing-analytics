@@ -323,6 +323,9 @@
 		C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */; };
 		C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAA1CF736680093B0C5 /* Preferences.swift */; };
 		C85DB8251F30B680009559CE /* SignUp.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C85DB8241F30B680009559CE /* SignUp.storyboard */; };
+		C85DB8281F31AAE0009559CE /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB8271F31AAE0009559CE /* SignUpViewController.swift */; };
+		C85DB82A1F31AAFD009559CE /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB8291F31AAFD009559CE /* LoginViewController.swift */; };
+		C85DB82C1F31AB1A009559CE /* ForgotPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
 		C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */; };
 		C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */; };
@@ -705,6 +708,9 @@
 		C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestManager.swift; sourceTree = "<group>"; };
 		C852BAAA1CF736680093B0C5 /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		C85DB8241F30B680009559CE /* SignUp.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = SignUp.storyboard; sourceTree = "<group>"; };
+		C85DB8271F31AAE0009559CE /* SignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
+		C85DB8291F31AAFD009559CE /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForgotPasswordViewController.swift; sourceTree = "<group>"; };
 		C85FAA501D4F84460087C2A2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
 		C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 2.xcdatamodel"; sourceTree = "<group>"; };
@@ -843,6 +849,7 @@
 		7F06590119F7FE920077FF95 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				C85DB8261F31AAAA009559CE /* SignUp */,
 				C8BBAC781C52649E004CA551 /* LicenseViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
@@ -1231,6 +1238,16 @@
 				C852BAAA1CF736680093B0C5 /* Preferences.swift */,
 			);
 			name = Preferences;
+			sourceTree = "<group>";
+		};
+		C85DB8261F31AAAA009559CE /* SignUp */ = {
+			isa = PBXGroup;
+			children = (
+				C85DB8271F31AAE0009559CE /* SignUpViewController.swift */,
+				C85DB8291F31AAFD009559CE /* LoginViewController.swift */,
+				C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */,
+			);
+			name = SignUp;
 			sourceTree = "<group>";
 		};
 		C8739D8B1D23C01500A89F3C /* Managers */ = {
@@ -1842,6 +1859,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C85DB82A1F31AAFD009559CE /* LoginViewController.swift in Sources */,
 				C8F71EDA1D8691F700826DE4 /* AFHTTPRequestOperation.m in Sources */,
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
 				C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */,
@@ -1852,6 +1870,7 @@
 				C8739E0F1D2BEE7900A89F3C /* SessionController.swift in Sources */,
 				C8739E1C1D2D5F1700A89F3C /* LocationData.swift in Sources */,
 				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
+				C85DB82C1F31AB1A009559CE /* ForgotPasswordViewController.swift in Sources */,
 				7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
 				C8739E161D2BF17900A89F3C /* CompetitorData.swift in Sources */,
@@ -1918,6 +1937,7 @@
 				C8F71EED1D8691F700826DE4 /* UIImageView+AFNetworking.m in Sources */,
 				C8F71EEB1D8691F700826DE4 /* UIAlertView+AFNetworking.m in Sources */,
 				C843D48C1EBCB36900250F01 /* SessionViewController.swift in Sources */,
+				C85DB8281F31AAE0009559CE /* SignUpViewController.swift in Sources */,
 				C89C5FCE1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift in Sources */,
 				C8F71EE11D8691F700826DE4 /* AFURLResponseSerialization.m in Sources */,
 				C8F71EE61D8691F700826DE4 /* SVProgressHUD.m in Sources */,
