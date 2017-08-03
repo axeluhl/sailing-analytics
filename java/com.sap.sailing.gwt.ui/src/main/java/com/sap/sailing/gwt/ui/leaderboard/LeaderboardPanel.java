@@ -2241,13 +2241,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            LeaderboardSettings potentialChangeSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings,result);
+                            currentSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings,result);
+                            
                             try {
                                 updateLeaderboard(result);
                                 // reapply, as columns might have changed
-                                if(!potentialChangeSettings.equals(currentSettings)){
-                                    updateSettings(potentialChangeSettings);
-                                }
+                                updateSettings(currentSettings);
                             } finally {
                                 if (showProgress) {
                                     removeBusyTask();
