@@ -43,10 +43,10 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             MultiRaceLeaderboardSettings settings, boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
-            String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            boolean showRaceDetails) {
+            String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
+            LeaderBoardStyle style) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails);
+                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails, style);
         initialize(settings);
     }
 
@@ -58,11 +58,11 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller) {
+            boolean enableSyncScroller, LeaderBoardStyle style) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
-                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller);
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller, style);
         initialize(settings);
     }
 
@@ -70,9 +70,9 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             MultiRaceLeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            boolean showRaceDetails) {
+            boolean showRaceDetails, LeaderBoardStyle style) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, competitorSelectionProvider,
-                leaderboardName, errorReporter, stringMessages, showRaceDetails);
+                leaderboardName, errorReporter, stringMessages, showRaceDetails,style);
         initialize(settings);
     }
 
@@ -86,8 +86,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
         }
         MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(selectedManeuverDetails,
                 selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, namesOfRaceColumnsToShow,
-                raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
-                timer.getRefreshInterval(), 
+                raceColumnSelection.getNumberOfLastRaceColumnsToShow(), timer.getRefreshInterval(),
                 raceColumnSelection.getType(), isShowAddedScores(),
                 isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorSailId(),
                 isShowCompetitorFullName(), isShowCompetitorNationality);
@@ -96,14 +95,13 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     }
 
     @Override
-    protected void setDefaultRaceColumnSelection(LeaderboardSettings settings) {
-        MultiRaceLeaderboardSettings s = (MultiRaceLeaderboardSettings) settings;
-        switch (s.getActiveRaceColumnSelectionStrategy()) {
+    protected void setDefaultRaceColumnSelection(MultiRaceLeaderboardSettings settings) {
+        switch (settings.getActiveRaceColumnSelectionStrategy()) {
         case EXPLICIT:
             raceColumnSelection = new ExplicitRaceColumnSelection();
             break;
         case LAST_N:
-            setRaceColumnSelectionToLastNStrategy(s.getNumberOfLastRacesToShow());
+            setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
             break;
         }
     }
@@ -125,10 +123,9 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     }
 
     @Override
-    protected LeaderboardSettings overrideDefaultsForNamesOfRaceColumns(LeaderboardSettings currentSettings,
-            LeaderboardDTO result) {
-        return ((MultiRaceLeaderboardSettings) currentSettings)
-                .overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
+    protected MultiRaceLeaderboardSettings overrideDefaultsForNamesOfRaceColumns(
+            MultiRaceLeaderboardSettings currentSettings, LeaderboardDTO result) {
+        return currentSettings.overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
     }
 
     @Override

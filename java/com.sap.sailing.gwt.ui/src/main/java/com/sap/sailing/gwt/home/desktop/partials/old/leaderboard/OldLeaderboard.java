@@ -67,6 +67,10 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     private Timer autoRefreshTimer;
     private final OldLeaderboardDelegate delegate;
     
+    public OldLeaderboard() {
+        this(null);
+    }
+    
     public OldLeaderboard(final OldLeaderboardDelegate delegate) {
         this.leaderboardPanel = null;
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();

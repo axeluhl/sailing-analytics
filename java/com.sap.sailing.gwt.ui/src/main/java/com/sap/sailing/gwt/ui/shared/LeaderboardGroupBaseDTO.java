@@ -2,9 +2,10 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.UUID;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 
-public class LeaderboardGroupBaseDTO extends NamedDTO {
+public class LeaderboardGroupBaseDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = -9023865026348923430L;
     private UUID id;
     public String description;

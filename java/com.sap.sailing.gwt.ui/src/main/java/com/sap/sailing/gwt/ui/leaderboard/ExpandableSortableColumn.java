@@ -239,10 +239,10 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
     }
     /**
      * Finishes the current toggling by removing the
-     * {@link LeaderboardPanel#removeBusyTask() busy task} from the {@link #getLeaderboardPanel() leaderboard panel} and setting the
+     * {@link ClassicLeaderboardPanel#removeBusyTask() busy task} from the {@link #getLeaderboardPanel() leaderboard panel} and setting the
      * {@link #setTogglingInProcess(boolean) togglingInProcess flag} to <code>false</code>.
      * Afterwards, {@link #queuedToggleRequests queued toggling requests} are executed, if any.
-     * Make sure that this method is called only once, and only after {@link LeaderboardPanel#addBusyTask()} has been called.
+     * Make sure that this method is called only once, and only after {@link ClassicLeaderboardPanel#addBusyTask()} has been called.
      */
     private void finishCurrentToggling() {
         getLeaderboardPanel().removeBusyTask();

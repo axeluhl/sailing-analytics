@@ -1820,8 +1820,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboardPage();
     String showLiveNow();
     String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
+    String estimatedDistance();
+    String estimatedTime();
+    String nothingUpcoming();
+
+    String chooseAAutoplayConfiguration();
+    String raceRankShort();
+    String showRaceRankColumn();
     String unknownLeaderboardType(String name);
     String selectCompetitorsToEliminate();
+    String noUpcomingRaceDataAvailable();
     String trackedRaceAlreadyLinked();
     String reallyRemoveSeries(String seriesName);
     String settingsId();
