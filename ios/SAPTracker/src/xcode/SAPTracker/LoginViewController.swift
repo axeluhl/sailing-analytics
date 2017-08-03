@@ -21,8 +21,20 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setup()
+    }
 
-        // Do any additional setup after loading the view.
+    fileprivate func setup() {
+        setupNavigationBar()
+    }
+
+    fileprivate func setupNavigationBar() {
+        navigationItem.title = "LOGIN"
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+    }
+
+    @IBAction func cancelButtonTapped(_ sender: Any) {
+        presentingViewController!.dismiss(animated: true, completion: nil)
     }
 
     @IBAction func loginButtonTapped(_ sender: Any) {

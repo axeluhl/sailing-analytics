@@ -26,8 +26,15 @@ class SignUpViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setup()
+    }
 
-        // Do any additional setup after loading the view.
+    fileprivate func setup() {
+        setupNavigationBar()
+    }
+    
+    fileprivate func setupNavigationBar() {
+        navigationItem.title = "SIGN UP"
     }
 
     @IBAction func loginButtonTapped(_ sender: Any) {

@@ -20,8 +20,15 @@ class ForgotPasswordViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setup()
+    }
 
-        // Do any additional setup after loading the view.
+    fileprivate func setup() {
+        setupNavigationBar()
+    }
+    
+    fileprivate func setupNavigationBar() {
+        navigationItem.title = "FORGOT PASSWORD"
     }
 
     @IBAction func resetPasswordButtonTapped(_ sender: Any) {

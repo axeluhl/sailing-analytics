@@ -267,6 +267,9 @@ class HomeViewController: UIViewController {
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
+        let loginAction = UIAlertAction(title: "LOGIN", style: .default) { (action) -> Void in
+            self.loginController.login()
+        }
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { (action) -> Void in
             self.performSegue(withIdentifier: Segue.Settings, sender: alertController)
         }
@@ -274,6 +277,7 @@ class HomeViewController: UIViewController {
             self.performSegue(withIdentifier: Segue.About, sender: alertController)
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
+        alertController.addAction(loginAction)
         alertController.addAction(settingsAction)
         alertController.addAction(aboutAction)
         alertController.addAction(cancelAction)
@@ -366,7 +370,13 @@ class HomeViewController: UIViewController {
         fetchedResultsController.delegate = self
         return fetchedResultsController
     }()
-    
+
+    fileprivate lazy var loginController: LoginController = {
+        let loginController = LoginController()
+        loginController.delegate = self
+        return loginController
+    }()
+
 }
 
 // MARK: - UITableViewDataSource
@@ -459,6 +469,16 @@ extension HomeViewController: CheckInControllerDelegate {
     
     func checkInController(_ sender: CheckInController, show alertController: UIAlertController) {
         present(alertController, animated: true, completion: nil)
+    }
+    
+}
+
+// MARK: - LoginControllerDelegate
+
+extension HomeViewController: LoginControllerDelegate {
+
+    func loginController(_ sender: LoginController, show viewController: UIViewController) {
+        present(viewController, animated: true, completion: nil)
     }
     
 }

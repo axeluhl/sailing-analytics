@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1421" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="qY9-7D-Xs4">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1421" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="CdT-Wl-cUy">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -20,53 +20,54 @@
         <!--Login View Controller-->
         <scene sceneID="aaN-XK-GEq">
             <objects>
-                <viewController id="qY9-7D-Xs4" customClass="LoginViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LoginViewController" id="qY9-7D-Xs4" customClass="LoginViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="iZ2-aJ-hLo"/>
                         <viewControllerLayoutGuide type="bottom" id="Fac-fv-OFd"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="dhF-n0-cgt">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                    <view key="view" contentMode="scaleToFill" misplaced="YES" id="dhF-n0-cgt" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Q6f-ps-FeZ">
-                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BJy-Aq-u8Y" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="264"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="247"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Login Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nz4-qo-WSf">
-                                                <rect key="frame" x="16" y="8" width="343" height="25"/>
+                                                <rect key="frame" x="16" y="8" width="343" height="21"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="18"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="User Name Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rwV-FV-peQ">
-                                                <rect key="frame" x="16" y="41" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="37" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="8Yr-4B-QNb">
-                                                <rect key="frame" x="16" y="71" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="64" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Password Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cAM-A4-6wu">
-                                                <rect key="frame" x="16" y="109" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="102" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="2EU-Pr-nmo">
-                                                <rect key="frame" x="16" y="139" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="129" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IMI-8y-Fpj">
-                                                <rect key="frame" x="16" y="219" width="167.5" height="37"/>
+                                                <rect key="frame" x="16" y="206" width="168" height="33"/>
+                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="18"/>
                                                 <state key="normal" title="Sign Up Button">
                                                     <color key="titleColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
@@ -76,7 +77,7 @@
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="goq-AQ-7ud">
-                                                <rect key="frame" x="191.5" y="219" width="167.5" height="37"/>
+                                                <rect key="frame" x="192" y="206" width="167" height="33"/>
                                                 <color key="backgroundColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="18"/>
                                                 <state key="normal" title="Login Button">
@@ -87,7 +88,7 @@
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1ga-QM-WUl">
-                                                <rect key="frame" x="16" y="177" width="180" height="34"/>
+                                                <rect key="frame" x="16" y="167" width="175" height="31"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <state key="normal" title="Forgot Password Button">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
@@ -97,7 +98,6 @@
                                                 </connections>
                                             </button>
                                         </subviews>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstItem="goq-AQ-7ud" firstAttribute="width" secondItem="IMI-8y-Fpj" secondAttribute="width" id="00l-7x-VrF"/>
                                             <constraint firstItem="Nz4-qo-WSf" firstAttribute="top" secondItem="BJy-Aq-u8Y" secondAttribute="top" constant="8" id="2Lm-M8-LYM"/>
@@ -142,7 +142,22 @@
                             <constraint firstItem="Fac-fv-OFd" firstAttribute="top" secondItem="Q6f-ps-FeZ" secondAttribute="bottom" id="Jgu-ru-6FN"/>
                             <constraint firstAttribute="trailing" secondItem="Q6f-ps-FeZ" secondAttribute="trailing" id="Pjf-lL-VlB"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="secondColor">
+                                <color key="value" red="0.83137254901960778" green="0.86274509803921573" blue="0.90196078431372551" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="firstColor">
+                                <color key="value" red="0.87058823529999996" green="0.94509803920000002" blue="0.94509803920000002" alpha="1" colorSpace="calibratedRGB"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
                     </view>
+                    <navigationItem key="navigationItem" id="YQF-mX-FKc">
+                        <barButtonItem key="rightBarButtonItem" systemItem="cancel" id="Rcb-QK-7Kt">
+                            <connections>
+                                <action selector="cancelButtonTapped:" destination="qY9-7D-Xs4" id="HJx-hT-HmD"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="forgotPasswordButton" destination="1ga-QM-WUl" id="m81-hb-yB4"/>
                         <outlet property="loginButton" destination="goq-AQ-7ud" id="VPB-Aw-pr4"/>
@@ -161,29 +176,29 @@
         <!--Sign Up View Controller-->
         <scene sceneID="EsF-ep-qOL">
             <objects>
-                <viewController id="Dwf-Hn-YUN" customClass="SignUpViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SignUpViewController" id="Dwf-Hn-YUN" customClass="SignUpViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="I0I-En-M7r"/>
                         <viewControllerLayoutGuide type="bottom" id="Tlg-ts-RTy"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="sgh-U8-gij">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                    <view key="view" contentMode="scaleToFill" misplaced="YES" id="sgh-U8-gij" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ocm-P5-xL5">
-                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lOZ-p2-hq2" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="494"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="468"/>
                                         <subviews>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="uyU-Dr-ejn">
-                                                <rect key="frame" x="16" y="139" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="129" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="54k-5G-O5L">
-                                                <rect key="frame" x="191.5" y="449" width="167.5" height="37"/>
+                                                <rect key="frame" x="192" y="427" width="167" height="33"/>
                                                 <color key="backgroundColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="18"/>
                                                 <state key="normal" title="Sign Up Button">
@@ -194,19 +209,20 @@
                                                 </connections>
                                             </button>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="E-Mail Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cfX-fx-f1B">
-                                                <rect key="frame" x="16" y="41" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="37" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sign Up Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mos-78-XZ0">
-                                                <rect key="frame" x="16" y="8" width="343" height="25"/>
+                                                <rect key="frame" x="16" y="8" width="343" height="21"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="18"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oJ1-CR-fGE">
-                                                <rect key="frame" x="16" y="449" width="167.5" height="37"/>
+                                                <rect key="frame" x="16" y="427" width="168" height="33"/>
+                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="18"/>
                                                 <state key="normal" title="Login Button">
                                                     <color key="titleColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
@@ -216,67 +232,66 @@
                                                 </connections>
                                             </button>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="kfC-jn-pil">
-                                                <rect key="frame" x="16" y="71" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="64" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="User Name Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="e0x-oF-wfr">
-                                                <rect key="frame" x="16" y="109" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="102" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="OSH-Yp-4lI">
-                                                <rect key="frame" x="16" y="207" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="194" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gwJ-Rz-JWp">
-                                                <rect key="frame" x="16" y="177" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="167" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ApJ-P7-ynQ">
-                                                <rect key="frame" x="16" y="275" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="259" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Company Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ill-eJ-ZJL">
-                                                <rect key="frame" x="16" y="245" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="232" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Jar-TR-EzN">
-                                                <rect key="frame" x="16" y="343" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="324" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Password Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zNK-Wa-fqw">
-                                                <rect key="frame" x="16" y="313" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="297" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="6jE-ca-Bkw">
-                                                <rect key="frame" x="16" y="411" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="389" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Repeat Password Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="igz-ad-G8g">
-                                                <rect key="frame" x="16" y="381" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="362" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstItem="cfX-fx-f1B" firstAttribute="trailing" secondItem="Mos-78-XZ0" secondAttribute="trailing" id="0Kn-mT-m3y"/>
                                             <constraint firstItem="oJ1-CR-fGE" firstAttribute="top" secondItem="6jE-ca-Bkw" secondAttribute="bottom" constant="8" id="11P-Dq-bsM"/>
@@ -343,6 +358,14 @@
                             <constraint firstItem="ocm-P5-xL5" firstAttribute="top" secondItem="I0I-En-M7r" secondAttribute="bottom" id="Rii-rd-3nN"/>
                             <constraint firstAttribute="trailing" secondItem="ocm-P5-xL5" secondAttribute="trailing" id="gSW-Ar-gIm"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="secondColor">
+                                <color key="value" red="0.83137254901960778" green="0.86274509803921573" blue="0.90196078431372551" alpha="1" colorSpace="calibratedRGB"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="firstColor">
+                                <color key="value" red="0.87058823529999996" green="0.94509803920000002" blue="0.94509803920000002" alpha="1" colorSpace="calibratedRGB"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <connections>
                         <outlet property="companyLabel" destination="ill-eJ-ZJL" id="7o5-C0-pIh"/>
@@ -367,53 +390,53 @@
         <!--Forgot Password View Controller-->
         <scene sceneID="pYn-OB-mE1">
             <objects>
-                <viewController id="lJd-XI-EoH" customClass="ForgotPasswordViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ForgotPasswordViewController" id="lJd-XI-EoH" customClass="ForgotPasswordViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="uYy-GO-a8a"/>
                         <viewControllerLayoutGuide type="bottom" id="Zm9-Ui-55B"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="fRF-10-jnF">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                    <view key="view" contentMode="scaleToFill" misplaced="YES" id="fRF-10-jnF" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xmA-Fn-yXT">
-                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hFw-4k-tbQ" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="252"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="235"/>
                                         <subviews>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="dkV-73-nyH">
-                                                <rect key="frame" x="16" y="169" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="156" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="E-Mail Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jT0-5l-zqu">
-                                                <rect key="frame" x="16" y="71" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="64" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Forgot Password Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="i3t-ER-sOF">
-                                                <rect key="frame" x="16" y="8" width="343" height="25"/>
+                                                <rect key="frame" x="16" y="8" width="343" height="21"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="18"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="VAJ-jX-LB3">
-                                                <rect key="frame" x="16" y="101" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="91" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="User Name Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gaB-EC-uXP">
-                                                <rect key="frame" x="16" y="139" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="129" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cy3-me-Gce">
-                                                <rect key="frame" x="16" y="207" width="343" height="37"/>
+                                                <rect key="frame" x="16" y="194" width="343" height="33"/>
                                                 <color key="backgroundColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="18"/>
                                                 <state key="normal" title="Reset Password Button">
@@ -424,13 +447,12 @@
                                                 </connections>
                                             </button>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Info Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kxR-WR-d7r">
-                                                <rect key="frame" x="16" y="41" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="37" width="343" height="19"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstItem="cy3-me-Gce" firstAttribute="trailing" secondItem="i3t-ER-sOF" secondAttribute="trailing" id="1mR-xT-uCN"/>
                                             <constraint firstItem="kxR-WR-d7r" firstAttribute="top" secondItem="i3t-ER-sOF" secondAttribute="bottom" constant="8" id="2me-FK-1S2"/>
@@ -474,6 +496,14 @@
                             <constraint firstAttribute="trailing" secondItem="xmA-Fn-yXT" secondAttribute="trailing" id="exa-bB-qgP"/>
                             <constraint firstItem="xmA-Fn-yXT" firstAttribute="leading" secondItem="fRF-10-jnF" secondAttribute="leading" id="ttu-Ux-clT"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="secondColor">
+                                <color key="value" red="0.83137254900000002" green="0.86274509799999999" blue="0.90196078430000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="firstColor">
+                                <color key="value" red="0.87058823529411766" green="0.94509803921568625" blue="0.94509803921568625" alpha="1" colorSpace="calibratedRGB"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <connections>
                         <outlet property="emailLabel" destination="jT0-5l-zqu" id="GlR-ob-LrF"/>
@@ -488,6 +518,22 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dgK-Kn-Y93" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="41" y="-884"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="lbf-Ic-ArT">
+            <objects>
+                <navigationController storyboardIdentifier="rootViewController" id="CdT-Wl-cUy" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="xQu-r9-hhZ">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="qY9-7D-Xs4" kind="relationship" relationship="rootViewController" id="iZ7-uZ-je7"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Tle-cd-a0F" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1662" y="-188"/>
         </scene>
     </scenes>
 </document>
