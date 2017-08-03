@@ -51,28 +51,28 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
     
     private static CellTemplates template = GWT.create(CellTemplates.class);
     
-    public SortableExpandableColumnHeader(String title, String iconURL, LeaderboardPanel leaderboardPanel,
+    public SortableExpandableColumnHeader(String title, String iconURL, LeaderboardPanel<?> leaderboardPanel,
     ExpandableSortableColumn<?> column, StringMessages stringConstants) {
         this(title, null, null, iconURL, leaderboardPanel, column, stringConstants);
     }
 
     public SortableExpandableColumnHeader(String title, String tooltip, String iconURL,
-    LeaderboardPanel leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants) {
+    LeaderboardPanel<?> leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants) {
         this(title, tooltip, null, iconURL, leaderboardPanel, column, stringConstants);
     }
 
     public SortableExpandableColumnHeader(String title, String tooltip, String iconURL,
-    LeaderboardPanel leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants, String unit) {
+    LeaderboardPanel<?> leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants, String unit) {
         this(title, tooltip, unit, iconURL, leaderboardPanel, column, stringConstants);
     }
 
     public SortableExpandableColumnHeader(String title, String tooltip, String unit,
-            String iconURL, LeaderboardPanel leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants) {
+            String iconURL, LeaderboardPanel<?> leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants) {
         super(constructCell(title, tooltip, unit, iconURL, column.isExpansionEnabled(), leaderboardPanel, column, stringConstants));
     }
 
     private static <T> Cell<SafeHtml> constructCell(final String title, final String tooltip, final String unit,
-            final String iconURL, boolean isExpansionEnabled, final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column, final StringMessages stringConstants) {
+            final String iconURL, boolean isExpansionEnabled, final LeaderboardPanel<?> leaderboardPanel, final ExpandableSortableColumn<?> column, final StringMessages stringConstants) {
         final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
         // if it's a medal race, add the cell rendering the medal image
         // add the cell rendering the expand/collapse button:

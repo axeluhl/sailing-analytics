@@ -220,7 +220,7 @@ public class TimeOnTimeAndDistanceRankingMetric extends AbstractRankingMetric {
         final Duration timeOnDistanceFactorInSecondsPerNauticalMileWho = getTimeOnDistanceFactorInSecondsPerNauticalMile(who);
         final double   g_who = timeOnDistanceFactorInSecondsPerNauticalMileWho==null?0:timeOnDistanceFactorInSecondsPerNauticalMileWho.asSeconds();
         
-        final Duration t_who = new MillisecondsDurationImpl(Double.valueOf(
+        final Duration t_who = d_to == null ? null : new MillisecondsDurationImpl(Double.valueOf(
                 (1./(d_to.inTime(t_to.times(f_to)).getMetersPerSecond() / Mile.METERS_PER_NAUTICAL_MILE) - g_to + g_who)
                               * d_who.getNauticalMiles() / f_who * 1000.).longValue());
         return t_who;

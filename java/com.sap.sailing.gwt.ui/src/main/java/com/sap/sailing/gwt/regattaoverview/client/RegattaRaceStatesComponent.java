@@ -519,7 +519,9 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         raceStatusColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                entryClickedHandler.onEntryClicked(object);
+                if(entryClickedHandler != null) {
+                    entryClickedHandler.onEntryClicked(object);
+                }
             }
         });
         raceStatusColumn.setSortable(true);
@@ -888,8 +890,8 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
 
     private String createRaceLink(RegattaOverviewEntryDTO entryDTO) {
         if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
-            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(entryDTO.regattaName,
-                    entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.regattaName, null, null, null);
+            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(entryDTO.raceInfo.raceIdentifier.getRegattaName(),
+                    entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.leaderboardName, null, null, null);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(true);
             ;
@@ -902,7 +904,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
     }
 
     private String createRegattaLink(RegattaOverviewEntryDTO entryDTO) {
-        String leaderboardLink = EntryPointLinkFactory.createLeaderboardTabLink(eventId.toString(), entryDTO.regattaName);
+        String leaderboardLink = EntryPointLinkFactory.createLeaderboardTabLink(eventId.toString(), entryDTO.leaderboardName);
         return leaderboardLink;
     }
     public void setRepeatedInfoLabel(FlowPanel repeatedInfoLabel) {
