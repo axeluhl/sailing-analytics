@@ -10,7 +10,6 @@ import UIKit
 
 class ForgotPasswordViewController: UIViewController {
 
-    @IBOutlet weak var forgotPasswordLabel: UILabel!
     @IBOutlet weak var infoLabel: UILabel!
     @IBOutlet weak var emailLabel: UILabel!
     @IBOutlet weak var emailTextField: UITextField!

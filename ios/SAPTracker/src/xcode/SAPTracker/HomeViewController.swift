@@ -267,7 +267,7 @@ class HomeViewController: UIViewController {
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let loginAction = UIAlertAction(title: "LOGIN", style: .default) { (action) -> Void in
+        let loginAction = UIAlertAction(title: "LOGIN ACTION", style: .default) { (action) -> Void in
             self.loginController.login()
         }
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { (action) -> Void in

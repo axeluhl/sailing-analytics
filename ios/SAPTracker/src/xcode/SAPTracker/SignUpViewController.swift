@@ -10,7 +10,6 @@ import UIKit
 
 class SignUpViewController: UIViewController {
 
-    @IBOutlet weak var signUpLabel: UILabel!
     @IBOutlet weak var emailLabel: UILabel!
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var userNameLabel: UILabel!
