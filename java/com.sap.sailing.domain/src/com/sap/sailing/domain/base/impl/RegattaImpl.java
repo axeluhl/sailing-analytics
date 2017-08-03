@@ -73,6 +73,7 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.NamedImpl;
 
@@ -417,11 +418,32 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
-    public Iterable<Competitor> getAllCompetitors() {
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
         if (competitorsProvider == null) {
             competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
         }
-        return competitorsProvider.getAllCompetitors();
+        final Pair<Iterable<RaceDefinition>, Iterable<Competitor>> allCompetitorsWithRaceDefinitionsConsidered = competitorsProvider.getAllCompetitorsWithRaceDefinitionsConsidered();
+        Set<Competitor> newResult = null;
+        Set<RaceDefinition> newRaceDefinitions = null;
+        final Iterable<RaceDefinition> racesConsideredSoFar = allCompetitorsWithRaceDefinitionsConsidered.getA();
+        for (final RaceDefinition race : getAllRaces()) {
+            if (!Util.contains(racesConsideredSoFar, race)) {
+                if (newResult == null) {
+                    newRaceDefinitions = new HashSet<>();
+                    Util.addAll(allCompetitorsWithRaceDefinitionsConsidered.getA(), newRaceDefinitions);
+                    newResult = new HashSet<>();
+                    Util.addAll(allCompetitorsWithRaceDefinitionsConsidered.getB(), newResult);
+                }
+                Util.addAll(race.getCompetitors(), newResult);
+                newRaceDefinitions.add(race);
+            }
+        }
+        return newResult == null ? allCompetitorsWithRaceDefinitionsConsidered : new Pair<>(newRaceDefinitions, newResult);
+    }
+
+    @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
     }
 
     @Override
