@@ -34,9 +34,10 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();
         SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(), defaultSettings.getRaceDetailsToShow(), overallDetails, DEFAULT_REFRESH_INTERVAL, defaultSettings.isShowAddedScores(), defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
                 /*showCompetitorSailIdColumn*/ true,
-                /* don't showCompetitorFullNameColumn in case screen is so small that we don't
-                 * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, false);
-        
+                /*
+                 * don't showCompetitorFullNameColumn in case screen is so small that we don't even display the
+                 * leaderboard initially
+                 */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, false, false);
         SettingsUtil.copyDefaultsFromValues(settings, settings);
         
         return settings;
@@ -57,6 +58,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
+                currentLeaderboardSettings.isShowRaceRankColumn(),
                 currentLeaderboardSettings.isShowCompetitorNationality());
         return SettingsUtil.copyValues(contextSpecificLeaderboardSettings, defaultLeaderboardSettings);
     }
@@ -72,7 +74,7 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn(),
-                currentLeaderboardSettings.isShowCompetitorNationality());
+                currentLeaderboardSettings.isShowCompetitorNationality(),currentLeaderboardSettings.isShowRaceRankColumn());
         return SettingsUtil.copyValues(globalLeaderboardSettings, defaultLeaderboardSettings);
     }
 

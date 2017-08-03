@@ -38,7 +38,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     
     protected BooleanSetting showCompetitorSailIdColumn;
     protected BooleanSetting showCompetitorFullNameColumn;
-    
     /**
      * Show a column with total number of races completed
      */
@@ -146,7 +145,7 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     public boolean isShowCompetitorFullNameColumn() {
         return showCompetitorFullNameColumn.getValue();
     }
-    
+
     public boolean isShowCompetitorNationality() {
         return isShowCompetitorNationality.getValue();
     }

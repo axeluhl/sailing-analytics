@@ -18,6 +18,13 @@ public abstract class AbstractStatisticsBox extends Composite implements Refresh
     public static final String ICON_WIND_FIX = "images/mobile/strongest_wind.svg";
     public static final String ICON_SUM_MILES = "images/mobile/sum_miles.svg";
     
+    public static final String ICON_COMPETITORS = "images/mobile/icon-competitors.svg";
+    public static final String ICON_LEGS = "images/mobile/icon-legs.svg";
+    public static final String ICON_LENGTH = "images/mobile/icon-length.svg";
+    public static final String ICON_RACEVIEWER = "images/mobile/icon-raceviewer.svg";
+    public static final String ICON_TIME = "images/mobile/icon-time.svg";
+    public static final String ICON_WIND = "images/mobile/icon-wind.svg";
+
     private NumberFormat simpleFormat = NumberFormat.getFormat("#0.0");
     
     private final boolean showRegattaInformation;

@@ -32,13 +32,21 @@ public interface QuickRanksDTOProvider {
     void removeQuickRanksListener(QuickRanksListener listener);
     
     /**
+     * When switching the underlying provider, this method allows to move current listeners to the new provider.
+     * 
+     * @param newProvider
+     */
+    public void moveListernersTo(QuickRanksDTOProvider newProvider);
+
+    /**
      * The strategy may or may not use this quick ranks information provided directly from the server. This information
      * may have been provided with some delay and may be slightly inconsistent with a {@link LeaderboardDTO leaderboard}
      * that was delivered through a different channel. Therefore, a strategy that has access to a current
      * {@link LeaderboardDTO leaderboard} should ignore this call if it already has quick ranks information available
      * from a leaderboard.
      * 
-     * @param quickRanksFromServer keys are the competitor IDs as strings
+     * @param quickRanksFromServer
+     *            keys are the competitor IDs as strings
      */
     void quickRanksReceivedFromServer(Map<String, QuickRankDTO> quickRanksFromServer);
     

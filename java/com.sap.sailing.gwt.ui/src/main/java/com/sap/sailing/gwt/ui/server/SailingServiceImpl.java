@@ -1754,20 +1754,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private Map<CompetitorDTO, BoatDTO> getCompetitorBoatsForRace(RaceDefinition race, List<CompetitorDTO> competitorDTOs) {
-        Map<CompetitorDTO, BoatDTO> competitorBoats = new HashMap<CompetitorDTO, BoatDTO>();
-        HashMap<String, CompetitorDTO> competitorDTOsMap = new HashMap<>();
-        for (CompetitorDTO competitorDTO : competitorDTOs) {
-            competitorDTOsMap.put(competitorDTO.getIdAsString(), competitorDTO);
-        }
-        for (Competitor competitor : race.getCompetitors()) {
-            Boat boatOfCompetitor = race.getBoatOfCompetitorById(competitor.getId());
-            if (boatOfCompetitor != null) {
-                BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(),
-                        boatOfCompetitor.getColor());
-                competitorBoats.put(competitorDTOsMap.get(competitor.getId().toString()), boatDTO);
+        try {
+            Map<CompetitorDTO, BoatDTO> competitorBoats = new HashMap<CompetitorDTO, BoatDTO>();
+            HashMap<String, CompetitorDTO> competitorDTOsMap = new HashMap<>();
+            for (CompetitorDTO competitorDTO : competitorDTOs) {
+                competitorDTOsMap.put(competitorDTO.getIdAsString(), competitorDTO);
             }
+            for (Competitor competitor : race.getCompetitors()) {
+                Boat boatOfCompetitor = race.getBoatOfCompetitorById(competitor.getId());
+                if (boatOfCompetitor != null) {
+                    BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(),
+                            boatOfCompetitor.getColor());
+                    competitorBoats.put(competitorDTOsMap.get(competitor.getId().toString()), boatDTO);
+                }
+            }
+            return competitorBoats;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return competitorBoats;
+        return null;
     }
     
     
