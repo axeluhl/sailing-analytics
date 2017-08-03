@@ -1725,7 +1725,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 newValue.append("leaderboardName", anniversary.getValue().getLeaderboardName());
                 newValue.append("startOfRace", anniversary.getValue().getStartOfRace());
                 newValue.append("eventID", anniversary.getValue().getEventID());
-                newValue.append("remoteUrl", anniversary.getValue().getRemoteUrl());
+                newValue.append("remoteUrl", anniversary.getValue().getRemoteName());
                 anniversarysStored.update(currentProxy, newValue, true, false);
             }
         } catch (Exception e) {
@@ -1746,7 +1746,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Date startOfRace = (Date) toLoad.get("startOfRace");
             String race = toLoad.get("race").toString();
             String regatta = toLoad.get("regatta").toString();
-            AnniversaryRaceInfo loadedAnniversary = new AnniversaryRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, eventID, remoteUrl);
+            AnniversaryRaceInfo loadedAnniversary = new AnniversaryRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, eventID);
+            loadedAnniversary.setRemoteName(remoteUrl);
             int anniversary = ((Number)toLoad.get("anniversary")).intValue();
             fromDb.put(anniversary, loadedAnniversary);
         }
