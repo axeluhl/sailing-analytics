@@ -2305,7 +2305,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             try {
                                 updateLeaderboard(result);
                                 // reapply, as columns might have changed
-                                if (!potentiallyChangedSettings.equals(currentSettings)){
+                                if (!potentiallyChangedSettings.equals(currentSettings)) {
                                     updateSettings(potentiallyChangedSettings);
                                 }
                             } finally {
