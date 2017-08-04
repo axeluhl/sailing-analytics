@@ -2301,7 +2301,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            LeaderboardSettings potentialChangeSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings,result);
+                            LS potentialChangeSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings,result);
                             try {
                                 updateLeaderboard(result);
                                 // reapply, as columns might have changed
