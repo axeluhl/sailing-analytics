@@ -54,7 +54,7 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
     }
     
-    public LeaderboardSettings overrideDefaultsForNamesOfRaceColumns(List<String> namesOfRaceColumns) {
+    public MultiRaceLeaderboardSettings overrideDefaultsForNamesOfRaceColumns(List<String> namesOfRaceColumns) {
         MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings();
         newSettings.legDetailsToShow.setValues(this.getLegDetailsToShow());
         newSettings.raceDetailsToShow.setValues(this.getRaceDetailsToShow());

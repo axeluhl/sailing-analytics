@@ -43,7 +43,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * {@link #updatedLeaderboard(LeaderboardDTO)} eventually, but in between, other callbacks to the same method
  * may occur, triggered by other, automatic adjustments or initialization of the {@link Timer}. To solve this
  * problem, subclasses may decide to use a separate {@link GetLeaderboardByNameAction} action and execute
- * it using the {@link #getLeaderboardPanel()}.{@link LeaderboardPanel#getExecutor() getExecutor()}. In the
+ * it using the {@link #getLeaderboardPanel()}.{@link ClassicLeaderboardPanel#getExecutor() getExecutor()}. In the
  * dedicated callback the subclass can then be sure that the {@link LeaderboardDTO} received matches the
  * time previously set on the {@link Timer}.
  * 

@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.WindSource;
@@ -1220,7 +1221,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                     if (trackedRace.getEndOfTracking() == null || trackedRace.getEndOfTracking().after(timePoint)) {
                         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
                         if (competitorTrack != null) {
-                            jsonCompetitorInLeg.put("speedOverGround-kts", roundDouble(competitorTrack.getEstimatedSpeed(timePoint).getKnots(), 2));
+                            final SpeedWithBearing estimatedSpeed = competitorTrack.getEstimatedSpeed(timePoint);
+                            if (estimatedSpeed != null) {
+                                jsonCompetitorInLeg.put("speedOverGround-kts", roundDouble(estimatedSpeed.getKnots(), 2));
+                            }
                         }
                     }
                     TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);

@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -55,7 +56,7 @@ public class RegattaAnalyticsDataManager {
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
                     /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
-                    /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true);
+                    /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true,new ClassicLeaderboardStyle());
         }
         return leaderboardPanel;
     }

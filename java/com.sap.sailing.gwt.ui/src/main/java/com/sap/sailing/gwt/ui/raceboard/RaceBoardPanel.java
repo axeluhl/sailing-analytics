@@ -39,7 +39,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
@@ -73,6 +73,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
@@ -182,7 +183,7 @@ public class RaceBoardPanel
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
-            boolean showChartMarkEditMediaButtonsAndVideo) {
+            boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -453,7 +454,7 @@ public class RaceBoardPanel
             String leaderboardGroupName,
             CompetitorFilterPanel competitorSearchTextBox) {
         SingleRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
-        LeaderboardSettings leaderboardSettings = settings
+        SingleRaceLeaderboardSettings leaderboardSettings = settings
                 .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
         return new SingleRaceLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 leaderboardSettings,
@@ -462,8 +463,8 @@ public class RaceBoardPanel
                 /* showRaceDetails */ true, competitorSearchTextBox,
                 /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false,
-                /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
-    }
+                /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle());
+}
 
     private void setComponentVisible(SideBySideComponentViewer componentViewer, Component<?> component, boolean visible) {
         component.setVisible(visible);      

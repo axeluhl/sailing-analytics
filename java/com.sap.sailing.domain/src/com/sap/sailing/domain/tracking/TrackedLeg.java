@@ -163,7 +163,7 @@ public interface TrackedLeg extends Serializable {
      * is not available
      * @throws NoWindException no wind available. unable to determine legtypes for given timepoint
      */
-    LegTargetTimeInfo getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
+    LegTargetTimeInfo getEstimatedTimeAndDistanceToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
             throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     /**

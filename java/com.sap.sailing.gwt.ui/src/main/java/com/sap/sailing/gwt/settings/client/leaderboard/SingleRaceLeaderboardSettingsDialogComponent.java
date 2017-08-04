@@ -16,9 +16,12 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 public class SingleRaceLeaderboardSettingsDialogComponent
         extends LeaderboardSettingsDialogComponent<SingleRaceLeaderboardSettings> {
 
+    protected CheckBox showRaceRankColumn;
+    
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
             StringMessages stringMessages) {
         super(initialSettings, stringMessages);
+        
     }
 
     @Override
@@ -55,7 +58,7 @@ public class SingleRaceLeaderboardSettingsDialogComponent
                 /* showOverallColumnWithNumberOfRacesSailedPerCompetitor */ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox
                         .getValue().booleanValue(),
                 showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
-                isCompetitorNationalityColumnVisible.getValue());
+                isCompetitorNationalityColumnVisible.getValue(), showRaceRankColumn.getValue());
         SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
         return newSettings;
     }
@@ -71,6 +74,14 @@ public class SingleRaceLeaderboardSettingsDialogComponent
         dialogPanel.add(createManeuverDetailsPanel(dialog));
         dialogPanel.add(createTimingDetailsPanel(dialog));
         return dialogPanel;
+    }
+    
+    @Override
+    protected FlowPanel createOverallDetailPanel(DataEntryDialog<?> dialog) {
+        FlowPanel detailPanel = super.createOverallDetailPanel(dialog);
+        showRaceRankColumn = createCheckbox(dialog, stringMessages.showRaceRankColumn(), initialSettings.isShowRaceRankColumn(), null);
+        detailPanel.add(showRaceRankColumn);
+        return detailPanel;
     }
 
     @Override

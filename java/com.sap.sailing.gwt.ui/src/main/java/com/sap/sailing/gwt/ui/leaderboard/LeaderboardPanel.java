@@ -50,7 +50,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -135,9 +134,6 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends AbstractCompositeComponent<LS>
         implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider, IsEmbeddableComponent,
         CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider, LeaderboardUpdateProvider {
-    private static final LeaderboardResources RESOURCES = GWT.create(LeaderboardResources.class);
-    private static final ComponentResources COMPONENT_RESOURCES = GWT.create(ComponentResources.class);
-    private static final LeaderboardTableResources TABLE_RESOURCES = GWT.create(LeaderboardTableResources.class);
 
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
@@ -190,13 +186,39 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
+    interface LeaderBoardStyle{
+        void renderNationalityFlag(ImageResource nationalityFlagImageResource, SafeHtmlBuilder sb);
+
+        void renderFlagImage(String flagImageURL, SafeHtmlBuilder sb,CompetitorDTO competitor);
+        
+        public LeaderboardResources getResources();
+        
+        public ComponentResources getComponentresources();
+        
+        public LeaderboardTableResources getTableresources();
+        
+        public void processStyleForTotalNetPointsColumn(String textColor, SafeStylesBuilder ssb);
+
+        void processStyleForRaceColumnWithoutReasonForMaxPoints(boolean isDiscarded, SafeStylesBuilder ssb);
+
+        String determineBoatColorDivStyle(String competitorColor);
+
+        void afterConstructorHook(FlowPanel contentPanel, LeaderboardPanel<?> leaderboardPanel);
+
+        void afterLeaderboardUpdate(LeaderboardDTO leaderboard);
+
+        boolean preUpdateToolbarHook(LeaderboardDTO leaderboard);
+
+        boolean hasRaceColumns();
+    }
+    
     /**
      * The leaderboard name is used to
      * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], boolean, String, com.google.gwt.user.client.rpc.AsyncCallback)
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
 
-    protected LeaderboardSettings currentSettings;
+    protected LS currentSettings;
 
     private String leaderboardName;
 
@@ -237,22 +259,20 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private final Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> overallDetailColumnMap;
 
     protected RaceColumnSelection raceColumnSelection;
+    protected final String RACE_COLUMN_HEADER_STYLE;
 
-    protected final String RACE_COLUMN_HEADER_STYLE = TABLE_RESOURCES.cellTableStyle().cellTableRaceColumnHeader();
+    protected final String LEG_DETAIL_COLUMN_HEADER_STYLE;
 
-    protected final String LEG_DETAIL_COLUMN_HEADER_STYLE = TABLE_RESOURCES.cellTableStyle()
-            .cellTableLegDetailColumnHeader();;
+    protected final String LEG_DETAIL_COLUMN_STYLE;
 
-    protected final String LEG_DETAIL_COLUMN_STYLE = TABLE_RESOURCES.cellTableStyle().cellTableLegDetailColumn();
+    protected final String LEG_COLUMN_HEADER_STYLE;
 
-    protected final String LEG_COLUMN_HEADER_STYLE = TABLE_RESOURCES.cellTableStyle().cellTableLegColumnHeader();
+    protected final String RACE_COLUMN_STYLE;
 
-    protected final String RACE_COLUMN_STYLE = TABLE_RESOURCES.cellTableStyle().cellTableRaceColumn();
+    protected final String LEG_COLUMN_STYLE;
 
-    protected final String LEG_COLUMN_STYLE = TABLE_RESOURCES.cellTableStyle().cellTableLegColumn();
-
-    protected final String TOTAL_COLUMN_STYLE = TABLE_RESOURCES.cellTableStyle().cellTableTotalColumn();
-
+    protected final String TOTAL_COLUMN_STYLE;
+    
     protected final Timer timer;
 
     /**
@@ -292,7 +312,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * This anchor's HTML holds the image tag for the play/pause button that needs to be updated when the {@link #timer}
      * changes its playing state
      */
-    private Anchor playPause;
+    Anchor playPause;
 
     final CompetitorSelectionProvider competitorSelectionProvider;
     private final HorizontalPanel filterControlPanel;
@@ -380,18 +400,22 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private final boolean enableSyncedScroller;
     public boolean isShowCompetitorNationality;
 
+    protected LeaderBoardStyle style;
+
+    private FlowPanel informationPanel;
+
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
+            AsyncActionsExecutor asyncActionsExecutor, LS settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails) {
+            ErrorReporter errorReporter, final StringMessages stringMessages, boolean showRaceDetails,LeaderBoardStyle style) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, false, 
-                competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, showRaceDetails);
+                competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, showRaceDetails,style);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded, CompetitorSelectionProvider competitorSelectionProvider,
+            AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardGroupName, String leaderboardName, ErrorReporter errorReporter,
-            final StringMessages stringMessages, boolean showRaceDetails) {
+            final StringMessages stringMessages, boolean showRaceDetails,LeaderBoardStyle style) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
                 competitorSelectionProvider,
                 new Timer(
@@ -402,18 +426,18 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
                 /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
-                /* enableSyncScroller */ false);
+                /* enableSyncScroller */ false,style);
     }
 
     public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded, CompetitorSelectionProvider competitorSelectionProvider,
+            AsyncActionsExecutor asyncActionsExecutor, LS settings, boolean isEmbedded, CompetitorSelectionProvider competitorSelectionProvider,
             Timer timer, String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
-            boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
+            boolean showCompetitorFilterStatus, boolean enableSyncScroller,LeaderBoardStyle style) {
         super(parent, context);
-
+        this.style = style;
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
@@ -430,7 +454,14 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.showCompetitorFilterStatus = showCompetitorFilterStatus;
         this.enableSyncedScroller = enableSyncScroller;
         this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
-        this.timer = timer;
+        this.timer = timer;RACE_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableRaceColumnHeader();
+        LEG_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumnHeader();
+        LEG_DETAIL_COLUMN_HEADER_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumnHeader();
+        RACE_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableRaceColumn();
+        LEG_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumn();
+        LEG_DETAIL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumn();
+        TOTAL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableTotalColumn();
+        
         overallDetailColumnMap = createOverallDetailColumnMap();
 
         if (settings.getLegDetailsToShow() != null) {
@@ -444,7 +475,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         totalRankColumn = new TotalRankColumn();
         leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
-                TABLE_RESOURCES);
+                style.getTableresources());
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
             @Override
             public void onCellPreview(CellPreviewEvent<LeaderboardRowDTO> event) {
@@ -526,17 +557,22 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     
     protected abstract void openSettingsDialog();
 
-    protected void initialize(LeaderboardSettings settings){
+    protected void initialize(LS settings){
         setDefaultRaceColumnSelection(settings);
 
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
         updateSettings(settings);
+        style.afterConstructorHook(contentPanel,this);
     }
 
-    private Widget createToolbarPanel() {
-        FlowPanel informationPanel = new FlowPanel();
+    public void scrollRowIntoView(int selected) {
+        leaderboardTable.getRowElement(selected).scrollIntoView();
+    }
+
+    Widget createToolbarPanel() {
+        informationPanel = new FlowPanel();
         informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");
         scoreCorrectionCommentLabel = new Label("");
@@ -571,8 +607,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
             }
         };
-        pauseIcon = RESOURCES.autoRefreshEnabledIcon();
-        playIcon = RESOURCES.autoRefreshDisabledIcon();
+        pauseIcon = style.getResources().autoRefreshEnabledIcon();
+        playIcon = style.getResources().autoRefreshDisabledIcon();
         refreshAndSettingsPanel = new HorizontalPanel();
         refreshAndSettingsPanel.ensureDebugId("RefreshAndSettingsPanel");
         refreshAndSettingsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -608,7 +644,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     @Override
     public Widget getToolbarWidget() {
-        return null;
+        return informationPanel;
     }
 
     @Override
@@ -626,16 +662,28 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     protected ImageResource getSettingsIcon() {
-        return COMPONENT_RESOURCES.settingsIcon();
+        return style.getComponentresources().settingsIcon();
     }
 
     public void setShowCompetitorNationality(boolean isShowCompetitorNationality) {
         this.isShowCompetitorNationality = isShowCompetitorNationality;
     }
 
-    public void updateSettings(final LeaderboardSettings newSettings) {
+    public void updateSettings(final LS newSettings) {
         this.currentSettings = newSettings;
-        
+        boolean oldShallAddOverallDetails = shallAddOverallDetails();
+
+
+        if (newSettings.getOverallDetailsToShow() != null) {
+            setValuesWithReferenceOrder(newSettings.getOverallDetailsToShow(), getAvailableOverallDetailColumnTypes(),
+                    selectedOverallDetailColumns);
+        }
+        setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
+        setShowAddedScores(newSettings.isShowAddedScores());
+        setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
+        setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
+        setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(
+                newSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         final List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
@@ -651,7 +699,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
         }
         
-        boolean oldShallAddOverallDetails = applyDetailSettings(newSettings);
+        oldShallAddOverallDetails = applyDetailSettings(newSettings);
 
         addBusyTask();
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
@@ -723,7 +771,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return oldShallAddOverallDetails;
     }
 
-    protected abstract void setDefaultRaceColumnSelection(LeaderboardSettings settings);
+    protected abstract void setDefaultRaceColumnSelection(LS settings);
 
     private void setValuesWithReferenceOrder(Collection<DetailType> valuesToSet,
             DetailType[] referenceOrder, List<DetailType> collectionToSetValuesTo) {
@@ -817,12 +865,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private class SailIDColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
         private final CompetitorFetcher<T> competitorFetcher;
 
-        protected SailIDColumn(CompetitorFetcher<T> competitorFetcher) {
+        protected SailIDColumn(CompetitorFetcher<T> competitorFetcher,LeaderBoardStyle style) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.competitorFetcher = competitorFetcher;
             // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
             // an overflow to the next column (see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3537)
-            setCellStyleNames(TABLE_RESOURCES.cellTableStyle().cellTableSailIdColumn());
+            setCellStyleNames(style.getTableresources().cellTableStyle().cellTableSailIdColumn());
         }
 
         @Override
@@ -847,14 +895,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
-            ImageResourceRenderer renderer = new ImageResourceRenderer();
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
             final String flagImageURL = competitor.getFlagImageURL();
-
             boolean boatColorShown = renderBoatColorIfNecessary(competitorFetcher.getCompetitor(object),sb);
-            
-
+           
             if (isShowCompetitorNationality || flagImageURL == null || flagImageURL.isEmpty()) {
                 final ImageResource nationalityFlagImageResource;
                 if (twoLetterIsoCountryCode == null || twoLetterIsoCountryCode.isEmpty()) {
@@ -863,12 +908,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
                 if (nationalityFlagImageResource != null) {
-                    sb.append(renderer.render(nationalityFlagImageResource));
+                    style.renderNationalityFlag(nationalityFlagImageResource,sb);
                     sb.appendHtmlConstant("&nbsp;");
                 }
             }
             if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
+                style.renderFlagImage(flagImageURL,sb,competitor);
                 sb.appendHtmlConstant("&nbsp;");
             }
             sb.appendEscaped(competitor.getSailID());
@@ -883,6 +928,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
+    protected void processStyleForRaceColumnWithReasonForMaxPoints(boolean isDiscarded, SafeStylesBuilder ssb) {
+        ssb.opacity(0.5d);
+    }
+
+    
+
     /**
      * Displays net/total points and possible max-points reasons based on a {@link LeaderboardRowDTO} and a race name
      * and makes the column sortable by the total points.
@@ -891,7 +942,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * 
      */
     protected abstract class RaceColumn<C> extends ExpandableSortableColumn<C> {
-        private RaceColumnDTO race;
+        RaceColumnDTO race;
 
         private final String headerStyle;
         private final String columnStyle;
@@ -981,20 +1032,29 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 }
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
+                    SafeStylesBuilder ssb = new SafeStylesBuilder();
+                    style.processStyleForRaceColumnWithoutReasonForMaxPoints(entry.discarded, ssb);
+                    html.append(SafeHtmlUtils.fromTrustedString("<span style='"));
+                    html.append(SafeHtmlUtils.fromTrustedString(ssb.toSafeStyles().asString()));
+                    html.append(SafeHtmlUtils.fromTrustedString("'>"));
                     if (!entry.discarded) {
-                        html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.appendHtmlConstant(netOrAddedPointsAsText);
-                        html.appendHtmlConstant("</span>");
+                        html.append(SafeHtmlUtils.fromTrustedString(netOrAddedPointsAsText));
                     } else {
-                        html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(totalOrAddedPointsAsText);
-                        html.appendHtmlConstant("</del></span>");
+                        html.append(SafeHtmlUtils.fromTrustedString("<del>"));
+                        html.append(SafeHtmlUtils.fromTrustedString(totalOrAddedPointsAsText));
+                        html.append(SafeHtmlUtils.fromTrustedString("</del>"));
                     }
+                    html.append(SafeHtmlUtils.fromTrustedString("</span>"));
+
                 } else {
-                    html.appendHtmlConstant(" <span title=\"" + totalOrAddedPointsAsText + "/" + netOrAddedPointsAsText
-                            + "\" style=\"opacity: 0.5;\">");
+                    SafeStylesBuilder ssb = new SafeStylesBuilder();
+                    processStyleForRaceColumnWithReasonForMaxPoints(entry.discarded, ssb);
+                    html.append(SafeHtmlUtils.fromTrustedString(
+                            "<span title=\"" + totalOrAddedPointsAsText + "/" + netOrAddedPointsAsText + "\" style='"));
+                    html.append(SafeHtmlUtils.fromTrustedString(ssb.toSafeStyles().asString()));
+                    html.append(SafeHtmlUtils.fromTrustedString("'>"));
                     if (entry.discarded) {
-                        html.appendHtmlConstant("<del>");
+                        html.append(SafeHtmlUtils.fromTrustedString("<del>"));
                     }
                     html.appendEscaped(
                             entry.reasonForMaxPoints == MaxPointsReason.NONE ? "" : entry.reasonForMaxPoints.name());
@@ -1833,9 +1893,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             extends com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn<LeaderboardRowDTO>
             implements CompetitorSelectionChangeListener {
         protected LeaderboardSelectionCheckboxColumn(final CompetitorSelectionProvider competitorSelectionProvider) {
-            super(TABLE_RESOURCES.cellTableStyle().cellTableCheckboxSelected(),
-                    TABLE_RESOURCES.cellTableStyle().cellTableCheckboxDeselected(),
-                    TABLE_RESOURCES.cellTableStyle().cellTableCheckboxColumnCell(),
+            super(style.getTableresources().cellTableStyle().cellTableCheckboxSelected(),
+                    style.getTableresources().cellTableStyle().cellTableCheckboxDeselected(),
+                    style.getTableresources().cellTableStyle().cellTableCheckboxColumnCell(),
                     new EntityIdentityComparator<LeaderboardRowDTO>() {
                         @Override
                         public boolean representSameEntity(LeaderboardRowDTO dto1, LeaderboardRowDTO dto2) {
@@ -2268,7 +2328,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
-    protected abstract LeaderboardSettings overrideDefaultsForNamesOfRaceColumns(LeaderboardSettings currentSettings, LeaderboardDTO result);
+    protected abstract LS overrideDefaultsForNamesOfRaceColumns(LS currentSettings, LeaderboardDTO result);
 
     protected boolean isFillTotalPointsUncorrected() {
         return false;
@@ -2383,24 +2443,31 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             }
 
             if (!isEmbedded) {
-                scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
-                if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
-                    Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                    String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(lastCorrectionDate);
-                    scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
-                } else {
-                    scoreCorrectionLastUpdateTimeLabel.setText("");
-                }
-
-                boolean hasLiveRace = !leaderboard.getLiveRaces(timer.getLiveTimePointInMillis()).isEmpty();
-                liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
-                scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
-                liveRaceLabel.setVisible(hasLiveRace);
+                updateToolbar(leaderboard);
             }
             informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
         }
+        style.afterLeaderboardUpdate(leaderboard);
     }
 
+    protected void updateToolbar(LeaderboardDTO leaderboard) {
+        boolean doExecute = style.preUpdateToolbarHook(leaderboard);
+        if(doExecute){
+            scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+            if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
+                Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
+                String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(lastCorrectionDate);
+                scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
+            } else {
+                scoreCorrectionLastUpdateTimeLabel.setText("");
+            }
+            
+            boolean hasLiveRace = !leaderboard.getLiveRaces(timer.getLiveTimePointInMillis()).isEmpty();
+            liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
+            scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
+            liveRaceLabel.setVisible(hasLiveRace);
+        }
+    }
     protected abstract void processAutoExpands(AbstractSortableColumnWithMinMax<?, ?> c, RaceColumn<?> lastRaceColumn);
 
     protected abstract void applyTop30FilterIfCompetitorSizeGreaterEqual40(LeaderboardDTO leaderboard);
@@ -2557,6 +2624,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private void adjustColumnLayout(LeaderboardDTO leaderboard) {
         int columnIndex = 0;
+        columnIndex = ensureRaceRankColumn(columnIndex);
         columnIndex = ensureSelectionCheckboxColumn(columnIndex);
         columnIndex = ensureRankColumn(columnIndex);
         columnIndex = ensureSailIDAndCompetitorColumn(columnIndex);
@@ -2565,10 +2633,17 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
         if (leaderboard != null) {
-            createMissingAndAdjustExistingRaceColumns(leaderboard);
+            if(style.hasRaceColumns()){
+                createMissingAndAdjustExistingRaceColumns(leaderboard);
+            }
             ensureTotalsColumn();
             updateTotalRacesSailedColumn();
         }
+    }
+
+    //Single leaderboard hook
+    protected int ensureRaceRankColumn(int columnIndex) {
+        return 0;
     }
 
     /**
@@ -2890,7 +2965,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                             public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
                                 return t.competitor;
                             }
-                        }));
+                        },style));
             }
             columnIndexWhereToInsertTheNextColumn++;
         } else {
