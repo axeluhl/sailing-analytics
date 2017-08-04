@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.OverallLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -13,21 +12,21 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class OverallLeaderboardPanel extends LeaderboardPanel {
+public class OverallLeaderboardPanel extends MultiRaceLeaderboardPanel {
     public OverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
-            boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, MultiRaceLeaderboardSettings settings,
+            boolean isEmbedded,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
             boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
-        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
+        super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
-                showCompetitorFilterStatus, enableSyncScroller);
+                showCompetitorFilterStatus, enableSyncScroller,new ClassicLeaderboardStyle());
     }
 
     @Override

@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -218,6 +219,11 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
 
     public Iterable<Competitor> getAllCompetitors() {
         return getFullLeaderboard().getAllCompetitors();
+    }
+
+    @Override
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        return getFullLeaderboard().getAllCompetitorsWithRaceDefinitionsConsidered();
     }
 
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {

@@ -4,6 +4,10 @@
   border-radius: 0.333333333333333em;
   overflow: hidden;
 }
+.box_embedded {
+  border: none;
+  border-top: 1px solid #dedede;
+}
 .box_header {
   color: #333;
   font-size: 1.2em;

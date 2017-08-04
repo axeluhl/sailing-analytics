@@ -24,6 +24,7 @@ public class RestApiApplication extends Application {
         classes.add(DataMiningResource.class);
         classes.add(PingResource.class);
         classes.add(AnniversaryListResource.class);
+        classes.add(StatisticsResource.class);
         
         // Exception Mapper
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);

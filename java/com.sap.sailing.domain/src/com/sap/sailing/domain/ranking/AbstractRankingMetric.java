@@ -463,7 +463,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                         durationForSubsequentLegsToReachAtEqualPerformance = getDurationToReachAtEqualPerformance(who, to,
                                 legWho.getLeg().getTo(), timePoint, cache);
                     }
-                    result = toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
+                    result = durationForSubsequentLegsToReachAtEqualPerformance == null ? null : toEndOfLegOrTo.plus(durationForSubsequentLegsToReachAtEqualPerformance);
                 }
             }
         }

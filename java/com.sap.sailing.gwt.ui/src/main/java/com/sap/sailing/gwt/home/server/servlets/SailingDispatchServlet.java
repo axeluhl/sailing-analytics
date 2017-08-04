@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.server.SailingDispatchContextImpl;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.RequestWrapper;
 import com.sap.sse.gwt.dispatch.servlets.AbstractDispatchServlet;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
@@ -23,6 +24,7 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
     private final ServiceTracker<EventNewsService, EventNewsService> eventNewsServiceTracker;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     private final ServiceTracker<UserStore, UserStore> userStoreTracker;
+    private final ServiceTracker<TrackedRaceStatisticsCache, TrackedRaceStatisticsCache> trackedRaceStatisticsCacheTracker;
 
     public SailingDispatchServlet() {
         final BundleContext context = Activator.getDefault();
@@ -30,6 +32,7 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
         eventNewsServiceTracker = ServiceTrackerFactory.createAndOpen(context, EventNewsService.class);
         securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
         userStoreTracker = ServiceTrackerFactory.createAndOpen(context, UserStore.class);
+        trackedRaceStatisticsCacheTracker = ServiceTrackerFactory.createAndOpen(context, TrackedRaceStatisticsCache.class);
     }
 
     @Override
@@ -37,6 +40,7 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
             RequestWrapper<R, A, SailingDispatchContext> request) {
         return new SailingDispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService(),
                 eventNewsServiceTracker.getService(), securityServiceTracker.getService(),
-                userStoreTracker.getService(), request.getClientLocaleName(), getThreadLocalRequest());
+                userStoreTracker.getService(), trackedRaceStatisticsCacheTracker.getService(),
+                request.getClientLocaleName(), getThreadLocalRequest());
     }
 }

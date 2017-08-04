@@ -18,10 +18,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.settings.client.leaderboard.MultiLeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultipleMultiLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -37,12 +36,12 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
- * A panel managing multiple {@link LeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
+ * A panel managing multiple {@link ClassicLeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
  * @author Frank
  */
-public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<LeaderboardSettings> implements TimeListener, SelectedLeaderboardChangeProvider {
+public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceLeaderboardSettings> implements TimeListener, SelectedLeaderboardChangeProvider<MultiRaceLeaderboardPanel> {
 
-    private LeaderboardPanel selectedLeaderboardPanel;
+    private MultiRaceLeaderboardPanel selectedLeaderboardPanel;
     private FlowPanel selectedLeaderboardFlowPanel;
 
     private final StringMessages stringMessages;
@@ -64,17 +63,17 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     private final boolean isEmbedded;
 
     private final Set<LeaderboardUpdateListener> leaderboardUpdateListeners;
-    private final Set<SelectedLeaderboardChangeListener> selectedLeaderboardChangeListeners;
-    private HashMap<String, LeaderboardSettings> contextStore;
-    private LeaderboardSettings loadedSettings;
+    private final Set<SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel>> selectedLeaderboardChangeListeners;
+    private HashMap<String, MultiRaceLeaderboardSettings> contextStore;
+    private MultiRaceLeaderboardSettings loadedSettings;
 
     public MultiLeaderboardProxyPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, String metaLeaderboardName,
             AsyncActionsExecutor asyncActionsExecutor,
-            Timer timer, boolean isEmbedded, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
+            Timer timer, boolean isEmbedded, String preselectedLeaderboardName,  
             ErrorReporter errorReporter, StringMessages stringMessages,
             boolean showRaceDetails, boolean autoExpandLastRaceColumn,
-            LeaderboardSettings settings) {
+            MultiRaceLeaderboardSettings settings) {
         super(parent, context);
 
         loadedSettings = settings;
@@ -97,7 +96,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
          * This only stores the ContextSpecific settings, as they differ for all Leaderboards
          */
         leaderboardUpdateListeners = new HashSet<LeaderboardUpdateListener>();
-        selectedLeaderboardChangeListeners = new HashSet<SelectedLeaderboardChangeListener>();
+        selectedLeaderboardChangeListeners = new HashSet<SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel>>();
 
         contextStore = new HashMap<>();
     }
@@ -146,17 +145,17 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     }
 
     @Override
-    public LeaderboardSettings getSettings() {
+    public MultiRaceLeaderboardSettings getSettings() {
         return selectedLeaderboardPanel.getSettings();
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent(LeaderboardSettings settings) {
+    public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(MultiRaceLeaderboardSettings settings) {
         return selectedLeaderboardPanel.getSettingsDialogComponent(settings);
     }
 
     @Override
-    public void updateSettings(LeaderboardSettings newSettings) {
+    public void updateSettings(MultiRaceLeaderboardSettings newSettings) {
         // store contextspecific setting in this hashmap, so they are not lost on tab change
         contextStore.put(selectedLeaderboardPanel.getLeaderboardName(), newSettings);
         selectedLeaderboardPanel.updateSettings(newSettings);
@@ -225,21 +224,21 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
             
             selectedLeaderboardFlowPanel = (FlowPanel) leaderboardsTabPanel.getWidget(newTabIndex);
 
-            LeaderboardSettings toMerge = contextStore.get(newSelectedLeaderboardName);
+            MultiRaceLeaderboardSettings toMerge = contextStore.get(newSelectedLeaderboardName);
             if (toMerge != null) {
                 toMerge = mergeContext(loadedSettings, toMerge);
             } else {
                 toMerge = loadedSettings;
             }
 
-            MultiLeaderboardPanel newSelectedLeaderboardPanel = new MultiLeaderboardPanel(this, getComponentContext(),
+            MultiMultiRaceLeaderboardPanel newSelectedLeaderboardPanel = new MultiMultiRaceLeaderboardPanel(this, getComponentContext(),
                     sailingService,
                     asyncActionsExecutor, toMerge, isEmbedded,
-                    /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
+                    new CompetitorSelectionModel(true), timer,
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, 
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                     false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
-                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
+                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle());
             selectedLeaderboardFlowPanel.add(newSelectedLeaderboardPanel);
             for (LeaderboardUpdateListener listener : leaderboardUpdateListeners) {
                 newSelectedLeaderboardPanel.addLeaderboardUpdateListener(listener);
@@ -256,7 +255,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
         this.selectedLeaderboardName = newSelectedLeaderboardName;
     }
 
-    private LeaderboardSettings mergeContext(LeaderboardSettings settings, LeaderboardSettings toMerge) {
+    private MultiRaceLeaderboardSettings mergeContext(MultiRaceLeaderboardSettings settings, MultiRaceLeaderboardSettings toMerge) {
         return LeaderboardSettingsFactory.getInstance().mergeLeaderboardSettings(toMerge, settings);
     }
 
@@ -278,20 +277,20 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     }
 
     @Override
-    public void addSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener listener) {
+    public void addSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel> listener) {
         selectedLeaderboardChangeListeners.add(listener);
     }
 
     @Override
-    public void removeSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener listener) {
+    public void removeSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel> listener) {
         selectedLeaderboardChangeListeners.remove(listener);
     }
 
     @Override
-    public void setSelectedLeaderboard(LeaderboardPanel selectedLeaderboard) {
+    public void setSelectedLeaderboard(MultiRaceLeaderboardPanel selectedLeaderboard) {
         if (this.selectedLeaderboardPanel != selectedLeaderboard) {
             this.selectedLeaderboardPanel = selectedLeaderboard;
-            for (SelectedLeaderboardChangeListener listener : selectedLeaderboardChangeListeners) {
+            for (SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel> listener : selectedLeaderboardChangeListeners) {
                 listener.onSelectedLeaderboardChanged(selectedLeaderboardPanel);
             }
         }
@@ -303,6 +302,6 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
 
     @Override
     public String getId() {
-        return MultiLeaderboardPanelLifecycle.MID;
+        return MultipleMultiLeaderboardPanelLifecycle.MID;
     }
 }
