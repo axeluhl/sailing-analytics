@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1724,7 +1725,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 newValue.append("regatta", anniversary.getValue().getIdentifier().getRegattaName());
                 newValue.append("leaderboardName", anniversary.getValue().getLeaderboardName());
                 newValue.append("startOfRace", anniversary.getValue().getStartOfRace());
-                newValue.append("eventID", anniversary.getValue().getEventID());
+                newValue.append("eventID", anniversary.getValue().getEventID().toString());
                 newValue.append("remoteUrl", anniversary.getValue().getRemoteName());
                 anniversarysStored.update(currentProxy, newValue, true, false);
             }
@@ -1746,7 +1747,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Date startOfRace = (Date) toLoad.get("startOfRace");
             String race = toLoad.get("race").toString();
             String regatta = toLoad.get("regatta").toString();
-            AnniversaryRaceInfo loadedAnniversary = new AnniversaryRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, eventID);
+            AnniversaryRaceInfo loadedAnniversary = new AnniversaryRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, UUID.fromString(eventID));
             loadedAnniversary.setRemoteName(remoteUrl);
             int anniversary = ((Number)toLoad.get("anniversary")).intValue();
             fromDb.put(anniversary, loadedAnniversary);

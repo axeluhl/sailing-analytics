@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.util.Date;
+import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -18,7 +19,7 @@ public class AnniversaryRaceInfoJsonSerializer implements JsonSerializer<Anniver
     @Override
     public JSONObject serialize(AnniversaryRaceInfo object) {
         JSONObject result = new JSONObject();
-        result.put(FIELD_EVENT_ID, object.getEventID());
+        result.put(FIELD_EVENT_ID, object.getEventID().toString());
         result.put(SimpleAnniversaryRaceInfoJsonSerializer.FIELD_RACE_NAME, object.getIdentifier().getRaceName());
         result.put(SimpleAnniversaryRaceInfoJsonSerializer.FIELD_REGATTA_NAME, object.getIdentifier().getRegattaName());
         result.put(FIELD_LEADERBOARD_NAME, object.getLeaderboardName());
@@ -33,6 +34,6 @@ public class AnniversaryRaceInfoJsonSerializer implements JsonSerializer<Anniver
         String regattaName = object.get(SimpleAnniversaryRaceInfoJsonSerializer.FIELD_REGATTA_NAME).toString();
         String leaderboardName = object.get(FIELD_LEADERBOARD_NAME).toString();
         Date startOfRace = (Date) object.get(SimpleAnniversaryRaceInfoJsonSerializer.FIELD_START_OF_RACE);
-        return new AnniversaryRaceInfo(new RegattaNameAndRaceName(regattaName, raceName), leaderboardName, startOfRace, eventId);
+        return new AnniversaryRaceInfo(new RegattaNameAndRaceName(regattaName, raceName), leaderboardName, startOfRace, UUID.fromString(eventId));
     }
 }

@@ -1,24 +1,25 @@
 package com.sap.sailing.domain.anniversary;
 
 import java.util.Date;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public class AnniversaryRaceInfo extends SimpleAnniversaryRaceInfo {
     public AnniversaryRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, Date startOfRace,
-            String eventID) {
+            UUID eventId) {
         super(identifier, startOfRace);
-        if (leaderboardName == null || eventID == null) {
+        if (leaderboardName == null || eventId == null) {
             throw new IllegalStateException("Anniversary Data is not allowed to contain any null values!");
         }
         this.identifier = identifier;
         this.leaderboardName = leaderboardName;
         this.startOfRace = startOfRace;
-        this.eventID = eventID;
+        this.eventID = eventId;
     }
 
     String leaderboardName;
-    String eventID;
+    UUID eventID;
 
     public RegattaAndRaceIdentifier getIdentifier() {
         return identifier;
@@ -32,7 +33,7 @@ public class AnniversaryRaceInfo extends SimpleAnniversaryRaceInfo {
         return startOfRace;
     }
 
-    public String getEventID() {
+    public UUID getEventID() {
         return eventID;
     }
 
@@ -41,4 +42,8 @@ public class AnniversaryRaceInfo extends SimpleAnniversaryRaceInfo {
         return "AnniversaryRaceInfo [identifier=" + identifier + ", leaderboardName=" + leaderboardName
                 + ", startOfRace=" + startOfRace + ", eventID=" + eventID + "]";
     }
+
+
+    
+    
 }
