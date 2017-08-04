@@ -88,7 +88,8 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.MINI_TRANSAT.getDisplayName(), imageResources.MiniTransatIcon());
         boatClassIconsMap.put(BoatClassMasterdata.MUSTO_SKIFF.getDisplayName(), imageResources.MustoSkiffIcon());
         boatClassIconsMap.put(BoatClassMasterdata.NACRA_15.getDisplayName(), imageResources.Nacra15Icon());
-        boatClassIconsMap.put(BoatClassMasterdata.NACRA_17.getDisplayName(), imageResources.Nacra17Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.NACRA_17.getDisplayName(), imageResources.Nacra17Icon());        
+		boatClassIconsMap.put(BoatClassMasterdata.NACRA_17_FOIL.getDisplayName(), imageResources.Nacra17Icon());
         boatClassIconsMap.put(BoatClassMasterdata.O_JOLLE.getDisplayName(), imageResources.OJolleIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OK.getDisplayName(), imageResources.OKIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OPEN_BIC.getDisplayName(), imageResources.OpenBicIcon());
