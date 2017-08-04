@@ -152,7 +152,7 @@ public class SecurityResource extends AbstractSecurityResource {
                 return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
             } else {
                 JSONObject result = new JSONObject();
-                result.put("username", username);
+                result.put("username", user.getName());
                 result.put("fullName", user.getFullName());
                 result.put("email", user.getEmail());
                 result.put("company", user.getCompany());
