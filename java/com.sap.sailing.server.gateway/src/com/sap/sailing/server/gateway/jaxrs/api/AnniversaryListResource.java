@@ -110,14 +110,14 @@ public class AnniversaryListResource extends AbstractSailingServerResource {
         }
         return getJsonResponse(json);
     }
-    
+
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
     @Path("fullRacelist")
     public Response fullRaceList() {
         JSONArray json = new JSONArray();
         HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store = new HashMap<>();
-        getService().getRemoteRaceList(store );
+        getService().getRemoteRaceList(store);
 
         for (Event event : getService().getAllEvents()) {
             for (LeaderboardGroup group : event.getLeaderboardGroups()) {
@@ -138,13 +138,13 @@ public class AnniversaryListResource extends AbstractSailingServerResource {
         }
 
         ArrayList<SimpleAnniversaryRaceInfo> sorted = new ArrayList<>(store.values());
-        Collections.sort(sorted,new Comparator<SimpleAnniversaryRaceInfo>() {
+        Collections.sort(sorted, new Comparator<SimpleAnniversaryRaceInfo>() {
             @Override
             public int compare(SimpleAnniversaryRaceInfo o1, SimpleAnniversaryRaceInfo o2) {
                 return o1.getStartOfRace().compareTo(o2.getStartOfRace());
             }
         });
-        for (int i = 0;i<sorted.size();i++) {
+        for (int i = 0; i < sorted.size(); i++) {
             SimpleAnniversaryRaceInfo current = sorted.get(i);
             JSONArray single = new JSONArray();
             single.add(String.valueOf(i));

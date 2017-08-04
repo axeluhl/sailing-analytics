@@ -459,7 +459,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
 
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
-    private AnniversaryCalculator anniversaryCalculator;
+    //  private AnniversaryCalculator anniversaryCalculator;
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -540,7 +540,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory ,trackedRegattaListener, sailingNotificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces);
-	this.anniversaryCalculator = anniversaryCalculator;
+//      this.anniversaryCalculator = anniversaryCalculator;
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
