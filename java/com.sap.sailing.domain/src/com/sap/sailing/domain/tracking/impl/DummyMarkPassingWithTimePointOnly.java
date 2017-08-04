@@ -5,6 +5,7 @@ import java.net.URI;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
@@ -50,6 +51,11 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
 
             @Override
             public Team getTeam() {
+                return null;
+            }
+
+            @Override
+            public Nationality getNationality() {
                 return null;
             }
 

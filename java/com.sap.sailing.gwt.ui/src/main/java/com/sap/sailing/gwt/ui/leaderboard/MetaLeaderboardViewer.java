@@ -71,7 +71,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
                         /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null,
                         settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                         /* autoApplyTopNFilter */ false,
-                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false));
+                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,new ClassicLeaderboardStyle()));
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
         

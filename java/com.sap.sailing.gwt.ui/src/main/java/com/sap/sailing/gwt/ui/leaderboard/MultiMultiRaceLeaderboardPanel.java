@@ -23,12 +23,12 @@ public class MultiMultiRaceLeaderboardPanel extends MultiRaceLeaderboardPanel {
             boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
-            boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
+            boolean showCompetitorFilterStatus, boolean enableSyncScroller, LeaderBoardStyle style) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, 
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
-                showCompetitorFilterStatus, enableSyncScroller);
+                showCompetitorFilterStatus, enableSyncScroller,style);
     }
 
 

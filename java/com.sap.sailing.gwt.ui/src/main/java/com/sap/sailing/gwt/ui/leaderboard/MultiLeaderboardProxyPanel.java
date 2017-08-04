@@ -36,7 +36,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
- * A panel managing multiple {@link LeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
+ * A panel managing multiple {@link ClassicLeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
  * @author Frank
  */
 public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceLeaderboardSettings> implements TimeListener, SelectedLeaderboardChangeProvider<MultiRaceLeaderboardPanel> {
@@ -238,7 +238,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, 
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                     false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
-                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
+                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle());
             selectedLeaderboardFlowPanel.add(newSelectedLeaderboardPanel);
             for (LeaderboardUpdateListener listener : leaderboardUpdateListeners) {
                 newSelectedLeaderboardPanel.addLeaderboardUpdateListener(listener);
