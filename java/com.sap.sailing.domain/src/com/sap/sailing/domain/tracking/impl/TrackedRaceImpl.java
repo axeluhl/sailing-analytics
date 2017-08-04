@@ -1744,7 +1744,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         boolean result = false;
         if (!tracks.values().isEmpty()) {
             for (GPSFixTrack<Competitor, GPSFixMoving> gpsTrack : tracks.values()) {
-                if (gpsTrack.getFirstRawFix() != null) {
+                if (!gpsTrack.isEmpty()) {
                     result = true;
                     break;
                 }

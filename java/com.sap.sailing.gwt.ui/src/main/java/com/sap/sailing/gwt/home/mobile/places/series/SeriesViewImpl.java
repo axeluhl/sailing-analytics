@@ -17,8 +17,9 @@ import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardB
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentYearEvent;
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
-import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
+import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.MobileStatisticsBoxView;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
+import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
 import com.sap.sailing.gwt.home.shared.refresh.LifecycleRefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -34,7 +35,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     @UiField Quickfinder quickFinderUi;
     @UiField(provided = true) MinileaderboardBox leaderboardUi;
     @UiField FlowPanel eventsUi;
-    @UiField(provided = true) StatisticsBox statisticsBoxUi;
+    @UiField(provided = true) EventStatisticsBox statisticsBoxUi;
 
     private final Presenter currentPresenter;
     private final RefreshManager refreshManager;
@@ -75,7 +76,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     }
     
     private void setupStatisticsBox(EventSeriesViewDTO series) {
-        statisticsBoxUi = new StatisticsBox(true);
+        statisticsBoxUi = new EventStatisticsBox(true, new MobileStatisticsBoxView());
         refreshManager.add(statisticsBoxUi, new GetSeriesStatisticsAction(series.getId()));
     }
 }

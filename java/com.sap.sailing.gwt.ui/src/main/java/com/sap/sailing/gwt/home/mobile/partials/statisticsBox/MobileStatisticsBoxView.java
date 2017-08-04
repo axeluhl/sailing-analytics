@@ -3,30 +3,33 @@ package com.sap.sailing.gwt.home.mobile.partials.statisticsBox;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
-import com.sap.sailing.gwt.home.shared.partials.statistics.AbstractStatisticsBox;
+import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxView;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class StatisticsBox extends AbstractStatisticsBox {
+public class MobileStatisticsBoxView extends Composite implements StatisticsBoxView {
     private static StatisticsBoxUiBinder uiBinder = GWT.create(StatisticsBoxUiBinder.class);
     
-    interface StatisticsBoxUiBinder extends UiBinder<Widget, StatisticsBox> {
+    interface StatisticsBoxUiBinder extends UiBinder<MobileSection, MobileStatisticsBoxView> {
     }
 
     @UiField MobileSection itemContainerUi;
+    @UiField SectionHeaderContent headerUi;
     
-    public StatisticsBox() {
-        this(true);
+    public MobileStatisticsBoxView() {
+        this(StringMessages.INSTANCE.statistics());
     }
-
-    public StatisticsBox(boolean showRegattaInformation) {
-        super(showRegattaInformation);
+    
+    public MobileStatisticsBoxView(String title) {
         StatisticsBoxResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        headerUi.setSectionTitle(title);
     }
 
     @Override
-    protected void clear() {
+    public void clear() {
         itemContainerUi.clearContent();
     }
     
