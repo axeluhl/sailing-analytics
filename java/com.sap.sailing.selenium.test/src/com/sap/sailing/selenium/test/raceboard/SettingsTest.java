@@ -74,10 +74,18 @@ public class SettingsTest extends AbstractSeleniumTest {
         super.setUp();
     }
 
-    // TODO bug 2529: temporarily ignored because make default is deactivated for RaceBoard
-    @Ignore
+    // This test is currently ignored due to changes in the RaceBoardMod-based settings semantic.
+    // Modes settings were formerly patched on the user defaults but are now patched on top of the system defaults.
+    // In addition, there are now different settigns keys per mode so that settigns for one mode do not have an effect on other modes.
+    // To verify this, there are new tests below but these do not test ReceBoard's embedded Leaderboard.
+    // FIXME uncomment leaderboard test code when selenium infrastructure gets an upgrade
+    /**
+     * Verifies the settings storage of the raceboard. Checks the precedences of url, context specific settings, mode
+     * settings and global settings.
+     */
     @Test
-    public void createRaceAsAdminSetWindSettingToTrue() throws InterruptedException, UnsupportedEncodingException {
+    @Ignore
+    public void testRaceBoardPageSettingsStorage() throws InterruptedException, UnsupportedEncodingException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
         events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
@@ -87,23 +95,286 @@ public class SettingsTest extends AbstractSeleniumTest {
         initTrackingForBmwCupRace(adminConsole);
 
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1));
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+        
+        //FIXME uncomment the leaderboard code when selenium on remote build server displays the raceboard properly
+
+//         DetailCheckboxInfo[] detailsToSelect = new DetailCheckboxInfo[] {
+//         // Overall details
+//        
+//         // Race details
+//         DetailCheckboxInfo.RACE_GAP_TO_LEADER,
+//         DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
+//         DetailCheckboxInfo.DISPLAY_LEGS,
+//        
+//         // Race Start Analysis
+//        
+//         // Leg Details
+//         DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+//        
+//         // Maneuvers
+//         DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE,
+//         DetailCheckboxInfo.PENALTY_CIRCLE
+//        
+//         };
+//        
+//         LeaderboardSettingsDialogPO leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+//         LeaderboardSettingsPanelPO leaderboardSettingsPanelPO =
+//         leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+//         DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+//         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+//         leaderboardSettingsPanelPO.setRefreshInterval(2);
+//         leaderboardSettingsDialog.pressMakeDefault();
+//         leaderboardSettingsDialog.pressCancel();
+
         MapSettingsPO mapSettings = raceboard.openMapSettings();
-        mapSettings.setWindChart(true);
-        mapSettings.makeDefault();
-        // reload
-        RaceBoardPage raceboard2 = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
-                BMW_CUP_REGATTA, String.format(BMW_RACE, 1));
-        MapSettingsPO mapSettings2 = raceboard2.openMapSettings();
-        boolean stillSelected = mapSettings2.isWindChartSelected();
-        Assert.assertTrue(stillSelected);
+        // Verify initial mode settings
+        Assert.assertFalse(mapSettings.isWindUp());
+        Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
+        mapSettings.setTransparentHoverlines(true);
+        mapSettings.setWindUp(false);
+        mapSettings.pressMakeDefault();
+
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "WINNING_LANES");
+
+//         detailsToSelect = new DetailCheckboxInfo[] {
+//         // Overall details
+//        
+//         // Race details
+//         DetailCheckboxInfo.RACE_GAP_TO_LEADER, //merged from user settings
+//         DetailCheckboxInfo.RACE_DISTANCE,
+//         DetailCheckboxInfo.RACE_TIME,
+//         DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND, //merged from user settings
+//         DetailCheckboxInfo.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR,
+//         DetailCheckboxInfo.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR,
+//        
+//         // Race Start Analysis
+//        
+//         // Leg Details
+//         DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+//        
+//         // Maneuvers
+//         DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE,
+//         DetailCheckboxInfo.PENALTY_CIRCLE
+//        
+//         };
+//        
+//        
+//         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+//         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+//         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+//         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+//        
+//         detailsToSelect = new DetailCheckboxInfo[] {
+//         // Overall details
+//        
+//         // Race details
+//         DetailCheckboxInfo.RACE_GAP_TO_LEADER,
+//         DetailCheckboxInfo.RACE_DISTANCE,
+//         DetailCheckboxInfo.RACE_TIME,
+//         DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
+//         DetailCheckboxInfo.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL, //new value
+//         DetailCheckboxInfo.DISPLAY_LEGS, //new value which should override mode settings
+//        
+//         // Race Start Analysis
+//        
+//         // Leg Details
+//         DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+//        
+//         // Maneuvers
+//         DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE,
+//         DetailCheckboxInfo.PENALTY_CIRCLE
+//        
+//         };
+//         leaderboardSettingsPanelPO.selectDetailsAndDeselectOther(detailsToSelect);
+//         leaderboardSettingsPanelPO.setRefreshInterval(1);
+//         leaderboardSettingsDialog.pressOk();
+
+        mapSettings = raceboard.openMapSettings();
+        // verify default mode settings override custom user settings
+        Assert.assertTrue(mapSettings.isWindUp());
+        // verify default mode settings override system defaults
+        Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
+        // Verify custom user settings override system defaults
+        Assert.assertTrue(mapSettings.isTransparentHoverlines());
+        mapSettings.setWindUp(false);
+        mapSettings.setTransparentHoverlines(false);
+        mapSettings.pressOk();
+
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "WINNING_LANES");
+
+//         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+//         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+//         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+//        
+//         //verify highest precedence of document settings
+//         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+//         //verify that document settings are able to override custom user settings by a system default value
+//         Assert.assertEquals(1, leaderboardSettingsPanelPO.getRefreshInterval());
+//        
+//         leaderboardSettingsDialog.pressCancel();
+
+        mapSettings = raceboard.openMapSettings();
+        // Verify that mode settings are overridden by document settings
+        Assert.assertFalse(mapSettings.isWindUp());
+        // verify that document settings are able to override custom user settings by a system default value
+        Assert.assertFalse(mapSettings.isTransparentHoverlines());
+
+        //FIXME uncomment when START_ANALYSIS mode can be handled by remote CI server
+         // verify that custom document settings override mode settings of other modes
+//         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+//         BMW_CUP_REGATTA,
+//         String.format(BMW_RACE, 1), "START_ANALYSIS");
+//         leaderboardSettingsDialog = raceboard.openLeaderboardSettingsDialog();
+//         leaderboardSettingsPanelPO = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
+//         selectedDetails = leaderboardSettingsPanelPO.getSelectedDetails();
+//         
+//         detailsToSelect = new DetailCheckboxInfo[] {
+//                 DetailCheckboxInfo.RACE_GAP_TO_LEADER, //start analysis mode
+//                 DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND, //user settings
+//                 DetailCheckboxInfo.DISPLAY_LEGS, //document settings which override mode settings
+//                 DetailCheckboxInfo.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL, //document settings
+//                 DetailCheckboxInfo.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_START, //start analysis mode
+//                 DetailCheckboxInfo.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, //start analysis mode
+//                 DetailCheckboxInfo.DISTANCE_TO_START_AT_RACE_START, //start analysis mode
+//                 DetailCheckboxInfo.SPEED_OVER_GROUND_AT_RACE_START, //start analysis mode
+//                 DetailCheckboxInfo.SPEED_OVER_GROUND_WHEN_STARTING, //start analysis mode
+//                 DetailCheckboxInfo.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_STARTING, //start analysis mode
+//                 DetailCheckboxInfo.START_TACK, //start analysis mode
+//                 
+//                 DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN, 
+//                 
+//                 DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE
+//         };
+//         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+//         leaderboardSettingsDialog.pressCancel();
+//        
+//         mapSettings = raceboard.openMapSettings();
+//         Assert.assertFalse(mapSettings.isWindUp());
+    }
+
+    /**
+     * Verifies that settings for different modes are distinct and do not have an effect on other modes. 
+     */
+    @Test
+    public void testThatUserDefaultsForOneModeDoNotHaveAnEffectOnAnotherMode() throws InterruptedException, UnsupportedEncodingException {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
+        
+        initTrackingForBmwCupRace(adminConsole);
+        
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+        
+        MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // Verify initial settings for mode PLAYER
+        Assert.assertFalse(mapSettings.isShowWindStreamletOverlay());
+        
+        mapSettings.setTransparentHoverlines(true);
+        mapSettings.setWindUp(false);
+        mapSettings.pressMakeDefault();
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "WINNING_LANES");
+
+        mapSettings = raceboard.openMapSettings();
+        // Verify initial settings for mode WINNING_LANES
+        Assert.assertFalse(mapSettings.isShowWindStreamletOverlay());
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+        
+        // Map settings for mode PLAYER are changed
+        mapSettings = raceboard.openMapSettings();
+        mapSettings.setShowWindStreamletOverlay(true);
+        mapSettings.pressMakeDefault();
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "WINNING_LANES");
+
+        mapSettings = raceboard.openMapSettings();
+        // Verify settings for mode WINNING_LANES are unchanged
+        Assert.assertFalse(mapSettings.isShowWindStreamletOverlay());
+    }
+    
+    /**
+     * Verifies that settings are stored for raceboard.
+     */
+    @Test
+    public void testThatSettingsAreStoredForOneMode() throws InterruptedException, UnsupportedEncodingException {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
+        
+        initTrackingForBmwCupRace(adminConsole);
+        
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER");
+        
+        MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // Verify initial mode settings
+        Assert.assertFalse(mapSettings.isWindUp());
+        Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
+        mapSettings.setWindUp(true);
+        mapSettings.setShowOnlySelectedCompetitors(true);
+        mapSettings.pressMakeDefault();
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "PLAYER");
+        
+        mapSettings = raceboard.openMapSettings();
+        // verify default settings work
+        Assert.assertTrue(mapSettings.isWindUp());
+        Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
+    }
+    
+    /**
+     * Verifies that settings are stored for raceboard.
+     */
+    @Test
+    public void testThatModeDependentSettingsAreStoredForOneMode() throws InterruptedException, UnsupportedEncodingException {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
+        
+        initTrackingForBmwCupRace(adminConsole);
+        
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES");
+        
+        MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // The following options are false in the system default but activated by the WINNING_LANES mode
+        Assert.assertTrue(mapSettings.isWindUp());
+        Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
+        mapSettings.setWindUp(false);
+        mapSettings.setShowOnlySelectedCompetitors(false);
+        mapSettings.pressMakeDefault();
+        
+        raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
+                String.format(BMW_RACE, 1), "WINNING_LANES");
+        
+        mapSettings = raceboard.openMapSettings();
+        // verify mode settigns have been overwritten
+        Assert.assertFalse(mapSettings.isWindUp());
+        Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
     }
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {
-        
-        TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(BMW_RACE, 1), BMW_CUP_BOAT_CLASS);
-        TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(BMW_RACE, 1));
-        
+
+        TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(BMW_RACE, 1),
+                BMW_CUP_BOAT_CLASS);
+        TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                String.format(BMW_RACE, 1));
+
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
@@ -143,9 +414,36 @@ public class SettingsTest extends AbstractSeleniumTest {
         LeaderboardUrlConfigurationDialogPO urlConfigurationDialog = leaderboardEntry
                 .getLeaderboardPageUrlConfigurationDialog();
         LeaderboardSettingsPanelPO leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
-
-        leaderboardSettingsPanel.setCheckboxValue("R2CheckBox", false);
+        
         DetailCheckboxInfo[] detailsToSelect = {
+                DetailCheckboxInfo.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED
+        };
+
+        leaderboardSettingsPanel.selectDetailsAndDeselectOther(detailsToSelect);
+        leaderboardSettingsPanel.setCheckboxValue("R2CheckBox", false);
+        leaderboardSettingsPanel.setRefreshInterval(2);
+
+        // open settings dialog of configurated leaderboard and match the set values with forwarded values
+        LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
+        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();
+
+        DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
+
+        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R1CheckBox"));
+        Assert.assertTrue(!leaderboardSettingsPanel.getCheckboxValue("R2CheckBox"));
+        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R3CheckBox"));
+        Assert.assertEquals(2, leaderboardSettingsPanel.getRefreshInterval());
+
+        // set different custom leaderboard settings
+
+        adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
+        urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
+        leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
+        
+        detailsToSelect = new DetailCheckboxInfo[] {
                 // Overall details
                 DetailCheckboxInfo.REGATTA_RANK, DetailCheckboxInfo.TOTAL_DISTANCE,
                 DetailCheckboxInfo.TOTAL_AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.TIME_ON_TIME_FACTOR,
@@ -185,34 +483,9 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.AVERAGE_JIBE_LOSS, DetailCheckboxInfo.PENALTY_CIRCLE
 
         };
+
         leaderboardSettingsPanel.selectDetailsAndDeselectOther(detailsToSelect);
-
-        leaderboardSettingsPanel.setRefreshInterval(2);
-
-        // open settings dialog of configurated leaderboard and match the set values with forwarded values
-        LeaderboardPage leaderboardPage = urlConfigurationDialog.openLeaderboard();
-        leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();
-
-        DetailCheckboxInfo[] selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
-
-        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
-
-        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R1CheckBox"));
-        Assert.assertTrue(!leaderboardSettingsPanel.getCheckboxValue("R2CheckBox"));
-        Assert.assertTrue(leaderboardSettingsPanel.getCheckboxValue("R3CheckBox"));
-        Assert.assertEquals(2, leaderboardSettingsPanel.getRefreshInterval());
-
-        // set different custom leaderboard settings
-
-        adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
-        leaderboardEntry = leaderboardConfiguration.getLeaderboardTable().getEntry(BMW_CUP_REGATTA);
-        urlConfigurationDialog = leaderboardEntry.getLeaderboardPageUrlConfigurationDialog();
-        leaderboardSettingsPanel = urlConfigurationDialog.goToLeaderboardSettings();
-
         leaderboardSettingsPanel.setNumberOfRacesToDisplay(2);
-        leaderboardSettingsPanel.selectDetailsAndDeselectOther();
-        // FIXME: Settings Dialog is in Error state here
 
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         leaderboardPage = urlConfigurationDialog.openLeaderboard();
@@ -220,9 +493,8 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assert.assertTrue(leaderboardSettingsPanel.isNumberOfRacesToDisplaySelected());
         Assert.assertEquals(2, leaderboardSettingsPanel.getNumberOfRacesToDisplaySelected());
         Assert.assertEquals(3, leaderboardSettingsPanel.getRefreshInterval());
-//        selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
-        // TODO fix leaderboard default values
-        // Assert.assertEquals(0, selectedDetails.length);
+        selectedDetails = leaderboardSettingsPanel.getSelectedDetails();
+        Assert.assertArrayEquals(detailsToSelect, selectedDetails);
 
     }
 
@@ -396,9 +668,9 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
 
     /**
-     * Verifies the settings storage of the leaderboard. Checks the precedences of url, context specific settings, and 
-     * global settings. Verifies also the {@code ignoreLocalSettings} flag for correctness which is used to deactivate settings
-     * storage support when it is set to {@code true}.
+     * Verifies the settings storage of the leaderboard. Checks the precedences of url, context specific settings, and
+     * global settings. Verifies also the {@code ignoreLocalSettings} flag for correctness which is used to deactivate
+     * settings storage support when it is set to {@code true}.
      */
     @Test
     public void testLeaderboardPageSettingsStorage() {
@@ -508,8 +780,8 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
 
     /**
-     * Verifies settings storage support for regatta overview. Checks the precedences of context specific and 
-     * global settings. Verifies also the {@code ignoreLocalSettings} flag for correctness which is used to deactivate settings
+     * Verifies settings storage support for regatta overview. Checks the precedences of context specific and global
+     * settings. Verifies also the {@code ignoreLocalSettings} flag for correctness which is used to deactivate settings
      * storage support when it is set to {@code true}.
      */
     @Test

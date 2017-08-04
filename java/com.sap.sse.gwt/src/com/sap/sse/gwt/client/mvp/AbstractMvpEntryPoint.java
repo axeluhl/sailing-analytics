@@ -7,6 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.StringMessages;
@@ -53,12 +54,19 @@ public abstract class AbstractMvpEntryPoint<S extends StringMessages, CF extends
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(clientFactory.getPlaceController(), eventBus, clientFactory.getDefaultPlace());
 
-        RootPanel.get().add(clientFactory.getRoot());
+        placeWidgetOnRootPanel(clientFactory.getRoot());
+
         // Goes to place represented on URL or default place
         historyHandler.handleCurrentHistory();
     }
 
     protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, CF clientFactory) {
         return new CustomActivityManager(activityMapperRegistry, clientFactory.getEventBus());
+    }
+
+    protected void placeWidgetOnRootPanel(Widget rootWidget) {
+        if (rootWidget != null) {
+            RootPanel.get().add(rootWidget);
+        }
     }
 }

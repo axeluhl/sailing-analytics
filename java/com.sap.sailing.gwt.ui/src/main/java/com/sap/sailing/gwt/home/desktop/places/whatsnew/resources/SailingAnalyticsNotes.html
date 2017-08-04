@@ -4,6 +4,111 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
     <div class="innerContent">
+        <h5 class="articleSubheadline">August 2017</h5>
+        <ul class="bulletList">
+           <li>In the list of past events, you can now find some statistics for the current and past years.
+               The statistics can be found at the end of the list of events for a year.
+               To see statistics of a past year, you need to expand the list of events for that year.
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">July 2017</h5>
+        <ul class="bulletList">
+           <li>When using Smartphone Tracking, mark positions obtained by pinging or tracking or manually
+               assigning a static position can now be removed using the "Delete Fix" pop-up menu item
+               in the Mark Position Editor. It will require removing and re-tracking the race to make
+               the removal take effect.
+           </li>
+           <li>In <code>/gwt/RaceBoard.html</code> it's now possible to display an overlay that shows
+               the estimated duration based on the course and the current wind conditions. To show this information,
+               you need to select the respective option in the map's settings dialog. The option's visibility
+               depends on the availability of sufficient polar data for the boat class.
+           </li>
+           <li>In <code>/gwt/RaceBoard.html</code> it isn't possible anymore to select other races to be shown in the embedded leaderboard.
+               This possibility caused several problems in the past. The leaderboard will now always stick to the single race for which the raceboard was opened.
+           </li>
+           <li>The autoplay sites have been re-implemented from ground up:
+               <ul>
+                    <li>Autoplay now uses the new settings framework</li>
+                    <li>Classic-Autoplay represents the old autoplay  </li>
+                    <li>Sixty-Inch-Autoplay is a new, more complex, redesigned,  multiview autoplay targeted at big screen displays</li>
+               </ul> 
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">June 2017</h5>
+        <ul class="bulletList">
+           <li>Several improvements were implemented regarding user settings:
+               <ul>
+                    <li>Document settings are saved as delta to the user defaults instead of the delta to the system defaults.
+                        In cases where a setting has the value 'A' as system default and 'B' as user default, it's now possible to set it back to 'A' for a document.
+                        Settings stored before this change will continue to work with the old overwriting semantic.</li>
+                    <li>Collection based settings are now stored as delta to the default set of values. This means that removals and additions are being recorded instead of all values of a setting.
+                        Having value 'A' as system default and adding 'B' for the user default and 'C' for one document will select values 'A', 'B' and 'C' for the document.</li>
+                    <li>Settings dialogs now have a 'reset to default' button. When pressing this button, user defaults as well as the current document settings are being reset to the system defaults.
+                        In addition, the settings dialog is updated to show the system defaults. Those defaults will only take effect for the current view when pressing ok.</li>
+                    <li>User settings can now also be saved for <code>/gwt/RaceBoard.html</code>. Be aware that different modes have distinct settings so that defaults defined for one mode do not have any effect on other modes.</li>
+                    <li>On the user profile page you can now find a list of all stored settings. You can show the technical settings data and remove specific setting entries.</li>
+               </ul>
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">May 2017</h5>
+        <ul class="bulletList">
+           <li>It's now possible to show nationality flags in addition to competitor images in leaderboards if both are available.
+               If no competitor images are available, this won't have any effect.
+               You can activate this option through the leaderboard settings dialog to be found in various views.
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">April 2017</h5>
+        <ul class="bulletList">
+           <li>Several pages are now enabled to save user settings with the following specifics:
+               <ul>
+                    <li>In settings dialogs there is a "Make default" button in the lower-left corner which is displayed when saving of settings is enabled. A click on that
+                        button causes the system to use the new settings as default values for the same page. This is independent of a race, event or leaderboard to be shown.</li>
+                    <li>A click on OK button causes the system to store the settings as document settings. Document settings are only used for the same event, leaderboard or race.
+                        When the page is opened for e.g. the same race, the settings used last time are loaded.</li>
+                    <li>Settings saved this way are stored locally in the browser's local storage and in the user profile if you are logged in.</li>
+                    <li>Settings can be overwritten by URL parameters.</li>
+               </ul>
+               The following pages are now enabled to provide user settings:
+               <ul>
+                    <li><code>/gwt/Leaderboard.html</code></li>
+                    <li><code>/gwt/RegattaOverview.html</code></li>
+                    <li>Leaderboards embedded in <code>/gwt/Home.html</code></li>
+               </ul>
+               This feature required changing several URL parameters, which means that previously saved bookmarks might work slightly different.
+           </li>
+           <li>The maneuver loss calculation for penalty circles has been improved. Previously, the end of the
+               penalty circle maneuver was considered to be at the last of the two adjacent tack/gybe maneuvers.
+               This, usually, is earlier than when approaching the course over ground at the beginning of the
+               penalty circle again. With this, the extrapolation of the speed/course at the beginning of
+               the maneuver did not last long enough. Furthermore, penalties with strong accelerations during
+               the gybing phase could have led to an incorrect inference of the speed and course at the
+               beginning of the maneuver. Both of these issues have now been fixed, leading to good results
+               also in very specific and unusual speed developments during a penalty circle maneuver.
+           </li>
+           <li>The advantage line display has been fixed for legs changing their type (upwind/downwind/reach)
+               while the race is going on. It now uses the leg type at the same current time point that the
+               leaderboard uses for calculating the competitor ranking.
+           </li>
+           <li>Images in the overall image gallery ("Photographers love Sailing") are now linked with the
+               events to which they belong. Clicking the image navigates to the event page.
+           </li>
+        </ul>
+    
+        <h5 class="articleSubheadline">March 2017</h5>
+        <ul class="bulletList">
+           <li>The SAP Sailing Analytics are now also available in French, Portugese, as well as Spanish.
+               Find the language chooser in the lower right corner of the footer, or when signed in, go to your user
+               profile and set your preferred language.
+           </li>
+           <li>The application's locale now switches based on the client's "Accept-Language" HTTP header field.
+               This means that the application in all its parts will show in the user's default language if
+               supported, defaulting to English otherwise.
+           </li>
+        </ul>    
         <h5 class="articleSubheadline">February 2017</h5>
         <ul class="bulletList">
            <li>The definition of "ride height" for foiling sensors has been changed. Instead of showing

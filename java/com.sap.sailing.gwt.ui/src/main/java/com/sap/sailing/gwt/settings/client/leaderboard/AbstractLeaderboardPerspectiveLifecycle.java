@@ -9,7 +9,7 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
 
     protected AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages,
             AbstractLeaderboardDTO leaderboard, boolean isOverall) {
-        addLifeCycle(new LeaderboardPanelLifecycle(leaderboard, stringMessages));
+        addLifeCycle(new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages));
         addLifeCycle(new MultiCompetitorLeaderboardChartLifecycle(isOverall));
     }
     
@@ -25,12 +25,12 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
     }
 
     @Override
-    protected LeaderboardPerspectiveOwnSettings extractOwnGlobalSettings(LeaderboardPerspectiveOwnSettings settings) {
+    protected LeaderboardPerspectiveOwnSettings extractOwnUserSettings(LeaderboardPerspectiveOwnSettings settings) {
         return settings;
     }
 
     @Override
-    protected LeaderboardPerspectiveOwnSettings extractOwnContextSettings(LeaderboardPerspectiveOwnSettings settings) {
+    protected LeaderboardPerspectiveOwnSettings extractOwnDocumentSettings(LeaderboardPerspectiveOwnSettings settings) {
         return settings;
     }
 

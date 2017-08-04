@@ -87,7 +87,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.FixOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.SideBySideComponentViewer;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
@@ -103,12 +103,12 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> implements RequiresResize, SelectionChangeEvent.Handler {
     protected static final int FIX_OVERLAY_Z_ORDER = 230;
     private final RaceMap raceMap;
-    private final LeaderboardPanel leaderboardPanel;
+    private final SingleRaceLeaderboardPanel leaderboardPanel;
     private final MarksPanel marksPanel;
     private Series markSeries;
     private LinePlotOptions markSeriesPlotOptions;
@@ -134,7 +134,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
 
     public EditMarkPositionPanel(Component<?> parent, ComponentContext<?> context, final RaceMap raceMap,
-            final LeaderboardPanel leaderboardPanel,
+            final SingleRaceLeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
@@ -787,7 +787,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent(AbstractSettings settings) {
         return null;
     }
 

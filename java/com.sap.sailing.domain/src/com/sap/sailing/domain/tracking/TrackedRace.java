@@ -77,7 +77,7 @@ import com.sap.sse.common.Util.Pair;
  */
 public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
     final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
-    final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_MINUTE.times(2);
+    final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_SECOND.times(30);
 
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
 
@@ -944,6 +944,22 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * @throws NoWindException
      */
     TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
+
+    /**
+     * Calculates the estimated distance it takes a competitor to sail the race, from start to finish.
+     * 
+     * @param timepoint
+     *            Used for positions of marks and wind information; note that sometimes the marks are not in place yet
+     *            when the race starts and that a windward mark may be collected already before the race finishes.
+     * 
+     * @return estimated time it takes to complete the race, plus more useful information about how this result came
+     *         about
+     * 
+     * @throws NotEnoughDataHasBeenAddedException
+     *             thrown if not enough polar data has been added or polar data service is not available
+     * @throws NoWindException
+     */
+    Distance getEstimatedDistanceToComplete(TimePoint now) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     void setPolarDataService(PolarDataService polarDataService);
 

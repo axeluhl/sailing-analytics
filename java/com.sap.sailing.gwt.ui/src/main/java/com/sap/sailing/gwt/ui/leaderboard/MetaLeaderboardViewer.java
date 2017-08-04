@@ -8,7 +8,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
-import com.sap.sailing.gwt.settings.client.leaderboard.MultiLeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultipleMultiLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -17,8 +18,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A viewer for an overall series leaderboard. Additionally the viewer can render a chart for the series leaderboard and
@@ -62,7 +63,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         /**
          * Cleanup one java8 suppliers can be used
          */
-        init(new LeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
+        init(new SingleRaceLeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
                         preselectedRace != null, preselectedRace, competitorSelectionModel, timer,
                 leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages,
@@ -70,7 +71,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
                         /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null,
                         settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                         /* autoApplyTopNFilter */ false,
-                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false));
+                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false,new ClassicLeaderboardStyle()));
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
         
@@ -85,13 +86,18 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
+        
+        MultiRaceLeaderboardSettings leaderboardSettings = settings.findSettingsByComponentId(MultipleMultiLeaderboardPanelLifecycle.MID);
+        if(leaderboardSettings == null) {
+            leaderboardSettings = lifecycle.getMultiLeaderboardPanelLifecycle().createDefaultSettings();
+        }
 
         multiLeaderboardPanel = new MultiLeaderboardProxyPanel(this, componentContext, sailingService,
                 metaLeaderboardName,
                 asyncActionsExecutor, timer, false /* isEmbedded */,
-                preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
+                preselectedLeaderboardName,  errorReporter, stringMessages,
                 perspectiveSettings.isShowRaceDetails(), perspectiveSettings.isAutoExpandLastRaceColumn(),
-                settings.findSettingsByComponentId(MultiLeaderboardPanelLifecycle.MID));
+                leaderboardSettings);
         multiLeaderboardPanel.setVisible(perspectiveSettings.isShowSeriesLeaderboards());
         mainPanel.add(getLeaderboardPanel());
         mainPanel.add(multiCompetitorChart);

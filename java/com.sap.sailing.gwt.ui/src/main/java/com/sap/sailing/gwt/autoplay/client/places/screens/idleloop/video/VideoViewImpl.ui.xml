@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res"
+        type="com.sap.sailing.gwt.autoplay.client.resources.SixtyInchBundle" />
+
+    
+    <ui:style>
+    
+    </ui:style>
+    <g:SimplePanel styleName="{res.style.slideBackground}"
+        ui:field="mainPanelUi">
+    </g:SimplePanel>
+</ui:UiBinder> 

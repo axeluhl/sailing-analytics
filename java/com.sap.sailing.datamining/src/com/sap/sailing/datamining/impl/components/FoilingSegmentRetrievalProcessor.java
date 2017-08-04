@@ -40,6 +40,7 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
             final BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
             if (bravoFixTrack != null) {
                 boolean isFoiling = false;
+                TimePoint last = null;
                 TimePoint startOfSegment = null;
                 bravoFixTrack.lockForRead();
                 try {
@@ -47,7 +48,9 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
                         if (isFoiling) {
                             if (!bravoFix.isFoiling()) {
                                 isFoiling = false;
-                                foilingSegments.add(createFoilingSegment(startOfSegment, bravoFix.getTimePoint(), element, bravoFixTrack));
+                                foilingSegments.add(createFoilingSegment(startOfSegment,
+                                        last /* don't include the last interval ending at the non-foiling fix */,
+                                        element, bravoFixTrack));
                                 startOfSegment = null;
                             }
                         } else {
@@ -56,6 +59,7 @@ public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor
                                 startOfSegment = bravoFix.getTimePoint();
                             }
                         }
+                        last = bravoFix.getTimePoint();
                     }
                 } finally {
                     bravoFixTrack.unlockAfterRead();

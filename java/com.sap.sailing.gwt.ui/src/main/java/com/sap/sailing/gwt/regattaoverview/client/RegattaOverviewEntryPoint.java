@@ -56,16 +56,16 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         siteHeader.addWidgetToRightSide(clockLabel);
         containerPanel.addNorth(siteHeader, 75);
         
-        RegattaOverviewContextDefinition regattaOverviewSettings = serializer
+        RegattaOverviewContextDefinition regattaOverviewContextDefinition = serializer
                 .deserializeFromCurrentLocation(new RegattaOverviewContextDefinition());
 
-        if (regattaOverviewSettings.getEvent() == null) {
+        if (regattaOverviewContextDefinition.getEvent() == null) {
             Window.alert("Missing parameter");
             return;
         }
 
         createAndAddDetailPanel();
-        createAndAddRegattaPanel(regattaOverviewSettings);
+        createAndAddRegattaPanel(regattaOverviewContextDefinition);
         toggleDetailPanel(false);
         
         regattaPanel.setEntryClickedHandler(new EntryHandler() { 

@@ -44,7 +44,7 @@ public class GetRegattaStatisticsAction implements SailingAction<ResultWithTTL<E
     @Override
     @GwtIncompatible
     public ResultWithTTL<EventStatisticsDTO> execute(SailingDispatchContext context) throws DispatchException {
-        StatisticsCalculator statisticsCalculator = new StatisticsCalculator();
+        StatisticsCalculator statisticsCalculator = new StatisticsCalculator(context.getTrackedRaceStatisticsCache());
         statisticsCalculator.doForLeaderboard(EventActionUtil.getLeaderboardContext(context, eventId, regattaId));
         return statisticsCalculator.getResult();
     }
