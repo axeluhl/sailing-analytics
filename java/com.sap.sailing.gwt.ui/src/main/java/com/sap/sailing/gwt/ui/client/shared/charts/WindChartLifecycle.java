@@ -38,12 +38,12 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings>
     }
 
     @Override
-    public WindChartSettings extractGlobalSettings(WindChartSettings settings) {
+    public WindChartSettings extractUserSettings(WindChartSettings settings) {
         return settings;
     }
 
     @Override
-    public WindChartSettings extractContextSpecificSettings(WindChartSettings settings) {
+    public WindChartSettings extractDocumentSettings(WindChartSettings settings) {
         return settings;
     }
 }

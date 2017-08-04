@@ -194,6 +194,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     private final com.sap.sailing.domain.base.Regatta regatta;
     private final IEventSubscriber eventSubscriber;
     private final IRaceSubscriber raceSubscriber;
+    private final IRacesListener racesListener;
+    private final ICompetitorsListener competitorsListener;
     private final Set<Receiver> receivers;
     private final DomainFactory domainFactory;
     private final WindStore windStore;
@@ -331,7 +333,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         // Initialize data controller using live and stored data sources
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
         eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, effectifeStoredURI);
-        eventSubscriber.subscribeCompetitors(new ICompetitorsListener() {
+        competitorsListener = new ICompetitorsListener() {
             @Override
             public void updateCompetitor(ICompetitor competitor) {
             	if (!competitor.isNonCompeting()) {
@@ -349,8 +351,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override
             public void addCompetitor(ICompetitor competitor) {
             }
-        });
-        eventSubscriber.subscribeRaces(new IRacesListener() {
+        };
+        eventSubscriber.subscribeCompetitors(competitorsListener);
+        racesListener = new IRacesListener() {
             @Override public void abandonRace(UUID raceId) {}
             @Override public void addRace(IRace race) {}
             @Override public void deleteRace(UUID raceId) {}
@@ -369,7 +372,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                     }
                 }
             }
-        });
+        };
+        eventSubscriber.subscribeRaces(racesListener);
         // Start live and stored data streams
         final Regatta effectiveRegatta;
         raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, effectifeStoredURI);
@@ -532,6 +536,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     protected void onStop(boolean stopReceiversPreemtively) throws InterruptedException {
         if (!stopped) {
             stopped = true;
+            eventSubscriber.unsubscribeRaces(racesListener);
+            eventSubscriber.unsubscribeCompetitors(competitorsListener);
             raceSubscriber.stop();
             eventSubscriber.stop();
             raceSubscriber.unsubscribeConnectionStatus(this);
@@ -656,7 +662,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     @Override
     public void raceNotLoaded(String reason) throws MalformedURLException, IOException, InterruptedException {
         logger.severe("Race for tracker "+this+" with ID "+getID()+" did not load: "+reason+". Stopping tracker.");
-        trackedRegattaRegistry.stopTracking(regatta, race);
+        if (race != null) {
+            trackedRegattaRegistry.stopTracking(regatta, race);
+        }
     }
 
     @Override

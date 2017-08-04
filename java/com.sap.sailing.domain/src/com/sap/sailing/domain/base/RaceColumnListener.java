@@ -33,6 +33,8 @@ public interface RaceColumnListener extends Serializable {
     
     void raceColumnMoved(RaceColumn raceColumn, int newIndex);
     
+    void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName);
+    
     void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor);
 
     void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName);

@@ -1,7 +1,6 @@
 package com.sap.sse.common.settings.value;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -14,6 +13,6 @@ public class LinkedHashSetValue extends ValueCollectionValue<Set<Value>> {
     
     @Override
     protected <T> Collection<T> emptyCollection() {
-        return new HashSet<>();
+        return new LinkedHashSet<>();
     }
 }

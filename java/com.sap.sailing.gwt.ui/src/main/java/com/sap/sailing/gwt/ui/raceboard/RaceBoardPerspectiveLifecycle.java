@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimePanelLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -18,23 +17,23 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     private final StringMessages stringMessages;
     private final RaceMapLifecycle raceMapLifecycle;
     private final WindChartLifecycle windChartLifecycle;
-    private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
+    private final SingleRaceLeaderboardPanelLifecycle leaderboardPanelLifecycle;
     private final MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
     private final RaceTimePanelLifecycle raceTimePanelLifecycle;
     
     public static final String ID = "rb";
-
+    
+    //constructor used by Standalone RaceBoard
     public RaceBoardPerspectiveLifecycle(StringMessages stringMessages) {
         this(null, stringMessages);
     }
-    
+
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
-        leaderboardPanelLifecycle = new LeaderboardPanelLifecycle(leaderboard, stringMessages);
+        leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, false);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages);
@@ -75,7 +74,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         return windChartLifecycle;
     }
 
-    public LeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
+    public SingleRaceLeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
         return leaderboardPanelLifecycle;
     }
 
@@ -97,12 +96,12 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     }
 
     @Override
-    protected RaceBoardPerspectiveOwnSettings extractOwnGlobalSettings(RaceBoardPerspectiveOwnSettings settings) {
+    protected RaceBoardPerspectiveOwnSettings extractOwnUserSettings(RaceBoardPerspectiveOwnSettings settings) {
         return settings;
     }
 
     @Override
-    protected RaceBoardPerspectiveOwnSettings extractOwnContextSettings(RaceBoardPerspectiveOwnSettings settings) {
+    protected RaceBoardPerspectiveOwnSettings extractOwnDocumentSettings(RaceBoardPerspectiveOwnSettings settings) {
         return settings;
     }
 }

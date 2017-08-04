@@ -19,6 +19,8 @@ import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoCommandException;
 import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -228,11 +230,28 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public DBCollection getGPSFixCollection() {
         DBCollection gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
+        
+        // Removes old indexes not needed anymore
+        dropIndexSafe(gpsFixCollection, "DEVICE_ID.DEVICE_TYPE_SPECIFIC_ID_1_GPSFIX.TIME_AS_MILLIS_1");
+        dropIndexSafe(gpsFixCollection, "DEVICE_ID_1_GPSFIX.TIME_AS_MILLIS_1");
+        
         DBObject index = new BasicDBObject();
-        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
-        index.put(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name(), 1);
+        index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
         gpsFixCollection.createIndex(index);
         return gpsFixCollection;
+    }
+    
+    /**
+     * Dropping an index that does not exist causes an exception. This method first checks if the index exist to prevent
+     * an exception from occurring.
+     */
+    private void dropIndexSafe(DBCollection collection, String indexName) {
+        collection.getIndexInfo().forEach(indexInfo -> {
+            if (indexName.equals(indexInfo.get("name"))) {
+                collection.dropIndex(indexName);
+            }
+        });
     }
 
     public DBCollection getGPSFixMetadataCollection() {
@@ -637,8 +656,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeRegatta(Regatta regatta) {
         DBCollection regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
-        regattasCollection.createIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), 1));
-        regattasCollection.createIndex(new BasicDBObject(FieldNames.REGATTA_ID.name(), 1));
+        BasicDBObject regattaByNameIndexKey = new BasicDBObject(FieldNames.REGATTA_NAME.name(), 1);
+        try {
+            regattasCollection.createIndex(regattaByNameIndexKey, new BasicDBObject("unique", true));
+        } catch (MongoCommandException e) {
+            // the index probably existed as non-unique; remove and create again
+            regattasCollection.dropIndex(regattaByNameIndexKey);
+            regattasCollection.createIndex(regattaByNameIndexKey, new BasicDBObject("unique", true));
+        }
+        BasicDBObject regattaByIdIndexKey = new BasicDBObject(FieldNames.REGATTA_ID.name(), 1);
+        try {
+            regattasCollection.createIndex(regattaByIdIndexKey, new BasicDBObject("unique", true));
+        } catch (MongoCommandException e) {
+            regattasCollection.dropIndex(regattaByIdIndexKey);
+            regattasCollection.createIndex(regattaByIdIndexKey, new BasicDBObject("unique", true));
+        }
         DBObject dbRegatta = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
@@ -667,7 +699,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
         dbRegatta.put(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name(), regatta.isControlTrackingFromStartAndFinishTimes());
         dbRegatta.put(FieldNames.REGATTA_RANKING_METRIC.name(), storeRankingMetric(regatta));
-        regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+        boolean success = false;
+        final int MAX_TRIES = 3;
+        for (int i=0; i<MAX_TRIES && !success; i++) {
+            try {
+                regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
+                success = true;
+            } catch (DuplicateKeyException e) {
+                if (i+1==MAX_TRIES) {
+                    throw e;
+                }
+            }
+        }
     }
 
     private DBObject storeRankingMetric(Regatta regatta) {

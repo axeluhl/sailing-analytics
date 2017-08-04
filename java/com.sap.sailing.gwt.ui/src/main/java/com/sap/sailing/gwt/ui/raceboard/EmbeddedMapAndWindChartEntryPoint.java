@@ -37,6 +37,8 @@ import com.sap.sailing.gwt.ui.client.TimePanelSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.DefaultQuickRanksDTOProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
@@ -115,7 +117,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                 defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
                 defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
                 defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
-                defaultRaceMapSettings.isShowDouglasPeuckerPoints());
+                defaultRaceMapSettings.isShowDouglasPeuckerPoints(), true);
         
         sailingService.getRaceIdentifier(regattaLikeName, raceColumnName, fleetName, new AsyncCallback<RegattaAndRaceIdentifier>() {
             @Override
@@ -200,8 +202,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages()), raceMapSettings,
                 sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
-                competitorSelection, getStringMessages(), selectedRaceIdentifier, raceMapResources,
-                /* showHeaderPanel */ false) {
+                competitorSelection, new RaceCompetitorSet(competitorSelection), getStringMessages(), selectedRaceIdentifier,
+                raceMapResources, /* showHeaderPanel */ false, new DefaultQuickRanksDTOProvider()) {
             @Override
             protected void showAdditionalControls(MapWidget map) {
                 backToLivePlayButton.removeFromParent();

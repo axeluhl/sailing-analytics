@@ -227,6 +227,16 @@ public class LeaderboardContext {
         
         return regattaDTO;
     }
+    
+    private int calculateRaceCount(Leaderboard sl) {
+        int result = 0;
+        for (RaceColumn column : sl.getRaceColumns()) {
+            if (!column.isCarryForward()) {
+                result += Util.size(column.getFleets());
+            }
+        }
+        return result;
+    }
 
     public void fillRegattaFields(RegattaMetadataDTO regattaDTO) {
         regattaDTO.setId(getLeaderboardName());
@@ -237,7 +247,7 @@ public class LeaderboardContext {
             }
         }
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
-        regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
+        regattaDTO.setRaceCount(calculateRaceCount(leaderboard));
         regattaDTO.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
         if (leaderboard instanceof RegattaLeaderboard) {
             regattaDTO.setStartDate(getStartDateWithEventFallback());

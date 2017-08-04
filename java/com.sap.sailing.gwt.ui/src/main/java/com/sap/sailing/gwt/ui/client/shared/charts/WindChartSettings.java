@@ -4,7 +4,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.gwt.settings.client.settingtypes.converter.WindSourceTypeStringToEnumConverter;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
@@ -28,11 +27,11 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
     protected void addChildSettings() {
         Set<WindSourceType> defaultWindDirectionSourcesToDisplay = new LinkedHashSet<WindSourceType>();
         defaultWindDirectionSourcesToDisplay.add(WindSourceType.COMBINED);
-        windDirectionSourcesToDisplay = new EnumLinkedHashSetSetting<>("windDirectionSourcesToDisplay", this, defaultWindDirectionSourcesToDisplay, new WindSourceTypeStringToEnumConverter());
+        windDirectionSourcesToDisplay = new EnumLinkedHashSetSetting<>("windDirectionSourcesToDisplay", this, defaultWindDirectionSourcesToDisplay, WindSourceType::valueOf);
         
         Set<WindSourceType> defaultWindSpeedSourcesToDisplay = new LinkedHashSet<>();
         defaultWindSpeedSourcesToDisplay.add(WindSourceType.COMBINED);
-        windSpeedSourcesToDisplay = new EnumLinkedHashSetSetting<>("windSpeedSourcesToDisplay", this, defaultWindSpeedSourcesToDisplay, new WindSourceTypeStringToEnumConverter());
+        windSpeedSourcesToDisplay = new EnumLinkedHashSetSetting<>("windSpeedSourcesToDisplay", this, defaultWindSpeedSourcesToDisplay, WindSourceType::valueOf);
         
         resolutionInMilliseconds = new LongSetting("resolutionInMilliseconds", this, DEFAULT_RESOLUTION_IN_MILLISECONDS);
         showWindSpeedSeries = new BooleanSetting("showWindSpeedSeries", this, true);

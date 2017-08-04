@@ -46,7 +46,7 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
     public void start(SeriesEventsPlace myPlace, AcceptsOneWidget contentArea) {
         initWidget(ourUiBinder.createAndBindUi(this));
 
-        for (EventMetadataDTO eventOfSeries : currentPresenter.getSeriesDTO().getEvents()) {
+        for (EventMetadataDTO eventOfSeries : currentPresenter.getSeriesDTO().getEventsDescending()) {
             if(eventOfSeries.getState() == EventState.PLANNED) {
                 continue;
             }

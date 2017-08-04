@@ -7,13 +7,13 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sse.common.Duration;
 
 public class RaceMapDataDTO implements IsSerializable {
     public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions;
     public CoursePositionsDTO coursePositions;
     public List<SidelineDTO> courseSidelines;
-    public LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
-    public LinkedHashMap<CompetitorDTO, Integer> competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
+    public LinkedHashMap<String, QuickRankDTO> quickRanks;
     public long simulationResultVersion;
     
     /**
@@ -21,4 +21,12 @@ public class RaceMapDataDTO implements IsSerializable {
      * that may be suppressed in a leaderboard.
      */
     public HashSet<String> raceCompetitorIdsAsStrings;
+    public Duration estimatedDuration;
+    @Override
+    public String toString() {
+        return "RaceMapDataDTO [boatPositions=" + boatPositions + ", coursePositions=" + coursePositions
+                + ", courseSidelines=" + courseSidelines + ", quickRanks=" + quickRanks + ", simulationResultVersion="
+                + simulationResultVersion + ", raceCompetitorIdsAsStrings=" + raceCompetitorIdsAsStrings
+                + ", estimatedDuration=" + estimatedDuration + "]";
+    }
 }

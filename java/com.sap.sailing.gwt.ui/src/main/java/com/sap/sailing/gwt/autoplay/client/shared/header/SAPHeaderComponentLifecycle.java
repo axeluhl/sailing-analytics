@@ -40,12 +40,12 @@ public class SAPHeaderComponentLifecycle implements ComponentLifecycle<SAPHeader
     }
 
     @Override
-    public SAPHeaderComponentSettings extractGlobalSettings(SAPHeaderComponentSettings settings) {
+    public SAPHeaderComponentSettings extractUserSettings(SAPHeaderComponentSettings settings) {
         return createDefaultSettings();
     }
 
     @Override
-    public SAPHeaderComponentSettings extractContextSpecificSettings(SAPHeaderComponentSettings settings) {
+    public SAPHeaderComponentSettings extractDocumentSettings(SAPHeaderComponentSettings settings) {
         return createDefaultSettings();
     }
 }

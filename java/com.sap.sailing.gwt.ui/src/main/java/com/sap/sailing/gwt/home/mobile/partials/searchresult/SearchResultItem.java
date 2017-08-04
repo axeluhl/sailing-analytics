@@ -16,21 +16,19 @@ public class SearchResultItem extends AbstractSearchResultItem {
 
     private static SearchResultItemUiBinder uiBinder = GWT.create(SearchResultItemUiBinder.class);
 
-    interface SearchResultItemUiBinder extends UiBinder<AnchorElement, SearchResultItem> {
+    interface SearchResultItemUiBinder extends UiBinder<DivElement, SearchResultItem> {
     }
     
     @UiField DivElement resultTitleUi;
     @UiField DivElement eventInfoContainerUi;
-    private final AnchorElement anchorUi;
+    @UiField AnchorElement anchorUi;
     private final MobilePlacesNavigator navigator;
+    private final SearchResultDTO item;
 
     SearchResultItem(MobilePlacesNavigator navigator, SearchResultDTO item) {
         this.navigator = navigator;
-        init(anchorUi = uiBinder.createAndBindUi(this), item);
-        SearchResultEventInfoDTO event = item.getEvents().iterator().next();
-        String eventId = String.valueOf(event.getId()), leaderboardName = item.getLeaderboardName(), baseUrl = item.getBaseUrl();
-        PlaceNavigation<?> regattaNavigation = navigator.getRegattaNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer());
-        regattaNavigation.configureAnchorElement(anchorUi);
+        this.item = item;
+        init(uiBinder.createAndBindUi(this), item);
     }
 
     @Override
@@ -39,9 +37,15 @@ public class SearchResultItem extends AbstractSearchResultItem {
     }
     
     @Override
+    protected void configureRegattaNavigation(String eventId, String leaderboardName, String baseUrl, boolean isOnRemoteServer) {
+        navigator.getRegattaNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer()).configureAnchorElement(anchorUi);
+    }
+    
+    @Override
     protected void addEventInfo(SearchResultEventInfoDTO event) {
-        if (eventInfoContainerUi.hasChildNodes()) return; // TODO: Temporary add only one event on mobile
-        eventInfoContainerUi.appendChild(new SearchResultItemEventInfo(navigator, event).getElement());
+        String eventId = String.valueOf(event.getId());
+        PlaceNavigation<?> eventNavigation = navigator.getEventNavigation(eventId, item.getBaseUrl(), item.isOnRemoteServer());
+        eventInfoContainerUi.appendChild(new SearchResultItemEventInfo(event, eventNavigation).getElement());
     }
 
 }
