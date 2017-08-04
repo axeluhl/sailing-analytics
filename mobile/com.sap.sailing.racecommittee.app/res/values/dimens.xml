@@ -96,6 +96,7 @@
     <dimen name="management_text_small">@dimen/textSize_18</dimen>
 
     <dimen name="header_margin_top">13dp</dimen>
+    <dimen name="dialog_margin">24dp</dimen>
 
     <dimen name="wind_input">55dp</dimen>
 

@@ -15,12 +15,12 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FullTimePickerDialog;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -31,10 +31,9 @@ import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
 @SuppressLint("ViewConstructor")
-public class CompetitorEditLayout extends ScrollView implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+public class CompetitorEditLayout extends ScrollView implements DatePickerDialog.OnDateSetListener, FullTimePickerDialog.OnTimeSetListener {
 
     private CompetitorResultWithIdImpl mCompetitor;
     private GregorianCalendar mCalendar;
@@ -79,17 +78,30 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
         if (mCompetitor.getFinishingTime() != null) {
             mCalendar.setTimeInMillis(mCompetitor.getFinishingTime().asMillis());
         }
-        final int year = mCalendar.get(Calendar.YEAR);
-        final int month = mCalendar.get(Calendar.MONTH);
-        final int day = mCalendar.get(Calendar.DAY_OF_MONTH);
-        final int hour = mCalendar.get(Calendar.HOUR_OF_DAY);
-        final int minutes = mCalendar.get(Calendar.MINUTE);
+        final int initialYear = mCalendar.get(Calendar.YEAR);
+        final int initialMonth = mCalendar.get(Calendar.MONTH);
+        final int initialDay = mCalendar.get(Calendar.DAY_OF_MONTH);
+        final int initialHour = mCalendar.get(Calendar.HOUR_OF_DAY);
+        final int initialMinutes = mCalendar.get(Calendar.MINUTE);
+        final int initialSecond = mCalendar.get(Calendar.SECOND);
 
+        View timeLayout = ViewHelper.get(layout, R.id.competitor_finish_time_layout);
+        if (timeLayout != null) {
+            timeLayout.setVisibility(mRestricted ? GONE : VISIBLE);
+        }
         mFinishDate = ViewHelper.get(layout, R.id.competitor_finish_date);
         if (mFinishDate != null) {
             mFinishDate.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    int year = initialYear;
+                    int month = initialMonth;
+                    int day = initialDay;
+                    if (mCalendar != null) {
+                        year = mCalendar.get(Calendar.YEAR);
+                        month = mCalendar.get(Calendar.MONTH);
+                        day = mCalendar.get(Calendar.DAY_OF_MONTH);
+                    }
                     DatePickerDialog dialog = new DatePickerDialog(context, R.style.AppTheme_PickerDialog, CompetitorEditLayout.this, year, month, day);
                     dialog.getDatePicker().setMinDate(startTime.asMillis());
                     dialog.show();
@@ -101,7 +113,15 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
             mFinishTime.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    TimePickerDialog dialog = new TimePickerDialog(context, R.style.AppTheme_PickerDialog, CompetitorEditLayout.this, hour, minutes, true);
+                    int hour = initialHour;
+                    int minutes = initialMinutes;
+                    int second = initialSecond;
+                    if (mCalendar != null) {
+                        hour = mCalendar.get(Calendar.HOUR_OF_DAY);
+                        minutes = mCalendar.get(Calendar.MINUTE);
+                        second = mCalendar.get(Calendar.SECOND);
+                    }
+                    FullTimePickerDialog dialog = new FullTimePickerDialog(context, R.style.AppTheme_PickerDialog, CompetitorEditLayout.this, hour, minutes, second, true);
                     dialog.show();
                 }
             });
@@ -140,7 +160,7 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
         }
         mScore = ViewHelper.get(layout, R.id.competitor_score);
         if (mScore != null && mCompetitor.getScore() != null) {
-            mScore.setText(String.format(Locale.US, "%f", mCompetitor.getScore()));
+            mScore.setText(String.format(Locale.getDefault(), "%f", mCompetitor.getScore()));
         }
         mComment = ViewHelper.get(layout, R.id.competitor_comment);
         if (mComment != null) {
@@ -166,7 +186,7 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
     }
 
     private void addPositionToPositionList(List<String> result, int i) {
-        result.add(String.format(Locale.US, "%d", i));
+        result.add(String.format(Locale.getDefault(), "%d", i));
     }
 
     public CompetitorResultWithIdImpl getValue() {
@@ -211,18 +231,19 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
     }
 
     @Override
-    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+    public void onTimeSet(FullTimePickerDialog dialog, int hourOfDay, int minute, int second) {
         if (mCalendar == null) {
             mCalendar = (GregorianCalendar) Calendar.getInstance();
         }
         mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
         mCalendar.set(Calendar.MINUTE, minute);
+        mCalendar.set(Calendar.SECOND, second);
         showFinishTime();
     }
 
     private void showFinishTime() {
-        SimpleDateFormat date = new SimpleDateFormat("dd.MM.yyyy", getResources().getConfiguration().locale);
-        SimpleDateFormat time = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+        SimpleDateFormat date = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
+        SimpleDateFormat time = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
 
         if (mFinishDate != null) {
             if (mCalendar != null) {
@@ -243,4 +264,5 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
             mDelete.getChildAt(i).setEnabled(mDelete.isEnabled());
         }
     }
+
 }
