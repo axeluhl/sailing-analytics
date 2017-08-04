@@ -76,7 +76,7 @@ public enum BoatClassMasterdata {
     MUSTO_SKIFF ("Musto Skiff", true, 4.55, 1.35, BoatHullType.MONOHULL, true, "Musto Performance Skiff", "MPS", "Musto"),
     NACRA_15 ("Nacra 15", true, 4.70, 2.35, BoatHullType.CATAMARAN, true, "N15", "Nacra-15"),
     NACRA_17 ("Nacra 17", true, 5.25, 2.59, BoatHullType.CATAMARAN, true, "N17", "Nacra-17"),
-	NACRA_17_FOIL ("Nacra 17 Foiling", true, 5.25, 2.59, BoatHullType.CATAMARAN, true, "N17F", "Nacra-17-Foiling"),
+    NACRA_17_FOIL ("Nacra 17 Foiling", true, 5.25, 2.59, BoatHullType.CATAMARAN, true, "N17F", "Nacra-17-Foiling"),
     O_JOLLE ("O-Jolle", true, 5.00, 1.66, BoatHullType.MONOHULL, false, "O Jolle", "OJolle", "Olympiajolle"),
     OK ("OK Dinghy", true, 5.25, 2.59, BoatHullType.MONOHULL, false, "OK-Dinghy", "OK-Jolle", "OK"),
     OPEN_BIC("O'pen BIC", true, 2.75, 1.14, BoatHullType.MONOHULL, false, "OpenBIC"),
