@@ -486,7 +486,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * compatibility with prior releases that did not support a persistent competitor collection.
      */
     public RacingEventServiceImpl() {
-        this(/* clearPersistentCompetitorStore */ true, /* serviceFinderFactory */ null, /* restoreTrackedRaces */ false,null);
+        this(/* clearPersistentCompetitorStore */ true, /* serviceFinderFactory */ null,
+                /* restoreTrackedRaces */ false, /* anniversaryCalculator */ null);
     }
 
     public RacingEventServiceImpl(WindStore windStore, SensorFixStore sensorFixStore,
@@ -499,8 +500,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.bundleContext = bundleContext;
     }
 
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces,AnniversaryCalculator anniversaryCalculator) {
-        this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, anniversaryCalculator);
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore,
+            final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces,
+            AnniversaryCalculator anniversaryCalculator) {
+        this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, anniversaryCalculator);
     }
     
     /**
