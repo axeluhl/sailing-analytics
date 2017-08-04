@@ -79,7 +79,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
 
     @Before
     public void setup() {
-        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
+        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false,null);
         sensorFixStore = service.getSensorFixStore();
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         author = service.getServerAuthor();

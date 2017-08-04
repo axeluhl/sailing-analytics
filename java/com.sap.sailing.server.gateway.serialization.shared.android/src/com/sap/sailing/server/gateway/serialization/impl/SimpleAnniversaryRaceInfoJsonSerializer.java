@@ -21,7 +21,7 @@ public class SimpleAnniversaryRaceInfoJsonSerializer implements JsonSerializer<S
         JSONObject result = new JSONObject();
         result.put(FIELD_RACE_NAME, object.getIdentifier().getRaceName());
         result.put(FIELD_REGATTA_NAME, object.getIdentifier().getRegattaName());
-        result.put(FIELD_START_OF_RACE, object.getStartOfRace());
+        result.put(FIELD_START_OF_RACE, object.getStartOfRace().getTime());
         return result;
     }
 
@@ -29,7 +29,7 @@ public class SimpleAnniversaryRaceInfoJsonSerializer implements JsonSerializer<S
     public SimpleAnniversaryRaceInfo deserialize(JSONObject object) throws JsonDeserializationException {
         String raceName = object.get(SimpleAnniversaryRaceInfoJsonSerializer.FIELD_RACE_NAME).toString();
         String regattaName = object.get(SimpleAnniversaryRaceInfoJsonSerializer.FIELD_REGATTA_NAME).toString();
-        Date startOfRace = (Date) object.get(SimpleAnniversaryRaceInfoJsonSerializer.FIELD_START_OF_RACE);
+        Date startOfRace = new Date(((Number)object.get(SimpleAnniversaryRaceInfoJsonSerializer.FIELD_START_OF_RACE)).longValue());
         return new SimpleAnniversaryRaceInfo(new RegattaNameAndRaceName(regattaName, raceName),  startOfRace);
     }
 }

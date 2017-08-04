@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import javax.ws.rs.GET;
@@ -103,6 +106,50 @@ public class AnniversaryListResource extends AbstractSailingServerResource {
 
         for (SimpleAnniversaryRaceInfo entry : anniversaryRaceList.values()) {
             json.add(simpleAnniversaryRaceListJsonSerializer.serialize(entry));
+
+        }
+        return getJsonResponse(json);
+    }
+    
+    @GET
+    @Produces(CONTENT_TYPE_JSON_UTF8)
+    @Path("fullRacelist")
+    public Response fullRaceList() {
+        JSONArray json = new JSONArray();
+        HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store = new HashMap<>();
+        getService().getRemoteRaceList(store );
+
+        for (Event event : getService().getAllEvents()) {
+            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+                for (Leaderboard leaderboard : group.getLeaderboards()) {
+                    for (RaceColumn race : leaderboard.getRaceColumns()) {
+                        for (Fleet fleet : race.getFleets()) {
+                            TrackedRace trackedRace = race.getTrackedRace(fleet);
+                            if (trackedRace != null) {
+                                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                                SimpleAnniversaryRaceInfo raceInfo = new SimpleAnniversaryRaceInfo(raceIdentifier,
+                                        trackedRace.getStartOfRace().asDate());
+                                store.put(raceInfo.getIdentifier(), raceInfo);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ArrayList<SimpleAnniversaryRaceInfo> sorted = new ArrayList<>(store.values());
+        Collections.sort(sorted,new Comparator<SimpleAnniversaryRaceInfo>() {
+            @Override
+            public int compare(SimpleAnniversaryRaceInfo o1, SimpleAnniversaryRaceInfo o2) {
+                return o1.getStartOfRace().compareTo(o2.getStartOfRace());
+            }
+        });
+        for (int i = 0;i<sorted.size();i++) {
+            SimpleAnniversaryRaceInfo current = sorted.get(i);
+            JSONArray single = new JSONArray();
+            single.add(String.valueOf(i));
+            single.add(simpleAnniversaryRaceListJsonSerializer.serialize(current));
+            json.add(single);
 
         }
         return getJsonResponse(json);

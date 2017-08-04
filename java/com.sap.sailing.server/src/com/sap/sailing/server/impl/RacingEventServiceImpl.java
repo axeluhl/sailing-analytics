@@ -58,6 +58,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.anniversary.SimpleAnniversaryRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -485,7 +486,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * compatibility with prior releases that did not support a persistent competitor collection.
      */
     public RacingEventServiceImpl() {
-        this(/* clearPersistentCompetitorStore */ true, /* serviceFinderFactory */ null, /* restoreTrackedRaces */ false);
+        this(/* clearPersistentCompetitorStore */ true, /* serviceFinderFactory */ null, /* restoreTrackedRaces */ false,null);
     }
 
     public RacingEventServiceImpl(WindStore windStore, SensorFixStore sensorFixStore,
@@ -498,8 +499,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.bundleContext = bundleContext;
     }
 
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
-        this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces,AnniversaryCalculator anniversaryCalculator) {
+        this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, anniversaryCalculator);
     }
     
     /**
@@ -3819,5 +3820,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         final Map<Integer, Statistics> result = new HashMap<>();
         statisticsAggregators.forEach((year, aggregator) -> result.put(year, aggregator.getStatistics()));
         return result;
+    }
+
+    @Override
+    public void getRemoteRaceList(HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store) {
+        for(Entry<RemoteSailingServerReference, Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>> race:remoteSailingServerSet.getCachedRaceList().entrySet()){
+            if(race.getValue().getB() != null){
+                throw new RuntimeException("Some remoteserver did not respond "  + race.getKey());
+            }
+            for(SimpleAnniversaryRaceInfo raceinfo:race.getValue().getA()){
+                store.put(raceinfo.getIdentifier(), raceinfo);
+            }
+        }
     }
 }

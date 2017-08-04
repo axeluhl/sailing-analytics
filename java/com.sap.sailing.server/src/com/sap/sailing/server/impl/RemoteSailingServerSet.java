@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.anniversary.SimpleAnniversaryRaceInfo;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
@@ -36,6 +37,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsByYearJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.SimpleAnniversaryRaceInfoJsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
@@ -64,6 +66,8 @@ public class RemoteSailingServerSet {
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
 
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Map<Integer, Statistics>, Exception>> cachedStatisticsByYearForRemoteSailingServers;
+    
+    private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>> cachedSimpleAnniversaryForRemoteSailingServers;
 
     /**
      * @param scheduler
@@ -73,6 +77,7 @@ public class RemoteSailingServerSet {
         remoteSailingServers = new ConcurrentHashMap<>();
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
         cachedStatisticsByYearForRemoteSailingServers = new ConcurrentHashMap<>();
+        cachedSimpleAnniversaryForRemoteSailingServers= new ConcurrentHashMap<>();
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -86,6 +91,7 @@ public class RemoteSailingServerSet {
             remoteSailingServers.clear();
             cachedEventsForRemoteSailingServers.clear();
             cachedStatisticsByYearForRemoteSailingServers.clear();
+            cachedSimpleAnniversaryForRemoteSailingServers.clear();
         });
     }
 
@@ -116,6 +122,52 @@ public class RemoteSailingServerSet {
         new Thread(() -> updateRemoteServerEventCacheSynchronously(ref), "Event Cache Updater for remote server " + ref).start();
         new Thread(() -> updateRemoteServerStatisticsCacheSynchronously(ref),
                 "Statistics by year Cache Updater for remote server " + ref).start();
+        new Thread(() -> updateRemoteServerAnniversaryCacheSynchronously(ref), "Anniversary Cache Updater for remote server " + ref).start();
+    }
+
+    private void updateRemoteServerAnniversaryCacheSynchronously(RemoteSailingServerReference ref) {
+        BufferedReader bufferedReader = null;
+        Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception> result;
+        try {
+            try {
+                final URL raceListURL = getRaceListURL(ref.getURL());
+                logger.fine("Updating racelist for remote server " + ref + " from URL " + raceListURL);
+                URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(raceListURL);
+                bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+                JSONParser parser = new JSONParser();
+                Object eventsAsObject = parser.parse(bufferedReader);
+                SimpleAnniversaryRaceInfoJsonSerializer deserializer = new SimpleAnniversaryRaceInfoJsonSerializer();
+                JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
+                final Set<SimpleAnniversaryRaceInfo> events = new HashSet<>();
+                for (Object eventAsObject : eventsAsJsonArray) {
+                    JSONObject eventAsJson = (JSONObject) eventAsObject;
+                    SimpleAnniversaryRaceInfo event = deserializer.deserialize(eventAsJson);
+                    events.add(event);
+                }
+                result = new Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>(events, /* exception */ null);
+            } finally {
+                if (bufferedReader != null) {
+                    bufferedReader.close();
+                }
+            }
+        } catch (IOException | ParseException e) {
+            logger.log(Level.INFO, "Exception trying to fetch events from remote server " + ref + ": " + e.getMessage(),
+                    e);
+            result = new Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>(/* events */ null, e);
+        }
+        final Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception> finalResult = result;
+        LockUtil.executeWithWriteLock(lock, () -> {
+            // check that the server was not removed while no lock was held
+            if (remoteSailingServers.containsValue(ref)) {
+                cachedSimpleAnniversaryForRemoteSailingServers.put(ref, finalResult);
+            } else {
+                logger.fine("Omitted update for " + ref + " as it was removed");
+            }
+        });
+    }
+    
+    private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
+        return getURL(remoteServerBaseURL, "sailingserver/api/v1/anniversary/races");
     }
 
     private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
@@ -285,6 +337,15 @@ public class RemoteSailingServerSet {
         LockUtil.lockForRead(lock);
         try {
             return Collections.unmodifiableMap(cachedStatisticsByYearForRemoteSailingServers);
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    public Map<RemoteSailingServerReference, Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>> getCachedRaceList() {
+        LockUtil.lockForRead(lock);
+        try {
+            return Collections.unmodifiableMap(cachedSimpleAnniversaryForRemoteSailingServers);
         } finally {
             LockUtil.unlockAfterRead(lock);
         }

@@ -7,6 +7,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +20,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.anniversary.SimpleAnniversaryRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
@@ -682,4 +684,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
      */
     Map<Integer, Statistics> getOverallStatisticsByYear();
+
+    void getRemoteRaceList(HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store);
 }

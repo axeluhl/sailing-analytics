@@ -23,7 +23,7 @@ public abstract class RacingEventServiceImplMock extends RacingEventServiceImpl 
     private DataImportLockWithProgress lock;
 
     public RacingEventServiceImplMock() {
-        super(/* clearPersistentCompetitorStore */ false, null, /* restoreTrackedRaces */ false);
+        super(/* clearPersistentCompetitorStore */ false, null, /* restoreTrackedRaces */ false,null);
     }
     
     public RacingEventServiceImplMock(DataImportProgressImpl dataImportProgressImpl, TypeBasedServiceFinderFactory serviceFinderFactory) {
