@@ -92,7 +92,7 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
                 try {
                     final Speed speed = createSpeed(sentence.getSpeedUnit(), sentence.getSpeed());
                     final KnotSpeedWithBearingAndTimepoint fix = new KnotSpeedWithBearingAndTimepoint(timePoint,
-                            speed.getKnots(), new DegreeBearingImpl(sentence.getAngle()));
+                            speed.getKnots(), new DegreeBearingImpl(sentence.getAngle()).reverse());
                     if (sentence.isTrue()) {
                         trueWind.add(fix);
                         tryToCreateWindFixFromTrueWind(fix);

@@ -36,7 +36,7 @@ public class NmeaFromZipImportTest {
         }
     }
 
-    @Ignore("This test only makes sense if the large file resources/Log210417.zip is present locally")
+//    @Ignore("This test only makes sense if the large file resources/Log210417.zip is present locally")
     @Test
     public void testOtherZipFile() throws IOException, InterruptedException {
         zipInputStream = new ZipInputStream(new FileInputStream("resources/Log210417.zip"));
