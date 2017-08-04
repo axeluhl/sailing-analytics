@@ -48,10 +48,10 @@ public class DoubleVectorFixMongoHandlerImpl implements FixMongoHandler<DoubleVe
     
     private double[] fromDBObject(DBObject dbObject) {
         @SuppressWarnings("unchecked")
-        List<Double> dbValues = (List<Double>) dbObject;
+        List<Number> dbValues = (List<Number>) dbObject;
         double[] result = new double[dbValues.size()];
         for(int i = 0 ; i < dbValues.size() ; i++) {
-            result[i] = dbValues.get(i);
+            result[i] = dbValues.get(i).doubleValue();
         }
         return result;
     }

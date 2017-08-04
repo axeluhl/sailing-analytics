@@ -4,12 +4,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -386,7 +389,7 @@ public final class HomeServiceUtil {
         mapToMetadataDTO(event, dto, service);
         return dto;
     }
-
+    
     public static EventLinkDTO convertToEventLinkDTO(EventBase event, URL baseURL, boolean onRemoteServer,
             RacingEventService service) {
         EventLinkDTO dto = new EventLinkDTO();
@@ -565,5 +568,88 @@ public final class HomeServiceUtil {
             }
         }
         return false;
+    }
+    
+    /**
+     * Provides the list of {@link Event}s for a series based on the given overall {@link LeaderboardGroup} in a
+     * descending order sorted by the {@link Event#getStartDate() event's start date}.
+     * 
+     * @param overallLeaderboardGroup the series overall {@link LeaderboardGroup}
+     * @param service {@link RacingEventService}
+     * @return the {@link Event}s for the series in descending od
+     */
+    public static List<Event> getEventsForSeriesInDescendingOrder(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
+        List<Event> eventsForSeriesOrdered = getEventsForSeriesOrdered(overallLeaderboardGroup, service);
+        Collections.reverse(eventsForSeriesOrdered);
+        return eventsForSeriesOrdered;
+    }
+    
+    /**
+     * Provides the list of {@link Event}s for a series based on the given overall {@link LeaderboardGroup} in an
+     * order that matches the order of {@link Leaderboard Leaderboards} in the {@link LeaderboardGroup}.
+     * 
+     * @param overallLeaderboardGroup the series overall {@link LeaderboardGroup}
+     * @param service {@link RacingEventService}
+     * @return the {@link Event}s for the series
+     */
+    public static List<Event> getEventsForSeriesOrdered(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
+        final Iterable<Event> eventsInSeries = getEventsInSeries(overallLeaderboardGroup, service);
+        final Iterable<Leaderboard> orderedLeaderboards = getLeaderboardsForSeriesInOrder(overallLeaderboardGroup);
+        final List<Event> orderedEventsInSeries = new ArrayList<>();
+        for (Leaderboard leaderboard : orderedLeaderboards) {
+            final Event associatedEvent = getAssociatedEventForLeaderboardInSeries(leaderboard, eventsInSeries);
+            if (associatedEvent != null) {
+                orderedEventsInSeries.add(associatedEvent);
+            }
+        }
+        return orderedEventsInSeries;
+    }
+
+    /**
+     * The {@link Leaderboard Leaderboards} referenced in the given {@link LeaderboardGroup} have a defined order. If
+     * the displayGroupsInReverseOrder flag is set for the {@link LeaderboardGroup}, the order needs to change in the
+     * UI. This methods sorts the {@link Leaderboard Leaderboards} using this flag.
+     */
+    public static Iterable<Leaderboard> getLeaderboardsForSeriesInOrder(LeaderboardGroup overallLeaderboardGroup) {
+        if (overallLeaderboardGroup.isDisplayGroupsInReverseOrder()) {
+            List<Leaderboard> leaderboardsInSeries = new ArrayList<>();
+            Util.addAll(overallLeaderboardGroup.getLeaderboards(), leaderboardsInSeries);
+            Collections.reverse(leaderboardsInSeries);
+            return leaderboardsInSeries;
+        }
+        return overallLeaderboardGroup.getLeaderboards();
+    }
+
+    private static Event getAssociatedEventForLeaderboardInSeries(Leaderboard leaderboard,
+            Iterable<Event> eventsInSeries) {
+        final CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
+        if (defaultCourseArea != null) {
+            for (Event event : eventsInSeries) {
+                if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
+                    return event;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The given {@link LeaderboardGroup} needs to be one that is used to define a {@link Event} series (e.g. ESS or
+     * Bundesliga). In this case, multiple {@link Event Events} reference the same {@link LeaderboardGroup}. This method
+     * calculates all Events that are associated to the given {@link LeaderboardGroup}.
+     */
+    private static Iterable<Event> getEventsInSeries(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
+        Set<Event> eventsInSeries = new HashSet<>();
+        for (Event event : service.getAllEvents()) {
+            for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                    eventsInSeries.add(event);
+                }
+            }
+        }
+        return eventsInSeries;
     }
 }

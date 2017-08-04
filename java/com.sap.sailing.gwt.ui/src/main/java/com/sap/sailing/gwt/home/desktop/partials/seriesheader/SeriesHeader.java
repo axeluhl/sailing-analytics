@@ -78,8 +78,8 @@ public class SeriesHeader extends Composite {
         eventName.setInnerText(series.getDisplayName());
         LabelTypeUtil.renderLabelType(eventState, series.getState().getStateMarker());
         
-        for (EventMetadataDTO eventOfSeries : series.getEvents()) {
-            if(eventOfSeries.getState() == EventState.PLANNED) {
+        for (EventMetadataDTO eventOfSeries : series.getEventsAscending()) {
+            if (eventOfSeries.getState() == EventState.PLANNED) {
                 InlineLabel eventLabel = new InlineLabel(eventOfSeries.getLocationOrVenue());
                 eventLabel.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item());
                 eventLabel.addStyleName(SeriesHeaderResources.INSTANCE.css().eventheader_intro_details_item_inactive());
