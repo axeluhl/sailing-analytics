@@ -122,7 +122,7 @@ public class Activator implements BundleActivator {
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
         anniversaryCalculator = new AnniversaryCalculator(ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
-                trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces,anniversaryCalculator);
+                trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces, anniversaryCalculator);
         notificationService.setRacingEventService(racingEventService);
         anniversaryCalculator.addListener(new AnniversaryDeterminator(racingEventService.getMongoObjectFactory()));
         anniversaryCalculator.setRacingEventService(racingEventService);

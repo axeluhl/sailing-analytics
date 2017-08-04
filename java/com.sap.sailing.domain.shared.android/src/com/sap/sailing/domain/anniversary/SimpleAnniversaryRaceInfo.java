@@ -9,9 +9,9 @@ public class SimpleAnniversaryRaceInfo {
     protected RegattaAndRaceIdentifier identifier;
     protected Date startOfRace;
     private String remoteName;
-    
+
     public SimpleAnniversaryRaceInfo(RegattaAndRaceIdentifier identifier, Date startOfRace) {
-        if(identifier == null || startOfRace == null){
+        if (identifier == null || startOfRace == null) {
             throw new IllegalStateException("Anniversary Data is not allowed to contain any null values!");
         }
         this.identifier = identifier;
@@ -64,6 +64,5 @@ public class SimpleAnniversaryRaceInfo {
             return false;
         return true;
     }
-    
-    
+
 }

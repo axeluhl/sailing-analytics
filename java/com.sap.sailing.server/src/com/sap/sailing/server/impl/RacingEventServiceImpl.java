@@ -525,7 +525,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
             TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService,
-            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,AnniversaryCalculator anniversaryCalculator) {
+            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces, AnniversaryCalculator anniversaryCalculator) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
