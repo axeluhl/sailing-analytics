@@ -305,6 +305,7 @@
 		9E95C3D61C723AB30016632B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95C3D51C723AB30016632B /* Constants.swift */; };
 		9ECBDDAE1C9C4F0300F76AEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */; };
 		C8150BA51DCC6FDB0087C9C2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8150BA71DCC6FDB0087C9C2 /* InfoPlist.strings */; };
+		C8289F3A1F386D8300A76953 /* SignUpRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8289F391F386D8300A76953 /* SignUpRequestManager.swift */; };
 		C843D47F1EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */; };
 		C843D4801EBC54A300250F01 /* CompetitorCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */; };
 		C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */; };
@@ -326,7 +327,7 @@
 		C85DB8281F31AAE0009559CE /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB8271F31AAE0009559CE /* SignUpViewController.swift */; };
 		C85DB82A1F31AAFD009559CE /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB8291F31AAFD009559CE /* LoginViewController.swift */; };
 		C85DB82C1F31AB1A009559CE /* ForgotPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */; };
-		C85DB82E1F31D804009559CE /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82D1F31D804009559CE /* LoginController.swift */; };
+		C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82D1F31D804009559CE /* SignUpController.swift */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
 		C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */; };
 		C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */; };
@@ -691,6 +692,7 @@
 		9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C8150BA61DCC6FDB0087C9C2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C8150BA81DCC6FDD0087C9C2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C8289F391F386D8300A76953 /* SignUpRequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpRequestManager.swift; sourceTree = "<group>"; };
 		C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CompetitorCheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorCheckIn.swift; sourceTree = "<group>"; };
 		C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MarkCheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -712,7 +714,7 @@
 		C85DB8271F31AAE0009559CE /* SignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		C85DB8291F31AAFD009559CE /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForgotPasswordViewController.swift; sourceTree = "<group>"; };
-		C85DB82D1F31D804009559CE /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
+		C85DB82D1F31D804009559CE /* SignUpController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpController.swift; sourceTree = "<group>"; };
 		C85FAA501D4F84460087C2A2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
 		C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 2.xcdatamodel"; sourceTree = "<group>"; };
@@ -872,7 +874,7 @@
 				C843D4891EBCADF500250F01 /* MarkSessionController.swift */,
 				C8739E0E1D2BEE7900A89F3C /* SessionController.swift */,
 				C8739E101D2BF13200A89F3C /* Data */,
-				C85DB82D1F31D804009559CE /* LoginController.swift */,
+				C85DB82D1F31D804009559CE /* SignUpController.swift */,
 			);
 			name = DataController;
 			sourceTree = "<group>";
@@ -1256,6 +1258,7 @@
 		C8739D8B1D23C01500A89F3C /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				C8289F391F386D8300A76953 /* SignUpRequestManager.swift */,
 				7F2C605919F160E400C32D93 /* LocationManager.swift */,
 				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
 				C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */,
@@ -1517,6 +1520,7 @@
 						CreatedOnToolsVersion = 6.0.1;
 						DevelopmentTeam = RRE8EFVCE3;
 						LastSwiftMigration = 0820;
+						ProvisioningStyle = Automatic;
 					};
 					7F83F16419F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
@@ -1877,11 +1881,12 @@
 				7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
 				C8739E161D2BF17900A89F3C /* CompetitorData.swift in Sources */,
+				C8289F3A1F386D8300A76953 /* SignUpRequestManager.swift in Sources */,
 				C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */,
 				C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */,
 				C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEE1D8691F700826DE4 /* UIProgressView+AFNetworking.m in Sources */,
-				C85DB82E1F31D804009559CE /* LoginController.swift in Sources */,
+				C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */,
 				C8FF5B7C1EB8CF2C00CF9764 /* MarkData.swift in Sources */,
@@ -2087,15 +2092,16 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "Q3U792Z354/“SAP Sailing Boat Tracker”";
-				PROVISIONING_PROFILE_SPECIFIER = "Q3U792Z354/“SAP Sailing Boat Tracker”";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -2108,15 +2114,16 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "Q3U792Z354/“SAP Sailing Boat Tracker”";
-				PROVISIONING_PROFILE_SPECIFIER = "Q3U792Z354/“SAP Sailing Boat Tracker”";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

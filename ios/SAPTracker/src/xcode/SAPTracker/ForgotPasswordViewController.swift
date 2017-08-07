@@ -8,7 +8,15 @@
 
 import UIKit
 
+protocol ForgotPasswordViewControllerDelegate {
+
+    func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePassword password: String, forEmail email: String)
+
+}
+
 class ForgotPasswordViewController: UIViewController {
+
+    var signUpController: SignUpController?
 
     @IBOutlet weak var infoLabel: UILabel!
     @IBOutlet weak var emailLabel: UILabel!

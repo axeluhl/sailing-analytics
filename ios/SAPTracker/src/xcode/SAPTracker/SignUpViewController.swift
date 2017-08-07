@@ -8,7 +8,22 @@
 
 import UIKit
 
+protocol SignUpViewControllerDelegate {
+    
+    func signUpViewController(
+        _ controller: SignUpViewController,
+        willSignUpWithUserName userName: String,
+        email: String,
+        fullName: String,
+        company: String,
+        password: String
+    )
+    
+}
+
 class SignUpViewController: UIViewController {
+
+    var signUpController: SignUpController?
 
     @IBOutlet weak var emailLabel: UILabel!
     @IBOutlet weak var emailTextField: UITextField!
@@ -37,9 +52,18 @@ class SignUpViewController: UIViewController {
     }
 
     @IBAction func loginButtonTapped(_ sender: Any) {
+        
     }
     
     @IBAction func signUpButtonTapped(_ sender: Any) {
+        signUpController?.signUpViewController(
+            self,
+            willSignUpWithUserName: userNameTextField.text!,
+            email: emailTextField.text!,
+            fullName: nameTextField.text!,
+            company: companyTextField.text!,
+            password: passwordTextField.text!
+        )
     }
 
 }

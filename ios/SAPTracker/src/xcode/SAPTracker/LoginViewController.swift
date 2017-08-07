@@ -8,7 +8,15 @@
 
 import UIKit
 
+protocol LoginViewControllerDelegate {
+
+    func loginViewController(_ controller: LoginViewController, willLoginWithUserName userName: String, password: String)
+
+}
+
 class LoginViewController: UIViewController {
+
+    var signUpController: SignUpController?
 
     @IBOutlet weak var loginLabel: UILabel!
     @IBOutlet weak var userNameLabel: UILabel!
@@ -38,6 +46,19 @@ class LoginViewController: UIViewController {
     }
 
     @IBAction func loginButtonTapped(_ sender: Any) {
+        signUpController?.loginViewController(
+            self,
+            willLoginWithUserName: userNameTextField.text!,
+            password: passwordTextField.text!
+        )
+    }
+
+    // MARK: - Segues
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let signUpVC = segue.destination as? SignUpViewController {
+            signUpVC.signUpController = signUpController
+        }
     }
 
 }
