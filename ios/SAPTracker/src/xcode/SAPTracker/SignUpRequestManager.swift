@@ -58,19 +58,10 @@ class SignUpRequestManager: NSObject {
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        // Setup body
-        var body = [String: AnyObject]()
-        body[BodyKeys.UserName] = userName as AnyObject?
-        body[BodyKeys.Email] = email as AnyObject?
-        body[BodyKeys.FullName] = fullName as AnyObject?
-        body[BodyKeys.Company] = company as AnyObject?
-        body[BodyKeys.Password] = password as AnyObject?
-        
-        // Put body
-        let urlString = "\(basePathString)/create_user"
+        let urlString = "\(basePathString)/create_user?username=\(userName)&email=\(email)&fullName=\(fullName)&company=\(company)&password=\(password)"
         manager.post(
             urlString,
-            parameters: body,
+            parameters: nil,
             success: { (requestOperation, responseObject) in self.postUserSuccess(responseObject: responseObject, success: success) },
             failure: { (requestOperation, error) in self.postUserFailure(error: error, failure: failure) }
         )
