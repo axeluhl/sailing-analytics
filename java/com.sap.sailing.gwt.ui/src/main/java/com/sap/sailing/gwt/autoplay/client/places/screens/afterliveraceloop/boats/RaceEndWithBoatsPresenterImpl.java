@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.afterliveraceloop.boa
 
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.Distance;
@@ -103,7 +102,6 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 raceColumn = column;
             }
         }
-        GWT.debugger();
         List<CompetitorDTO> sortedCompetitors = leaderboardPanel.getLeaderboard()
                 .getCompetitorsFromBestToWorst(raceColumn);
 
