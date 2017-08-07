@@ -27,12 +27,12 @@ public class RaceListResource extends AbstractSailingServerResource {
 
     private final SimpleRaceInfoJsonSerializer simpleRaceListJsonSerializer = new SimpleRaceInfoJsonSerializer();
 
-    @GET
-    @Produces(CONTENT_TYPE_JSON_UTF8)
-    @Path("races")
     /**
      * Returns a list of all locally tracked races, the list is not sorted
      */
+    @GET
+    @Produces(CONTENT_TYPE_JSON_UTF8)
+    @Path("races")
     public Response raceList() {
         JSONArray json = new JSONArray();
         for (SimpleRaceInfo entry : getService().getLocalRaceList().values()) {
@@ -41,13 +41,13 @@ public class RaceListResource extends AbstractSailingServerResource {
         return getJsonResponse(json);
     }
 
-    @GET
-    @Produces(CONTENT_TYPE_JSON_UTF8)
-    @Path("fullRacelist")
     /**
      * Returns a list of all locally and remote tracked races that are currently known, The list is sorted by Startdate,
      * and each SimpleRaceInfo object is put together with an incrementing number starting at 0
      */
+    @GET
+    @Produces(CONTENT_TYPE_JSON_UTF8)
+    @Path("fullRacelist")
     public Response fullRaceList() {
         JSONArray json = new JSONArray();
         Map<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
