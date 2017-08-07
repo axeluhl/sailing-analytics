@@ -55,6 +55,7 @@ public class LeaderboardSettingsFactory {
                 defaultSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 defaultSettings.isShowCompetitorSailIdColumn(),
                 defaultSettings.isShowCompetitorFullNameColumn(),
+                defaultSettings.isShowRaceRankColumn(),
                 defaultSettings.isShowCompetitorNationality());
     }
     
@@ -68,6 +69,7 @@ public class LeaderboardSettingsFactory {
                 settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 settings.isShowCompetitorSailIdColumn(),
                 settings.isShowCompetitorFullNameColumn(),
+                settings.isShowRaceRankColumn(),
                 settings.isShowCompetitorNationality());
     }
     

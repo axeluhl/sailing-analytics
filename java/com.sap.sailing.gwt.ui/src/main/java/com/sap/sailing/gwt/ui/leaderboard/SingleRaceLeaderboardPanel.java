@@ -4,13 +4,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
+import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettingsDialogComponent;
@@ -46,30 +52,66 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
      * race identifier} matches the value of this attribute will be added.
      */
     private final RegattaAndRaceIdentifier preSelectedRace;
-
+    private RaceRankColumn raceRankColumn;
     private boolean notSortedYet = true;
 
+    private boolean showRaceRankColumn;
+    
     public SingleRaceLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, SingleRaceLeaderboardSettings settings,
             boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages, boolean showRaceDetails,
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,
-            boolean enableSyncScroller) {
+            boolean enableSyncScroller,LeaderBoardStyle style) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, competitorSelectionProvider,
                 timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 competitorSearchTextBox, showSelectionCheckbox, optionalRaceTimesInfoProvider, autoExpandLastRaceColumn,
-                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller);
+                adjustTimerDelay, autoApplyTopNFilter, showCompetitorFilterStatus, enableSyncScroller,style);
         assert preSelectedRace != null;
         this.preSelectedRace = preSelectedRace;
-
+        this.showRaceRankColumn = settings.isShowRaceRankColumn();
         initialize(settings);
+    }
+    
+
+    @Override
+    protected int ensureRaceRankColumn(int rankColumnIndex) {
+        boolean required = isShowRaceRankColumn() && preSelectedRace != null;
+        final int indexOfNextColumn = required ? 1 : 0;
+        if (getLeaderboardTable().getColumnCount() > rankColumnIndex) {
+            if (required) {
+                if (getLeaderboardTable().getColumn(rankColumnIndex) != getRaceRankColumn()) {
+                    insertColumn(rankColumnIndex, getRaceRankColumn());
+                }
+            } else {
+                if (getLeaderboardTable().getColumn(rankColumnIndex) == getRaceRankColumn()) {
+                    removeColumn(rankColumnIndex);
+                }
+            }
+        } else {
+            if (required) {
+                insertColumn(rankColumnIndex, getRaceRankColumn());
+            }
+        }
+        return indexOfNextColumn;
+    }
+
+    private AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> getRaceRankColumn() {
+        if(raceRankColumn == null){
+            raceRankColumn = new RaceRankColumn(preSelectedRace);
+        }
+        return raceRankColumn;
+    }
+
+    private boolean isShowRaceRankColumn() {
+        return showRaceRankColumn;
     }
 
     @Override
-    protected void setDefaultRaceColumnSelection(LeaderboardSettings settings) {
+    protected void setDefaultRaceColumnSelection(SingleRaceLeaderboardSettings settings) {
         raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
     }
 
@@ -79,7 +121,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
                 selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, timer.getRefreshInterval(),
                 isShowAddedScores(),
                 isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorSailId(),
-                isShowCompetitorFullName(), isShowCompetitorNationality);
+                isShowCompetitorFullName(), isShowCompetitorNationality,showRaceRankColumn);
         SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
         return leaderboardSettings;
     }
@@ -98,7 +140,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         boolean showBoatColor = !isShowCompetitorFullName() && isEmbedded;
         if (showBoatColor) {
             String competitorColor = competitorSelectionProvider.getColor(competitor, preSelectedRace).getAsHtml();
-            sb.appendHtmlConstant("<div style=\"border-bottom: 2px solid " + competitorColor + ";\">");
+            sb.appendHtmlConstant("<div style=\" "+style.determineBoatColorDivStyle(competitorColor)+ "\">");
         }
         return showBoatColor;
     }
@@ -109,7 +151,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     }
 
     @Override
-    protected LeaderboardSettings overrideDefaultsForNamesOfRaceColumns(LeaderboardSettings currentSettings,
+    protected SingleRaceLeaderboardSettings overrideDefaultsForNamesOfRaceColumns(SingleRaceLeaderboardSettings currentSettings,
             LeaderboardDTO result) {
         return currentSettings;
     }
@@ -203,5 +245,59 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
 
     public void setAutoExpandPreSelected(boolean b) {
         autoExpandPreSelectedRace = b;
+    }
+    
+    private class RaceRankColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
+        public RaceRankColumn(RegattaAndRaceIdentifier preSelectedRace) {
+            super(new TextCell(), SortingOrder.ASCENDING, SingleRaceLeaderboardPanel.this);
+            setHorizontalAlignment(ALIGN_CENTER);
+            setSortable(true);
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            int raceRank = getRacePlace(object);
+            return "" + (raceRank == 0 ? "-" : raceRank);
+        }
+
+        private int getRacePlace(LeaderboardRowDTO object) {
+            RaceColumn<?> raceColumn = getRaceColumnByRaceName(preSelectedRace.getRaceName());
+            if(raceColumn.race == null){
+                return -1;
+            }
+            List<CompetitorDTO> competitorsSorted = getLeaderboard().getCompetitorsFromBestToWorst(raceColumn.race);
+            int raceRank = -1;
+            for (int i = 0; i < competitorsSorted.size(); i++) {
+                if (object.competitor.equals(competitorsSorted.get(i))) {
+                    raceRank = i + 1;
+                    break;
+                }
+            }
+            return raceRank;
+        }
+
+        @Override
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
+                @Override
+                public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
+                    int racePlace1 = getRacePlace(o1);
+                    int racePlace2 = getRacePlace(o2);
+                    return racePlace1 == 0 ? racePlace2 == 0 ? 0 : 1 : racePlace2 == 0 ? -1 : racePlace1 - racePlace2;
+                }
+            };
+        }
+
+        @Override
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.raceRankShort()),
+                    stringMessages.raceRank());
+        }
+    }
+    
+    @Override
+    public void updateSettings(SingleRaceLeaderboardSettings newSettings) {
+        super.updateSettings(newSettings);
+        showRaceRankColumn = newSettings.isShowRaceRankColumn();
     }
 }

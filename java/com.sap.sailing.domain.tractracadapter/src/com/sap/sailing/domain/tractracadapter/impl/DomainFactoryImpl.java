@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -85,6 +84,7 @@ import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.WeakIdentityHashMap;
+import com.sap.sse.util.WeakValueCache;
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
@@ -105,17 +105,14 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
     
-    // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
-    private final Map<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
-        new HashMap<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint>();
+    private final WeakValueCache<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache = new WeakValueCache<>(new HashMap<>());
     
     private final Map<com.sap.sse.common.Util.Pair<String, UUID>, DynamicPerson> personCache = new HashMap<>();
     
     /**
      * Caches regattas by their name and their boat class's name
      */
-    private final Map<com.sap.sse.common.Util.Pair<String, String>, com.sap.sailing.domain.base.Regatta> regattaCache =
-            new HashMap<com.sap.sse.common.Util.Pair<String, String>, com.sap.sailing.domain.base.Regatta>();
+    private final WeakValueCache<com.sap.sse.common.Util.Pair<String, String>, com.sap.sailing.domain.base.Regatta> regattaCache = new WeakValueCache<>(new HashMap<>());
     
     /**
      * A cache based on weak references to the TracTrac race, allowing for quick race lookup as long as the
@@ -128,7 +125,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * Maps from the TracTrac race UUIDs to the domain model's {@link RaceDefinition} objects that represent the race
      * identified by that UUID
      */
-    private final ConcurrentMap<UUID, RaceDefinition> raceCache = new ConcurrentHashMap<>();
+    private final WeakValueCache<UUID, RaceDefinition> raceCache = new WeakValueCache<>(new ConcurrentHashMap<>());
     
     private final MetadataParser metadataParser;
 
@@ -136,7 +133,7 @@ public class DomainFactoryImpl implements DomainFactory {
         this.baseDomainFactory = baseDomainFactory;
         this.metadataParser = new MetadataParserImpl();
     }
-
+    
     @Override
     public MetadataParser getMetadataParser() {
         return metadataParser;

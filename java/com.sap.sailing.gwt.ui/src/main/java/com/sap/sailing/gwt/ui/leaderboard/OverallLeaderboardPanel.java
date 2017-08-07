@@ -26,7 +26,7 @@ public class OverallLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
-                showCompetitorFilterStatus, enableSyncScroller);
+                showCompetitorFilterStatus, enableSyncScroller,new ClassicLeaderboardStyle());
     }
 
     @Override
