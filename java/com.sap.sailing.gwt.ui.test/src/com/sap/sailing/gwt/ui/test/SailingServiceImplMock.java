@@ -47,7 +47,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
 
     public SailingServiceImplMock() {
         super();
-        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false,null);
+        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
         try {
             replicationService = new ReplicationServiceImpl("test exchange", "localhost", 0,
                     new ReplicationInstancesManager(), new AbstractReplicablesProvider() {

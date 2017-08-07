@@ -41,8 +41,7 @@ public abstract class AbstractJaxRsApiTest {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().dropDatabase();
         racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
-                new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false,
-                /* anniversaryCalculator */ null);
+                new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false);
     }
 
     protected <T extends AbstractSailingServerResource> T spyResource(T resource) {

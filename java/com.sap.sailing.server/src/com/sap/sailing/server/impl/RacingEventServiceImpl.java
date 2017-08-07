@@ -178,7 +178,6 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
-import com.sap.sailing.server.anniversary.AnniversaryCalculator;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
@@ -487,7 +486,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     public RacingEventServiceImpl() {
         this(/* clearPersistentCompetitorStore */ true, /* serviceFinderFactory */ null,
-                /* restoreTrackedRaces */ false, /* anniversaryCalculator */ null);
+                /* restoreTrackedRaces */ false);
     }
 
     public RacingEventServiceImpl(WindStore windStore, SensorFixStore sensorFixStore,
@@ -501,10 +500,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore,
-            final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces,
-            AnniversaryCalculator anniversaryCalculator) {
+            final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
         this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, anniversaryCalculator);
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
     }
     
     /**
@@ -525,7 +523,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
             TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService,
-            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,AnniversaryCalculator anniversaryCalculator) {
+            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
@@ -540,7 +538,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory ,trackedRegattaListener, sailingNotificationService,
                 trackedRaceStatisticsCache, restoreTrackedRaces);
-//      this.anniversaryCalculator = anniversaryCalculator;
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -3827,14 +3824,40 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void getRemoteRaceList(HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store) {
-        for(Entry<RemoteSailingServerReference, Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>> race:remoteSailingServerSet.getCachedRaceList().entrySet()){
-            if(race.getValue().getB() != null){
-                throw new RuntimeException("Some remoteserver did not respond "  + race.getKey());
+    public HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> getRemoteRaceList() {
+        HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store = new HashMap<>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>> race : remoteSailingServerSet
+                .getCachedRaceList().entrySet()) {
+            if (race.getValue().getB() != null) {
+                throw new RuntimeException("Some remoteserver did not respond " + race.getKey());
             }
-            for(SimpleAnniversaryRaceInfo raceinfo:race.getValue().getA()){
+            for (SimpleAnniversaryRaceInfo raceinfo : race.getValue().getA()) {
                 store.put(raceinfo.getIdentifier(), raceinfo);
             }
         }
+        return store;
+    }
+
+    @Override
+    public Map<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> getLocalRaceList() {
+        HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store = new HashMap<>();
+        for (Event event : getAllEvents()) {
+            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+                for (Leaderboard leaderboard : group.getLeaderboards()) {
+                    for (RaceColumn race : leaderboard.getRaceColumns()) {
+                        for (Fleet fleet : race.getFleets()) {
+                            TrackedRace trackedRace = race.getTrackedRace(fleet);
+                            if (trackedRace != null) {
+                                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                                SimpleAnniversaryRaceInfo raceInfo = new SimpleAnniversaryRaceInfo(raceIdentifier,
+                                        trackedRace.getStartOfRace().asDate());
+                                store.put(raceInfo.getIdentifier(), raceInfo);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return store;
     }
 }

@@ -7,7 +7,6 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -685,5 +684,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Map<Integer, Statistics> getOverallStatisticsByYear();
 
-    void getRemoteRaceList(HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store);
+    Map<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> getRemoteRaceList();
+
+    Map<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> getLocalRaceList();
 }
