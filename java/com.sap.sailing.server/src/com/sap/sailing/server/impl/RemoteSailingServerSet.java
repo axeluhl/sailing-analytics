@@ -77,7 +77,7 @@ public class RemoteSailingServerSet {
         remoteSailingServers = new ConcurrentHashMap<>();
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
         cachedStatisticsByYearForRemoteSailingServers = new ConcurrentHashMap<>();
-        cachedSimpleAnniversaryForRemoteSailingServers= new ConcurrentHashMap<>();
+        cachedSimpleAnniversaryForRemoteSailingServers = new ConcurrentHashMap<>();
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
