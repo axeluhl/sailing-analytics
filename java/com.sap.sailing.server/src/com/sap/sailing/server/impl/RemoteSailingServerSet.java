@@ -167,7 +167,11 @@ public class RemoteSailingServerSet {
     }
     
     private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
-        return getURL(remoteServerBaseURL, "sailingserver/api/v1/trackedRaces/localRaces");
+        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/localRaces");
+    }
+
+    private URL getEndpointUrl(URL remoteServerBaseURL, final String endpoint) throws MalformedURLException {
+        return getURL(remoteServerBaseURL, "sailingserver/api/v1"+endpoint);
     }
 
     private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
@@ -263,11 +267,11 @@ public class RemoteSailingServerSet {
     }
 
     private URL getEventsURL(URL remoteServerBaseURL) throws MalformedURLException {
-        return getURL(remoteServerBaseURL, "sailingserver/api/v1/events");
+        return getEndpointUrl(remoteServerBaseURL, "/events");
     }
 
     private URL getStatisticsByYearURL(URL remoteServerBaseURL) throws MalformedURLException {
-        return getURL(remoteServerBaseURL, "sailingserver/api/v1/statistics/years");
+        return getEndpointUrl(remoteServerBaseURL, "/statistics/years");
     }
 
     private URL getURL(URL remoteServerBaseURL, String subURL) throws MalformedURLException {
