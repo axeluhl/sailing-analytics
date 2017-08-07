@@ -91,12 +91,20 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
             if (timePoint != null) {
                 try {
                     final Speed speed = createSpeed(sentence.getSpeedUnit(), sentence.getSpeed());
-                    final KnotSpeedWithBearingAndTimepoint fix = new KnotSpeedWithBearingAndTimepoint(timePoint,
-                            speed.getKnots(), new DegreeBearingImpl(sentence.getAngle()).reverse());
+                    final KnotSpeedWithBearingAndTimepoint fix;
                     if (sentence.isTrue()) {
-                        trueWind.add(fix);
-                        tryToCreateWindFixFromTrueWind(fix);
+                        final Bearing trueHeading = trueHeadings.getInterpolatedValue(getLastTimePoint(), f->new ScalableBearing(f));
+                        if (trueHeading != null) {
+                            // need to take heading into account as MWV is still relative to bow, even if "true" is provided;
+                            // it is what you would see on the wind display when set to "true wind"
+                            fix = new KnotSpeedWithBearingAndTimepoint(timePoint,
+                                    speed.getKnots(), new DegreeBearingImpl(sentence.getAngle()).reverse().add(trueHeading));
+                            trueWind.add(fix);
+                            tryToCreateWindFixFromTrueWind(fix);
+                        }
                     } else {
+                        fix = new KnotSpeedWithBearingAndTimepoint(timePoint,
+                                speed.getKnots(), new DegreeBearingImpl(sentence.getAngle()).reverse());
                         apparentWind.add(fix);
                         tryToCreateWindFixFromApparentWind(fix);
                     }
