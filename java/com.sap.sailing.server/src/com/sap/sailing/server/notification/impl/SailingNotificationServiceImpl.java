@@ -191,7 +191,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
         String link = getBaseURL(event).toString() + "/gwt/RaceBoard.html?locale=" + locale.toLanguageTag()
         + "&eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
         + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
-        + raceIdentifier.getRaceName() + "&showMapControls=true&viewShowNavigationPanel=true&regattaName="
+        + raceIdentifier.getRaceName() + "&showMapControls=true&regattaName="
         + raceIdentifier.getRegattaName() + "&mode=" + raceboardMode;
         return new Pair<String, String>(messages.get(locale, labelMessageKey), link);
     }

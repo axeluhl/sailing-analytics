@@ -14,6 +14,7 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
@@ -108,6 +109,20 @@ public class DependentRaceStateTest {
         verify(listenerC, times(3)).onStartTimeChanged(stateC);
         verify(listenerB, times(2)).onStartTimeChanged(stateB);
         verify(listenerA, times(1)).onStartTimeChanged(stateA);
+    }
+
+    /**
+     * See bug 4197
+     */
+    @Test
+    public void testCyclicStartTimeDependencyDoesNotLeadToEndlessRecursion() {
+        raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
+                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+        raceLogA.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
+                new SimpleRaceLogIdentifierImpl("C", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+        assertEquals(ResolutionFailed.CYCLIC_DEPENDENCY, stateA.getStartTimeFinderResult().getResolutionFailed());
     }
 
     @Test

@@ -60,7 +60,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class WindChart extends AbstractRaceChart<WindChartSettings> implements RequiresResize {
     public static final String LOAD_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
@@ -431,7 +431,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     }
 
     @Override
-    public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent(WindChartSettings settings) {
         return windChartLifecycle.getSettingsDialogComponent(settings);
     }
 

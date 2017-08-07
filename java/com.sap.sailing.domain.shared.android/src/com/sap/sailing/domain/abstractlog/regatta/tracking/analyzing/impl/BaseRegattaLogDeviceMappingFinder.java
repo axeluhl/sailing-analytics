@@ -73,6 +73,31 @@ public abstract class BaseRegattaLogDeviceMappingFinder<ItemT extends WithID>
         }
     }
 
+    /**
+     * Checks if the regatta log has one or more device mappings for {@code item} that cover the time point
+     * {@code fixTimePoint}.
+     */
+    public boolean hasMappingFor(ItemT item, TimePoint fixTimePoint) {
+        boolean result = false;
+        Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> events = new HashMap<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>>();
+        Map<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents = new HashMap<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent>();
+        findUnrevokedMappingAndClosingEvents(events, closingEvents);
+        final List<RegattaLogDeviceMappingEvent<ItemT>> mappingsList = events.get(item);
+        if (mappingsList != null) {
+            for (final RegattaLogDeviceMappingEvent<ItemT> event : mappingsList) {
+                final TimePoint from = event.getFrom();
+                final RegattaLogCloseOpenEndedDeviceMappingEvent closingEvent = closingEvents.get(event.getId());
+                final TimePoint toInclusive = closingEvent != null ? closingEvent.getClosingTimePointInclusive() : event.getToInclusive();
+                final TimeRange mappingTimeRange = new TimeRangeImpl(from, toInclusive, /* inclusive */ true);
+                if (mappingTimeRange.includes(fixTimePoint)) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
     protected abstract RegattaLogDeviceMappingEvent<ItemT> createDeviceMappingEvent(ItemT item,
             AbstractLogEventAuthor author, TimePoint plus, TimePoint toInclusive, DeviceIdentifier deviceId);
 

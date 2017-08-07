@@ -17,12 +17,150 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.7.5 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 25/07/2017
+Build number: 14214
+
+ 1) Bugs
+
+ - When the library calls the IRaceStartStopTimesChangeListener methods,
+   the IRace object can be not updated (Reported By Axel Uhl, 25/07/2017)
+
+********************************************
+************* TracAPI 3.7.4 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 25/07/2017
+Build number: 14207
+
+ 1) Bugs
+
+ - It is not possible to connect a second time to the ISubscriber object to receive
+ live notifications if it has been closed before (Reported By Axel Uhl, 24/07/2017)
+
+********************************************
+************* TracAPI 3.7.3 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 24/07/2017
+Build number: 14195
+
+ 1) Bugs
+
+ - When the specific live delay is updated, the EM sends a message with the new and the
+  old values to the clients. TracAPI checks if the cached value is equals to the old value and
+  only in this case, it updates the live delay. If the server sends some wrong values or if a message
+  is lost, the live delay will never be updated and for this reason this validation has been
+  removed (Reported By Axel Uhl, 24/07/2017)
+
+********************************************
+************* TracAPI 3.7.2 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation
+It keeps the backward compatibility.
+
+Release date: 21/07/2017
+Build number: 14174
+
+ 1) Bugs
+
+ - IRace.getCourseArea() is not updated when the race is loaded a second time (Reported By Axel Uhl, 21/07/2017)
+
+********************************************
+************* TracAPI 3.7.1 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features.
+It keeps the backward compatibility.
+
+Release date: 21/07/2017
+Build number: 14172
+
+ 1) Features
+
+ - RaceStatusType includes a new value: 9 - Final. The meaning of this value is that the related race has finished and the
+ splits have been validated (Requested by Chris Terkelsen, 18/07/2017).
+
+ 2) Bugs
+
+ - NullPointerException when the client stops the subscription during the loading progress (it happens sometimes).
+ The data provider is set to null and one of the threads that sends the positions to the app can use it (Reported
+ By André Borud, 03/07/2017)
+ - IRace.getEvent() is null when the race is updated (Reported By Axel Uhl, 21/07/2017)
+
+********************************************
+************* TracAPI 3.7.0 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds some new features.
+These features add methods to the API keeping the backward compatibility with the releases
+3.6.x. The minor version has been increased from 6 to 7 because there are some important
+changes in the implementation.
+
+This version provides a new JavaDoc version.
+
+Release date: 28/07/2017
+Build number: 14122
+
+ 1) Features
+
+ - RaceCompetitorStatusType: New race competitor status type defined: F_CONFIRMED. Represents a competitor with a
+ control passing registered for the last gate/mark that is accepted as the official result (Requested by Ugo
+ Alvazzi, 26/04/2017)
+ - WebSockets support: instead of using a TCP connection is possible to retrieve data using WebSockets (using the
+ same protocol used by the HTML Viewer). The protocol is not fully implemented and it only has to be used for testing
+ (Requested by Jorge Piera, 30/04/2017).
+ - Use an asynchronous API: the dataserver implementation has been migrated to an asynchronous API that provides
+ a better performance downloading replay data (the tests show that is 2.5 times faster). TracAPI has also adopted
+ this new asynchronous interface but at this moment it continues using the synchronous approach (Requested by Jorge
+ Piera, 03/05/2017)
+ - Adding the method ISubscriberFactory.clean to release the objects in memory (Requested by André Borud, 01/06/2017)
+ - Adding the method IPosition.isGPSTiming to know is the time of a position has been retrieved from a physical
+ GPS device (Requested by Jérome Soussens, 21/06/2017)
+
+ 2) Bugs
+
+ - When a static control is updated, the IControlPointPositionListener.gotControlPointPosition event
+ is not called if the consumer application is not registered to the IEventSubscriber (Reported by
+ Axel Uhl, 18/06/2017)
+ - The live delay sometimes is not propagated. The server always propagates the event but TracAPI can
+ filter it if the IEventSubscriber is not being used or if it has not been correctly initialized
+ using the right live-uri (Reported by Julian Mayland, 21/06/2017)
+
+********************************************
+************* TracAPI 3.6.3 ****************
+********************************************
+This is a final version. It adds support for these new features:
+
+ - IMetadataContainer: Fixed bug in IMetadataContainer implementation. Metadata received through serialized objects was not being parsed.
+
+Release date: 10/04/2017
+Build number: -
+
+********************************************
+************* TracAPI 3.6.2 ****************
+********************************************
+This is a final version. It adds support for these new features:
+
+ - IControlPoint.getId() will return null when the control point is part of a line and the related IControl do not have
+   the properties P1.UUID/P2.UUID defined.
+
+Release date: 06/04/2017
+Build number: -
+
+********************************************
 ************* TracAPI 3.6.1 ****************
 ********************************************
 This is a final version. It adds support for these new features:
 
-- IControl and IRace now have a method getCourseArea() that returns the course area.
-- IControlPoint has a getId method that returns the UUID. It will be initialized with the value set in the P1.UUID and
+ - IControl and IRace now have a method getCourseArea() that returns the course area.
+ - IControlPoint has a getId method that returns the UUID. It will be initialized with the value set in the P1.UUID and
   P2.UUID properties defined in the parent IControl. In case these properties are not defined the UUID will fallback to
   the parent IControl UUID.
 

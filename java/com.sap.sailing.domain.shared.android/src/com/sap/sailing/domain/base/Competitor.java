@@ -11,8 +11,13 @@ import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 
 public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
-    @Connector(messageKey="Team", ordinal=9)
     Team getTeam();
+    
+    /**
+     * Short for {@link #getTeam()}.{@link Team#getNationality() getNationality()}.
+     */
+    @Connector(messageKey="Nationality", ordinal=9)
+    Nationality getNationality();
 
     @Connector(messageKey="Boat", ordinal=10)
     Boat getBoat();

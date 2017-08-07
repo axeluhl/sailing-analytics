@@ -96,8 +96,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if(showQuickfinder && event.getType() == EventType.MULTI_REGATTA) {
             view.setQuickFinderValues(getRegattasByLeaderboardGroupName());
         } else if(showQuickfinder && event.getType() == EventType.SERIES_EVENT) {
-            List<EventReferenceWithStateDTO> seriesEventToShow = new ArrayList<>(event.getEventsOfSeries().size());
-            for (EventReferenceWithStateDTO seriesEvent : event.getEventsOfSeries()) {
+            List<EventReferenceWithStateDTO> eventsOfSeriesSorted = event.getEventsOfSeriesSorted();
+            List<EventReferenceWithStateDTO> seriesEventToShow = new ArrayList<>(eventsOfSeriesSorted.size());
+            for (EventReferenceWithStateDTO seriesEvent : eventsOfSeriesSorted) {
                 if(seriesEvent.getState() != EventState.PLANNED) {
                     seriesEventToShow.add(seriesEvent);
                 }
@@ -261,13 +262,12 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName,
                 UUID.fromString(getCtx().getEventId()), mode);
-        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
-                .createDefaultWithCanReplayDuringLiveRaces(true);
+        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
+        
         HashMap<String, Settings> innerSettings = new HashMap<>();
         innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                 perspectiveOwnSettings, innerSettings);
-
         return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
     }
     

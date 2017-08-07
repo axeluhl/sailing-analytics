@@ -43,7 +43,8 @@ public class TargetTimeInfoDeserializer implements JsonDeserializer<TargetTimeIn
             final Distance legDistance = new MeterDistance(((Number) legAsJson.get(TargetTimeInfoSerializer.LEG_DISTANCE_METERS)).doubleValue());
             final LegType legType = LegType.valueOf((String) legAsJson.get(TargetTimeInfoSerializer.LEG_TYPE));
             final Wind legWind = windDeserializer.deserialize((JSONObject) legAsJson.get(TargetTimeInfoSerializer.LEG_WIND));
-            final LegTargetTimeInfo legInfo = new TargetTimeInfoImpl.LegTargetTimeInfoImpl(legDistance, legWind, legBearing, expectedDuration, expectedStartTime, legType);
+            final LegTargetTimeInfo legInfo = new TargetTimeInfoImpl.LegTargetTimeInfoImpl(legDistance, legWind,
+                    legBearing, expectedDuration, expectedStartTime, legType, Distance.NULL);
             legInfos.add(legInfo);
         }
         return new TargetTimeInfoImpl(legInfos);

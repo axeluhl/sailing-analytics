@@ -3,8 +3,16 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
+
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -16,17 +24,6 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
-import com.sap.sailing.racecommittee.app.utils.StringHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.filter.AbstractKeywordFilter;
-import com.sap.sse.common.filter.Filter;
-import com.sap.sse.common.util.NaturalComparator;
 
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
 
@@ -54,20 +51,17 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final CompetitorResultEditableImpl item = mFiltered.get(position);
-
         int bgId = R.attr.sap_gray_black_30;
-        if (!item.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+        if (item.getOneBasedRank() == 0) {
             bgId = R.attr.sap_gray_black_20;
         }
         holder.itemView.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
         holder.mItemText.setText(item.getCompetitorDisplayName());
-
         final boolean hasReason = !MaxPointsReason.NONE.equals(item.getMaxPointsReason());
         holder.mItemPenalty.setVisibility(hasReason ? View.VISIBLE : View.GONE);
         if (hasReason) {
             holder.mItemPenalty.setText(item.getMaxPointsReason().name());
         }
-
         holder.mItemCheck.setOnCheckedChangeListener(null); // because of item recycling
         holder.mItemCheck.setChecked(item.isChecked());
         holder.mItemCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -79,7 +73,6 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
                 }
             }
         });
-
         holder.mItemEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

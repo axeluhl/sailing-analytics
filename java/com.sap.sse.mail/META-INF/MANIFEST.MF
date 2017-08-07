@@ -12,6 +12,7 @@ Export-Package: com.sap.sse.mail,
  com.sap.sse.mail.queue.impl
 Import-Package: javax.mail,
  javax.mail.internet,
+ javax.mail.util;version="1.4.0",
  org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1"
 Require-Bundle: com.sap.sse.replication,

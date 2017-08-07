@@ -192,14 +192,15 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         
         @Override
         public int getNumberOfCompetitorsWithoutMaxPointReason(RaceColumn column, TimePoint timePoint) {
-        	if (numberOfCompetitorsWithoutMaxPointReason == -1) {
-        		numberOfCompetitorsWithoutMaxPointReason = 0;
-				for (Competitor competitor : getCompetitors()) {
-					MaxPointsReason maxPointReason = getScoreCorrection().getMaxPointsReason(competitor, column, timePoint);
-					numberOfCompetitorsWithoutMaxPointReason += maxPointReason == MaxPointsReason.NONE ? 1 : 0;
-				}
-        	}
-        	return numberOfCompetitorsWithoutMaxPointReason;
+            if (numberOfCompetitorsWithoutMaxPointReason == -1) {
+                numberOfCompetitorsWithoutMaxPointReason = 0;
+                for (Competitor competitor : getCompetitors()) {
+                    MaxPointsReason maxPointReason = getScoreCorrection().getMaxPointsReason(competitor, column,
+                            timePoint);
+                    numberOfCompetitorsWithoutMaxPointReason += maxPointReason == MaxPointsReason.NONE ? 1 : 0;
+                }
+            }
+            return numberOfCompetitorsWithoutMaxPointReason;
         }
     }
 
@@ -256,6 +257,11 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
+    public void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnNameChanged(raceColumn, oldName, newName);
     }
 
     @Override

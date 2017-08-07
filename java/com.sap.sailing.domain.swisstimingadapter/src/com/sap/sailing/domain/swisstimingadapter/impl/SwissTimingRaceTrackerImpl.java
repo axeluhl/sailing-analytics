@@ -189,10 +189,10 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
 
             @Override
             public RaceDefinition getRace() {
-                synchronized (this) {
+                synchronized (SwissTimingRaceTrackerImpl.this) {
                     while (race == null) {
                         try {
-                            this.wait();
+                            SwissTimingRaceTrackerImpl.this.wait();
                         } catch (InterruptedException e) {
                             logger.log(Level.SEVERE, "Interrupted wait", e);
                         }
@@ -204,14 +204,14 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override
             public RaceDefinition getRace(long timeoutInMilliseconds) {
                 long start = System.currentTimeMillis();
-                synchronized (this) {
+                synchronized (SwissTimingRaceTrackerImpl.this) {
                     RaceDefinition preResult = race;
                     boolean interrupted = false;
                     while ((System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && preResult == null) {
                         try {
                             long timeToWait = timeoutInMilliseconds - (System.currentTimeMillis() - start);
                             if (timeToWait > 0) {
-                                this.wait(timeToWait);
+                                SwissTimingRaceTrackerImpl.this.wait(timeToWait);
                             }
                             preResult = race;
                         } catch (InterruptedException e) {
@@ -465,7 +465,10 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         assert course != null;
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = new RaceImpl(raceID, raceName, raceDescription, boatClass);
-        race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
+        synchronized (this) {
+            race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
+            this.notifyAll();
+        }
         // temp
         CompetitorStore competitorStore = domainFactory.getBaseDomainFactory().getCompetitorStore();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor c : startList.getCompetitors()) {

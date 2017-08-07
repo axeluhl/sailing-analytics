@@ -362,6 +362,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        raceColumnListeners.notifyListenersAboutRaceColumnNameChanged(raceColumn, oldName, newName);
+    }
+
+    @Override
     public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
         raceColumnListeners.notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
     }

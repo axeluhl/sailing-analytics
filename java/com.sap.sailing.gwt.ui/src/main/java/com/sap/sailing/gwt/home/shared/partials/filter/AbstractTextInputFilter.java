@@ -26,7 +26,7 @@ public abstract class AbstractTextInputFilter<T, C> extends AbstractFilterWidget
     private void initTextInputWidget(Widget textInputWidget, String placeholderText, KeyUpHandler handler) {
         textInputWidget.getElement().setAttribute("placeholder", placeholderText);
         textInputWidget.addStyleName(FilterWidgetResources.INSTANCE.css().input_filter_text_input());
-        textInputWidget.addHandler(handler, KeyUpEvent.getType());
+        textInputWidget.addDomHandler(handler, KeyUpEvent.getType());
         containerUi.add(textInputWidget);
     }
     

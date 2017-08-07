@@ -67,20 +67,15 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
             showLeaderboardButton = true;
         }
         headerUi.setSectionTitle(headerText);
-        
         itemContainerUi.clearContent();
-        
-        if(data.getItems().isEmpty()) {
+        if (data.getItems().isEmpty()) {
             itemContainerUi.addContent(getNoResultsInfoWidget());
             return;
         }
-        
         headerUi.setLabelType(data.isLive() ? LabelType.LIVE : LabelType.NONE);
-        
-        if(data.getScoreCorrectionText() != null || data.getLastScoreUpdate() != null) {
+        if (data.getScoreCorrectionText() != null || data.getLastScoreUpdate() != null) {
             itemContainerUi.addContent(getScoreInformation(data));
         }
-        
         boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item, showRaceCounts));

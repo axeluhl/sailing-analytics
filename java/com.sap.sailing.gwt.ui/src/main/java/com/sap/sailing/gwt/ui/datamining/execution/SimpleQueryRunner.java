@@ -23,7 +23,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> implements QueryRunner {
 
@@ -161,7 +161,7 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
     }
 
     @Override
-    public SettingsDialogComponent<QueryRunnerSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<QueryRunnerSettings> getSettingsDialogComponent(QueryRunnerSettings settings) {
         return new QueryRunnerSettingsDialogComponent(settings, stringMessages);
     }
 
