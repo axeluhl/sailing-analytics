@@ -11,3 +11,4 @@ Export-Package: net.sf.marineapi.nmea.event,
  net.sf.marineapi.nmea.util,
  net.sf.marineapi.provider,
  net.sf.marineapi.provider.event
+Bundle-ActivationPolicy: lazy

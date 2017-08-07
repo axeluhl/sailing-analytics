@@ -13,3 +13,5 @@ Require-Bundle: com.sap.sailing.domain,
  net.sf.marineapi,
  com.sap.sailing.declination
 Import-Package: org.osgi.framework
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: com.sap.sailing.nmeaconnector.impl.Activator
