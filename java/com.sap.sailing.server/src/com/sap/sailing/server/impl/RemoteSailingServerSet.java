@@ -135,23 +135,23 @@ public class RemoteSailingServerSet {
                 URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(raceListURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 JSONParser parser = new JSONParser();
-                Object eventsAsObject = parser.parse(bufferedReader);
+                Object racesAsObject = parser.parse(bufferedReader);
                 SimpleAnniversaryRaceInfoJsonSerializer deserializer = new SimpleAnniversaryRaceInfoJsonSerializer();
-                JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
-                final Set<SimpleAnniversaryRaceInfo> events = new HashSet<>();
-                for (Object eventAsObject : eventsAsJsonArray) {
-                    JSONObject eventAsJson = (JSONObject) eventAsObject;
-                    SimpleAnniversaryRaceInfo event = deserializer.deserialize(eventAsJson);
-                    events.add(event);
+                JSONArray racesAsJsonArray = (JSONArray) racesAsObject;
+                final Set<SimpleAnniversaryRaceInfo> races = new HashSet<>();
+                for (Object raceAsObject : racesAsJsonArray) {
+                    JSONObject raceAsJson = (JSONObject) raceAsObject;
+                    SimpleAnniversaryRaceInfo event = deserializer.deserialize(raceAsJson);
+                    races.add(event);
                 }
-                result = new Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>(events, /* exception */ null);
+                result = new Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>(races, /* exception */ null);
             } finally {
                 if (bufferedReader != null) {
                     bufferedReader.close();
                 }
             }
         } catch (IOException | ParseException e) {
-            logger.log(Level.INFO, "Exception trying to fetch events from remote server " + ref + ": " + e.getMessage(),
+            logger.log(Level.INFO, "Exception trying to fetch AnniversaryRaceData from remote server " + ref + ": " + e.getMessage(),
                     e);
             result = new Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>(/* events */ null, e);
         }
