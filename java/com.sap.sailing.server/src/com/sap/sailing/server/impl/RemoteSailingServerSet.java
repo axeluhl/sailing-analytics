@@ -67,7 +67,7 @@ public class RemoteSailingServerSet {
 
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Map<Integer, Statistics>, Exception>> cachedStatisticsByYearForRemoteSailingServers;
     
-    private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedSimpleAnniversaryForRemoteSailingServers;
+    private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedTrackedRacesForRemoteSailingServers;
 
     /**
      * @param scheduler
@@ -77,7 +77,7 @@ public class RemoteSailingServerSet {
         remoteSailingServers = new ConcurrentHashMap<>();
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
         cachedStatisticsByYearForRemoteSailingServers = new ConcurrentHashMap<>();
-        cachedSimpleAnniversaryForRemoteSailingServers = new ConcurrentHashMap<>();
+        cachedTrackedRacesForRemoteSailingServers = new ConcurrentHashMap<>();
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -91,7 +91,7 @@ public class RemoteSailingServerSet {
             remoteSailingServers.clear();
             cachedEventsForRemoteSailingServers.clear();
             cachedStatisticsByYearForRemoteSailingServers.clear();
-            cachedSimpleAnniversaryForRemoteSailingServers.clear();
+            cachedTrackedRacesForRemoteSailingServers.clear();
         });
     }
 
@@ -122,10 +122,10 @@ public class RemoteSailingServerSet {
         new Thread(() -> updateRemoteServerEventCacheSynchronously(ref), "Event Cache Updater for remote server " + ref).start();
         new Thread(() -> updateRemoteServerStatisticsCacheSynchronously(ref),
                 "Statistics by year Cache Updater for remote server " + ref).start();
-        new Thread(() -> updateRemoteServerAnniversaryCacheSynchronously(ref), "Anniversary Cache Updater for remote server " + ref).start();
+        new Thread(() -> updateRemoteServerTrackedRacesCacheSynchronously(ref), "Anniversary Cache Updater for remote server " + ref).start();
     }
 
-    private void updateRemoteServerAnniversaryCacheSynchronously(RemoteSailingServerReference ref) {
+    private void updateRemoteServerTrackedRacesCacheSynchronously(RemoteSailingServerReference ref) {
         BufferedReader bufferedReader = null;
         Util.Pair<Iterable<SimpleRaceInfo>, Exception> result;
         try {
@@ -159,7 +159,7 @@ public class RemoteSailingServerSet {
         LockUtil.executeWithWriteLock(lock, () -> {
             // check that the server was not removed while no lock was held
             if (remoteSailingServers.containsValue(ref)) {
-                cachedSimpleAnniversaryForRemoteSailingServers.put(ref, finalResult);
+                cachedTrackedRacesForRemoteSailingServers.put(ref, finalResult);
             } else {
                 logger.fine("Omitted update for " + ref + " as it was removed");
             }
@@ -167,7 +167,7 @@ public class RemoteSailingServerSet {
     }
     
     private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
-        return getURL(remoteServerBaseURL, "sailingserver/api/v1/anniversary/races");
+        return getURL(remoteServerBaseURL, "sailingserver/api/v1/trackedRaces/localRaces");
     }
 
     private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
@@ -345,7 +345,7 @@ public class RemoteSailingServerSet {
     public Map<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> getCachedRaceList() {
         LockUtil.lockForRead(lock);
         try {
-            return Collections.unmodifiableMap(cachedSimpleAnniversaryForRemoteSailingServers);
+            return Collections.unmodifiableMap(cachedTrackedRacesForRemoteSailingServers);
         } finally {
             LockUtil.unlockAfterRead(lock);
         }

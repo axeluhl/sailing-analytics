@@ -20,8 +20,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
 
-@Path("/v1/raceinfo")
-public class RaceListResource extends AbstractSailingServerResource {
+@Path("/v1/trackedRaces")
+public class TrackedRaceListResource extends AbstractSailingServerResource {
     private static final String HEADER_NAME_CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_TYPE_JSON_UTF8 = MediaType.APPLICATION_JSON + ";charset=UTF-8";
 
@@ -32,7 +32,7 @@ public class RaceListResource extends AbstractSailingServerResource {
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
-    @Path("races")
+    @Path("localRaces")
     public Response raceList() {
         JSONArray json = new JSONArray();
         for (SimpleRaceInfo entry : getService().getLocalRaceList().values()) {
@@ -47,7 +47,7 @@ public class RaceListResource extends AbstractSailingServerResource {
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
-    @Path("fullRacelist")
+    @Path("allRaces")
     public Response fullRaceList() {
         JSONArray json = new JSONArray();
         Map<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
