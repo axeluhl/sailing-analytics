@@ -5,17 +5,17 @@ import java.util.Date;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public class SimpleRaceInfo {
+    private final RegattaAndRaceIdentifier identifier;
+    private final Date startOfRace;
+    private final String remoteName;
 
-    protected RegattaAndRaceIdentifier identifier;
-    protected Date startOfRace;
-    private String remoteName;
-
-    public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, Date startOfRace) {
+    public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, Date startOfRace, String remoteName) {
         if (identifier == null || startOfRace == null) {
             throw new IllegalStateException("SimpleRaceInfo Data is not allowed to contain any null values!");
         }
         this.identifier = identifier;
         this.startOfRace = startOfRace;
+        this.remoteName = remoteName;
     }
 
     public RegattaAndRaceIdentifier getIdentifier() {
@@ -28,10 +28,6 @@ public class SimpleRaceInfo {
 
     public String getRemoteName() {
         return remoteName;
-    }
-
-    public void setRemoteName(String remoteName) {
-        this.remoteName = remoteName;
     }
 
     @Override

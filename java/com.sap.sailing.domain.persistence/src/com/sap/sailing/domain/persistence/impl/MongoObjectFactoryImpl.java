@@ -1669,12 +1669,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Date startOfRace = (Date) toLoad.get("startOfRace");
             String race = toLoad.get("race").toString();
             String regatta = toLoad.get("regatta").toString();
-            DetailedRaceInfo loadedAnniversary = new DetailedRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, UUID.fromString(eventID));
             Object rurl = toLoad.get("remoteUrl");
-            if(rurl != null){
-                loadedAnniversary.setRemoteName( rurl.toString());
+            final String remoteName;
+            if (rurl != null) {
+                remoteName = rurl.toString();
+            } else {
+                remoteName = null;
             }
-            int anniversary = ((Number)toLoad.get("anniversary")).intValue();
+            DetailedRaceInfo loadedAnniversary = new DetailedRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, UUID.fromString(eventID), remoteName);
+            int anniversary = ((Number) toLoad.get("anniversary")).intValue();
             fromDb.put(anniversary, loadedAnniversary);
         }
         return fromDb;

@@ -6,31 +6,21 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public class DetailedRaceInfo extends SimpleRaceInfo {
+    private final String leaderboardName;
+    private final UUID eventID;
+    
     public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, Date startOfRace,
-            UUID eventId) {
-        super(identifier, startOfRace);
+            UUID eventId, String remoteName) {
+        super(identifier, startOfRace, remoteName);
         if (leaderboardName == null || eventId == null) {
             throw new IllegalStateException("DetailedRaceInfo Data is not allowed to contain any null values!");
         }
-        this.identifier = identifier;
         this.leaderboardName = leaderboardName;
-        this.startOfRace = startOfRace;
         this.eventID = eventId;
-    }
-
-    String leaderboardName;
-    UUID eventID;
-
-    public RegattaAndRaceIdentifier getIdentifier() {
-        return identifier;
     }
 
     public String getLeaderboardName() {
         return leaderboardName;
-    }
-
-    public Date getStartOfRace() {
-        return startOfRace;
     }
 
     public UUID getEventID() {
@@ -39,11 +29,7 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
 
     @Override
     public String toString() {
-        return "DetailedRaceInfo [identifier=" + identifier + ", leaderboardName=" + leaderboardName
-                + ", startOfRace=" + startOfRace + ", eventID=" + eventID + "]";
+        return "DetailedRaceInfo [identifier=" + getIdentifier() + ", leaderboardName=" + leaderboardName
+                + ", startOfRace=" + getStartOfRace() + ", eventID=" + eventID + "]";
     }
-
-
-    
-    
 }
