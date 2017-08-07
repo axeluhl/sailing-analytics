@@ -11,17 +11,18 @@ import com.sap.sailing.gwt.home.communication.event.news.GetEventOverviewNewsAct
 import com.sap.sailing.gwt.home.communication.event.statistics.GetEventStatisticsAction;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
-import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
+import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.MobileStatisticsBoxView;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
+import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
 
 public abstract class AbstractEventOverview extends AbstractEventView<EventViewBase.Presenter> {
     
     private EventOverviewStage overviewStageUi;
     private UpdatesBox updatesBoxUi;
     private Impressions impressionsUi;
-    private StatisticsBox statisticsBoxUi;
+    private EventStatisticsBox statisticsBoxUi;
 
     public AbstractEventOverview(EventViewBase.Presenter presenter, boolean showRegattaName, boolean enableLogoNavigation) {
         super(presenter, showRegattaName, enableLogoNavigation);
@@ -48,7 +49,7 @@ public abstract class AbstractEventOverview extends AbstractEventView<EventViewB
     }
     
     protected void setupStatisticsBox(Panel container, boolean forRegattaOnly) {
-        statisticsBoxUi = new StatisticsBox(!forRegattaOnly);
+        statisticsBoxUi = new EventStatisticsBox(!forRegattaOnly, new MobileStatisticsBoxView());
         refreshManager.add(statisticsBoxUi, forRegattaOnly ? new GetRegattaStatisticsAction(getEventId(),
                 getRegattaId()) : new GetEventStatisticsAction(getEventId()));
         container.add(statisticsBoxUi);

@@ -55,6 +55,7 @@ public class EventListDataCalculator implements EventVisitor {
             latestEvent.getEventSeries().setEventsCount(numberOfEventsPerSeries.get(seriesName));
             addEventToResults(latestEvent);
         }
+        result.addStatistics(service.getOverallStatisticsByYear());
         return result;
     }
     

@@ -17,7 +17,7 @@ public class EventStatisticsDTO implements DTO {
     private long numberOfWindFixes;
     private String competitorInfo;
     private Double competitorSpeedInKnots;
-    private Double totalDistanceTraveled;
+    private Distance totalDistanceTraveled;
 
     @SuppressWarnings("unused")
     private EventStatisticsDTO() {
@@ -38,9 +38,7 @@ public class EventStatisticsDTO implements DTO {
             this.competitorInfo = maxSpeed.getA().getName();
             this.competitorSpeedInKnots = maxSpeed.getB().getKnots();
         }
-        if (totalDistanceTraveled != null) {
-            this.totalDistanceTraveled = totalDistanceTraveled.getSeaMiles();
-        }
+        this.totalDistanceTraveled = totalDistanceTraveled;
     }
 
     public int getRegattasFoughtCount() {
@@ -91,7 +89,7 @@ public class EventStatisticsDTO implements DTO {
         return competitorSpeedInKnots;
     }
 
-    public Double getTotalDistanceTraveled() {
+    public Distance getTotalDistanceTraveled() {
         return totalDistanceTraveled;
     }
 }

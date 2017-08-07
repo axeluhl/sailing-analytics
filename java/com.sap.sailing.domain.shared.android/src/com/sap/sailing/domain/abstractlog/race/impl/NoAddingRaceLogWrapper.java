@@ -258,4 +258,9 @@ public class NoAddingRaceLogWrapper implements RaceLog {
             Function<RaceLogEvent, ScalableValue<InternalType, ValueType>> converter) {
         return innerRaceLog.getInterpolatedValue(timePoint, converter);
     }
+    
+    @Override
+    public int size() {
+        return innerRaceLog.size();
+    }
 }

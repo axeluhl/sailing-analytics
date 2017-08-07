@@ -1418,6 +1418,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String racesQuickfinder();
     String profileQuickfinder();
     String statistics();
+    String statisticsFor(String name);
     String impressions();
     String notAvailableOnMobileMessage();
     String gotoDesktop();
