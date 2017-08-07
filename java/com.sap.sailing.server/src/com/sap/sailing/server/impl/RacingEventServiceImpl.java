@@ -58,7 +58,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.anniversary.SimpleAnniversaryRaceInfo;
+import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -458,7 +458,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
 
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
-    //  private AnniversaryCalculator anniversaryCalculator;
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -519,7 +518,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * @param trackedRaceStatisticsCache
      *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no
      *            detailed statistics about TrackedRaces will be calculated.
-     * @param anniversaryCalculator 
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
             TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService,
@@ -3824,14 +3822,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> getRemoteRaceList() {
-        HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store = new HashMap<>();
-        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>> race : remoteSailingServerSet
+    public HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList() {
+        HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> race : remoteSailingServerSet
                 .getCachedRaceList().entrySet()) {
             if (race.getValue().getB() != null) {
                 throw new RuntimeException("Some remoteserver did not respond " + race.getKey());
             }
-            for (SimpleAnniversaryRaceInfo raceinfo : race.getValue().getA()) {
+            for (SimpleRaceInfo raceinfo : race.getValue().getA()) {
                 store.put(raceinfo.getIdentifier(), raceinfo);
             }
         }
@@ -3839,8 +3837,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Map<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> getLocalRaceList() {
-        HashMap<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> store = new HashMap<>();
+    public Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList() {
+        HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
         for (Event event : getAllEvents()) {
             for (LeaderboardGroup group : event.getLeaderboardGroups()) {
                 for (Leaderboard leaderboard : group.getLeaderboards()) {
@@ -3849,7 +3847,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                             TrackedRace trackedRace = race.getTrackedRace(fleet);
                             if (trackedRace != null) {
                                 RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-                                SimpleAnniversaryRaceInfo raceInfo = new SimpleAnniversaryRaceInfo(raceIdentifier,
+                                SimpleRaceInfo raceInfo = new SimpleRaceInfo(raceIdentifier,
                                         trackedRace.getStartOfRace().asDate());
                                 store.put(raceInfo.getIdentifier(), raceInfo);
                             }

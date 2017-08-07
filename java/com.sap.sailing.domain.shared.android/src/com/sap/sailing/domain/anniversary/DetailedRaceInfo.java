@@ -5,12 +5,12 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
-public class AnniversaryRaceInfo extends SimpleAnniversaryRaceInfo {
-    public AnniversaryRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, Date startOfRace,
+public class DetailedRaceInfo extends SimpleRaceInfo {
+    public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, Date startOfRace,
             UUID eventId) {
         super(identifier, startOfRace);
         if (leaderboardName == null || eventId == null) {
-            throw new IllegalStateException("Anniversary Data is not allowed to contain any null values!");
+            throw new IllegalStateException("DetailedRaceInfo Data is not allowed to contain any null values!");
         }
         this.identifier = identifier;
         this.leaderboardName = leaderboardName;
@@ -39,7 +39,7 @@ public class AnniversaryRaceInfo extends SimpleAnniversaryRaceInfo {
 
     @Override
     public String toString() {
-        return "AnniversaryRaceInfo [identifier=" + identifier + ", leaderboardName=" + leaderboardName
+        return "DetailedRaceInfo [identifier=" + identifier + ", leaderboardName=" + leaderboardName
                 + ", startOfRace=" + startOfRace + ", eventID=" + eventID + "]";
     }
 

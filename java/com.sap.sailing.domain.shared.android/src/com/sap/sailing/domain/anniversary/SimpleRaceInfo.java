@@ -4,15 +4,15 @@ import java.util.Date;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
-public class SimpleAnniversaryRaceInfo {
+public class SimpleRaceInfo {
 
     protected RegattaAndRaceIdentifier identifier;
     protected Date startOfRace;
     private String remoteName;
 
-    public SimpleAnniversaryRaceInfo(RegattaAndRaceIdentifier identifier, Date startOfRace) {
+    public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, Date startOfRace) {
         if (identifier == null || startOfRace == null) {
-            throw new IllegalStateException("Anniversary Data is not allowed to contain any null values!");
+            throw new IllegalStateException("SimpleRaceInfo Data is not allowed to contain any null values!");
         }
         this.identifier = identifier;
         this.startOfRace = startOfRace;
@@ -51,7 +51,7 @@ public class SimpleAnniversaryRaceInfo {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SimpleAnniversaryRaceInfo other = (SimpleAnniversaryRaceInfo) obj;
+        SimpleRaceInfo other = (SimpleRaceInfo) obj;
         if (identifier == null) {
             if (other.identifier != null)
                 return false;

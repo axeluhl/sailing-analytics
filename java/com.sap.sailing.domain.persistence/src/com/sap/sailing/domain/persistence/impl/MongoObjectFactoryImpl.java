@@ -67,7 +67,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
-import com.sap.sailing.domain.anniversary.AnniversaryRaceInfo;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -1637,10 +1637,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeAnniversaryData(Map<Integer, AnniversaryRaceInfo> data) {
+    public void storeAnniversaryData(Map<Integer, DetailedRaceInfo> data) {
         try {
             DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
-            for (Entry<Integer, AnniversaryRaceInfo> anniversary : data.entrySet()) {
+            for (Entry<Integer, DetailedRaceInfo> anniversary : data.entrySet()) {
                 BasicDBObject currentProxy = new BasicDBObject("anniversary", anniversary.getKey().intValue());
                 BasicDBObject newValue = new BasicDBObject("anniversary", anniversary.getKey().intValue());
                 newValue.append("race", anniversary.getValue().getIdentifier().getRaceName());
@@ -1657,8 +1657,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public Map<Integer, AnniversaryRaceInfo> getAnniversaryData() {
-        HashMap<Integer, AnniversaryRaceInfo> fromDb = new HashMap<>();
+    public Map<Integer, DetailedRaceInfo> getAnniversaryData() {
+        HashMap<Integer, DetailedRaceInfo> fromDb = new HashMap<>();
         DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
         DBCursor cursor = anniversarysStored.find();
         while (cursor.hasNext()) {
@@ -1669,7 +1669,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Date startOfRace = (Date) toLoad.get("startOfRace");
             String race = toLoad.get("race").toString();
             String regatta = toLoad.get("regatta").toString();
-            AnniversaryRaceInfo loadedAnniversary = new AnniversaryRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, UUID.fromString(eventID));
+            DetailedRaceInfo loadedAnniversary = new DetailedRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, UUID.fromString(eventID));
             Object rurl = toLoad.get("remoteUrl");
             if(rurl != null){
                 loadedAnniversary.setRemoteName( rurl.toString());

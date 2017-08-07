@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.mongodb.DB;
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.anniversary.AnniversaryRaceInfo;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -184,7 +184,7 @@ public interface MongoObjectFactory {
      */
     void removeAllConnectivityParametersForRacesToRestore();
 
-    void storeAnniversaryData(Map<Integer, AnniversaryRaceInfo> data);
+    void storeAnniversaryData(Map<Integer, DetailedRaceInfo> data);
 
-    Map<Integer, AnniversaryRaceInfo> getAnniversaryData();
+    Map<Integer, DetailedRaceInfo> getAnniversaryData();
 }

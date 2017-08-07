@@ -19,7 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.anniversary.SimpleAnniversaryRaceInfo;
+import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
@@ -684,7 +684,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Map<Integer, Statistics> getOverallStatisticsByYear();
 
-    Map<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> getRemoteRaceList();
+    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList();
 
-    Map<RegattaAndRaceIdentifier, SimpleAnniversaryRaceInfo> getLocalRaceList();
+    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
 }

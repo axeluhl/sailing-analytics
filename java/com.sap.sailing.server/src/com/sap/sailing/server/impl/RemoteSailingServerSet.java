@@ -26,7 +26,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.anniversary.SimpleAnniversaryRaceInfo;
+import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
@@ -37,7 +37,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsByYearJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.impl.SimpleAnniversaryRaceInfoJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
@@ -67,7 +67,7 @@ public class RemoteSailingServerSet {
 
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Map<Integer, Statistics>, Exception>> cachedStatisticsByYearForRemoteSailingServers;
     
-    private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>> cachedSimpleAnniversaryForRemoteSailingServers;
+    private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedSimpleAnniversaryForRemoteSailingServers;
 
     /**
      * @param scheduler
@@ -127,7 +127,7 @@ public class RemoteSailingServerSet {
 
     private void updateRemoteServerAnniversaryCacheSynchronously(RemoteSailingServerReference ref) {
         BufferedReader bufferedReader = null;
-        Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception> result;
+        Util.Pair<Iterable<SimpleRaceInfo>, Exception> result;
         try {
             try {
                 final URL raceListURL = getRaceListURL(ref.getURL());
@@ -136,15 +136,15 @@ public class RemoteSailingServerSet {
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 JSONParser parser = new JSONParser();
                 Object racesAsObject = parser.parse(bufferedReader);
-                SimpleAnniversaryRaceInfoJsonSerializer deserializer = new SimpleAnniversaryRaceInfoJsonSerializer();
+                SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
                 JSONArray racesAsJsonArray = (JSONArray) racesAsObject;
-                final Set<SimpleAnniversaryRaceInfo> races = new HashSet<>();
+                final Set<SimpleRaceInfo> races = new HashSet<>();
                 for (Object raceAsObject : racesAsJsonArray) {
                     JSONObject raceAsJson = (JSONObject) raceAsObject;
-                    SimpleAnniversaryRaceInfo event = deserializer.deserialize(raceAsJson);
+                    SimpleRaceInfo event = deserializer.deserialize(raceAsJson);
                     races.add(event);
                 }
-                result = new Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>(races, /* exception */ null);
+                result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(races, /* exception */ null);
             } finally {
                 if (bufferedReader != null) {
                     bufferedReader.close();
@@ -153,9 +153,9 @@ public class RemoteSailingServerSet {
         } catch (IOException | ParseException e) {
             logger.log(Level.INFO, "Exception trying to fetch AnniversaryRaceData from remote server " + ref + ": " + e.getMessage(),
                     e);
-            result = new Util.Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>(/* events */ null, e);
+            result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(/* events */ null, e);
         }
-        final Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception> finalResult = result;
+        final Pair<Iterable<SimpleRaceInfo>, Exception> finalResult = result;
         LockUtil.executeWithWriteLock(lock, () -> {
             // check that the server was not removed while no lock was held
             if (remoteSailingServers.containsValue(ref)) {
@@ -342,7 +342,7 @@ public class RemoteSailingServerSet {
         }
     }
 
-    public Map<RemoteSailingServerReference, Pair<Iterable<SimpleAnniversaryRaceInfo>, Exception>> getCachedRaceList() {
+    public Map<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> getCachedRaceList() {
         LockUtil.lockForRead(lock);
         try {
             return Collections.unmodifiableMap(cachedSimpleAnniversaryForRemoteSailingServers);
