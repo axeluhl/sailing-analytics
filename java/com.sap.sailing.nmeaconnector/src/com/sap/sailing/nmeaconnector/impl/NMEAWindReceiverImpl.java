@@ -348,8 +348,7 @@ public class NMEAWindReceiverImpl implements NMEAWindReceiver {
                 final Bearing trueHeading = trueHeadings.getInterpolatedValue(getLastTimePoint(), fix->new ScalableBearing(fix));
                 if (trueHeading != null) {
                     final SpeedWithBearing apparentWindTrue = new KnotSpeedWithBearingImpl(apparentWind.getKnots(), apparentWind.getBearing().add(trueHeading));
-                    final SpeedWithBearing inducedWind = new KnotSpeedWithBearingImpl(sensorSpeed.getKnots(), sensorSpeed.getBearing().reverse());
-                    final SpeedWithBearing trueWind = apparentWindTrue.add(inducedWind);
+                    final SpeedWithBearing trueWind = apparentWindTrue.add(sensorSpeed); // this subtracts the induced wind which is the sensorSpeed reversed
                     final Wind wind = new WindImpl(position, apparentWind.getTimePoint(), trueWind);
                     notifyListeners(wind);
                 }
