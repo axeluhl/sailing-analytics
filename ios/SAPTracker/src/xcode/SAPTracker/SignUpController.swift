@@ -44,7 +44,11 @@ class SignUpController: NSObject {
 extension SignUpController: LoginViewControllerDelegate {
     
     func loginViewController(_ controller: LoginViewController, willLoginWithUserName userName: String, password: String) {
-        
+        requestManager.postAccessToken(userName: userName, password: password, success: { (userName, accessToken) in
+            
+        }) { (error, message) in
+            self.showAlert(forError: error, andMessage: message, withViewController: controller)
+        }
     }
     
 }
@@ -61,7 +65,7 @@ extension SignUpController: SignUpViewControllerDelegate {
         company: String,
         password: String)
     {
-        requestManager.postUser(userName: userName, email: email, fullName: fullName, company: company, password: password, success: { userName, accessToken in
+        requestManager.postCreateUser(userName: userName, email: email, fullName: fullName, company: company, password: password, success: { userName, accessToken in
             do {
                 try Keychain.userName.savePassword(userName)
                 try Keychain.userPassword.savePassword(password)

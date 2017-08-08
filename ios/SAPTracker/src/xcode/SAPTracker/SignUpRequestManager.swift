@@ -10,8 +10,8 @@ import UIKit
 
 enum SignUpRequestManagerError: Error {
     case percentEncodingError
-    case postUserFailed
-    case postUserInvalidResponse
+    case postFailed
+    case invalidResponse
 }
 
 extension SignUpRequestManagerError: LocalizedError {
@@ -19,10 +19,10 @@ extension SignUpRequestManagerError: LocalizedError {
         switch self {
         case .percentEncodingError:
             return "PERCENT ENCODING ERROR"
-        case .postUserFailed:
-            return "POST USER FAILED"
-        case .postUserInvalidResponse:
-            return "POST USER INVALID RESPONSE"
+        case .postFailed:
+            return "POST FAILED"
+        case .invalidResponse:
+            return "INVALID RESPONSE"
         }
     }
 }
@@ -33,10 +33,13 @@ class SignUpRequestManager: NSObject {
     
     fileprivate enum BodyKeys {
         static let AccessToken = "access_token"
+        static let Authenticated = "authenticated"
         static let Company = "company"
         static let Email = "email"
         static let FullName = "fullName"
         static let Password = "password"
+        static let Principal = "principal"
+        static let Remembered = "remembered"
         static let UserName = "username"
     }
     
@@ -54,53 +57,145 @@ class SignUpRequestManager: NSObject {
         super.init()
     }
     
-    // MARK: - CreateUser
+    // MARK: - AccessToken
     
-    func postUser(
+    func postAccessToken(
         userName: String,
-        email: String,
-        fullName: String,
-        company: String,
         password: String,
-        success: @escaping (_ userName: String, _ token: String) -> Void,
+        success: @escaping (_ userName: String, _ accessToken: String) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
-        if let urlString = "\(basePathString)/create_user?username=\(userName)&email=\(email)&fullName=\(fullName)&company=\(company)&password=\(password)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            manager.post(
-                urlString,
-                parameters: nil,
-                success: { (requestOperation, responseObject) in self.postUserSuccess(responseObject: responseObject, success: success, failure: failure) },
-                failure: { (requestOperation, error) in self.postUserFailure(error: error, failure: failure) }
-            )
-        } else {
-            failure(SignUpRequestManagerError.percentEncodingError, nil)
-        }
+        let urlString = "\(basePathString)/access_token"
+        manager.requestSerializer.setAuthorizationHeaderFieldWithUsername(userName, password: password)
+        manager.post(
+            urlString,
+            parameters: nil,
+            success: { (requestOperation, responseObject) in self.postAccessTokenSuccess(responseObject: responseObject, success: success, failure: failure) },
+            failure: { (requestOperation, error) in self.postAccessTokenFailure(error: error, failure: failure) }
+        )
     }
     
-    fileprivate func postUserSuccess(
+    fileprivate func postAccessTokenSuccess(
         responseObject: Any,
-        success: (_ userName: String, _ token: String) -> Void,
+        success: (_ userName: String, _ accessToken: String) -> Void,
         failure: (_ error: Error, _ message: String?) -> Void)
     {
         guard let response = responseObject as? Dictionary<String, AnyObject> else {
-            postUserFailure(error: SignUpRequestManagerError.postUserInvalidResponse, failure: failure)
+            postCreateUserFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
             return
         }
         guard let userName = response[BodyKeys.UserName] as? String else {
-            postUserFailure(error: SignUpRequestManagerError.postUserInvalidResponse, failure: failure)
+            postCreateUserFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
             return
         }
         guard let accessToken = response[BodyKeys.AccessToken] as? String else {
-            postUserFailure(error: SignUpRequestManagerError.postUserInvalidResponse, failure: failure)
+            postCreateUserFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
             return
         }
         logInfo(name: "\(#function)", info: response.description)
         success(userName, accessToken)
     }
     
-    fileprivate func postUserFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
+    fileprivate func postAccessTokenFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(SignUpRequestManagerError.postUserFailed, stringForError(error))
+        failure(SignUpRequestManagerError.postFailed, stringForError(error))
+    }
+    
+    // MARK: - CreateUser
+    
+    func postCreateUser(
+        userName: String,
+        email: String,
+        fullName: String,
+        company: String,
+        password: String,
+        success: @escaping (_ userName: String, _ accessToken: String) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        if let urlString = "\(basePathString)/create_user?username=\(userName)&email=\(email)&fullName=\(fullName)&company=\(company)&password=\(password)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            manager.post(
+                urlString,
+                parameters: nil,
+                success: { (requestOperation, responseObject) in self.postCreateUserSuccess(responseObject: responseObject, success: success, failure: failure) },
+                failure: { (requestOperation, error) in self.postCreateUserFailure(error: error, failure: failure) }
+            )
+        } else {
+            failure(SignUpRequestManagerError.percentEncodingError, nil)
+        }
+    }
+    
+    fileprivate func postCreateUserSuccess(
+        responseObject: Any,
+        success: (_ userName: String, _ accessToken: String) -> Void,
+        failure: (_ error: Error, _ message: String?) -> Void)
+    {
+        guard let response = responseObject as? Dictionary<String, AnyObject> else {
+            postCreateUserFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            return
+        }
+        guard let userName = response[BodyKeys.UserName] as? String else {
+            postCreateUserFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            return
+        }
+        guard let accessToken = response[BodyKeys.AccessToken] as? String else {
+            postCreateUserFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            return
+        }
+        logInfo(name: "\(#function)", info: response.description)
+        success(userName, accessToken)
+    }
+    
+    fileprivate func postCreateUserFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(SignUpRequestManagerError.postFailed, stringForError(error))
+    }
+    
+    // MARK: - Hello
+    
+    func postHello(
+        userName: String,
+        password: String,
+        success: @escaping (_ principal: String, _ authenticated: Bool, _ remembered: Bool) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let urlString = "\(basePathString)/hello"
+        manager.requestSerializer.setAuthorizationHeaderFieldWithUsername(userName, password: password)
+        manager.post(
+            urlString,
+            parameters: nil,
+            success: { (requestOperation, responseObject) in self.postHelloSuccess(responseObject: responseObject, success: success, failure: failure) },
+            failure: { (requestOperation, error) in self.postHelloFailure(error: error, failure: failure) }
+        )
+    }
+    
+    fileprivate func postHelloSuccess(
+        responseObject: Any,
+        success: (_ principal: String, _ authenticated: Bool, _ remembered: Bool) -> Void,
+        failure: (_ error: Error, _ message: String?) -> Void)
+    {
+        guard let response = responseObject as? Dictionary<String, AnyObject> else {
+            postHelloFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            return
+        }
+        guard let principal = response[BodyKeys.Principal] as? String else {
+            postHelloFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            return
+        }
+        guard let authenticated = response[BodyKeys.Authenticated] as? Bool else {
+            postHelloFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            return
+        }
+        guard let remembered = response[BodyKeys.Remembered] as? Bool else {
+            postHelloFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            return
+        }
+        logInfo(name: "\(#function)", info: response.description)
+        success(principal, authenticated, remembered)
+    }
+    
+    fileprivate func postHelloFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(SignUpRequestManagerError.postFailed, stringForError(error))
     }
     
     // MARK: - Helper
