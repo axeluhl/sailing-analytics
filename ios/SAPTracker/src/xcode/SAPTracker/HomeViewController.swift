@@ -268,7 +268,7 @@ class HomeViewController: UIViewController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
         let loginAction = UIAlertAction(title: "LOGIN ACTION", style: .default) { (action) -> Void in
-            self.signUpController.login()
+            self.signUpController.login(self)
         }
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { (action) -> Void in
             self.performSegue(withIdentifier: Segue.Settings, sender: alertController)
@@ -477,8 +477,12 @@ extension HomeViewController: CheckInControllerDelegate {
 
 extension HomeViewController: SignUpControllerDelegate {
 
-    func signUpController(_ sender: SignUpController, show viewController: UIViewController) {
-        present(viewController, animated: true, completion: nil)
+    func signUpControllerDidFinish(_ controller: SignUpController) {
+        
+    }
+
+    func signUpControllerDidCancel(_ controller: SignUpController) {
+        
     }
 
 }

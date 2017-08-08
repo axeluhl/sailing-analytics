@@ -9,8 +9,10 @@
 import UIKit
 
 @objc protocol SignUpControllerDelegate {
-    
-    func signUpController(_ sender: SignUpController, show viewController: UIViewController)
+
+    func signUpControllerDidFinish(_ controller: SignUpController)
+
+    func signUpControllerDidCancel(_ controller: SignUpController)
 
 }
 
@@ -20,12 +22,12 @@ class SignUpController: NSObject {
     
     fileprivate let requestManager = SignUpRequestManager(baseURLString: "https://dev.sapsailing.com")
 
-    func login() {
+    func login(_ sender: UIViewController) {
         let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
         let loginNC = storyboard.instantiateInitialViewController() as! UINavigationController
         let loginVC = loginNC.viewControllers[0] as! LoginViewController
         loginVC.signUpController = self
-        delegate?.signUpController(self, show: loginNC)
+        sender.present(loginNC, animated: true, completion: nil)
     }
 
 }
