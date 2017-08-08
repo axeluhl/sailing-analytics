@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -134,15 +135,23 @@ public class RemoteSailingServerSet {
                 logger.fine("Updating racelist for remote server " + ref + " from URL " + raceListURL);
                 URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(raceListURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
-                JSONParser parser = new JSONParser();
-                Object racesAsObject = parser.parse(bufferedReader);
                 SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
-                JSONArray racesAsJsonArray = (JSONArray) racesAsObject;
+                
                 final Set<SimpleRaceInfo> races = new HashSet<>();
-                for (Object raceAsObject : racesAsJsonArray) {
-                    JSONObject raceAsJson = (JSONObject) raceAsObject;
-                    SimpleRaceInfo event = deserializer.deserialize(raceAsJson);
-                    races.add(event);
+
+                JSONParser parser = new JSONParser();
+                JSONObject racesGroupedByRemoteAsObject = (JSONObject) parser.parse(bufferedReader);
+                for(Entry<Object, Object> racesGroupdByRemote:racesGroupedByRemoteAsObject.entrySet()){
+                    String remoteUrl = (String) racesGroupdByRemote.getKey();
+                    if(remoteUrl.isEmpty()){
+                        remoteUrl = ref.getURL().toExternalForm();
+                    }
+                    JSONArray raceListForOneRemote = (JSONArray) racesGroupdByRemote.getValue();
+                    for(Object remoteRace:raceListForOneRemote){
+                        JSONObject remoteRaceAsJson = (JSONObject) remoteRace;
+                        SimpleRaceInfo event = deserializer.deserialize(remoteRaceAsJson,remoteUrl);
+                        races.add(event);
+                    }
                 }
                 result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(races, /* exception */ null);
             } finally {

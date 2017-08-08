@@ -3849,7 +3849,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                                 RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
                                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                                 if (startOfRace != null) {
-                                    SimpleRaceInfo raceInfo = new SimpleRaceInfo(raceIdentifier, startOfRace.asDate(), /* remoteName */ null);
+                                    SimpleRaceInfo raceInfo = new SimpleRaceInfo(raceIdentifier, startOfRace.asDate(), "");
                                     store.put(raceInfo.getIdentifier(), raceInfo);
                                 }
                             }

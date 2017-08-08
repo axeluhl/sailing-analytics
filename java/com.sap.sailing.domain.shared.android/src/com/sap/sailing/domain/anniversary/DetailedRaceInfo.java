@@ -14,8 +14,8 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
     private final UUID eventID;
     
     public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, Date startOfRace,
-            UUID eventId, String remoteName) {
-        super(identifier, startOfRace, remoteName);
+            UUID eventId, String remoteUrl) {
+        super(identifier, startOfRace,remoteUrl);
         if (leaderboardName == null || eventId == null) {
             throw new IllegalStateException("DetailedRaceInfo Data is not allowed to contain any null values!");
         }

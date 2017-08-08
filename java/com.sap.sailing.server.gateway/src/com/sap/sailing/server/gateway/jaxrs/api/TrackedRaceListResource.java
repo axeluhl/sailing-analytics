@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -14,6 +16,7 @@ import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -32,11 +35,26 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
-    @Path("localRaces")
+    @Path("getRaces")
     public Response raceList() {
-        JSONArray json = new JSONArray();
+        HashMap<String,List<SimpleRaceInfo>> raceData = new HashMap<>();
+        //replace with transitive call later!
         for (SimpleRaceInfo entry : getService().getLocalRaceList().values()) {
-            json.add(simpleRaceListJsonSerializer.serialize(entry));
+            String remoteUrl = entry.getRemoteUrl();
+            List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
+            if(remoteList == null){
+                remoteList = new ArrayList<>();
+                raceData.put(remoteUrl, remoteList);
+            }
+            remoteList.add(entry);
+        }
+        JSONObject json = new JSONObject();
+        for(Entry<String, List<SimpleRaceInfo>> raced:raceData.entrySet()){
+            JSONArray list = new JSONArray();
+            for(SimpleRaceInfo simpleRaceInfo:raced.getValue()){
+                list.add(simpleRaceListJsonSerializer.serialize(simpleRaceInfo));
+            }
+            json.put(raced.getKey() , list);
         }
         return getJsonResponse(json);
     }
@@ -65,6 +83,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             SimpleRaceInfo current = sorted.get(i);
             JSONArray single = new JSONArray();
             single.add(String.valueOf(i));
+            single.add(current.getRemoteUrl());
             single.add(simpleRaceListJsonSerializer.serialize(current));
             json.add(single);
 
