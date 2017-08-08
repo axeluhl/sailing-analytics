@@ -176,7 +176,7 @@ public class RemoteSailingServerSet {
     }
     
     private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
-        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/localRaces");
+        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/getRaces");
     }
 
     private URL getEndpointUrl(URL remoteServerBaseURL, final String endpoint) throws MalformedURLException {

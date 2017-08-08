@@ -7,27 +7,27 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 public class SimpleRaceInfo {
     private final RegattaAndRaceIdentifier identifier;
     private final Date startOfRace;
-    private final String remoteName;
+    private String remoteUrl = "";
 
-    public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, Date startOfRace, String remoteName) {
-        if (identifier == null || startOfRace == null) {
+    public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, Date startOfRace, String remoteUrl) {
+        if (identifier == null || startOfRace == null || remoteUrl == null) {
             throw new IllegalStateException("SimpleRaceInfo Data is not allowed to contain any null values!");
         }
         this.identifier = identifier;
         this.startOfRace = startOfRace;
-        this.remoteName = remoteName;
+        this.remoteUrl = remoteUrl;
     }
 
     public RegattaAndRaceIdentifier getIdentifier() {
         return identifier;
     }
+    
+    public String getRemoteUrl() {
+        return remoteUrl;
+    }
 
     public Date getStartOfRace() {
         return startOfRace;
-    }
-
-    public String getRemoteName() {
-        return remoteName;
     }
 
     @Override
