@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.shared.partials.statistics;
 
 import com.google.gwt.i18n.client.NumberFormat;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public abstract class AbstractStatisticsBoxPresenter {
@@ -12,6 +13,18 @@ public abstract class AbstractStatisticsBoxPresenter {
         this.view = view;
     }
 
+    public void addCompetitorItem(String iconUrl, String name, SimpleCompetitorDTO competitor) {
+        if (competitor != null) {
+            addItem(iconUrl, name, competitor.getSailID() != null ? competitor.getSailID() : competitor.getName());
+        }
+    }
+    
+    public void addKnotsItem(String iconUrl, String name, Double speedInKnots) {
+        if (speedInKnots != null) {
+            addItem(iconUrl, name, StringMessages.INSTANCE.knotsValue(speedInKnots));
+        }
+    }
+    
     public void addItemWithCompactFormat(String iconUrl, String name, Double payload) {
         if (payload != null && payload != 0) {
             addItem(iconUrl, name, compactNumber(payload));

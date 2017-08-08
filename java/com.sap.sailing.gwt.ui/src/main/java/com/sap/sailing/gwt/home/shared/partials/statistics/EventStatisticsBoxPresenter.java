@@ -1,6 +1,13 @@
 package com.sap.sailing.gwt.home.shared.partials.statistics;
 
-import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.*;
+import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_COMPATITORS_COUNT;
+import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_FASTEST_SAILOR;
+import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_RACES_COUNT;
+import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_RAW_GPS_FIX;
+import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_REGATTAS_FOUGHT;
+import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_SUM_MILES;
+import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_TRACKED_COUNT;
+import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_WIND_FIX;
 
 import com.sap.sailing.gwt.home.communication.event.statistics.EventStatisticsDTO;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
@@ -29,7 +36,7 @@ public class EventStatisticsBoxPresenter extends AbstractStatisticsBoxPresenter 
         addItemWithCompactFormat(ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
         addItemWithCompactFormat(ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
         addItemWithCompactFormat(ICON_SUM_MILES, MSG.sailedMiles(), statistics.getTotalDistanceTraveled() == null ? null : statistics.getTotalDistanceTraveled().getSeaMiles());
-        addItemWithCompactFormat(ICON_FASTEST_SAILOR, MSG.fastestSailor() + ": "
-                + statistics.getCompetitorInfo(), statistics.getCompetitorSpeed());
+        addCompetitorItem(ICON_FASTEST_SAILOR, MSG.fastestSailor(), statistics.getCompetitorInfo());
+        addKnotsItem(ICON_FASTEST_SAILOR, MSG.highestSpeed(), statistics.getCompetitorSpeed());
     }
 }

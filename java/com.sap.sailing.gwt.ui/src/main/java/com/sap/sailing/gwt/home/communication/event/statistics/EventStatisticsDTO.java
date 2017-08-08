@@ -4,6 +4,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
@@ -15,7 +16,7 @@ public class EventStatisticsDTO implements DTO {
     private int trackedRacesCount;
     private long numberOfGPSFixes;
     private long numberOfWindFixes;
-    private String competitorInfo;
+    private SimpleCompetitorDTO competitorInfo;
     private Double competitorSpeedInKnots;
     private Distance totalDistanceTraveled;
 
@@ -35,7 +36,7 @@ public class EventStatisticsDTO implements DTO {
         this.numberOfGPSFixes = numberOfGPSFixes;
         this.numberOfWindFixes = numberOfWindFixes;
         if (maxSpeed != null) {
-            this.competitorInfo = maxSpeed.getA().getName();
+            this.competitorInfo = new SimpleCompetitorDTO(maxSpeed.getA());
             this.competitorSpeedInKnots = maxSpeed.getB().getKnots();
         }
         this.totalDistanceTraveled = totalDistanceTraveled;
@@ -81,7 +82,7 @@ public class EventStatisticsDTO implements DTO {
         return numberOfWindFixes;
     }
 
-    public String getCompetitorInfo() {
+    public SimpleCompetitorDTO getCompetitorInfo() {
         return competitorInfo;
     }
 
