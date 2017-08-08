@@ -11,6 +11,7 @@ import UIKit
 enum SignUpRequestManagerError: Error {
     case percentEncodingError
     case postUserFailed
+    case postUserInvalidResponse
 }
 
 extension SignUpRequestManagerError: LocalizedError {
@@ -20,6 +21,8 @@ extension SignUpRequestManagerError: LocalizedError {
             return "PERCENT ENCODING ERROR"
         case .postUserFailed:
             return "POST USER FAILED"
+        case .postUserInvalidResponse:
+            return "POST USER INVALID RESPONSE"
         }
     }
 }
@@ -29,6 +32,7 @@ class SignUpRequestManager: NSObject {
     fileprivate let basePathString = "/security/api/restsecurity"
     
     fileprivate enum BodyKeys {
+        static let AccessToken = "access_token"
         static let Company = "company"
         static let Email = "email"
         static let FullName = "fullName"
@@ -50,7 +54,7 @@ class SignUpRequestManager: NSObject {
         super.init()
     }
     
-    // MARK: - User
+    // MARK: - CreateUser
     
     func postUser(
         userName: String,
@@ -58,14 +62,14 @@ class SignUpRequestManager: NSObject {
         fullName: String,
         company: String,
         password: String,
-        success: @escaping () -> Void,
+        success: @escaping (_ userName: String, _ token: String) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         if let urlString = "\(basePathString)/create_user?username=\(userName)&email=\(email)&fullName=\(fullName)&company=\(company)&password=\(password)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
             manager.post(
                 urlString,
                 parameters: nil,
-                success: { (requestOperation, responseObject) in self.postUserSuccess(responseObject: responseObject, success: success) },
+                success: { (requestOperation, responseObject) in self.postUserSuccess(responseObject: responseObject, success: success, failure: failure) },
                 failure: { (requestOperation, error) in self.postUserFailure(error: error, failure: failure) }
             )
         } else {
@@ -73,9 +77,25 @@ class SignUpRequestManager: NSObject {
         }
     }
     
-    fileprivate func postUserSuccess(responseObject: Any, success: () -> Void) {
-        logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
-        success()
+    fileprivate func postUserSuccess(
+        responseObject: Any,
+        success: (_ userName: String, _ token: String) -> Void,
+        failure: (_ error: Error, _ message: String?) -> Void)
+    {
+        guard let response = responseObject as? Dictionary<String, AnyObject> else {
+            postUserFailure(error: SignUpRequestManagerError.postUserInvalidResponse, failure: failure)
+            return
+        }
+        guard let userName = response[BodyKeys.UserName] as? String else {
+            postUserFailure(error: SignUpRequestManagerError.postUserInvalidResponse, failure: failure)
+            return
+        }
+        guard let accessToken = response[BodyKeys.AccessToken] as? String else {
+            postUserFailure(error: SignUpRequestManagerError.postUserInvalidResponse, failure: failure)
+            return
+        }
+        logInfo(name: "\(#function)", info: response.description)
+        success(userName, accessToken)
     }
     
     fileprivate func postUserFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
@@ -84,10 +104,6 @@ class SignUpRequestManager: NSObject {
     }
     
     // MARK: - Helper
-    
-    fileprivate func responseObjectToString(responseObject: Any?) -> String {
-        return (responseObject as? String) ?? "response object is empty or cannot be casted"
-    }
     
     fileprivate func stringForError(_ error: Error) -> String? {
         guard let data = ((error as NSError).userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] as? NSData) as? Data else { return nil }

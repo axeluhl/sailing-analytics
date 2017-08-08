@@ -347,6 +347,7 @@
 		C89C5FCE1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCD1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift */; };
 		C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */; };
 		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
+		C8B3B9BC1F39E64400B3B6BA /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */; };
 		C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BBAC781C52649E004CA551 /* LicenseViewController.swift */; };
 		C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCC31D51C53500FC1A27 /* TeamData.swift */; };
 		C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */; };
@@ -738,6 +739,7 @@
 		C89C5FCD1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSFixesCell.swift; sourceTree = "<group>"; };
 		C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewModeCell.swift; sourceTree = "<group>"; };
 		C8A4400A1C18153600DF70A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		C8BBAC781C52649E004CA551 /* LicenseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseViewController.swift; sourceTree = "<group>"; };
 		C8BFCCC31D51C53500FC1A27 /* TeamData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamData.swift; sourceTree = "<group>"; };
 		C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
@@ -1246,6 +1248,7 @@
 			children = (
 				C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */,
 				C852BAAA1CF736680093B0C5 /* Preferences.swift */,
+				C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */,
 			);
 			name = Preferences;
 			sourceTree = "<group>";
@@ -1931,6 +1934,7 @@
 				C8F71EF01D8691F700826DE4 /* UIWebView+AFNetworking.m in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */,
+				C8B3B9BC1F39E64400B3B6BA /* Keychain.swift in Sources */,
 				C8739E141D2BF16300A89F3C /* LeaderboardData.swift in Sources */,
 				C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */,
 				C8F71EEF1D8691F700826DE4 /* UIRefreshControl+AFNetworking.m in Sources */,
