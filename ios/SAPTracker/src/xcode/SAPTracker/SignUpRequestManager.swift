@@ -9,14 +9,17 @@
 import UIKit
 
 enum SignUpRequestManagerError: Error {
-    case userNameDoesNotMeetRequirements
+    case percentEncodingError
+    case postUserFailed
 }
 
 extension SignUpRequestManagerError: LocalizedError {
     var errorDescription: String? {
         switch self {
-        case .userNameDoesNotMeetRequirements:
-            return "USERNAME DOES NOT MEET REQUIREMENTS"
+        case .percentEncodingError:
+            return "PERCENT ENCODING ERROR"
+        case .postUserFailed:
+            return "POST USER FAILED"
         }
     }
 }
@@ -48,7 +51,7 @@ class SignUpRequestManager: NSObject {
     }
     
     // MARK: - User
-
+    
     func postUser(
         userName: String,
         email: String,
@@ -56,32 +59,39 @@ class SignUpRequestManager: NSObject {
         company: String,
         password: String,
         success: @escaping () -> Void,
-        failure: @escaping (_ error: Error) -> Void)
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
-        let urlString = "\(basePathString)/create_user?username=\(userName)&email=\(email)&fullName=\(fullName)&company=\(company)&password=\(password)"
-        manager.post(
-            urlString,
-            parameters: nil,
-            success: { (requestOperation, responseObject) in self.postUserSuccess(responseObject: responseObject, success: success) },
-            failure: { (requestOperation, error) in self.postUserFailure(error: error, failure: failure) }
-        )
+        if let urlString = "\(basePathString)/create_user?username=\(userName)&email=\(email)&fullName=\(fullName)&company=\(company)&password=\(password)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            manager.post(
+                urlString,
+                parameters: nil,
+                success: { (requestOperation, responseObject) in self.postUserSuccess(responseObject: responseObject, success: success) },
+                failure: { (requestOperation, error) in self.postUserFailure(error: error, failure: failure) }
+            )
+        } else {
+            failure(SignUpRequestManagerError.percentEncodingError, nil)
+        }
     }
-
+    
     fileprivate func postUserSuccess(responseObject: Any, success: () -> Void) {
         logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
         success()
     }
-
-    fileprivate func postUserFailure(error: Error, failure: (_ error: Error) -> Void) {
+    
+    fileprivate func postUserFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
-        logError(name: "\(#function)", error: String(data: ((error as NSError).userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] as! NSData) as Data, encoding: String.Encoding.utf8)!)
-        failure(RequestManagerError.postGPSFixFailed)
+        failure(SignUpRequestManagerError.postUserFailed, stringForError(error))
     }
-
+    
     // MARK: - Helper
-
+    
     fileprivate func responseObjectToString(responseObject: Any?) -> String {
         return (responseObject as? String) ?? "response object is empty or cannot be casted"
     }
-
+    
+    fileprivate func stringForError(_ error: Error) -> String? {
+        guard let data = ((error as NSError).userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] as? NSData) as? Data else { return nil }
+        return String(data: data, encoding: String.Encoding.utf8)
+    }
+    
 }

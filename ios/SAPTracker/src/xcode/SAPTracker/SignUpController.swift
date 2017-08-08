@@ -55,9 +55,12 @@ extension SignUpController: SignUpViewControllerDelegate {
         password: String)
     {
         requestManager.postUser(userName: userName, email: email, fullName: fullName, company: company, password: password, success: {
-            
-        }) { (error) in
-            
+            self.delegate?.signUpControllerDidFinish(self)
+        }) { (error, message) in
+            let alertController = UIAlertController.init(title: error.localizedDescription, message: message, preferredStyle: .alert)
+            let okAction = UIAlertAction.init(title: Translation.Common.OK.String, style: .cancel, handler: nil)
+            alertController.addAction(okAction)
+            controller.present(alertController, animated: true, completion: nil)
         }
     }
 
