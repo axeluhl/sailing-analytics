@@ -352,7 +352,7 @@
 		C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
 		C8E0BD0A1F39A08B002FCCA5 /* FormularViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */; };
-		C8E0BD0D1F39ADAD002FCCA5 /* KeycahinPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD0C1F39ADAD002FCCA5 /* KeycahinPasswordItem.swift */; };
+		C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */; };
 		C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F1B1E01D488B6D004C3379 /* Translation.swift */; };
 		C8F71EDA1D8691F700826DE4 /* AFHTTPRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EA61D8691F700826DE4 /* AFHTTPRequestOperation.m */; };
 		C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EA81D8691F700826DE4 /* AFHTTPRequestOperationManager.m */; };
@@ -744,7 +744,7 @@
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 3.xcdatamodel"; sourceTree = "<group>"; };
 		C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormularViewController.swift; sourceTree = "<group>"; };
-		C8E0BD0C1F39ADAD002FCCA5 /* KeycahinPasswordItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeycahinPasswordItem.swift; sourceTree = "<group>"; };
+		C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeychainPasswordItem.swift; sourceTree = "<group>"; };
 		C8F1B1E01D488B6D004C3379 /* Translation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translation.swift; sourceTree = "<group>"; };
 		C8F71EA51D8691F700826DE4 /* AFHTTPRequestOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPRequestOperation.h; sourceTree = "<group>"; };
 		C8F71EA61D8691F700826DE4 /* AFHTTPRequestOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPRequestOperation.m; sourceTree = "<group>"; };
@@ -1244,7 +1244,7 @@
 		C852BAA91CF736440093B0C5 /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
-				C8E0BD0C1F39ADAD002FCCA5 /* KeycahinPasswordItem.swift */,
+				C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */,
 				C852BAAA1CF736680093B0C5 /* Preferences.swift */,
 			);
 			name = Preferences;
@@ -1890,7 +1890,7 @@
 				C8289F3A1F386D8300A76953 /* SignUpRequestManager.swift in Sources */,
 				C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */,
 				C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */,
-				C8E0BD0D1F39ADAD002FCCA5 /* KeycahinPasswordItem.swift in Sources */,
+				C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */,
 				C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEE1D8691F700826DE4 /* UIProgressView+AFNetworking.m in Sources */,
 				C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */,
