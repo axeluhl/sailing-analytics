@@ -16,8 +16,8 @@ public class EventStatisticsDTO implements DTO {
     private int trackedRacesCount;
     private long numberOfGPSFixes;
     private long numberOfWindFixes;
-    private SimpleCompetitorDTO competitorInfo;
-    private Double competitorSpeedInKnots;
+    private SimpleCompetitorDTO fastestCompetitor;
+    private Double fastestCompetitorSpeedInKnots;
     private Distance totalDistanceTraveled;
 
     @SuppressWarnings("unused")
@@ -36,8 +36,8 @@ public class EventStatisticsDTO implements DTO {
         this.numberOfGPSFixes = numberOfGPSFixes;
         this.numberOfWindFixes = numberOfWindFixes;
         if (maxSpeed != null) {
-            this.competitorInfo = new SimpleCompetitorDTO(maxSpeed.getA());
-            this.competitorSpeedInKnots = maxSpeed.getB().getKnots();
+            this.fastestCompetitor = new SimpleCompetitorDTO(maxSpeed.getA());
+            this.fastestCompetitorSpeedInKnots = maxSpeed.getB().getKnots();
         }
         this.totalDistanceTraveled = totalDistanceTraveled;
     }
@@ -81,13 +81,13 @@ public class EventStatisticsDTO implements DTO {
     public long getNumberOfWindFixes() {
         return numberOfWindFixes;
     }
-
-    public SimpleCompetitorDTO getCompetitorInfo() {
-        return competitorInfo;
+    
+    public SimpleCompetitorDTO getFastestCompetitor() {
+        return fastestCompetitor;
     }
-
-    public Double getCompetitorSpeed() {
-        return competitorSpeedInKnots;
+    
+    public Double getFastestCompetitorSpeedInKnots() {
+        return fastestCompetitorSpeedInKnots;
     }
 
     public Distance getTotalDistanceTraveled() {

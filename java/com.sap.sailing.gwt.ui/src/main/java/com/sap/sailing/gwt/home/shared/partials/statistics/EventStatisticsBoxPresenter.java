@@ -36,7 +36,7 @@ public class EventStatisticsBoxPresenter extends AbstractStatisticsBoxPresenter 
         addItemWithCompactFormat(ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
         addItemWithCompactFormat(ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
         addItemWithCompactFormat(ICON_SUM_MILES, MSG.sailedMiles(), statistics.getTotalDistanceTraveled() == null ? null : statistics.getTotalDistanceTraveled().getSeaMiles());
-        addCompetitorItem(ICON_FASTEST_SAILOR, MSG.fastestSailor(), statistics.getCompetitorInfo());
-        addKnotsItem(ICON_FASTEST_SAILOR, MSG.highestSpeed(), statistics.getCompetitorSpeed());
+        addCompetitorItem(ICON_FASTEST_SAILOR, MSG.fastestSailor(), statistics.getFastestCompetitor());
+        addKnotsItem(ICON_FASTEST_SAILOR, MSG.highestSpeed(), statistics.getFastestCompetitorSpeedInKnots());
     }
 }
