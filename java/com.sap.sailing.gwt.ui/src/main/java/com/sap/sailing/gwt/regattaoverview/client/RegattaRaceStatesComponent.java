@@ -258,10 +258,6 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                 repeatedInfoLabel,
                 isAppending, null);
 
-        isAppending |= collectRepeatedInfos("", "", canRemoveLastUpdate, repeatedInfoLabel, isAppending, null);
-
-        isAppending |= collectRepeatedInfos("", "", canRemoveProtestTime, repeatedInfoLabel, isAppending, null);
-
         LinkedList<ColumnSortInfo> sortInfos = new LinkedList<ColumnSortList.ColumnSortInfo>();
         if (table != null) {
             ColumnSortList columnSortList = table.getColumnSortList();
