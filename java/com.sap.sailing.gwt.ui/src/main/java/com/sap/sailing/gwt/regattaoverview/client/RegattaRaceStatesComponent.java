@@ -173,7 +173,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         String firstCourseAreaName = null;
         String firstRegattaName = null;
         String firstCourseName = null;
-        RegattaOverviewEntryDTO firstCourseRegattaOverviewEntry = null;
+        RaceInfoDTO firstCourseRegattaOverviewEntry = null;
         RegattaOverviewEntryDTO firstRegattaNameEntry = null;
         String lastBoatClass = null;
         boolean canRemoveCourseArea = true;
@@ -182,16 +182,11 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         boolean canRemoveBoatClass = true;
         boolean canRemoveLastUpdate = true;
         boolean canRemoveProtestTime = true;
-        boolean isAppending = false;
+        
+        boolean first = true;
         for (RegattaOverviewEntryDTO loopEntryDTO : allEntries) {
             final RaceInfoDTO loopRaceInfo = loopEntryDTO.raceInfo;
-
-            if (firstRegattaName == null) {
-                firstRegattaName = loopEntryDTO.regattaDisplayName;
-                firstRegattaNameEntry = loopEntryDTO;
-            } else if (canRemoveRegatta && !firstRegattaName.equals(loopEntryDTO.regattaDisplayName)) {
-                canRemoveRegatta = false;
-            }
+            
             if (canRemoveLastUpdate && timePassedInSeconds(loopRaceInfo.lastUpdateTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveLastUpdate = false;
             }
@@ -199,34 +194,43 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                     && timePassedInSeconds(loopRaceInfo.protestFinishTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveProtestTime = false;
             }
-            if (firstCourseAreaName == null) {
+
+            if (first) {
+                firstRegattaName = loopEntryDTO.regattaDisplayName;
+                firstRegattaNameEntry = loopEntryDTO;
+                
                 firstCourseAreaName = loopEntryDTO.courseAreaName;
-            } else if (canRemoveCourseArea && !firstCourseAreaName.equals(loopEntryDTO.courseAreaName)) {
-                canRemoveCourseArea = false;
-            }
-
-            if (canRemoveCourse && firstCourseRegattaOverviewEntry == null) {
-                if (loopRaceInfo.lastCourseDesign == null) {
-                    canRemoveCourse = false;
-                } else {
-                    firstCourseName = loopRaceInfo.lastCourseName;
-                    firstCourseRegattaOverviewEntry = loopEntryDTO;
-                }
-            } else if (canRemoveCourse
-                    && !firstCourseRegattaOverviewEntry.raceInfo.lastCourseDesign
-                            .equals(loopRaceInfo.lastCourseDesign)) {
-                    canRemoveCourse = false;
-            }
-
-            if (lastBoatClass == null) {
+                
+                firstCourseName = loopRaceInfo.lastCourseName;
+                firstCourseRegattaOverviewEntry = loopRaceInfo;
+                
                 lastBoatClass = loopEntryDTO.boatClassName;
-            } else if (canRemoveBoatClass && !lastBoatClass.equals(loopEntryDTO.boatClassName)) {
-                canRemoveBoatClass = false;
+            } else {
+                if (canRemoveRegatta && !Util.equalsWithNull(firstRegattaName, loopEntryDTO.regattaDisplayName)) {
+                    canRemoveRegatta = false;
+                }
+                
+                if (canRemoveCourseArea && !Util.equalsWithNull(firstCourseAreaName, loopEntryDTO.courseAreaName)) {
+                    canRemoveCourseArea = false;
+                }
+                
+                if (canRemoveCourse && !Util.equalsWithNull(firstCourseName, loopRaceInfo.lastCourseName)
+                        && !Util.equalsWithNull(firstCourseRegattaOverviewEntry.lastCourseDesign,
+                                loopRaceInfo.lastCourseDesign)) {
+                    canRemoveCourse = false;
+                }
+                
+                if (canRemoveBoatClass && !Util.equalsWithNull(lastBoatClass, loopEntryDTO.boatClassName)) {
+                    canRemoveBoatClass = false;
+                }
             }
+            
+            first = false;
         }
         // final RegattaOverviewEntryDTO entryForRepeatedInfos = firstEntry;
         repeatedInfoLabel.clear();
 
+        boolean isAppending = false;
         RegattaOverviewEntryDTO _firstRegattaNameEntry = firstRegattaNameEntry;
         isAppending |= collectRepeatedInfos(stringMessages.regatta(), firstRegattaName, canRemoveRegatta,
                 repeatedInfoLabel, isAppending, new Command() {
@@ -240,7 +244,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                 repeatedInfoLabel,
                 isAppending, null);
 
-        final RegattaOverviewEntryDTO _lastCourseEntry = firstCourseRegattaOverviewEntry;
+        final RaceInfoDTO _lastCourseEntry = firstCourseRegattaOverviewEntry;
         isAppending |= collectRepeatedInfos(stringMessages.course(), firstCourseName, canRemoveCourse,
                 repeatedInfoLabel,
                 isAppending, new Command() {
@@ -567,7 +571,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                raceCourseClicked(object);
+                raceCourseClicked(object.raceInfo);
             }
         });
         // raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -863,10 +867,10 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         return result;
     }
 
-    private void raceCourseClicked(RegattaOverviewEntryDTO entryDTO) {
-        RaceCourseDTO courseDTO = entryDTO.raceInfo.lastCourseDesign;
+    private void raceCourseClicked(RaceInfoDTO raceInfo) {
+        RaceCourseDTO courseDTO = raceInfo.lastCourseDesign;
         if (courseDTO != null && courseDTO.waypoints.size() > 0) {
-            DialogBox courseViewDialogBox = createCourseViewDialogBox(entryDTO.raceInfo);
+            DialogBox courseViewDialogBox = createCourseViewDialogBox(raceInfo);
             courseViewDialogBox.center();
             courseViewDialogBox.setGlassEnabled(true);
             courseViewDialogBox.setAnimationEnabled(true);
