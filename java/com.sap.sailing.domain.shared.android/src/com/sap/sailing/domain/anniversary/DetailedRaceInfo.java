@@ -5,6 +5,10 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
+/**
+ * Unused class that is meant to store found anniversaries, currently not used as only a simpler version of bug4227 is implemented yet.
+ *
+ */
 public class DetailedRaceInfo extends SimpleRaceInfo {
     private final String leaderboardName;
     private final UUID eventID;
