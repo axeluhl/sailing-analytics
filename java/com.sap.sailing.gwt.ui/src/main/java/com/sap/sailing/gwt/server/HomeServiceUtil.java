@@ -97,11 +97,16 @@ public final class HomeServiceUtil {
     }
     
     public static EventState calculateEventState(EventBase event) {
-        TimePoint now = MillisecondsTimePoint.now();
-        if (now.before(event.getStartDate())) {
+        final TimePoint startDate = event.getStartDate();
+        if (startDate == null) {
+            return EventState.PLANNED;
+        }
+        final TimePoint now = MillisecondsTimePoint.now();
+        if (now.before(startDate)) {
             return event.isPublic() ? EventState.UPCOMING : EventState.PLANNED;
         }
-        if (now.after(event.getEndDate())) {
+        final TimePoint endDate = event.getEndDate();
+        if (endDate != null && now.after(endDate)) {
             return EventState.FINISHED;
         }
         return EventState.RUNNING;
@@ -354,8 +359,8 @@ public final class HomeServiceUtil {
     
     public static void mapToMetadataDTO(EventBase event, EventMetadataDTO dto, RacingEventService service) {
         mapToReferenceDTO(event, dto, service);
-        dto.setStartDate(event.getStartDate().asDate());
-        dto.setEndDate(event.getEndDate().asDate());
+        dto.setStartDate(event.getStartDate() == null ? null : event.getStartDate().asDate());
+        dto.setEndDate(event.getEndDate() == null ? null : event.getEndDate().asDate());
         dto.setState(HomeServiceUtil.calculateEventState(event));
         dto.setVenue(event.getVenue().getName());
         if(HomeServiceUtil.isFakeSeries(event)) {
