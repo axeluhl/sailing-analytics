@@ -11,6 +11,7 @@ import UIKit
 protocol ForgotPasswordViewControllerDelegate {
 
     func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForEmail email: String)
+
     func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForUserName userName: String)
 
 }
