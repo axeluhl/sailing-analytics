@@ -67,8 +67,12 @@ extension SignUpController: SignUpViewControllerDelegate {
 
 extension SignUpController: ForgotPasswordViewControllerDelegate {
 
-    func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePassword password: String, forEmail email: String) {
+    func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForEmail email: String) {
         
     }
 
+    func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForUserName userName: String) {
+        
+    }
+    
 }

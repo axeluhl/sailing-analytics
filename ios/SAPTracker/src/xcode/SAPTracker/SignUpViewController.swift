@@ -58,10 +58,6 @@ class SignUpViewController: FormularViewController {
     fileprivate func setupNavigationBar() {
         navigationItem.title = "SIGN UP"
     }
-
-    @IBAction func loginButtonTapped(_ sender: Any) {
-        
-    }
     
     @IBAction func signUpButtonTapped(_ sender: Any) {
         signUpController?.signUpViewController(

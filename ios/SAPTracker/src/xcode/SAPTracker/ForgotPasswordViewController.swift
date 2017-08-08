@@ -10,7 +10,8 @@ import UIKit
 
 protocol ForgotPasswordViewControllerDelegate {
 
-    func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePassword password: String, forEmail email: String)
+    func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForEmail email: String)
+    func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForUserName userName: String)
 
 }
 
@@ -40,6 +41,18 @@ class ForgotPasswordViewController: FormularViewController {
     }
 
     @IBAction func resetPasswordButtonTapped(_ sender: Any) {
+        if let email = emailTextField.text {
+            if !email.isEmpty {
+                signUpController?.forgotPasswordViewController(self, willChangePasswordForEmail: email)
+                return
+            }
+        }
+        if let userName = userNameTextField.text {
+            if !userName.isEmpty {
+                signUpController?.forgotPasswordViewController(self, willChangePasswordForUserName: userName)
+                return
+            }
+        }
     }
 
 }

@@ -60,6 +60,9 @@ class LoginViewController: FormularViewController {
         if let signUpVC = segue.destination as? SignUpViewController {
             signUpVC.signUpController = signUpController
         }
+        if let forgotPasswordVC = segue.destination as? ForgotPasswordViewController {
+            forgotPasswordVC.signUpController = signUpController
+        }
     }
 
 }
