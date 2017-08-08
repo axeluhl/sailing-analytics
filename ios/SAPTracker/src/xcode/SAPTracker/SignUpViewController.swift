@@ -21,7 +21,7 @@ protocol SignUpViewControllerDelegate {
     
 }
 
-class SignUpViewController: UIViewController {
+class SignUpViewController: FormularViewController {
 
     var signUpController: SignUpController?
 
@@ -40,6 +40,14 @@ class SignUpViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        textFields.append(contentsOf: [
+            emailTextField,
+            userNameTextField,
+            nameTextField,
+            companyTextField,
+            passwordTextField,
+            repeatPasswordTextField]
+        )
         setup()
     }
 

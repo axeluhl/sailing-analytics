@@ -14,7 +14,7 @@ protocol ForgotPasswordViewControllerDelegate {
 
 }
 
-class ForgotPasswordViewController: UIViewController {
+class ForgotPasswordViewController: FormularViewController {
 
     var signUpController: SignUpController?
 
@@ -27,6 +27,7 @@ class ForgotPasswordViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        textFields.append(contentsOf: [emailTextField, userNameTextField])
         setup()
     }
 

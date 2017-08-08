@@ -14,7 +14,7 @@ protocol LoginViewControllerDelegate {
 
 }
 
-class LoginViewController: UIViewController {
+class LoginViewController: FormularViewController {
 
     var signUpController: SignUpController?
 
@@ -29,6 +29,7 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        textFields.append(contentsOf: [userNameTextField, passwordTextField])
         setup()
     }
 
