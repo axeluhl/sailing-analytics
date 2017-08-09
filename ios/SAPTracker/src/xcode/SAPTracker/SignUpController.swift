@@ -86,11 +86,19 @@ extension SignUpController: SignUpViewControllerDelegate {
 extension SignUpController: ForgotPasswordViewControllerDelegate {
     
     func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForEmail email: String) {
-        
+        requestManager.postForgotPassword(email: email, success: { 
+            
+        }) { (error, message) in
+            self.showAlert(forError: error, andMessage: message, withViewController: controller)
+        }
     }
     
     func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForUserName userName: String) {
-        
+        requestManager.postForgotPassword(userName: userName, success: {
+            
+        }) { (error, message) in
+            self.showAlert(forError: error, andMessage: message, withViewController: controller)
+        }
     }
     
 }

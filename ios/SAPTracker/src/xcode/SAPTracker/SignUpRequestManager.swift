@@ -67,12 +67,11 @@ class SignUpRequestManager: NSObject {
     {
         let urlString = "\(basePathString)/access_token"
         manager.requestSerializer.setAuthorizationHeaderFieldWithUsername(userName, password: password)
-        manager.post(
-            urlString,
-            parameters: nil,
-            success: { (requestOperation, responseObject) in self.postAccessTokenSuccess(responseObject: responseObject, success: success, failure: failure) },
-            failure: { (requestOperation, error) in self.postAccessTokenFailure(error: error, failure: failure) }
-        )
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postAccessTokenSuccess(responseObject: responseObject, success: success, failure: failure)
+        }) { (requestOperation, error) in
+            self.postAccessTokenFailure(error: error, failure: failure)
+        }
     }
     
     fileprivate func postAccessTokenSuccess(
@@ -113,12 +112,11 @@ class SignUpRequestManager: NSObject {
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         if let urlString = "\(basePathString)/create_user?username=\(userName)&email=\(email)&fullName=\(fullName)&company=\(company)&password=\(password)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            manager.post(
-                urlString,
-                parameters: nil,
-                success: { (requestOperation, responseObject) in self.postCreateUserSuccess(responseObject: responseObject, success: success, failure: failure) },
-                failure: { (requestOperation, error) in self.postCreateUserFailure(error: error, failure: failure) }
-            )
+            manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+                self.postCreateUserSuccess(responseObject: responseObject, success: success, failure: failure)
+            }) { (requestOperation, error) in
+                self.postCreateUserFailure(error: error, failure: failure)
+            }
         } else {
             failure(SignUpRequestManagerError.percentEncodingError, nil)
         }
@@ -150,6 +148,59 @@ class SignUpRequestManager: NSObject {
         failure(SignUpRequestManagerError.postFailed, stringForError(error))
     }
     
+    // MARK: - ForgotPassword
+    
+    func postForgotPassword(
+        email: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        if let urlString = "\(basePathString)/forgot_password?email=\(email)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            self.postForgotPassword(urlString: urlString, success: success, failure: failure)
+        } else {
+            self.postForgotPasswordFailure(error: SignUpRequestManagerError.percentEncodingError, failure: failure)
+        }
+    }
+    
+    func postForgotPassword(
+        userName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        if let urlString = "\(basePathString)/forgot_password?username=\(userName)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            self.postForgotPassword(urlString: urlString, success: success, failure: failure)
+        } else {
+            self.postForgotPasswordFailure(error: SignUpRequestManagerError.percentEncodingError, failure: failure)
+        }
+    }
+    
+    fileprivate func postForgotPassword(
+        urlString: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postForgotPasswordSuccess(responseObject: responseObject, success: success, failure: failure)
+        }) { (requestOperation, error) in
+            self.postForgotPasswordFailure(error: error, failure: failure)
+        }
+    }
+    
+    fileprivate func postForgotPasswordSuccess(
+        responseObject: Any,
+        success: () -> Void,
+        failure: (_ error: Error, _ message: String?) -> Void)
+    {
+        let response = responseObject as AnyObject
+        logInfo(name: "\(#function)", info: response.description)
+        success()
+    }
+    
+    fileprivate func postForgotPasswordFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(SignUpRequestManagerError.postFailed, stringForError(error))
+    }
+    
     // MARK: - Hello
     
     func postHello(
@@ -160,12 +211,11 @@ class SignUpRequestManager: NSObject {
     {
         let urlString = "\(basePathString)/hello"
         manager.requestSerializer.setAuthorizationHeaderFieldWithUsername(userName, password: password)
-        manager.post(
-            urlString,
-            parameters: nil,
-            success: { (requestOperation, responseObject) in self.postHelloSuccess(responseObject: responseObject, success: success, failure: failure) },
-            failure: { (requestOperation, error) in self.postHelloFailure(error: error, failure: failure) }
-        )
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postHelloSuccess(responseObject: responseObject, success: success, failure: failure)
+        }) { (requestOperation, error) in
+            self.postHelloFailure(error: error, failure: failure)
+        }
     }
     
     fileprivate func postHelloSuccess(
