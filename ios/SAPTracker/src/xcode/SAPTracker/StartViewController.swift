@@ -15,7 +15,7 @@ class StartViewController: UIViewController {
         setup()
     }
 
-    // MARK: Setup
+    // MARK: - Setup
 
     fileprivate func setup() {
         setupNavigationBar()
@@ -24,6 +24,34 @@ class StartViewController: UIViewController {
     fileprivate func setupNavigationBar() {
         navigationItem.title = Application.Title
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+    }
+    
+    // MARK: - Actions
+
+    @IBAction func trainingButtonTapped(_ sender: Any) {
+        signUpController.login(self)
+    }
+
+    // MARK: - Properties
+    
+    fileprivate lazy var signUpController: SignUpController = {
+        let signUpController = SignUpController()
+        signUpController.delegate = self
+        return signUpController
+    }()
+
+}
+
+// MARK: - SignUpControllerDelegate
+
+extension StartViewController: SignUpControllerDelegate {
+    
+    func signUpControllerDidFinish(_ controller: SignUpController) {
+        
+    }
+    
+    func signUpControllerDidCancel(_ controller: SignUpController) {
+        
     }
     
 }

@@ -266,9 +266,6 @@ class HomeViewController: UIViewController {
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let loginAction = UIAlertAction(title: "LOGIN ACTION", style: .default) { (action) -> Void in
-            self.signUpController.login(self)
-        }
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { (action) -> Void in
             self.performSegue(withIdentifier: Segue.Settings, sender: alertController)
         }
@@ -276,7 +273,6 @@ class HomeViewController: UIViewController {
             self.performSegue(withIdentifier: Segue.About, sender: alertController)
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
-        alertController.addAction(loginAction)
         alertController.addAction(settingsAction)
         alertController.addAction(aboutAction)
         alertController.addAction(cancelAction)
@@ -368,12 +364,6 @@ class HomeViewController: UIViewController {
         let fetchedResultsController = CoreDataManager.sharedManager.checkInFetchedResultsController()
         fetchedResultsController.delegate = self
         return fetchedResultsController
-    }()
-
-    fileprivate lazy var signUpController: SignUpController = {
-        let signUpController = SignUpController()
-        signUpController.delegate = self
-        return signUpController
     }()
 
 }
@@ -470,18 +460,4 @@ extension HomeViewController: CheckInControllerDelegate {
         present(alertController, animated: true, completion: nil)
     }
     
-}
-
-// MARK: - SignUpControllerDelegate
-
-extension HomeViewController: SignUpControllerDelegate {
-
-    func signUpControllerDidFinish(_ controller: SignUpController) {
-        
-    }
-
-    func signUpControllerDidCancel(_ controller: SignUpController) {
-        
-    }
-
 }

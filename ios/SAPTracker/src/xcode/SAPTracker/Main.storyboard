@@ -416,6 +416,9 @@
                                     </userDefinedRuntimeAttribute>
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                 </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="trainingButtonTapped:" destination="ulQ-cJ-h3D" eventType="touchUpInside" id="8is-aQ-a7u"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HXH-VT-k0L">
                                 <rect key="frame" x="16" y="399.5" width="343" height="187.5"/>
@@ -504,7 +507,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mark Name Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="12" adjustsLetterSpacingToFitWidth="YES" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="BQe-Id-ec3">
-                                <rect key="frame" x="101" y="290.5" width="173" height="22"/>
+                                <rect key="frame" x="101.5" y="290.5" width="173" height="22"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="22" id="g3A-7J-yFy"/>
                                 </constraints>
@@ -710,7 +713,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6rV-hv-c3D" userLabel="Countdown View">
-                                        <rect key="frame" x="6.5" y="38" width="363" height="50"/>
+                                        <rect key="frame" x="6" y="38" width="363" height="50"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pjH-rV-MGI" userLabel="Days View">
                                                 <rect key="frame" x="0.0" y="0.0" width="121" height="50"/>
@@ -1422,7 +1425,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sGK-xV-9a0">
-                                <rect key="frame" x="3" y="243.5" width="369" height="98.5"/>
+                                <rect key="frame" x="3" y="244" width="369" height="98.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
