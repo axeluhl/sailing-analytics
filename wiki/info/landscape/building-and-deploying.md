@@ -75,7 +75,7 @@ The following descriptions are based on a situation where an Xmake migration has
 
 ### MiOS Build for iOS Apps
 
-For iOS and Android there are two different build processes in place. At this point (2016-02-02) we're only just beginning to understand how things work, and this is an attempt to summarize the technical steps necessary to get the build done and hand things over to the "Final Assembly" department for deployment to the stores.
+For iOS and Android there are two different build processes in place. After changing from MiOS to xMake during July 2017, things have changed considerably. This is an attempt to summarize the technical steps necessary to get the build done and hand things over to the "Final Assembly" department for deployment to the stores.
 
 Our iOS app build is described by the contents of branch ``central-ios-release-build``. We usually merge ``ubilabs--ios--develop`` into ``master`` and then ``master`` into ``central-ios-release-build``. Builds off the latter branch can be tested using [this Jenkins job](https://xmake-mobile-dev.wdf.sap.corp:8443/job/sapsailingcapture-OD-common/). Run a [Build with Parameters](https://xmake-mobile-dev.wdf.sap.corp:8443/job/sapsailingcapture-OD-common/build?delay=0sec) and enter ``central-ios-release-build`` as the TREEISH. Use ``-X 0.9.3-26`` or similar (see [here](https://wiki.wdf.sap.corp/wiki/display/xMake/Release+Notes+-+xmake) for the latest version) in the "Build Options" field to specify the latest version of Xmake. The build should succeed and produce the .ipa file somewhere in the [build's target Maven repository](http://dewdfms0036.wdf.sap.corp:8080/job/sapsailingcapture-GIT-DEV-OD-ENTERPRISE/ws/.m2/repository/com/sap/sailing/mobile/ios/SAPTracker/).
 
