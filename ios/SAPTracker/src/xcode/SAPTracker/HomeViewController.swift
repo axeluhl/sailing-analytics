@@ -77,8 +77,7 @@ class HomeViewController: UIViewController {
     }
     
     fileprivate func setupNavigationBar() {
-        navigationItem.title = Application.Title
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+        navigationItem.title = "REGATTAS TITLE"
     }
     
     fileprivate func setupTableView() {
