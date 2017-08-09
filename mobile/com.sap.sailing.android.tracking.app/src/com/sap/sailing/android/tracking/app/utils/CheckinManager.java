@@ -94,6 +94,8 @@ public class CheckinManager {
         int port = uri.getPort();
         Exception exception = null;
         try {
+            String leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
+                .replace("+", "%20");
             Set<String> parameterNames = uri.getQueryParameterNames();
             if (parameterNames.contains(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING)) {
                 CompetitorUrlData competitorUrlData = new CompetitorUrlData(server, port);
