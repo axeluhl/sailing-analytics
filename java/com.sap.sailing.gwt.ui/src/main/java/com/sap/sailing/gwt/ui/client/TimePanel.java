@@ -37,7 +37,7 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeComponent<T> implements TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
@@ -596,8 +596,8 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     }
 
     @Override
-    public SettingsDialogComponent<T> getSettingsDialogComponent() {
-        return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
+    public SettingsDialogComponent<T> getSettingsDialogComponent(T settings) {
+        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages);
     }
 
     @Override

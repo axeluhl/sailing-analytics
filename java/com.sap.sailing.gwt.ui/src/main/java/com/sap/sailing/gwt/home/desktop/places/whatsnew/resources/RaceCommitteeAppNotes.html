@@ -4,6 +4,35 @@
 <div id="mainContent">
 	<h4 class="articleHeadline">What's New - SAP Sailing Race Manager</h4>
 	<div class="innerContent">
+		<h5 class="articleSubheadline">June 2017</h5>
+		<ul class="bulletList">
+			<li>It is now possible to capture results during any phase of a race,
+			    particularly also during the start phase, making it possible to
+			    enter penalties such as OCS, BFD or UFD when they occur.
+			</li>
+			<li>When adding a result for a competitor, this result can be "reset" in
+			    two ways: either the entry is swiped from the result list (trash can).
+			    This way, no update will be sent to the server for that competitor until
+			    it is added again to the result list. If instead any explicit score
+			    for the competitor is cleared, the rank is set to 0 and the penalty is
+			    set to "NONE" then the competitor will remain in the list, and this
+			    "empty" result will be sent to the server, clearing any previous score
+			</li>
+			<li>When entering and publishing partial results, updates will only be applied
+			    for those competitors for which a result has been entered. In particular,
+			    when operating with multiple devices on the same course area and in case
+			    the devices haven't synchronized their states yet this will make sure that
+			    partial results entered on one device will not unnecessarily remove changes
+			    applied on another device.
+			</li>
+			    corrections that were sent to the server. This is the only way to
+			    "reset" an erroneous score correction entirely from the app, because
+			    swiping and thus removing the competitor from the list would leave the
+			    previous score correction unchanged on the server upon the next result
+			    publication.
+			</li>
+		</ul>
+
 		<h5 class="articleSubheadline">April 2017</h5>
 		<ul class="bulletList">
 			<li>The "By Marks" course editor can now handle any valid CSS color for

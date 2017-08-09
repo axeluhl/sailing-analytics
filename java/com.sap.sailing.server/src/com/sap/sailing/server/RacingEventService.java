@@ -67,6 +67,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
+import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -665,4 +666,20 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @see #getNumberOfTrackedRacesToRestore()
      */
     int getNumberOfTrackedRacesRestored();
+
+    /**
+     * Provides {@link Statistics statistic information} for every year which is covered by the local
+     * server.
+     * 
+     * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
+     */
+    Map<Integer, Statistics> getLocalStatisticsByYear();
+
+    /**
+     * Provides {@link Statistics statistic information} for every year which is covered by the local and
+     * all remote servers.
+     * 
+     * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
+     */
+    Map<Integer, Statistics> getOverallStatisticsByYear();
 }

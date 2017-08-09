@@ -46,7 +46,7 @@ public class CompetitorImportMatcher {
     }
 
     private boolean compareCountryCode(CompetitorDescriptor competitorDescriptor, CompetitorDTO existingCompetitor) {
-        return Util.equalsWithNull(competitorDescriptor.getCountryCode().getThreeLetterIOCCode(),
+        return Util.equalsWithNull(competitorDescriptor.getCountryCode() == null ? null : competitorDescriptor.getCountryCode().getThreeLetterIOCCode(),
                         existingCompetitor.getThreeLetterIocCountryCode(), /* ignoreCase */ true);
     }
 }

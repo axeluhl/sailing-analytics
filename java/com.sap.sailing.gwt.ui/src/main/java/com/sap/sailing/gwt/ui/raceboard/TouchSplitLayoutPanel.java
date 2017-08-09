@@ -653,6 +653,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             splitterTogglerButton.setStyleName(buttonStyleName);
             splitterTogglerButton.addStyleDependentName("Closed");
             splitterTogglerButton.addStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
+            splitterTogglerButton.ensureDebugId("SplitLayoutPanelToggleButton-" + associatedComponent.getDependentCssClassName());
             splitterTogglerButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {

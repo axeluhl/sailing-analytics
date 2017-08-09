@@ -25,11 +25,12 @@ import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnFactory.
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueProvider;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.filter.Filter;
 
-public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends AbstractWindDTO>>
-        extends Composite implements FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
+public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends AbstractWindDTO>> extends Composite
+        implements FilterValueProvider<SimpleCompetitorDTO>, FilterValueChangeHandler<SimpleRaceMetadataDTO> {
 
     private static final LocalCss CSS = RaceListResources.INSTANCE.css();
 

@@ -17,6 +17,8 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     public static DateTimeFormatRenderer shortTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_SHORT));
+    public static DateTimeFormatRenderer mediumTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat(PredefinedFormat.TIME_MEDIUM));
 
     public static DateTimeFormatRenderer weekdayMonthAbbrDayDateFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("EEE, " + LocaleInfo.getCurrentLocale().getDateTimeFormatInfo().formatMonthAbbrevDay()));

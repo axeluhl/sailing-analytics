@@ -216,6 +216,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         if (result == 0) {
                             try {
                                 result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
+                                if (result == 0) {
+                                    result = compareByArbitraryButStableCriteria(o1, o2);
+                                }
                             } catch (NoWindException e) {
                                 throw new NoWindError(e);
                             }
@@ -225,6 +228,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             }
         }
         return result;
+    }
+
+    private int compareByArbitraryButStableCriteria(Competitor o1, Competitor o2) {
+        return o1.getName().compareTo(o2.getName());
     }
 
     /**

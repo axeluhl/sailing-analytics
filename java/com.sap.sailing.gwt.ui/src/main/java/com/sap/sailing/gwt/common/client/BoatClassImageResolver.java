@@ -34,10 +34,12 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata._49ER.getDisplayName(), imageResources._49erIcon());
         boatClassIconsMap.put(BoatClassMasterdata._5O5.getDisplayName(), imageResources._505mIcon());
         boatClassIconsMap.put(BoatClassMasterdata._5_5MR.getDisplayName(), imageResources._5_5MRIcon());
+        boatClassIconsMap.put(BoatClassMasterdata._8MR.getDisplayName(), imageResources._8MRIcon());
         boatClassIconsMap.put(BoatClassMasterdata.A_CAT.getDisplayName(), imageResources.A_CatIcon());
         boatClassIconsMap.put(BoatClassMasterdata.ALBIN_EXPRESS.getDisplayName(), imageResources.AlbinExpressIcon());
         boatClassIconsMap.put(BoatClassMasterdata.ALBIN_BALLAD.getDisplayName(), imageResources.AlbinBalladIcon());
         boatClassIconsMap.put(BoatClassMasterdata.B_ONE.getDisplayName(), imageResources.BOne());
+        boatClassIconsMap.put(BoatClassMasterdata.CADET.getDisplayName(), imageResources.CadetIcon());
         boatClassIconsMap.put(BoatClassMasterdata.CANOE_IC.getDisplayName(), imageResources.CanoeICIcon());
         boatClassIconsMap.put(BoatClassMasterdata.CANOE_TAIFUN.getDisplayName(), imageResources.CanoeTaifunIcon());
         boatClassIconsMap.put(BoatClassMasterdata.CONTENDER.getDisplayName(), imageResources.ContenderIcon());
@@ -86,7 +88,9 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.MELGES_24.getDisplayName(), imageResources.Melges24Icon());
         boatClassIconsMap.put(BoatClassMasterdata.MINI_TRANSAT.getDisplayName(), imageResources.MiniTransatIcon());
         boatClassIconsMap.put(BoatClassMasterdata.MUSTO_SKIFF.getDisplayName(), imageResources.MustoSkiffIcon());
-        boatClassIconsMap.put(BoatClassMasterdata.NACRA_17.getDisplayName(), imageResources.Nacra17Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.NACRA_15.getDisplayName(), imageResources.Nacra15Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.NACRA_17.getDisplayName(), imageResources.Nacra17Icon());        
+        boatClassIconsMap.put(BoatClassMasterdata.NACRA_17_FOIL.getDisplayName(), imageResources.Nacra17Icon());
         boatClassIconsMap.put(BoatClassMasterdata.O_JOLLE.getDisplayName(), imageResources.OJolleIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OK.getDisplayName(), imageResources.OKIcon());
         boatClassIconsMap.put(BoatClassMasterdata.OPEN_BIC.getDisplayName(), imageResources.OpenBicIcon());
@@ -113,6 +117,9 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.SUNBEAM_22.getDisplayName(), imageResources.Sunbeam22Icon());
         boatClassIconsMap.put(BoatClassMasterdata.SWAN_45.getDisplayName(), imageResources.Swan45Icon());
         boatClassIconsMap.put(BoatClassMasterdata.TARTAN_10.getDisplayName(), imageResources.Tartan10Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.TECHNO_293.getDisplayName(), imageResources.Techno293Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.TECHNO_293_PLUS.getDisplayName(), imageResources.Techno293PlusIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.TEENY.getDisplayName(), imageResources.TeenyIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TORNADO.getDisplayName(), imageResources.TornadoIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TOM_28_MAX.getDisplayName(), imageResources.Tom28MaxIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TRIAS.getDisplayName(), imageResources.TriasIcon());

@@ -3,6 +3,7 @@
     xmlns:ui="urn:ui:com.google.gwt.uibinder" 
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
     xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+    xmlns:sp="urn:import:com.sap.sailing.gwt.home.shared.partials"
     xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.places.event"
     xmlns:g="urn:import:com.google.gwt.user.client.ui"
     >
@@ -22,6 +23,6 @@
         </div>
         <g:FlowPanel ui:field="eventsUi" />
         <mp:minileaderboard.MinileaderboardBox ui:field="leaderboardUi"/>
-        <mp:statisticsBox.StatisticsBox ui:field="statisticsBoxUi" />
+        <sp:statistics.EventStatisticsBox ui:field="statisticsBoxUi" />
     </g:HTMLPanel>
 </ui:UiBinder>

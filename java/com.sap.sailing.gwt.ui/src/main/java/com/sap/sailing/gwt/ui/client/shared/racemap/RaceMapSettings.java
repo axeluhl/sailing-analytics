@@ -9,7 +9,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.settings.client.settingtypes.DistanceSetting;
-import com.sap.sailing.gwt.settings.client.settingtypes.converter.ManeuverTypeStringToEnumConverter;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
@@ -70,6 +69,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      */
     private BooleanSetting windUp;
     
+    private BooleanSetting showEstimatedDuration;
+    
     @Override
     protected void addChildSettings() {
         showMapControls = new BooleanSetting(PARAM_SHOW_MAPCONTROLS, this, true);
@@ -85,8 +86,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         tailLengthInMilliseconds = new LongSetting("tailLengthInMilliseconds", this, 100000l);
         showOnlySelectedCompetitors = new BooleanSetting("showOnlySelectedCompetitors", this, false);
         showSelectedCompetitorsInfo = new BooleanSetting("showSelectedCompetitorsInfo", this, true);
-        maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), new ManeuverTypeStringToEnumConverter());
+        maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), ManeuverType::valueOf);
         showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
+        showEstimatedDuration = new BooleanSetting("showEstimatedDuration", this, false);
     }
 
     public RaceMapSettings() {
@@ -96,7 +98,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             Boolean transparentHoverlines, Integer hoverlineStrokeWeight, Long tailLengthInMilliseconds, Boolean windUp,
             Distance buoyZoneRadius, Boolean showOnlySelectedCompetitors, Boolean showSelectedCompetitorsInfo,
             Boolean showWindStreamletColors, Boolean showWindStreamletOverlay, Boolean showSimulationOverlay,
-            Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints) {
+            Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints,
+            Boolean showEstimatedDuration) {
         this.zoomSettings.init(zoomSettings);
         this.helpLinesSettings.init(helpLinesSettings);
         this.transparentHoverlines.setValue(transparentHoverlines);
@@ -112,6 +115,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.showMapControls.setValue(showMapControls);
         this.maneuverTypesToShow.setValues(maneuverTypesToShow);
         this.showDouglasPeuckerPoints.setValue(showDouglasPeuckerPoints);
+        this.showEstimatedDuration.setValue(showEstimatedDuration);
     }
 
     public static RaceMapSettings getDefaultWithShowMapControls(boolean showMapControlls) {
@@ -140,7 +144,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* showSimulationOverlay */ showSimulationOverlay,
                 /* showMapControls */ showMapControls,
                 /* maneuverTypesToShow */ getDefaultManeuvers(),
-                /* showDouglasPeuckerPoints */ false);
+                /* showDouglasPeuckerPoints */ false,
+                /* showEstimatedDuration*/ false);
     }
     
     private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
@@ -162,27 +167,28 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     /**
-     * copy constructor that produces a new settings object that equals the one passed as argument but takes the zoom settings from the second parameter
+     * copy constructor that produces a new settings object that equals the one passed as argument but takes the zoom
+     * settings from the second parameter
      */
     public RaceMapSettings(RaceMapSettings settings, RaceMapZoomSettings zoomSettings) {
-        this.buoyZoneRadius.setDefaultValue(settings.buoyZoneRadius.getDefaultValue());
-        this.buoyZoneRadius.setValue(settings.buoyZoneRadius.getValue());
-        this.helpLinesSettings.init(settings.getHelpLinesSettings());
-        this.transparentHoverlines.setValue(settings.transparentHoverlines.getValue());
-        this.hoverlineStrokeWeight.setValue(settings.hoverlineStrokeWeight.getValue());
-        this.maneuverTypesToShow.setValues(settings.maneuverTypesToShow.getValues());
-        this.showDouglasPeuckerPoints.setValue(settings.showDouglasPeuckerPoints.getValue());
-        this.showOnlySelectedCompetitors.setValue(settings.showOnlySelectedCompetitors.getValue());
-        this.showSelectedCompetitorsInfo.setValue(settings.showSelectedCompetitorsInfo.getValue());
-        this.showSimulationOverlay.setValue(settings.showSimulationOverlay.getValue());
-        this.showWindStreamletOverlay.setValue(settings.showWindStreamletOverlay.getValue());
-        this.showWindStreamletColors.setValue(settings.showWindStreamletColors.getValue());
-        this.showMapControls.setValue(settings.showMapControls.getValue());
-        this.tailLengthInMilliseconds.setValue(settings.tailLengthInMilliseconds.getValue());
-        this.windUp.setValue(settings.windUp.getValue());
-        this.zoomSettings.init(zoomSettings);
+        this(/* zoomSettings */ zoomSettings,
+             /* helpLinesSettings */ settings.getHelpLinesSettings(),
+             /* transparentHoverlines */ settings.getTransparentHoverlines(),
+             /* hoverlineStrokeWeight */ settings.getHoverlineStrokeWeight(),
+             /* tailLengthInMilliseconds */ settings.getTailLengthInMilliseconds(),
+             /* windUp */ settings.isWindUp(),
+             /* buoyZoneRadius */ settings.getBuoyZoneRadius(),
+             /* showOnlySelectedCompetitors */ settings.isShowOnlySelectedCompetitors(),
+             /* showSelectedCompetitorsInfo */ settings.isShowSelectedCompetitorsInfo(),
+             /* showWindStreamletColors */ settings.isShowWindStreamletColors(),
+             /* showWindStreamletOverlay */ settings.isShowWindStreamletOverlay(),
+             /* showSimulationOverlay */ settings.isShowSimulationOverlay(),
+             /* showMapControls */ settings.isShowMapControls(),
+             /* maneuverTypesToShow */ settings.getManeuverTypesToShow(),
+             /* showDouglasPeuckerPoints */ settings.isShowDouglasPeuckerPoints(),
+             /* showEstimatedDuration */ settings.isShowEstimatedDuration());
     }
-    
+
     /**
      * @return 0 if the tails are not visible {@link #getTailLengthInMilliseconds()} otherwise
      */
@@ -250,33 +256,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         return buoyZoneRadius.isDefaultValue();
     }
     
-    public RaceMapSettings getDefaultSettings() {
-        RaceMapSettings newRaceMapSettings = new RaceMapSettings();
-        newRaceMapSettings.buoyZoneRadius.setDefaultValue(this.buoyZoneRadius.getDefaultValue());
-        return newRaceMapSettings;
-    }
-    
-    public RaceMapSettings keepDefaults(RaceMapSettings previousSettings) {
-        RaceMapSettings newRaceMapSettings = previousSettings.getDefaultSettings();
-        newRaceMapSettings.buoyZoneRadius.setValue(getBuoyZoneRadius());
-        newRaceMapSettings.hoverlineStrokeWeight.setValue(getHoverlineStrokeWeight());
-        newRaceMapSettings.maneuverTypesToShow.setValues(getManeuverTypesToShow());
-        newRaceMapSettings.showDouglasPeuckerPoints.setValue(isShowDouglasPeuckerPoints());
-        newRaceMapSettings.showMapControls.setValue(isShowMapControls());
-        newRaceMapSettings.showOnlySelectedCompetitors.setValue(isShowOnlySelectedCompetitors());
-        newRaceMapSettings.showSelectedCompetitorsInfo.setValue(isShowSelectedCompetitorsInfo());
-        newRaceMapSettings.showSimulationOverlay.setValue(isShowSimulationOverlay());
-        newRaceMapSettings.showWindStreamletColors.setValue(isShowWindStreamletColors());
-        newRaceMapSettings.showWindStreamletOverlay.setValue(isShowWindStreamletOverlay());
-        newRaceMapSettings.tailLengthInMilliseconds.setValue(getTailLengthInMilliseconds());
-        newRaceMapSettings.transparentHoverlines.setValue(getTransparentHoverlines());
-        newRaceMapSettings.windUp.setValue(isWindUp());
-        newRaceMapSettings.helpLinesSettings.init(this.helpLinesSettings);
-        newRaceMapSettings.zoomSettings.init(this.zoomSettings);
-        return newRaceMapSettings;
-    }
-    
-    public static RaceMapSettings createSettingsWithNewDefaultBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
+    public static RaceMapSettings createSettingsWithNewBuoyZoneRadius(RaceMapSettings settings, Distance newDefaultBuoyZoneRadius) {
         final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
                 settings.getZoomSettings(), settings.getHelpLinesSettings(),
                 settings.getTransparentHoverlines(),
@@ -288,8 +268,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 settings.isShowWindStreamletOverlay(),
                 settings.isShowSimulationOverlay(), settings.isShowMapControls(),
                 settings.getManeuverTypesToShow(),
-                settings.isShowDouglasPeuckerPoints());
-        newRaceMapSettings.buoyZoneRadius.setDefaultValue(newDefaultBuoyZoneRadius);
+                settings.isShowDouglasPeuckerPoints(),settings.isShowEstimatedDuration());
         return newRaceMapSettings;
     }
 
@@ -301,7 +280,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         return showMapControls.getValue();
     }
 
-    private static HashSet<ManeuverType> getDefaultManeuvers() {
+    public static HashSet<ManeuverType> getDefaultManeuvers() {
         HashSet<ManeuverType> types = new HashSet<ManeuverType>();
         types.add(ManeuverType.JIBE);
         types.add(ManeuverType.TACK);
@@ -325,5 +304,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
 
     public Set<ManeuverType> getManeuverTypesToShow() {
         return Util.createSet(maneuverTypesToShow.getValues());
+    }
+
+    public boolean isShowEstimatedDuration() {
+        return showEstimatedDuration.getValue();
     }
 }

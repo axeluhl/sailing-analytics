@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
-        	 xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
+             xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'
+             xmlns:sp='urn:import:com.sap.sailing.gwt.home.shared.partials'>
   	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <g:HTMLPanel>
@@ -10,7 +11,7 @@
         <dp:regattanavigation.DropdownFilter ui:field="boatCategoryFilterUi" 
         		addStyleNames="{res.mainCss.spacermargintopmedium} {res.mainCss.spacermarginbottombig}"/>
 		<dp:multiregattalist.MultiRegattaList ui:field="regattaListUi" />
-		<dp:statistics.StatisticsBox addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" ui:field="statisticsBoxUi"/>
+		<sp:statistics.EventStatisticsBox addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" ui:field="statisticsBoxUi"/>
       </div>
     </div>
     <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />
