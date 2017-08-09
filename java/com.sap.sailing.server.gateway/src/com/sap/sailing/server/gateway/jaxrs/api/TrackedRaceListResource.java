@@ -45,7 +45,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
-    @Path("details")
+    @Path("raceDetails")
     public Response getDetailsForRace(@QueryParam("raceName") String raceName,
             @QueryParam("regattaName") String regattaName) {
         HashSet<DetailedRaceInfo> detailedRaces = new HashSet<>();

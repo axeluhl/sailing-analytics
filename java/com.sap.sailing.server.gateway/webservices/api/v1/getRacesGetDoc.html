@@ -9,18 +9,11 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/trackedRaces/allRaces</h2>
+<h2>URL: /api/v1/trackedRaces/getRaces</h2>
 
 <b>Description:</b>
-<p>Gets all TrackedRaces found on the local instance as well as the
-collected TrackedRaces from all remote instances. Only those
-TrackedRaces are contained that are reachable by any Event and have a
-valid startOfRace. The list consolidated to not contain duplicates.
-The list is sorted and numbered by startOfRace. Take note that this
-list can contain past and future races and starts counting at zero.
-This call is only a temporary solution, and will be removed at a later
-point in time, use getRaces & raceDetails instead.</p>
-<br />
+<p>Gets all TrackedRaces found on the local instance, or (future) it's remote servers. Only those TrackedRaces are contained that are reachable by any Event and have a valid startOfRace.</p>
+<br/>
 <table>
     <tr>
         <td>Webservice Type:</td>
@@ -44,7 +37,7 @@ point in time, use getRaces & raceDetails instead.</p>
     </tr>
     <tr>
         <td>Example:</td>
-        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/allRaces">http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/allRaces</a></td>
+        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/getRaces">http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/getRaces</a></td>
     </tr>
 </table>
 <div style="height: 1em;"></div>

@@ -292,7 +292,7 @@ public class RemoteSailingServerSet {
         String encodedRaceName = java.net.URLEncoder.encode(matching.getIdentifier().getRaceName(), "UTF-8").replace("+", "%20");
         String encodedRegattaName = java.net.URLEncoder.encode(matching.getIdentifier().getRegattaName(), "UTF-8").replace("+", "%20");
         String params = "raceName="+encodedRaceName+"&regattaName="+encodedRegattaName;
-        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/details?"+params);
+        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/raceDetails?"+params);
     }
 
     private URL getStatisticsByYearURL(URL remoteServerBaseURL) throws MalformedURLException {

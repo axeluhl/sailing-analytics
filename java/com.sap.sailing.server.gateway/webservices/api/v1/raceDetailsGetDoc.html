@@ -9,11 +9,11 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/trackedRaces/localRaces</h2>
+<h2>URL: /api/v1/trackedRaces/raceDetails</h2>
 
 <b>Description:</b>
-<p>Gets all TrackedRaces found on the local instance. Only those TrackedRaces are contained that are reachable by any Event and have a valid startOfRace.</p>
-<br/>
+<p>Gets all matching races that are stored locally or on remoteservers that match the raceidentifier. This call works transient and can hop multiple servers. It should be expected that multiple results will be returned with different leaderboardNames, it is the responsibility of the caller to filter these based on the usecase.</p>
+<br />
 <table>
     <tr>
         <td>Webservice Type:</td>
@@ -25,7 +25,8 @@
     </tr>
     <tr>
         <td>Mandatory parameters:</td>
-        <td>None</td>
+        <td>raceName</td>
+        <td>regattaName</td>
     </tr>
     <tr>
         <td>Optional parameters:</td>
@@ -37,7 +38,7 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/localRaces">http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/localRaces</a></td>
+        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/raceDetails?raceName=Race%202&regattaName=ESS%202016%20Cardiff">http://www.sapsailing.com/sailingserver/api/v1/trackedRaces/raceDetails?raceName=Race%202&regattaName=ESS%202016%20Cardiff</a></td>
     </tr>
 </table>
 <div style="height: 1em;"></div>

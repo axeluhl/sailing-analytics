@@ -4010,7 +4010,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                             TrackedRace trackedRace = race.getTrackedRace(fleet);
                             if (trackedRace != null) {
                                 RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-                                if (raceIdentifier.equals(regattaNameAndRaceName)) {
+                                if (raceIdentifier.equals(regattaNameAndRaceName) && trackedRace.getStartOfRace() != null) {
                                     DetailedRaceInfo newMatch = new DetailedRaceInfo(raceIdentifier,
                                             leaderboard.getName(), trackedRace.getStartOfRace(), event.getId(),
                                             null);
