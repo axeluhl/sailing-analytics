@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
@@ -191,6 +192,7 @@ public interface MongoObjectFactory {
 
     /**
      * Currently unused, meant to store determined Anniversaries related to bug4227 
+     * @throws MalformedURLException 
      */
-    Map<Integer, DetailedRaceInfo> getAnniversaryData();
+    Map<Integer, DetailedRaceInfo> getAnniversaryData() throws MalformedURLException;
 }

@@ -1,16 +1,17 @@
 package com.sap.sailing.domain.anniversary;
 
-import java.util.Date;
+import java.net.URL;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sse.common.TimePoint;
 
 public class SimpleRaceInfo {
     private final RegattaAndRaceIdentifier identifier;
-    private final Date startOfRace;
-    private String remoteUrl = "";
+    private final TimePoint startOfRace;
+    private URL remoteUrl = null;
 
-    public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, Date startOfRace, String remoteUrl) {
-        if (identifier == null || startOfRace == null || remoteUrl == null) {
+    public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, TimePoint startOfRace, URL remoteUrl) {
+        if (identifier == null || startOfRace == null) {
             throw new IllegalStateException("SimpleRaceInfo Data is not allowed to contain any null values!");
         }
         this.identifier = identifier;
@@ -22,11 +23,11 @@ public class SimpleRaceInfo {
         return identifier;
     }
     
-    public String getRemoteUrl() {
+    public URL getRemoteUrl() {
         return remoteUrl;
     }
 
-    public Date getStartOfRace() {
+    public TimePoint getStartOfRace() {
         return startOfRace;
     }
 

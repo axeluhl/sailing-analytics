@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
-import java.util.Date;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -10,12 +11,16 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class DetailedRaceInfoJsonSerializer implements JsonSerializer<DetailedRaceInfo>, JsonDeserializer<DetailedRaceInfo> {
+public class DetailedRaceInfoJsonSerializer
+        implements JsonSerializer<DetailedRaceInfo>, JsonDeserializer<DetailedRaceInfo> {
 
     public static final String FIELD_EVENT_ID = "eventID";
     public static final String FIELD_LEADERBOARD_NAME = "leaderboardName";
-    private static final String FIELD_REMOTEURL = "remoteUrl";
+    public static final String FIELD_REMOTEURL = "remoteUrl";
+    public static final String FIELD_RACES = "races";
 
     @Override
     public JSONObject serialize(DetailedRaceInfo object) {
@@ -24,19 +29,33 @@ public class DetailedRaceInfoJsonSerializer implements JsonSerializer<DetailedRa
         result.put(SimpleRaceInfoJsonSerializer.FIELD_RACE_NAME, object.getIdentifier().getRaceName());
         result.put(SimpleRaceInfoJsonSerializer.FIELD_REGATTA_NAME, object.getIdentifier().getRegattaName());
         result.put(FIELD_LEADERBOARD_NAME, object.getLeaderboardName());
-        result.put(SimpleRaceInfoJsonSerializer.FIELD_START_OF_RACE, object.getStartOfRace());
-        result.put(FIELD_REMOTEURL, object.getRemoteUrl());
+        result.put(SimpleRaceInfoJsonSerializer.FIELD_START_OF_RACE, object.getStartOfRace().asMillis());
+        if (object.getRemoteUrl() == null) {
+            result.put(FIELD_REMOTEURL, "");
+        } else {
+            result.put(FIELD_REMOTEURL, object.getRemoteUrl().toExternalForm());
+        }
         return result;
     }
-    
+
     @Override
     public DetailedRaceInfo deserialize(JSONObject object) throws JsonDeserializationException {
         String eventId = object.get(FIELD_EVENT_ID).toString();
         String raceName = object.get(SimpleRaceInfoJsonSerializer.FIELD_RACE_NAME).toString();
         String regattaName = object.get(SimpleRaceInfoJsonSerializer.FIELD_REGATTA_NAME).toString();
         String leaderboardName = object.get(FIELD_LEADERBOARD_NAME).toString();
-        Date startOfRace = (Date) object.get(SimpleRaceInfoJsonSerializer.FIELD_START_OF_RACE);
+        TimePoint startOfRace = new MillisecondsTimePoint(
+                ((Number) object.get(SimpleRaceInfoJsonSerializer.FIELD_START_OF_RACE)).longValue());
         String remoteUrl = (String) object.get(FIELD_REMOTEURL);
-        return new DetailedRaceInfo(new RegattaNameAndRaceName(regattaName, raceName), leaderboardName, startOfRace, UUID.fromString(eventId),remoteUrl);
+        URL remoteUrlObj = null;
+        if (remoteUrl != null && !remoteUrl.isEmpty()) {
+            try {
+                remoteUrlObj = new URL(remoteUrl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+        return new DetailedRaceInfo(new RegattaNameAndRaceName(regattaName, raceName), leaderboardName, startOfRace,
+                UUID.fromString(eventId), remoteUrlObj);
     }
 }

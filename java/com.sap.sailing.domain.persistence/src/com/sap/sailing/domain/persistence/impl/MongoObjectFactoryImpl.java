@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -1646,7 +1646,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 newValue.append("race", anniversary.getValue().getIdentifier().getRaceName());
                 newValue.append("regatta", anniversary.getValue().getIdentifier().getRegattaName());
                 newValue.append("leaderboardName", anniversary.getValue().getLeaderboardName());
-                newValue.append("startOfRace", anniversary.getValue().getStartOfRace());
+                storeTimePoint(anniversary.getValue().getStartOfRace(), newValue, ("startOfRace"));
                 newValue.append("eventID", anniversary.getValue().getEventID().toString());
                 newValue.append("remoteUrl", anniversary.getValue().getRemoteUrl());
                 anniversarysStored.update(currentProxy, newValue, true, false);
@@ -1657,7 +1657,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public Map<Integer, DetailedRaceInfo> getAnniversaryData() {
+    public Map<Integer, DetailedRaceInfo> getAnniversaryData() throws MalformedURLException {
         HashMap<Integer, DetailedRaceInfo> fromDb = new HashMap<>();
         DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
         DBCursor cursor = anniversarysStored.find();
@@ -1666,13 +1666,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             String leaderboardName = toLoad.get("leaderboardName").toString();
             String eventID = toLoad.get("eventID").toString();
 
-            Date startOfRace = (Date) toLoad.get("startOfRace");
+            TimePoint startOfRace = new MillisecondsTimePoint(((Number) toLoad.get("startOfRace")).longValue());
             String race = toLoad.get("race").toString();
             String regatta = toLoad.get("regatta").toString();
             Object rurl = toLoad.get("remoteUrl");
-            final String remoteUrlOrNull;
+            final URL remoteUrlOrNull;
             if (rurl != null) {
-                remoteUrlOrNull = rurl.toString();
+                remoteUrlOrNull = new URL(rurl.toString());
             } else {
                 remoteUrlOrNull = null;
             }

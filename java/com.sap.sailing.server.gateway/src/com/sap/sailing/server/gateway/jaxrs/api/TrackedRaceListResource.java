@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,13 +24,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
-import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedRaceInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
@@ -53,55 +49,15 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     public Response getDetailsForRace(@QueryParam("raceName") String raceName,
             @QueryParam("regattaName") String regattaName) {
         HashSet<DetailedRaceInfo> detailedRaces = new HashSet<>();
-        for (Event event : getService().getAllEvents()) {
-            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
-                for (Leaderboard leaderboard : group.getLeaderboards()) {
-                    for (RaceColumn race : leaderboard.getRaceColumns()) {
-                        for (Fleet fleet : race.getFleets()) {
-                            TrackedRace trackedRace = race.getTrackedRace(fleet);
-                            if (trackedRace != null) {
-                                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-                                if (raceIdentifier.getRaceName().equals(raceName)
-                                        && raceIdentifier.getRegattaName().equals(regattaName)) {
-                                    // remoteurl is "" as the own url is only known by the caller, and the call is not
-                                    // resolved transiently on other servers yet
-                                    DetailedRaceInfo newMatch = new DetailedRaceInfo(raceIdentifier,
-                                            leaderboard.getName(), trackedRace.getStartOfRace().asDate(), event.getId(),
-                                            "");
-                                    detailedRaces.add(newMatch);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        detailedRaces.addAll(getService().getFullDetailsForRace(new RegattaNameAndRaceName(regattaName, raceName)));
         if (detailedRaces.isEmpty()) {
             return Response.status(Status.NOT_FOUND).header(HEADER_NAME_CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8).build();
         }
         JSONArray result = new JSONArray();
-        for(DetailedRaceInfo detailedRace:detailedRaces){
+        for (DetailedRaceInfo detailedRace : detailedRaces) {
             result.add(detailedRaceListJsonSerializer.serialize(detailedRace));
         }
         return getJsonResponse(result);
-    }
-
-    /**
-     * If a conflict occurs between two ReggataAndRace identifies, due to being reachable via multiple
-     * Events/Leaderboardgroups, prefer the one determined with a leaderboard of the same name
-     */
-    public DetailedRaceInfo resolve(DetailedRaceInfo current, DetailedRaceInfo contender) {
-        if (current.getEventID().equals(contender.getEventID())
-                && current.getLeaderboardName().equals(contender.getLeaderboardName())) {
-            // same for relevant values, it does not matter
-            return current;
-        }
-        if (current.getLeaderboardName().equals(contender.getIdentifier().getRaceName())) {
-            System.out.println("Resolved conflict " + current + " " + contender + " with current");
-            return current;
-        }
-        System.out.println("Resolved conflict " + current + " " + contender + " with contender");
-        return contender;
     }
 
     /**
@@ -111,10 +67,10 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     @Produces(CONTENT_TYPE_JSON_UTF8)
     @Path("getRaces")
     public Response raceList() {
-        HashMap<String, List<SimpleRaceInfo>> raceData = new HashMap<>();
+        HashMap<URL, List<SimpleRaceInfo>> raceData = new HashMap<>();
         // replace with transitive call later!
         for (SimpleRaceInfo entry : getService().getLocalRaceList().values()) {
-            String remoteUrl = entry.getRemoteUrl();
+            URL remoteUrl = entry.getRemoteUrl();
             List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
             if (remoteList == null) {
                 remoteList = new ArrayList<>();
@@ -122,13 +78,20 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             }
             remoteList.add(entry);
         }
-        JSONObject json = new JSONObject();
-        for (Entry<String, List<SimpleRaceInfo>> raced : raceData.entrySet()) {
+        JSONArray json = new JSONArray();
+        for (Entry<URL, List<SimpleRaceInfo>> raced : raceData.entrySet()) {
             JSONArray list = new JSONArray();
             for (SimpleRaceInfo simpleRaceInfo : raced.getValue()) {
                 list.add(simpleRaceListJsonSerializer.serialize(simpleRaceInfo));
             }
-            json.put(raced.getKey(), list);
+            JSONObject remote = new JSONObject();
+            if(raced.getKey() == null){
+                remote.put(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL, "");
+            }else{
+                remote.put(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL, raced.getKey().toExternalForm());
+            }
+            remote.put(DetailedRaceInfoJsonSerializer.FIELD_RACES, list);
+            json.add(remote);
         }
         return getJsonResponse(json);
     }
@@ -155,12 +118,11 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
         });
         for (int i = 0; i < sorted.size(); i++) {
             SimpleRaceInfo current = sorted.get(i);
-            JSONArray single = new JSONArray();
-            single.add(String.valueOf(i));
-            single.add(current.getRemoteUrl());
-            single.add(simpleRaceListJsonSerializer.serialize(current));
-            json.add(single);
-
+            JSONObject raceInfo = new JSONObject();
+            raceInfo.put("racenumber", String.valueOf(i));
+            raceInfo.put("remoteUrl", current.getRemoteUrl());
+            raceInfo.put("raceinfo", simpleRaceListJsonSerializer.serialize(current));
+            json.add(raceInfo);
         }
         return getJsonResponse(json);
     }

@@ -3,16 +3,17 @@ package com.sap.sailing.server.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,6 +28,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.EventBase;
@@ -38,6 +40,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsByYearJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.StatisticsJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.DetailedRaceInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -140,18 +143,24 @@ public class RemoteSailingServerSet {
                 final Set<SimpleRaceInfo> races = new HashSet<>();
 
                 JSONParser parser = new JSONParser();
-                JSONObject racesGroupedByRemoteAsObject = (JSONObject) parser.parse(bufferedReader);
-                for(Entry<Object, Object> racesGroupdByRemote:racesGroupedByRemoteAsObject.entrySet()){
-                    String remoteUrl = (String) racesGroupdByRemote.getKey();
-                    if(remoteUrl.isEmpty()){
-                        remoteUrl = ref.getURL().toExternalForm();
+                JSONArray racesGroupedByRemoteAsObject = (JSONArray) parser.parse(bufferedReader);
+                for(Object remoteWithRaces:racesGroupedByRemoteAsObject){
+                    JSONObject remoteWithRacesAsJson = (JSONObject) remoteWithRaces;
+                    String remoteUrlAsString = (String) remoteWithRacesAsJson.get(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL);
+                    URL remoteUrl;
+                    if(remoteUrlAsString != null && !remoteUrlAsString.isEmpty()){
+                        remoteUrl = new URL(remoteUrlAsString);
+                    }else{
+                        remoteUrl = ref.getURL();
+                        
                     }
-                    JSONArray raceListForOneRemote = (JSONArray) racesGroupdByRemote.getValue();
+                    JSONArray raceListForOneRemote = (JSONArray) remoteWithRacesAsJson.get(DetailedRaceInfoJsonSerializer.FIELD_RACES);
                     for(Object remoteRace:raceListForOneRemote){
                         JSONObject remoteRaceAsJson = (JSONObject) remoteRace;
                         SimpleRaceInfo event = deserializer.deserialize(remoteRaceAsJson,remoteUrl);
                         races.add(event);
                     }
+                    
                 }
                 result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(races, /* exception */ null);
             } finally {
@@ -278,6 +287,13 @@ public class RemoteSailingServerSet {
     private URL getEventsURL(URL remoteServerBaseURL) throws MalformedURLException {
         return getEndpointUrl(remoteServerBaseURL, "/events");
     }
+    
+    private URL getDetailRaceInfoURL(URL remoteServerBaseURL, SimpleRaceInfo matching) throws MalformedURLException, UnsupportedEncodingException {
+        String encodedRaceName = java.net.URLEncoder.encode(matching.getIdentifier().getRaceName(), "UTF-8").replace("+", "%20");
+        String encodedRegattaName = java.net.URLEncoder.encode(matching.getIdentifier().getRegattaName(), "UTF-8").replace("+", "%20");
+        String params = "raceName="+encodedRaceName+"&regattaName="+encodedRegattaName;
+        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/details?"+params);
+    }
 
     private URL getStatisticsByYearURL(URL remoteServerBaseURL) throws MalformedURLException {
         return getEndpointUrl(remoteServerBaseURL, "/statistics/years");
@@ -361,6 +377,33 @@ public class RemoteSailingServerSet {
             return Collections.unmodifiableMap(cachedTrackedRacesForRemoteSailingServers);
         } finally {
             LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    public Collection<? extends DetailedRaceInfo> getDetailedInfoBlocking(SimpleRaceInfo matching) {
+        try {
+            URL remoteRequestUrl = getDetailRaceInfoURL(matching.getRemoteUrl(),matching);
+            logger.fine("Loading DetailedRace data for remote server from URL " + remoteRequestUrl);
+            URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(remoteRequestUrl);
+            HashSet<DetailedRaceInfo> answer = new HashSet<>();
+            try (BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(urlConnection.getInputStream(), "UTF-8"))) {
+                JSONParser parser = new JSONParser();
+                JSONArray result =  (JSONArray) parser.parse(bufferedReader);
+                DetailedRaceInfoJsonSerializer detailedRaceListJsonSerializer = new DetailedRaceInfoJsonSerializer();
+                for(Object detailedInfo:result){
+                    JSONObject detailedInfoAsJson = (JSONObject) detailedInfo;
+                    DetailedRaceInfo detailedInfoAsJava = detailedRaceListJsonSerializer.deserialize(detailedInfoAsJson);
+                    if(detailedInfoAsJava.getRemoteUrl()==null){
+                        //not transitive, use direct url
+                        detailedInfoAsJava = new DetailedRaceInfo(detailedInfoAsJava,matching.getRemoteUrl());
+                    }
+                    answer.add(detailedInfoAsJava);
+                }
+            }
+            return answer;
+        } catch (ParseException | IOException e) {
+            throw new IllegalStateException("RemoteUrl could not be called ", e);
         }
     }
 }
