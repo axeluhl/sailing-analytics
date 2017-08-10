@@ -102,7 +102,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -3861,9 +3860,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public DetailedRaceInfo getFullDetailsForRace(RegattaNameAndRaceName regattaNameAndRaceName) {
+    public DetailedRaceInfo getFullDetailsForRace(RegattaAndRaceIdentifier raceIdentifier) {
         DetailedRaceInfo bestMatch = null;
-        // first check if the race is found locally
+        // start from the top; while there are more efficient ways to look up the TrackedRace by its
+        // race identifier, this wouldn't tell a valid event and leaderboard combination through which
+        // to navigate to it
         for (Event event : this.getAllEvents()) {
             for (LeaderboardGroup group : event.getLeaderboardGroups()) {
                 for (Leaderboard leaderboard : group.getLeaderboards()) {
@@ -3871,14 +3872,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         for (Fleet fleet : race.getFleets()) {
                             TrackedRace trackedRace = race.getTrackedRace(fleet);
                             if (trackedRace != null) {
-                                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                                RegattaAndRaceIdentifier trackedRaceIdentifier = trackedRace.getRaceIdentifier();
                                 // check if the race matches the RegattaAndRaceIdentifier
-                                if (raceIdentifier.equals(regattaNameAndRaceName)
+                                if (trackedRaceIdentifier.equals(raceIdentifier)
                                         && trackedRace.getStartOfRace() != null) {
                                     // check if the match is a best match -> we keep the previous match otherwise
                                     if (bestMatch == null
-                                            || (leaderboard.getName().equals(raceIdentifier.getRegattaName()))) {
-                                        bestMatch = new DetailedRaceInfo(raceIdentifier, leaderboard.getName(),
+                                            || (leaderboard.getName().equals(trackedRaceIdentifier.getRegattaName()))) {
+                                        bestMatch = new DetailedRaceInfo(trackedRaceIdentifier, leaderboard.getName(),
                                                 trackedRace.getStartOfRace(), event.getId(), null);
                                     }
                                 }
@@ -3888,25 +3889,21 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }
-
-        if (bestMatch != null) {
-            return bestMatch;
-        }
-
-        // check for stored simpleRaceInfo from remote server
-        Map<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> races = remoteSailingServerSet
-                .getCachedRaceList();
-        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> cachedInfo : races
-                .entrySet()) {
-            Iterable<SimpleRaceInfo> raceList = cachedInfo.getValue().getA();
-            if (raceList != null) {
-                for (SimpleRaceInfo race : raceList) {
-                    if (race.getIdentifier().equals(regattaNameAndRaceName)) {
-                        return remoteSailingServerSet.getDetailedInfoBlocking(race);
+        if (bestMatch == null) {
+            // check for stored simpleRaceInfo from remote server
+            Map<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> races = remoteSailingServerSet.getCachedRaceList();
+            for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> cachedInfo : races.entrySet()) {
+                Iterable<SimpleRaceInfo> raceList = cachedInfo.getValue().getA();
+                if (raceList != null) {
+                    for (SimpleRaceInfo race : raceList) {
+                        if (race.getIdentifier().equals(raceIdentifier)) {
+                            bestMatch = remoteSailingServerSet.getDetailedInfoBlocking(race);
+                            break;
+                        }
                     }
                 }
             }
         }
-        return null;
+        return bestMatch;
     }
 }

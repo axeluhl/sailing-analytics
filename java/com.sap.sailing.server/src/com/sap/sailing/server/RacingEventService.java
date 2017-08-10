@@ -51,7 +51,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -690,5 +689,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
 
-    DetailedRaceInfo getFullDetailsForRace(RegattaNameAndRaceName regattaNameAndRaceName);
+    DetailedRaceInfo getFullDetailsForRace(RegattaAndRaceIdentifier regattaNameAndRaceName);
 }
