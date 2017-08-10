@@ -8,6 +8,19 @@
 
 import UIKit
 
+enum SignUpControllerError: Error {
+    case loginFailed
+}
+
+extension SignUpControllerError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .loginFailed:
+            return SignUpTranslation.SignUpControllerError.LoginFailed.String
+        }
+    }
+}
+
 @objc protocol SignUpControllerDelegate {
     
     func signUpControllerDidFinish(_ controller: SignUpController)
@@ -47,8 +60,15 @@ extension SignUpController: LoginViewControllerDelegate {
         requestManager.postAccessToken(userName: userName, password: password, success: { (userName, accessToken) in
             
         }) { (error, message) in
-            self.showAlert(forError: error, andMessage: message, withViewController: controller)
+            self.showAlert(forError: self.loginViewControllerError(forError: error), andMessage: message, withViewController: controller)
         }
+    }
+    
+    private func loginViewControllerError(forError error: Error) -> Error {
+        if (error as NSError).domain == NSURLErrorDomain {
+            return error
+        }
+        return SignUpControllerError.loginFailed
     }
     
 }

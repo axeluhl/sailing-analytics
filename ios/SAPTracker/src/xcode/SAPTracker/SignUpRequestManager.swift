@@ -10,7 +10,6 @@ import UIKit
 
 enum SignUpRequestManagerError: Error {
     case percentEncodingError
-    case postFailed
     case invalidResponse
 }
 
@@ -19,8 +18,6 @@ extension SignUpRequestManagerError: LocalizedError {
         switch self {
         case .percentEncodingError:
             return "PERCENT ENCODING ERROR"
-        case .postFailed:
-            return "POST FAILED"
         case .invalidResponse:
             return "INVALID RESPONSE"
         }
@@ -97,7 +94,7 @@ class SignUpRequestManager: NSObject {
     
     fileprivate func postAccessTokenFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(SignUpRequestManagerError.postFailed, stringForError(error))
+        failure(error, stringForError(error))
     }
     
     // MARK: - CreateUser
@@ -145,7 +142,7 @@ class SignUpRequestManager: NSObject {
     
     fileprivate func postCreateUserFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(SignUpRequestManagerError.postFailed, stringForError(error))
+        failure(error, stringForError(error))
     }
     
     // MARK: - ForgotPassword
@@ -198,7 +195,7 @@ class SignUpRequestManager: NSObject {
     
     fileprivate func postForgotPasswordFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(SignUpRequestManagerError.postFailed, stringForError(error))
+        failure(error, stringForError(error))
     }
     
     // MARK: - Hello
@@ -245,7 +242,7 @@ class SignUpRequestManager: NSObject {
     
     fileprivate func postHelloFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(SignUpRequestManagerError.postFailed, stringForError(error))
+        failure(error, stringForError(error))
     }
     
     // MARK: - Helper

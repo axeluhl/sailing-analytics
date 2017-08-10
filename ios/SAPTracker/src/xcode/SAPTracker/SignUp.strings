@@ -15,7 +15,7 @@
 // MARK: - ForgotPasswordView
 
 "ForgotPasswordView.Title" = "Passwort vergessen";
-"ForgotPasswordView.InfoLabel.Text" = "Benutzernamen oder E-Mail-Adresse angeben";
+"ForgotPasswordView.InfoLabel.Text" = "Benutzernamen oder E-Mail Adresse angeben";
 "ForgotPasswordView.ResetPasswordButton.Title" = "Passwort zurücksetzen";
 
 // MARK: - LoginView
@@ -24,7 +24,9 @@
 "LoginView.ForgotPasswordButton.Title" = "Passwort vergessen";
 "LoginView.LoginButton.Title" = "Anmelden";
 
-// MARK: - SignUpController
+// MARK: - SignUpControllerError
+
+"SignUpControllerError.LoginFailed" = "Anmeldung fehlgeschlagen. Zugangsdaten überprüfen.";
 
 // MARK: - SignUpView
 
