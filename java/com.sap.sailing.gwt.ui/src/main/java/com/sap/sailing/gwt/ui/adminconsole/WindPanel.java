@@ -82,12 +82,13 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  */
 public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower {
 
-    private static final String EXPEDITON_IMPORT_PARAMETER_RACES = "races";
+    private static final String WIND_IMPORT_PARAMETER_RACES = "races";
 
     private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
 
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
+    private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -260,8 +261,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
         mainPanel.add(createExpeditionWindImportPanel());
         mainPanel.add(createGribWindImportPanel());
+        mainPanel.add(createNmeaWindImportPanel());
         mainPanel.add(createIgtimiWindImportPanel(mainPanel));
-
     }
 
     private CaptionPanel createIgtimiWindImportPanel(VerticalPanel mainPanel) {
@@ -345,7 +346,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     }
     /**
      * Creates a file upload form that works with {@code AbstractWindImportServlet} on the server side. In particular,
-     * the race selection is managed in a hidden field named {@link #EXPEDITON_IMPORT_PARAMETER_RACES}, and the
+     * the race selection is managed in a hidden field named {@link #WIND_IMPORT_PARAMETER_RACES}, and the
      * {@code upload} element is the MIME multipart file upload form element. The form uses {@code POST} as its method.
      * 
      * The submit button is initially disabled. Callers can implement their own logic based, e.g., on event handlers they
@@ -377,7 +378,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         if (multi) {
             fileUpload.getElement().setAttribute("multiple", "multiple");
         }
-        final Hidden hiddenRacesField = new Hidden(EXPEDITON_IMPORT_PARAMETER_RACES);
+        final Hidden hiddenRacesField = new Hidden(WIND_IMPORT_PARAMETER_RACES);
         formContentPanel.add(hiddenRacesField);
         formContentPanel.add(fileUpload);
         formContentPanel.add(submitButton);
@@ -413,21 +414,24 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 importResultPanel.clear();
                 String windImportResultJson = event.getResults();
-
-                WindImportResult windImportResult = WindImportResult.fromJson(windImportResultJson);
-                JsArray<RaceEntry> raceEntries = windImportResult.getRaceEntries();
-                Label resultHeader = new Label(stringMessages.windImport_ResultHeader(String.valueOf(windImportResult.getFirst()), 
-                        String.valueOf(windImportResult.getLast()), raceEntries.length()));
-                importResultPanel.add(resultHeader);
-                if (windImportResult.getError() != null) {
-                    Label errorText = new Label(stringMessages.windImport_ResultError(windImportResult.getError()));
-                    importResultPanel.add(errorText);
-                }
-                for (int i = 0; i < raceEntries.length(); i++) {
-                    RaceEntry raceEntry = raceEntries.get(i);
-                    Label entryText = new Label(stringMessages.windImport_ResultEntry(raceEntry.getRaceName(), raceEntry.getRegattaName(), 
-                            raceEntry.getCount(), String.valueOf(raceEntry.getFirst()), String.valueOf(raceEntry.getLast())));
-                    importResultPanel.add(entryText);
+                try {
+                    WindImportResult windImportResult = WindImportResult.fromJson(windImportResultJson);
+                    JsArray<RaceEntry> raceEntries = windImportResult.getRaceEntries();
+                    Label resultHeader = new Label(stringMessages.windImport_ResultHeader(String.valueOf(windImportResult.getFirst()), 
+                            String.valueOf(windImportResult.getLast()), raceEntries.length()));
+                    importResultPanel.add(resultHeader);
+                    if (windImportResult.getError() != null) {
+                        Label errorText = new Label(stringMessages.windImport_ResultError(windImportResult.getError()));
+                        importResultPanel.add(errorText);
+                    }
+                    for (int i = 0; i < raceEntries.length(); i++) {
+                        RaceEntry raceEntry = raceEntries.get(i);
+                        Label entryText = new Label(stringMessages.windImport_ResultEntry(raceEntry.getRaceName(), raceEntry.getRegattaName(), 
+                                raceEntry.getCount(), String.valueOf(raceEntry.getFirst()), String.valueOf(raceEntry.getLast())));
+                        importResultPanel.add(entryText);
+                    }
+                } catch (Exception e) {
+                    errorReporter.reportError(stringMessages.windImport_ResultError(e.getMessage()));
                 }
             }
         });
@@ -485,6 +489,25 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         return windImportRootPanel;
     }
 
+    private CaptionPanel createNmeaWindImportPanel() {
+        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(URL_SAILINGSERVER_NMEA_IMPORT, /* multi */ true);
+        CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.nmeaWindImport_Title());
+        VerticalPanel windImportContentPanel = new VerticalPanel();
+        windImportRootPanel.add(windImportContentPanel);
+        final FormPanel form = formAndFileUploadAndSubmitButton.getFormPanel();
+        windImportContentPanel.add(form);
+        VerticalPanel formContentPanel = formAndFileUploadAndSubmitButton.getFormContentPanel();
+        HorizontalPanel inputPanel = new HorizontalPanel();
+        formContentPanel.add(inputPanel);
+        final Panel importResultPanel = new VerticalPanel();
+        windImportContentPanel.add(importResultPanel);
+        formAndFileUploadAndSubmitButton.getSubmitButton().setEnabled(true);
+        final FileUpload fileUpload = formAndFileUploadAndSubmitButton.getFileUpload();
+        inputPanel.setSpacing(5);
+        inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
+        return windImportRootPanel;
+    }
+
     private CaptionPanel createGribWindImportPanel() {
         /*
          * To style the "browse" button of the file upload widget
@@ -507,7 +530,6 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
         return windImportRootPanel;
     }
-
 
     private void showWindSettingDialog(RaceDTO race, CoursePositionsDTO course) {
         AddWindFixDialog windSettingDialog = new AddWindFixDialog(race, course, stringMessages, new DialogCallback<WindDTO>() {
