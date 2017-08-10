@@ -280,7 +280,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         return showMapControls.getValue();
     }
 
-    private static HashSet<ManeuverType> getDefaultManeuvers() {
+    public static HashSet<ManeuverType> getDefaultManeuvers() {
         HashSet<ManeuverType> types = new HashSet<ManeuverType>();
         types.add(ManeuverType.JIBE);
         types.add(ManeuverType.TACK);

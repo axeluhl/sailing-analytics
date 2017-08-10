@@ -215,5 +215,11 @@ public class RaceTimesInfoProvider {
             listener.raceTimesInfosReceived(getRaceTimesInfos(), clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         }
     }
-    
+
+    public void reset() {
+        listeners.clear();
+        raceIdentifiers.clear();
+        raceTimesInfos.clear();
+    }
+
 }

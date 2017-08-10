@@ -356,7 +356,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * quick ranks received from a {@link RaceMapDataDTO#quickRanks} field but may choose to ignore this information, e.g.,
      * if it can assume that more current information about ranks and leg numbers is available from a {@link LeaderboardDTO}.
      */
-    private final QuickRanksDTOProvider quickRanksDTOProvider;
+    private QuickRanksDTOProvider quickRanksDTOProvider;
     
     private final CombinedWindPanel combinedWindPanel;
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
@@ -494,6 +494,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.setSize("100%", "100%");
     }
     
+    public void setQuickRanksDTOProvider(QuickRanksDTOProvider newQuickRanksDTOProvider) {
+        if (this.quickRanksDTOProvider != null) {
+            this.quickRanksDTOProvider.moveListernersTo(newQuickRanksDTOProvider);
+        }
+        this.quickRanksDTOProvider = newQuickRanksDTOProvider;
+    }
     /**
      * The {@link WindDTO#dampenedTrueWindFromDeg} direction if {@link #lastCombinedWindTrackInfoDTO} has a
      * {@link WindSourceType#COMBINED} source which has at least one fix recorded; <code>null</code> otherwise.
@@ -896,6 +902,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
+    public WindInfoForRaceDTO getLastCombinedWindTrackInfoDTO() {
+        return lastCombinedWindTrackInfoDTO;
+    }
     /**
      * Requests updates for map data and, when received, updates the map structures accordingly.
      * <p>
@@ -1468,29 +1477,29 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         GWT.log("no legType to display advantage line");
                     } else {
                         switch (lastBoatFix.legType) {
-                            case UPWIND:
-                            case DOWNWIND: {
-                                rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
-                                if (rotatedBearingDeg1 >= 360.0) {
-                                    rotatedBearingDeg1 -= 360.0;
-                                }
-                                rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
-                                if (rotatedBearingDeg2 < 0.0) {
-                                    rotatedBearingDeg2 += 360.0;
-                                }
-                                break;
+                        case UPWIND:
+                        case DOWNWIND: {
+                            rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
+                            if (rotatedBearingDeg1 >= 360.0) {
+                                rotatedBearingDeg1 -= 360.0;
                             }
-                            case REACHING: {
-                                rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
-                                if (rotatedBearingDeg1 >= 360.0) {
-                                    rotatedBearingDeg1 -= 360.0;
-                                }
-                                rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
-                                if (rotatedBearingDeg2 < 0.0) {
-                                    rotatedBearingDeg2 += 360.0;
-                                }
-                                break;
+                            rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
+                            if (rotatedBearingDeg2 < 0.0) {
+                                rotatedBearingDeg2 += 360.0;
                             }
+                                break;
+                        }
+                        case REACHING: {
+                            rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
+                            if (rotatedBearingDeg1 >= 360.0) {
+                                rotatedBearingDeg1 -= 360.0;
+                            }
+                            rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
+                            if (rotatedBearingDeg2 < 0.0) {
+                                rotatedBearingDeg2 += 360.0;
+                            }
+                                break;
+                        }
                         }
                         MVCArray<LatLng> nextPath = MVCArray.newInstance();
                         LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
@@ -1504,7 +1513,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             options.setStrokeColor("#000000");
                             options.setStrokeWeight(1);
                             options.setStrokeOpacity(0.5);
-    
+                            
                             advantageLine = Polyline.newInstance(options);
                             advantageTimer = new AdvantageLineAnimator(advantageLine);
                             MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
@@ -1513,7 +1522,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             advantageLine.setPath(pointsAsArray);
                             advantageLine.setMap(map);
                             Hoverline advantageHoverline = new Hoverline(advantageLine, options, this);
-    
+                            
                             advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
                                     bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
                             advantageLine.addMouseOverHandler(advantageLineMouseOverHandler);
@@ -1533,8 +1542,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             }
                         }
                         drawAdvantageLine = true;
-                        advantageLineCompetitor = visibleLeaderInfo.getB();
+                    advantageLineCompetitor = visibleLeaderInfo.getB();
                     }
+                   
                 }
             }
             if (!drawAdvantageLine) {
@@ -3016,5 +3026,4 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public RaceMapLifecycle getLifecycle() {
         return raceMapLifecycle;
     }
-
 }

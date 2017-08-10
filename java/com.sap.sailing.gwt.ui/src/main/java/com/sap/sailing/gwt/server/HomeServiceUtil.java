@@ -23,9 +23,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -99,11 +97,16 @@ public final class HomeServiceUtil {
     }
     
     public static EventState calculateEventState(EventBase event) {
-        TimePoint now = MillisecondsTimePoint.now();
-        if (now.before(event.getStartDate())) {
+        final TimePoint startDate = event.getStartDate();
+        if (startDate == null) {
+            return EventState.PLANNED;
+        }
+        final TimePoint now = MillisecondsTimePoint.now();
+        if (now.before(startDate)) {
             return event.isPublic() ? EventState.UPCOMING : EventState.PLANNED;
         }
-        if (now.after(event.getEndDate())) {
+        final TimePoint endDate = event.getEndDate();
+        if (endDate != null && now.after(endDate)) {
             return EventState.FINISHED;
         }
         return EventState.RUNNING;
@@ -180,51 +183,6 @@ public final class HomeServiceUtil {
 
     public static int calculateCompetitorsCount(Leaderboard sl) {
         return Util.size(sl.getCompetitors());
-    }
-    
-    public static int calculateRaceCount(Leaderboard sl) {
-        int nonCarryForwardRacesCount = 0;
-        for (RaceColumn column : sl.getRaceColumns()) {
-            if (!column.isCarryForward()) {
-                nonCarryForwardRacesCount += Util.size(column.getFleets());
-            }
-        }
-        return nonCarryForwardRacesCount;
-    }
-    
-    public static int calculateRaceColumnCount(Leaderboard sl) {
-        int nonCarryForwardRacesCount = 0;
-        for (RaceColumn rc : sl.getRaceColumns()) {
-            nonCarryForwardRacesCount += rc.isCarryForward() ? 0 : 1;
-        }
-        return nonCarryForwardRacesCount;
-    }
-    
-    public static int calculateTrackedRaceCount(Leaderboard sl) {
-        int count=0;
-        for (RaceColumn column : sl.getRaceColumns()) {
-            for (Fleet fleet : column.getFleets()) {
-                TrackedRace trackedRace = column.getTrackedRace(fleet);
-                if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-    
-    public static int calculateTrackedRaceColumnCount(Leaderboard sl) {
-        int count=0;
-        for (RaceColumn column : sl.getRaceColumns()) {
-            for (Fleet fleet : column.getFleets()) {
-                TrackedRace trackedRace = column.getTrackedRace(fleet);
-                if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
-                    count++;
-                    break;
-                }
-            }
-        }
-        return count;
     }
     
     public static String getBoatClassName(Leaderboard leaderboard) {
@@ -401,8 +359,8 @@ public final class HomeServiceUtil {
     
     public static void mapToMetadataDTO(EventBase event, EventMetadataDTO dto, RacingEventService service) {
         mapToReferenceDTO(event, dto, service);
-        dto.setStartDate(event.getStartDate().asDate());
-        dto.setEndDate(event.getEndDate().asDate());
+        dto.setStartDate(event.getStartDate() == null ? null : event.getStartDate().asDate());
+        dto.setEndDate(event.getEndDate() == null ? null : event.getEndDate().asDate());
         dto.setState(HomeServiceUtil.calculateEventState(event));
         dto.setVenue(event.getVenue().getName());
         if(HomeServiceUtil.isFakeSeries(event)) {

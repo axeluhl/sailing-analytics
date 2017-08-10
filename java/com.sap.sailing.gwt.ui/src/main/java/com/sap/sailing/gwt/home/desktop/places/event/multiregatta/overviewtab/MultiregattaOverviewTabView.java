@@ -19,10 +19,11 @@ import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaLi
 import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
-import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
+import com.sap.sailing.gwt.home.desktop.partials.statistics.DesktopStatisticsBoxView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
+import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
@@ -43,7 +44,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
-    @UiField StatisticsBox statisticsBoxUi;
+    @UiField(provided = true) EventStatisticsBox statisticsBoxUi;
     @UiField RaceOfficeSection raceOfficeSectionUi;
     private Presenter currentPresenter;
 
@@ -69,6 +70,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         MultiregattaOverviewRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaOverviewRegattasTabViewRegattaFilterList();
         boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.all(), regattaFilterList);
         regattaListUi = new MultiRegattaList(currentPresenter, false);
+        statisticsBoxUi = new EventStatisticsBox(true, new DesktopStatisticsBoxView());
         initWidget(ourUiBinder.createAndBindUi(this));
         raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());
         

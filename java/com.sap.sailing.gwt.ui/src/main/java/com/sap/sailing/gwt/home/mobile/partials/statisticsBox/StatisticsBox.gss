@@ -56,4 +56,9 @@ img.statisticsbox_content_item_icon {
   background: #ebebeb;
   border: 1px solid #dedede;
   border-radius: 0.384615384615385em;
+  display: inline-block;
+  max-width: 35%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

@@ -4,7 +4,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
@@ -38,12 +37,12 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             MetaLeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            Timer timer, String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace,
+            Timer timer, String preselectedLeaderboardName,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages, DetailType chartDetailType) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
-                preselectedLeaderboardName, preselectedRace, leaderboardGroupName, metaLeaderboardName,
+                preselectedLeaderboardName, leaderboardGroupName, metaLeaderboardName,
                 errorReporter, stringMessages, chartDetailType);
     }
     
@@ -53,25 +52,22 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer,
-            String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace, String leaderboardGroupName,
+            String preselectedLeaderboardName, String leaderboardGroupName,
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             DetailType chartDetailType) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
 
-
-        /**
-         * Cleanup one java8 suppliers can be used
-         */
-        init(new SingleRaceLeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
-                        settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
-                        preselectedRace != null, preselectedRace, competitorSelectionModel, timer,
-                leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages,
+        init(new MultiRaceLeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
+                        settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), /* isEmbedded */ false,
+                        competitorSelectionModel, timer,
+                        leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages,
                         settings.getPerspectiveOwnSettings().isShowRaceDetails(), /* competitorSearchTextBox */ null,
                         /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null,
                         settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                         /* autoApplyTopNFilter */ false,
-                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false));
+                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, new ClassicLeaderboardStyle()));
+        
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
         

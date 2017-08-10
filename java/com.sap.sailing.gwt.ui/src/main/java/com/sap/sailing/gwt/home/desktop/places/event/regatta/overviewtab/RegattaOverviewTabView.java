@@ -22,10 +22,11 @@ import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
 import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.standings.StandingsList;
-import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
+import com.sap.sailing.gwt.home.desktop.partials.statistics.DesktopStatisticsBoxView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
+import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
@@ -46,7 +47,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) EventOverviewStage stageUi;
     @UiField(provided = true) StandingsList standingsUi;
-    @UiField(provided = true) StatisticsBox statisticsBoxUi;
+    @UiField(provided = true) EventStatisticsBox statisticsBoxUi;
     @UiField RaceOfficeSection raceOfficeSectionUi;
 
     public RegattaOverviewTabView() {
@@ -66,7 +67,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     public void start(RegattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
         liveRacesListUi = new LiveRacesList(currentPresenter, false);
         stageUi = new EventOverviewStage(currentPresenter);
-        statisticsBoxUi = new StatisticsBox(false);
+        statisticsBoxUi = new EventStatisticsBox(false, new DesktopStatisticsBoxView());
         final HasRegattaMetadata regattaMetadata = currentPresenter.getRegattaMetadata();
         standingsUi = new StandingsList(regattaMetadata != null && regattaMetadata.getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(currentPresenter.getRegattaId()));
         initWidget(ourUiBinder.createAndBindUi(this));

@@ -24,8 +24,9 @@ public class RecentEventsCalculator implements EventVisitor {
 
     @Override
     public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
-        EventHolder holder = new EventHolder(event, onRemoteServer, baseURL);
-        if (event.getEndDate().before(now) && event.getEndDate().after(now.minus(Duration.ONE_YEAR))) {
+        final EventHolder holder = new EventHolder(event, onRemoteServer, baseURL);
+        final TimePoint endDate = event.getEndDate();
+        if (endDate != null && endDate.before(now) && endDate.after(now.minus(Duration.ONE_YEAR))) {
             recentEventsOfLast12Month.add(holder);
         }
     }
