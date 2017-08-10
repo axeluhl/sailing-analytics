@@ -79,6 +79,11 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
                 addTabAndFocus(new PolarBackendResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
                         stringMessages));
                 removeTab(oldHeader);
+            } else if (result.getResultType().equals("com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation")) {
+                CloseableTabHeader oldHeader = getSelectedHeader();
+                addTabAndFocus(new ManeuverSpeedDetailsResultsPresenter(TabbedResultsPresenter.this, getComponentContext(),
+                        stringMessages));
+                removeTab(oldHeader);
             } else {
                 if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
                     CloseableTabHeader oldHeader = getSelectedHeader();

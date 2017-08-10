@@ -15,6 +15,7 @@ import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
 import com.sap.sailing.datamining.data.HasManeuverContext;
+import com.sap.sailing.datamining.data.HasManeuverSpeedDetailsContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
@@ -23,6 +24,8 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.data.HasWindFixContext;
 import com.sap.sailing.datamining.data.HasWindTrackContext;
+import com.sap.sailing.datamining.impl.components.aggregators.ManeuverSpeedDetailsStatisticAvgAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ManeuverSpeedDetailsStatisticMedianAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingAverageDegreesAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingMaxAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingMinAggregationProcessor;
@@ -102,6 +105,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasBravoFixTrackContext.class);
         internalClasses.add(HasFoilingSegmentContext.class);
         internalClasses.add(HasManeuverContext.class);
+        internalClasses.add(HasManeuverSpeedDetailsContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);
         internalClasses.add(HasLeaderboardGroupContext.class);
@@ -139,6 +143,8 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         aggregators.add(ParallelBearingAverageDegreesAggregationProcessor.getDefinition());
         aggregators.add(ParallelBearingMaxAggregationProcessor.getDefinition());
         aggregators.add(ParallelBearingMinAggregationProcessor.getDefinition());
+        aggregators.add(ManeuverSpeedDetailsStatisticAvgAggregationProcessor.getDefinition());
+        aggregators.add(ManeuverSpeedDetailsStatisticMedianAggregationProcessor.getDefinition());
         return aggregators;
     }
     

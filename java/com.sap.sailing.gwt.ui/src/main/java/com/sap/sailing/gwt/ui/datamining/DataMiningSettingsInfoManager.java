@@ -3,7 +3,10 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
+import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettingsImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.presentation.ManeuverSpeedDetailsSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.polarmining.PolarDataMiningSettingsDialogComponent;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
@@ -22,6 +25,10 @@ public class DataMiningSettingsInfoManager {
         PolarDataMiningSettingsInfo polarDataMiningSettingsInfo = new PolarDataMiningSettingsInfo();
         infosMappedBySettingsType.put(PolarDataMiningSettings.class, polarDataMiningSettingsInfo);
         infosMappedBySettingsType.put(PolarDataMiningSettingsImpl.class, polarDataMiningSettingsInfo);
+        
+        ManeuverSpeedDetailsSettingsInfo maneuverSpeedDetailsSettingsInfo = new ManeuverSpeedDetailsSettingsInfo();
+        infosMappedBySettingsType.put(ManeuverSpeedDetailsSettings.class, maneuverSpeedDetailsSettingsInfo);
+        infosMappedBySettingsType.put(ManeuverSpeedDetailsSettingsImpl.class, maneuverSpeedDetailsSettingsInfo);
     }
 
     public DataMiningSettingsInfo getSettingsInfo(Class<?> settingsType) {
@@ -44,6 +51,26 @@ public class DataMiningSettingsInfoManager {
         @Override
         public String getId() {
             return "PolarDataMiningSettingsInfo";
+        }
+        
+    }
+    
+    private class ManeuverSpeedDetailsSettingsInfo implements DataMiningSettingsInfo {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new ManeuverSpeedDetailsSettingsDialogComponent((ManeuverSpeedDetailsSettings) settings);
+        }
+
+        @Override
+        public String getLocalizedName(StringMessages stringMessages) {
+            return stringMessages.maneuverSpeedDetails();
+        }
+
+        @Override
+        public String getId() {
+            return "ManeuverSpeedDetailsSettingsInfo";
         }
         
     }

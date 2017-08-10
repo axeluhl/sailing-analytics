@@ -9,13 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
-import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.Exporting;
 import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.Series.Type;
-import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
-import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Timer;
@@ -24,6 +18,7 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
 import com.sap.sailing.polars.datamining.shared.PolarBackendData;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
@@ -58,7 +53,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
             StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
-        polarChart = createPolarChart();
+        polarChart = ChartFactory.createPolarChart(true);
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -68,8 +63,8 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
         };
         polarChartWrapperPanel.add(polarChart);
         
-        speedChart = createSpeedChart();
-        angleChart = createAngleChart();
+        speedChart = ChartFactory.createSpeedChart(stringMessages);
+        angleChart = ChartFactory.createAngleChart(stringMessages);
         speedAndAngleChart = new DockLayoutPanel(Unit.PCT) {
             @Override
             public void onResize() {
@@ -86,40 +81,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(speedAndAngleChart, 60);
     }
-   
-
-    private Chart createSpeedChart() {
-        Chart speedChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
-        speedChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
-        speedChart.setExporting(new Exporting().setEnabled(false));
-        speedChart.getYAxis().setExtremes(0, speedChart.getYAxis().getExtremes().getMax())
-                .setAxisTitleText(stringMessages.boatSpeed() + " (" +  stringMessages.knotsUnit() + ")");
-        speedChart.getXAxis().setAxisTitleText(stringMessages.windSpeed());
-        return speedChart;
-    }
     
-    private Chart createAngleChart() {
-        Chart angleChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
-        angleChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
-        angleChart.setExporting(new Exporting().setEnabled(false));
-        angleChart.getYAxis().setAxisTitleText(stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")");
-        angleChart.getXAxis().setAxisTitleText(stringMessages.windSpeed());
-        return angleChart;
-    }
-
-    private Chart createPolarChart() {
-        LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1).setMarker(new Marker().setEnabled(false));
-        Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
-                .setLinePlotOptions(linePlotOptions)
-                .setPolar(true).setHeight100().setWidth100();
-        polarSheetChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
-        polarSheetChart.getYAxis().setMin(0);
-        polarSheetChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
-        polarSheetChart.setOption("/pane/startAngle", 180);
-        polarSheetChart.setExporting(new Exporting().setEnabled(false));
-        return polarSheetChart;
-    }
-
     @Override
     protected Widget getPresentationWidget() {
         return dockLayoutPanel;

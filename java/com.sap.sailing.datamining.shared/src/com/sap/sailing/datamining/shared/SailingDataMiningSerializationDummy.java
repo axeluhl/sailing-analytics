@@ -24,6 +24,10 @@ public final class SailingDataMiningSerializationDummy implements SerializationD
     private ManeuverType maneuverType;
     private Tack tack;
     private NauticalSide nauticalSide;
+    private ManeuverSpeedDetailsAggregation maneuverSpeedDetailsAggregation;
+    private ManeuverSpeedDetailsAggregationImpl maneuverSpeedDetailsAggregationImpl;
+    private ManeuverSpeedDetailsSettings maneuverSpeedDetailsSettings;
+    private ManeuverSpeedDetailsSettingsImpl maneuverSpeedDetailsSettingsImpl;
     
     private SailingDataMiningSerializationDummy() { }
     

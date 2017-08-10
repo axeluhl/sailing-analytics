@@ -8,15 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
-import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.Exporting;
-import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.events.PointSelectEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointSelectEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.PointUnselectEvent;
@@ -25,9 +19,6 @@ import org.moxieapps.gwt.highcharts.client.events.SeriesHideEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesHideEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.SeriesShowEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesShowEventHandler;
-import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
-import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
-import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -37,6 +28,7 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
 import com.sap.sailing.polars.datamining.shared.PolarAggregation;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.common.settings.Settings;
@@ -80,7 +72,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     public PolarResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
-        polarChart = createPolarChart();
+        polarChart = ChartFactory.createPolarChart(true);
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -90,9 +82,9 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         };
         polarChartWrapperPanel.add(polarChart);
 
-        dataCountHistogramChart = createDataCountHistogramChart(stringMessages.beatAngle() + " ("
-                + stringMessages.degreesShort() + ")", true);
-        dataCountPerAngleHistogramChart = createDataCountHistogramChart(stringMessages.windSpeed(), true);
+        dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.beatAngle() + " ("
+                + stringMessages.degreesShort() + ")", stringMessages);
+        dataCountPerAngleHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.windSpeed(), stringMessages);
         histogramChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
             @Override
             public void onResize() {
@@ -178,30 +170,6 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         };
     }
 
-    private Chart createDataCountHistogramChart(String xAxisLabel, boolean showXLabels) {
-        Chart histogramChart = new Chart().setType(Type.COLUMN).setHeight100().setWidth100();
-        histogramChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
-        histogramChart.getYAxis().setMin(0).setAxisTitle(new AxisTitle().setText(stringMessages.numberOfDataPoints()));
-        histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(30).setEnabled(showXLabels))
-                .setAxisTitle(new AxisTitle().setText(xAxisLabel));
-        histogramChart.setLegend(new Legend().setEnabled(false));
-        histogramChart.setExporting(new Exporting().setEnabled(false));
-        return histogramChart;
-    }
-
-    private Chart createPolarChart() {
-        LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1).setMarker(new Marker().setEnabled(false));
-        Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
-                .setLinePlotOptions(linePlotOptions)
-                .setPolar(true).setHeight100().setWidth100();
-        polarSheetChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
-        polarSheetChart.getYAxis().setMin(0);
-        polarSheetChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
-        polarSheetChart.setOption("/pane/startAngle", 180);
-        polarSheetChart.setExporting(new Exporting().setEnabled(false));
-        return polarSheetChart;
-    }
-
     @Override
     protected Widget getPresentationWidget() {
         return dockLayoutPanel;
@@ -224,7 +192,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
             int count = aggregation.getCount();
             int[] countPerAngle = aggregation.getCountPerAngle();
             PolarDataMiningSettings settings = aggregation.getSettings();
-            if (settings.getMinimumDataCountPerGraph() < count) {
+            if (settings.getMinimumDataCountPerGraph() <= count) {
                 Series polarSeries = polarChart.createSeries();
                 Series histogramSeries = dataCountHistogramChart.createSeries();
                 Map<Integer, Map<Double, Integer>> histogramData = aggregation.getCountHistogramPerAngle();
@@ -234,7 +202,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
                     int convertedAngle = i > 180 ? i - 360 : i;
                     double speed = speedsPerAngle[i];
                     Point point = null;
-                    if (countPerAngle[i] >= settings.getMinimumDataCountPerAngle() && speed > 0) {
+                    if (countPerAngle[i] >= settings.getMinimumDataCountPerAngle() && speed != 0) {
                         point = new Point(convertedAngle, speed);
                         polarSeries.addPoint(point, false, false, false);
                     }  else {

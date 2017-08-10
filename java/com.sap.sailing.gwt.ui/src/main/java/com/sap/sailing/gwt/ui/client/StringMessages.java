@@ -1464,6 +1464,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String resultsChart();
     String tabbedResultsPresenter();
     String polarResultsPresenter();
+    String maneuverSpeedDetailsResultsPresenter();
     String dataMiningRetrieval();
     String actionWatch();
     String actionAnalyze();
@@ -1812,4 +1813,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String selectCompetitorsToEliminate();
     String trackedRaceAlreadyLinked();
     String reallyRemoveSeries(String seriesName);
+    String maneuverSpeedDetails();
+    String maneuverDirectionNormalization();
+
 }
