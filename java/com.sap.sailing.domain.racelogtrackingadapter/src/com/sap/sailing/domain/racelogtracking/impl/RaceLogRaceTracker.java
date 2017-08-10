@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,7 +73,7 @@ import difflib.PatchFailedException;
  * Track a race using the data defined in the {@link RaceLog} and possibly the Leaderboards
  * {@link IsRegattaLike#getRegattaLog RegattaLog}. If the events suggest that the race is already in the
  * {@link RaceLogTrackingState#TRACKING} state, tracking commences immediately and existing fixes are loaded immediately
- * from the database.Thinkpad
+ * from the database.
  * <p>
  * Otherwise, the tracker waits until a {@link RaceLogStartTrackingEvent} is received to perform these tasks.
  * 
@@ -93,12 +92,11 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceLogResolver raceLogResolver;
 
-    private DynamicTrackedRace trackedRace;
-    private StartOfTrackingController startOfTrackingController;
-    private EndOfTrackingController endOfTrackingController;
+    private volatile DynamicTrackedRace trackedRace;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            RaceLogResolver raceLogResolver) {
+            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams) {
+        super(connectivityParams);
         this.params = params;
         this.windStore = windStore;
         this.trackedRegatta = regatta;
@@ -177,13 +175,6 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         for (Entry<AbstractLog<?, ?>, Object> visitor : visitors.entrySet()) {
             visitor.getKey().removeListener(visitor.getValue());
         }
-        if (startOfTrackingController != null && trackedRace != null) {
-            trackedRace.removeStartTimeChangedListener(startOfTrackingController);
-        }
-        if (endOfTrackingController != null && trackedRace != null) {
-            trackedRace.removeListener(endOfTrackingController);
-        }
-
         logger.info(String.format("Stopped tracking race-log race %s %s %s", params.getLeaderboard(),
                 params.getRaceColumn(), params.getFleet()));
     }
@@ -194,17 +185,17 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces() {
-        return trackedRace == null ? null : Collections.singleton(trackedRace.getRace());
+    public RaceDefinition getRace() {
+        return trackedRace == null ? null : trackedRace.getRace();
     }
 
     @Override
-    public Set<RegattaAndRaceIdentifier> getRaceIdentifiers() {
-        return trackedRace == null ? null : Collections.singleton(trackedRace.getRaceIdentifier());
+    public RegattaAndRaceIdentifier getRaceIdentifier() {
+        return trackedRace == null ? null : trackedRace.getRaceIdentifier();
     }
 
     @Override
-    public RaceHandle getRacesHandle() {
+    public RaceHandle getRaceHandle() {
         return new RaceLogRacesHandle(this);
     }
 
@@ -308,10 +299,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         trackedRace = trackedRegatta.createTrackedRace(raceDef, sidelines, windStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
-        startOfTrackingController = new StartOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
-        trackedRace.addStartTimeChangedListener(startOfTrackingController);
-        endOfTrackingController = new EndOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
-        trackedRace.addListener(endOfTrackingController);
+        notifyRaceCreationListeners();
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
         synchronized (this) {

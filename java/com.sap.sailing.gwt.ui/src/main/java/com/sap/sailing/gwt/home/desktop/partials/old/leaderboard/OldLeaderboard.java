@@ -20,6 +20,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,12 +29,12 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
@@ -49,9 +50,10 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     }
 
     @UiField HTMLPanel oldLeaderboardPanel;
-    
+
     @UiField Anchor settingsAnchor;
     @UiField Anchor autoRefreshAnchor;
+    @UiField Anchor showLiveRacesAnchor;
     @UiField Anchor fullscreenAnchor;
     @UiField DivElement lastScoringUpdateTimeDiv;
     @UiField DivElement lastScoringUpdateTextDiv;
@@ -61,7 +63,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
-    private LeaderboardPanel leaderboardPanel;
+    private MultiRaceLeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldLeaderboardDelegate delegate;
     
@@ -75,6 +77,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         initWidget(uiBinder.createAndBindUi(this));
         settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
         autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
+        showLiveRacesAnchor.setTitle(StringMessages.INSTANCE.showLiveNow());
         fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
@@ -183,7 +186,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
             final String componentName = leaderboardPanel.getLocalizedShortName();
             final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
 
-            SettingsDialog<?> dialog = new SettingsDialog<LeaderboardSettings>(leaderboardPanel, StringMessages.INSTANCE) {
+            SettingsDialog<MultiRaceLeaderboardSettings> dialog = new SettingsDialog<MultiRaceLeaderboardSettings>(leaderboardPanel, StringMessages.INSTANCE) {
                 protected Widget getAdditionalWidget() {
                     Widget additionalWidget = super.getAdditionalWidget();
                     if (!oldLeaderboardPanel.getElement().isOrHasChild(leaderboardPanel.getElement())) {
@@ -206,9 +209,30 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         }
     }
 
-    public void setLeaderboard(LeaderboardPanel leaderboardPanel, final Timer timer) {
+    /**
+     * Provides access to the {@link OldLeaderboard leaderboard}'s control to show live races.
+     * 
+     * @return the {@link FocusWidget control} for showing live races.
+     */
+    public FocusWidget getShowLiveRacesControl() {
+        return showLiveRacesAnchor;
+    }
+
+    /**
+     * Provides access to the {@link OldLeaderboard leaderboard}'s control for fullscreen mode.
+     * 
+     * @return the {@link FocusWidget control} for fullscreen mode.
+     */
+    public FocusWidget getFullscreenControl() {
+        return fullscreenAnchor;
+    }
+
+    public void setLeaderboard(MultiRaceLeaderboardPanel leaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
+        if (leaderboardPanel.getComponentContext() == null) {
+            throw new IllegalStateException("Leaderboard Component with null Context");
+        }
         oldLeaderboardPanel.add(leaderboardPanel);
         leaderboardPanel.addBusyStateChangeListener(this);
     }
@@ -271,7 +295,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         }
     }
 
-    public interface OldLeaderboardDelegate extends LeaderboardDelegate<LeaderboardPanel> {
+    public interface OldLeaderboardDelegate extends LeaderboardDelegate {
         Element getHasLiveRaceElement();
     }
 

@@ -45,6 +45,16 @@ public abstract class AbstractRacingEventServiceOperation<ResultType> implements
     }
 
     @Override
+    public RacingEventServiceOperation<?> transformAddRegattaLeaderboardClientOp(CreateRegattaLeaderboardWithEliminations addLeaderboard) {
+        return addLeaderboard;
+    }
+
+    @Override
+    public RacingEventServiceOperation<?> transformAddRegattaLeaderboardServerOp(CreateRegattaLeaderboardWithEliminations addLeaderboard) {
+        return addLeaderboard;
+    }
+
+    @Override
     public RacingEventServiceOperation<?> transformRenameLeaderboardColumnClientOp(
             RenameLeaderboardColumn renameLeaderboardColumnClientOp) {
         return renameLeaderboardColumnClientOp;
@@ -105,4 +115,10 @@ public abstract class AbstractRacingEventServiceOperation<ResultType> implements
     public static RacingEventServiceOperation<Void> getNoOp() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return super.toString()+" [requiresSynchronousExecution="+requiresSynchronousExecution()+"]";
+    }
+    
 }

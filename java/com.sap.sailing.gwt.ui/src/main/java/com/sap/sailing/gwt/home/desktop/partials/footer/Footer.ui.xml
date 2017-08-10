@@ -56,7 +56,7 @@
             		class="{local_res.css.sitefooter_links_link} {res.mediaCss.showonsmall} {res.mediaCss.hideonmedium} {res.mediaCss.hideonlarge}">
               Mobile
             </a>
-            <a href="{releaseNotesNavigation.getTargetUrl}" class="{local_res.css.sitefooter_links_link}">
+            <a href="{releaseNotesNavigation.getSafeTargetUrl}" class="{local_res.css.sitefooter_links_link}">
               <ui:text from='{i18n.whatsNew}' />
             </a>
           </div>

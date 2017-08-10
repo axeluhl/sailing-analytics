@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -54,11 +53,13 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.panels.CustomizableFilterablePanel;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public abstract class AbstractTrackedRacesListComposite extends SimplePanel
-        implements Component<TrackedRacesSettings>, RegattasDisplayer {
+public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
+        RegattasDisplayer {
 
     protected final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
 
@@ -68,7 +69,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
     
     private SelectionCheckboxColumn<RaceDTO> selectionCheckboxColumn;
 
-    private FlushableCellTable<RaceDTO> raceTable;
+    protected FlushableCellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
 
@@ -96,9 +97,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
         }
     }
 
-    public AbstractTrackedRacesListComposite(final SailingServiceAsync sailingService,
+    public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
+            final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages, boolean hasMultiSelection) {
+        super(parent, context);
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
@@ -129,14 +132,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
         VerticalPanel panel = new VerticalPanel();
-        setWidget(panel);
+        initWidget(panel);
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
         
         noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
-
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new FlushableCellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRacesCellTable");
@@ -183,7 +185,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
         filterablePanelRaces.add(lblFilterRacesByName);
         filterablePanelRaces.addDefaultTextBox();
         filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
-
+        
         filterPanel.add(filterablePanelRaces);
         filterPanel.setCellVerticalAlignment(filterablePanelRaces, HasVerticalAlignment.ALIGN_MIDDLE);
 
@@ -433,7 +435,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
     }
 
     @Override
-    public SettingsDialogComponent<TrackedRacesSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<TrackedRacesSettings> getSettingsDialogComponent(TrackedRacesSettings settings) {
         return new TrackedRacesSettingsDialogComponent<TrackedRacesSettings>(settings, stringMessages);
     }
 
@@ -517,23 +519,15 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
     @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         makeControlsReactToFillRegattas(regattas);
-        if (Util.isEmpty(regattas)) {
-            raceTable.setVisible(false);
-            noTrackedRacesLabel.setVisible(true);
-        } else {
-            raceTable.setVisible(true);
-            noTrackedRacesLabel.setVisible(false);
-        }
-        List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
-        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
-        List<String> regattaNames = new ArrayList<>();
+        displayRaceTableUI(regattas);
+        final List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
+        final List<String> regattaNames = new ArrayList<>();
         for (RegattaDTO regatta : regattas) {
-            newAllRegattas.add(regatta);
             for (RaceDTO race : regatta.races) {
                 if (race != null) {
                     if (raceIsToBeAddedToList(race)) {
-                        //We need only those regatta names which are available 
-                        //at tracking table
+                        // We need only those regatta names which are available
+                        // at tracking table
                         if (!regattaNames.contains(regatta.getName())) {
                             regattaNames.add(regatta.getName());
                         }
@@ -542,20 +536,49 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
                 }
             }
         }
-
-        listBoxRegattas.clear();
-        listBoxRegattas.addItem(stringMessages.all(), "");
-        regattaNames.stream().sorted().forEach(regatta->listBoxRegattas.addItem(regatta, regatta));
+        refreshListBoxRegattas(regattaNames);
         allRaces = newAllRaces;
         filterablePanelRaces.updateAll(allRaces);
+    }
+
+    private void refreshListBoxRegattas(List<String> regattaNames) {
+        final String lastSelectedRegattaName = listBoxRegattas.getSelectedValue();
+        listBoxRegattas.clear();
+        listBoxRegattas.addItem(stringMessages.all(), "");
+        regattaNames.stream().sorted().forEach(regatta -> listBoxRegattas.addItem(regatta, regatta));
+        restoreListBoxRegattasSelection(lastSelectedRegattaName);
+    }
+
+    private void restoreListBoxRegattasSelection(String lastSelectedRegattaName) {
+        for (int i = 0; i < listBoxRegattas.getItemCount(); i++) {
+            if (listBoxRegattas.getValue(i).equals(lastSelectedRegattaName)) {
+                listBoxRegattas.setSelectedIndex(i);
+                break;
+            }
+        }
+    }
+
+    private void displayRaceTableUI(Iterable<RegattaDTO> regattas) {
+        if (Util.isEmpty(regattas)) {
+            hideRaceTable();
+        } else {
+            showRaceTable();
+        }
+    }
+
+    private void showRaceTable() {
+        raceTable.setVisible(true);
+        noTrackedRacesLabel.setVisible(false);
+    }
+
+    private void hideRaceTable() {
+        raceTable.setVisible(false);
+        noTrackedRacesLabel.setVisible(true);
     }
 
     /**
      * Allows applying some sort of filter to the process of adding races. Defaults to true in standard implementation.
      * Override for custom behavior
-     * 
-     * @param race
-     * @return
      */
     protected boolean raceIsToBeAddedToList(RaceDTO race) {
         return true;
@@ -565,8 +588,4 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
         return refreshableSelectionModel;
     }
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
-    }
 }

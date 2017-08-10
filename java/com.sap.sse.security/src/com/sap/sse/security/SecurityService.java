@@ -171,7 +171,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param key must not be <code>null</code>
      * @param value must not be <code>null</code>
      */
-    Void setPreference(String username, String key, String value);
+    void setPreference(String username, String key, String value);
 
     void setPreferenceObject(String name, String preferenceKey, Object preference);
 
@@ -185,6 +185,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
     String getPreference(String username, String key);
+    
+    /**
+     * @return all preferences of the given user
+     */
+    Map<String, String> getAllPreferences(String username);
 
     /**
      * Issues a new access token and remembers it so that later the user identified by <code>username</code> can be

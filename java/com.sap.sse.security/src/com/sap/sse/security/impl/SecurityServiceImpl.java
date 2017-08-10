@@ -31,6 +31,7 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
@@ -271,17 +272,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public CachingSecurityManager getSecurityManager() {
         return this.securityManager;
     }
-    
+
     @Override
     public Iterable<AccessControlList> getAccessControlListList() {
         return aclStore.getAccessControlLists();
     }
-    
+
     @Override
     public AccessControlList getAccessControlListByName(String id) {
         return aclStore.getAccessControlListByName(id);
     }
-    
+
     @Override
     public AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap) {
         for (UserGroup group : permissionMap.keySet()) {
@@ -289,7 +290,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         return aclStore.getAccessControlListByName(id);
     }
-    
+
     /*
      * @param name The name of the user or user group to add
      */
@@ -298,7 +299,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         aclStore.addPermission(acl, name, permission);
         return aclStore.getAccessControlListByName(acl);
     }
-    
+
     /*
      * @param name The name of the user or user group to remove
      */
@@ -307,32 +308,32 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         aclStore.removePermission(acl, name, permission);
         return aclStore.getAccessControlListByName(acl);
     }
-    
+
     @Override
     public Iterable<UserGroup> getUserGroupList() {
         return userStore.getUserGroups();
     }
-    
+
     @Override
     public UserGroup getUserGroupByName(String name) {
         return userStore.getUserGroupByName(name);
     }
-    
+
     @Override
     public Iterable<Tenant> getTenantList() {
         return userStore.getTenants();
     }
-    
+
     @Override
     public UserGroup createUserGroup(String name, String owner) throws UserGroupManagementException {
         return userStore.createUserGroup(name, owner, aclStore);
     }
-    
+
     @Override
     public Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException {
         return userStore.createTenant(name, owner, aclStore);
     }
-    
+
     @Override
     public UserGroup addUserToUserGroup(String user, String name) {
         UserGroup userGroup = userStore.getUserGroupByName(name);
@@ -971,28 +972,28 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return cacheManager;
     }
 
-    @Override
-    public Void setPreference(final String username, final String key, final String value) {
+    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) {
         final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            apply(s->s.internalSetPreference(username, key, value));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to set preference for user " + username);
+        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
+                || !username.equals(subject.getPrincipal().toString()))) {
+            final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
+                    : subject.getPrincipal().toString();
+            throw new AuthorizationException(
+                    "User " + currentUserName + " does not have the permission required to access data of user " + username);
         }
-        return null;
+    }
+
+    @Override
+    public void setPreference(final String username, final String key, final String value) {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        apply(s->s.internalSetPreference(username, key, value));
     }
 
     @Override
     public void setPreferenceObject(final String username, final String key, final Object value) {
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
-            apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to set preference object for user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
+        apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
     }
 
     @Override
@@ -1008,13 +1009,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void unsetPreference(String username, String key) {
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            apply(s->s.internalUnsetPreference(username, key));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to unset preference for user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        apply(s->s.internalUnsetPreference(username, key));
     }
 
     @Override
@@ -1051,13 +1047,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public String getPreference(String username, String key) {
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            return userStore.getPreference(username, key);
-        } else {
-            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to read preferences of user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return userStore.getPreference(username, key);
+    }
+
+    @Override
+    public Map<String, String> getAllPreferences(String username) {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return store.getAllPreferences(username);
     }
     
     @Override

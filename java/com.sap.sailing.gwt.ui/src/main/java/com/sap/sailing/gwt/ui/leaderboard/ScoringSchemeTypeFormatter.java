@@ -36,6 +36,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointFirstGetsTenOrEight();
         case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT:
             return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEight();
+        case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT_2017:
+            return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEight2017();
         case LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07:
             return stringMessages.scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
         case LOW_POINT_LEAGUE_OVERALL:
@@ -52,6 +54,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointFirstGetsTenOrEightDescription();
         case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT:
             return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
+        case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT_2017:
+            return stringMessages.scoringSchemeHighPointFirstGetsTwelveOrEight2017Description();
         case HIGH_POINT_ESS_OVERALL:
             return stringMessages.scoringSchemeHighPointEssOverallDescription();
         case HIGH_POINT_ESS_OVERALL_12:

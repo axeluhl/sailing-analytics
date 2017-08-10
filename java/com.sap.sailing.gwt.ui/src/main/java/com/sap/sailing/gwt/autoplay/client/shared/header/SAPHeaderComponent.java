@@ -8,6 +8,8 @@ import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthenticat
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
 
 public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComponentSettings> {
@@ -16,8 +18,11 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
     
     private final SAPSailingHeaderWithAuthentication sapHeader;
     
-    public SAPHeaderComponent(SAPHeaderComponentLifecycle componentLifecycle, UserService userService, SAPHeaderComponentSettings settings, 
+    public SAPHeaderComponent(Component<?> parent, ComponentContext<?> context,
+            SAPHeaderComponentLifecycle componentLifecycle,
+            UserService userService, SAPHeaderComponentSettings settings,
             StringMessages stringMessages, boolean startInAutoScreenMode) {
+        super(parent, context);
         this.componentLifecycle = componentLifecycle;
         this.settings = settings;
         this.sapHeader = new SAPSailingHeaderWithAuthentication(settings.getTitle());
@@ -51,7 +56,7 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
     }
     
     @Override
-    public SAPHeaderComponentSettingsDialogComponent getSettingsDialogComponent() {
+    public SAPHeaderComponentSettingsDialogComponent getSettingsDialogComponent(SAPHeaderComponentSettings settings) {
         return componentLifecycle.getSettingsDialogComponent(settings);
     }
     
@@ -69,5 +74,10 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
     @Override
     public String getDependentCssClassName() {
         return "";
+    }
+
+    @Override
+    public String getId() {
+        return componentLifecycle.getComponentId();
     }
 }

@@ -44,8 +44,9 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
     final IControlPointPositionListener listener;
 
     public MarkPositionReceiver(final DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            IRace tractracRace, Simulator simulator, final DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+            IRace tractracRace, Simulator simulator, final DomainFactory domainFactory, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, long timeoutInMilliseconds) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         // assumption: there is currently only one race per TracTrac Event object
         this.tractracRace = tractracRace;
         if (tractracEvent.getRaces().isEmpty()) {

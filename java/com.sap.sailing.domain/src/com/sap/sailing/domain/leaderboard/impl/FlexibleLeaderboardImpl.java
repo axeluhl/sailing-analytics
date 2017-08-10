@@ -154,7 +154,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
 
     @Override
-    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
+    public FlexibleRaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
         FlexibleRaceColumn column = addRaceColumn(columnName, medalRace, /* logAlreadyExistingColumn */false);
         column.setTrackedRace(defaultFleet, race); // triggers listeners because this object was registered above as
                                                    // race column listener on the column
@@ -363,7 +363,22 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
     
     @Override
-    protected LeaderboardType getLeaderboardType() {
+    public LeaderboardType getLeaderboardType() {
         return LeaderboardType.FlexibleLeaderboard;
+    }
+
+    /**
+     * In addition to invoking the superclass implementation, a flexible leaderboard also
+     * detaches all race logs from any tracked race currently linked to any of the race columns
+     * of this leaderboard.
+     */
+    @Override
+    public void destroy() {
+        super.destroy();
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            for (final Fleet fleet : raceColumn.getFleets()) {
+                raceColumn.setTrackedRace(fleet, null); // this will in particular detach the race log
+            }
+        }
     }
 }

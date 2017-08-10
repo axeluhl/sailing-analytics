@@ -58,6 +58,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Data consumption of mobile apps|wiki/info/mobile/data-consumption]]
 * [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
 * [[Push Notifications|wiki/info/mobile/push-notifications]]
+* [[NMEA|wiki/info/mobile/nmea]]
 
 ### API
 
@@ -97,6 +98,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[JMX Support|wiki/howto/development/jmx]]
 * [[Working with GWT Locally|wiki/howto/development/local-gwt]]
 * [[Log File Analysis|wiki/howto/development/log-file-analysis]]
+* [[Old Log Compression|wiki/howto/development/Log-File-Compression]]
 * [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
 * [[Profiling|wiki/howto/development/profiling]]
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]

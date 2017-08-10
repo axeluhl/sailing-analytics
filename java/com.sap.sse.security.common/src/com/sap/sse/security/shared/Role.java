@@ -8,11 +8,11 @@ public class Role implements AbstractRole {
     private final String rolename;
     private final String tenant;
     private final String instance;
-    
+
     public class EmptyTenantOrInstanceException extends Exception {
         private static final long serialVersionUID = -2425368113141277409L;
     }
-    
+
     /**
      * @param tenant permitted values are "*" or a tenant name
      * @param instance permitted values are "*" or a instance name
@@ -26,16 +26,16 @@ public class Role implements AbstractRole {
         this.tenant = tenant;
         this.instance = instance;
     }
-    
+
     public Role(String abstractRolename, String tenant, String instance) throws EmptyTenantOrInstanceException {
         this(AbstractRoles.valueOf(abstractRolename), tenant, instance);
     }
-    
+
     @Override
     public String getRolename() {
         return rolename;
     }
-    
+
     @Override
     public Iterable<String> getPermissions() {
         List<String> permissions = new ArrayList<>();

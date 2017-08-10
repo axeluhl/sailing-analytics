@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatSeriesD
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueProvider;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionFleetView;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionSeriesView;
@@ -19,9 +20,9 @@ import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
-public abstract class RegattaCompetitionPresenter implements
-        RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>, 
-        FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
+public abstract class RegattaCompetitionPresenter
+        implements RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>,
+        FilterValueProvider<SimpleCompetitorDTO>, FilterValueChangeHandler<SimpleRaceMetadataDTO> {
 
     private final RegattaCompetitionView view;
     private Filter<SimpleRaceMetadataDTO> latestRacesByCompetitorFilter;

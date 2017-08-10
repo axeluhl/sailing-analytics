@@ -20,4 +20,5 @@ public interface SensorFix extends Timed {
      * @throws IllegalArgumentException if the valueName isn't known by this fix
      */
     double get(String valueName) throws IllegalArgumentException;
+
 }

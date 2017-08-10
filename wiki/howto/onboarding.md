@@ -8,24 +8,24 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.5.2 "Mars SR2"), http://www.eclipse.org
+1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.5.2 "Neon SR2"), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install GWT Eclipse plugin for Eclipse (http://gwt-plugins.github.io/documentation/gwt-eclipse-plugin/Download.html)
+  * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin/tree/gpe-fork using http://storage.googleapis.com/gwt-eclipse-plugin/release as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
-3. Git (e.g. msysGit for Windows v2.9.2), http://git-scm.com
+3. Git (e.g. Git for Windows v2.12.2), http://git-scm.com / https://git-for-windows.github.io/
 4. MongoDB (e.g. Production Release 2.6.7), download: http://www.mongodb.org/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
 6. JDK 1.7 (Java SE 7), http://jdk7.java.net
 7. JDK 1.8 (Java SE 8), http://jdk8.java.net
 8. Maven 3.1.1 (or higher), http://maven.apache.org
-9. GWT SDK 2.8.0 (http://www.gwtproject.org/download.html)
+9. GWT SDK 2.8.1 (http://www.gwtproject.org/download.html)
 10. Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/)
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.5.2 "Mars SR2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers-452/mars2) by using the script "configuration/installPluginsForEclipseMars.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.6.2 "Neon.2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neon2) by using the script "configuration/installPluginsForEclipseNeon.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipseMars.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipseNeon.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -34,9 +34,6 @@ On Windows you need a Git Bash or Cygwin shell to run the script. In addition yo
 On Mac OS, it's not sufficient to provide the path to the app, instead you need to get the path to the directory inside of the app package hosting the "eclipse" binary (.../Eclipse.app/Contents/MacOS).
 
 Be aware hat the installation may take several minutes depending on your Internet connection. When the script finished running, please check that no errors occurred (the installation process only logs errors but doesn't fail).
-
-__NOTE:__
-Beside the installation script for Eclipse Mars, there is also one for the new Eclipse Neon release (4.6.0). Due to a ECJ/JDT regression, this version will brake project functionality. If you've already installed Eclipse Neon, you can easily downgrade to Mars SR2, reusing your existing workspace. You just have to accept the warning you'll get during first startup and perform a workspace cleanup (`Project > Clean... > Clean all projects`). In rare cases, the target platform must be set again.
 
 #### Further optional but recommended installations
 
@@ -87,7 +84,7 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Wait until the target platform has been resolved completely
   * Rebuild all projects
 4. Run the Race Analysis Suite
-  * Start the MongoDB
+  * Start the MongoDB (cd /somePathto MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)
   * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the debug dropdown
   * Run "Security UI sdm" in the debug dropdown
   * Run "SailingGWT" in the debug dropdown
@@ -98,12 +95,32 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * For TracTrac Events: (Date 27.11.2012) Use Live URI tcp://10.18.22.156:4412, Stored URI tcp://10.18.22.156:4413, JSON URL  http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php
   * Press List Races
 
+#### Git repository configuration essentials
+
+The project has some configuration of line endings for specific file types in ".gitattributes". To make this work as intended, you need to set the git attribute "core.autocrlf" to "false". This can be done by navigating to your local repository in a Bach/Git Bach/Cygwin instance and executing the command `git config core.autocrlf false`.
+
+If you are first time git user, don't forget to specify your user metadata. Use the commands `git config user.name "My Name"` and `git config user.email my.email@sap.com` to tell git your name and email address.
+
 #### Maven Setup
 Copy the settings.xml **and** the toolchains.xml from the top-level git folder to your ~/.m2 directory. Adjust the proxy settings in settings.xml accordingly (suggested settings for corporate network inside). Set the paths inside of toolchains.xml to your JDKs depending on where you installed them (this is like setting the compiler for your IDE, but for Maven; This makes it possible to build with the same Maven configuration on every system). Make sure the mvn executable you installed above is in your path. Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.
 
 #### Further hints
 - Configure Eclipse to use Chrome or Firefox as the default browser
 - Install the GWT Browser Plugin for the GWT Development mode <del>(Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably)</del> (As of 2016-08-31 Firefox is the only browser supporting the GWT plugin, you have to download Firefox version 24 for it to work)
+
+#### Git usage troubleshooting
+
+There are some inconsistencies regarding line endings (unix vs windows) in our git repository. There is a configuration named ".gitattributes" committed to the root folder of the repository that helps to prevent inconsistencies of line endings when committing files. Files that existed before are partially using unix (LF) or windows (CRLF) line endings. When committing files, git will ensure unix line endings for e.g. *.java files. This can lead to big diffs that hurt when trying to merge/diff.
+
+When merging branches that potentially have conflicts regarding line endings, you can specifically parameterize the git command line to not produce a big bunch of conflicts. Using the parameter `-Xignore-space-at-eol` while doing a merge will drastically reduce such conflicts. Using this, the commandline to merge "master" into your current branch is `git merge -Xignore-space-at-eol master`.
+
+In cases where code was reformatted, you can also ignore all whitespace changes by using the parameter `-Xignore-space-change`.
+
+When doing a diff, you can also use the parameters `--ignore-space-at-eol` and `--ignore-space-change`.
+
+When doing a merge in Eclipse, you can tell the merge editor to do a similar thing by right clicking and selecting "Ignore White Space". Other merge/diff tools also provide such a functionality.
+
+When a file has "wrong line endings" (line endings are different to what is configured in ".gitattributes" file) and you touch those files without changing the contents, git will potentially show that these files are changed. To get rid of those phantom changes, you can do a "git checkout HEAD path/toFile/in/repository".
 
 #### Additional steps required for Android projects
 

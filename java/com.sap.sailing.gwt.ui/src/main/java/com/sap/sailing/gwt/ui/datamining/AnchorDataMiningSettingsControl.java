@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -15,21 +14,25 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class AnchorDataMiningSettingsControl implements DataMiningSettingsControl {
+public class AnchorDataMiningSettingsControl extends AbstractComponent<CompositeSettings> implements DataMiningSettingsControl {
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
     
     private final StringMessages stringMessages;
     private final Collection<Component<?>> components;
     private final Anchor anchor;
     
-    public AnchorDataMiningSettingsControl(final StringMessages stringMessages) {
+    public AnchorDataMiningSettingsControl(Component<?> parent, ComponentContext<?> context,
+            final StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         components = new LinkedHashSet<>();
         
@@ -85,27 +88,28 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
     }
 
     @Override
-    public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent() {
+    //FIXME why does this not use a perspective? 
+    public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent(CompositeSettings settings) {
         return new CompositeTabbedSettingsDialogComponent(components);
     }
 
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (Entry<Serializable, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
+        for (Entry<String, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
             updateSettings(componentAndSettings);
         }
     }
 
     @Override 
     public CompositeSettings getSettings() {
-        Map<Serializable, Settings> settings = new HashMap<>();
+        Map<String, Settings> settings = new HashMap<>();
         for (Component<?> component : components) {
             settings.put(component.getId(), component.hasSettings() ? component.getSettings() : null);
         }
         return new CompositeSettings(settings);
     }
     
-    private <S extends Settings> void updateSettings(Entry<Serializable, S> componentIdAndSettings) {
+    private <S extends Settings> void updateSettings(Entry<String, S> componentIdAndSettings) {
         // we assume that the component to which the ID resolves matches with the settings type provided
         @SuppressWarnings("unchecked")
         Component<S> component = (Component<S>) findComponentById(componentIdAndSettings.getKey());
@@ -115,7 +119,7 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
         }
     }
     
-    private Component<?> findComponentById(Serializable componentId) {
+    private Component<?> findComponentById(String componentId) {
         for (Component<?> component : components) {
             if (component.getId().equals(componentId)) {
                 return component;
@@ -130,8 +134,8 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
     }
 
     @Override
-    public Serializable getId() {
-        return getLocalizedShortName();
+    public String getId() {
+        return "AnchorDataMiningSettingsControl";
     }
 
 }

@@ -87,7 +87,7 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
     public void testManeuversForHasso() throws NoWindException {
         Competitor hasso = getCompetitorByName("Dr.Plattner");
         NavigableSet<MarkPassing> hassosMarkPassings = getTrackedRace().getMarkPassings(hasso);
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(hasso, hassosMarkPassings.first().getTimePoint(),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(hasso, hassosMarkPassings.first().getTimePoint(),
                 hassosMarkPassings.last().getTimePoint(), /* waitForLatest */ true);
         Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
         c.clear();
@@ -105,7 +105,7 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
     }
 
-    private void assertManeuver(List<Maneuver> maneuvers, ManeuverType type, Tack newTack,
+    private void assertManeuver(Iterable<Maneuver> maneuvers, ManeuverType type, Tack newTack,
             MillisecondsTimePoint timePoint, int toleranceInMilliseconds) {
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == type && (newTack == null || newTack == maneuver.getNewTack()) &&

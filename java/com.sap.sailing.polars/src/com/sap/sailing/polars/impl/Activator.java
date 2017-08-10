@@ -15,6 +15,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.ReplicablePolarService;
 import com.sap.sailing.polars.jaxrs.client.PolarDataClient;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.util.ClearStateTestSupport;
 
 /**
  * Handles OSGi (de-)registration of the polar data service. 
@@ -34,24 +35,34 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         logger.info("Registering PolarDataService");
         PolarDataServiceImpl service = new PolarDataServiceImpl();
-        registrations.add(context.registerService(PolarDataService.class, service, null));
+        final ServiceRegistration<PolarDataService> polarDataServiceRegistration = context.registerService(PolarDataService.class, service, null);
+        registrations.add(polarDataServiceRegistration);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, service.getId().toString());
         registrations.add(context.registerService(Replicable.class.getName(), service, replicableServiceProperties));
-        
+        registrations.add(context.registerService(ClearStateTestSupport.class.getName(), service, null));
         final String polarDataSourceURL = System.getProperty(POLAR_DATA_SOURCE_URL_PROPERTY_NAME);
         if (polarDataSourceURL != null && !polarDataSourceURL.isEmpty()) {
-            waitForRacingEventServiceToObtainDomainFactory(polarDataSourceURL, service);
+            waitForRacingEventServiceToObtainDomainFactory(polarDataSourceURL, service, context, polarDataServiceRegistration);
         }
     }
     
     /**
      * Spawns a daemon thread that waits for the domain factory to be registered with the {@link PolarDataService}, then
-     * runs the polar data import from the given URL. The domain factory is required to resolve boat classes during
-     * de-serialization.
+     * unregisters the service from the OSGi registry because it will temporarily become unusable, runs the polar data
+     * import from the given URL and registers the service again, adding the service registration object to the set of
+     * {@link #registrations}. The domain factory is required to resolve boat classes during de-serialization.
+     * 
+     * @param polarDataServiceRegistration
+     *            used to remove the service registration temporarily while updating the service by a remote import
+     * @param registerPolarServiceCallback
+     *            called when the polar data has successfully been obtained; expected to register the polar service as
+     *            {@link Replicable} and as the {@link PolarDataService} with the OSGi registry
      */
-    private void waitForRacingEventServiceToObtainDomainFactory(final String polarDataSourceURL, final ReplicablePolarService polarService) {
-        final Thread t = new Thread(()->{
+    private void waitForRacingEventServiceToObtainDomainFactory(final String polarDataSourceURL,
+            final ReplicablePolarService polarService, final BundleContext context,
+            ServiceRegistration<PolarDataService> polarDataServiceRegistration) {
+        final Thread t = new Thread(() -> {
                 try {
                     Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
                     logger.info("Waiting for domain factory to be registered with PolarService...");
@@ -59,7 +70,9 @@ public class Activator implements BundleActivator {
                     polarService.runWithDomainFactory(domainFactory -> { 
                         PolarDataClient polarDataClient = new PolarDataClient(polarDataSourceURL, polarService);
                         try {
+                            polarDataServiceRegistration.unregister();
                             polarDataClient.updatePolarDataRegressions();
+                            registrations.add(context.registerService(PolarDataService.class, polarService, null));
                         } catch (Exception e) {
                             logger.log(Level.SEVERE, "Exception while trying to import polar data from "+polarDataSourceURL, e);
                         }

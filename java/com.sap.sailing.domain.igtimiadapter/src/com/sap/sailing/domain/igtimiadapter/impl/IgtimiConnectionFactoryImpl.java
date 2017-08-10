@@ -104,7 +104,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     private String getSignInUrl() {
-        return "https://www.igtimi.com/users/sign_in";
+        return getBaseUrl()+"/users/sign_in";
     }
 
     private String getOauthTokenUrl() {
@@ -112,13 +112,14 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     private String getOauthAuthorizeUrl() throws UnsupportedEncodingException {
-        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+URLEncoder.encode(getClient().getRedirectUri(), "UTF-8");
+        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+URLEncoder.encode(getClient().getDefaultRedirectUri(), "UTF-8");
     }
     
     /**
      * @return no trailing slash
      */
     private String getBaseUrl() {
+//        return "http://staging.igtimi.com"; // Use this for testing a staged Igtimi server version
         return "https://www.igtimi.com";
     }
 
@@ -320,8 +321,9 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public String getAuthorizationUrl() {
-        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+client.getRedirectUri();
+    public String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPort) {
+        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+
+                "&redirect_uri="+client.getRedirectUri(redirectProtocol, redirectHost, redirectPort);
     }
 
     private Client getClient() {
@@ -344,7 +346,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         urlParameters.add(new BasicNameValuePair("client_id", getClient().getId()));
         urlParameters.add(new BasicNameValuePair("client_secret", getClient().getSecret()));
         urlParameters.add(new BasicNameValuePair("code", code));
-        urlParameters.add(new BasicNameValuePair("redirect_uri", getClient().getRedirectUri()));
+        urlParameters.add(new BasicNameValuePair("redirect_uri", getClient().getDefaultRedirectUri()));
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
         HttpResponse response = client.execute(post);
         JSONObject accessTokenJson = ConnectivityUtils.getJsonFromResponse(response);
@@ -399,9 +401,8 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         final String[] action = new String[1];
         final Map<String, String> inputFieldsToSubmit = new HashMap<>();
         try {
-            String pageContent = ConnectivityUtils.getContent(response);
-            String unescapedHtml = StringEscapeUtils.unescapeHtml(pageContent);
-            parser.parse(new ByteArrayInputStream(unescapedHtml.getBytes("UTF-8")), new DefaultHandler() {
+            String pageContent = ConnectivityUtils.getContent(response).replaceAll("<link (.*[^/])>", "<link $1 />");
+            parser.parse(new ByteArrayInputStream(pageContent.getBytes("UTF-8")), new DefaultHandler() {
                 @Override
                 public void startElement(String uri, String localName, String qName, Attributes attributes)
                         throws SAXException {
@@ -423,6 +424,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             });
         } catch (SAXParseException e) {
             // swallow; we try to grab what we can; let's hope it was enough...
+            logger.log(Level.FINE, "Exception trying to parse Igtimi authorization document", e);
         }
         response.getEntity().getContent().close();
         final RedirectStrategy oldRedirectStrategy = client.getRedirectStrategy();
@@ -496,7 +498,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     
     public Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         HttpClient client = getHttpClient();
-        HttpGet getWebsocketServers = new HttpGet("https://www.igtimi.com/server_listers/web_sockets");
+        HttpGet getWebsocketServers = new HttpGet(getBaseUrl()+"/server_listers/web_sockets");
         JSONObject serversJson = ConnectivityUtils.getJsonFromResponse(client.execute(getWebsocketServers));
         final List<URI> result = new ArrayList<>();
         for (Object serverUrl : (JSONArray) serversJson.get("web_socket_servers")) {

@@ -7,6 +7,7 @@
               android:paddingRight="24dp">
 
     <LinearLayout
+        android:id="@+id/competitor_position_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -29,6 +30,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/competitor_penalty_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -53,6 +55,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/competitor_score_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -99,6 +102,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/competitor_finish_time_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -142,6 +146,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/competitor_comment_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">

@@ -108,11 +108,17 @@ public final class EventActionUtil {
         return calculateTtlForNonLiveEvent(event, eventState);
     }
 
-    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(SailingDispatchContext context, UUID eventId, CalculationWithEvent<T> callback) {
+    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(SailingDispatchContext context,
+            UUID eventId, CalculationWithEvent<T> callback) {
+        return withLiveRaceOrDefaultSchedule(context, eventId, callback, null);
+    }
+
+    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(SailingDispatchContext context,
+            UUID eventId, CalculationWithEvent<T> callback, T defaultResult) {
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState eventState = HomeServiceUtil.calculateEventState(event);
-        if (eventState != EventState.RUNNING) {
-            return new ResultWithTTL<T>(calculateTtlForNonLiveEvent(event, eventState), null);
+        if (eventState == EventState.FINISHED) {
+            return new ResultWithTTL<T>(calculateTtlForNonLiveEvent(event, eventState), defaultResult);
         }
         return callback.calculateWithEvent(event);
     }
@@ -137,18 +143,20 @@ public final class EventActionUtil {
      * @return The calculated {@link Duration time to live}
      */
     public static Duration calculateTtlForNonLiveEvent(Event event, EventState eventState) {
-        TimePoint now = MillisecondsTimePoint.now();
         if(eventState == EventState.UPCOMING || eventState == EventState.PLANNED) {
-            Duration tillStart = now.until(event.getStartDate());
-            double hoursTillStart = tillStart.asHours();
             long ttl = Duration.ONE_HOUR.asMillis();
-            if(hoursTillStart < 36) {
-                ttl = Duration.ONE_MINUTE.times(30).asMillis();
+            final TimePoint startDate = event.getStartDate();
+            if (startDate != null) {
+                final Duration tillStart = MillisecondsTimePoint.now().until(startDate);
+                final double hoursTillStart = tillStart.asHours();
+                if (hoursTillStart < 36) {
+                    ttl = Duration.ONE_MINUTE.times(30).asMillis();
+                }
+                if (hoursTillStart < 3) {
+                    ttl = Duration.ONE_MINUTE.times(15).asMillis();
+                }
+                ttl = Math.min(ttl, tillStart.asMillis());
             }
-            if(hoursTillStart < 3) {
-                ttl = Duration.ONE_MINUTE.times(15).asMillis();
-            }
-            ttl = Math.min(ttl, tillStart.asMillis());
             return new MillisecondsDurationImpl(ttl);
         }
         if(eventState == EventState.FINISHED) {

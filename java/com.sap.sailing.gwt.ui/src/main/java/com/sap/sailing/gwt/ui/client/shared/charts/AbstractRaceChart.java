@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -36,15 +37,27 @@ import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public abstract class AbstractRaceChart<SettingsType extends Settings> extends AbsolutePanel implements Component<SettingsType>, TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
+public abstract class AbstractRaceChart<SettingsType extends Settings> extends AbstractCompositeComponent<SettingsType> implements TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
     /**
      * Used as the turboThreshold for the Highcharts series; this is basically the maximum number of points in a series
      * to be displayed. Default is 1000. See also bug 1742.
      */
     protected static final int MAX_SERIES_POINTS = 1000000;
+    
+    public static class ExposedAbsolutePanel extends AbsolutePanel {
+        
+        public WidgetCollection getChildren() {
+            return super.getChildren();
+        }
+        
+    }
+    
+    private ExposedAbsolutePanel rootPanel = new ExposedAbsolutePanel();
 
     protected Chart chart;
     protected PlotLine timePlotLine;
@@ -78,8 +91,11 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     
     private final Button settingsButton;
     
-    protected AbstractRaceChart(SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, 
+    protected AbstractRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
+            TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+        super(parent, context);
         this.sailingService = sailingService;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.timer = timer;
@@ -98,6 +114,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         settingsButton.setStyleName(chartsCss.settingsButtonStyle());
         settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
         add(settingsButton);
+        initWidget(rootPanel);
         getElement().getStyle().setMarginRight(12, Unit.PX);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
     }
@@ -124,7 +141,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     protected void setWidget(Widget widget) {
         Button settingsButton = getSettingsButton();
         boolean foundWidget = false;
-        for (Iterator<Widget> i=getChildren().iterator(); i.hasNext(); ) {
+        for (Iterator<Widget> i=rootPanel.getChildren().iterator(); i.hasNext(); ) {
             Widget child = i.next();
             if (child == widget) {
                 foundWidget = true;
@@ -253,11 +270,19 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         timePlotLine.setValue(date.getTime());
         chart.getXAxis().addPlotLines(timePlotLine);
     }
-
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
+    
+    public void add(Widget widget) {
+      rootPanel.add(widget);
     }
+    
+    public boolean remove(Widget widget) {
+        return rootPanel.remove(widget);
+    }
+    
+    public WidgetCollection getChildren() {
+        return rootPanel.getChildren();
+    }
+
 
     /**
      * Determines if a standard loading message is allowed to appear over the chart or not.

@@ -3,10 +3,8 @@ package com.sap.sse.shared.settings;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
 
 /**
@@ -17,19 +15,14 @@ import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
  *
  */
 public class SettingsToJsonSerializer extends AbstractSettingsToJsonSerializer<JSONObject, JSONArray> {
-    public String serializeToString(GenericSerializableSettings settings) {
-        return serialize(settings).toJSONString();
+    @Override
+    public String jsonObjectToString(JSONObject jsonObject) {
+        return jsonObject.toJSONString();
     }
-
-    public <T extends GenericSerializableSettings> T deserialize(T settings, String jsonString) {
-        if (jsonString != null && !jsonString.isEmpty()) {
-            try {
-                deserialize(settings, (JSONObject) new JSONParser().parse(jsonString));
-            } catch (ParseException e) {
-                throw new RuntimeException("Could not parse settings as JSON: " + jsonString, e);
-            }
-        }
-        return settings;
+    
+    @Override
+    protected JSONObject parseStringToJsonObject(String jsonString) throws Exception {
+        return (JSONObject) new JSONParser().parse(jsonString);
     }
 
     @Override
@@ -64,5 +57,10 @@ public class SettingsToJsonSerializer extends AbstractSettingsToJsonSerializer<J
     @Override
     protected Iterable<Object> fromJsonArray(JSONArray jsonArray) {
         return jsonArray;
+    }
+
+    @Override
+    public boolean isArray(Object jsonValue) {
+        return jsonValue instanceof JSONArray;
     }
 }

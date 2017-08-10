@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity/user</h2>
+
+<b>Description:</b>
+<p>The service creates reads, updates or deletes a user object, based on the HTTP method used. This endpoint
+cannot be used to update the password. See <a href="change_password.html"><code>change_password</code></a>.</p>
+<br/>
+<table>
+	<tr>
+		<td>Request Method:</td>
+		<td>PUT</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>a JSON document of the following format, documenting the successful creation of the user object<br>
+		    <pre>{"username":"abc","access_token":"gISIhDNIFoXEVxzefrKUcXYOFKwBfq1xDPfv4wQdDjA="}</pre>
+		</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>
+			<div>username</div>
+			<div>email</div>
+			<div>fullName</div>
+			<div>company</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><code>curl -X PUT "http://127.0.0.1:8888/security/api/restsecurity/user?username=uhl&email=axel.uhl@sap.com&fullName=Axel%20Uhl&company=SAP%20SE"</code><br>
+	            Will provide a JSON document as explained above.</td>
+	</tr>
+</table>
+<table>
+	<tr>
+		<td>Request Method:</td>
+		<td>GET</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>a JSON document of the following format<br>
+		    <pre>{"username":"abc","access_token":"gISIhDNIFoXEVxzefrKUcXYOFKwBfq1xDPfv4wQdDjA="}</pre>
+		</td>
+	</tr>
+	<tr>
+		<td>Optional parameter:</td>
+		<td>
+			<div>username</div> If provided, the record for the user with that name will be shown. This requires this
+			                    user to be the currently authenticated subject, or the authenticated subject needs to
+			                    have administrator permissions.
+		</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><code>curl "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/user?username=uhl"</code><br>
+	            Will provide a JSON document as explained above.</td>
+	</tr>
+</table>
+<table>
+	<tr>
+		<td>Request Method:</td>
+		<td>DELETE</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>An Empty response with status code 200 in case of success; error-indicating status codes otherwise</pre>
+		</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>
+			<div>username</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><code>curl -X DELETE "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/user?username=uhl"</code></td>
+	</tr>
+</table>
+</body>
+</html>

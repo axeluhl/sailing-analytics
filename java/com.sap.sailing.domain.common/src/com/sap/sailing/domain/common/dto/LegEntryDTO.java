@@ -41,6 +41,9 @@ public class LegEntryDTO implements Serializable {
      * leg yet, it's <code>null</code>.
      */
     public Double currentRideHeightInMeters;
+
+    public Double currentHeelInDegrees;
+    public Double currentPitchInDegrees;
     
     /**
      * If the competitor has already finished the leg at the time point for which this entry was created, contains the
@@ -75,6 +78,8 @@ public class LegEntryDTO implements Serializable {
         result = prime * result + ((averageManeuverLossInMeters == null) ? 0 : averageManeuverLossInMeters.hashCode());
         result = prime * result
                 + ((averageSpeedOverGroundInKnots == null) ? 0 : averageSpeedOverGroundInKnots.hashCode());
+        result = prime * result + ((currentHeelInDegrees == null) ? 0 : currentHeelInDegrees.hashCode());
+        result = prime * result + ((currentPitchInDegrees == null) ? 0 : currentPitchInDegrees.hashCode());
         result = prime * result + ((currentRideHeightInMeters == null) ? 0 : currentRideHeightInMeters.hashCode());
         result = prime * result
                 + ((currentSpeedOverGroundInKnots == null) ? 0 : currentSpeedOverGroundInKnots.hashCode());
@@ -129,6 +134,16 @@ public class LegEntryDTO implements Serializable {
             if (other.averageSpeedOverGroundInKnots != null)
                 return false;
         } else if (!averageSpeedOverGroundInKnots.equals(other.averageSpeedOverGroundInKnots))
+            return false;
+        if (currentHeelInDegrees == null) {
+            if (other.currentHeelInDegrees != null)
+                return false;
+        } else if (!currentHeelInDegrees.equals(other.currentHeelInDegrees))
+            return false;
+        if (currentPitchInDegrees == null) {
+            if (other.currentPitchInDegrees != null)
+                return false;
+        } else if (!currentPitchInDegrees.equals(other.currentPitchInDegrees))
             return false;
         if (currentRideHeightInMeters == null) {
             if (other.currentRideHeightInMeters != null)

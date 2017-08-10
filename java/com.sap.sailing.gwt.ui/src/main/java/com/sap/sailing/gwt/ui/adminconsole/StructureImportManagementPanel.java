@@ -299,7 +299,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 @Override
                 public void onFailure(Throwable caught) {
                     busyIndicator.setBusy(false);
-                    errorReporter.reportError("Error trying to load regattas");
+                    errorReporter.reportError(stringMessages.errorLoadingRegattas(jsonURL, caught.getMessage()));
                 }
 
                 @Override
@@ -342,7 +342,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      */
     private RegattaDTO createRegattaDefaults(RegattaDTO regatta) {
         RegattaDTO result = new RegattaDTO("Default", ScoringSchemeType.LOW_POINT);
-        result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length */ new MeterDistance(5));
+        result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length */ new MeterDistance(5), /* hull beam */ new MeterDistance(1.8));
         result.series = regatta.series;
         result.rankingMetricType = RankingMetrics.ONE_DESIGN;
         return result;

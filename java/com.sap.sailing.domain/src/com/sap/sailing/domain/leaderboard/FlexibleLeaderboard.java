@@ -48,7 +48,7 @@ public interface FlexibleLeaderboard extends LeaderboardThatHasRegattaLike, Rena
      *            tells if the column to add represents a medal race which has double score and cannot be discarded
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
-    RaceColumn addRaceColumn(String name, boolean medalRace);
+    FlexibleRaceColumn addRaceColumn(String name, boolean medalRace);
     
     /**
      * Adds a tracked race to this leaderboard. If a {@link RaceColumn} with name <code>columnName</code> already exists
@@ -62,7 +62,7 @@ public interface FlexibleLeaderboard extends LeaderboardThatHasRegattaLike, Rena
      * 
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
-    RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace);
+    FlexibleRaceColumn addRace(TrackedRace race, String columnName, boolean medalRace);
 
     void removeRaceColumn(String columnName);
 

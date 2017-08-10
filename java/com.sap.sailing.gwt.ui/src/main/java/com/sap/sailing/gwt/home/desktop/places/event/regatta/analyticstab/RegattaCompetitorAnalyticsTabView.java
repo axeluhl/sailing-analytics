@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
+import com.sap.sailing.gwt.home.desktop.places.Consumer;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
@@ -28,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.common.Util;
 
 /**
@@ -75,22 +77,34 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
+            final Runnable callback = new Runnable() {
+                @Override
+                public void run() {
+                    leaderboardUpdateProvider = regattaAnalyticsManager.getLeaderboardPanel();
+                    leaderboardUpdateProvider.addLeaderboardUpdateListener(RegattaCompetitorAnalyticsTabView.this);
+                    initWidget(ourUiBinder.createAndBindUi(RegattaCompetitorAnalyticsTabView.this));
+                    
+                    DetailType initialDetailType = DetailType.REGATTA_RANK;
+                    if (regattaAnalyticsManager.getMultiCompetitorChart() == null) {
+                        regattaAnalyticsManager.createMultiCompetitorChart(leaderboardName, initialDetailType);
+                    }
+                    competitorCharts.setChart(regattaAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(),
+                            initialDetailType);
+                    
+                    regattaAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
+                    contentArea.setWidget(RegattaCompetitorAnalyticsTabView.this);
+                }
+            };
             if(regattaAnalyticsManager.getLeaderboardPanel() == null) {
-                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
+                createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager, currentPresenter.getUserService(), null, new Consumer<MultiRaceLeaderboardPanel>() {
+                    @Override
+                    public void consume(MultiRaceLeaderboardPanel object) {
+                        callback.run();
+                    }
+                });
+            } else {
+                callback.run();
             }
-            leaderboardUpdateProvider = regattaAnalyticsManager.getLeaderboardPanel();
-            leaderboardUpdateProvider.addLeaderboardUpdateListener(this);
-            initWidget(ourUiBinder.createAndBindUi(this));
-
-            DetailType initialDetailType = DetailType.REGATTA_RANK;
-            if (regattaAnalyticsManager.getMultiCompetitorChart() == null) {
-                regattaAnalyticsManager.createMultiCompetitorChart(leaderboardName, initialDetailType);
-            }
-            competitorCharts.setChart(regattaAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(),
-                    initialDetailType);
-
-            regattaAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());
-            contentArea.setWidget(this);
         }
     }
 

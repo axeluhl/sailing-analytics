@@ -38,9 +38,11 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Settings> {
+public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
         @Override
@@ -129,8 +131,8 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     private final Map<GroupKey, Double> averagePerMainKey;
     private final Map<GroupKey, Double> medianPerMainKey;
 
-    public ResultsChart(StringMessages stringMessages) {
-        super(stringMessages);
+    public ResultsChart(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
@@ -192,8 +194,9 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     }
 
     @Override
-    protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues) {
         this.currentResultValues = resultValues;
+        decimalsListBox.setValue(getCurrentResult().getValueDecimals(), false);
         updateKeyComparatorListBox();
         resetChartSeries();
         updateChartLabels();
@@ -388,7 +391,7 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 
@@ -405,5 +408,10 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     @Override
     public Settings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "rc";
     }
 }

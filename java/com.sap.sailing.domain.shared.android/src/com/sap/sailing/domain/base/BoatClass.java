@@ -17,6 +17,8 @@ public interface BoatClass extends Named, IsManagedByCache<SharedDomainFactory> 
      */
     Distance getMaximumDistanceForCourseApproximation();
     
+    Duration getApproximateManeuverDuration();
+    
     long getApproximateManeuverDurationInMilliseconds();
 
     /**

@@ -85,7 +85,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         }
     }
 
-    public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider,
+    public ManeuverCountRaceColumn(LeaderboardPanel<?> leaderboardPanel, RaceNameProvider raceNameProvider,
             StringMessages stringConstants, List<DetailType> maneuverDetailSelection, String headerStyle,
             String columnStylee, String detailHeaderStyle, String detailColumnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), DetailType.NUMBER_OF_MANEUVERS.getDefaultSortingOrder(), 
@@ -106,7 +106,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
                 if (legDetail != null) {
                     if (legDetail.averageManeuverLossInMeters != null) {
                         for (ManeuverType maneuverType : maneuverTypes) {
-                            final Integer maneuverCount = legDetail.numberOfManeuvers.get(maneuverType);
+                            final Integer maneuverCount = legDetail.numberOfManeuvers==null?null:legDetail.numberOfManeuvers.get(maneuverType);
                             if (maneuverCount != null && maneuverCount != 0) {
                                 totalLossInMeters += legDetail.averageManeuverLossInMeters.get(maneuverType) * maneuverCount;
                                 count += maneuverCount;
@@ -124,7 +124,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         if (row != null && row.legDetails != null) {
             for (LegEntryDTO legDetail : row.legDetails) {
                 if (legDetail != null) {
-                    if (legDetail.numberOfManeuvers.get(maneuverType) != null) {
+                    if (legDetail.numberOfManeuvers != null && legDetail.numberOfManeuvers.get(maneuverType) != null) {
                         if (totalNumberOfManeuvers == null) {
                             totalNumberOfManeuvers = (double) legDetail.numberOfManeuvers.get(maneuverType);
                         } else {
@@ -235,7 +235,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     @Override
     protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
+            LeaderboardPanel<?> leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
         result.put(DetailType.TACK, new FormattedDoubleDetailTypeColumn(DetailType.TACK, new NumberOfTacks(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));

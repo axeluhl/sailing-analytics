@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file datatype="javapropertyresourcebundle" date="2017-04-19T13:57:38Z" original="/usr/sap/ljs/app/Converter_429408536936316109/java/com.sap.sailing.domain.racelogtrackingadapter/resources/stringmessages/TrackingStringMessages.properties" source-language="en" target-language="es">
+		<header>
+			<skl>
+				<internal-file crc="55a81e913c44ad945c6ad9615879c2ce" form="base64">H4sIAAAAAAAAAF1RQU7DQAy85xW+cakQ50o5FCSkSEBLk8J5m7iN1c16tXZbIsTf2U1SWnHzzjjjmYkGUx/I7Qt3IjVK7J455NWEwhWGHYdMauPe10/c4DJ8kJBugq14jXsSxbCQ/NUcEOQYEHo+QmtOCNoifD/8wMJ7ICdqrMXmHqoWHSS9YWHH1vI5XRzlgQPUlurDwFpyBzhKoqNsAOlMUN+yi+oMYToPRrIz2po7rDj/HKe4kNGy3AgGyUuN30F8JjOZcU1gam6pxQiNtI2aLmY/oe2HsFVL8hKt5MVuiGdizICmSb40ctAZssBjogZPVCOcSdvhneIbm9b7aw0zEOq87aesW4wlpEiS3Myz7ZH7Cl2DIU8j6DBnxvtSOWAxylT4pRdLDbu7O70Wn672qDPwFo3g5fI8aRQs+SRx7cT7qYM/6raT5GIV48Z/7f2b6TAvFysoY+zUwWPyONKZRKxwJe1b/b8KE579Ah7aV3t8AgAA</internal-file>
+			</skl>
+			<phase-group>
+				<phase company-name="SAP AG" date="2017-04-06T12:41:23Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+			</phase-group>
+			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Java properties Flexible File Converter" tool-version="1.1.0"/>
+		</header>
+		<body>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="trackingInvitationFor" resname="trackingInvitationFor">
+				<source>Tracking Invitation for</source>
+				<target state="signed-off">Invitación de seguimiento para</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="scanQRCodeOrVisitUrlToRegisterAs" resname="scanQRCodeOrVisitUrlToRegisterAs">
+				<source>Make sure you have the <ph id="1">{0}</ph> App installed. Then scan the following QRCode or click the link using your smartphone to register as</source>
+				<target state="signed-off">Asegúrese de tener instalada la aplicación <ph id="1">{0}</ph>. Escanee a continuación el siguiente código QR o haga clic en el enlace con su smartphone para registrarse como</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="welcomeTo" resname="welcomeTo">
+				<source>Welcome to</source>
+				<target state="signed-off">Bienvenido a</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="iOSUsers" resname="iOSUsers">
+				<source>Start iOS App</source>
+				<target state="signed-off">Inicie la aplicación iOS</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="androidUsers" resname="androidUsers">
+				<source>Start Android App</source>
+				<target state="signed-off">Inicie la aplicación Android</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="alternativelyVisitThisLink" resname="alternativelyVisitThisLink">
+				<source>If you are reading this mail on the device with the App already installed, simply click below to start:</source>
+				<target state="signed-off">Si está leyendo este correo electrónico en el dispositivo con la aplicación ya instalada, haga clic debajo para empezar:</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="buoyTender" resname="buoyTender">
+				<source>buoy tender</source>
+				<target state="signed-off">balizador</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appStoreInstallText" resname="appStoreInstallText">
+				<source>If you don''t have the App yet, please install:</source>
+				<target state="signed-off">Si todavía no tiene instalada la aplicación, instálela:</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appIos" resname="appIos">
+				<source>Install iOS App</source>
+				<target state="signed-off">Instalar la aplicación iOS</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appAndroid" resname="appAndroid">
+				<source>Install Android App</source>
+				<target state="signed-off">Instalar la aplicación Android</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="buoyPingerAppName" resname="buoyPingerAppName">
+				<source>SAP Sailing Buoy Pinger</source>
+				<target state="signed-off">SAP Sailing Buoy Pinger</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sailInSightAppName" resname="sailInSightAppName">
+				<source>SAP Sail InSight</source>
+				<target state="signed-off">SAP Sail InSight</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

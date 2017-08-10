@@ -30,7 +30,6 @@ import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.loginpanel.LoginPanelCss;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -153,13 +152,7 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
 
     public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
             ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
-            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
-        this(userService, permissionsForRoleProvider, buildVersionRetriever, releaseNotesAnchorLabel, releaseNotesURL, errorReporter, loginPanelCss, true);
-    }
-    
-    public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
-            ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
-            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, boolean withLogin) {
+            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages) {
         super(Unit.EM);
         this.permissionsForRoleProvider = permissionsForRoleProvider;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
@@ -212,11 +205,8 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
         final DockPanel informationPanel = new DockPanel();
         informationPanel.setSize("100%", "95%");
         informationPanel.setSpacing(10);
-        if(withLogin) {
-            informationPanel.add(new LoginPanel(loginPanelCss, getUserService()), DockPanel.WEST);
-        }
         informationPanel.add(errorReporter.getPersistentInformationWidget(), DockPanel.CENTER);
-        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter);
+        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter, stringMessages);
         sysinfoPanel.ensureDebugId("SystemInformation");
         final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
         sysinfoPanel.add(releaseNotesLink);

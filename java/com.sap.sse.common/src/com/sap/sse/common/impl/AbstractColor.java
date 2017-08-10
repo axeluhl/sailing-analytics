@@ -2,6 +2,7 @@ package com.sap.sse.common.impl;
 
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 
 public abstract class AbstractColor implements Color {
     private static final long serialVersionUID = 7758884012281863458L;
@@ -16,35 +17,43 @@ public abstract class AbstractColor implements Color {
     private static String toBrowserHexValue(int number) {
         StringBuilder builder = new StringBuilder(Integer.toHexString(number & 0xff));
         while (builder.length() < 2) {
-            builder.append("0");
+            builder.insert(0, '0');
         }
         return builder.toString().toUpperCase();
     }
 
     /**
      * accepts all colors in the css-format (see http://www.w3schools.com/cssref/css_colors_legal.asp)
+     * 
+     * @return {@code null} in case {@code color==null} or {@code color} cannot be parsed successfully as a valid CSS
+     *         color string
      */
     public static Color getCssColor(String color) {
-        String[] colorWithName = color.trim().split("[()]");
-        if (colorWithName.length == 2) {
-            switch (colorWithName[0].trim().toLowerCase()) {
-            case "rgb":
-            case "rgba":
-                return getRGBColor(colorWithName[1]);
-            case "hsl":
-            case "hsla":
-            case "hsv":
-                return getHSVColor(colorWithName[1]);
+        Color resultColor;
+        if (color == null) {
+            resultColor = null;
+        } else {
+            String[] colorWithName = color.trim().split("[()]");
+            if (colorWithName.length == 2) {
+                switch (colorWithName[0].trim().toLowerCase()) {
+                case "rgb":
+                case "rgba":
+                    return getRGBColor(colorWithName[1]);
+                case "hsl":
+                case "hsla":
+                case "hsv":
+                    return getHSVColor(colorWithName[1]);
+                }
             }
-        }
-        Color resultColor = getColorByLowercaseNameStatic(color.toLowerCase().replace(" ", ""));
-        if (resultColor == null) {
-            try {
-                resultColor = new RGBColor(color);
-            } catch (NumberFormatException e) {
-                // ignore this exception and return null
-            } catch (IllegalArgumentException e) {
-                // ignore this exception and return null
+            resultColor = getColorByLowercaseNameStatic(color.toLowerCase().replace(" ", ""));
+            if (resultColor == null) {
+                try {
+                    resultColor = new RGBColor(color);
+                } catch (NumberFormatException e) {
+                    // ignore this exception and return null
+                } catch (IllegalArgumentException e) {
+                    // ignore this exception and return null
+                }
             }
         }
         return resultColor;
@@ -412,5 +421,11 @@ public abstract class AbstractColor implements Color {
         default:
             return null;
         }
+    }
+
+    @Override
+    public Color invert() {
+        final Triple<Integer, Integer, Integer> rgb = getAsRGB();
+        return new RGBColor(255-rgb.getA(), 255-rgb.getB(), 255-rgb.getC());
     }
 }

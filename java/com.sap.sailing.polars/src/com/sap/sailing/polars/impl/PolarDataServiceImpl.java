@@ -53,6 +53,7 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.util.ClearStateTestSupport;
 
 /**
  * Uses a custom datamining pipeline to aggregate incoming fixes in two regression based polar containers.
@@ -63,7 +64,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
  * @author Axel Uhl
  * 
  */
-public class PolarDataServiceImpl implements ReplicablePolarService {
+public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateTestSupport {
 
     private static final Logger logger = Logger.getLogger(PolarDataServiceImpl.class.getSimpleName());
 
@@ -379,13 +380,6 @@ public class PolarDataServiceImpl implements ReplicablePolarService {
         consumer.accept(myDomainFactory);
     }
 
-    @Override
-    public void unregisterDomainFactory(DomainFactory domainFactory) {
-        if (this.domainFactory == domainFactory) {
-            this.domainFactory = null;
-        }
-    }
-
     public Map<GroupKey, AngleAndSpeedRegression> getCubicRegressionsPerCourse() {
         return polarDataMiner.getCubicRegressionPerCourseProcessor().getRegressions();
     }
@@ -396,5 +390,10 @@ public class PolarDataServiceImpl implements ReplicablePolarService {
 
     public Map<BoatClass, Long> getFixCointPerBoatClass() {
         return polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().getFixCountPerBoatClass();
+    }
+
+    @Override
+    public void clearState() throws Exception {
+        resetState();
     }
 }

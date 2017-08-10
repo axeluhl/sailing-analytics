@@ -37,7 +37,7 @@ public class SignInTest {
             IllegalAccessException, ClassCastException, ParseException {
         // use the credentials of "Another Test App"
         final Client testAppClient = new ClientImpl("7fcdd217e0aa16090edb4ad55b09ec43b2021090e209541fc9b7003c2a2b70c6",
-                "aa569cf4909bdc7b0e04b11873f3c4ea20687421e010fcc25b771cca9e6f3f9a", "http://127.0.0.1:8888/igtimi/oauth/v1/authorizationcallback");
+                "aa569cf4909bdc7b0e04b11873f3c4ea20687421e010fcc25b771cca9e6f3f9a", "http", "127.0.0.1", "8888", "/igtimi/oauth/v1/authorizationcallback");
         MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
         MongoDBService mongoTestService = mongoTestConfig.getService();
         final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
@@ -55,7 +55,7 @@ public class SignInTest {
             InstantiationException, IllegalAccessException, ClassCastException {
         // use the credentials of "Another Test App"
         final Client testAppClient = new ClientImpl("a4cecd8593e12d43a03433a6db0eea243a411749f93c278dce6a26d4804eebd2",
-                "4d66022d1ec3e2991f8053514495b61cc076ff02d664f0dc8f3df9150c3864ef", "http://1.2.3.4");
+                "4d66022d1ec3e2991f8053514495b61cc076ff02d664f0dc8f3df9150c3864ef", "http", "1.2.3.4", null, "/");
         MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
         MongoDBService mongoTestService = mongoTestConfig.getService();
         final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
@@ -71,7 +71,7 @@ public class SignInTest {
             InstantiationException, IllegalAccessException, ClassCastException, ParseException {
         // use the credentials of "Another Test App"
         final Client testAppClient = new ClientImpl("a4cecd8593e12d43a03433a6db0eea243a411749f93c278dce6a26d4804eebd2",
-                "4d66022d1ec3e2991f8053514495b61cc076ff02d664f0dc8f3df9150c3864ef", "http://1.2.3.4");
+                "4d66022d1ec3e2991f8053514495b61cc076ff02d664f0dc8f3df9150c3864ef", "http", "1.2.3.4", null, "/");
         MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
         MongoDBService mongoTestService = mongoTestConfig.getService();
         final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),

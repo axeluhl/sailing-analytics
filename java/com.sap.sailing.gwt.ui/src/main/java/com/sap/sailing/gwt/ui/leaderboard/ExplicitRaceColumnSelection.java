@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
 
 /**
  * An explicit selection of race columns. Requests to add to or clear the selection are respected. If an updated version

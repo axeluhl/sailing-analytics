@@ -43,7 +43,9 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * Allows presentation of {@link PolarAggregation} data.
@@ -75,8 +77,8 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     private final Map<Series, Series> histogramSeriesForPolarSeries= new HashMap<>();
     private final Map<Series, Map<Long, Series>> perAngleHistogramSeriesForAngle = new HashMap<>();
 
-    public PolarResultsPresenter(StringMessages stringMessages) {
-        super(stringMessages);
+    public PolarResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         
         polarChart = createPolarChart();
         polarChartWrapperPanel = new SimpleLayoutPanel() {
@@ -206,12 +208,6 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     }
 
     @Override
-    protected void onDataSelectionValueChange() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
@@ -292,7 +288,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     }
 
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent(Settings settings) {
         return null;
     }
 
@@ -309,5 +305,10 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     @Override
     public Settings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "PolarResultsPresenter";
     }
 }

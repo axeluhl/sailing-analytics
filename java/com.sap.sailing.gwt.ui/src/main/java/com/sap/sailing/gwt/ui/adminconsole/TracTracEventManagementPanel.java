@@ -85,7 +85,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private FlushableCellTable<TracTracRaceRecordDTO> racesTable;
     
-    public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public TracTracEventManagementPanel(final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
@@ -455,12 +456,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private String getBoatClassNamesAsString(TracTracRaceRecordDTO object) {
         StringBuilder boatClassNames = new StringBuilder();
-        
         for (String boatClassName : object.boatClassNames) {
             boatClassNames.append(boatClassName);
             boatClassNames.append(", ");
         }
-        
         return boatClassNames.substring(0, boatClassNames.length() - 2);
     }
     

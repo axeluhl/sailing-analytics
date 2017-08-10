@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -31,6 +32,9 @@ public interface DomainFactory {
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
+    /**
+     * @param boatClass if {@code null}, the boat class will be inferred from the Race ID
+     */
     Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String raceID, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
@@ -62,11 +66,10 @@ public interface DomainFactory {
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
             String raceName, String raceDescription, BoatClass boatClass, StartList startList,
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm);
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination);
 
-    ControlPoint getOrCreateControlPoint(Iterable<String> devices);
+    ControlPoint getOrCreateControlPoint(Iterable<String> devices, MarkType markType);
 
-    RaceDefinition createRaceDefinition(Regatta regatta, String raceID, Iterable<Competitor> competitors,
-            List<ControlPoint> courseDefinition);
-
+    RaceDefinition createRaceDefinition(Regatta regatta, String swissTimingRaceID, Iterable<Competitor> competitors,
+            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition);
 }

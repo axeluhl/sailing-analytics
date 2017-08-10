@@ -227,7 +227,7 @@ public class LeaderboardData extends ExportAction {
         if (competitorsForColumn == null) {
             competitorsForColumn = new ArrayList<>();
         }
-        List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(column, timepointToBeUsed);
+        Iterable<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(column, timepointToBeUsed);
         for (Competitor competitorInLeaderboard : competitors) {
             // we must keep track of competitors that we are associated to fleets
             // in order to not export the score correction twice. This is needed
@@ -438,8 +438,8 @@ public class LeaderboardData extends ExportAction {
                 continue;
             }
 
-            List<Maneuver> maneuvers = getManeuvers(race, competitor, /*waitForLatest*/ false);
-            addNamedElementWithValue(competitorRaceDataElement, "number_of_maneuvers", maneuvers != null ? maneuvers.size() : 0);
+            Iterable<Maneuver> maneuvers = getManeuvers(race, competitor, /*waitForLatest*/ false);
+            addNamedElementWithValue(competitorRaceDataElement, "number_of_maneuvers", maneuvers != null ? Util.size(maneuvers) : 0);
             addNamedElementWithValue(competitorRaceDataElement, "number_of_tacks", getNumberOfTacks(maneuvers));
             addNamedElementWithValue(competitorRaceDataElement, "number_of_jibes", getNumberOfJibes(maneuvers));
             addNamedElementWithValue(competitorRaceDataElement, "number_of_penalty_circles", getNumberOfPenaltyCircles(maneuvers));
@@ -778,8 +778,8 @@ public class LeaderboardData extends ExportAction {
                 addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg_between_start_and_finish", 0);
             }
             
-            List<Maneuver> maneuvers = competitorLeg.getManeuvers(legFinishTime, /*waitForLatest*/false);
-            addNamedElementWithValue(competitorLegDataElement, "maneuver_count", maneuvers.size());
+            Iterable<Maneuver> maneuvers = competitorLeg.getManeuvers(legFinishTime, /*waitForLatest*/false);
+            addNamedElementWithValue(competitorLegDataElement, "maneuver_count", Util.size(maneuvers));
             Element maneuversElement = new Element("maneuvers");
             int maneuverCounter = 0;
             for (Maneuver man : maneuvers) {

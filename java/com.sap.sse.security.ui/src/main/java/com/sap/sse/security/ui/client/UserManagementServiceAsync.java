@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -73,10 +74,17 @@ public interface UserManagementServiceAsync {
     void addSetting(String key, String clazz, String setting, AsyncCallback<Void> callback);
 
     void setPreference(String username, String key, String value, AsyncCallback<Void> callback);
+    
+    void setPreferences(String username, Map<String, String> keyValuePairs, AsyncCallback<Void> callback);
 
     void unsetPreference(String username, String key, AsyncCallback<Void> callback);
 
     void getPreference(String username, String key, AsyncCallback<String> callback);
+    
+    void getPreferences(String username, List<String> keys,
+            final AsyncCallback<Map<String, String>> callback);
+    
+    void getAllPreferences(String username, final AsyncCallback<Map<String, String>> callback);
 
     /**
      * Obtains an access token for the user specified by {@code username}. The caller needs to

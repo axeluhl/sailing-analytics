@@ -2,7 +2,6 @@ package com.sap.sailing.xmlexport;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.NavigableSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -271,13 +270,13 @@ public abstract class ExportAction {
         return result;
     }
     
-    public List<Maneuver> getManeuvers(TrackedRace trackedRace, Competitor competitor, boolean waitForLatest) throws NoWindException {
-        List<Maneuver> maneuvers = trackedRace.getManeuvers(competitor,
+    public Iterable<Maneuver> getManeuvers(TrackedRace trackedRace, Competitor competitor, boolean waitForLatest) throws NoWindException {
+        Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor,
                 trackedRace.getStartOfRace(), trackedRace.getEndOfRace(), waitForLatest);
         return maneuvers;
     }
 
-    public Integer getNumberOfJibes(List<Maneuver> maneuvers) throws NoWindException {
+    public Integer getNumberOfJibes(Iterable<Maneuver> maneuvers) throws NoWindException {
         int result = 0;
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == ManeuverType.JIBE) {
@@ -287,7 +286,7 @@ public abstract class ExportAction {
         return result;
     }
 
-    public Integer getNumberOfPenaltyCircles(List<Maneuver> maneuvers) throws NoWindException {
+    public Integer getNumberOfPenaltyCircles(Iterable<Maneuver> maneuvers) throws NoWindException {
         int result = 0;
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
@@ -297,7 +296,7 @@ public abstract class ExportAction {
         return result;
     }
 
-    public Integer getNumberOfTacks(List<Maneuver> maneuvers) throws NoWindException {
+    public Integer getNumberOfTacks(Iterable<Maneuver> maneuvers) throws NoWindException {
         int result = 0;
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == ManeuverType.TACK) {

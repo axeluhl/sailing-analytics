@@ -56,14 +56,15 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie2017;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -82,9 +83,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRankingTestBase {
-    protected Leaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
-        ThresholdBasedResultDiscardingRuleImpl discardingRules = new ThresholdBasedResultDiscardingRuleImpl(discardingThresholds);
-        return new RegattaLeaderboardImpl(regatta, discardingRules);
+    protected DelegatingRegattaLeaderboardWithCompetitorElimination createDelegatingRegattaLeaderboardWithCompetitorElimination(
+            Regatta regatta, String leaderboardName, int[] discardingThresholds) {
+        return new DelegatingRegattaLeaderboardWithCompetitorElimination(()->createLeaderboard(regatta, discardingThresholds), leaderboardName);
     }
 
     @Test
@@ -1454,6 +1455,44 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(new Double(1), leaderboardHighPointESSOverall.getNetPoints(competitors[14], later));
         assertEquals(new Double(1), leaderboardHighPointESSOverall.getNetPoints(competitors[15], later));
     }
+    
+    @Test
+    public void testESS2017WithCompetitorsBeingDSQScoringTwoLessThanLastCompetingCompetitor() throws NoWindException {
+        Competitor[] competitors = createCompetitors(8).toArray(new Competitor[0]);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        FlexibleLeaderboard leaderboardHighPoint12LastBreaksTie2017 = new FlexibleLeaderboardImpl("Test ESS Highpoint", 
+        		new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                new HighPointFirstGets12Or8AndLastBreaksTie2017(), null);
+        RaceColumn raceColumn = leaderboardHighPoint12LastBreaksTie2017
+                .addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R1", /* medalRace */
+                        false);
+        // test basic scores with best getting 12 and worst getting 5 in a 12 point scheme
+        assertTrue(leaderboardHighPoint12LastBreaksTie2017.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
+                leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later), 
+                leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[3], later)) < 0); // c0 better than c3
+        assertEquals(8, leaderboardHighPoint12LastBreaksTie2017.getCompetitorsFromBestToWorst(later).size());
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(new Double(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        // now let's assume that the first competitor is DSQ so it gets 4 points
+        leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[0], raceColumn, MaxPointsReason.DSQ);
+        assertEquals(8, leaderboardHighPoint12LastBreaksTie2017.getCompetitorsFromBestToWorst(later).size());
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
+        assertEquals(new Double(4), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[0], raceColumn, MaxPointsReason.NONE);
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(new Double(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[0], raceColumn, MaxPointsReason.DNS);
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
+        assertEquals(new Double(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        // two competitors not started leading to tie
+        leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[1], raceColumn, MaxPointsReason.DNS);
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[2], later));
+        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
+        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+    }
 
     @Test
     public void testOverallLeaderboardWithESSHighPointScoring() throws NoWindException {
@@ -1538,6 +1577,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(c[0], rankedCompetitors.get(0));
         assertEquals(c[2], rankedCompetitors.get(1));
     }
+
     @Test 
     public void testHighPointScoringEightWithInterpolationWhenFleetNotComplete() throws NoWindException {
         int competitorsCount = 21;
@@ -1778,7 +1818,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(1. + .9, leaderboard1.getNetPoints(c1[0], afterEndOfR1), 0.00000001);
         assertEquals(1, leaderboard1.getTotalRankOfCompetitor(c1[0], afterEndOfR1));
         // now assert that the competitor c1[0] is best in r2 because of the score correction, although c1[0] doesn't have a fleet
-        assertEquals(0, leaderboard1.getCompetitorsFromBestToWorst(r2, afterEndOfR1).indexOf(c1[0]));
+        assertEquals(0, Util.indexOf(leaderboard1.getCompetitorsFromBestToWorst(r2, afterEndOfR1), c1[0]));
     }
 
     @Test

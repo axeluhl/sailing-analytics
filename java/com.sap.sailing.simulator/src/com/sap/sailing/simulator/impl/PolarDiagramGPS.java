@@ -23,7 +23,7 @@ public class PolarDiagramGPS extends PolarDiagramBase {
 
     private static final long serialVersionUID = -9219705955440602679L;
     private final PolarDataService polarData;
-    private double avgSpeed;
+    private double avgSpeedInKnots;
 
     public PolarDiagramGPS(BoatClass boatClass, PolarDataService polarData) throws SparseSimulationDataException {
         this.boatClass = boatClass;
@@ -53,7 +53,7 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         SpeedWithBearing beatPort;
         SpeedWithBearing beatStar;
         int avgCount = 0;
-        avgSpeed = 0;
+        avgSpeedInKnots = 0;
         for (int i = 0; i < windSpeeds.size(); i++) {
             try {
                 beatPort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND,
@@ -71,14 +71,14 @@ public class PolarDiagramGPS extends PolarDiagramBase {
                 beatAngles.add(avgBeatAngle);
                 Speed avgBeatSpeed = new KnotSpeedImpl((beatStar.getKnots() + beatPort.getKnots()) / 2.0);
                 beatSpeed.add(avgBeatSpeed);
-                avgSpeed += avgBeatSpeed.getKnots();
+                avgSpeedInKnots += avgBeatSpeed.getKnots();
                 avgCount++;
             } else {
                 beatAngles.add(null);
                 beatSpeed.add(null);
             }
         }
-        avgSpeed /= avgCount;
+        avgSpeedInKnots /= avgCount;
 
         // initialize jibe-angles and -speeds
         SpeedWithBearing jibePort;
@@ -175,7 +175,7 @@ public class PolarDiagramGPS extends PolarDiagramBase {
     }
 
     public double getAvgSpeed() {
-        return this.avgSpeed;
+        return this.avgSpeedInKnots;
     }
 
 }

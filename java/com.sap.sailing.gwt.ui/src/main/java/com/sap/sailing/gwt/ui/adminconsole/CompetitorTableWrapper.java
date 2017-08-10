@@ -34,6 +34,18 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
+/**
+ * A filterable competitor table. The data model is managed by the {@link #getFilterField() filter field}. In
+ * order to set an initial set of competitors to display by this table, use {@link #refreshCompetitorList(Iterable)}.
+ * The selected competitors can be obtained from the {@link #getSelectionModel() selection model}. The competitor
+ * set can also be updated to that of a leaderboard by using {@link #refreshCompetitorList(String)}, providing the
+ * leaderboard name as parameter. The competitors currently in the table (regardless of the current filter settings)
+ * are returned by {@link #getAllCompetitors()}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <S>
+ */
 public class CompetitorTableWrapper<S extends RefreshableSelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     
@@ -285,43 +297,28 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
      */
     public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>,
             Throwable> callback) {
+        final AsyncCallback<Iterable<CompetitorDTO>> myCallback = new AsyncCallback<Iterable<CompetitorDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
+                if (callback != null) {
+                    callback.onFailure(caught);
+                }
+            }
+
+            @Override
+            public void onSuccess(Iterable<CompetitorDTO> result) {
+                getFilteredCompetitors(result);
+                refreshCompetitorList(result);
+                if (callback != null) {
+                    callback.onSuccess(result);
+                }
+            }
+        };
         if (leaderboardName != null) {
-            sailingService.getCompetitorsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                    if (callback != null) {
-                        callback.onFailure(caught);
-                    }
-                }
-
-                @Override
-                public void onSuccess(Iterable<CompetitorDTO> result) {
-                    refreshCompetitorList(result);
-                    if (callback != null) {
-                        callback.onSuccess(result);
-                    }
-                }
-            });
+            sailingService.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
-            sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                    if (callback != null) {
-                        callback.onFailure(caught);
-                    }
-                }
-
-                @Override
-                public void onSuccess(Iterable<CompetitorDTO> result) {
-                    getFilteredCompetitors(result);
-                    refreshCompetitorList(result);
-                    if (callback != null) {
-                        callback.onSuccess(result);
-                    }
-                }
-            });
+            sailingService.getCompetitors(myCallback);
         }
     }
 
@@ -333,23 +330,26 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(final CompetitorDTO competitor) {
-                sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                final List<CompetitorDTO> competitors = new ArrayList<>();
+                competitors.add(competitor);
+                sailingService.addOrUpdateCompetitor(competitors, new AsyncCallback<List<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor: " + caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(CompetitorDTO updatedCompetitor) {
+                    public void onSuccess(List<CompetitorDTO> updatedCompetitor) {
+                        assert updatedCompetitor.size() == 1;
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
                         getFilterField().remove(originalCompetitor);
                         if (editedCompetitorIndex >= 0){
-                            getFilterField().add(editedCompetitorIndex, updatedCompetitor);
+                            getFilterField().add(editedCompetitorIndex, updatedCompetitor.iterator().next());
                         } else {
                             //in case competitor was not present --> not edit, but create
-                            getFilterField().add(updatedCompetitor);
+                            getFilterField().add(updatedCompetitor.iterator().next());
                         }
                         getDataProvider().refresh();
                     }  

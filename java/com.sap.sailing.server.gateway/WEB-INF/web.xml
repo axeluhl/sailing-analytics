@@ -115,14 +115,32 @@
 
 	<servlet>
 		<servlet-name>WindImportServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.expeditionimport.WindImportServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.windimport.expedition.WindImportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>WindImportServlet</servlet-name>
 		<url-pattern>/expedition-import</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
+        <servlet>
+                <servlet-name>GribWindImportServlet</servlet-name>
+                <servlet-class>com.sap.sailing.server.gateway.windimport.grib.GribWindImportServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+                <servlet-name>GribWindImportServlet</servlet-name>
+                <url-pattern>/grib-wind-import</url-pattern>
+        </servlet-mapping>
+  
+        <servlet>
+                <servlet-name>NmeaWindImportServlet</servlet-name>
+                <servlet-class>com.sap.sailing.server.gateway.windimport.nmea.NmeaWindImportServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+                <servlet-name>NmeaWindImportServlet</servlet-name>
+                <url-pattern>/nmea-wind-import</url-pattern>
+        </servlet-mapping>
+        
+        <servlet>
 		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
 	</servlet>
@@ -138,14 +156,6 @@
 	<servlet-mapping>
 		<servlet-name>WindStatusHtmlServlet</servlet-name>
 		<url-pattern>/windStatus</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<servlet-name>WindStatusJsonServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusJsonServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>WindStatusJsonServlet</servlet-name>
-		<url-pattern>/windStatusJson</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>

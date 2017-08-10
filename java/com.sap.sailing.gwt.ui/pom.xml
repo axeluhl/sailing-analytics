@@ -123,7 +123,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${gwt.version}</version>
+        <version>${gwt.plugin.version}</version>
         <executions>
           <!-- GWT version detected from dependencyManagement -->
           <execution>
@@ -131,7 +131,7 @@
               <!-- <userAgents>chrome</userAgents> -->
               <modules>
                 <module>com.sap.sailing.gwt.home.Home</module>
-                <module>com.sap.sailing.gwt.AutoPlay</module>
+                <module>com.sap.sailing.gwt.autoplay.AutoPlay</module>
                 <module>com.sap.sailing.gwt.ui.AdminConsole</module>
                 <module>com.sap.sailing.gwt.ui.Leaderboard</module>
                 <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
@@ -183,7 +183,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>gwt-maven-plugin</artifactId>
-            <version>${gwt.version}</version>
+            <version>${gwt.plugin.version}</version>
             <executions>
               <execution>
                 <configuration combine.self="override">
