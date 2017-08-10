@@ -64,7 +64,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
      * Returns a list of tracked races. By default, only TrackedRaces from the local instance are returned. The entries
      * are grouped by the remote from where they originated. Local entries have an empty remote URL. The returned list
      * is not specifically sorted.<br>
-     * TODO bug 4227: implement a parameter to optionally add remote {@link TrackedRaces} to the list and extend this JavaDoc
+     * TODO bug 4227: implement a parameter to optionally add remote {@link TrackedRace TrackedRaces} to the list and extend this JavaDoc
      * accordingly.
      */
     @GET
@@ -125,7 +125,8 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             SimpleRaceInfo current = sorted.get(i);
             JSONObject raceInfo = new JSONObject();
             raceInfo.put("racenumber", String.valueOf(i));
-            raceInfo.put("remoteUrl", current.getRemoteUrl());
+            final URL remoteUrl = current.getRemoteUrl();
+            raceInfo.put("remoteUrl", remoteUrl == null ? null : remoteUrl.toExternalForm());
             raceInfo.put("raceinfo", simpleRaceListJsonSerializer.serialize(current));
             json.add(raceInfo);
         }
