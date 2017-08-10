@@ -83,11 +83,8 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
                 list.add(simpleRaceListJsonSerializer.serialize(simpleRaceInfo));
             }
             JSONObject remote = new JSONObject();
-            if(raced.getKey() == null){
-                remote.put(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL, "");
-            }else{
-                remote.put(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL, raced.getKey().toExternalForm());
-            }
+            final URL remoteURL = raced.getKey();
+            remote.put(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL, remoteURL == null ? null : remoteURL.toExternalForm());
             remote.put(DetailedRaceInfoJsonSerializer.FIELD_RACES, list);
             json.add(remote);
         }

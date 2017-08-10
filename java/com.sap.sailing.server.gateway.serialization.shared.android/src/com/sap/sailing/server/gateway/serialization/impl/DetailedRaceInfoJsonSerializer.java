@@ -30,11 +30,8 @@ public class DetailedRaceInfoJsonSerializer
         result.put(SimpleRaceInfoJsonSerializer.FIELD_REGATTA_NAME, object.getIdentifier().getRegattaName());
         result.put(FIELD_LEADERBOARD_NAME, object.getLeaderboardName());
         result.put(SimpleRaceInfoJsonSerializer.FIELD_START_OF_RACE, object.getStartOfRace().asMillis());
-        if (object.getRemoteUrl() == null) {
-            result.put(FIELD_REMOTEURL, "");
-        } else {
-            result.put(FIELD_REMOTEURL, object.getRemoteUrl().toExternalForm());
-        }
+        final URL remoteUrl = object.getRemoteUrl();
+        result.put(FIELD_REMOTEURL, remoteUrl == null ? null : remoteUrl.toExternalForm());
         return result;
     }
 
