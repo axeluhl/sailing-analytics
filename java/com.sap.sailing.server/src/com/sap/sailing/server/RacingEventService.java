@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
@@ -691,5 +690,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
 
-    Collection<? extends DetailedRaceInfo> getFullDetailsForRace(RegattaNameAndRaceName regattaNameAndRaceName);
+    DetailedRaceInfo getFullDetailsForRace(RegattaNameAndRaceName regattaNameAndRaceName);
 }

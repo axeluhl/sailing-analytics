@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -382,28 +381,23 @@ public class RemoteSailingServerSet {
         }
     }
 
-    public Collection<? extends DetailedRaceInfo> getDetailedInfoBlocking(SimpleRaceInfo matching) {
+    public DetailedRaceInfo getDetailedInfoBlocking(SimpleRaceInfo matching) {
         try {
             URL remoteRequestUrl = getDetailRaceInfoURL(matching.getRemoteUrl(),matching);
             logger.fine("Loading DetailedRace data for remote server from URL " + remoteRequestUrl);
             URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(remoteRequestUrl);
-            HashSet<DetailedRaceInfo> answer = new HashSet<>();
             try (BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(urlConnection.getInputStream(), "UTF-8"))) {
                 JSONParser parser = new JSONParser();
-                JSONArray result =  (JSONArray) parser.parse(bufferedReader);
+                JSONObject detailedInfoAsJson =  (JSONObject) parser.parse(bufferedReader);
                 DetailedRaceInfoJsonSerializer detailedRaceListJsonSerializer = new DetailedRaceInfoJsonSerializer();
-                for(Object detailedInfo:result){
-                    JSONObject detailedInfoAsJson = (JSONObject) detailedInfo;
-                    DetailedRaceInfo detailedInfoAsJava = detailedRaceListJsonSerializer.deserialize(detailedInfoAsJson);
-                    if(detailedInfoAsJava.getRemoteUrl()==null){
-                        //not transitive, use direct url
-                        detailedInfoAsJava = new DetailedRaceInfo(detailedInfoAsJava,matching.getRemoteUrl());
-                    }
-                    answer.add(detailedInfoAsJava);
+                DetailedRaceInfo detailedInfoAsJava = detailedRaceListJsonSerializer.deserialize(detailedInfoAsJson);
+                if (detailedInfoAsJava.getRemoteUrl() == null) {
+                    // not transitive, use direct url
+                    detailedInfoAsJava = new DetailedRaceInfo(detailedInfoAsJava, matching.getRemoteUrl());
                 }
+                return detailedInfoAsJava;
             }
-            return answer;
         } catch (ParseException | IOException e) {
             throw new IllegalStateException("RemoteUrl could not be called ", e);
         }

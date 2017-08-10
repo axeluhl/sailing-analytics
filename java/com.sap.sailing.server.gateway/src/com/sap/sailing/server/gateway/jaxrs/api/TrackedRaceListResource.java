@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,24 +39,19 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
 
     /**
      * Allows to query for more details on a specific race, implemented to allow for example to retrieve more
-     * information about an anniversary. Can be implemented to work transient with further remote servers, this
-     * implementation does not, but has the same api as a future transient implementation.
+     * information about an anniversary. This call works transitively by asking a server that is known to have the race
+     * in question in case that the race isn't found locally.
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
     @Path("raceDetails")
     public Response getDetailsForRace(@QueryParam("raceName") String raceName,
             @QueryParam("regattaName") String regattaName) {
-        HashSet<DetailedRaceInfo> detailedRaces = new HashSet<>();
-        detailedRaces.addAll(getService().getFullDetailsForRace(new RegattaNameAndRaceName(regattaName, raceName)));
-        if (detailedRaces.isEmpty()) {
+        final DetailedRaceInfo detailedRaceInfo = getService().getFullDetailsForRace(new RegattaNameAndRaceName(regattaName, raceName));
+        if (detailedRaceInfo == null) {
             return Response.status(Status.NOT_FOUND).header(HEADER_NAME_CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8).build();
         }
-        JSONArray result = new JSONArray();
-        for (DetailedRaceInfo detailedRace : detailedRaces) {
-            result.add(detailedRaceListJsonSerializer.serialize(detailedRace));
-        }
-        return getJsonResponse(result);
+        return getJsonResponse(detailedRaceListJsonSerializer.serialize(detailedRaceInfo));
     }
 
     /**

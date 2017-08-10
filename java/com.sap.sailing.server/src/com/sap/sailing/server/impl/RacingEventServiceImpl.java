@@ -3980,28 +3980,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Collection<? extends DetailedRaceInfo> getFullDetailsForRace(RegattaNameAndRaceName regattaNameAndRaceName) {
-        //check for stored simpleRaceInfo from remote server
-        Map<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> races = remoteSailingServerSet
-                .getCachedRaceList();
-        SimpleRaceInfo matching = null;
-        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> cachedInfo : races
-                .entrySet()) {
-            Iterable<SimpleRaceInfo> raceList = cachedInfo.getValue().getA();
-            if (raceList != null) {
-                for (SimpleRaceInfo race : raceList) {
-                    if (race.getIdentifier().equals(regattaNameAndRaceName)) {
-                        matching = race;
-                    }
-                }
-            }
-        }
-        HashSet<DetailedRaceInfo> detailedRaces = new HashSet<>();
-        //add remote if address exists
-        if (matching != null && matching.getRemoteUrl() != null) {
-            detailedRaces.addAll(remoteSailingServerSet.getDetailedInfoBlocking(matching));
-        }
-        //also add local
+    public DetailedRaceInfo getFullDetailsForRace(RegattaNameAndRaceName regattaNameAndRaceName) {
+        DetailedRaceInfo bestMatch = null;
+        // first check if the race is found locally
         for (Event event : this.getAllEvents()) {
             for (LeaderboardGroup group : event.getLeaderboardGroups()) {
                 for (Leaderboard leaderboard : group.getLeaderboards()) {
@@ -4010,11 +3991,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                             TrackedRace trackedRace = race.getTrackedRace(fleet);
                             if (trackedRace != null) {
                                 RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                                // check if the race matches the RegattaAndRaceIdentifier
                                 if (raceIdentifier.equals(regattaNameAndRaceName) && trackedRace.getStartOfRace() != null) {
-                                    DetailedRaceInfo newMatch = new DetailedRaceInfo(raceIdentifier,
+                                    // check if the match is a best match -> we keep the previous match otherwise
+                                    if (bestMatch == null || (leaderboard.getName().equals(raceIdentifier.getRegattaName()))) {
+                                        bestMatch = new DetailedRaceInfo(raceIdentifier,
                                             leaderboard.getName(), trackedRace.getStartOfRace(), event.getId(),
                                             null);
-                                    detailedRaces.add(newMatch);
+                                    }
                                 }
                             }
                         }
@@ -4022,7 +4006,25 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }
-       
-        return detailedRaces;
+        
+        if (bestMatch != null) {
+            return bestMatch;
+        }
+        
+        //check for stored simpleRaceInfo from remote server
+        Map<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> races = remoteSailingServerSet
+                .getCachedRaceList();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> cachedInfo : races
+                .entrySet()) {
+            Iterable<SimpleRaceInfo> raceList = cachedInfo.getValue().getA();
+            if (raceList != null) {
+                for (SimpleRaceInfo race : raceList) {
+                    if (race.getIdentifier().equals(regattaNameAndRaceName)) {
+                        return remoteSailingServerSet.getDetailedInfoBlocking(race);
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
