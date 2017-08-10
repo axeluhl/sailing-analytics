@@ -141,28 +141,25 @@ public class RemoteSailingServerSet {
                 URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(raceListURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
-                
                 final Set<SimpleRaceInfo> races = new HashSet<>();
-
                 JSONParser parser = new JSONParser();
                 JSONArray racesGroupedByRemoteAsObject = (JSONArray) parser.parse(bufferedReader);
-                for(Object remoteWithRaces:racesGroupedByRemoteAsObject){
+                for (Object remoteWithRaces : racesGroupedByRemoteAsObject) {
                     JSONObject remoteWithRacesAsJson = (JSONObject) remoteWithRaces;
                     String remoteUrlAsString = (String) remoteWithRacesAsJson.get(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL);
                     URL remoteUrl;
-                    if(remoteUrlAsString != null && !remoteUrlAsString.isEmpty()){
+                    if (remoteUrlAsString != null && !remoteUrlAsString.isEmpty()) {
                         remoteUrl = new URL(remoteUrlAsString);
-                    }else{
+                    } else {
                         remoteUrl = ref.getURL();
-                        
+
                     }
                     JSONArray raceListForOneRemote = (JSONArray) remoteWithRacesAsJson.get(DetailedRaceInfoJsonSerializer.FIELD_RACES);
-                    for(Object remoteRace:raceListForOneRemote){
+                    for (Object remoteRace : raceListForOneRemote) {
                         JSONObject remoteRaceAsJson = (JSONObject) remoteRace;
-                        SimpleRaceInfo event = deserializer.deserialize(remoteRaceAsJson,remoteUrl);
+                        SimpleRaceInfo event = deserializer.deserialize(remoteRaceAsJson, remoteUrl);
                         races.add(event);
                     }
-                    
                 }
                 result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(races, /* exception */ null);
             } finally {
