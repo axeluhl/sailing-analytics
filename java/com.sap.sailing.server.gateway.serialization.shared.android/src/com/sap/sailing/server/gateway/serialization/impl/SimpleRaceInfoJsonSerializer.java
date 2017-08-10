@@ -30,6 +30,6 @@ public class SimpleRaceInfoJsonSerializer implements JsonSerializer<SimpleRaceIn
         String raceName = object.get(SimpleRaceInfoJsonSerializer.FIELD_RACE_NAME).toString();
         String regattaName = object.get(SimpleRaceInfoJsonSerializer.FIELD_REGATTA_NAME).toString();
         TimePoint startOfRace = new MillisecondsTimePoint(((Number)object.get(SimpleRaceInfoJsonSerializer.FIELD_START_OF_RACE)).longValue());
-        return new SimpleRaceInfo(new RegattaNameAndRaceName(regattaName, raceName),  startOfRace,remoteUrl);
+        return new SimpleRaceInfo(new RegattaNameAndRaceName(regattaName, raceName), startOfRace, remoteUrl);
     }
 }
