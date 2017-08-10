@@ -35,12 +35,12 @@ class SignUpController: NSObject {
     
     fileprivate let requestManager = SignUpRequestManager(baseURLString: "https://dev.sapsailing.com")
     
-    func login(_ sender: UIViewController) {
+    func loginWithViewController(_ controller: UIViewController) {
         let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
         let loginNC = storyboard.instantiateInitialViewController() as! UINavigationController
         let loginVC = loginNC.viewControllers[0] as! LoginViewController
         loginVC.signUpController = self
-        sender.present(loginNC, animated: true, completion: nil)
+        controller.present(loginNC, animated: true, completion: nil)
     }
     
     fileprivate func showAlert(forError error: Error, andMessage message: String?, withViewController controller: UIViewController) {

@@ -29,7 +29,7 @@ class StartViewController: UIViewController {
     // MARK: - Actions
 
     @IBAction func trainingButtonTapped(_ sender: Any) {
-        signUpController.login(self)
+        signUpController.loginWithViewController(self)
     }
 
     // MARK: - Properties
