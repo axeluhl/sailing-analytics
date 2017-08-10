@@ -19,6 +19,11 @@ public class SimpleRaceInfo {
     private final TimePoint startOfRace;
     private final URL remoteUrl;
 
+    /**
+     * @param remoteUrl
+     *            use {@code null} to mean "local"; a local server does not necessarily know under which URL it is being
+     *            reached and therefore cannot provide this
+     */
     public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, TimePoint startOfRace, URL remoteUrl) {
         if (identifier == null || startOfRace == null) {
             throw new IllegalStateException("SimpleRaceInfo Data is not allowed to contain any null values!");
@@ -32,6 +37,10 @@ public class SimpleRaceInfo {
         return identifier;
     }
     
+    /**
+     * The URL used in a remote server reference through which the record was obtained; or {@code null} in
+     * case the race identified by this object resides on the local server responding to a request.
+     */
     public URL getRemoteUrl() {
         return remoteUrl;
     }
