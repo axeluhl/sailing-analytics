@@ -154,7 +154,7 @@ public class SimulationServiceImpl implements SimulationService {
         protected void defaultAction() {
             if ((!this.covered)&&(legIdentifier!=null)) {
                 this.covered = true;
-                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl((RegattaAndRaceIdentifier) legIdentifier.getRaceIdentifier(), legIdentifier.getLegName());
+                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier.getRaceIdentifier(), legIdentifier.getLegName());
                 scheduler.schedule(() -> triggerUpdate(tmpLegIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
             }
         }
