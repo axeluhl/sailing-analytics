@@ -94,7 +94,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     }
                 }
                 if (raceboardData.getRace() == null) {
-                    createErrorPage(getStringMessages().couldNotFindRaceInRegatte( raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getRegattaName()));
+                    createErrorPage(getStringMessages().couldNotFindRaceInRegatta(raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getRegattaName()));
                     return;
                 }
                 
@@ -102,7 +102,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
                         .createStoredSettingsLocatorForRaceBoard(raceboardContextDefinition,
                                 finalMode != null ? finalMode.name() : null);
-                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(raceboardData.getRace().getRaceIdentifier(), StringMessages.INSTANCE);
+                final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(StringMessages.INSTANCE);
                 RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(), storageDefinition);
                 
                 componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
@@ -156,7 +156,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
-                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo);
+                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo,true);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
         return raceBoardPerspective;
     }  

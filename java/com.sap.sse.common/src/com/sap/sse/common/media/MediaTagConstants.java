@@ -9,4 +9,5 @@ public interface MediaTagConstants {
     static final String HIGHLIGHT = "Highlight";
     static final String LIVESTREAM = "Livestream";
     static final String FEATURED = "Featured";
+    static final String BIGSCREEN = "BigScreen";
 }

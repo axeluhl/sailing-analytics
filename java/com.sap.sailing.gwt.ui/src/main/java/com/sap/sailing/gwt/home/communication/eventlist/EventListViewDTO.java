@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.home.communication.eventlist;
 
 import java.util.ArrayList;
+import java.util.Map;
 
+import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
@@ -29,30 +32,48 @@ public class EventListViewDTO implements DTO, Result {
         return recentEvents;
     }
 
-    private  EventListYearDTO getYear(int year) {
+    @GwtIncompatible
+    private EventListYearDTO getYear(int year, boolean ensureYearExists) {
         for(int i = 0; i < recentEvents.size(); i++) {
             EventListYearDTO yearDTO = recentEvents.get(i);
             if(year == yearDTO.getYear()) {
                 return yearDTO;
             }
             if(year > yearDTO.getYear()) {
+                if(!ensureYearExists) {
+                    return null;
+                }
                 EventListYearDTO newYear = new EventListYearDTO(year);
                 recentEvents.add(i, newYear);
                 return newYear;
             }
         }
+        if(!ensureYearExists) {
+            return null;
+        }
         EventListYearDTO newYear = new EventListYearDTO(year);
         recentEvents.add(newYear);
         return newYear;
     }
-
+    
+    @GwtIncompatible
     public void addEvent(EventListEventDTO event, int year) {
         if (event.getState() == EventState.RUNNING || event.getState() == EventState.FINISHED) {
             // recent event or live event
-            getYear(year).addEvent(event);
+            getYear(year, true).addEvent(event);
         } else {
             // upcoming event
             addUpcomingEvent(event);
         }
+    }
+    
+    @GwtIncompatible
+    public void addStatistics(Map<Integer, Statistics> statisticsByYear) {
+        statisticsByYear.forEach((year, statistics) -> {
+            EventListYearDTO yearDTO = getYear(year, false);
+            if(yearDTO != null) {
+                yearDTO.addStatistics(statistics);
+            }
+        });
     }
 }

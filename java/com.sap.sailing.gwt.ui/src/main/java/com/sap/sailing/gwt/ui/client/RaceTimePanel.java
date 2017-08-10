@@ -126,7 +126,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     protected String getTimeToStartLabelText(Date time) {
         String result = null;
         RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
-        if (selectedRaceTimes.startOfRace != null) {
+        if (selectedRaceTimes != null && selectedRaceTimes.startOfRace != null) {
             if (time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
                 long timeToStartInMs = selectedRaceTimes.startOfRace.getTime() - time.getTime();
                 result = timeToStartInMs < 1000 ? stringMessages.start() : stringMessages.timeToStart(DateAndTimeFormatterUtil.formatElapsedTime(timeToStartInMs));

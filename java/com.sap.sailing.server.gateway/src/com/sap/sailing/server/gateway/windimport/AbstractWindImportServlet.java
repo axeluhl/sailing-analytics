@@ -198,7 +198,7 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
         response.getWriter().append(windImportResult.json().toJSONString());
     }
 
-    protected abstract Iterable<Wind> importWind(Map<InputStream, String> streamsWithFilenames) throws IOException;
+    protected abstract Iterable<Wind> importWind(Map<InputStream, String> streamsWithFilenames) throws IOException, InterruptedException;
 
     protected abstract WindSource getWindSource(UploadRequest uploadRequest);
 

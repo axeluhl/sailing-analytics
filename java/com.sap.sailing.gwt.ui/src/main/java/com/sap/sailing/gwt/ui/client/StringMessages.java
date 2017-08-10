@@ -1135,7 +1135,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addRaces();
     String withNamePrefix();
     String pleaseSelectASeriesFirst();
-    String upcommingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
+    String upcomingEventStartsInDays(@PluralCount(DefaultRule_0_1_2_n.class) int days);
     String sharingMailTooltip();
     String sharingTwitterTooltip();
     String sharingFacebookTooltip();
@@ -1418,6 +1418,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String racesQuickfinder();
     String profileQuickfinder();
     String statistics();
+    String statisticsFor(String name);
     String impressions();
     String notAvailableOnMobileMessage();
     String gotoDesktop();
@@ -1428,6 +1429,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String collapseX(String text);
     String numberOfGPSFixes();
     String fastestSailor();
+    String highestSpeed();
     String numberWindFixes();
     String sailedMiles();
     String millionValue(double value);
@@ -1799,6 +1801,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventRegattaHeaderLegendAudioNo();
     String set();
     String gribWindImport_Title();
+    String nmeaWindImport_Title();
     String angleInDegree();
     String angleInRadian();
     String centralAngleInRadian();
@@ -1819,8 +1822,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboardPage();
     String showLiveNow();
     String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
+    String estimatedDistance();
+    String estimatedTime();
+    String nothingUpcoming();
+
+    String chooseAAutoplayConfiguration();
+    String raceRankShort();
+    String showRaceRankColumn();
     String unknownLeaderboardType(String name);
     String selectCompetitorsToEliminate();
+    String noUpcomingRaceDataAvailable();
     String trackedRaceAlreadyLinked();
     String reallyRemoveSeries(String seriesName);
     String settingsId();
@@ -1829,7 +1840,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String userProfileSettingsTabDescription();
     String userSettingsFilter();
     String requiresRegattaRaceAndLeaderboard();
-    String couldNotFindRaceInRegatte(String raceName, String regattaName);
+    String couldNotFindRaceInRegatta(String raceName, String regattaName);
     String algorithmTimeOutText();
     String mixedLegText();
     String pathCanvasOverlayTitle(int numPoints, String distance, String date);
