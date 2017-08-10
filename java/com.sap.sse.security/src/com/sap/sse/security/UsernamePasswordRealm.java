@@ -9,7 +9,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 
-public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
+public class UsernamePasswordRealm extends AbstractCompositeAuthrizingRealm {
     
     public UsernamePasswordRealm() {
         super();

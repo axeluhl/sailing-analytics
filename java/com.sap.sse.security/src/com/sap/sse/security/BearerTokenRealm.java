@@ -12,7 +12,7 @@ import org.apache.shiro.authc.SaltedAuthenticationInfo;
  * @author Axel Uhl (D043530)
  *
  */
-public class BearerTokenRealm extends AbstractUserStoreBasedRealm {
+public class BearerTokenRealm extends AbstractCompositeAuthrizingRealm {
     
     public BearerTokenRealm() {
         super();

@@ -1,6 +1,6 @@
 package com.sap.sse.security;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -9,21 +9,20 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
-import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.authz.Permission;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sse.common.Util;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.UserManagementException;
 
-public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
-    private static final Logger logger = Logger.getLogger(AbstractUserStoreBasedRealm.class.getName());
+public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm {
+    private static final Logger logger = Logger.getLogger(AbstractCompositeAuthrizingRealm.class.getName());
     private final Future<UserStore> userStore;
     private final Future<AccessControlListStore> aclStore;
     private PermissionsForRoleProvider permissionsForRoleProvider;
@@ -45,7 +44,7 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
         testAclStore = theTestAclStore;
     }
 
-    public AbstractUserStoreBasedRealm() {
+    public AbstractCompositeAuthrizingRealm() {
         super();
         setCachingEnabled(false); // always grab fresh authorization info from the user store
         BundleContext context = Activator.getContext();
@@ -153,28 +152,130 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
     }
 
     @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        final SimpleAuthorizationInfo ai = new SimpleAuthorizationInfo();
-        final List<String> roles = new ArrayList<>();
-        final List<String> permissions = new ArrayList<>();
-        for (Object r : principals) {
-            String username = r.toString();
-            try {
-                Util.addAll(getUserStore().getRolesFromUser(username), roles);
-                if (permissionsForRoleProvider != null) {
-                    for (String role : roles) {
-                        for (String permission : permissionsForRoleProvider.getPermissions(role)) {
-                            ai.addStringPermission(permission);
-                        }
+    public boolean isPermitted(PrincipalCollection principals, Permission perm) {
+        String[] parts = perm.toString().split(":");
+        if (parts.length < 3) {
+            throw new WrongPermissionFormatException(perm);
+        }
+        String user = (String) principals.getPrimaryPrincipal();
+        AccessControlList acl = getAccessControlListStore().getAccessControlListByName(parts[3]);
+        if (acl.hasPermission(user, parts[2])) {
+            return true;
+        } else if (acl.hasPermission(user, "!" + parts[2])) {
+            return false;
+        }
+        try {
+            for (String directPermission : getUserStore().getPermissionsFromUser(user)) {
+                Permission directPerm = getPermissionResolver().resolvePermission(directPermission);
+                if (directPerm.implies(perm)) {
+                    return true;
+                }
+            }
+        } catch (UserManagementException e) {
+            logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
+            return false;
+        }
+        try {
+            for (String role : getUserStore().getRolesFromUser(user)) {
+                for (String rolePermission : permissionsForRoleProvider.getPermissions(role)) {
+                    Permission rolePerm = getPermissionResolver().resolvePermission(rolePermission);
+                    if (rolePerm.implies(perm)) {
+                        return true;
                     }
                 }
-                Util.addAll(getUserStore().getPermissionsFromUser(username), permissions);
-            } catch (UserManagementException e) {
-               throw new AuthenticationException(e.getMessage());
+            }
+        } catch (UserManagementException e) {
+            logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
+            return false;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean[] isPermitted(PrincipalCollection principals, List<Permission> permissions) {
+        boolean[] result = new boolean[permissions.size()];
+        for (int i = 0; i < permissions.size(); i++) {
+            result[i] = isPermitted(principals, permissions.get(i));
+        }
+        return result;
+    }
+
+    @Override
+    public boolean isPermittedAll(PrincipalCollection principal, Collection<Permission> permissions) {
+        if (permissions != null && !permissions.isEmpty()) {
+            for (Permission permission : permissions) {
+                if (!isPermitted(principal, permission)) {
+                    return false;
+                }
             }
         }
-        ai.addRoles(roles);
-        ai.addStringPermissions(permissions);
-        return ai;
+        return true;
+    }
+
+    @Override
+    public void checkPermission(PrincipalCollection principal, Permission permission) throws AuthorizationException {
+        // TODO
+    }
+
+    @Override
+    public void checkPermissions(PrincipalCollection principal, Collection<Permission> permissions) throws AuthorizationException {
+        // TODO
+    }
+    
+    @Override
+    public boolean hasRole(PrincipalCollection principal, String roleIdentifier) {
+        String user = (String) principal.getPrimaryPrincipal();
+        try {
+            for (String role : getUserStore().getRolesFromUser(user)) {
+                if (role.equals(roleIdentifier)) {
+                    return true;
+                }
+            }
+        } catch (UserManagementException e) {
+            logger.log(Level.SEVERE, "User " + user + " does not exist.", e);
+            return false;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean[] hasRoles(PrincipalCollection principal, List<String> roleIdentifiers) {
+        boolean[] result = new boolean[roleIdentifiers.size()];
+        for (int i = 0; i < roleIdentifiers.size(); i++) {
+            result[i] = hasRole(principal, roleIdentifiers.get(i));
+        }
+        return result;
+    }
+    
+    @Override
+    public boolean hasAllRoles(PrincipalCollection principal, Collection<String> roleIdentifiers) {
+        if (roleIdentifiers != null && !roleIdentifiers.isEmpty()) {
+            for (String role : roleIdentifiers) {
+                if (!hasRole(principal, role)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    @Override
+    public void checkRole(PrincipalCollection principal, String role) throws AuthorizationException {
+        // TODO
+    }
+    
+    @Override
+    public void checkRoles(PrincipalCollection principal, Collection<String> roles) throws AuthorizationException {
+        // TODO
+    }
+
+    @Override
+    public void checkRoles(PrincipalCollection principal, String... roles) throws AuthorizationException {
+        // TODO
+    }
+    
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+        return null; // As all the public methods of AuthorizingRealm are overridden to not use this, this should never be called.
     }
 }

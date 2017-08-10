@@ -37,7 +37,7 @@ import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 // GWT has similar class. 
 
-public class OAuthRealm extends AbstractUserStoreBasedRealm {
+public class OAuthRealm extends AbstractCompositeAuthrizingRealm {
     private static final Logger logger = Logger.getLogger(OAuthRealm.class.getName());
     
     public OAuthRealm() {

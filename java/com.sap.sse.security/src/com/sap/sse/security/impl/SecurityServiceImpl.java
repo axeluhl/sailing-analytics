@@ -1054,7 +1054,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Map<String, String> getAllPreferences(String username) {
         ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
-        return store.getAllPreferences(username);
+        return userStore.getAllPreferences(username);
     }
     
     @Override
