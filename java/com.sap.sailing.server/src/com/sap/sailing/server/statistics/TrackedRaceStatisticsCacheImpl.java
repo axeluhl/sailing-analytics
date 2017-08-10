@@ -150,7 +150,7 @@ public class TrackedRaceStatisticsCacheImpl extends AbstractTrackedRegattaAndRac
         public TrackedRaceStatistics computeCacheUpdate(TrackedRace trackedRace, EmptyUpdateInterval updateInterval)
                 throws Exception {
             logger.log(Level.FINE, ()->"Updating statistics for race " + trackedRace.getRaceIdentifier());
-            return new TrackedRaceStatisticsCalculator(trackedRace, false, true).getStatistics();
+            return new TrackedRaceStatisticsCalculator(trackedRace, true, true).getStatistics();
         }
     }
     

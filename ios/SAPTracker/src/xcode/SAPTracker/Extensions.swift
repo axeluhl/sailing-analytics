@@ -12,13 +12,17 @@ import Foundation
 
 func logInfo(name: String, info: String) {
     #if DEBUG
-        NSLog("\(name): \(info)")
+        NSLog("[INFO] \(name): %@", info)
     #endif
 }
 
-func logError(name: String, error: ErrorType) {
+func logError(name: String, error: Error) {
+    logError(name: name, error: error as? String ?? "")
+}
+
+func logError(name: String, error: String) {
     #if DEBUG
-        NSLog("\(name): \(error)")
+        NSLog("[ERROR] \(name): %@", error)
     #endif
 }
 
@@ -42,16 +46,16 @@ extension UIColor { // Set color to RGB hex value. See http://stackoverflow.com/
 // MARK: - UIImage
 
 extension UIImage {
-
+    
     public convenience init?(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
         let rect = CGRect(origin: .zero, size: size)
         UIGraphicsBeginImageContextWithOptions(rect.size, false, 0.0)
         color.setFill()
         UIRectFill(rect)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
+        guard let image = UIGraphicsGetImageFromCurrentImageContext() else { return nil }
         UIGraphicsEndImageContext()
-        guard let cgImage = image.CGImage else { return nil }
-        self.init(CGImage: cgImage)
+        guard let cgImage = image.cgImage else { return nil }
+        self.init(cgImage: cgImage)
     }
 
 }
@@ -62,8 +66,8 @@ extension UITableViewCell {
 
     func removeSeparatorInset() {
         preservesSuperviewLayoutMargins = false
-        layoutMargins = UIEdgeInsetsZero
-        separatorInset = UIEdgeInsetsZero
+        layoutMargins = UIEdgeInsets.zero
+        separatorInset = UIEdgeInsets.zero
     }
     
 }

@@ -131,7 +131,16 @@
                 <url-pattern>/grib-wind-import</url-pattern>
         </servlet-mapping>
   
-	<servlet>
+        <servlet>
+                <servlet-name>NmeaWindImportServlet</servlet-name>
+                <servlet-class>com.sap.sailing.server.gateway.windimport.nmea.NmeaWindImportServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+                <servlet-name>NmeaWindImportServlet</servlet-name>
+                <url-pattern>/nmea-wind-import</url-pattern>
+        </servlet-mapping>
+        
+        <servlet>
 		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
 	</servlet>

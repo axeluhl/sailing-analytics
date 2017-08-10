@@ -5,8 +5,13 @@ import java.util.List;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.statistics.Statistics;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Triple;
 
 public class EventListYearDTO implements IsSerializable {
     private int year;
@@ -18,6 +23,9 @@ public class EventListYearDTO implements IsSerializable {
     private long numberOfGPSFixes;
     private long numberOfWindFixes;
     private Distance distanceTraveled;
+    private SimpleCompetitorDTO fastestCompetitor;
+    private Double fastestCompetitorSpeedInKnots;
+    
     private ArrayList<EventListEventDTO> events = new ArrayList<>();
 
     @SuppressWarnings("unused")
@@ -57,6 +65,11 @@ public class EventListYearDTO implements IsSerializable {
         numberOfGPSFixes = statistics.getNumberOfGPSFixes();
         numberOfWindFixes = statistics.getNumberOfWindFixes();
         distanceTraveled = statistics.getDistanceTraveled();
+        final Triple<Competitor, Speed, TimePoint> maxSpeed = statistics.getMaxSpeed();
+        if (maxSpeed != null) {
+            fastestCompetitor = new SimpleCompetitorDTO(maxSpeed.getA());
+            fastestCompetitorSpeedInKnots = maxSpeed.getB().getKnots();
+        }
     }
 
     public int getEventCount() {
@@ -89,5 +102,13 @@ public class EventListYearDTO implements IsSerializable {
 
     public Distance getDistanceTraveled() {
         return distanceTraveled;
+    }
+    
+    public SimpleCompetitorDTO getFastestCompetitor() {
+        return fastestCompetitor;
+    }
+    
+    public Double getFastestCompetitorSpeedInKnots() {
+        return fastestCompetitorSpeedInKnots;
     }
 }

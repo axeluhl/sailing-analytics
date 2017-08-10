@@ -1,6 +1,10 @@
 package com.sap.sailing.domain.statistics;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * A {@link Statistics} object represents several statistical information.
@@ -41,4 +45,6 @@ public interface Statistics {
      * @return the totally sailed {@link Distance}; never {@code null}
      */
     Distance getDistanceTraveled();
+
+    Triple<Competitor, Speed, TimePoint> getMaxSpeed();
 }

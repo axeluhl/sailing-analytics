@@ -33,6 +33,7 @@ import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
@@ -70,6 +71,7 @@ public class RemoteSailingServerSet {
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
 
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Map<Integer, Statistics>, Exception>> cachedStatisticsByYearForRemoteSailingServers;
+    private final StatisticsJsonDeserializer statisticsJsonDeserializer;
     
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedTrackedRacesForRemoteSailingServers;
 
@@ -77,7 +79,8 @@ public class RemoteSailingServerSet {
      * @param scheduler
      *            Used to schedule the periodic updates of the {@link #cachedEventsForRemoteSailingServers event cache}
      */
-    public RemoteSailingServerSet(ScheduledExecutorService scheduler) {
+    public RemoteSailingServerSet(ScheduledExecutorService scheduler, SharedDomainFactory baseDomainFactory) {
+        this.statisticsJsonDeserializer = StatisticsJsonDeserializer.create(baseDomainFactory);
         remoteSailingServers = new ConcurrentHashMap<>();
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
         cachedStatisticsByYearForRemoteSailingServers = new ConcurrentHashMap<>();
@@ -243,8 +246,7 @@ public class RemoteSailingServerSet {
             final URL statisticsByYearURL = getStatisticsByYearURL(ref.getURL());
             logger.fine("Updating by-year statistics for remote server " + ref + " from URL " + statisticsByYearURL);
             JSONArray statisticsByYear = getJsonFromRemoteServerSynchronously(ref, statisticsByYearURL);
-            StatisticsByYearJsonDeserializer deserializer = new StatisticsByYearJsonDeserializer(
-                    new StatisticsJsonDeserializer());
+            StatisticsByYearJsonDeserializer deserializer = new StatisticsByYearJsonDeserializer(statisticsJsonDeserializer);
             final Map<Integer, Statistics> statisticsByYearMap = new HashMap<>();
             for (Object entry : statisticsByYear) {
                 JSONObject jsonEntry = (JSONObject) entry;
