@@ -379,14 +379,19 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Iterable<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
+        MarkPassing legStart = getMarkPassingForLegStart();
         MarkPassing legEnd = getMarkPassingForLegEnd();
+        TimePoint start = timePoint;
         TimePoint end = timePoint;
+        if (legStart != null) {
+            start = legStart.getTimePoint();
+        }
         if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
             // timePoint is after leg finish; take leg end and end time point
             end = legEnd.getTimePoint();
         }
         Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(),
-                getMarkPassingForLegStart().getTimePoint(), end, waitForLatest);
+                start, end, waitForLatest);
         return maneuvers;
     }
 
