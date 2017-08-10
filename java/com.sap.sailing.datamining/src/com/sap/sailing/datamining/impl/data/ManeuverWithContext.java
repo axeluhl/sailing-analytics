@@ -65,26 +65,23 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
     
     @Override
-    public Double getEnteringCoG() {
-        return getCoGAtTimepoint(maneuver.getTimePointBefore());
+    public Double getEnteringBeatAngle() {
+        return getBeatAngleAtTimepoint(maneuver.getTimePointBefore());
     }
 
     @Override
-    public Double getExitingCoG() {
-        return getCoGAtTimepoint(maneuver.getTimePointAfter());
+    public Double getExitingBeatAngle() {
+        return getBeatAngleAtTimepoint(maneuver.getTimePointAfter());
     }
     
-    private Double getCoGAtTimepoint(TimePoint timepoint) {
+    private Double getBeatAngleAtTimepoint(TimePoint timepoint) {
         Wind wind = trackedLegOfCompetitor.getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getWind(maneuver.getPosition(), timepoint);
         GPSFixTrack<Competitor,GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
         if(wind != null) {
             competitorTrack.lockForRead();
             try {
                 SpeedWithBearing speedWithBearing = competitorTrack.getEstimatedSpeed(timepoint);
-                double beatAngle =  wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees();
-                if(beatAngle < 0) {
-                    beatAngle += 360;
-                }
+                double beatAngle = Math.abs(wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees());
                 return beatAngle;
             } finally {
                 competitorTrack.unlockAfterRead();
