@@ -432,10 +432,6 @@ public class RaceBoardPanel
         FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
         new GenericAuthentication(userService, userManagementMenuView, display, 
                 SailingAuthenticationEntryPointLinkFactory.INSTANCE, raceBoardResources);
-        if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_RACEBOARD) {
-            regattaAndRaceTimeInformationHeader.getElement().getStyle().setRight(10, Unit.PX);
-            userManagementMenuView.asWidget().removeFromParent();
-        }
     }
 
     @SuppressWarnings("unused")
