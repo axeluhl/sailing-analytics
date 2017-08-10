@@ -2985,7 +2985,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             // produce an additional mark passing maneuver; continue to analyze to catch jibe sets and kiwi drops
             result.add(new MarkPassingManeuverImpl(ManeuverType.MARK_PASSING, tackAfterManeuver, markPassingPosition,
                     markPassingTimePoint, speedWithBearingOnApproximationAtBeginning,
-                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, waypointPassed,
+                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, timePointBeforeManeuver, timePointAfterManeuver, waypointPassed,
                     sideToWhichWaypointWasPassed));
         } else {
             markPassingTimePoint = null;
@@ -3023,7 +3023,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     Position penaltyPosition = competitorTrack.getEstimatedPosition(penaltyTimePoint, /* extrapolate */ false);
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, penaltyPosition,
                             penaltyTimePoint, speedWithBearingOnApproximationAtBeginning,
-                            competitorTrack.getEstimatedSpeed(penaltyTimePoint), firstPenaltyCircleCompletedAt.getTotalCourseChangeInDegrees(), maneuverLoss);
+                            competitorTrack.getEstimatedSpeed(penaltyTimePoint), firstPenaltyCircleCompletedAt.getTotalCourseChangeInDegrees(), maneuverLoss, timePointBeforeManeuver, timePointAfterManeuver);
                     result.add(maneuver);
                     // after we've "consumed" one tack and one jibe, recursively find more maneuvers if tacks and/or jibes remain
                     if (numberOfTacks>1 || numberOfJibes>1) {
@@ -3063,7 +3063,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     }
                     final Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
                             maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
-                            speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss);
+                            speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, timePointBeforeManeuver, timePointAfterManeuver);
                     result.add(maneuver);
                 }
             }

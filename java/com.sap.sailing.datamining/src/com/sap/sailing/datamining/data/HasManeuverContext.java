@@ -22,5 +22,11 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
 
     @Statistic(messageKey="ManeuverLoss", resultDecimals=0, ordinal=4)
     Distance getManeuverLoss();
+    
+    @Statistic(messageKey="ManeuverEnteringCoG", ordinal=5)
+    Double getEnteringCoG();
+    
+    @Statistic(messageKey="ManeuverExitingCoG", ordinal=6)
+    Double getExitingCoG();
 
 }
