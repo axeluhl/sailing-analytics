@@ -34,13 +34,17 @@ class ForgotPasswordViewController: FormularViewController {
     }
 
     fileprivate func setup() {
-        setupNavigationBar()
+        setupLocalization()
     }
     
-    fileprivate func setupNavigationBar() {
-        navigationItem.title = "FORGOT PASSWORD"
+    fileprivate func setupLocalization() {
+        navigationItem.title = NSLocalizedString("ForgotPasswordView.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        infoLabel.text = NSLocalizedString("ForgotPasswordView.InfoLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        emailLabel.text = NSLocalizedString("ForgotPasswordView.EmailLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        userNameLabel.text = NSLocalizedString("ForgotPasswordView.UserNameLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        resetPasswordButton.setTitle(NSLocalizedString("ForgotPasswordView.ResetPasswordButton.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: ""), for: .normal)
     }
-
+    
     @IBAction func resetPasswordButtonTapped(_ sender: Any) {
         if let email = emailTextField.text {
             if !email.isEmpty {

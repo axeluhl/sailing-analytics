@@ -25,25 +25,27 @@ class SignUpViewController: FormularViewController {
 
     var signUpController: SignUpController?
 
+    @IBOutlet weak var infoLabel: UILabel!
     @IBOutlet weak var emailLabel: UILabel!
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var userNameTextField: UITextField!
-    @IBOutlet weak var nameLabel: UILabel!
-    @IBOutlet weak var nameTextField: UITextField!
+    @IBOutlet weak var fullNameLabel: UILabel!
+    @IBOutlet weak var fullNameTextField: UITextField!
     @IBOutlet weak var companyLabel: UILabel!
     @IBOutlet weak var companyTextField: UITextField!
     @IBOutlet weak var passwordLabel: UILabel!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var repeatPasswordLabel: UILabel!
     @IBOutlet weak var repeatPasswordTextField: UITextField!
+    @IBOutlet weak var signUpButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         textFields.append(contentsOf: [
             emailTextField,
             userNameTextField,
-            nameTextField,
+            fullNameTextField,
             companyTextField,
             passwordTextField,
             repeatPasswordTextField]
@@ -52,11 +54,21 @@ class SignUpViewController: FormularViewController {
     }
 
     fileprivate func setup() {
-        setupNavigationBar()
+        setupLocalization()
     }
     
-    fileprivate func setupNavigationBar() {
-        navigationItem.title = "SIGN UP"
+    fileprivate func setupLocalization() {
+        navigationItem.title = NSLocalizedString("SignUpView.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        infoLabel.text = NSLocalizedString("SignUpView.InfoLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        emailLabel.text = NSLocalizedString("SignUpView.EmailLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        userNameLabel.text = NSLocalizedString("SignUpView.UserNameLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        fullNameLabel.text = NSLocalizedString("SignUpView.FullNameLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        companyLabel.text = NSLocalizedString("SignUpView.CompanyLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        passwordLabel.text = NSLocalizedString("SignUpView.PasswordLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        passwordTextField.placeholder = NSLocalizedString("SignUpView.PasswordTextField.Placeholder", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        repeatPasswordLabel.text = NSLocalizedString("SignUpView.RepeatPasswordLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        repeatPasswordTextField.placeholder = NSLocalizedString("SignUpView.RepeatPasswordTextField.Placeholder", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
+        signUpButton.setTitle(NSLocalizedString("SignUpView.SignUpButton.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: ""), for: .normal)
     }
     
     @IBAction func signUpButtonTapped(_ sender: Any) {
@@ -64,7 +76,7 @@ class SignUpViewController: FormularViewController {
             self,
             willSignUpWithUserName: userNameTextField.text!,
             email: emailTextField.text!,
-            fullName: nameTextField.text!,
+            fullName: fullNameTextField.text!,
             company: companyTextField.text!,
             password: passwordTextField.text!
         )
