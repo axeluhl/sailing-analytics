@@ -22,5 +22,7 @@ public class YearStatisticsBoxPresenter extends AbstractStatisticsBoxPresenter {
         addItemWithCompactFormat(ICON_RAW_GPS_FIX, MSG.numberOfGPSFixes(), statistics.getNumberOfGPSFixes());
         addItemWithCompactFormat(ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
         addItemWithCompactFormat(ICON_SUM_MILES, MSG.sailedMiles(), statistics.getDistanceTraveled().getNauticalMiles());
+        addCompetitorItem(ICON_FASTEST_SAILOR, MSG.fastestSailor(), statistics.getFastestCompetitor());
+        addKnotsItem(ICON_FASTEST_SAILOR, MSG.highestSpeed(), statistics.getFastestCompetitorSpeedInKnots());
     }
 }
