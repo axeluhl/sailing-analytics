@@ -327,8 +327,8 @@ public class SimulationServiceImpl implements SimulationService {
         TimePoint simulationStartTime = MillisecondsTimePoint.now();
         SimulationResults result = null;
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
-        LegChangeListener legListener = legListeners.get(legIdentifier.getRaceIdentifier()); 
         if (trackedRace != null) {
+            boolean isLive = trackedRace.isLive(simulationStartTime);
             int legNumber = legIdentifier.getLegNumber();
             Course raceCourse = trackedRace.getRace().getCourse();
             Leg leg = raceCourse.getLegs().get(legNumber);
@@ -348,7 +348,7 @@ public class SimulationServiceImpl implements SimulationService {
             }
             if (markPassing != null) {
                 startTimePoint = markPassing.getTimePoint();
-            } else if (legListener.isLive() && (legNumber == 0)) {
+            } else if (isLive && (legNumber == 0)) {
                 startTimePoint = simulationStartTime;
             }
             markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
@@ -364,7 +364,7 @@ public class SimulationServiceImpl implements SimulationService {
             if ((startTimePoint != null) && (endTimePoint != null)) {
                 legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
             }
-            if (legListener.isLive() && (markPassing == null)) {
+            if (isLive && (markPassing == null)) {
                 endTimePoint = simulationStartTime;
             }
             Position startPosition = null;
