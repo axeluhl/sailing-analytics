@@ -7,8 +7,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sse.common.TimePoint;
 
 /**
- * Unused class that is meant to store found anniversaries, currently not used as only a simpler version of bug4227 is implemented yet.
- *
+ * Reference to an "anniversary" race, such that it can be used to obtain a link to the race on its hosting server. For
+ * this, the object hosts additional information about the leaderboard and the event.
  */
 public class DetailedRaceInfo extends SimpleRaceInfo {
     private final String leaderboardName;

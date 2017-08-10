@@ -5,10 +5,19 @@ import java.net.URL;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Used to capture information about a race for use in an "anniversary" feature that allows us
+ * to sort a set of races by their start time. Races are identified by a {@link RegattaAndRaceIdentifier}.
+ * Their start time is recorded in the {@link #startOfRace} field which must not be {@code null}, and
+ * the {@link URL} of the remote server reference is stored in {@link #remoteUrl}. Using clients shall
+ * make sure that the same {@link URL} object is used for larger sets of objects of this type in order
+ * not to waste memory on a massive replication of those equal {@link URL} objects identifying the same
+ * remote server.
+ */
 public class SimpleRaceInfo {
     private final RegattaAndRaceIdentifier identifier;
     private final TimePoint startOfRace;
-    private URL remoteUrl = null;
+    private final URL remoteUrl;
 
     public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, TimePoint startOfRace, URL remoteUrl) {
         if (identifier == null || startOfRace == null) {
