@@ -58,9 +58,6 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
 
-        /**
-         * Cleanup one java8 suppliers can be used
-         */
         init(new MultiRaceLeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), /* isEmbedded */ false,
                         competitorSelectionModel, timer,
