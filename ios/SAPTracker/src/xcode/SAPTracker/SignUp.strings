@@ -6,19 +6,21 @@
   Copyright © 2017 com.sap.sailing. All rights reserved.
 */
 
+// MARK: - Common
+
+"Common.Email" = "E-Mail";
+"Common.Password" = "Passwort";
+"Common.UserName" = "Benutzername";
+
 // MARK: - ForgotPasswordView
 
 "ForgotPasswordView.Title" = "Passwort vergessen";
 "ForgotPasswordView.InfoLabel.Text" = "Benutzernamen oder E-Mail-Adresse angeben";
-"ForgotPasswordView.EmailLabel.Text" = "E-Mail";
-"ForgotPasswordView.UserNameLabel.Text" = "Benutzername";
 "ForgotPasswordView.ResetPasswordButton.Title" = "Passwort zurücksetzen";
 
 // MARK: - LoginView
 
 "LoginView.Title" = "Anmelden";
-"LoginView.UserNameLabel.Text" = "Benutzername";
-"LoginView.PasswordLabel.Text" = "Passwort";
 "LoginView.ForgotPasswordButton.Title" = "Passwort vergessen";
 "LoginView.LoginButton.Title" = "Anmelden";
 
@@ -28,11 +30,8 @@
 
 "SignUpView.Title" = "Registrieren";
 "SignUpView.InfoLabel.Text" = "Herzlich Willkommen.";
-"SignUpView.EmailLabel.Text" = "E-Mail";
-"SignUpView.UserNameLabel.Text" = "Benutzername";
 "SignUpView.FullNameLabel.Text" = "Vollständiger Name";
 "SignUpView.CompanyLabel.Text" = "Unternehmen";
-"SignUpView.PasswordLabel.Text" = "Passwort";
 "SignUpView.PasswordTextField.Placeholder" = "Geben Sie ein neues Passwort ein";
 "SignUpView.RepeatPasswordLabel.Text" = "Passwort Wiederholung";
 "SignUpView.RepeatPasswordTextField.Placeholder" = "Wiederholen Sie das Passwort";

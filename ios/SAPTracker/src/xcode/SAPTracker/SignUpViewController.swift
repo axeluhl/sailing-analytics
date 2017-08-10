@@ -58,17 +58,17 @@ class SignUpViewController: FormularViewController {
     }
     
     fileprivate func setupLocalization() {
-        navigationItem.title = NSLocalizedString("SignUpView.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        infoLabel.text = NSLocalizedString("SignUpView.InfoLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        emailLabel.text = NSLocalizedString("SignUpView.EmailLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        userNameLabel.text = NSLocalizedString("SignUpView.UserNameLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        fullNameLabel.text = NSLocalizedString("SignUpView.FullNameLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        companyLabel.text = NSLocalizedString("SignUpView.CompanyLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        passwordLabel.text = NSLocalizedString("SignUpView.PasswordLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        passwordTextField.placeholder = NSLocalizedString("SignUpView.PasswordTextField.Placeholder", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        repeatPasswordLabel.text = NSLocalizedString("SignUpView.RepeatPasswordLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        repeatPasswordTextField.placeholder = NSLocalizedString("SignUpView.RepeatPasswordTextField.Placeholder", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        signUpButton.setTitle(NSLocalizedString("SignUpView.SignUpButton.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: ""), for: .normal)
+        navigationItem.title = SignUpTranslation.SignUpView.Title.String
+        infoLabel.text = SignUpTranslation.SignUpView.InfoLabel.Text.String
+        emailLabel.text = SignUpTranslation.Common.Email.String
+        userNameLabel.text = SignUpTranslation.Common.UserName.String
+        fullNameLabel.text = SignUpTranslation.SignUpView.FullNameLabel.Text.String
+        companyLabel.text = SignUpTranslation.SignUpView.CompanyLabel.Text.String
+        passwordLabel.text = SignUpTranslation.Common.Password.String
+        passwordTextField.placeholder = SignUpTranslation.SignUpView.PasswordTextField.Placeholder.String
+        repeatPasswordLabel.text = SignUpTranslation.SignUpView.RepeatPasswordLabel.Text.String
+        repeatPasswordTextField.placeholder = SignUpTranslation.SignUpView.RepeatPasswordTextField.Placeholder.String
+        signUpButton.setTitle(SignUpTranslation.SignUpView.SignUpButton.Title.String, for: .normal)
     }
     
     @IBAction func signUpButtonTapped(_ sender: Any) {

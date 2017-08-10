@@ -38,12 +38,12 @@ class LoginViewController: FormularViewController {
     }
     
     fileprivate func setupLocalization() {
-        navigationItem.title = NSLocalizedString("LoginView.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        userNameLabel.text = NSLocalizedString("LoginView.UserNameLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        passwordLabel.text = NSLocalizedString("LoginView.PasswordLabel.Text", tableName: "SignUp", bundle: Bundle.main, value: "", comment: "")
-        forgotPasswordButton.setTitle(NSLocalizedString("LoginView.ForgotPasswordButton.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: ""), for: .normal)
-        signUpButton.setTitle(NSLocalizedString("SignUpView.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: ""), for: .normal)
-        loginButton.setTitle(NSLocalizedString("LoginView.LoginButton.Title", tableName: "SignUp", bundle: Bundle.main, value: "", comment: ""), for: .normal)
+        navigationItem.title = SignUpTranslation.LoginView.Title.String
+        userNameLabel.text = SignUpTranslation.Common.UserName.String
+        passwordLabel.text = SignUpTranslation.Common.Password.String
+        forgotPasswordButton.setTitle(SignUpTranslation.ForgotPasswordView.Title.String, for: .normal)
+        signUpButton.setTitle(SignUpTranslation.SignUpView.Title.String, for: .normal)
+        loginButton.setTitle(SignUpTranslation.LoginView.LoginButton.Title.String, for: .normal)
     }
     
     fileprivate func setupNavigationBar() {
