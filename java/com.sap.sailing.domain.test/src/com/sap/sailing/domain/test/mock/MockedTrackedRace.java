@@ -87,6 +87,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
     private static final long serialVersionUID = 5827912985564121181L;
@@ -321,6 +322,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public Iterable<Competitor> getAllCompetitors() {
+                        return null;
+                    }
+
+                    @Override
+                    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
                         return null;
                     }
 

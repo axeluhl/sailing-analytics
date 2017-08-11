@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.racemap.statistik.PreRaceStatisticsBox;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
+import com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
@@ -23,7 +24,7 @@ public class PreRaceRacemapViewImpl extends ResizeComposite implements PreRaceRa
     ResizableFlowPanel raceInfoHolder;
     @UiField
     Label bottomInfoPanel;
-    PreRaceStatisticsBox statistics = new PreRaceStatisticsBox(false);
+    PreRaceStatisticsBox statistics = new PreRaceStatisticsBox();
     private NumberFormat compactFormat = NumberFormat.getFormat("#.0");
 
     interface PreRaceRacemapViewImplUiBinder extends UiBinder<Widget, PreRaceRacemapViewImpl> {
@@ -50,14 +51,15 @@ public class PreRaceRacemapViewImpl extends ResizeComposite implements PreRaceRa
     public void updateStatistic(GetSixtyInchStatisticDTO result, String url, String windSpeed, String windDegree) {
         // google maps api workaround
         racemap.onResize();
+        
         statistics.clear();
         statistics.addItem(PreRaceStatisticsBox.ICON_COMPETITORS, StringMessages.INSTANCE.competitors(),
                 result.getCompetitors());
-        statistics.addItem(PreRaceStatisticsBox.ICON_WIND_FIX, StringMessages.INSTANCE.wind(), windSpeed);
+        statistics.addItem(StatisticsBoxConstants.ICON_WIND_FIX, StringMessages.INSTANCE.wind(), windSpeed);
         statistics.addItem(PreRaceStatisticsBox.ICON_WIND, StringMessages.INSTANCE.averageDirection(), windDegree);
         statistics.addItem(PreRaceStatisticsBox.ICON_LEGS, StringMessages.INSTANCE.legs(), result.getLegs());
         try {
-            statistics.addItem(PreRaceStatisticsBox.ICON_SUM_MILES, StringMessages.INSTANCE.estimatedDistance(),
+            statistics.addItem(StatisticsBoxConstants.ICON_SUM_MILES, StringMessages.INSTANCE.estimatedDistance(),
                     compactFormat.format(result.getDistance().getSeaMiles()) + " "
                             + StringMessages.INSTANCE.seaMiles());
         } catch (Exception e) {

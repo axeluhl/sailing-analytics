@@ -2303,9 +2303,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                         public void onSuccess(LeaderboardDTO result) {
                             LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings, result);
                             try {
+                                final boolean wasEmptyRaceColumnSelection = Util.isEmpty(raceColumnSelection.getSelectedRaceColumns());
                                 updateLeaderboard(result);
                                 // reapply, as columns might have changed
-                                if (!potentiallyChangedSettings.equals(currentSettings)) {
+                                if (wasEmptyRaceColumnSelection || !potentiallyChangedSettings.equals(currentSettings)) {
                                     updateSettings(potentiallyChangedSettings);
                                 }
                             } finally {

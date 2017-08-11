@@ -13,7 +13,7 @@ import SAPTracker
 
 class SAPTrackerAPITests: XCTestCase {
     
-    let bundle = NSBundle(forClass: SAPTrackerAPITests.self)
+    let bundle = Bundle(for: SAPTrackerAPITests.self)
     
     override func setUp() {
         // TODO: point to real server
