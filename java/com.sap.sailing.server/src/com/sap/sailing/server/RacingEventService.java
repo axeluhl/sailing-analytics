@@ -713,7 +713,24 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
 
+    /**
+     * Provides a {@link DetailedRaceInfo} for the given {@link RegattaAndRaceIdentifier}. The algorithm first tries to
+     * resolve this via {@link getFullDetailsForRaceLocal(RegattaAndRaceIdentifier)}, if no local result can be
+     * determined, the identifier is resolved against the cached remote race list in the
+     * {@link com.sap.sailing.server.impl.RemoteSailingServerSet}. If a match is found, the remoteUrl stored in the
+     * match is used to make a remote REST call to retrieve the required information from the remote server. This method
+     * is intended to be used to resolve detailed information for determined anniversary races.
+     * 
+     * @return a DetailedRaceInfo object or null if the race could not be resolved
+     */
     DetailedRaceInfo getFullDetailsForRaceCascading(RegattaAndRaceIdentifier regattaNameAndRaceName);
 
+    /**
+     * Provides a {@link DetailedRaceInfo} for the given {@link RegattaAndRaceIdentifier}. This method only tries to
+     * resolve the race against locally tracked races reachable from an event that have a startOfRace that is not
+     * {@code null}.
+     * 
+     * @return a DetailedRaceInfo object or null if the race could not be resolved
+     */
     DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier);
 }
