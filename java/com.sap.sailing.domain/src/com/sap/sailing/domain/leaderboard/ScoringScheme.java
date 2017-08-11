@@ -50,7 +50,6 @@ public interface ScoringScheme extends Serializable {
      * If the <code>competitor</code> has no {@link RaceColumn#getTrackedRace(Competitor) tracked race} in the column in which
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race.
-     * @param timePoint TODO
      */
     Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
             int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher,
