@@ -538,6 +538,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final ServiceTracker<DeviceIdentifierStringSerializationHandler, DeviceIdentifierStringSerializationHandler>
     deviceIdentifierStringSerializationHandlerTracker;
     
+    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
     private final DomainObjectFactory domainObjectFactory;
@@ -588,6 +590,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceLogTrackingAdapterFactory.class);
         deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
                 DeviceIdentifierStringSerializationHandler.class);
+        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
         igtimiAdapterTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
@@ -2354,6 +2357,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return replicationServiceTracker.getService();
     }
     
+    protected SecurityService getSecurityService() {
+        return securityServiceTracker.getService();
+    }
+    
     @Override
     public List<String> getLeaderboardNames() {
         return new ArrayList<String>(getService().getLeaderboards().keySet());
@@ -3487,10 +3494,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<EventDTO> getEvents() throws MalformedURLException {
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
-            EventDTO eventDTO = convertToEventDTO(event, false);
-            eventDTO.setBaseURL(getEventBaseURLFromEventOrRequest(event));
-            eventDTO.setIsOnRemoteServer(false);
-            result.add(eventDTO);
+            if (SecurityUtils.getSubject().isPermitted(Event.class.getName() + ":" + "view" + ":" + event.getName())) {
+                EventDTO eventDTO = convertToEventDTO(event, false);
+                eventDTO.setBaseURL(getEventBaseURLFromEventOrRequest(event));
+                eventDTO.setIsOnRemoteServer(false);
+                result.add(eventDTO);
+            }
         }
         return result;
     }
@@ -3600,7 +3609,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
                         officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
         createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
-        return getEventById(eventUuid, false);
+        EventDTO result = getEventById(eventUuid, false);
+        getSecurityService().createAccessControlList(result.getName());
+        getSecurityService().createOwnership(result.getName(), (String) SecurityUtils.getSubject().getPrincipal(), "tenant"); // TODO: remove dummy tenant
+        return result;
     }
 
     @Override

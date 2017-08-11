@@ -81,6 +81,7 @@ import com.sap.sse.security.GithubApi;
 import com.sap.sse.security.InstagramApi;
 import com.sap.sse.security.OAuthRealm;
 import com.sap.sse.security.OAuthToken;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.Social;
@@ -282,6 +283,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public AccessControlList getAccessControlListByName(String id) {
         return aclStore.getAccessControlListByName(id);
     }
+    
+    @Override
+    public SecurityService createAccessControlList(String id) {
+        aclStore.createAccessControlList(id);
+        return this;
+    }
 
     @Override
     public AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap) {
@@ -307,6 +314,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public AccessControlList removeFromACL(String acl, String permission, String name) {
         aclStore.removePermission(acl, name, permission);
         return aclStore.getAccessControlListByName(acl);
+    }
+    
+    @Override
+    public SecurityService createOwnership(String id, String owner, String tenant) {
+        aclStore.createOwnership(id, owner, tenant);
+        return this;
     }
 
     @Override

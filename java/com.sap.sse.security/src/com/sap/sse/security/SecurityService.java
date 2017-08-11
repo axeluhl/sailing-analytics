@@ -37,6 +37,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     AccessControlList getAccessControlListByName(String id);
     
+    SecurityService createAccessControlList(String id);
+    
     AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap);
     
     /*
@@ -48,6 +50,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param name The name of the user or user group to remove
      */
     AccessControlList removeFromACL(String acl, String permission, String name);
+    
+    SecurityService createOwnership(String id, String owner, String tenant);
     
     Iterable<UserGroup> getUserGroupList();
     

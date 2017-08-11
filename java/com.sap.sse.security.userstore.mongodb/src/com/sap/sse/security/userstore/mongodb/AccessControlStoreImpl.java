@@ -141,6 +141,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
             }
         }
     }
+    
+    @Override
+    public Owner createOwnership(String id, String owner, String tenantOwner) {
+        setOwnership(id, owner, tenantOwner);
+        return ownershipList.get(id);
+    }
 
     @Override
     public AccessControlStore setOwnership(String id, String owner, String tenantOwner) {

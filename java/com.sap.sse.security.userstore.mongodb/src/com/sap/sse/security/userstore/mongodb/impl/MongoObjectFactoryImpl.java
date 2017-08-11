@@ -36,7 +36,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeAccessControlList(AccessControlList acl) {
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
-        aclCollection.createIndex(new BasicDBObject(FieldNames.AccessControlList.NAME.name(), null));
+        aclCollection.createIndex(new BasicDBObject(FieldNames.AccessControlList.NAME.name(), 1));
         DBObject dbACL = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.AccessControlList.NAME.name(), acl.getName());
         dbACL.put(FieldNames.AccessControlList.NAME.name(), acl.getName());
@@ -55,7 +55,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeTenant(String name) {
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
-        tenantCollection.createIndex(new BasicDBObject(FieldNames.Tenant.NAME.name(), null));
+        tenantCollection.createIndex(new BasicDBObject(FieldNames.Tenant.NAME.name(), 1));
         DBObject dbTenant = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Tenant.NAME.name(), name);
         dbTenant.put(FieldNames.Tenant.NAME.name(), name);
@@ -73,7 +73,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeUserGroup(UserGroup group) {
         DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
-        userGroupCollection.createIndex(new BasicDBObject(FieldNames.UserGroup.NAME.name(), null));
+        userGroupCollection.createIndex(new BasicDBObject(FieldNames.UserGroup.NAME.name(), 1));
         DBObject dbUserGroup = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.UserGroup.NAME.name(), group.getName());
         dbUserGroup.put(FieldNames.UserGroup.NAME.name(), group.getName());
