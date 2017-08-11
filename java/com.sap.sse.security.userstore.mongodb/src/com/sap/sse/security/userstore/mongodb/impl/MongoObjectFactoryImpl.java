@@ -10,6 +10,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.sap.sse.security.AccessControlList;
+import com.sap.sse.security.Owner;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserGroup;
@@ -39,7 +40,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbACL = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.AccessControlList.NAME.name(), acl.getName());
         dbACL.put(FieldNames.AccessControlList.NAME.name(), acl.getName());
-        dbACL.put(FieldNames.AccessControlList.OWNER.name(), acl.getOwner());
         dbACL.put(FieldNames.AccessControlList.PERMISSION_MAP.name(), acl.getPermissionMap());
         aclCollection.update(query, dbACL, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
@@ -197,5 +197,25 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbSettingTypes.put(e.getKey(), e.getValue().getName());
         }
         return dbSettingTypes;
+    }
+
+    @Override
+    public void storeOwnership(Owner owner) {
+        DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
+        ownershipCollection.createIndex(new BasicDBObject(FieldNames.Ownership.NAME.name(), null));
+        DBObject dbOwnership = new BasicDBObject();
+        DBObject query = new BasicDBObject(FieldNames.Ownership.NAME.name(), owner.getName());
+        dbOwnership.put(FieldNames.Ownership.NAME.name(), owner.getName());
+        dbOwnership.put(FieldNames.Ownership.OWNER.name(), owner.getOwner());
+        dbOwnership.put(FieldNames.Ownership.TENANT_OWNER.name(), owner.getTenantOwner());
+        ownershipCollection.update(query, dbOwnership, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void deleteOwnership(Owner owner) {
+        DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
+        DBObject dbOwnership = new BasicDBObject();
+        dbOwnership.put(FieldNames.Ownership.NAME.name(), owner.getName());
+        ownershipCollection.remove(dbOwnership);
     }
 }

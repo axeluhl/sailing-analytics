@@ -7,11 +7,11 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
-import com.sap.sse.security.AccessControlListStore;
+import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public abstract class AbstractSecurityReplicationTest extends AbstractServerWithSingleServiceReplicationTest<SecurityService, SecurityServiceImpl> {
@@ -34,7 +34,7 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
         protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException,
                 UserManagementException, MailException {
             final UserStoreImpl userStore = new UserStoreImpl();
-            final AccessControlListStore aclStore = new AccessControlListStoreImpl(userStore);
+            final AccessControlStore aclStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(userStore, aclStore);
             result.clearReplicaState();
             return result;
@@ -43,7 +43,7 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
         @Override
         protected SecurityServiceImpl createNewReplica() {
             final UserStoreImpl userStore = new UserStoreImpl();
-            final AccessControlListStore aclStore = new AccessControlListStoreImpl(userStore);
+            final AccessControlStore aclStore = new AccessControlStoreImpl(userStore);
             return new SecurityServiceImpl(userStore, aclStore);
         }
     }

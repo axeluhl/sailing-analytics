@@ -7,24 +7,18 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class AccessControlListDTO implements IsSerializable {
     private String id;
-    private String owner;
     
     private Map<UserGroupDTO, Set<String>> permissionMap;
     
     AccessControlListDTO() {} // for serialization only
     
-    public AccessControlListDTO(String id, String owner, Map<UserGroupDTO, Set<String>> permissionMap) {
+    public AccessControlListDTO(String id, Map<UserGroupDTO, Set<String>> permissionMap) {
         this.id = id;
-        this.owner = owner;
         this.permissionMap = permissionMap;
     }
     
     public String getId() {
         return id;
-    }
-    
-    public String getOwner() {
-        return owner;
     }
     
     public boolean hasPermission(String user, String permission) {

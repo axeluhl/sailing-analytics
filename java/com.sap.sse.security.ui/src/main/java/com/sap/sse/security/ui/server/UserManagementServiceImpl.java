@@ -33,8 +33,9 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.security.AccessControlList;
-import com.sap.sse.security.AccessControlListStore;
+import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.Credential;
+import com.sap.sse.security.Owner;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.Tenant;
@@ -56,6 +57,7 @@ import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
+import com.sap.sse.security.ui.shared.OwnerDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -70,7 +72,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private final BundleContext context;
     private final FutureTask<SecurityService> securityService;
     private final UserStore userStore;
-    private final AccessControlListStore aclStore;
+    private final AccessControlStore aclStore;
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();
@@ -99,20 +101,24 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }.start();
         userStore = context.getService(context.getServiceReference(UserStore.class));
-        aclStore = context.getService(context.getServiceReference(AccessControlListStore.class));
+        aclStore = context.getService(context.getServiceReference(AccessControlStore.class));
     }
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
+        AccessControlList acl = aclStore.getAccessControlListByName(userGroup.getName());
+        Owner ownership = aclStore.getOwnership(userGroup.getName());
         return new UserGroupDTO(userGroup.getName(), 
-                createAclDTOFromAcl(aclStore.getAccessControlListByName(userGroup.getName())), userGroup.getUsernames());
+                createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), userGroup.getUsernames());
     }
     
     private TenantDTO createTenantDTOFromTenant(Tenant tenant) {
         if (tenant == null) {
             return null;
         } else {
+            AccessControlList acl = aclStore.getAccessControlListByName(tenant.getName());
+            Owner ownership = aclStore.getOwnership(tenant.getName());
             return new TenantDTO(tenant.getName(),
-                    createAclDTOFromAcl(aclStore.getAccessControlListByName(tenant.getName())), tenant.getUsernames());
+                    createAclDTOFromAcl(acl), createOwnershipDTOFromOwnership(ownership), tenant.getUsernames());
         }
     }
     
@@ -123,8 +129,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
                     entry.getValue());
         }
-        return new AccessControlListDTO(acl.getName(), acl.getOwner(),
-                permissionMapDTO);
+        return new AccessControlListDTO(acl.getName(), permissionMapDTO);
+    }
+    
+    private OwnerDTO createOwnershipDTOFromOwnership(Owner ownership) {
+        return new OwnerDTO(ownership.getName(), ownership.getOwner(), ownership.getTenantOwner());
     }
     
     @Override

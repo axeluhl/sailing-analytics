@@ -16,18 +16,18 @@ import com.mongodb.MongoException;
 import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.security.AccessControlListStore;
+import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
 public class LoginTest {
     private UserStoreImpl store;
-    private AccessControlListStore aclStore;
+    private AccessControlStore aclStore;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
@@ -38,7 +38,7 @@ public class LoginTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         store = new UserStoreImpl();
-        aclStore = new AccessControlListStoreImpl(null, null, store);
+        aclStore = new AccessControlStoreImpl(null, null, store);
         
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.mongodb.DB;
 import com.sap.sse.security.AccessControlList;
+import com.sap.sse.security.Owner;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserGroup;
 
@@ -11,6 +12,10 @@ public interface MongoObjectFactory {
     public void storeAccessControlList(AccessControlList acl);
     
     public void deleteAccessControlList(AccessControlList acl);
+    
+    public void storeOwnership(Owner owner);
+    
+    public void deleteOwnership(Owner owner);
     
     public void storeTenant(String name);
     

@@ -19,7 +19,7 @@ import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -32,7 +32,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     private static final String C = "c";
 
     private UserStoreImpl store;
-    private AccessControlListStoreImpl aclStore;
+    private AccessControlStoreImpl aclStore;
     
     private static final String user1 = "me";
     private static final String user2 = "somebody_else";
@@ -54,7 +54,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         store = new UserStoreImpl();
-        aclStore = new AccessControlListStoreImpl(null, null, store);
+        aclStore = new AccessControlStoreImpl(null, null, store);
     }
     
     @Test

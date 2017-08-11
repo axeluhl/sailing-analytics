@@ -9,7 +9,6 @@ public class AccessControlListWithStore implements AccessControlList {
     private static final long serialVersionUID = -5709064967680495227L;
     
     private final String id;
-    private String owner;
     
     private final UserStore userStore;
     
@@ -18,15 +17,14 @@ public class AccessControlListWithStore implements AccessControlList {
      */
     private final Map<String, Set<String>> permissionMap;
     
-    public AccessControlListWithStore(String id, String owner, Map<String, Set<String>> permissionMap, UserStore userStore) {
+    public AccessControlListWithStore(String id, Map<String, Set<String>> permissionMap, UserStore userStore) {
         this.id = id;
-        this.owner = owner;
         this.permissionMap = permissionMap;
         this.userStore = userStore;
     }
     
-    public AccessControlListWithStore(String id, String owner, UserStore userStore) {
-        this(id, owner, new HashMap<>(), userStore);
+    public AccessControlListWithStore(String id, UserStore userStore) {
+        this(id, new HashMap<>(), userStore);
     }
     
     @Override
@@ -41,30 +39,6 @@ public class AccessControlListWithStore implements AccessControlList {
     }
 
     @Override
-    public AccessControlList putPermissions(String group, Set<String> permissions) {
-        permissionMap.put(group,  permissions);
-        return this;
-    }
-
-    @Override
-    public AccessControlList addPermission(String group, String permission) {
-        Set<String> permissionsForGroup = permissionMap.get(group);
-        if (permissionsForGroup != null) {
-            permissionsForGroup.add(permission);
-        }
-        return this;
-    }
-
-    @Override
-    public AccessControlList removePermission(String group, String permission) {
-        Set<String> permissionsForGroup = permissionMap.get(group);
-        if (permissionsForGroup != null) {
-            permissionsForGroup.remove(permission);
-        }
-        return null;
-    }
-
-    @Override
     public String getName() {
         return id;
     }
@@ -72,11 +46,6 @@ public class AccessControlListWithStore implements AccessControlList {
     @Override
     public Serializable getId() {
         return getName();
-    }
-
-    @Override
-    public String getOwner() {
-        return owner;
     }
 
     @Override

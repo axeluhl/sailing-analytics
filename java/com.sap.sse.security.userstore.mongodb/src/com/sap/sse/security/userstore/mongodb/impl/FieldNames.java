@@ -4,8 +4,13 @@ public class FieldNames {
     
     public static enum AccessControlList {
         NAME,
-        OWNER,
         PERMISSION_MAP
+    }
+    
+    public static enum Ownership {
+        NAME,
+        OWNER,
+        TENANT_OWNER
     }
     
     public static enum Tenant {

@@ -126,9 +126,6 @@ public class UserManagementPanel extends DockPanel {
                 sb.appendHtmlConstant("<td>");
                 sb.appendEscaped(value.getId());
                 sb.appendHtmlConstant("</td>");
-                sb.appendHtmlConstant("<td>");
-                sb.appendEscaped(value.getOwner());
-                sb.appendHtmlConstant("</td>");
                 for (UserGroupDTO group : value.getPermissionMap().keySet()) {
                     sb.appendHtmlConstant("<td>");
                     String concated = group.getName() + ": ";
@@ -212,7 +209,7 @@ public class UserManagementPanel extends DockPanel {
                 sb.appendEscaped(value.getName());
                 sb.appendHtmlConstant("</td>");
                 sb.appendHtmlConstant("<td>");
-                sb.appendEscaped(value.getAccessControlList().getOwner() == null? "" : value.getAccessControlList().getOwner());
+                sb.appendEscaped(value.getOwner() == null? "" : value.getOwner().getOwner());
                 sb.appendHtmlConstant("</td>");
                 sb.appendHtmlConstant("<td>");
                 String concated = "";

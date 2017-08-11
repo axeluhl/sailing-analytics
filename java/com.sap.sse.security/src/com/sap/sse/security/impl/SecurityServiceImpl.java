@@ -73,7 +73,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.AccessControlList;
-import com.sap.sse.security.AccessControlListStore;
+import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
@@ -111,7 +111,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private final ReplicatingCacheManager cacheManager;
     
     private UserStore userStore;
-    private AccessControlListStore aclStore;
+    private AccessControlStore aclStore;
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
     private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
@@ -131,14 +131,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
     }
     
-    public SecurityServiceImpl(UserStore userStore, AccessControlListStore aclStore) {
+    public SecurityServiceImpl(UserStore userStore, AccessControlStore aclStore) {
         this(null, userStore, aclStore);
     }
 
     /**
      * @param mailProperties must not be <code>null</code>
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlListStore aclStore) {
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore aclStore) {
         this(mailServiceTracker, userStore, aclStore, /* setAsActivatorTestSecurityService */ false);
     }
     
@@ -151,7 +151,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      *            replication.
      * 
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlListStore aclStore, boolean setAsActivatorSecurityService) {
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore aclStore, boolean setAsActivatorSecurityService) {
         logger.info("Initializing Security Service with user store " + userStore);
         if (setAsActivatorSecurityService) {
             Activator.setSecurityService(this);

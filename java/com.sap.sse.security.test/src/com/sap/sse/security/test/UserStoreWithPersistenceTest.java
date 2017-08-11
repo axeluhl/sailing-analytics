@@ -18,7 +18,7 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -34,7 +34,7 @@ public class UserStoreWithPersistenceTest {
     private final String prefValue = "pv";
 
     private UserStoreImpl store;
-    private AccessControlListStoreImpl aclStore;
+    private AccessControlStoreImpl aclStore;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
@@ -50,7 +50,7 @@ public class UserStoreWithPersistenceTest {
 
     private void newStore() {
         store = new UserStoreImpl();
-        aclStore = new AccessControlListStoreImpl(null, null, store);
+        aclStore = new AccessControlStoreImpl(null, null, store);
     }
 
     @Test

@@ -18,11 +18,11 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.impl.MailServiceImpl;
 import com.sap.sse.mail.replication.testsupport.AbstractMailServiceReplicationTest;
 import com.sap.sse.replication.testsupport.AbstractServerWithMultipleServicesReplicationTest;
-import com.sap.sse.security.AccessControlListStore;
+import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 /**
@@ -54,7 +54,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(masterMailService).when(trackerMock).getService();
             final UserStoreImpl userStore = new UserStoreImpl();
-            final AccessControlListStore aclStore = new AccessControlListStoreImpl(userStore);
+            final AccessControlStore aclStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, aclStore);
             result.clearReplicaState();
             return result;
@@ -66,7 +66,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(replicaMailService).when(trackerMock).getService();
             final UserStoreImpl userStore = new UserStoreImpl();
-            final AccessControlListStore aclStore = new AccessControlListStoreImpl(userStore);
+            final AccessControlStore aclStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, aclStore);
             return result;
         }

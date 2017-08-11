@@ -20,7 +20,7 @@ import org.apache.shiro.SecurityUtils;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.security.AccessControlListStore;
+import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
@@ -314,13 +314,13 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public UserGroup createUserGroup(String name, String owner, AccessControlListStore aclStore) throws UserGroupManagementException {
+    public UserGroup createUserGroup(String name, String owner, AccessControlStore aclStore) throws UserGroupManagementException {
         if (userGroups.contains(name)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
         logger.info("Creating user group: " + name + " with owner " + owner);
         UserGroup group = new UserGroupImpl(name);
-        aclStore.createAccessControlList(name, owner);
+        aclStore.createAccessControlList(name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
@@ -367,7 +367,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Tenant createTenant(String name, String owner, AccessControlListStore aclStore) throws TenantManagementException, UserGroupManagementException {
+    public Tenant createTenant(String name, String owner, AccessControlStore aclStore) throws TenantManagementException, UserGroupManagementException {
         if (tenants.contains(name)) {
             throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
         }
@@ -406,12 +406,12 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public User createUser(String name, String email, String owner, AccessControlListStore aclStore, Account... accounts) throws UserManagementException {
+    public User createUser(String name, String email, String owner, AccessControlStore aclStore, Account... accounts) throws UserManagementException {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         User user = new User(name, email, accounts);
-        aclStore.createAccessControlList(name, owner);
+        aclStore.createAccessControlList(name);
         logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);

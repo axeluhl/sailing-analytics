@@ -7,10 +7,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.security.AccessControlListStore;
+import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.PreferenceConverterRegistrationManager;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class Activator implements BundleActivator {
@@ -32,9 +32,9 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         UserStoreImpl userStore = new UserStoreImpl();
-        AccessControlListStoreImpl aclStore = new AccessControlListStoreImpl(userStore);
+        AccessControlStoreImpl aclStore = new AccessControlStoreImpl(userStore);
         aclStore.loadRemainingACLs();
-        aclStoreRegistration = context.registerService(AccessControlListStore.class.getName(),
+        aclStoreRegistration = context.registerService(AccessControlStore.class.getName(),
                 aclStore, null);
         userStoreRegistration = context.registerService(UserStore.class.getName(),
                 userStore, null);

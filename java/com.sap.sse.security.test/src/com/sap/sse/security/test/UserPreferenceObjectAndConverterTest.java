@@ -11,7 +11,7 @@ import com.mongodb.MongoException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -20,7 +20,7 @@ import junit.framework.Assert;
 public class UserPreferenceObjectAndConverterTest {
     
     private UserStoreImpl store;
-    private AccessControlListStoreImpl aclStore;
+    private AccessControlStoreImpl aclStore;
 
     private final String email = "anonymous@sapsailing.com";
     private static final String user1 = "me";
@@ -44,7 +44,7 @@ public class UserPreferenceObjectAndConverterTest {
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         store = new UserStoreImpl();
-        aclStore = new AccessControlListStoreImpl(null, null, store);
+        aclStore = new AccessControlStoreImpl(null, null, store);
     }
 
     @Test

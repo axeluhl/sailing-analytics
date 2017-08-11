@@ -98,7 +98,7 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
         tenant.setName("tenant");
         if (userGroup != null) {
             nameBox.setText(userGroup.getName());
-            ownerBox.setText(userGroup.getAccessControlList().getOwner() == null ? "" : userGroup.getAccessControlList().getOwner());
+            ownerBox.setText(userGroup.getOwner() == null ? "" : userGroup.getOwner().getOwner() + " | " + userGroup.getOwner().getTenantOwner());
             tenant.setEnabled(userGroup instanceof TenantDTO);
         }
         this.stringMessages = stringMessages;

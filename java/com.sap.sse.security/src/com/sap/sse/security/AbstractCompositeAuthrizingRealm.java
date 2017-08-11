@@ -24,7 +24,7 @@ import com.sap.sse.security.shared.UserManagementException;
 public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm {
     private static final Logger logger = Logger.getLogger(AbstractCompositeAuthrizingRealm.class.getName());
     private final Future<UserStore> userStore;
-    private final Future<AccessControlListStore> aclStore;
+    private final Future<AccessControlStore> aclStore;
     private PermissionsForRoleProvider permissionsForRoleProvider;
 
     /**
@@ -34,13 +34,13 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
      * default constructor is invoked.
      */
     private static UserStore testUserStore;
-    private static AccessControlListStore testAclStore;
+    private static AccessControlStore testAclStore;
 
     public static void setTestUserStore(UserStore theTestUserStore) {
         testUserStore = theTestUserStore;
     }
     
-    public static void setTestAclStore(AccessControlListStore theTestAclStore) {
+    public static void setTestAclStore(AccessControlStore theTestAclStore) {
         testAclStore = theTestAclStore;
     }
 
@@ -91,15 +91,15 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         return result;
     }
     
-    private Future<AccessControlListStore> createAclStoreFuture(BundleContext bundleContext) {
-        final ServiceTracker<AccessControlListStore, AccessControlListStore> tracker = new ServiceTracker<>(bundleContext, AccessControlListStore.class, /* customizer */ null);
+    private Future<AccessControlStore> createAclStoreFuture(BundleContext bundleContext) {
+        final ServiceTracker<AccessControlStore, AccessControlStore> tracker = new ServiceTracker<>(bundleContext, AccessControlStore.class, /* customizer */ null);
         tracker.open();
-        final FutureTask<AccessControlListStore> result = new FutureTask<>(new Callable<AccessControlListStore>() {
+        final FutureTask<AccessControlStore> result = new FutureTask<>(new Callable<AccessControlStore>() {
             @Override
-            public AccessControlListStore call() throws InterruptedException {
+            public AccessControlStore call() throws InterruptedException {
                 try {
                     logger.info("Waiting for AccessControlListStore service...");
-                    AccessControlListStore aclStore = tracker.waitForService(0);
+                    AccessControlStore aclStore = tracker.waitForService(0);
                     logger.info("Obtained AccessControlListStore service "+aclStore);
                     return aclStore;
                 } catch (InterruptedException e) {
@@ -136,8 +136,8 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         return result;
     }
     
-    protected AccessControlListStore getAccessControlListStore() {
-        AccessControlListStore result;
+    protected AccessControlStore getAccessControlListStore() {
+        AccessControlStore result;
         if (testAclStore != null) {
             result = testAclStore;
         } else {
@@ -158,6 +158,7 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             throw new WrongPermissionFormatException(perm);
         }
         String user = (String) principals.getPrimaryPrincipal();
+        // TODO check ownership
         AccessControlList acl = getAccessControlListStore().getAccessControlListByName(parts[3]);
         if (acl.hasPermission(user, parts[2])) {
             return true;

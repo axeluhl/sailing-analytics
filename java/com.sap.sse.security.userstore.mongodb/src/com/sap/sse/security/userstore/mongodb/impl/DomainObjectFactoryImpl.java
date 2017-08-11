@@ -20,7 +20,9 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.sap.sse.security.AccessControlList;
-import com.sap.sse.security.AccessControlListStore;
+import com.sap.sse.security.AccessControlStore;
+import com.sap.sse.security.Owner;
+import com.sap.sse.security.OwnerImpl;
 import com.sap.sse.security.AccessControlListWithStore;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
@@ -43,7 +45,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<AccessControlList> loadAllAccessControlLists(UserStore userStore, AccessControlListStore aclStore) {
+    public Iterable<AccessControlList> loadAllAccessControlLists(UserStore userStore, AccessControlStore aclStore) {
         ArrayList<AccessControlList> result = new ArrayList<>();
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         try {
@@ -58,7 +60,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public AccessControlList loadAccessControlList(String name, UserStore userStore, AccessControlListStore aclStore) {
+    public AccessControlList loadAccessControlList(String name, UserStore userStore, AccessControlStore aclStore) {
         DBObject query = new BasicDBObject();
         query.put(FieldNames.AccessControlList.NAME.name(), name);
         DBCursor cursor = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name()).find(query);
@@ -68,9 +70,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return null;
     }
 
-    public AccessControlList loadAccessControlList(DBObject aclDBObject, UserStore userStore, AccessControlListStore aclStore) {
-        final String name = (String) aclDBObject.get(FieldNames.AccessControlList.NAME.name());
-        final String owner = (String) aclDBObject.get(FieldNames.AccessControlList.OWNER.name());        
+    public AccessControlList loadAccessControlList(DBObject aclDBObject, UserStore userStore, AccessControlStore aclStore) {
+        final String name = (String) aclDBObject.get(FieldNames.AccessControlList.NAME.name());       
         Map<?, ?> permissionMapAsBSON = ((BSONObject) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name())).toMap();
         Map<String, Set<String>> permissionMap = new HashMap<>();
         for (Map.Entry<?, ?> entry : permissionMapAsBSON.entrySet()) {
@@ -81,7 +82,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             permissionMap.put(key, value);
         }
-        AccessControlList result = new AccessControlListWithStore(name, owner, permissionMap, userStore);
+        AccessControlList result = new AccessControlListWithStore(name, permissionMap, userStore);
         return result;
     }
     
@@ -320,5 +321,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result.put(key, value);
         }
         return result;
+    }
+
+    @Override
+    public Iterable<Owner> loadAllOwnerships() {
+        ArrayList<Owner> result = new ArrayList<>();
+        DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
+        try {
+            for (DBObject o : ownershipCollection.find()) {
+                result.add(loadOwnership(o));
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load ownerships.");
+            logger.log(Level.SEVERE, "loadAllOwnerships", e);
+        }
+        return result;
+    }
+    
+    private Owner loadOwnership(DBObject ownershipDBObject) {
+        final String name = (String) ownershipDBObject.get(FieldNames.Ownership.NAME.name());
+        final String owner = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER.name());
+        final String tenantOwner = (String) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER.name());
+        return new OwnerImpl(name, owner, tenantOwner);
     }
 }

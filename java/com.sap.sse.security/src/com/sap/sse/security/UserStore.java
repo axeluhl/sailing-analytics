@@ -15,7 +15,7 @@ public interface UserStore extends Named {
     
     UserGroup getUserGroupByName(String name);
     
-    UserGroup createUserGroup(String name, String owner, AccessControlListStore aclStore) throws UserGroupManagementException;
+    UserGroup createUserGroup(String name, String owner, AccessControlStore aclStore) throws UserGroupManagementException;
     
     void updateUserGroup(UserGroup tenant);
     
@@ -28,7 +28,7 @@ public interface UserStore extends Named {
      */
     Tenant getTenantByName(String name);
     
-    Tenant createTenant(String name, String owner, AccessControlListStore aclStore) throws TenantManagementException, UserGroupManagementException;
+    Tenant createTenant(String name, String owner, AccessControlStore aclStore) throws TenantManagementException, UserGroupManagementException;
     
     void updateTenant(Tenant tenant);
     
@@ -50,7 +50,7 @@ public interface UserStore extends Named {
     
     User getUserByAccessToken(String accessToken);
 
-    User createUser(String name, String email, String owner, AccessControlListStore aclStore, Account... accounts) throws UserManagementException;
+    User createUser(String name, String email, String owner, AccessControlStore aclStore, Account... accounts) throws UserManagementException;
 
     void updateUser(User user);
 
