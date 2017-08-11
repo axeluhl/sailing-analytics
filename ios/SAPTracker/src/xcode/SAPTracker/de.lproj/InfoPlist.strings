@@ -8,3 +8,4 @@
 
 "NSLocationAlwaysUsageDescription" = "Um das ganze Rennen mit Deinem Gerät zu tracken, muss das Tracking auch dann fortgesetzt werden, wenn der Bildschirm abgeschaltet oder gesperrt wird. Das hilft, die Batterielaufzeit zu verlängern und versehentlich das Tracking zu stoppen.";
 "NSCameraUsageDescription" = "Die Kamera wird benötigt, um per QR-Code einen Check-In auszuführen.";
+"NSPhotoLibraryUsageDescription" = "Um das Team Photo zu ersetzen, benötigt die App den Zugriff auf ihr Fotoalbum.";
