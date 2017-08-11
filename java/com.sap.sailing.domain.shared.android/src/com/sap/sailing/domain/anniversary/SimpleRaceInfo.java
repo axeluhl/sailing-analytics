@@ -5,11 +5,25 @@ import java.net.URL;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Used to capture information about a race for use in an "anniversary" feature that allows us
+ * to sort a set of races by their start time. Races are identified by a {@link RegattaAndRaceIdentifier}.
+ * Their start time is recorded in the {@link #startOfRace} field which must not be {@code null}, and
+ * the {@link URL} of the remote server reference is stored in {@link #remoteUrl}. Using clients shall
+ * make sure that the same {@link URL} object is used for larger sets of objects of this type in order
+ * not to waste memory on a massive replication of those equal {@link URL} objects identifying the same
+ * remote server.
+ */
 public class SimpleRaceInfo {
     private final RegattaAndRaceIdentifier identifier;
     private final TimePoint startOfRace;
-    private URL remoteUrl = null;
+    private final URL remoteUrl;
 
+    /**
+     * @param remoteUrl
+     *            use {@code null} to mean "local"; a local server does not necessarily know under which URL it is being
+     *            reached and therefore cannot provide this
+     */
     public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, TimePoint startOfRace, URL remoteUrl) {
         if (identifier == null || startOfRace == null) {
             throw new IllegalStateException("SimpleRaceInfo Data is not allowed to contain any null values!");
@@ -23,6 +37,10 @@ public class SimpleRaceInfo {
         return identifier;
     }
     
+    /**
+     * The URL used in a remote server reference through which the record was obtained; or {@code null} in
+     * case the race identified by this object resides on the local server responding to a request.
+     */
     public URL getRemoteUrl() {
         return remoteUrl;
     }

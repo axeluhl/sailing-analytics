@@ -10,7 +10,7 @@ import UIKit
 
 class LeaderboardData: BaseData {
     
-    private struct Keys {
+    fileprivate struct Keys {
         static let Name = "name"
     }
     

@@ -10,7 +10,7 @@ import UIKit
 
 class CompetitorData: BaseData {
 
-    private struct Keys {
+    fileprivate struct Keys {
         static let BoatClassName = "boatClassName"
         static let CountryCode = "countryCode"
         static let ID = "id"

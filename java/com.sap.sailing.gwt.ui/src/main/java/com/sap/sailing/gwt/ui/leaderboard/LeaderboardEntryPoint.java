@@ -135,7 +135,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                             
                             final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(null, context,
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
-                                    timer, null, null, leaderboardGroupName, leaderboardName,
+                                    timer, null, leaderboardGroupName, leaderboardName,
                                     LeaderboardEntryPoint.this, getStringMessages(),
                                     getActualChartDetailType(defaultSettings));
                             createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextDefinition);

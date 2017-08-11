@@ -1429,6 +1429,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String collapseX(String text);
     String numberOfGPSFixes();
     String fastestSailor();
+    String highestSpeed();
     String numberWindFixes();
     String sailedMiles();
     String millionValue(double value);
@@ -1800,6 +1801,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventRegattaHeaderLegendAudioNo();
     String set();
     String gribWindImport_Title();
+    String nmeaWindImport_Title();
     String angleInDegree();
     String angleInRadian();
     String centralAngleInRadian();
