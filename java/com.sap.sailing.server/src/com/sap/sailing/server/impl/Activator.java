@@ -85,7 +85,7 @@ public class Activator implements BundleActivator {
     private SailingNotificationServiceImpl notificationService;
 
     private ServiceTracker<MailService, MailService> mailServiceTracker;
-
+    
     public Activator() {
         clearPersistentCompetitors = Boolean
                 .valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, "" + false));
@@ -115,9 +115,11 @@ public class Activator implements BundleActivator {
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
+
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
                 trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
         notificationService.setRacingEventService(racingEventService);
+
 
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
