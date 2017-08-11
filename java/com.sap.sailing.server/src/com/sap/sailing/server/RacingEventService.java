@@ -689,5 +689,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
 
-    DetailedRaceInfo getFullDetailsForRace(RegattaAndRaceIdentifier regattaNameAndRaceName);
+    DetailedRaceInfo getFullDetailsForRaceCascading(RegattaAndRaceIdentifier regattaNameAndRaceName);
+
+    DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier);
 }

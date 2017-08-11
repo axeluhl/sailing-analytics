@@ -3858,9 +3858,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         return store;
     }
-
+    
     @Override
-    public DetailedRaceInfo getFullDetailsForRace(RegattaAndRaceIdentifier raceIdentifier) {
+    public DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier) {
         DetailedRaceInfo bestMatch = null;
         // start from the top; while there are more efficient ways to look up the TrackedRace by its
         // race identifier, this wouldn't tell a valid event and leaderboard combination through which
@@ -3889,6 +3889,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }
+        return bestMatch;
+    }
+
+    @Override
+    public DetailedRaceInfo getFullDetailsForRaceCascading(RegattaAndRaceIdentifier raceIdentifier) {
+        DetailedRaceInfo bestMatch = getFullDetailsForRaceLocal(raceIdentifier);
         if (bestMatch == null) {
             // check for stored simpleRaceInfo from remote server
             Map<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> races = remoteSailingServerSet.getCachedRaceList();

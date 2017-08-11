@@ -47,7 +47,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     @Path("raceDetails")
     public Response getDetailsForRace(@QueryParam("raceName") String raceName,
             @QueryParam("regattaName") String regattaName) {
-        final DetailedRaceInfo detailedRaceInfo = getService().getFullDetailsForRace(new RegattaNameAndRaceName(regattaName, raceName));
+        final DetailedRaceInfo detailedRaceInfo = getService().getFullDetailsForRaceLocal(new RegattaNameAndRaceName(regattaName, raceName));
         if (detailedRaceInfo == null) {
             return Response.status(Status.NOT_FOUND).header(HEADER_NAME_CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8).build();
         }
