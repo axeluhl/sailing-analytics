@@ -158,7 +158,10 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
             throw new WrongPermissionFormatException(perm);
         }
         String user = (String) principals.getPrimaryPrincipal();
-        // TODO check ownership
+        Owner ownership = getAccessControlListStore().getOwnership(parts[3]);
+        if (user.equals(ownership.getOwner())) { // TODO check for tenant ownership
+            return true;
+        }
         AccessControlList acl = getAccessControlListStore().getAccessControlListByName(parts[3]);
         if (acl.hasPermission(user, parts[2])) {
             return true;
