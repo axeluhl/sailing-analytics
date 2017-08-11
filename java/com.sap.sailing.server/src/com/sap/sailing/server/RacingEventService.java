@@ -19,6 +19,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
+import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
@@ -682,4 +684,36 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
      */
     Map<Integer, Statistics> getOverallStatisticsByYear();
+
+    /**
+     * Obtains information about all {@link TrackedRace}s connected to {@link Event}s managed locally on this server
+     * instance or reachable through a remote server reference, having a non-{@code null}
+     * {@link TrackedRace#getStartOfRace() start time}. Being "connected" here means that the race is linked to a
+     * {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
+     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
+     * 
+     * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
+     *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
+     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null} for races managed locally on this server;
+     *         for races obtained through remote server references, the remote URL will be that of the remote server
+     *         reference. Callers may modify the map as each call to this method will produce a new copy.
+     */
+    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList();
+
+    /**
+     * Obtains information about all {@link TrackedRace}s connected to {@link Event}s managed locally on this server
+     * instance, having a non-{@code null} {@link TrackedRace#getStartOfRace() start time}. Being "connected" here means
+     * that the race is linked to a {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
+     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
+     * 
+     * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
+     *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
+     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null}, meaning that the tracked races live
+     *         locally on this server. Callers may modify the map as each call to this method will produce a new copy.
+     */
+    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
+
+    DetailedRaceInfo getFullDetailsForRaceCascading(RegattaAndRaceIdentifier regattaNameAndRaceName);
+
+    DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier);
 }

@@ -107,4 +107,9 @@ public enum CollectionNames {
      * way by corresponding implementations of the RaceTrackingConnectivityParametersMongoHandler} interface.
      */
     CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED,
+    
+    /**
+     * Contains the known anniversaries
+     */
+    ANNIVERSARIES
 }

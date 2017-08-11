@@ -58,6 +58,8 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
+import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -3815,5 +3817,99 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         final Map<Integer, Statistics> result = new HashMap<>();
         statisticsAggregators.forEach((year, aggregator) -> result.put(year, aggregator.getStatistics()));
         return result;
+    }
+
+    @Override
+    public HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList() {
+        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> race : remoteSailingServerSet
+                .getCachedRaceList().entrySet()) {
+            if (race.getValue().getB() != null) {
+                throw new RuntimeException("Some remoteserver did not respond " + race.getKey());
+            }
+            for (SimpleRaceInfo raceinfo : race.getValue().getA()) {
+                store.put(raceinfo.getIdentifier(), raceinfo);
+            }
+        }
+        return store;
+    }
+
+    @Override
+    public Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList() {
+        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
+        for (Event event : getAllEvents()) {
+            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+                for (Leaderboard leaderboard : group.getLeaderboards()) {
+                    for (RaceColumn race : leaderboard.getRaceColumns()) {
+                        for (Fleet fleet : race.getFleets()) {
+                            TrackedRace trackedRace = race.getTrackedRace(fleet);
+                            if (trackedRace != null) {
+                                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                                final TimePoint startOfRace = trackedRace.getStartOfRace();
+                                if (startOfRace != null) {
+                                    SimpleRaceInfo raceInfo = new SimpleRaceInfo(raceIdentifier, startOfRace, /* remoteURL */ null);
+                                    store.put(raceInfo.getIdentifier(), raceInfo);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return store;
+    }
+    
+    @Override
+    public DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier) {
+        DetailedRaceInfo bestMatch = null;
+        // start from the top; while there are more efficient ways to look up the TrackedRace by its
+        // race identifier, this wouldn't tell a valid event and leaderboard combination through which
+        // to navigate to it
+        for (Event event : this.getAllEvents()) {
+            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+                for (Leaderboard leaderboard : group.getLeaderboards()) {
+                    for (RaceColumn race : leaderboard.getRaceColumns()) {
+                        for (Fleet fleet : race.getFleets()) {
+                            TrackedRace trackedRace = race.getTrackedRace(fleet);
+                            if (trackedRace != null) {
+                                RegattaAndRaceIdentifier trackedRaceIdentifier = trackedRace.getRaceIdentifier();
+                                // check if the race matches the RegattaAndRaceIdentifier
+                                if (trackedRaceIdentifier.equals(raceIdentifier)
+                                        && trackedRace.getStartOfRace() != null) {
+                                    // check if the match is a best match -> we keep the previous match otherwise
+                                    if (bestMatch == null
+                                            || (leaderboard.getName().equals(trackedRaceIdentifier.getRegattaName()))) {
+                                        bestMatch = new DetailedRaceInfo(trackedRaceIdentifier, leaderboard.getName(),
+                                                trackedRace.getStartOfRace(), event.getId(), null);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return bestMatch;
+    }
+
+    @Override
+    public DetailedRaceInfo getFullDetailsForRaceCascading(RegattaAndRaceIdentifier raceIdentifier) {
+        DetailedRaceInfo bestMatch = getFullDetailsForRaceLocal(raceIdentifier);
+        if (bestMatch == null) {
+            // check for stored simpleRaceInfo from remote server
+            Map<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> races = remoteSailingServerSet.getCachedRaceList();
+            for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> cachedInfo : races.entrySet()) {
+                Iterable<SimpleRaceInfo> raceList = cachedInfo.getValue().getA();
+                if (raceList != null) {
+                    for (SimpleRaceInfo race : raceList) {
+                        if (race.getIdentifier().equals(raceIdentifier)) {
+                            bestMatch = remoteSailingServerSet.getDetailedInfoBlocking(race);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return bestMatch;
     }
 }
