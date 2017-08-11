@@ -38,3 +38,9 @@
 "SignUpView.RepeatPasswordLabel.Text" = "Passwort Wiederholung";
 "SignUpView.RepeatPasswordTextField.Placeholder" = "Wiederholen Sie das Passwort";
 "SignUpView.SignUpButton.Title" = "Registrieren";
+
+// MARK: - SignUpViewError
+
+"SignUpViewError.UserNameIsToShort" = "Bitte einen Benutzername mit mindestens 3 Zeichen eingeben.";
+"SignUpViewError.PasswordIsToShort" = "Bitte ein Passwort mit mindestens 5 Zeichen eingeben.";
+"SignUpViewError.PasswordsNotEqual" = "Passwort und Passwortwiederholung müssen übereinstimmen.";

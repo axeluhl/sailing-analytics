@@ -118,6 +118,20 @@ class SignUpTranslation: NSObject {
         }
     }
     
+    // MARK: SignUpViewError
+    
+    struct SignUpViewError {
+        struct UserNameIsToShort {
+            static let String = NSLocalizedString("SignUpViewError.UserNameIsToShort", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
+        }
+        struct PasswordIsToShort {
+            static let String = NSLocalizedString("SignUpViewError.PasswordIsToShort", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
+        }
+        struct PasswordsNotEqual {
+            static let String = NSLocalizedString("SignUpViewError.PasswordsNotEqual", tableName: TableName, bundle: Bundle.main, value: "", comment: "")
+        }
+    }
+    
 }
 
                 

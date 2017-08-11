@@ -193,10 +193,10 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lOZ-p2-hq2" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="503"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="533"/>
                                         <subviews>
                                             <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="uyU-Dr-ejn">
-                                                <rect key="frame" x="16" y="136" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="166" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" returnKeyType="continue"/>
@@ -205,7 +205,7 @@
                                                 </connections>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="54k-5G-O5L">
-                                                <rect key="frame" x="16" y="458" width="343" height="37"/>
+                                                <rect key="frame" x="16" y="488" width="343" height="37"/>
                                                 <color key="backgroundColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="18"/>
                                                 <state key="normal" title="Sign Up Button">
@@ -216,13 +216,13 @@
                                                 </connections>
                                             </button>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mos-78-XZ0">
-                                                <rect key="frame" x="16" y="38" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="68" width="343" height="22"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="kfC-jn-pil">
-                                                <rect key="frame" x="16" y="68" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="98" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" returnKeyType="continue"/>
@@ -231,13 +231,13 @@
                                                 </connections>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="User Name Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="e0x-oF-wfr">
-                                                <rect key="frame" x="16" y="106" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="136" width="343" height="22"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="OSH-Yp-4lI">
-                                                <rect key="frame" x="16" y="204" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="234" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" returnKeyType="continue"/>
@@ -246,13 +246,13 @@
                                                 </connections>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Full Name Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gwJ-Rz-JWp">
-                                                <rect key="frame" x="16" y="174" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="204" width="343" height="22"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ApJ-P7-ynQ">
-                                                <rect key="frame" x="16" y="272" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="302" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" returnKeyType="continue"/>
@@ -261,13 +261,13 @@
                                                 </connections>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Company Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ill-eJ-ZJL">
-                                                <rect key="frame" x="16" y="242" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="272" width="343" height="22"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Jar-TR-EzN">
-                                                <rect key="frame" x="16" y="340" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="370" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" returnKeyType="continue" secureTextEntry="YES"/>
@@ -276,13 +276,13 @@
                                                 </connections>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Password Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zNK-Wa-fqw">
-                                                <rect key="frame" x="16" y="310" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="340" width="343" height="22"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" clipsSubviews="YES" tag="5" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="6jE-ca-Bkw">
-                                                <rect key="frame" x="16" y="408" width="343" height="30"/>
+                                                <rect key="frame" x="16" y="438" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" returnKeyType="done" secureTextEntry="YES"/>
@@ -291,7 +291,7 @@
                                                 </connections>
                                             </textField>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Repeat Password Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="igz-ad-G8g">
-                                                <rect key="frame" x="16" y="378" width="343" height="22"/>
+                                                <rect key="frame" x="16" y="408" width="343" height="22"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -302,12 +302,20 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Error Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RSO-pi-25b">
+                                                <rect key="frame" x="16" y="38" width="343" height="22"/>
+                                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
+                                                <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
                                         </subviews>
                                         <constraints>
                                             <constraint firstItem="uyU-Dr-ejn" firstAttribute="top" secondItem="e0x-oF-wfr" secondAttribute="bottom" constant="8" id="147-Ic-cKj"/>
+                                            <constraint firstItem="RSO-pi-25b" firstAttribute="top" secondItem="FT0-Pp-Tcs" secondAttribute="bottom" constant="8" id="223-oX-8qo"/>
                                             <constraint firstItem="FT0-Pp-Tcs" firstAttribute="leading" secondItem="lOZ-p2-hq2" secondAttribute="leading" constant="16" id="2TP-kk-aXP"/>
                                             <constraint firstItem="gwJ-Rz-JWp" firstAttribute="leading" secondItem="Mos-78-XZ0" secondAttribute="leading" id="2fP-w1-0Cy"/>
                                             <constraint firstItem="54k-5G-O5L" firstAttribute="trailing" secondItem="Mos-78-XZ0" secondAttribute="trailing" id="3Kh-XZ-jog"/>
+                                            <constraint firstAttribute="trailing" secondItem="RSO-pi-25b" secondAttribute="trailing" constant="16" id="3ep-r0-5hS"/>
                                             <constraint firstItem="OSH-Yp-4lI" firstAttribute="trailing" secondItem="Mos-78-XZ0" secondAttribute="trailing" id="4aq-8H-XCe"/>
                                             <constraint firstItem="54k-5G-O5L" firstAttribute="leading" secondItem="Mos-78-XZ0" secondAttribute="leading" id="7ZD-Xw-uN1"/>
                                             <constraint firstItem="gwJ-Rz-JWp" firstAttribute="top" secondItem="uyU-Dr-ejn" secondAttribute="bottom" constant="8" id="7nK-Yz-lrj"/>
@@ -315,6 +323,7 @@
                                             <constraint firstItem="54k-5G-O5L" firstAttribute="top" secondItem="6jE-ca-Bkw" secondAttribute="bottom" constant="20" id="Duf-MN-kJR"/>
                                             <constraint firstItem="FT0-Pp-Tcs" firstAttribute="top" secondItem="lOZ-p2-hq2" secondAttribute="top" constant="8" id="FSO-WG-KZv"/>
                                             <constraint firstAttribute="trailing" secondItem="FT0-Pp-Tcs" secondAttribute="trailing" constant="16" id="FxZ-qt-NRv"/>
+                                            <constraint firstItem="Mos-78-XZ0" firstAttribute="top" secondItem="RSO-pi-25b" secondAttribute="bottom" constant="8" id="I7u-Jt-Ueq"/>
                                             <constraint firstItem="kfC-jn-pil" firstAttribute="trailing" secondItem="Mos-78-XZ0" secondAttribute="trailing" id="JYJ-vH-dRj"/>
                                             <constraint firstItem="OSH-Yp-4lI" firstAttribute="leading" secondItem="Mos-78-XZ0" secondAttribute="leading" id="LmP-J7-VAr"/>
                                             <constraint firstItem="ill-eJ-ZJL" firstAttribute="leading" secondItem="Mos-78-XZ0" secondAttribute="leading" id="NBo-91-mPl"/>
@@ -322,10 +331,10 @@
                                             <constraint firstItem="ill-eJ-ZJL" firstAttribute="trailing" secondItem="Mos-78-XZ0" secondAttribute="trailing" id="Pgg-CR-lOW"/>
                                             <constraint firstItem="ApJ-P7-ynQ" firstAttribute="leading" secondItem="Mos-78-XZ0" secondAttribute="leading" id="Q22-YB-UTe"/>
                                             <constraint firstItem="Jar-TR-EzN" firstAttribute="trailing" secondItem="Mos-78-XZ0" secondAttribute="trailing" id="Qqt-jt-Pbv"/>
+                                            <constraint firstItem="RSO-pi-25b" firstAttribute="leading" secondItem="lOZ-p2-hq2" secondAttribute="leading" constant="16" id="Usf-nj-I1T"/>
                                             <constraint firstItem="Jar-TR-EzN" firstAttribute="leading" secondItem="Mos-78-XZ0" secondAttribute="leading" id="W9D-qc-yTw"/>
                                             <constraint firstItem="kfC-jn-pil" firstAttribute="top" secondItem="Mos-78-XZ0" secondAttribute="bottom" constant="8" id="WdL-di-mUe"/>
                                             <constraint firstItem="ApJ-P7-ynQ" firstAttribute="top" secondItem="ill-eJ-ZJL" secondAttribute="bottom" constant="8" id="Zri-H7-NxV"/>
-                                            <constraint firstItem="Mos-78-XZ0" firstAttribute="top" secondItem="FT0-Pp-Tcs" secondAttribute="bottom" constant="8" id="aLD-v5-M1h"/>
                                             <constraint firstItem="zNK-Wa-fqw" firstAttribute="trailing" secondItem="Mos-78-XZ0" secondAttribute="trailing" id="aTC-zT-dHx"/>
                                             <constraint firstItem="ill-eJ-ZJL" firstAttribute="top" secondItem="OSH-Yp-4lI" secondAttribute="bottom" constant="8" id="aUf-EO-k5f"/>
                                             <constraint firstItem="6jE-ca-Bkw" firstAttribute="leading" secondItem="Mos-78-XZ0" secondAttribute="leading" id="cYe-zR-A8O"/>
@@ -383,6 +392,7 @@
                         <outlet property="companyTextField" destination="ApJ-P7-ynQ" id="K9c-M8-mVi"/>
                         <outlet property="emailLabel" destination="Mos-78-XZ0" id="cZM-cD-bBc"/>
                         <outlet property="emailTextField" destination="kfC-jn-pil" id="n7S-xQ-px9"/>
+                        <outlet property="errorLabel" destination="RSO-pi-25b" id="ao1-8h-YjO"/>
                         <outlet property="fullNameLabel" destination="gwJ-Rz-JWp" id="aRx-Ip-lkS"/>
                         <outlet property="fullNameTextField" destination="OSH-Yp-4lI" id="Aq1-Yr-1da"/>
                         <outlet property="infoLabel" destination="FT0-Pp-Tcs" id="WZK-dB-Tsm"/>
