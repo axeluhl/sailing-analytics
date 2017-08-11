@@ -151,8 +151,8 @@ public class RemoteSailingServerSet {
                     if (remoteUrlAsString != null && !remoteUrlAsString.isEmpty()) {
                         remoteUrl = new URL(remoteUrlAsString);
                     } else {
+                        // the race was local to the remote server, indicated by a null URL; use the remote reference's URL for those
                         remoteUrl = ref.getURL();
-
                     }
                     JSONArray raceListForOneRemote = (JSONArray) remoteWithRacesAsJson.get(DetailedRaceInfoJsonSerializer.FIELD_RACES);
                     for (Object remoteRace : raceListForOneRemote) {
@@ -184,7 +184,7 @@ public class RemoteSailingServerSet {
     }
     
     private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
-        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/getRaces");
+        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/getRaces?transitive=true");
     }
 
     private URL getEndpointUrl(URL remoteServerBaseURL, final String endpoint) throws MalformedURLException {

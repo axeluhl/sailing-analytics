@@ -56,25 +56,29 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
 
     /**
      * Returns a list of tracked races. By default, only TrackedRaces from the local instance are returned. The entries
-     * are grouped by the remote from where they originated. Local entries have an empty remote URL. The returned list
-     * is not specifically sorted.<br>
-     * TODO bug 4227: implement a parameter to optionally add remote {@link TrackedRace TrackedRaces} to the list and extend this JavaDoc
-     * accordingly.
+     * are grouped by the remote URL from where they originated. Local entries have a {@code null} value for the
+     * {@link DetailedRaceInfoJsonSerializer# FIELD_REMOTEURL remote URL} field. The order of the list returned is
+     * undefined.<br>
+     * 
+     * TODO bug 4227: implement a parameter to optionally add remote {@link TrackedRace TrackedRaces} to the list and
+     * extend this JavaDoc accordingly.
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
     @Path("getRaces")
-    public Response raceList() {
+    public Response raceList(@QueryParam("transitive") Boolean transitive) {
         HashMap<URL, List<SimpleRaceInfo>> raceData = new HashMap<>();
-        //TODO replace with transitive collection of racelist, once other remote services are transitive (without events being transitive this offers nothing)
-        for (SimpleRaceInfo entry : getService().getLocalRaceList().values()) {
-            URL remoteUrl = entry.getRemoteUrl();
-            List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
-            if (remoteList == null) {
-                remoteList = new ArrayList<>();
-                raceData.put(remoteUrl, remoteList);
+        raceData.put(null, new ArrayList<>(getService().getLocalRaceList().values()));
+        if (transitive != null && Boolean.TRUE.equals(transitive)) {
+            for (SimpleRaceInfo remoteRace : getService().getRemoteRaceList().values()) {
+                URL remoteUrl = remoteRace.getRemoteUrl();
+                List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
+                if (remoteList == null) {
+                    remoteList = new ArrayList<>();
+                    raceData.put(remoteUrl, remoteList);
+                }
+                remoteList.add(remoteRace);
             }
-            remoteList.add(entry);
         }
         JSONArray json = new JSONArray();
         for (Entry<URL, List<SimpleRaceInfo>> raced : raceData.entrySet()) {
@@ -92,9 +96,11 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     }
 
     /**
-     * Returns a list of all locally and remote tracked races that are currently known, The list is sorted by startOfRace,
-     * and each {@link SimpleRaceInfo} object is put together with an incrementing number starting at 0.
-     * Duplicate races are eliminated with a precedence of local ones.
+     * Returns a list of all locally and remote tracked races that are currently known. The list is sorted by the
+     * {@link SimpleRaceInfoJsonSerializer#FIELD_START_OF_RACE} field, and each {@link SimpleRaceInfo} object is put
+     * together with an incrementing number starting at 0. Duplicate races are eliminated such that local copies take
+     * precedence over remote ones. Races hosted on the server on which this method is invoked will be grouped under the
+     * {@code null} value for the {@code remoteUrl} field.
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
@@ -104,7 +110,6 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
         Map<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
         store.putAll(getService().getRemoteRaceList());
         store.putAll(getService().getLocalRaceList());
-
         ArrayList<SimpleRaceInfo> sorted = new ArrayList<>(store.values());
         Collections.sort(sorted, new Comparator<SimpleRaceInfo>() {
             @Override

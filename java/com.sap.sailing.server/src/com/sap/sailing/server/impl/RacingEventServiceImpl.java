@@ -3821,7 +3821,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList() {
-        HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
+        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
         for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> race : remoteSailingServerSet
                 .getCachedRaceList().entrySet()) {
             if (race.getValue().getB() != null) {
@@ -3836,7 +3836,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList() {
-        HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
+        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
         for (Event event : getAllEvents()) {
             for (LeaderboardGroup group : event.getLeaderboardGroups()) {
                 for (Leaderboard leaderboard : group.getLeaderboards()) {
@@ -3847,7 +3847,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                                 RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
                                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                                 if (startOfRace != null) {
-                                    SimpleRaceInfo raceInfo = new SimpleRaceInfo(raceIdentifier, startOfRace, null);
+                                    SimpleRaceInfo raceInfo = new SimpleRaceInfo(raceIdentifier, startOfRace, /* remoteURL */ null);
                                     store.put(raceInfo.getIdentifier(), raceInfo);
                                 }
                             }

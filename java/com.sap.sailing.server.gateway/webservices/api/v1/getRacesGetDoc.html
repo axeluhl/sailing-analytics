@@ -12,7 +12,8 @@
 <h2>URL: /api/v1/trackedRaces/getRaces</h2>
 
 <b>Description:</b>
-<p>Gets all TrackedRaces found on the local instance, or (future) its remote servers. Only those TrackedRaces are contained that are reachable by any Event and have a valid startOfRace.</p>
+<p>Gets all TrackedRaces found on the local instance, and optionally (depending on the "transitive" parameter) its remote servers.
+Only those TrackedRaces are contained that are reachable by any Event and have a valid startOfRace.</p>
 <br/>
 <table>
     <tr>
@@ -29,7 +30,9 @@
     </tr>
     <tr>
         <td>Optional parameters:</td>
-        <td>None</td>
+        <td>
+		<div>transitive (true or false) - determines whether the races from other servers referenced remotely shall be collected in the response</div>
+        </td>
     </tr>
     <tr>
         <td>Request method:</td>
