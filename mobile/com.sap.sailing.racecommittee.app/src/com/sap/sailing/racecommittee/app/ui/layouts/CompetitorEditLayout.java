@@ -59,7 +59,7 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
         mRestricted = restrictedView;
         mCompetitor = competitor;
         int layoutId;
-        if (AppUtils.with(getContext()).isPhone() && AppUtils.with(getContext()).isHDPI()) {
+        if (AppUtils.with(getContext()).isPhone()) {
             layoutId = R.layout.race_tracking_list_competitor_edit_small;
         } else {
             layoutId = R.layout.race_tracking_list_competitor_edit_normal;
