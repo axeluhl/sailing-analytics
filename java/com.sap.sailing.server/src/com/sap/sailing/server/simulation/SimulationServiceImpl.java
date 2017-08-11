@@ -204,7 +204,9 @@ public class SimulationServiceImpl implements SimulationService {
         @Override
         public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
             // relevant for simulation
-            // TODO: identify influenced legs and update these legs
+            if (this.isLive()) {
+                defaultAction();
+            }
         }
 
         @Override
