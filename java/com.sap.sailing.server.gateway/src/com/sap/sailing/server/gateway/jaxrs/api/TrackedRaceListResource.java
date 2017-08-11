@@ -68,7 +68,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     @Path("getRaces")
     public Response raceList() {
         HashMap<URL, List<SimpleRaceInfo>> raceData = new HashMap<>();
-        // replace with transitive call later!
+        //TODO replace with transitive collection of racelist, once other remote services are transitive (without events being transitive this offers nothing)
         for (SimpleRaceInfo entry : getService().getLocalRaceList().values()) {
             URL remoteUrl = entry.getRemoteUrl();
             List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
