@@ -95,10 +95,8 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
         NauticalSide toSide;
         if(Math.abs(starboardSideVotes - portsideVotes) > 1) {
             toSide = starboardSideVotes > portsideVotes ? NauticalSide.STARBOARD : NauticalSide.PORT;
-        } else if(firstTWA < lastTWA) {
-            toSide = lastTWA - firstTWA <= 180 ? NauticalSide.STARBOARD : NauticalSide.PORT;
         } else {
-            toSide = firstTWA - lastTWA <= 180 ? NauticalSide.PORT : NauticalSide.STARBOARD;
+            toSide = ManeuverSpeedDetailsUtils.determineNauticalSideByClosestAngleDistance(firstTWA, lastTWA);
         }
         
         Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(toSide, settings);
@@ -110,6 +108,7 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
         int enteringTWA = -1;
         for(int i = 0; i < totalSteps; ++i) {
             int roundedTWA = (int) Math.round(twas[i]) % 360;
+            
             if(settings.isNormalizeManeuverDirection()) {
                 if(toSide != settings.getNormalizedManeuverDirection()) {
                     roundedTWA = (360 - roundedTWA) % 360;
@@ -119,14 +118,13 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
             //neglect speed differences between TWA resolution < 1 Deg
             if(speedPerTWA[roundedTWA] == 0) {
                 speedPerTWA[roundedTWA] = speeds[i];
+            } else {
+                speedPerTWA[roundedTWA] = (speedPerTWA[roundedTWA] + speeds[i]) / 2;
             }
             if(i != 0) {
                 double diffWithPreviousTWA = Math.abs(previousRoundedTWA - roundedTWA);
-                if(diffWithPreviousTWA > 180) {
-                    diffWithPreviousTWA = 360 - diffWithPreviousTWA;
-                }
-                
-                if(diffWithPreviousTWA > 1) {
+                NauticalSide currentSide = ManeuverSpeedDetailsUtils.determineNauticalSideByClosestAngleDistance(previousRoundedTWA, roundedTWA);
+                if(diffWithPreviousTWA > 1 && currentSide == toSide) {
                     double diffWithPreviousSpeed = speed - previousSpeed;
                     //fill the TWA gaps with linear approximation
                     for(int step = 1, fillingTWA = forNextTWA.apply(previousRoundedTWA); fillingTWA != roundedTWA; fillingTWA = forNextTWA.apply(fillingTWA), ++step) {
