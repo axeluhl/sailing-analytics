@@ -29,4 +29,10 @@ public class LoginPopup extends PopupPanel {
 
         add(lpop);
     }
+    
+    @Override
+    public void show() {
+        super.show();
+        getElement().getStyle().clearLeft();
+    }
 }
