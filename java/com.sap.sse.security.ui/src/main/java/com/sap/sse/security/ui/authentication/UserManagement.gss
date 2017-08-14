@@ -1,6 +1,32 @@
 .flyover {
     font-size: 1rem;
 }
+.flyover_small_hidden {
+    visibility: hidden;
+}
+
+@media ( min-width: 49em) {
+    .flyover_position_grid {
+        visibility: visible;
+        right: 0 !important;
+        top: 55px !important;
+    }
+}
+
+@media ( min-width: 76em) {
+    .flyover_position_grid {
+        visibility: visible;
+        right: calc(( 100vw - 81rem)/2) !important;
+    }
+}
+
+.flyover_mobile {
+    right: 0px;
+    top: 70px !important;
+    position: absolute;
+    overflow: visible;
+    z-index: 4;
+}
 .flyover_content_wrapper {
     padding: 0 1rem;
 }
