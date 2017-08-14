@@ -97,7 +97,7 @@ public abstract class AbstractTrackedRegattaAndRaceObserver implements TrackedRe
             trackedRegatta.addRaceListener(raceListener);
         }
 
-        public void raceRemoved(TrackedRace trackedRace) {
+        public synchronized void raceRemoved(TrackedRace trackedRace) {
             remove(trackedRace.getRaceIdentifier());
         }
 
