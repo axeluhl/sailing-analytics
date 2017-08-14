@@ -43,6 +43,7 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE = PACKAGE_NAME + ".action.toggle";
     public final static String INTENT_ACTION_ON_LIFECYCLE = PACKAGE_NAME + ".action.on";
     public final static String INTENT_ACTION_EXTRA = PACKAGE_NAME + ".action.extra";
+    public final static String INTENT_ACTION_EXTRA_FORCED = INTENT_ACTION_EXTRA + ".forced";
 
     // Lifecycle events as extra
     public final static String INTENT_ACTION_EXTRA_LIFECYCLE = INTENT_ACTION_EXTRA + ".lifecycle";

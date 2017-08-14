@@ -5,6 +5,7 @@ import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFi
 import java.text.SimpleDateFormat;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
@@ -311,7 +312,9 @@ public class TimePanelFragment extends BasePanelFragment {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
             switch (view.toggleMarker()) {
                 case PanelButton.LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_FORCED, true);
+                    BroadcastManager.getInstance(getActivity()).addIntent(intent);
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
