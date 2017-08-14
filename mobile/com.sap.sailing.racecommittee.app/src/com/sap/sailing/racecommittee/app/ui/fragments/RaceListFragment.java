@@ -11,6 +11,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
@@ -88,7 +89,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private boolean mUpdateList = true;
     private View mProgress;
     private final Set<ManagedRace> mAllRaces;
-    
+
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
         @Override
         public void onStartTimeChanged(ReadonlyRaceState state) {
@@ -310,6 +311,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onResume() {
         super.onResume();
+
         TickSingleton.INSTANCE.registerListener(this);
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_PROTEST);
@@ -338,6 +340,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onStart() {
         super.onStart();
+
         unregisterOnAllRaces();
         registerOnAllRaces();
         for (ManagedRace race : mManagedRacesById.values()) {
@@ -348,6 +351,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onStop() {
         unregisterOnAllRaces();
+
         super.onStop();
     }
 
@@ -420,6 +424,23 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mAdapter.onRacesChanged();
         mAdapter.notifyDataSetChanged();
         filterChanged();
+        showConflictSign();
+    }
+
+    private void showConflictSign() {
+        boolean showSign = false;
+        for (ManagedRace race : mAllRaces) {
+            CompetitorResults results = race.getState().getFinishPositioningList();
+            if (results != null && results.hasConflicts()) {
+                showSign = true;
+                break;
+            }
+        }
+        if (showSign) {
+            mAllRacesButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_warning_yellow_24dp, 0);
+        } else {
+            mAllRacesButton.setCompoundDrawables(null, null, null, null);
+        }
     }
 
     public void openDrawer() {
