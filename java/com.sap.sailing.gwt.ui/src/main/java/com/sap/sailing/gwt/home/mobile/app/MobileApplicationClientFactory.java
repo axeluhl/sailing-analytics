@@ -115,18 +115,12 @@ public class MobileApplicationClientFactory extends
                 }
                 if (lastLoginOrSupression == null
                         || lastLoginOrSupression.getTime() + SUPRESSION_DELAY < currentTime.getTime()) {
-                    new LoginPopup(false).doShow(new Runnable() {
-                        @Override
-                        public void run() {
-                            storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
-                        }
-                    },new Runnable() {
-                        @Override
-                        public void run() {
-                            storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
-                            placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo());
-                        }
-                    });
+                    new LoginPopup(false, () -> {
+                        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
+                    }, () -> {
+                        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
+                        placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo());
+                    }).show();
                 } else {
                     GWT.log("No logininfo required, user was logged in recently, or clicked dismiss "
                             + lastLoginOrSupression + " cur " + currentTime);

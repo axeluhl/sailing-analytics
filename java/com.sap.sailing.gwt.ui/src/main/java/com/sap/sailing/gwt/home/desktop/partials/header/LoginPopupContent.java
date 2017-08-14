@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.partials.header;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Anchor;
@@ -19,16 +21,21 @@ public class LoginPopupContent extends Composite{
     @UiField
     Anchor dismiss;
 
-    public LoginPopupContent() {
+    public LoginPopupContent(final Runnable onDismiss, final Runnable onMoreInfo) {
         initWidget(uiBinder.createAndBindUi(this));
-    }
+        dismiss.addClickHandler(new ClickHandler() {
 
-    public Anchor getDismiss() {
-        return dismiss;
-    }
+            @Override
+            public void onClick(ClickEvent event) {
+                onDismiss.run();
+            }
+        });
+        moreInfo.addClickHandler(new ClickHandler() {
 
-    public Anchor getMoreInfo() {
-        return moreInfo;
+            @Override
+            public void onClick(ClickEvent event) {
+                onMoreInfo.run();
+            }
+        });
     }
-
 }

@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.partials.header;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -27,7 +25,7 @@ public class LoginPopup extends PopupPanel {
         }
     }
 
-    public LoginPopup(boolean desktop) {
+    public LoginPopup(boolean desktop, final Runnable onDismiss, final Runnable onMoreInfo) {
         LOCAL_CSS.ensureInjected();
         CSS.ensureInjected();
         this.addStyleName(LOCAL_CSS.flyover());
@@ -38,28 +36,14 @@ public class LoginPopup extends PopupPanel {
         }
         ensureDebugId("loginpopupNewUser");
         setAutoHideEnabled(true);
-        lpop = new LoginPopupContent();
+        lpop = new LoginPopupContent(() -> {
+            hide();
+            onDismiss.run();
+        }, () -> {
+            hide();
+            onMoreInfo.run();
+        });
 
         add(lpop);
-    }
-
-    public void doShow(Runnable onDispose, Runnable onMoreInfo) {
-        show();
-        lpop.getDismiss().addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                hide();
-                onDispose.run();
-            }
-        });
-        lpop.getMoreInfo().addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                hide();
-                onMoreInfo.run();
-            }
-        });
     }
 }
