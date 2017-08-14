@@ -126,6 +126,7 @@ public class TimePanelFragment extends BasePanelFragment {
         filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
         filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
+        filter.addAction(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
@@ -243,12 +244,6 @@ public class TimePanelFragment extends BasePanelFragment {
         }
     }
 
-    private void toggleCompetitorList() {
-        if (RaceLogRaceStatus.FINISHING.equals(getRaceState().getStatus())) {
-            mCompetitorList.toggleMarker();
-        }
-    }
-
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {
 
         @Override
@@ -257,8 +252,6 @@ public class TimePanelFragment extends BasePanelFragment {
 
             checkStatus();
             uncheckMarker(null);
-
-            toggleCompetitorList();
         }
 
         @Override
@@ -355,9 +348,10 @@ public class TimePanelFragment extends BasePanelFragment {
                 if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
                     uncheckMarker(null);
                 }
+
                 if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
                     if (intent.getExtras() != null) {
-                        String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                        String data = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA);
                         if (AppConstants.INTENT_ACTION_TOGGLE_TIME.equals(data)) {
                             uncheckMarker(mRaceHeader);
                         } else if (AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR.equals(data)) {
@@ -368,13 +362,18 @@ public class TimePanelFragment extends BasePanelFragment {
                     }
                 }
 
-                if (AppConstants.INTENT_ACTION_CLICK.equals(action)) {
+                if (AppConstants.INTENT_ACTION_ON_LIFECYCLE.equals(action)) {
                     if (intent.getExtras() != null) {
-                        String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                        if (AppConstants.INTENT_ACTION_CLICK_COMPETITOR.equals(data)) {
-                            if (mCompetitorList != null && mClickListener != null) {
-                                // TODO find a way for show finishing list
-                                // mClickListener.onClick(mCompetitorList);
+                        String event = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE);
+                        String data = intent.getStringExtra(AppConstants.INTENT_ACTION_EXTRA);
+                        if (AppConstants.INTENT_ACTION_EXTRA_START.equals(event)) {
+                            if (AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR.equals(data)) {
+                                mCompetitorList.setMarkerLevel(PanelButton.LEVEL_TOGGLED);
+                            }
+                        }
+                        if (AppConstants.INTENT_ACTION_EXTRA_STOP.equals(event)) {
+                            if (AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR.equals(data)) {
+                                mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
                             }
                         }
                     }
