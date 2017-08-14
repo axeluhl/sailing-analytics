@@ -1,13 +1,9 @@
 package com.sap.sailing.gwt.home.mobile.app;
 
-import java.util.Date;
-
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.storage.client.Storage;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -36,7 +32,6 @@ import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
-import com.sap.sse.security.ui.authentication.login.LoginPopup;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -88,48 +83,12 @@ public class MobileApplicationClientFactory extends
 
                     @Override
                     public void onUserStatusChange(UserDTO user) {
-                        checkNewUserPopup(user,navigator);
+                        checkNewUserPopup(user, false, () -> navigator.goToPlace(navigator.getMoreLoginInfo()));
                     }
                 }, true);
             }
         });
     }
-    
-    
-    private void checkNewUserPopup(UserDTO user, MobilePlacesNavigator placesNavigator) {
-        Storage storage = Storage.getLocalStorageIfSupported();
-        if (storage != null) {
-            Date currentTime = new Date();
-            if (user != null) {
-                storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
-            } else {
-                Date lastLoginOrSupression = null;
-                try {
-                    String value = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
-                    if (value != null) {
-                        lastLoginOrSupression = new Date(Long.parseLong(value));
-                    }
-                } catch (Exception e) {
-                    GWT.log("Error parsing localstore value!");
-                    storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
-                }
-                if (lastLoginOrSupression == null
-                        || lastLoginOrSupression.getTime() + SUPRESSION_DELAY < currentTime.getTime()) {
-                    new LoginPopup(false, () -> {
-                        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
-                    }, () -> {
-                        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
-                        placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo());
-                    }).show();
-                } else {
-                    GWT.log("No logininfo required, user was logged in recently, or clicked dismiss "
-                            + lastLoginOrSupression + " cur " + currentTime);
-                }
-            }
-
-        }
-    }
-
 
     public MobilePlacesNavigator getNavigator() {
         return navigator;
