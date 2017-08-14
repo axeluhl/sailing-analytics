@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.partials.header;
+package com.sap.sse.security.ui.authentication.login;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

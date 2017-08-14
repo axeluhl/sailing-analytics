@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages"/>
+    <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
 	<ui:style>
 	.more {
 		display: inline-block;
@@ -49,10 +49,10 @@
 	}
 	</ui:style>
 	<g:FlowPanel styleName="{style.main}">
-		<g:Label styleName="{style.lbl}" text="{i18n.shortMoreInfoLogin}" />
+		<g:Label styleName="{style.lbl}" text="{i18n_sec.showMoreInfoLogin}" />
 		<g:FlowPanel styleName="{style.btns}">
-			<g:Anchor styleName="{style.more}" ui:field="moreInfo" text="{i18n.moreInfo}" />
-			<g:Anchor styleName="{style.dismiss}" ui:field="dismiss" text="{i18n.dismiss}" />
+			<g:Anchor styleName="{style.more}" ui:field="moreInfo" text="{i18n_sec.moreInfo}" />
+			<g:Anchor styleName="{style.dismiss}" ui:field="dismiss" text="{i18n_sec.dismiss}" />
 		</g:FlowPanel>
 	</g:FlowPanel>
 </ui:UiBinder> 
