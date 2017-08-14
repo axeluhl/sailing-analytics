@@ -7,4 +7,9 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 
 public class CompetitorResultsImpl extends ArrayList<CompetitorResult> implements CompetitorResults {
     private static final long serialVersionUID = 4928351242700897387L;
+
+    @Override
+    public boolean hasConflicts() {
+        return true; // FIXME just for testing
+    }
 }

@@ -7,4 +7,6 @@ package com.sap.sailing.domain.abstractlog.race;
  */
 public interface CompetitorResults extends Iterable<CompetitorResult> {
     boolean add(CompetitorResult result);
+
+    boolean hasConflicts();
 }
