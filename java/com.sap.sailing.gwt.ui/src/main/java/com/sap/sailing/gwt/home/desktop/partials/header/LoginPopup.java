@@ -31,9 +31,9 @@ public class LoginPopup extends PopupPanel {
         LOCAL_CSS.ensureInjected();
         CSS.ensureInjected();
         this.addStyleName(LOCAL_CSS.flyover());
-        if(desktop){
+        if (desktop) {
             this.addStyleName(CSS.mainLayout());
-        }else{
+        } else {
             this.addStyleName(CSS.mobileLayout());
         }
         ensureDebugId("loginpopupNewUser");
