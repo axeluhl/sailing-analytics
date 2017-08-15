@@ -1,12 +1,14 @@
 package com.sap.sse.security.ui.client;
 
-import java.util.Date;
 import java.util.logging.Logger;
 
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.storage.client.Storage;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.mvp.ClientFactoryImpl;
 import com.sap.sse.gwt.client.mvp.TopLevelView;
 import com.sap.sse.security.ui.authentication.login.LoginPopup;
@@ -20,7 +22,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends ClientFactoryImpl<TLV> implements WithSecurity {
     private static final Logger log = Logger.getLogger(SecureClientFactoryImpl.class.getName());
     protected static final String STORAGE_KEY_FOR_USER_LOGIN_HINT = "sailing.ui.lastLoginOrSuppression";
-    protected static final long SUPRESSION_DELAY = 1000 * 60 * 60 * 24 * 7;
+    protected static final Duration SUPRESSION_DELAY = Duration.ONE_WEEK;
     
     private WithSecurity securityProvider;
 
@@ -51,22 +53,13 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
     protected void checkNewUserPopup(UserDTO user, boolean desktop, Runnable gotoMoreInfo) {
         Storage storage = Storage.getLocalStorageIfSupported();
         if (storage != null) {
-            Date currentTime = new Date();
+            final TimePoint currentTime = MillisecondsTimePoint.now();
             if (user != null) {
                 setUserLoginHintToStorage(storage, currentTime);
             } else {
-                Date lastLoginOrSupression = null;
-                final String value = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
-                try {
-                    if (value != null) {
-                        lastLoginOrSupression = new Date(Long.parseLong(value));
-                    }
-                } catch (Exception e) {
-                    log.warning("Error parsing localstore value '" + stringValue + "'");
-                    storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
-                }
+                final TimePoint lastLoginOrSupression = parseLastNewUserSupression(storage);
                 if (lastLoginOrSupression == null
-                        || lastLoginOrSupression.getTime() + SUPRESSION_DELAY < currentTime.getTime()) {
+                        || lastLoginOrSupression.plus(SUPRESSION_DELAY).before(currentTime)) {
                     new LoginPopup(desktop, () -> {
                         setUserLoginHintToStorage(storage, currentTime);
                     }, () -> {
@@ -81,7 +74,21 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
         }
     }
 
-    private void setUserLoginHintToStorage(Storage storage, Date currentTime) {
-        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
+    private TimePoint parseLastNewUserSupression(Storage storage) {
+        TimePoint lastLoginOrSupression = null;
+        final String stringValue = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+        try {
+            if (stringValue != null) {
+                lastLoginOrSupression = new MillisecondsTimePoint(Long.parseLong(stringValue));
+            }
+        } catch (Exception e) {
+            log.warning("Error parsing localstore value '" + stringValue + "'");
+            storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+        }
+        return lastLoginOrSupression;
+    }
+
+    private void setUserLoginHintToStorage(Storage storage, TimePoint currentTime) {
+        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.asMillis()));
     }
 }
