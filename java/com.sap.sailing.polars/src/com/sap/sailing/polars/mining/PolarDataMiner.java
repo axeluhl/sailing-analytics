@@ -434,7 +434,7 @@ public class PolarDataMiner {
     }
 
     public void raceFinishedTracking(TrackedRace race) {
-        Set<GPSFixMovingWithOriginInfo> fixes = null;
+        final Set<GPSFixMovingWithOriginInfo> fixes;
         synchronized (fixesForRacesWhichAreStillLoading) {
             fixes = fixesForRacesWhichAreStillLoading.remove(race);
         }
