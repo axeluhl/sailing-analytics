@@ -18,7 +18,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  *
  */
 public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends ClientFactoryImpl<TLV> implements WithSecurity {
-    protected static final String STORAGE_KEY_FOR_USER_LOGIN_HINT = "lastnewUserSupression";
+    protected static final String STORAGE_KEY_FOR_USER_LOGIN_HINT = "sailing.ui.lastLoginOrSuppression";
     protected static final long SUPRESSION_DELAY = 1000 * 60 * 60 * 24 * 7;
     
     private WithSecurity securityProvider;
