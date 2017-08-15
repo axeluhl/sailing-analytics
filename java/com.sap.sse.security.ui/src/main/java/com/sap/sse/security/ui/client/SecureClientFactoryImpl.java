@@ -1,8 +1,8 @@
 package com.sap.sse.security.ui.client;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.storage.client.Storage;
@@ -18,6 +18,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  *
  */
 public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends ClientFactoryImpl<TLV> implements WithSecurity {
+    private static final Logger log = Logger.getLogger(SecureClientFactoryImpl.class.getName());
     protected static final String STORAGE_KEY_FOR_USER_LOGIN_HINT = "sailing.ui.lastLoginOrSuppression";
     protected static final long SUPRESSION_DELAY = 1000 * 60 * 60 * 24 * 7;
     
@@ -55,13 +56,13 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
                 setUserLoginHintToStorage(storage, currentTime);
             } else {
                 Date lastLoginOrSupression = null;
+                final String value = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
                 try {
-                    String value = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
                     if (value != null) {
                         lastLoginOrSupression = new Date(Long.parseLong(value));
                     }
                 } catch (Exception e) {
-                    GWT.log("Error parsing localstore value!");
+                    log.warning("Error parsing localstore value '" + stringValue + "'");
                     storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
                 }
                 if (lastLoginOrSupression == null
@@ -73,7 +74,7 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
                         gotoMoreInfo.run();
                     }).show();
                 } else {
-                    GWT.log("No logininfo required, user was logged in recently, or clicked dismiss "
+                    log.fine("No logininfo required, user was logged in recently, or clicked dismiss "
                             + lastLoginOrSupression + " cur " + currentTime);
                 }
             }
