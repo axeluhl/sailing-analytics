@@ -19,7 +19,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  */
 public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends ClientFactoryImpl<TLV> implements WithSecurity {
     protected static final String STORAGE_KEY_FOR_USER_LOGIN_HINT = "lastnewUserSupression";
-    protected static final long SUPRESSION_DELAY = 1000*60*60*24*7;
+    protected static final long SUPRESSION_DELAY = 1000 * 60 * 60 * 24 * 7;
     
     private WithSecurity securityProvider;
 
@@ -52,7 +52,7 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
         if (storage != null) {
             Date currentTime = new Date();
             if (user != null) {
-                storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
+                setUserLoginHintToStorage(storage, currentTime);
             } else {
                 Date lastLoginOrSupression = null;
                 try {
@@ -67,9 +67,9 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
                 if (lastLoginOrSupression == null
                         || lastLoginOrSupression.getTime() + SUPRESSION_DELAY < currentTime.getTime()) {
                     new LoginPopup(desktop, () -> {
-                        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
+                        setUserLoginHintToStorage(storage, currentTime);
                     }, () -> {
-                        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
+                        setUserLoginHintToStorage(storage, currentTime);
                         gotoMoreInfo.run();
                     }).show();
                 } else {
@@ -77,7 +77,10 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
                             + lastLoginOrSupression + " cur " + currentTime);
                 }
             }
-
         }
+    }
+
+    private void setUserLoginHintToStorage(Storage storage, Date currentTime) {
+        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.getTime()));
     }
 }
