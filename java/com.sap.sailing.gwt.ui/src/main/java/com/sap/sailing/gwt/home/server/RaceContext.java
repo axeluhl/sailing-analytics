@@ -615,7 +615,7 @@ public class RaceContext {
      *         {@link RaceViewState#RUNNING}, false otherwise
      */
     public boolean isLive() {
-        return getLiveRaceViewState() == RaceViewState.RUNNING;
+        return getLiveRaceViewState() == RaceViewState.RUNNING || getLiveRaceViewState() == RaceViewState.FINISHING;
     }
     
     public Collection<SimpleCompetitorDTO> getCompetitors() {

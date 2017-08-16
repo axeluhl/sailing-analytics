@@ -71,10 +71,18 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<IR
             final IRace race = event.getA();
             // An uninitialized race means that all timing data is not valid; we replace start of tracking,
             // end of tracking and start time received by null values.
+            IStartStopData startEndRaceTimesData = event.getC();
+            if (startEndRaceTimesData != null) {
+                final long startTime = startEndRaceTimesData.getStartTime();
+                TimePoint startOfRace = startTime == 0 ? null : getSimulator() == null ? new MillisecondsTimePoint(
+                        startTime) : getSimulator().advance(new MillisecondsTimePoint(startTime));
+                trackedRace.setStartTimeReceived(startOfRace);
+                // Note that end of race can't currently be set on a tracked race
+                logger.info("Received race start time update for race "+race.getName()+": "+startTime);
+            }
             if (!race.isInitialized()) {
                 trackedRace.setStartOfTrackingReceived(null);
                 trackedRace.setEndOfTrackingReceived(null);
-                trackedRace.setStartTimeReceived(null);
                 logger.info("Received isInitialized()==false for race "+race.getName());
             } else {
                 IStartStopData startEndTrackingTimesData = event.getB();
@@ -90,15 +98,6 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<IR
                                     .advance(new MillisecondsTimePoint(endTrackingTime));
                     trackedRace.setEndOfTrackingReceived(endOfTracking);
                     logger.info("Received tracking times update for race "+race.getName()+": "+startOfTracking+".."+endOfTracking);
-                }
-                IStartStopData startEndRaceTimesData = event.getC();
-                if (startEndRaceTimesData != null) {
-                    final long startTime = startEndRaceTimesData.getStartTime();
-                    TimePoint startOfRace = startTime == 0 ? null : getSimulator() == null ? new MillisecondsTimePoint(
-                            startTime) : getSimulator().advance(new MillisecondsTimePoint(startTime));
-                    trackedRace.setStartTimeReceived(startOfRace);
-                    // Note that end of race can't currently be set on a tracked race
-                    logger.info("Received race start time update for race "+race.getName()+": "+startTime);
                 }
             }
         } else {

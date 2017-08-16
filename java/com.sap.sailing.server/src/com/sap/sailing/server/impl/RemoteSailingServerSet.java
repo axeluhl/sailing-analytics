@@ -321,9 +321,10 @@ public class RemoteSailingServerSet {
             if (ref != null) {
                 cachedEventsForRemoteSailingServers.remove(ref);
                 cachedStatisticsByYearForRemoteSailingServers.remove(ref);
+                cachedTrackedRacesForRemoteSailingServers.remove(ref);
             }
             return ref;
-        }finally{
+        } finally {
             LockUtil.unlockAfterWrite(lock);
         }
     }
