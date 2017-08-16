@@ -32,7 +32,7 @@ import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
-import com.sap.sse.security.ui.authentication.login.LoginPopup;
+import com.sap.sse.security.ui.authentication.login.LoginPopupContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -67,7 +67,7 @@ public class MobileApplicationClientFactory extends
         this(new MobileApplicationView(navigator, eventBus), eventBus, placeController, navigator);
     }
 
-    public MobileApplicationClientFactory(MobileApplicationView root, EventBus eventBus,
+    public MobileApplicationClientFactory(final MobileApplicationView root, EventBus eventBus,
             PlaceController placeController, final MobilePlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
@@ -84,12 +84,17 @@ public class MobileApplicationClientFactory extends
 
                     @Override
                     public void onUserStatusChange(UserDTO user) {
-                        checkNewUserPopup(user, () -> new LoginPopup(false, () -> {
-                            setUserLoginHintToStorage();
-                        }, () -> {
-                            setUserLoginHintToStorage();
-                            navigator.goToPlace(navigator.getMoreLoginInfo());
-                        }).show());
+                        checkNewUserPopup(user, () -> {
+                            final LoginPopupContent content = new LoginPopupContent(() -> {
+                                root.setSubHeaderContent(null);
+                                setUserLoginHintToStorage();
+                            }, () -> {
+                                root.setSubHeaderContent(null);
+                                setUserLoginHintToStorage();
+                                navigator.goToPlace(navigator.getMoreLoginInfo());
+                            });
+                            root.setSubHeaderContent(content);
+                        });
                     }
                 }, true);
             }
