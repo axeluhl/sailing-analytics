@@ -1,7 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="local_res" type="com.sap.sse.security.ui.authentication.UserManagementResources" />
     <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
     <ui:style>
     .more {
@@ -17,16 +16,15 @@
     }
 
     .btns {
+        padding-top: 0.25em;
         position: relative;
     }
     </ui:style>
-    <g:HTMLPanel addStyleNames="{local_res.css.flyover_content_wrapper}">
-        <div class="{local_res.css.flyover_content}">
-            <g:Label text="{i18n_sec.showMoreInfoLogin}" />
-            <div class="{style.btns}">
-                <g:Anchor styleName="{style.more}" ui:field="moreInfo" text="{i18n_sec.moreInfo}" />
-                <g:Anchor styleName="{style.dismiss}" ui:field="dismiss" text="{i18n_sec.dismiss}" />
-            </div>
+    <g:HTMLPanel>
+        <g:Label text="{i18n_sec.showMoreInfoLogin}" />
+        <div class="{style.btns}">
+            <g:Anchor styleName="{style.more}" ui:field="moreInfo" text="{i18n_sec.moreInfo}" />
+            <g:Anchor styleName="{style.dismiss}" ui:field="dismiss" text="{i18n_sec.dismiss}" />
         </div>
     </g:HTMLPanel>
 </ui:UiBinder> 
