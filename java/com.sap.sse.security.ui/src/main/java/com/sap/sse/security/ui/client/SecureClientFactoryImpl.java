@@ -51,44 +51,47 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
     }
     
     protected void checkNewUserPopup(UserDTO user, boolean desktop, Runnable gotoMoreInfo) {
-        Storage storage = Storage.getLocalStorageIfSupported();
-        if (storage != null) {
-            final TimePoint currentTime = MillisecondsTimePoint.now();
-            if (user != null) {
-                setUserLoginHintToStorage(storage, currentTime);
+        final TimePoint currentTime = MillisecondsTimePoint.now();
+        if (user != null) {
+            setUserLoginHintToStorage();
+        } else {
+            final TimePoint lastLoginOrSupression = parseLastNewUserSupression();
+            if (lastLoginOrSupression == null
+                   || lastLoginOrSupression.plus(SUPRESSION_DELAY).before(currentTime)) {
+                new LoginPopup(desktop, () -> {
+                    setUserLoginHintToStorage();
+                }, () -> {
+                    setUserLoginHintToStorage();
+                    gotoMoreInfo.run();
+                }).show();
             } else {
-                final TimePoint lastLoginOrSupression = parseLastNewUserSupression(storage);
-                if (lastLoginOrSupression == null
-                        || lastLoginOrSupression.plus(SUPRESSION_DELAY).before(currentTime)) {
-                    new LoginPopup(desktop, () -> {
-                        setUserLoginHintToStorage(storage, currentTime);
-                    }, () -> {
-                        setUserLoginHintToStorage(storage, currentTime);
-                        gotoMoreInfo.run();
-                    }).show();
-                } else {
-                    log.fine("No logininfo required, user was logged in recently, or clicked dismiss "
-                            + lastLoginOrSupression + " cur " + currentTime);
-                }
+                log.fine("No logininfo required, user was logged in recently, or clicked dismiss "
+                        + lastLoginOrSupression + " cur " + currentTime);
             }
         }
     }
 
-    private TimePoint parseLastNewUserSupression(Storage storage) {
+    private TimePoint parseLastNewUserSupression() {
         TimePoint lastLoginOrSupression = null;
-        final String stringValue = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
-        try {
-            if (stringValue != null) {
-                lastLoginOrSupression = new MillisecondsTimePoint(Long.parseLong(stringValue));
+        final Storage storage = Storage.getLocalStorageIfSupported();
+        if(storage != null) {
+            final String stringValue = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+            try {
+                if (stringValue != null) {
+                    lastLoginOrSupression = new MillisecondsTimePoint(Long.parseLong(stringValue));
+                }
+            } catch (Exception e) {
+                log.warning("Error parsing localstore value '" + stringValue + "'");
+                storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
             }
-        } catch (Exception e) {
-            log.warning("Error parsing localstore value '" + stringValue + "'");
-            storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
         }
         return lastLoginOrSupression;
     }
 
-    private void setUserLoginHintToStorage(Storage storage, TimePoint currentTime) {
-        storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(currentTime.asMillis()));
+    private void setUserLoginHintToStorage() {
+        final Storage storage = Storage.getLocalStorageIfSupported();
+        if(storage != null) {
+            storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(MillisecondsTimePoint.now().asMillis()));
+        }
     }
 }
