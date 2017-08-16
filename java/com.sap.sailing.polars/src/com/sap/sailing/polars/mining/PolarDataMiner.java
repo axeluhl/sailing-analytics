@@ -193,7 +193,6 @@ public class PolarDataMiner {
         preFilteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithOriginInfo>(
                 GPSFixMovingWithOriginInfo.class, executor, preFilterResultReceivers,
                 new FilterCriterion<GPSFixMovingWithOriginInfo>() {
-
                     @Override
                     public boolean matches(GPSFixMovingWithOriginInfo element) {
                         boolean result = false;
