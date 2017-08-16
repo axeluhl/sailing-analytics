@@ -92,7 +92,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
                     @Override
                     public void onUserStatusChange(UserDTO user) {
-                        checkNewUserPopup(user, () -> new LoginPopup(true, () -> {
+                        checkNewUserPopup(user, () -> new LoginPopup(() -> {
                             setUserLoginHintToStorage();
                         }, () -> {
                             setUserLoginHintToStorage();

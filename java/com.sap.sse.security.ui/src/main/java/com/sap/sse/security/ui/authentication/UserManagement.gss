@@ -20,14 +20,6 @@
         right: calc(( 100vw - 81rem)/2) !important;
     }
 }
-
-.flyover_mobile {
-    right: 0px;
-    top: 70px !important;
-    position: absolute;
-    overflow: visible;
-    z-index: 4;
-}
 .flyover_content_wrapper {
     padding: 0 1rem;
 }

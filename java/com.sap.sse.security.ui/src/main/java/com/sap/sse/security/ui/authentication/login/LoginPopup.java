@@ -9,15 +9,11 @@ public class LoginPopup extends PopupPanel {
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css();
     private LoginPopupContent lpop;
 
-    public LoginPopup(boolean desktop, final Runnable onDismiss, final Runnable onMoreInfo) {
+    public LoginPopup(final Runnable onDismiss, final Runnable onMoreInfo) {
         LOCAL_CSS.ensureInjected();
         this.addStyleName(LOCAL_CSS.flyover());
-        if (desktop) {
-            this.addStyleName(LOCAL_CSS.flyover_small_hidden());
-            this.addStyleName(LOCAL_CSS.flyover_position_grid());
-        } else {
-            this.addStyleName(LOCAL_CSS.flyover_mobile());
-        }
+        this.addStyleName(LOCAL_CSS.flyover_small_hidden());
+        this.addStyleName(LOCAL_CSS.flyover_position_grid());
         ensureDebugId("loginpopupNewUser");
         setAutoHideEnabled(true);
         lpop = new LoginPopupContent(() -> {

@@ -18,7 +18,6 @@ public interface UserManagementResources extends ClientBundle {
         String flyover();
         String flyover_small_hidden();
         String flyover_position_grid();
-        String flyover_mobile();
         String flyover_content_wrapper();
         String flyover_content();
         String form_title();
