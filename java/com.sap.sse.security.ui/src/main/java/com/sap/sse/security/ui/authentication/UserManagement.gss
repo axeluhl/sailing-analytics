@@ -25,7 +25,6 @@
 }
 .flyover_content {
     width: 24.8em;
-    float: right;
     padding: 1.333333333333333em;
     background-color: #fff;
     border-radius: .2em;
