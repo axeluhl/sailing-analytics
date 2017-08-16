@@ -56,7 +56,7 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
         } else {
             final TimePoint lastLoginOrSupression = parseLastNewUserSupression();
             if (lastLoginOrSupression == null
-                   || lastLoginOrSupression.plus(SUPRESSION_DELAY).before(currentTime)) {
+                    || lastLoginOrSupression.plus(SUPRESSION_DELAY).before(currentTime)) {
                 newUserRunnable.run();
             } else {
                 log.fine("No logininfo required, user was logged in recently, or clicked dismiss "
