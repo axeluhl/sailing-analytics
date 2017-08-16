@@ -32,6 +32,7 @@ import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
+import com.sap.sse.security.ui.authentication.login.LoginPopup;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -83,7 +84,12 @@ public class MobileApplicationClientFactory extends
 
                     @Override
                     public void onUserStatusChange(UserDTO user) {
-                        checkNewUserPopup(user, false, () -> navigator.goToPlace(navigator.getMoreLoginInfo()));
+                        checkNewUserPopup(user, () -> new LoginPopup(false, () -> {
+                            setUserLoginHintToStorage();
+                        }, () -> {
+                            setUserLoginHintToStorage();
+                            navigator.goToPlace(navigator.getMoreLoginInfo());
+                        }).show());
                     }
                 }, true);
             }

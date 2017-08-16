@@ -39,6 +39,7 @@ import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
+import com.sap.sse.security.ui.authentication.login.LoginPopup;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -91,7 +92,12 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
                     @Override
                     public void onUserStatusChange(UserDTO user) {
-                        checkNewUserPopup(user, true, () -> placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo()));
+                        checkNewUserPopup(user, () -> new LoginPopup(true, () -> {
+                            setUserLoginHintToStorage();
+                        }, () -> {
+                            setUserLoginHintToStorage();
+                            placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo());
+                        }).show());
                     }
                 }, true);
             }

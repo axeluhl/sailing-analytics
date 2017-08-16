@@ -11,7 +11,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.mvp.ClientFactoryImpl;
 import com.sap.sse.gwt.client.mvp.TopLevelView;
-import com.sap.sse.security.ui.authentication.login.LoginPopup;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -50,7 +49,7 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
         return securityProvider.getUserService();
     }
     
-    protected void checkNewUserPopup(UserDTO user, boolean desktop, Runnable gotoMoreInfo) {
+    protected void checkNewUserPopup(UserDTO user, Runnable newUserRunnable) {
         final TimePoint currentTime = MillisecondsTimePoint.now();
         if (user != null) {
             setUserLoginHintToStorage();
@@ -58,12 +57,7 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
             final TimePoint lastLoginOrSupression = parseLastNewUserSupression();
             if (lastLoginOrSupression == null
                    || lastLoginOrSupression.plus(SUPRESSION_DELAY).before(currentTime)) {
-                new LoginPopup(desktop, () -> {
-                    setUserLoginHintToStorage();
-                }, () -> {
-                    setUserLoginHintToStorage();
-                    gotoMoreInfo.run();
-                }).show();
+                newUserRunnable.run();
             } else {
                 log.fine("No logininfo required, user was logged in recently, or clicked dismiss "
                         + lastLoginOrSupression + " cur " + currentTime);
@@ -88,7 +82,7 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
         return lastLoginOrSupression;
     }
 
-    private void setUserLoginHintToStorage() {
+    protected void setUserLoginHintToStorage() {
         final Storage storage = Storage.getLocalStorageIfSupported();
         if(storage != null) {
             storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(MillisecondsTimePoint.now().asMillis()));
