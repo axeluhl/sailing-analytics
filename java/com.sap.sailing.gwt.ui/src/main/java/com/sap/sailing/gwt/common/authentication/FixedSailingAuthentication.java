@@ -17,6 +17,7 @@ public class FixedSailingAuthentication extends GenericAuthentication {
         super(userService, userManagementMenuView, new FixedFlyoutAuthenticationView(res),
                 SailingAuthenticationEntryPointLinkFactory.INSTANCE, res);
         res.mainCss().ensureInjected();
+        new FixedSailingLoginHintPopup(getAuthenticationManager());
     }
     
 }
