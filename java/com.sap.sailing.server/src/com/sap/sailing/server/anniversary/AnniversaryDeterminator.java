@@ -32,6 +32,7 @@ public class AnniversaryDeterminator implements ChangeListener {
     }
 
     public AnniversaryDeterminator(CachedOsgiTypeBasedServiceFinderFactory serviceFinderFactory,AnniversaryChecker... checkerToUse) {
+        knownAnniversaries = new ConcurrentHashMap<>();
         mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
         try {
             knownAnniversaries.putAll(mongoObjectFactory.getAnniversaryData());
@@ -42,7 +43,6 @@ public class AnniversaryDeterminator implements ChangeListener {
         for(AnniversaryChecker toAdd:checkerToUse){
             checkers.add(toAdd);
         }
-        knownAnniversaries = new ConcurrentHashMap<>();
     }
 
     @Override
