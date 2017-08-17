@@ -5,7 +5,6 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.gwt.client.mvp.ClientFactoryImpl;
 import com.sap.sse.gwt.client.mvp.TopLevelView;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * An implementation of a ClientFactory providing security services
@@ -37,23 +36,5 @@ public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends 
     @Override
     public UserService getUserService() {
         return securityProvider.getUserService();
-    }
-    
-    protected void checkNewUserPopup(UserDTO user, Runnable newUserRunnable) {
-        if (user != null) {
-            setUserLoginHintToStorage();
-        } else {
-            if (!wasUserRecentlyLoggedInOrDismissedTheHint()) {
-                newUserRunnable.run();
-            }
-        }
-    }
-    
-    public boolean wasUserRecentlyLoggedInOrDismissedTheHint() {
-        return getUserService().wasUserRecentlyLoggedInOrDismissedTheHint();
-    }
-
-    public void setUserLoginHintToStorage() {
-        getUserService().setUserLoginHintToStorage();
     }
 }

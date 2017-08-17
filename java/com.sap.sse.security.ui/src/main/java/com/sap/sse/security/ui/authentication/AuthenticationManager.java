@@ -1,5 +1,7 @@
 package com.sap.sse.security.ui.authentication;
 
+import java.util.function.Consumer;
+
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -82,4 +84,6 @@ public interface AuthenticationManager {
          */
         void onSuccess(T result);
     }
+
+    void checkNewUserPopup(Consumer<Runnable> showUserHintCallback);
 }

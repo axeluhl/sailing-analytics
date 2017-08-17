@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.mobile.app;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -34,9 +32,7 @@ import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
 import com.sap.sse.security.ui.authentication.login.LoginPopupContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
-import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * 
@@ -75,29 +71,16 @@ public class MobileApplicationClientFactory extends
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
         
-        
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
-
-                    @Override
-                    public void onUserStatusChange(UserDTO user) {
-                        checkNewUserPopup(user, () -> {
-                            final LoginPopupContent content = new LoginPopupContent(() -> {
-                                root.setSubHeaderContent(null);
-                                setUserLoginHintToStorage();
-                            }, () -> {
-                                root.setSubHeaderContent(null);
-                                setUserLoginHintToStorage();
-                                navigator.goToPlace(navigator.getMoreLoginInfo());
-                            });
-                            root.setSubHeaderContent(content);
-                        });
-                    }
-                }, true);
-            }
+        authenticationManager.checkNewUserPopup(dismissCallback -> {
+            final LoginPopupContent content = new LoginPopupContent(() -> {
+                root.setSubHeaderContent(null);
+                dismissCallback.run();
+            }, () -> {
+                root.setSubHeaderContent(null);
+                dismissCallback.run();
+                navigator.goToPlace(navigator.getMoreLoginInfo());
+            });
+            root.setSubHeaderContent(content);
         });
     }
 

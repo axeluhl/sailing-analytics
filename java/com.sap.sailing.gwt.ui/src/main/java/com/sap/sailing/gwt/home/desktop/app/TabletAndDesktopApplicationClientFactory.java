@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.app;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -41,9 +39,7 @@ import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.login.LoginPopup;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
-import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> implements DesktopClientFactory {
@@ -84,23 +80,13 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
 
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
-
-                    @Override
-                    public void onUserStatusChange(UserDTO user) {
-                        checkNewUserPopup(user, () -> new LoginPopup(() -> {
-                            setUserLoginHintToStorage();
-                        }, () -> {
-                            setUserLoginHintToStorage();
-                            placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo());
-                        }).show());
-                    }
-                }, true);
-            }
+        authenticationManager.checkNewUserPopup(dismissCallback -> {
+            new LoginPopup(() -> {
+                dismissCallback.run();
+            }, () -> {
+                dismissCallback.run();
+                placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo());
+            }).show();
         });
     }
     
