@@ -5865,18 +5865,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<TrackFileImportDeviceIdentifierDTO> getTrackFileImportDeviceIds(List<String> uuids)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        List<TrackFileImportDeviceIdentifierDTO> result = new ArrayList<>();
-        for (String uuidAsString : uuids) {
-            UUID uuid = UUID.fromString(uuidAsString);
-            TrackFileImportDeviceIdentifier device = TrackFileImportDeviceIdentifierImpl.getOrCreate(uuid);
-            long numFixes = getService().getSensorFixStore().getNumberOfFixes(device);
-            TimeRange timeRange = getService().getSensorFixStore().getTimeRangeCoveredByFixes(device);
-            Date from = timeRange == null ? null : timeRange.from().asDate();
-            Date to = timeRange == null ? null : timeRange.to().asDate();
-            result.add(new TrackFileImportDeviceIdentifierDTO(uuidAsString, device.getFileName(), device.getTrackName(),
-                    numFixes, from, to));
+        try {
+            final List<TrackFileImportDeviceIdentifierDTO> result = new ArrayList<>();
+            for (String uuidAsString : uuids) {
+                UUID uuid = UUID.fromString(uuidAsString);
+                TrackFileImportDeviceIdentifier device = TrackFileImportDeviceIdentifierImpl.getOrCreate(uuid);
+                long numFixes = getService().getSensorFixStore().getNumberOfFixes(device);
+                TimeRange timeRange = getService().getSensorFixStore().getTimeRangeCoveredByFixes(device);
+                Date from = timeRange == null ? null : timeRange.from().asDate();
+                Date to = timeRange == null ? null : timeRange.to().asDate();
+                result.add(new TrackFileImportDeviceIdentifierDTO(uuidAsString, device.getFileName(), device.getTrackName(),
+                        numFixes, from, to));
+            }
+            return result;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception trying to obtain track file import device IDs", e);
+            throw e;
         }
-        return result;
     }
 
     @Override
