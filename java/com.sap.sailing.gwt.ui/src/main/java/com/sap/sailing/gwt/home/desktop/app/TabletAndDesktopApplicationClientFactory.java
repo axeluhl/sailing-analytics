@@ -37,7 +37,7 @@ import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
-import com.sap.sse.security.ui.authentication.login.LoginPopup;
+import com.sap.sse.security.ui.authentication.login.LoginHintPopup;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -46,7 +46,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final WrappedPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
-    private LoginPopup loginPopup;
+    private LoginHintPopup loginPopup;
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -86,7 +86,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 loginPopup.hide();
             }
         }, dismissCallback -> {
-            loginPopup = new LoginPopup(() -> {
+            loginPopup = new LoginHintPopup(() -> {
                 dismissCallback.run();
             }, () -> {
                 dismissCallback.run();

@@ -9,11 +9,11 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class LoginPopupContent extends Composite{
+public class LoginHintContent extends Composite{
 
     private static LoginPopupContentUiBinder uiBinder = GWT.create(LoginPopupContentUiBinder.class);
 
-    interface LoginPopupContentUiBinder extends UiBinder<Widget, LoginPopupContent> {
+    interface LoginPopupContentUiBinder extends UiBinder<Widget, LoginHintContent> {
     }
 
     @UiField
@@ -21,7 +21,7 @@ public class LoginPopupContent extends Composite{
     @UiField
     Anchor dismiss;
 
-    public LoginPopupContent(final Runnable onDismiss, final Runnable onMoreInfo) {
+    public LoginHintContent(final Runnable onDismiss, final Runnable onMoreInfo) {
         initWidget(uiBinder.createAndBindUi(this));
         dismiss.addClickHandler(new ClickHandler() {
 

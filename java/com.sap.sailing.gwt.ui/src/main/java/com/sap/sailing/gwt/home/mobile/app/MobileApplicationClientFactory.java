@@ -30,7 +30,7 @@ import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.authentication.WithUserService;
-import com.sap.sse.security.ui.authentication.login.LoginPopupContent;
+import com.sap.sse.security.ui.authentication.login.LoginHintContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -72,7 +72,7 @@ public class MobileApplicationClientFactory extends
                 .getPasswordResetNavigation().getFullQualifiedUrl());
         
         authenticationManager.checkNewUserPopup(() -> root.setSubHeaderContent(null), dismissCallback -> {
-            final LoginPopupContent content = new LoginPopupContent(() -> {
+            final LoginHintContent content = new LoginHintContent(() -> {
                 root.setSubHeaderContent(null);
                 dismissCallback.run();
             }, () -> {

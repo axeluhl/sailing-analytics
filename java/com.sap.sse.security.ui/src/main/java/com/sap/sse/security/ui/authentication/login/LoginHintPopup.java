@@ -5,18 +5,18 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 
-public class LoginPopup extends PopupPanel {
+public class LoginHintPopup extends PopupPanel {
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css();
-    private LoginPopupContent lpop;
+    private LoginHintContent lpop;
 
-    public LoginPopup(final Runnable onDismiss, final Runnable onMoreInfo) {
+    public LoginHintPopup(final Runnable onDismiss, final Runnable onMoreInfo) {
         LOCAL_CSS.ensureInjected();
         this.addStyleName(LOCAL_CSS.flyover());
         this.addStyleName(LOCAL_CSS.flyover_small_hidden());
         this.addStyleName(LOCAL_CSS.flyover_position_grid());
-        ensureDebugId("loginpopupNewUser");
+        ensureDebugId("loginHintPopup");
         setAutoHideEnabled(true);
-        lpop = new LoginPopupContent(() -> {
+        lpop = new LoginHintContent(() -> {
             hide();
             onDismiss.run();
         }, () -> {
