@@ -15,5 +15,6 @@ public class RaceBoardLoginHintPopup extends GenericLoginHintPopup {
         addStyleName(style.usermanagement_view());
         setStyleName(style.usermanagement_mobile(), DeviceDetector.isMobile());
         getWidget().addStyleName(style.usermanagement_view_content_wrapper());
+        content.addStyleName(style.usermanagement_view_content());
     }
 }

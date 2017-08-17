@@ -8,7 +8,7 @@ import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 
 public class LoginHintPopup extends PopupPanel {
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css();
-    private LoginHintContent lpop;
+    protected final LoginHintContent content;
     private Runnable dismissCallback;
 
     public LoginHintPopup(AuthenticationManager authenticationManager, Runnable moreInfoCallback) {
@@ -16,7 +16,7 @@ public class LoginHintPopup extends PopupPanel {
         this.setStyleName(LOCAL_CSS.flyover());
         ensureDebugId("loginHintPopup");
         setAutoHideEnabled(true);
-        lpop = new LoginHintContent(() -> {
+        content = new LoginHintContent(() -> {
             hide();
             dismissCallback.run();
         }, () -> {
@@ -24,11 +24,11 @@ public class LoginHintPopup extends PopupPanel {
             dismissCallback.run();
             moreInfoCallback.run();
         });
-        lpop.addStyleName(LOCAL_CSS.flyover_content());
+        content.addStyleName(LOCAL_CSS.flyover_content());
 
         final SimplePanel wrapper = new SimplePanel();
         wrapper.addStyleName(LOCAL_CSS.flyover_content_wrapper());
-        wrapper.add(lpop);
+        wrapper.add(content);
         add(wrapper);
         
         authenticationManager.checkNewUserPopup(this::hide, dismissCallback -> {
