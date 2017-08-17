@@ -71,7 +71,7 @@ public class MobileApplicationClientFactory extends
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
         
-        authenticationManager.checkNewUserPopup(dismissCallback -> {
+        authenticationManager.checkNewUserPopup(() -> root.setSubHeaderContent(null), dismissCallback -> {
             final LoginPopupContent content = new LoginPopupContent(() -> {
                 root.setSubHeaderContent(null);
                 dismissCallback.run();

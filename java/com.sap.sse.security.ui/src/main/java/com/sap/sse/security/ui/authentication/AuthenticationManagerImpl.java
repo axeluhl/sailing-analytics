@@ -171,15 +171,18 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
     
     @Override
-    public void checkNewUserPopup(Consumer<Runnable> showUserHintCallback) {
+    public void checkNewUserPopup(final Runnable hideUserHintCallback, Consumer<Runnable> showUserHintCallback) {
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
-                // We are only interested in the initial user
-                userService.removeUserStatusEventHandler(this);
-                
-                if (user == null && !userService.wasUserRecentlyLoggedInOrDismissedTheHint()) {
-                    showUserHintCallback.accept(userService::setUserLoginHintToStorage);
+                if (user != null) {
+                    // No further user changes need to be handled
+                    userService.removeUserStatusEventHandler(this);
+                    hideUserHintCallback.run();
+                } else {
+                    if (!userService.wasUserRecentlyLoggedInOrDismissedTheHint()) {
+                        showUserHintCallback.accept(userService::setUserLoginHintToStorage);
+                    }
                 }
             }
         }, true);

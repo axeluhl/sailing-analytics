@@ -85,5 +85,5 @@ public interface AuthenticationManager {
         void onSuccess(T result);
     }
 
-    void checkNewUserPopup(Consumer<Runnable> showUserHintCallback);
+    void checkNewUserPopup(Runnable hideUserHintCallback, Consumer<Runnable> showUserHintCallback);
 }

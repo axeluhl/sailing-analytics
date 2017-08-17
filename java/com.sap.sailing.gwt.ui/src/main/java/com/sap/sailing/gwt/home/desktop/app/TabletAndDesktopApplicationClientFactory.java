@@ -46,6 +46,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final WrappedPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
+    private LoginPopup loginPopup;
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -80,13 +81,18 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
 
-        authenticationManager.checkNewUserPopup(dismissCallback -> {
-            new LoginPopup(() -> {
+        authenticationManager.checkNewUserPopup(() -> {
+            if (loginPopup != null) {
+                loginPopup.hide();
+            }
+        }, dismissCallback -> {
+            loginPopup = new LoginPopup(() -> {
                 dismissCallback.run();
             }, () -> {
                 dismissCallback.run();
                 placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo());
-            }).show();
+            });
+            loginPopup.show();
         });
     }
     
