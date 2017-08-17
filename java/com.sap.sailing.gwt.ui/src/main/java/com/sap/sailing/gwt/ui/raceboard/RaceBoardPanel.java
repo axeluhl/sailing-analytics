@@ -429,9 +429,10 @@ public class RaceBoardPanel
     
     private void setupUserManagementControlPanel(UserService userService) {
         mainCss.ensureInjected();
-        FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
-        new GenericAuthentication(userService, userManagementMenuView, display, 
+        final FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
+        final GenericAuthentication genericAuthentication = new GenericAuthentication(userService, userManagementMenuView, display, 
                 SailingAuthenticationEntryPointLinkFactory.INSTANCE, raceBoardResources);
+        new RaceBoardLoginHintPopup(genericAuthentication.getAuthenticationManager());
     }
 
     @SuppressWarnings("unused")
