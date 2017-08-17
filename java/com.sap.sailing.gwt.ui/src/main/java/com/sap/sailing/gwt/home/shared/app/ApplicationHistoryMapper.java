@@ -78,7 +78,9 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileS
         AuthenticationPlace.Tokenizer.class,
         ConfirmationPlace.Tokenizer.class,
         PasswordResetPlace.Tokenizer.class,
-        ErrorPlace.Tokenizer.class, MoreLoginInformationPlace.Tokenizer.class
+        MoreLoginInformationPlace.Tokenizer.class,
+        // Other places
+        ErrorPlace.Tokenizer.class
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {
 }
