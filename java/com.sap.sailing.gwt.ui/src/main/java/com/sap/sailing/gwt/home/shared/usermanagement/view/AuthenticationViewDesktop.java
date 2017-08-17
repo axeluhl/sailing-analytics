@@ -14,5 +14,6 @@ public class AuthenticationViewDesktop extends AbstractFlyoutAuthenticationView 
     public void show() {
         popupPanel.show();
         popupPanel.getElement().getStyle().clearLeft();
+        popupPanel.getElement().getStyle().clearTop();
     }
 }

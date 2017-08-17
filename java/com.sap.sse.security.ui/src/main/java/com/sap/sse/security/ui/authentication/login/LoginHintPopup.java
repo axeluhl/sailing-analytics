@@ -41,5 +41,6 @@ public class LoginHintPopup extends PopupPanel {
     public void show() {
         super.show();
         getElement().getStyle().clearLeft();
+        getElement().getStyle().clearTop();
     }
 }

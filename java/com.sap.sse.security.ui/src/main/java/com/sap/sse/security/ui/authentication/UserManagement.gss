@@ -4,8 +4,8 @@
 
 .flyover_position_grid {
     visibility: visible;
-    right: 0 !important;
-    top: 55px !important;
+    right: 0;
+    top: 55px;
 }
 
 @media ( max-width: 40em) {
@@ -17,7 +17,7 @@
 @media ( min-width: 76em) {
     .flyover_position_grid {
         visibility: visible;
-        right: calc(( 100vw - 81rem)/2) !important;
+        right: calc(( 100vw - 81rem)/2);
     }
 }
 .flyover_content_wrapper {
