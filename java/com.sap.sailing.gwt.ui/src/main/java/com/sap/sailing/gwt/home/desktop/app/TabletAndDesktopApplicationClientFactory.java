@@ -37,7 +37,6 @@ import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
-import com.sap.sse.security.ui.authentication.login.LoginHintPopup;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -46,7 +45,6 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final WrappedPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
-    private LoginHintPopup loginPopup;
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -81,19 +79,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
 
-        authenticationManager.checkNewUserPopup(() -> {
-            if (loginPopup != null) {
-                loginPopup.hide();
-            }
-        }, dismissCallback -> {
-            loginPopup = new LoginHintPopup(() -> {
-                dismissCallback.run();
-            }, () -> {
-                dismissCallback.run();
-                placesNavigator.goToPlace(placesNavigator.getMoreLoginInfo());
-            });
-            loginPopup.show();
-        });
+        new DesktopLoginHintPopup(authenticationManager, placesNavigator);
     }
     
     @Override
