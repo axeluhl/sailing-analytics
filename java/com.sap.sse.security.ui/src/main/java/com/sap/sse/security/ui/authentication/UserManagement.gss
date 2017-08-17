@@ -4,7 +4,7 @@
 
 .flyover_position_grid {
     visibility: visible;
-    right: 0;
+    right: 0.25em;
     top: 55px;
 }
 
@@ -17,7 +17,7 @@
 @media ( min-width: 76em) {
     .flyover_position_grid {
         visibility: visible;
-        right: calc(( 100vw - 81rem)/2);
+        right: calc(( 100vw - 80.5rem)/2);
     }
 }
 .flyover_content_wrapper {
