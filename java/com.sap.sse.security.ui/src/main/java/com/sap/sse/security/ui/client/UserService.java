@@ -190,6 +190,10 @@ public class UserService {
     }
 
     private void setCurrentUser(UserDTO result, final boolean notifyOtherInstances) {
+        if (result != null) {
+            // we remember that a user was authenticated to suppress the hint for some time
+            setUserLoginHintToStorage();
+        }
         currentUser = result;
         userInitiallyLoaded = true;
         logger.info("User changed to " + (result == null ? "No User" : (result.getName() + " roles: "
