@@ -67,7 +67,6 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileS
         LatestNewsPlace.Tokenizer.class,
         MiniLeaderboardPlace.Tokenizer.class,
         SeriesMiniOverallLeaderboardPlace.Tokenizer.class,//
-        ErrorPlace.Tokenizer.class, //
         ImprintPlace.Tokenizer.class,
         SeriesMiniOverallLeaderboardPlace.Tokenizer.class,
         // User management places:
