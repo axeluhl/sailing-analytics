@@ -13,8 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -41,6 +43,7 @@ import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sse.datamining.components.FilterCriterion;
@@ -72,7 +75,10 @@ public class PolarDataMiner {
     private static final int EXECUTOR_QUEUE_SIZE = 100;
     private static final int THREAD_POOL_SIZE = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
     private final ThreadPoolExecutor executor = createExecutor();
-    private final ConcurrentMap<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService processRacesThatFinishedLoadingExecutor = ThreadPoolUtil.INSTANCE
+            .createBackgroundTaskThreadPoolExecutor(1,
+                    PolarDataMiner.class.getName() + " processRacesThatFinishedLoadingExecutor");
+    private final Map<BoatClass, AtomicInteger> stats = new ConcurrentHashMap<>();
 
     private final Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
 
@@ -191,6 +197,14 @@ public class PolarDataMiner {
                                 element.getCompetitor(),
                                 backendPolarSheetGenerationSettings.getPctOfLeadingCompetitorsToInclude())) {
                             result = true;
+                            final BoatClass boatClass = element.getCompetitor().getBoat().getBoatClass();
+                            AtomicInteger count = stats.get(boatClass);
+                            if (count == null) {
+                                count = new AtomicInteger(1);
+                                stats.put(boatClass, count);
+                            } else {
+                                count.getAndIncrement();
+                            }
                         }
                         return result;
                     }
@@ -204,31 +218,17 @@ public class PolarDataMiner {
     }
 
     public void addFix(GPSFixMoving fix, Competitor competitor, TrackedRace trackedRace) {
-        GPSFixMovingWithOriginInfo fixWithOriginInfo = new GPSFixMovingWithOriginInfo(fix, trackedRace, competitor);
-        if (trackedRace.getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
-            /*
-             * logger.info("Received fix for replay race which has not finished loading. Queuing. " +
-             * (trackedRace.getRace() != null ? trackedRace.getRace().getName() : trackedRace.getRaceIdentifier()
-             * .getRaceName()));
-             */
-            Set<GPSFixMovingWithOriginInfo> fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
-            if (fixes == null) {
-                synchronized (fixesForRacesWhichAreStillLoading) {
-                    fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
-                    if (fixes == null) {
-                        fixes = new HashSet<>();
-                        fixesForRacesWhichAreStillLoading.put(trackedRace, fixes);
-                    }
-                }
-            }
-            fixes.add(fixWithOriginInfo);
-        } else {
+        // don't process fixes while LOADING because wind data is loading at the same time, and
+        // unpredictable results may occur due to this
+        if (trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.LOADING) {
+            GPSFixMovingWithOriginInfo fixWithOriginInfo = new GPSFixMovingWithOriginInfo(fix, trackedRace, competitor);
             processFix(trackedRace, fixWithOriginInfo);
         }
     }
 
     private void processFix(TrackedRace trackedRace, GPSFixMovingWithOriginInfo fixWithOriginInfo) {
-        if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 10) {
+        if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 10) { // in this case synchronous execution becomes likely, but
+            // we are in a synchronous callback and don't want to spend too much time here in this foreground thread; queue it!
             fixQueue.add(fixWithOriginInfo);
         } else {
             preFilteringProcessor.processElement(fixWithOriginInfo);
@@ -421,18 +421,25 @@ public class PolarDataMiner {
         return speedRegressionPerAngleClusterProcessor.getSpeedRegressionFunction(boatClass, trueWindAngle);
     }
 
-    public void raceFinishedTracking(TrackedRace race) {
-        final Set<GPSFixMovingWithOriginInfo> fixes;
-        synchronized (fixesForRacesWhichAreStillLoading) {
-            fixes = fixesForRacesWhichAreStillLoading.remove(race);
-        }
-        if (fixes != null) {
+    public void raceFinishedTracking(final TrackedRace race) {
+        processRacesThatFinishedLoadingExecutor.execute(()->{
             logger.info("All queued fixes for newly loaded race will process now. "
                     + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName()));
-            for (GPSFixMovingWithOriginInfo fix : fixes) {
-                processFix(race, fix);
+            for (final Competitor competitor : race.getRace().getCompetitors()) {
+                final GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
+                track.lockForRead();
+                try {
+                    for (final GPSFixMoving fix : track.getFixes()) {
+                        preFilteringProcessor.processElement(new GPSFixMovingWithOriginInfo(fix, race, competitor));
+                    }
+                } finally {
+                    track.unlockAfterRead();
+                }
             }
-        }
+            logger.info("Finished injecting fixes for race "
+                    + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName())
+                    + "; stats: " + stats);
+        });
     }
 
     public void registerListener(BoatClass boatClass, PolarsChangedListener listener) {
