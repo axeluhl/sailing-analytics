@@ -105,14 +105,14 @@ class ScanViewController: UIViewController {
                 message: error.localizedFailureReason,
                 preferredStyle: .alert
             )
-            let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { (action) in
+            let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { [weak self] action in
                 if let settingsURL = URL(string: UIApplicationOpenSettingsURLString) {
                     UIApplication.shared.openURL(settingsURL)
                 }
-                _ = self.navigationController?.popViewController(animated: true)
+                _ = self?.navigationController?.popViewController(animated: true)
             }
-            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel) { (action) in
-                _ = self.navigationController?.popViewController(animated: true)
+            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel) { [weak self] action in
+                _ = self?.navigationController?.popViewController(animated: true)
             }
             alertController.addAction(settingsAction)
             alertController.addAction(cancelAction)
@@ -213,8 +213,8 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
             message: Translation.ScanView.IncorrectCodeAlert.Message.String,
             preferredStyle: .alert
         )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { (action) in
-            self.startScanning()
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+            self?.startScanning()
         }
         alertController.addAction(okAction)
         present(alertController, animated: true, completion: nil)

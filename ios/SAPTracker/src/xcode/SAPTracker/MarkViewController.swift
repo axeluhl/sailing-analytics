@@ -12,7 +12,7 @@ class MarkViewController: SessionViewController {
 
     @IBOutlet weak var markNameLabel: UILabel!
 
-    var markCheckIn: MarkCheckIn!
+    weak var markCheckIn: MarkCheckIn!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,17 +70,17 @@ class MarkViewController: SessionViewController {
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { (action) in
-            self.performSegue(withIdentifier: Segue.Settings, sender: self)
+        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.Settings, sender: self)
         }
-        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { (action) in
-            self.checkOut()
+        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { [weak self] action in
+            self?.checkOut()
         }
-        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { (action) -> Void in
-            self.update()
+        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { [weak self] action in
+            self?.update()
         }
-        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { (action) -> Void in
-            self.performSegue(withIdentifier: Segue.About, sender: alertController)
+        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.About, sender: alertController)
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(settingsAction)

@@ -18,7 +18,7 @@ protocol ForgotPasswordViewControllerDelegate {
 
 class ForgotPasswordViewController: FormularViewController {
 
-    var signUpController: SignUpController?
+    weak var signUpController: SignUpController?
 
     @IBOutlet weak var infoLabel: UILabel!
     @IBOutlet weak var emailLabel: UILabel!

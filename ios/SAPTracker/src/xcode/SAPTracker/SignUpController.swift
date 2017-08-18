@@ -21,7 +21,7 @@ extension SignUpControllerError: LocalizedError {
     }
 }
 
-@objc protocol SignUpControllerDelegate {
+@objc protocol SignUpControllerDelegate: class {
     
     func signUpControllerDidFinish(_ controller: SignUpController)
     
@@ -31,7 +31,7 @@ extension SignUpControllerError: LocalizedError {
 
 class SignUpController: NSObject {
 
-    var delegate: SignUpControllerDelegate?
+    weak var delegate: SignUpControllerDelegate?
     
     fileprivate let requestManager = SignUpRequestManager(baseURLString: "https://dev.sapsailing.com")
     

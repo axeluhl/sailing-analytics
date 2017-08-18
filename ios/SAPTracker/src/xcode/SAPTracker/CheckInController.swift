@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import AVFoundation
 
-@objc protocol CheckInControllerDelegate {
+@objc protocol CheckInControllerDelegate: class {
     
     func checkInController(_ sender: CheckInController, show alertController: UIAlertController)
 
@@ -18,7 +18,7 @@ import AVFoundation
 
 class CheckInController : NSObject {
     
-    var delegate: CheckInControllerDelegate?
+    weak var delegate: CheckInControllerDelegate?
     
     fileprivate var requestManager = RequestManager()
     
@@ -46,11 +46,11 @@ class CheckInController : NSObject {
                 message: String(format: Translation.CheckInController.WelcomeAlert.Message.String, checkInData.competitorData.sailID),
                 preferredStyle: .alert
             )
-            let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { (action) in
-                self.postCheckIn(checkInData: checkInData, completion: completion)
+            let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+                self?.postCheckIn(checkInData: checkInData, completion: completion)
             }
-            let cancelAction = UIAlertAction(title: Translation.CheckInController.WelcomeAlert.CancelAction.Title.String, style: .cancel) { (action) in
-                self.checkInDidFinish(withSuccess: false, completion: completion)
+            let cancelAction = UIAlertAction(title: Translation.CheckInController.WelcomeAlert.CancelAction.Title.String, style: .cancel) { [weak self] action in
+                self?.checkInDidFinish(withSuccess: false, completion: completion)
             }
             alertController.addAction(okAction)
             alertController.addAction(cancelAction)
@@ -68,8 +68,8 @@ class CheckInController : NSObject {
             message: error.localizedDescription,
             preferredStyle: .alert
         )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { (action) in
-            self.checkInDidFinish(withSuccess: false, completion: completion)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+            self?.checkInDidFinish(withSuccess: false, completion: completion)
         }
         alertController.addAction(okAction)
         showCheckInAlert(alertController: alertController)
@@ -120,8 +120,8 @@ class CheckInController : NSObject {
             message: error.localizedDescription,
             preferredStyle: .alert
         )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { (action) in
-            self.checkInDidFinish(withSuccess: false, completion: completion)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+            self?.checkInDidFinish(withSuccess: false, completion: completion)
         }
         alertController.addAction(okAction)
         showCheckInAlert(alertController: alertController)

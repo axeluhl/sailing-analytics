@@ -10,7 +10,7 @@ import Foundation
 
 class LeaderboardViewController: UIViewController {
     
-    var checkIn: CheckIn!
+    weak var checkIn: CheckIn!
     
     @IBOutlet weak var webView: UIWebView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
@@ -55,8 +55,8 @@ extension LeaderboardViewController: UIWebViewDelegate {
     func webView(_ webView: UIWebView, didFailLoadWithError error: Error) {
         activityIndicator.stopAnimating()
         let alertController = UIAlertController(title: error.localizedDescription, message: nil, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { (action) in
-            self.presentingViewController!.dismiss(animated: true, completion: nil)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+            self?.presentingViewController!.dismiss(animated: true, completion: nil)
         }
         alertController.addAction(okAction)
         present(alertController, animated: true, completion: nil)

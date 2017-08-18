@@ -146,9 +146,9 @@ class HomeViewController: UIViewController {
             message: Translation.HomeView.TermsAlert.Message.String,
             preferredStyle: .alert
         )
-        let showTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.ShowTermsAction.Title.String, style: .default) { action in
+        let showTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.ShowTermsAction.Title.String, style: .default) { [weak self] action in
             UIApplication.shared.openURL(URLs.Terms)
-            self.reviewTerms(completion: completion) // Review terms until user accepted terms
+            self?.reviewTerms(completion: completion) // Review terms until user accepted terms
         }
         let acceptTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.AcceptTermsAction.Title.String, style: .default) { action in
             Preferences.termsAccepted = true
@@ -169,9 +169,9 @@ class HomeViewController: UIViewController {
                 message: "Please try to respect the code convention which is used for this project.",
                 preferredStyle: .alert
             )
-            let showCodeConventionAction = UIAlertAction(title: "Code Convention", style: .default) { action in
+            let showCodeConventionAction = UIAlertAction(title: "Code Convention", style: .default) { [weak self] action in
                 UIApplication.shared.openURL(URLs.CodeConvention)
-                self.reviewCodeConvention(completion: completion)
+                self?.reviewCodeConvention(completion: completion)
             }
             let okAction = UIAlertAction(title: "OK", style: .default) { action in
                 Preferences.codeConventionRead = true
@@ -266,11 +266,11 @@ class HomeViewController: UIViewController {
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { (action) -> Void in
-            self.performSegue(withIdentifier: Segue.Settings, sender: alertController)
+        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.Settings, sender: alertController)
         }
-        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { (action) -> Void in
-            self.performSegue(withIdentifier: Segue.About, sender: alertController)
+        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.About, sender: alertController)
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(settingsAction)

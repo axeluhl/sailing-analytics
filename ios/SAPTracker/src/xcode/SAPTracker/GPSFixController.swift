@@ -39,7 +39,7 @@ class GPSFixController: NSObject {
         }
     }
     
-    let checkIn: CheckIn
+    weak var checkIn: CheckIn!
     
     init(checkIn: CheckIn) {
         self.checkIn = checkIn

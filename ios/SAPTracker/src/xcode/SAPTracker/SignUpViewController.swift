@@ -42,7 +42,7 @@ protocol SignUpViewControllerDelegate {
 
 class SignUpViewController: FormularViewController {
     
-    var signUpController: SignUpController?
+    weak var signUpController: SignUpController?
     
     @IBOutlet weak var infoLabel: UILabel!
     @IBOutlet weak var errorLabel: UILabel!

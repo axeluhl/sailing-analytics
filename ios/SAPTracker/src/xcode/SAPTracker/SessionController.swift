@@ -10,7 +10,7 @@ import UIKit
 
 class SessionController: NSObject {
         
-    let checkIn: CheckIn
+    weak var checkIn: CheckIn!
     
     var sendingBackgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
     var sendingDate: Date = Date()

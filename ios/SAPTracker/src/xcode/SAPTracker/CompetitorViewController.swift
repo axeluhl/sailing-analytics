@@ -30,9 +30,9 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     @IBOutlet weak var eventButton: UIButton!
     @IBOutlet weak var announcementLabel: UILabel!
     
-    var competitorCheckIn: CompetitorCheckIn!
+    weak var competitorCheckIn: CompetitorCheckIn!
     
-    var countdownTimer: Timer?
+    weak var countdownTimer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,14 +43,36 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        validateTimer()
         refresh()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        invalidateTimer()
+    }
+    
+    // MARK: - Timer
+    
+    fileprivate func validateTimer() {
+        tickTimer()
+        countdownTimer = Timer.scheduledTimer(
+            timeInterval: 1,
+            target: self,
+            selector: #selector(tickTimer),
+            userInfo: nil,
+            repeats: true
+        )
+    }
+    
+    fileprivate func invalidateTimer() {
+        countdownTimer?.invalidate()
     }
     
     // MARK: - Setup
     
     fileprivate func setup() {
         setupButtons()
-        setupCountdownTimer()
         setupLocalization()
         setupNavigationBar()
     }
@@ -59,18 +81,6 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
         eventButton.setBackgroundImage(Images.BlueHighlighted, for: .highlighted)
         leaderboardButton.setBackgroundImage(Images.BlueHighlighted, for: .highlighted)
         startTrackingButton.setBackgroundImage(Images.GreenHighlighted, for: .highlighted)
-    }
-    
-    fileprivate func setupCountdownTimer() {
-        countdownTimer?.invalidate()
-        countdownTimer = Timer.scheduledTimer(
-            timeInterval: 1,
-            target: self,
-            selector: #selector(CompetitorViewController.countdownTimerTick),
-            userInfo: nil,
-            repeats: true
-        )
-        countdownTimerTick()
     }
     
     fileprivate func setupLocalization() {
@@ -174,7 +184,8 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     
     // MARK: - Timer
     
-    @objc fileprivate func countdownTimerTick() {
+    @objc fileprivate func tickTimer() {
+        guard competitorCheckIn != nil else { return }
         if competitorCheckIn.event.startDate - Date().timeIntervalSince1970 > 0 {
             regattaStartLabel.text = Translation.CompetitorView.RegattaStartLabel.Text.BeforeRegattaDidStart.String
             let duration = competitorCheckIn.event.startDate - Date().timeIntervalSince1970
@@ -220,20 +231,20 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { (action) in
-            self.performSegue(withIdentifier: Segue.Settings, sender: self)
+        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.Settings, sender: self)
         }
-        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { (action) in
-            self.checkOut()
+        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { [weak self] action in
+            self?.checkOut()
         }
-        let replaceImageAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { (action) in
-            self.showSelectImageAlert()
+        let replaceImageAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { [weak self] action in
+            self?.showSelectImageAlert()
         }
-        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { (action) -> Void in
-            self.update()
+        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { [weak self] action in
+            self?.update()
         }
-        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { (action) -> Void in
-            self.performSegue(withIdentifier: Segue.About, sender: alertController)
+        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.About, sender: alertController)
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(settingsAction)
@@ -253,11 +264,11 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
                                                     message: Translation.CompetitorView.SelectImageAlert.Message.String,
                                                     preferredStyle: .alert
             )
-            let cameraAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.CameraAction.Title.String, style: .default) { (action) in
-                self.showImagePicker(sourceType: .camera)
+            let cameraAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.CameraAction.Title.String, style: .default) { [weak self] action in
+                self?.showImagePicker(sourceType: .camera)
             }
-            let photoLibraryAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.PhotoLibraryAction.Title.String, style: .default) { (action) in
-                self.showImagePicker(sourceType: .photoLibrary)
+            let photoLibraryAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.PhotoLibraryAction.Title.String, style: .default) { [weak self] action in
+                self?.showImagePicker(sourceType: .photoLibrary)
             }
             let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
             alertController.addAction(cameraAction)

@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol SessionViewControllerDelegate {
+protocol SessionViewControllerDelegate: class {
 
     func performCheckOut()
 
@@ -27,7 +27,7 @@ class SessionViewController: UIViewController {
 
     @IBOutlet weak var startTrackingButton: UIButton!
 
-    var delegate: SessionViewControllerDelegate!
+    weak var delegate: SessionViewControllerDelegate!
     
     // MARK: - Actions
 
@@ -67,8 +67,8 @@ class SessionViewController: UIViewController {
             message: Translation.CompetitorView.CheckOutAlert.Message.String,
             preferredStyle: .alert
         )
-        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .default) { (action) in
-            self.delegate.performCheckOut()
+        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .default) { [weak self] action in
+            self?.delegate.performCheckOut()
         }
         let noAction = UIAlertAction(title: Translation.Common.No.String, style: .cancel, handler: nil)
         alertController.addAction(yesAction)
@@ -82,13 +82,13 @@ class SessionViewController: UIViewController {
             message: "WIFI IS ON BUT NOT CONNECTED",
             preferredStyle: .alert
         )
-        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { (action) in
+        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { action in
             if let settingsURL = URL(string: "prefs:root=WIFI") {
                 UIApplication.shared.openURL(settingsURL)
             }
         }
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { (action) in
-            self.startTracking()
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+            self?.startTracking()
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(settingsAction)
@@ -103,7 +103,7 @@ class SessionViewController: UIViewController {
             message: message,
             preferredStyle: .alert
         )
-        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { (action) in
+        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { action in
             if let locationServiceURL = URL(string: "prefs:root=LOCATION_SERVICES") {
                 UIApplication.shared.openURL(locationServiceURL)
             }
