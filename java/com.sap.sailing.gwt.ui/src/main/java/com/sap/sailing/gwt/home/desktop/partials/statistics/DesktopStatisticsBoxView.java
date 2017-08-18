@@ -28,7 +28,7 @@ public class DesktopStatisticsBoxView extends Composite implements StatisticsBox
         StatisticsBoxResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         titleUi.setInnerText(title);
-        if(embedded) {
+        if (embedded) {
             addStyleName(StatisticsBoxResources.INSTANCE.css().box_embedded());
         }
         setVisible(false);
