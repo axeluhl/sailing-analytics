@@ -57,17 +57,21 @@ class TrackingViewController : UIViewController {
                                                 preferredStyle: .alert
         )
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
-            LocationManager.sharedManager.stopTracking()
-            SVProgressHUD.show()
-            self?.sessionController.gpsFixController.sendAll(completion: { (withSuccess) in
-                SVProgressHUD.popActivity()
-                self?.dismiss(animated: true, completion: nil)
-            })
+            self?.stopTracking()
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
+    }
+    
+    fileprivate func stopTracking() {
+        LocationManager.sharedManager.stopTracking()
+        SVProgressHUD.show()
+        self.sessionController.gpsFixController.sendAll(completion: { (withSuccess) in
+            SVProgressHUD.popActivity()
+            self.dismiss(animated: true, completion: nil)
+        })
     }
     
 }
