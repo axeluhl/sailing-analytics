@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -97,21 +96,13 @@ public class PolarDataMiner {
     private ThreadPoolExecutor createExecutor() {
         return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60l, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(EXECUTOR_QUEUE_SIZE), new ThreadFactoryWithPriority(PolarDataMiner.class.getSimpleName(),
-                        Thread.NORM_PRIORITY-1, /* daemon */true), new RejectedExecutionHandler() {
-                    @Override
-                    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                        logger.warning("Polar Data Miner Executor rejected execution. Running sequentially.");
-                        r.run();
-                    }
-                }) {
+                        Thread.NORM_PRIORITY-1, /* daemon */true)) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);
-                synchronized (fixQueue) {
-                    while (this.getQueue().size() < (EXECUTOR_QUEUE_SIZE / 10) && !fixQueue.isEmpty()) {
-                        GPSFixMovingWithOriginInfo fix = fixQueue.poll();
-                        preFilteringProcessor.processElement(fix);
-                    }
+                GPSFixMovingWithOriginInfo fix;
+                while (this.getQueue().size() < (EXECUTOR_QUEUE_SIZE / 10) && (fix=fixQueue.poll()) != null) {
+                    preFilteringProcessor.processElement(fix);
                 }
             }
         };
@@ -237,12 +228,10 @@ public class PolarDataMiner {
     }
 
     private void processFix(TrackedRace trackedRace, GPSFixMovingWithOriginInfo fixWithOriginInfo) {
-        synchronized (fixQueue) {
-            if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 10) {
-                fixQueue.add(fixWithOriginInfo);
-            } else {
-                preFilteringProcessor.processElement(fixWithOriginInfo);
-            }
+        if (executor.getQueue().size() >= EXECUTOR_QUEUE_SIZE / 10) {
+            fixQueue.add(fixWithOriginInfo);
+        } else {
+            preFilteringProcessor.processElement(fixWithOriginInfo);
         }
     }
 
