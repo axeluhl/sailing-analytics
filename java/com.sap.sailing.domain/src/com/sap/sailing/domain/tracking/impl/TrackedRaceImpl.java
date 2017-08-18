@@ -3136,7 +3136,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
-
+    /**
+     * Computes maneuver details such as maneuver entering and exiting timepoint with speed and bearing,
+     * timepoint of maneuver climax, total course change, and relevant maneuver bearing steps.
+     * 
+     * @param competitor
+     * @param timePointBeforeManeuver
+     * @param timePointAfterManeuver
+     * @param maneuverDirection
+     * @return
+     */
     private ComputedManeuverDetails computeManeuverDetails(Competitor competitor, TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver, NauticalSide maneuverDirection) {
         List<ManeuverBearingStep> bearingStepsToAnalyze = getManeuverBearingSteps(competitor, timePointBeforeManeuver,
                 timePointAfterManeuver);
