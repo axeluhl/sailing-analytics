@@ -40,6 +40,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/5.5mR.png")
     ImageResource _5_5MRIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/8MR.png")
+    ImageResource _8MRIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/A_CAT.png")
     ImageResource A_CatIcon();
     
@@ -51,6 +54,9 @@ public interface BoatClassImageResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/B_ONE.png")
     ImageResource BOne();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CADET.png")
+    ImageResource CadetIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/CANOE_IC.png")
     ImageResource CanoeICIcon();
@@ -160,6 +166,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/MUSTO_SKIFF.png")
     ImageResource MustoSkiffIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/NACRA_15.png")
+    ImageResource Nacra15Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/NACRA_17.png")
     ImageResource Nacra17Icon();
     
@@ -201,6 +210,15 @@ public interface BoatClassImageResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SWAN_45.png")
     ImageResource Swan45Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TECHNO_293.png")
+    ImageResource Techno293Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TECHNO_293_PLUS.png")
+    ImageResource Techno293PlusIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TEENY.png")
+    ImageResource TeenyIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TORNADO.png")
     ImageResource TornadoIcon();

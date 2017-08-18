@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.SimpleAbstractRaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * All {@link RaceColumnListener} events received from the underlying leaderboard's race columns
@@ -221,7 +223,12 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
 
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        return leaderboard.getAllCompetitors();
+        return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
+    }
+
+    @Override
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        return leaderboard.getAllCompetitorsWithRaceDefinitionsConsidered();
     }
 
     @Override

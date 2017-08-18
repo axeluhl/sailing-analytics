@@ -10,7 +10,7 @@ import Foundation
 
 class TimerViewController: UIViewController {
 
-    private let startDate = NSDate()
+    fileprivate let startDate = Date()
     
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var timeLabel: UILabel!
@@ -22,40 +22,41 @@ class TimerViewController: UIViewController {
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupLocalization()
         setupTimer()
     }
     
-    private func setupLocalization() {
+    fileprivate func setupLocalization() {
         titleLabel.text = Translation.TimerView.TitleLabel.Text.String
     }
     
-    private func setupTimer() {
-        let timer = NSTimer(timeInterval: 0.1,
-                            target: self,
-                            selector: #selector(tick),
-                            userInfo: nil,
-                            repeats: true
+    fileprivate func setupTimer() {
+        let timer = Timer(
+            timeInterval: 0.1,
+            target: self,
+            selector: #selector(tick),
+            userInfo: nil,
+            repeats: true
         )
-        NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)    
+        RunLoop.current.add(timer, forMode: RunLoopMode.commonModes)
     }
     
     // MARK: - Timer
     
-    @objc private func tick(timer: NSTimer) {
-        let currentDate = NSDate()
-        let timeInterval = currentDate.timeIntervalSinceDate(startDate)
-        let timerDate = NSDate(timeIntervalSince1970: timeInterval)
-        timeLabel.text = dateFormatter.stringFromDate(timerDate)
+    @objc fileprivate func tick(_ timer: Timer) {
+        let currentDate = Date()
+        let timeInterval = currentDate.timeIntervalSince(startDate)
+        let timerDate = Date(timeIntervalSince1970: timeInterval)
+        timeLabel.text = dateFormatter.string(from: timerDate)
     }
     
     // MARK: - Properties
     
-    private lazy var dateFormatter: NSDateFormatter = {
-        let dateFormatter = NSDateFormatter()
+    fileprivate lazy var dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
         return dateFormatter
     }()
     

@@ -4,6 +4,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A composite settings dialog that combines all settings of a perspective provide by a {@link PerspectiveLifecycle}.

@@ -242,6 +242,11 @@ public class UserService {
         getUserManagementService().getPreferences(username, keys, callback);
     }
     
+    public void getAllPreferences(final AsyncCallback<Map<String, String>> callback) {
+        String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
+        getUserManagementService().getAllPreferences(username, callback);
+    }
+    
     /**
      * Sets the {@link #getCurrentUser() current user}'s preference with the given {@link String key} on server.
      * 

@@ -382,12 +382,15 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            used to decide whether the client requires an update to the race's competitor set. If the server
      *            has the same MD5 hash for the race's competitors, no competitor set is transmitted to the client.
      *            Otherwise, the full race competitor ID's as strings are sent to the client again for update.
+     * @param estimatedDurationRequired {@code true} if the estimated duration should be calculated
+     * @param timeToGetTheEstimatedDurationFor the time to use for the calculation of the estimated duration.
+     *            May be {@code null} if estimatedDurationRequired is {@code false}
      */
     void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
-            AsyncCallback<CompactRaceMapDataDTO> callback);
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeToGetTheEstimatedDurationFor,
+            boolean estimatedDurationRequired, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<String, Date> fromPerCompetitorIdAsString,
             Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate,

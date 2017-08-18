@@ -20,7 +20,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -127,7 +127,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     protected String getTimeToStartLabelText(Date time) {
         String result = null;
         RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
-        if (selectedRaceTimes.startOfRace != null) {
+        if (selectedRaceTimes != null && selectedRaceTimes.startOfRace != null) {
             if (time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
                 long timeToStartInMs = selectedRaceTimes.startOfRace.getTime() - time.getTime();
                 result = timeToStartInMs < 1000 ? stringMessages.start() : stringMessages.timeToStart(DateAndTimeFormatterUtil.formatElapsedTime(timeToStartInMs));
@@ -151,8 +151,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     @Override
-    public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent() {
-        return componentLifecycle.getSettingsDialogComponent(getSettings());
+    public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent(RaceTimePanelSettings settings) {
+        return componentLifecycle.getSettingsDialogComponent(settings);
     }
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {

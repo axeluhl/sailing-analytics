@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.shared.components;
 
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A {@link ComponentLifecycle} decouples the lifecycle of a component from the corresponding component instance. This way we
@@ -32,8 +33,22 @@ public interface ComponentLifecycle<S extends Settings> {
      */
     boolean hasSettings();
 
-    S extractGlobalSettings(S settings);
+    /**
+     * Extracts User Settings from provided {@link Settings}.
+     * 
+     * @param settings The settings which belong to the component maintained by this lifecycle
+     * @return User Settings extracted from the provided settings
+     * @see ComponentContext
+     */
+    S extractUserSettings(S settings);
 
-    S extractContextSpecificSettings(S settings);
+    /**
+     * Extracts Document Settings from provided {@link Settings}.
+     * 
+     * @param settings The settings which belong to the component maintained by this lifecycle
+     * @return Document Settings extracted from the provided settings
+     * @see ComponentContext
+     */
+    S extractDocumentSettings(S settings);
 
 }
