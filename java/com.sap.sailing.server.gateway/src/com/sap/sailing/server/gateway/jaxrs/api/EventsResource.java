@@ -14,9 +14,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Map;import java.util.Spliterator;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.validation.constraints.NotNull;
@@ -103,6 +104,10 @@ public class EventsResource extends AbstractSailingServerResource {
             return isRequired("venueName");
         }
         
+        if(eventDescription == null){
+            eventDescription = eventName;
+        }
+        
         MillisecondsTimePoint startDate = null;
         try{
             startDate = startDateString != null ? new MillisecondsTimePoint(df.parse(startDateString)) : new MillisecondsTimePoint(new Date());
@@ -148,6 +153,12 @@ public class EventsResource extends AbstractSailingServerResource {
         Event event = getService().apply(
                 new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
                         officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos, leaderboardGroupIds));
+        
+        addCourseArea(event.getId().toString(), "Default");
+        addRegatta(event.getName(),"A_CAT",null,event.getId().toString(),null,true,"LOW_POINT",null,3.0,true,false,"ONE_DESIGN");
+        addLeaderboard(event.getName(), new ArrayList<Integer>());
+//        addLeaderboardGroup(event.getId().toString(), event.getName(), event.getDescription(), event.getName(), false, new ArrayList<String>(), null, null);
+        
 
         return ok(event.getId().toString(), MediaType.TEXT_PLAIN);
     }
@@ -323,11 +334,14 @@ public class EventsResource extends AbstractSailingServerResource {
     @Produces("text/plain")
     public Response addLeaderboard( 
             @FormParam("regattaName") @NotNull String regattaName,
-            @FormParam("discardThreshold") List<Integer> discardThresholdsParam, 
-            @FormParam("leaderboardGroupId") String leaderboardGroupId) {
+            @FormParam("discardThreshold") List<Integer> discardThresholdsParam) {
         
         if(regattaName == null){
             return isRequired("regattaName");
+        }
+        
+        if(getService().getRegatta(new RegattaName(regattaName)) == null){
+            return couldNotFind(Regatta.class.getSimpleName() , regattaName);
         }
         
         int[] discardThresholds = discardThresholdsParam != null ? discardThresholdsParam.stream().mapToInt(i->i).toArray() : null;
@@ -335,9 +349,36 @@ public class EventsResource extends AbstractSailingServerResource {
         final RegattaLeaderboard leaderboard = getService()
                 .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
         
+        // searching for default leadboardgroup of event
+        // how to do this easier?
+        LeaderboardGroup foundLg = null;
+        for(Event event : getService().getAllEvents()){
+            Iterable<CourseArea> courseAreas = event.getVenue().getCourseAreas();
+            for(CourseArea courseArea : courseAreas){
+                if(courseArea.getId().equals(leaderboard.getRegatta().getDefaultCourseArea().getId())){
+                    for(LeaderboardGroup lg : event.getLeaderboardGroups()){
+                        // if default leaderboard
+                        if(lg.getName().equals(event.getName())){
+                            foundLg = lg;
+                            lg.addLeaderboard(leaderboard);
+                        }
+                    }
+                }
+            }
+        }
         
-
+        // check if there is a default leaderboard group
+        if(foundLg != null){
+            List<String> leaderboards = stream(foundLg.getLeaderboards().spliterator()).map(lg -> lg.getName()).collect(Collectors.toList());
+         // how to get overallLeaderboard[...] parameters?
+            getService().updateLeaderboardGroup(foundLg.getName(), foundLg.getName(), foundLg.getDescription(), foundLg.getDisplayName(), leaderboards, null, null);
+        }
+       
         return ok(leaderboard.getName(), MediaType.TEXT_PLAIN);
+    }
+    
+    private <T> Stream<T> stream(Spliterator<T> spliterator) {
+        return StreamSupport.stream(spliterator, false);
     }
 
     @POST
@@ -345,20 +386,20 @@ public class EventsResource extends AbstractSailingServerResource {
     @Consumes("text/plain")
     @Produces("text/plain")
     public Response addLeaderboardGroup(@FormParam("eventId") @NotNull String eventIdParam,
-            @FormParam("leaderboardGroupName") @NotNull String leaderboardGroupName,
+            @FormParam("leaderboardGroupName") String leaderboardGroupName,
             @FormParam("leaderboardGroupDescription") String leaderboardGroupDescription,
             @FormParam("leaderboardGroupDisplayName") String leaderboardGroupDisplayName,
             @FormParam("displayGroupsInReverseOrder") boolean displayGroupsInReverseOrder,
             @FormParam("leaderboardNames") List<String> leaderboardNames,
             @FormParam("overallLeaderboardDiscardThresholds") List<Integer> overallLeaderboardDiscardThresholdsParam, 
-            @QueryParam("overallLeaderboardScoringSchemeType") String overallLeaderboardScoringSchemeTypeParam) {
+            @FormParam("overallLeaderboardScoringSchemeType") String overallLeaderboardScoringSchemeTypeParam) {
         
         if(eventIdParam == null){
             return isRequired("eventId");
         }
         
-        if(leaderboardGroupName == null){
-            return isRequired("leaderboardGroupName");
+        if(leaderboardGroupDescription == null){
+            leaderboardGroupDescription = leaderboardGroupName;
         }
         
         UUID eventId = null;
@@ -366,6 +407,15 @@ public class EventsResource extends AbstractSailingServerResource {
             eventId = UUID.fromString(eventIdParam);
         } catch (IllegalArgumentException e) {
             return invalidIdFormat(eventIdParam);
+        }
+        
+        Event event = getService().getEvent(eventId);
+        if(event == null){
+            return getBadEventErrorResponse(eventId.toString());
+        }
+        
+        if(leaderboardGroupName == null){
+            leaderboardGroupName = event.getName();
         }
         
         ScoringSchemeType overallLeaderboardScoringSchemeType = null;    
@@ -376,11 +426,6 @@ public class EventsResource extends AbstractSailingServerResource {
                 String correctValues = getEnumValuesAsString(ScoringSchemeType.class);
                 return valueNotKnown(overallLeaderboardScoringSchemeTypeParam, correctValues);
             }
-        }
-        
-        Event event = getService().getEvent(eventId);
-        if(event == null){
-            return getBadEventErrorResponse(eventId.toString());
         }
         
         int[] overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholdsParam != null ? overallLeaderboardDiscardThresholdsParam.stream().mapToInt(i->i).toArray() : null;
@@ -531,8 +576,8 @@ public class EventsResource extends AbstractSailingServerResource {
         return Response.status(Status.NOT_FOUND).entity("Could not find an event with id '" + StringEscapeUtils.escapeHtml(eventId) + "'.").type(MediaType.TEXT_PLAIN).build();
     }
     
-    private Response couldNotFind(Object object, String id) {
-        return Response.status(Status.NOT_FOUND).entity("Could not find object of type "+object.getClass().getSimpleName()+" with id '" + StringEscapeUtils.escapeHtml(id) + "'.").type(MediaType.TEXT_PLAIN).build();
+    private Response couldNotFind(String className, String id) {
+        return Response.status(Status.NOT_FOUND).entity("Could not find object of type "+className+" with identifier '" + StringEscapeUtils.escapeHtml(id) + "'.").type(MediaType.TEXT_PLAIN).build();
     }
     
     private Response alreadyExists(Object object, String id) {
