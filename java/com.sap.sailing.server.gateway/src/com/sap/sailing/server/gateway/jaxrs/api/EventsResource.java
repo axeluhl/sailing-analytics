@@ -348,7 +348,7 @@ public class EventsResource extends AbstractSailingServerResource {
     public Response addCourseArea(@FormParam("eventId") String eventIdParam,
             @FormParam("courseAreaName") @DefaultValue(DEFAULT_SERIES_NAME) String courseAreaName) {
 
-//        SecurityUtils.getSubject().checkPermission(Permission.COURSEAREA.getStringPermission(Mode.CREATE));
+//        SecurityUtils.getSubject().checkPermission(Permission.COURSE_AREA.getStringPermission(Mode.CREATE));
         SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
         
         if (eventIdParam == null) {
