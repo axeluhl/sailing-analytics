@@ -28,5 +28,12 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
     
     @Statistic(messageKey="ManeuverExitingBeatAngle", ordinal=6)
     Double getExitingBeatAngle();
+    
+    @Statistic(messageKey="ManeuverDurationInSeconds", resultDecimals=2)
+    Double getManeuverDuration();
+    
+    @Statistic(messageKey="BeatAngleAtManeuverClimax")
+    Double getBeatAngleAtManeuverClimax();
+    
 
 }

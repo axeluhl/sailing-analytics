@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 
 public class ManeuverWithContext implements HasManeuverContext {
@@ -22,6 +23,20 @@ public class ManeuverWithContext implements HasManeuverContext {
     public ManeuverWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver maneuver) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
         this.maneuver = maneuver;
+    }
+    
+    @Override
+    public Double getManeuverDuration() {
+        return maneuver.getTimePointBefore().until(maneuver.getTimePointAfter()).asSeconds();
+    }
+    
+    @Override
+    public Double getBeatAngleAtManeuverClimax() {
+        Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
+        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        Wind wind = trackedRace.getWind(maneuver.getPosition(), maneuver.getTimePoint());
+        SpeedWithBearing speedWithBearing = trackedRace.getTrack(competitor).getEstimatedSpeed(maneuver.getTimePoint());
+        return Math.abs(wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees());
     }
 
     @Override
