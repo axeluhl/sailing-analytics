@@ -193,7 +193,6 @@ public class PolarDataMiner {
         preFilteringProcessor = new ParallelFilteringProcessor<GPSFixMovingWithOriginInfo>(
                 GPSFixMovingWithOriginInfo.class, executor, preFilterResultReceivers,
                 new FilterCriterion<GPSFixMovingWithOriginInfo>() {
-
                     @Override
                     public boolean matches(GPSFixMovingWithOriginInfo element) {
                         boolean result = false;
@@ -434,7 +433,7 @@ public class PolarDataMiner {
     }
 
     public void raceFinishedTracking(TrackedRace race) {
-        Set<GPSFixMovingWithOriginInfo> fixes = null;
+        final Set<GPSFixMovingWithOriginInfo> fixes;
         synchronized (fixesForRacesWhichAreStillLoading) {
             fixes = fixesForRacesWhichAreStillLoading.remove(race);
         }

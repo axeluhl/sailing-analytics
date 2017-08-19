@@ -50,6 +50,7 @@
 }
 .regattaheader_content_details {
   overflow: hidden;
+  min-height: 1.133333333333333em;
 }
 .regattaheader_content_details_item {
   float: left;
