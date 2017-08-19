@@ -35,6 +35,8 @@ import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.WindFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.WindTrackRetrievalProcessor;
 import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
+import com.sap.sailing.datamining.shared.ManeuverSettings;
+import com.sap.sailing.datamining.shared.ManeuverSettingsImpl;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettingsImpl;
 import com.sap.sailing.server.RacingEventService;
@@ -111,7 +113,7 @@ public class SailingDataRetrievalChainDefinitions {
         final DataRetrieverChainDefinition<RacingEventService, HasManeuverContext> maneuverRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 legOfCompetitorRetrieverChainDefinition, HasManeuverContext.class, "ManeuverSailingDomainRetrieverChain");
         maneuverRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, ManeuverRetrievalProcessor.class,
-                HasManeuverContext.class, "Maneuver");
+                HasManeuverContext.class, ManeuverSettings.class, ManeuverSettingsImpl.createDefault(), "Maneuver");
         dataRetrieverChainDefinitions.add(maneuverRetrieverChainDefinition);
 
         DataRetrieverChainDefinition<RacingEventService, HasManeuverSpeedDetailsContext> speedDetailsDataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(

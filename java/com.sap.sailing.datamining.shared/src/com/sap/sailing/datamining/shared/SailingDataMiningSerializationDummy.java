@@ -28,6 +28,8 @@ public final class SailingDataMiningSerializationDummy implements SerializationD
     private ManeuverSpeedDetailsAggregationImpl maneuverSpeedDetailsAggregationImpl;
     private ManeuverSpeedDetailsSettings maneuverSpeedDetailsSettings;
     private ManeuverSpeedDetailsSettingsImpl maneuverSpeedDetailsSettingsImpl;
+    private ManeuverSettings maneuverSettings;
+    private ManeuverSettingsImpl maneuverSettingsImpl;
     
     private SailingDataMiningSerializationDummy() { }
     

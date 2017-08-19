@@ -3,9 +3,12 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.datamining.shared.ManeuverSettings;
+import com.sap.sailing.datamining.shared.ManeuverSettingsImpl;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettingsImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.presentation.ManeuverSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.presentation.ManeuverSpeedDetailsSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.polarmining.PolarDataMiningSettingsDialogComponent;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
@@ -29,6 +32,10 @@ public class DataMiningSettingsInfoManager {
         ManeuverSpeedDetailsSettingsInfo maneuverSpeedDetailsSettingsInfo = new ManeuverSpeedDetailsSettingsInfo();
         infosMappedBySettingsType.put(ManeuverSpeedDetailsSettings.class, maneuverSpeedDetailsSettingsInfo);
         infosMappedBySettingsType.put(ManeuverSpeedDetailsSettingsImpl.class, maneuverSpeedDetailsSettingsInfo);
+        
+        ManeuverSettingsInfo maneuverSettingsInfo = new ManeuverSettingsInfo();
+        infosMappedBySettingsType.put(ManeuverSettings.class, maneuverSettingsInfo);
+        infosMappedBySettingsType.put(ManeuverSettingsImpl.class, maneuverSettingsInfo);
     }
 
     public DataMiningSettingsInfo getSettingsInfo(Class<?> settingsType) {
@@ -51,6 +58,26 @@ public class DataMiningSettingsInfoManager {
         @Override
         public String getId() {
             return "PolarDataMiningSettingsInfo";
+        }
+        
+    }
+    
+    private class ManeuverSettingsInfo implements DataMiningSettingsInfo {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new ManeuverSettingsDialogComponent((ManeuverSettings) settings);
+        }
+
+        @Override
+        public String getLocalizedName(StringMessages stringMessages) {
+            return stringMessages.maneuver();
+        }
+
+        @Override
+        public String getId() {
+            return "ManeuverSettingsInfo";
         }
         
     }

@@ -1886,4 +1886,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorLoadingRegattaStructure(UUID event, String message);
     String showEstimatedDuration();
     String estimatedDuration();
+    String maneuver();
+    String minManeuverDuration();
+    String maxManeuverDuration();
+    String minManeuverEnteringSpeedInKnots();
+    String maxManeuverEnteringSpeedInKnots();
+    String minManeuverExitingSpeedInKnots();
+    String maxManeuverExitingSpeedInKnots();
 }

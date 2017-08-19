@@ -10,7 +10,7 @@ import com.sap.sse.datamining.annotations.Statistic;
 public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, HasTrackedLegOfCompetitor {
     @Connector(scanForStatistics=false)
     HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext();
-
+    
     @Dimension(messageKey="ManeuverType", ordinal=12)
     ManeuverType getManeuverType();
     

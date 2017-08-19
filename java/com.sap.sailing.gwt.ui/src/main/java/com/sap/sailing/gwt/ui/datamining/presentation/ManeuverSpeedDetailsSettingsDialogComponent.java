@@ -10,17 +10,10 @@ import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettingsImpl;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-/**
- * Provides a widget for configuring {@link PolarDataMiningSettings}, including validation.
- * 
- * @author D054528 (Frederik Petersen)
- *
- */
 public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDialogComponent<ManeuverSpeedDetailsSettings> {
 
     private ManeuverSpeedDetailsSettings settings;
@@ -45,8 +38,8 @@ public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDial
     }
 
     private void setupGrid(Grid grid, DataEntryDialog<?> dialog) {
-        Label minimumGraphDataSizeLabel = dialog.createLabel(stringMessages.maneuverDirectionNormalization());
-        grid.setWidget(0, 0, minimumGraphDataSizeLabel);
+        Label directionNormalizationLabel = dialog.createLabel(stringMessages.maneuverDirectionNormalization());
+        grid.setWidget(0, 0, directionNormalizationLabel);
         maneuverDirectionNoNormalizationRadioButton = dialog.createRadioButton("maneuverDirectionNormalization", stringMessages.disabled());
         maneuverDirectionStarboardNormalizationRadioButton = dialog.createRadioButton("maneuverDirectionNormalization", stringMessages.starboardSide());
         maneuverDirectionPortNormalizationRadioButton = dialog.createRadioButton("maneuverDirectionNormalization", stringMessages.portSide());

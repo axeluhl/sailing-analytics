@@ -25,6 +25,18 @@ public class ManeuverWithContext implements HasManeuverContext {
         this.maneuver = maneuver;
     }
     
+    public Double getManeuverEnteringSpeed() {
+        Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
+        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        return trackedRace.getTrack(competitor).getEstimatedSpeed(maneuver.getTimePointBefore()).getKnots();
+    }
+    
+    public Double getManeuverExitingSpeed() {
+        Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
+        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        return trackedRace.getTrack(competitor).getEstimatedSpeed(maneuver.getTimePointAfter()).getKnots();
+    }
+    
     @Override
     public Double getManeuverDuration() {
         return maneuver.getTimePointBefore().until(maneuver.getTimePointAfter()).asSeconds();
