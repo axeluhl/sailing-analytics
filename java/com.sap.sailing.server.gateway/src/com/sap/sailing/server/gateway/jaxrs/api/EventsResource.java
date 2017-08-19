@@ -126,7 +126,6 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("boatClassName") String boatClassName)
     {
         SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
-        logger.fine(SecurityUtils.getSubject().getSession().toString());
 
         boolean createRegatta = Boolean.parseBoolean(createRegattaParam);
         boolean isPublic = Boolean.parseBoolean(isPublicParam);
@@ -189,7 +188,7 @@ public class EventsResource extends AbstractSailingServerResource {
         Map<Locale, URL> sailorsInfoWebsiteURLs = null;
         Iterable<ImageDescriptor> images = Collections.<ImageDescriptor> emptyList();
         Iterable<VideoDescriptor> videos = Collections.<VideoDescriptor> emptyList();
-
+        
         Event event = getService()
                 .apply(new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
                         officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos, leaderboardGroupIds));
@@ -230,6 +229,8 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("controlTrackingFromStartAndFinishTimes") @DefaultValue(DEFAULT_REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES) String controlTrackingFromStartAndFinishTimesParam,
             @FormParam("rankingMetric") @DefaultValue(DEFAULT_LG_RANKING_METRIC) String rankingMetricParam)
         {
+        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regattaName));
+        SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.READ));
         
         boolean isPersistent = Boolean.parseBoolean(isPersistentParam);
         boolean controlTrackingFromStartAndFinishTimes = Boolean.parseBoolean(controlTrackingFromStartAndFinishTimesParam);
@@ -278,9 +279,9 @@ public class EventsResource extends AbstractSailingServerResource {
 
         String boatClassName = null;
         try {
-            boatClassName = BoatClassMasterdata.valueOf(boatClassNameParam).name();
+            boatClassName = BoatClassMasterdata.valueOf(boatClassNameParam).getDisplayName();
         } catch (IllegalArgumentException e) {
-            String correctValues = getEnumValuesAsString(BoatClassMasterdata.class);
+            String correctValues = getBoatClassDisplayNames();
             return getValueUnknownResponse(boatClassNameParam, correctValues);
         }
 
@@ -347,6 +348,9 @@ public class EventsResource extends AbstractSailingServerResource {
     public Response addCourseArea(@FormParam("eventId") String eventIdParam,
             @FormParam("courseAreaName") @DefaultValue(DEFAULT_SERIES_NAME) String courseAreaName) {
 
+//        SecurityUtils.getSubject().checkPermission(Permission.COURSEAREA.getStringPermission(Mode.CREATE));
+        SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
+        
         if (eventIdParam == null) {
             return getParameterMissingResponse("eventId");
         }
@@ -384,6 +388,8 @@ public class EventsResource extends AbstractSailingServerResource {
     public Response addLeaderboard(@FormParam("regattaName") String regattaName,
             @FormParam("discardThreshold") List<Integer> discardThresholdsParam) {
 
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.CREATE, regattaName));
+        
         if (regattaName == null) {
             return getParameterMissingResponse("regattaName");
         }
@@ -449,6 +455,8 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("overallLeaderboardDiscardThresholds") List<Integer> overallLeaderboardDiscardThresholdsParam,
             @FormParam("overallLeaderboardScoringSchemeType") String overallLeaderboardScoringSchemeTypeParam) {
 
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD_GROUP.getStringPermissionForObjects(Mode.CREATE, leaderboardGroupName));
+        
         if (eventIdParam == null) {
             return getParameterMissingResponse("eventId");
         }
@@ -512,6 +520,10 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private <E extends Enum<E>> String getEnumValuesAsString(Class<E> e) {
         return EnumSet.allOf(e).stream().map(en -> en.name()).collect(Collectors.joining(", "));
+    }
+    
+    private String getBoatClassDisplayNames() {
+        return EnumSet.allOf(BoatClassMasterdata.class).stream().map(en -> en.getDisplayName()).collect(Collectors.joining(", "));
     }
 
     private LinkedHashMap<String, SeriesCreationParametersDTO> createDefaultSeriesCreationParameters() {
