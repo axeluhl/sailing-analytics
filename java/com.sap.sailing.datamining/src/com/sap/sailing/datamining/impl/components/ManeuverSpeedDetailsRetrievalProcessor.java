@@ -2,6 +2,7 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
@@ -13,11 +14,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sse.common.TimePoint;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.TrackedRaceUtil;
+import com.sap.sailing.util.TrackedRaceUtil.BearingStep;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
@@ -35,19 +37,13 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
         Collection<HasManeuverSpeedDetailsContext> maneuverSpeedDetails = new ArrayList<>();
         Maneuver maneuver = element.getManeuver();
         TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor();
-        Competitor competitor = element.getTrackedLegOfCompetitorContext().getCompetitor();
-        GPSFixTrack<Competitor,GPSFixMoving> competitorTrack = element.getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getTrack(competitor);
-        Wind wind = trackedLegOfCompetitor.getTrackedLeg().getTrackedRace().getWind(maneuver.getPosition(), maneuver.getTimePoint());
+        TrackedRace trackedRace = element.getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        Wind wind = trackedRace.getWind(maneuver.getPosition(), maneuver.getTimePoint());
         if(wind != null) {
-            competitorTrack.lockForRead();
-            try {
-                if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null && maneuver.getTimePointBefore().until(maneuver.getTimePointAfter()).asMillis() >= 500) {
-                    SpeedPerTWAExtraction speedPerTWAExtraction = extractSpeedPerTWA(competitorTrack, wind, maneuver.getTimePointBefore(), maneuver.getTimePointAfter());
-                    ManeuverSpeedDetailsWithContext maneuverSpeedDetailsContext = new ManeuverSpeedDetailsWithContext(element, speedPerTWAExtraction.getToSide(), speedPerTWAExtraction.getSpeedPerTWA(), speedPerTWAExtraction.getEnteringTWA(), speedPerTWAExtraction.getExitingTWA(), settings);
-                    maneuverSpeedDetails.add(maneuverSpeedDetailsContext);
-                }
-            } finally {
-                competitorTrack.unlockAfterRead();
+            if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null && maneuver.getTimePointBefore().until(maneuver.getTimePointAfter()).asMillis() >= 500) {
+                SpeedPerTWAExtraction speedPerTWAExtraction = extractSpeedPerTWA(trackedRace, trackedLegOfCompetitor.getCompetitor(), wind, maneuver);
+                ManeuverSpeedDetailsWithContext maneuverSpeedDetailsContext = new ManeuverSpeedDetailsWithContext(element, speedPerTWAExtraction.getSpeedPerTWA(), speedPerTWAExtraction.getEnteringTWA(), speedPerTWAExtraction.getExitingTWA(), settings);
+                maneuverSpeedDetails.add(maneuverSpeedDetailsContext);
             }
         }
         
@@ -55,113 +51,90 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
     }
 
 
-    private SpeedPerTWAExtraction extractSpeedPerTWA(GPSFixTrack<Competitor, GPSFixMoving> competitorTrack, Wind wind,
-            TimePoint timePointBefore, TimePoint timePointAfter) {
-        long maneuverDuration = timePointBefore.until(timePointAfter).asMillis();
+    private SpeedPerTWAExtraction extractSpeedPerTWA(TrackedRace trackedRace, Competitor competitor, Wind wind,
+            Maneuver maneuver) {
+        long maneuverDuration = maneuver.getTimePointBefore().until(maneuver.getTimePointAfter()).asMillis();
         long stepMillis = maneuverDuration < 200 * 5 ? maneuverDuration / 5 : 200;
         if(stepMillis == 0) {
             stepMillis = 1;
         }
         
-        int starboardSideVotes = 0;
-        int portsideVotes = 0;
         
-        int totalSteps = (int) (maneuverDuration / stepMillis) + 1;
+        List<BearingStep> maneuverBearingSteps = TrackedRaceUtil.getBearingSteps(trackedRace.getTrack(competitor), maneuver.getTimePointBefore(), maneuver.getTimePointAfter(), new MillisecondsDurationImpl(stepMillis));
         
-        double[] twas = new double[totalSteps];
-        double[] speeds = new double[totalSteps];
-        for(int step = 0; step < totalSteps; ++step) {
-            TimePoint t = timePointBefore.plus(stepMillis * step);
-            SpeedWithBearing speedWithBearing = competitorTrack.getEstimatedSpeed(t);
-            double twa =  wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees();
-            if(twa < 0) {
-                twa += 360;
-            }
-            double speed = speedWithBearing.getKnots();
-            if(step != 0) {
-                if(twa > twas[step - 1]) {
-                    ++starboardSideVotes;
-                } else if(twa < twas[step - 1]) {
-                    ++portsideVotes;
-                }
-            }
-            twas[step] = twa;
-            speeds[step] = speed;
-        }
-        
-        double firstTWA = twas[0];
-        double lastTWA = twas[twas.length-1];
-        
-        NauticalSide toSide;
-        if(Math.abs(starboardSideVotes - portsideVotes) > 1) {
-            toSide = starboardSideVotes > portsideVotes ? NauticalSide.STARBOARD : NauticalSide.PORT;
-        } else {
-            toSide = ManeuverSpeedDetailsUtils.determineNauticalSideByClosestAngleDistance(firstTWA, lastTWA);
-        }
-        
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(toSide, settings);
+        NauticalSide maneuverDirection = maneuver.getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
+        double totalCourseChangeSignum = Math.signum(maneuver.getDirectionChangeInDegrees());
+        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverDirection, settings);
         
         double[] speedPerTWA = new double[360];
         int previousRoundedTWA = -1;
         double previousSpeed = 0;
         
         int enteringTWA = -1;
-        for(int i = 0; i < totalSteps; ++i) {
-            int roundedTWA = (int) Math.round(twas[i]) % 360;
+        
+        for(BearingStep bearingStep : maneuverBearingSteps) {
+            SpeedWithBearing speedWithBearing = bearingStep.getSpeedWithBearing();
+            double twa =  wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees();
+            if(twa < 0) {
+                twa += 360;
+            }
+            double speed = speedWithBearing.getKnots();
+            
+            int roundedTWA = (int) Math.round(twa) % 360;
+            
+            if(enteringTWA == -1) {
+                enteringTWA = roundedTWA;
+            }
+            
+            if(Math.signum(bearingStep.getCourseChangeInDegrees()) != totalCourseChangeSignum) {
+                continue;
+            }
             
             if(settings.isNormalizeManeuverDirection()) {
-                if(toSide != settings.getNormalizedManeuverDirection()) {
+                if(maneuverDirection != settings.getNormalizedManeuverDirection()) {
                     roundedTWA = (360 - roundedTWA) % 360;
                 }
             }
-            double speed = speeds[i];
-            //neglect speed differences between TWA resolution < 1 Deg
+            //Neglect speed differences between TWA resolution < 1 Deg
+            //First twa/speed tuple gets priority over next tuples due it its "speed change freshness" regarding the whole twa sequence
             if(speedPerTWA[roundedTWA] == 0) {
-                speedPerTWA[roundedTWA] = speeds[i];
-            } else {
-                speedPerTWA[roundedTWA] = (speedPerTWA[roundedTWA] + speeds[i]) / 2;
-            }
-            if(i != 0) {
-                double diffWithPreviousTWA = Math.abs(previousRoundedTWA - roundedTWA);
-                NauticalSide currentSide = ManeuverSpeedDetailsUtils.determineNauticalSideByClosestAngleDistance(previousRoundedTWA, roundedTWA);
-                if(diffWithPreviousTWA > 1 && currentSide == toSide) {
-                    double diffWithPreviousSpeed = speed - previousSpeed;
-                    //fill the TWA gaps with linear approximation
-                    for(int step = 1, fillingTWA = forNextTWA.apply(previousRoundedTWA); fillingTWA != roundedTWA; fillingTWA = forNextTWA.apply(fillingTWA), ++step) {
-                        if(speedPerTWA[fillingTWA] == 0) {
-                            speedPerTWA[fillingTWA] = previousSpeed + diffWithPreviousSpeed * step / diffWithPreviousTWA;
+                speedPerTWA[roundedTWA] = speed;
+                //First bearing step supposed to have 0 as course change as
+                //it does not have any previous steps with bearings to compute bearing difference.
+                if(bearingStep.getCourseChangeInDegrees() != 0 && bearingStep.getCourseChangeInDegrees() < 30) {
+                    int diffWithPreviousTWA = Math.abs(previousRoundedTWA - roundedTWA);
+                    if(diffWithPreviousTWA > 1) {
+                        double diffWithPreviousSpeed = speed - previousSpeed;
+                        //fill the TWA gaps with linear approximation
+                        for(int step = 1, fillingTWA = forNextTWA.apply(previousRoundedTWA); fillingTWA != roundedTWA; fillingTWA = forNextTWA.apply(fillingTWA), ++step) {
+                            if(speedPerTWA[fillingTWA] == 0) {
+                                speedPerTWA[fillingTWA] = previousSpeed + diffWithPreviousSpeed * step / diffWithPreviousTWA;
+                            }
                         }
                     }
                 }
-            } else {
-                enteringTWA = roundedTWA;
             }
             previousRoundedTWA = roundedTWA;
             previousSpeed = speed;
         }
         int exitingTWA = previousRoundedTWA == -1 ? enteringTWA : previousRoundedTWA;
         
-        return new SpeedPerTWAExtraction(speedPerTWA, toSide, enteringTWA, exitingTWA);
+        return new SpeedPerTWAExtraction(speedPerTWA, enteringTWA, exitingTWA);
     }
     
     private static class SpeedPerTWAExtraction {
         
         private final double[] speedPerTWA;
-        private final NauticalSide toSide;
         private final int enteringTWA;
         private final int exitingTWA;
         
-        public SpeedPerTWAExtraction(double[] speedPerTWA, NauticalSide toSide, int enteringTWA, int exitingTWA) {
+        public SpeedPerTWAExtraction(double[] speedPerTWA, int enteringTWA, int exitingTWA) {
             this.speedPerTWA = speedPerTWA;
-            this.toSide = toSide;
             this.enteringTWA = enteringTWA;
             this.exitingTWA = exitingTWA;
         }
         public double[] getSpeedPerTWA() {
             return speedPerTWA;
-        }
-        public NauticalSide getToSide() {
-            return toSide;
         }
         public int getEnteringTWA() {
             return enteringTWA;

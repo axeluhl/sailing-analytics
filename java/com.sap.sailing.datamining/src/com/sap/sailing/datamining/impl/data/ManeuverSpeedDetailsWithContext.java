@@ -7,20 +7,17 @@ import com.sap.sailing.datamining.data.HasManeuverSpeedDetailsContext;
 import com.sap.sailing.datamining.data.ManeuverSpeedDetailsStatistic;
 import com.sap.sailing.datamining.impl.components.ManeuverSpeedDetailsUtils;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
-import com.sap.sailing.domain.common.NauticalSide;
 
 public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsContext {
     
     private final HasManeuverContext maneuverContext;
     private final double[] maneuverSpeedPerTWA;
-    private final NauticalSide toSide;
     private int maneuverEnteringTWA;
     private int maneuverExitingTWA;
     private final ManeuverSpeedDetailsSettings settings;
 
-    public ManeuverSpeedDetailsWithContext(HasManeuverContext maneuverContext, NauticalSide toSide, double[] maneuverSpeedPerTWA, int enteringTWA, int exitingTWA, ManeuverSpeedDetailsSettings settings) {
+    public ManeuverSpeedDetailsWithContext(HasManeuverContext maneuverContext, double[] maneuverSpeedPerTWA, int enteringTWA, int exitingTWA, ManeuverSpeedDetailsSettings settings) {
         this.maneuverContext = maneuverContext;
-        this.toSide = toSide;
         this.maneuverSpeedPerTWA = maneuverSpeedPerTWA;
         this.maneuverEnteringTWA = enteringTWA;
         this.maneuverExitingTWA = exitingTWA;
@@ -37,7 +34,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double[] speedSlopePerTWA = new double[360];
         double lastSpeedValue = 0;
         
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(toSide, settings);
+        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide(), settings);
         
         for(int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = forNextTWA.apply(twa)) {
             if(maneuverSpeedPerTWA[twa] == 0 || lastSpeedValue == 0) {
@@ -51,21 +48,18 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
     }
     
     @Override
-    public NauticalSide getToSide() {
-        return toSide;
-    }
-
-    @Override
     public ManeuverSpeedDetailsStatistic getRatioToInitialSpeedStatistic() {
         double[] speedRatioToBeginningSpeedPerTWA = new double[360];
         double firstSpeedValue = 0;
         
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(toSide, settings);
+        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide(), settings);
         
         for(int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = forNextTWA.apply(twa)) {
+            if(firstSpeedValue == 0) {
+                firstSpeedValue = maneuverSpeedPerTWA[twa];
+            }
             if(maneuverSpeedPerTWA[twa] == 0 || firstSpeedValue == 0) {
                 speedRatioToBeginningSpeedPerTWA[twa] = 0;
-                firstSpeedValue = maneuverSpeedPerTWA[twa];
             } else {
                 speedRatioToBeginningSpeedPerTWA[twa] = maneuverSpeedPerTWA[twa] / firstSpeedValue;
             }
@@ -78,7 +72,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double[] speedRatioToPreviousSpeedPerTWA = new double[360];
         double lastSpeedValue = 0;
         
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(toSide, settings);
+        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide(), settings);
         
         for(int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = forNextTWA.apply(twa)) {
             if(maneuverSpeedPerTWA[twa] == 0 || lastSpeedValue == 0) {
