@@ -86,7 +86,7 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
                 enteringTWA = roundedTWA;
             }
             
-            if(Math.signum(bearingStep.getCourseChangeInDegrees()) != totalCourseChangeSignum) {
+            if(Math.abs(Math.signum(bearingStep.getCourseChangeInDegrees()) - totalCourseChangeSignum) == 2) {
                 continue;
             }
             
@@ -101,7 +101,7 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
                 speedPerTWA[roundedTWA] = speed;
                 //First bearing step supposed to have 0 as course change as
                 //it does not have any previous steps with bearings to compute bearing difference.
-                if(bearingStep.getCourseChangeInDegrees() != 0 && bearingStep.getCourseChangeInDegrees() < 30) {
+                if(bearingStep.getCourseChangeInDegrees() != 0 && bearingStep.getCourseChangeInDegrees() < 40) {
                     int diffWithPreviousTWA = Math.abs(previousRoundedTWA - roundedTWA);
                     if(diffWithPreviousTWA > 1) {
                         double diffWithPreviousSpeed = speed - previousSpeed;

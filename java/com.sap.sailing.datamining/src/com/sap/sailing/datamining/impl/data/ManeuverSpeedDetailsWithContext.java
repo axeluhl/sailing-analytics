@@ -7,6 +7,7 @@ import com.sap.sailing.datamining.data.HasManeuverSpeedDetailsContext;
 import com.sap.sailing.datamining.data.ManeuverSpeedDetailsStatistic;
 import com.sap.sailing.datamining.impl.components.ManeuverSpeedDetailsUtils;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
+import com.sap.sailing.domain.common.NauticalSide;
 
 public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsContext {
     
@@ -27,6 +28,11 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
     @Override
     public HasManeuverContext getManeuverContext() {
         return maneuverContext;
+    }
+    
+    @Override
+    public NauticalSide getToSide() {
+        return maneuverContext.getToSide();
     }
 
     @Override
