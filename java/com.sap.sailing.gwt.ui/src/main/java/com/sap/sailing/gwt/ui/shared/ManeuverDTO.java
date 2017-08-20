@@ -50,8 +50,8 @@ public class ManeuverDTO implements IsSerializable {
         String timeAndManeuver = DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(this.timepoint)
                 + ": " + this.type.name();
         String directionChange = stringMessages.directionChange() + ": "
-                + ((int) this.directionChangeInDegrees) + " "+stringMessages.degreesShort()+" ("
-                + ((int) before.bearingInDegrees) + " deg -> " + ((int) after.bearingInDegrees) + " "+stringMessages.degreesShort()+")";
+                + ((int) Math.round(this.directionChangeInDegrees)) + " "+stringMessages.degreesShort()+" ("
+                + ((int) Math.round(before.bearingInDegrees)) + " deg -> " + ((int) Math.round(after.bearingInDegrees)) + " "+stringMessages.degreesShort()+")";
         String speedChange = stringMessages.speedChange() + ": " 
                 + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "+stringMessages.knotsUnit()+" ("
                 + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " "+stringMessages.knotsUnit()+" -> "
