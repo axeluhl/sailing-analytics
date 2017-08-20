@@ -75,9 +75,6 @@ import com.sap.sse.shared.media.VideoDescriptor;
 
 @Path("/v1/events")
 public class EventsResource extends AbstractSailingServerResource {
-
-    private static final String DEFAULT_SERIES_NAME = "Default";
-    private static final String DEFAULT_FLEET_NAME = "Default";
         
     private static final SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 
@@ -157,7 +154,6 @@ public class EventsResource extends AbstractSailingServerResource {
             leaderboardGroupIds = leaderboardGroupIdsList.stream().map(id -> UUID.fromString(id))
                     .collect(Collectors.toList());
         }
-
 
         UUID eventId = UUID.randomUUID();
 
@@ -303,12 +299,9 @@ public class EventsResource extends AbstractSailingServerResource {
                 useStartTimeInterference, buoyZoneRadiusInHullLengths, courseAreaId, boatClassName, startDate, endDate,
                 scoringScheme, rankingMetric, regattaId, regattaCreationParametersDTO);
         
-        addLeaderboard(regattaName, new int[0]);
-       
 
         return ok(regatta.getId().toString(), MediaType.TEXT_PLAIN);
     }
-
 
     @POST
     @Path("/addCourseArea")
@@ -384,7 +377,7 @@ public class EventsResource extends AbstractSailingServerResource {
     @Path("/addLeaderboardGroup")
     @Consumes("text/plain")
     @Produces("text/plain")
-    public Response addLeaderboardGroup(@FormParam("eventId") @NotNull String eventIdParam,
+    public Response addLeaderboardGroup(@FormParam("eventId") String eventIdParam,
             @FormParam("leaderboardGroupName") String leaderboardGroupName,
             @FormParam("leaderboardGroupDescription") String leaderboardGroupDescription,
             @FormParam("leaderboardGroupDisplayName") String leaderboardGroupDisplayName,
@@ -433,6 +426,10 @@ public class EventsResource extends AbstractSailingServerResource {
 
         int[] overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholdsParam != null
                 ? overallLeaderboardDiscardThresholdsParam.stream().mapToInt(i -> i).toArray() : new int[0];
+                
+        if(leaderboardNames == null){
+            leaderboardNames = new ArrayList<String>();
+        }
 
         LeaderboardGroup leaderboardGroup = addLeaderboardGroup(leaderboardGroupName, leaderboardGroupDescription,
                 leaderboardGroupDisplayName, leaderboardNames, displayGroupsInReverseOrder, event,
@@ -569,8 +566,8 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private LinkedHashMap<String, SeriesCreationParametersDTO> createDefaultSeriesCreationParameters() {
         final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
-        seriesCreationParameters.put(DEFAULT_SERIES_NAME, new SeriesCreationParametersDTO(
-                Arrays.asList(new FleetDTO(DEFAULT_FLEET_NAME, 0, null)), false, false, false, false, null, false, null));
+        seriesCreationParameters.put("Default", new SeriesCreationParametersDTO(
+                Arrays.asList(new FleetDTO("Default", 0, null)), false, false, false, false, null, false, null));
         return seriesCreationParameters;
     }
 
