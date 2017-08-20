@@ -23,6 +23,7 @@ public class RestApiApplication extends Application {
         classes.add(FileStorageResource.class);
         classes.add(DataMiningResource.class);
         classes.add(PingResource.class);
+        classes.add(TrackedRaceListResource.class);
         classes.add(StatisticsResource.class);
         
         // Exception Mapper

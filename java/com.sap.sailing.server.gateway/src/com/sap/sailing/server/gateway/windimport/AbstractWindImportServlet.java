@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +36,7 @@ import com.sap.sailing.server.gateway.windimport.AbstractWindImportServlet.WindI
 import com.sap.sse.common.Util;
 
 public abstract class AbstractWindImportServlet extends SailingServerHttpServlet {
-
+    private static final Logger logger = Logger.getLogger(AbstractWindImportServlet.class.getName());
     private static final long serialVersionUID = 1L;
 
     public static class UploadRequest {
@@ -192,6 +194,7 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
             // Use text/html to prevent browsers from wrapping the response body,
             // see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
         } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error ocurred trying to import wind fixes", e);
             windImportResult.error = e.toString();
         }
         response.setContentType("text/html;charset=UTF-8");

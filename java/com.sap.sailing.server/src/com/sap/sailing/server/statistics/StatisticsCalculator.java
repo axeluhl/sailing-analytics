@@ -130,6 +130,6 @@ public class StatisticsCalculator {
         return new StatisticsImpl(getNumberOfCompetitors(), getNumberOfRegattas(),
                 getNumberOfRaces(), getNumberOfTrackedRaces(),
                 getNumberOfGPSFixes(), getNumberOfWindFixes(),
-                getTotalDistanceTraveled());
+                getTotalDistanceTraveled(), getMaxSpeed());
     }
 }

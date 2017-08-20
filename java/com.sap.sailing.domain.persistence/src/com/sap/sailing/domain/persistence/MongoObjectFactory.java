@@ -1,10 +1,13 @@
 package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import com.mongodb.DB;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -181,4 +184,15 @@ public interface MongoObjectFactory {
      * objects obtained through {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)}.
      */
     void removeAllConnectivityParametersForRacesToRestore();
+
+    /**
+     * Currently unused, meant to store determined Anniversaries related to bug4227 
+     */
+    void storeAnniversaryData(Map<Integer, DetailedRaceInfo> data);
+
+    /**
+     * Currently unused, meant to store determined Anniversaries related to bug4227 
+     * @throws MalformedURLException 
+     */
+    Map<Integer, DetailedRaceInfo> getAnniversaryData() throws MalformedURLException;
 }

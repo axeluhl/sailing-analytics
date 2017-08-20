@@ -1,7 +1,11 @@
 package com.sap.sailing.domain.statistics.impl;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.statistics.Statistics;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Triple;
 
 public class StatisticsImpl implements Statistics {
 
@@ -12,6 +16,7 @@ public class StatisticsImpl implements Statistics {
     private final long numberOfGPSFixes;
     private final long numberOfWindFixes;
     private final Distance distanceTraveled;
+    private final Triple<Competitor, Speed, TimePoint> maxSpeed;
     
     /**
      * @param distanceTraveled
@@ -20,7 +25,7 @@ public class StatisticsImpl implements Statistics {
      *            further {@code null} checks.
      */
     public StatisticsImpl(int numberOfCompetitors, int numberOfRegattas, int numberOfRaces, int numberOfTrackedRaces,
-            long numberOfGPSFixes, long numberOfWindFixes, Distance distanceTraveled) {
+            long numberOfGPSFixes, long numberOfWindFixes, Distance distanceTraveled, Triple<Competitor, Speed, TimePoint> maxSpeed) {
         super();
         this.numberOfCompetitors = numberOfCompetitors;
         this.numberOfRegattas = numberOfRegattas;
@@ -29,6 +34,7 @@ public class StatisticsImpl implements Statistics {
         this.numberOfGPSFixes = numberOfGPSFixes;
         this.numberOfWindFixes = numberOfWindFixes;
         this.distanceTraveled = distanceTraveled == null ? Distance.NULL : distanceTraveled;
+        this.maxSpeed = maxSpeed;
     }
 
     @Override
@@ -64,5 +70,9 @@ public class StatisticsImpl implements Statistics {
     @Override
     public Distance getDistanceTraveled() {
         return distanceTraveled;
+    }
+    
+    public Triple<Competitor, Speed, TimePoint> getMaxSpeed() {
+        return maxSpeed;
     }
 }

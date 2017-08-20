@@ -56,7 +56,6 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             final StringMessages stringMessages, DetailType chartDetailType) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
-        // FIXME: Cleanup with java8 using supplier
         init(new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), false,
                  competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,

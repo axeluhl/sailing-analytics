@@ -436,6 +436,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
     String scoringSchemeLowPointTieBreakBasedOnLastSeriesOnly();
     String scoringSchemeLowPointTieBreakBasedOnLastSeriesOnlyDescription();
+    String scoringSchemeLowPointWithAutomaticRdg();
     String scoringSchemeHighPointEssOverall12();
     String scoringSchemeHighPointEssOverall12Description();
     String scoringSchemeHighPointFirstGetsTwelveOrEight();
@@ -1429,6 +1430,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String collapseX(String text);
     String numberOfGPSFixes();
     String fastestSailor();
+    String highestSpeed();
     String numberWindFixes();
     String sailedMiles();
     String millionValue(double value);
