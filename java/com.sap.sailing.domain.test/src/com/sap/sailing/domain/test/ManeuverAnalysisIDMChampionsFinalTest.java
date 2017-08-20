@@ -100,7 +100,7 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         Date toDate = new Date(1317650038784l); // that's shortly after their penalty circle
         Date fromDate = new Date(toDate.getTime()-450000l);
         final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        TimePoint maneuverTime = new MillisecondsTimePoint(dateFormatter.parse("2011-10-03T15:52:30.000+0200"));
+        TimePoint maneuverTime = new MillisecondsTimePoint(dateFormatter.parse("2011-10-03T15:52:31.000+0200"));
         Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>();
