@@ -3250,7 +3250,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             //Only allow consideration of the new cut step when remaining course change sign corresponds to the direction of processed maneuver.
             //As initial maximal course change may not match the signum of direction of processed maneuver,
             //course changes after cut operation with the right signum must get priority over max course change with wrong signum.
-            if(Math.abs(Math.signum(courseChangeInDegreesBeforeManeuverClimax) - totalCourseChangeSignum) < 2 && (Math.signum(maxCourseChangeInDegreesBeforeManeuverClimax) != totalCourseChangeSignum || Math.abs(maxCourseChangeInDegreesBeforeManeuverClimax) <= Math.abs(courseChangeInDegreesAfterManeuverClimax))) {
+            if(Math.abs(Math.signum(courseChangeInDegreesBeforeManeuverClimax) - totalCourseChangeSignum) < 2 && (Math.signum(maxCourseChangeInDegreesAfterManeuverClimax) != totalCourseChangeSignum || Math.abs(maxCourseChangeInDegreesAfterManeuverClimax) <= Math.abs(courseChangeInDegreesAfterManeuverClimax))) {
                 setNextEntryAsBoundary = true;
             }
         }
