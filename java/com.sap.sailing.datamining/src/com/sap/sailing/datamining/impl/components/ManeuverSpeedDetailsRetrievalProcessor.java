@@ -113,6 +113,8 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
                         }
                     }
                 }
+            } else {
+                speedPerTWA[roundedTWA] = (speedPerTWA[roundedTWA] + speed) / 2;
             }
             previousRoundedTWA = roundedTWA;
             previousSpeed = speed;
