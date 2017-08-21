@@ -29,22 +29,22 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
     @Statistic(messageKey="ManeuverExitingBeatAngle", ordinal=6)
     Double getExitingBeatAngle();
     
-    @Statistic(messageKey="ManeuverDurationInSeconds", resultDecimals=2)
+    @Statistic(messageKey="ManeuverDurationInSeconds", ordinal=8, resultDecimals=2)
     Double getManeuverDuration();
     
-    @Statistic(messageKey="BeatAngleAtManeuverClimax")
+    @Statistic(messageKey="BeatAngleAtManeuverClimax", ordinal=7)
     Double getBeatAngleAtManeuverClimax();
     
-    @Statistic(messageKey="EnteringManeuverSpeedMinusExitingSpeed", ordinal=17, resultDecimals=4)
-    Double getEnteringManeuverSpeedMinusExitingSpeedStatistic();
+    @Statistic(messageKey="EnteringManeuverSpeedMinusExitingSpeed", ordinal=19, resultDecimals=4)
+    Double getEnteringManeuverSpeedMinusExitingSpeed();
     
-    @Statistic(messageKey="RatioBetweenInitialAndFinalManeuverSpeed", ordinal=18, resultDecimals=4)
-    Double getRatioBetweenInitialAndFinalManeuverSpeedStatistic();
+    @Statistic(messageKey="RatioBetweenManeuverEnteringAndExitingSpeed", ordinal=20, resultDecimals=4)
+    Double getRatioBetweenManeuverEnteringAndExitingSpeed();
 
-    @Statistic(messageKey="ManeuverEnteringSpeedInKnots")
+    @Statistic(messageKey="ManeuverEnteringSpeedInKnots", ordinal=17, resultDecimals=2)
     Double getManeuverEnteringSpeed();
 
-    @Statistic(messageKey="ManeuverExitingSpeedInKnots")
+    @Statistic(messageKey="ManeuverExitingSpeedInKnots", ordinal=18, resultDecimals=2)
     Double getManeuverExitingSpeed();
     
 

@@ -52,7 +52,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
     }
     
     @Override
-    public ManeuverSpeedDetailsStatistic getRatioToInitialSpeedStatistic() {
+    public ManeuverSpeedDetailsStatistic getRatioToEnteringSpeedStatistic() {
         double[] speedRatioToBeginningSpeedPerTWA = new double[360];
         double firstSpeedValue = maneuverContext.getManeuverEnteringSpeed();
         
@@ -90,8 +90,8 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
     }
 
     @Override
-    public Double getLowestRatioToInitialSpeedStatistic() {
-        double[] speedRatioPerTWA = getRatioToInitialSpeedStatistic().getManeuverValuePerTWA();
+    public Double getLowestRatioToEnteringSpeedStatistic() {
+        double[] speedRatioPerTWA = getRatioToEnteringSpeedStatistic().getManeuverValuePerTWA();
         double lowestSpeedRatio = 1;
         for (double speedRatio : speedRatioPerTWA) {
             if(speedRatio != 0) {
@@ -104,8 +104,8 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
     }
     
     @Override
-    public Double getHighestRatioToInitialSpeedStatistic() {
-        double[] speedRatioPerTWA = getRatioToInitialSpeedStatistic().getManeuverValuePerTWA();
+    public Double getHighestRatioToEnteringSpeedStatistic() {
+        double[] speedRatioPerTWA = getRatioToEnteringSpeedStatistic().getManeuverValuePerTWA();
         double highestSpeedRatio = 1;
         for (double speedRatio : speedRatioPerTWA) {
             if(speedRatio != 0) {
@@ -118,8 +118,8 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
     }
     
     @Override
-    public Double getHighestRatioToInitialSpeedMinusLowestStatistic() {
-        double[] speedRatioPerTWA = getRatioToInitialSpeedStatistic().getManeuverValuePerTWA();
+    public Double getHighestRatioToEnteringSpeedMinusLowestStatistic() {
+        double[] speedRatioPerTWA = getRatioToEnteringSpeedStatistic().getManeuverValuePerTWA();
         double highestSpeedRatio = 1;
         double lowestSpeedRatio = 1;
         for (double speedRatio : speedRatioPerTWA) {

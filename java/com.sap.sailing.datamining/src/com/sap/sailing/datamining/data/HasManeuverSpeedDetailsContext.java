@@ -14,22 +14,22 @@ public interface HasManeuverSpeedDetailsContext {
     @Connector(scanForStatistics=false)
     HasManeuverContext getManeuverContext();
     
-    @Statistic(messageKey="SpeedSlope", ordinal=8, resultDecimals=4)
+    @Statistic(messageKey="SpeedSlope", ordinal=6, resultDecimals=4)
     ManeuverSpeedDetailsStatistic getSpeedSlopeStatistic();
     
-    @Statistic(messageKey="RatioToInitialSpeed", ordinal=1, resultDecimals=4)
-    ManeuverSpeedDetailsStatistic getRatioToInitialSpeedStatistic();
+    @Statistic(messageKey="RatioToEnteringSpeed", ordinal=1, resultDecimals=4)
+    ManeuverSpeedDetailsStatistic getRatioToEnteringSpeedStatistic();
 
     @Statistic(messageKey="RatioToPreviousTWA", ordinal=5, resultDecimals=4)
     ManeuverSpeedDetailsStatistic getRatioToPreviousTWAStatistic();
     
-    @Statistic(messageKey="LowestRatioToInitialSpeed", ordinal=2, resultDecimals=4)
-    Double getLowestRatioToInitialSpeedStatistic();
+    @Statistic(messageKey="LowestRatioToEnteringSpeed", ordinal=2, resultDecimals=4)
+    Double getLowestRatioToEnteringSpeedStatistic();
     
-    @Statistic(messageKey="HighestRatioToInitialSpeed", ordinal=3, resultDecimals=4)
-    Double getHighestRatioToInitialSpeedStatistic();
+    @Statistic(messageKey="HighestRatioToEnteringSpeed", ordinal=3, resultDecimals=4)
+    Double getHighestRatioToEnteringSpeedStatistic();
     
-    @Statistic(messageKey="HighestRatioToInitialSpeedMinusLowest", ordinal=4, resultDecimals=4)
-    Double getHighestRatioToInitialSpeedMinusLowestStatistic();
+    @Statistic(messageKey="HighestRatioToEnteringSpeedMinusLowest", ordinal=4, resultDecimals=4)
+    Double getHighestRatioToEnteringSpeedMinusLowestStatistic();
     
 }

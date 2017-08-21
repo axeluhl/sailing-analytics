@@ -118,12 +118,12 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
     
     @Override
-    public Double getEnteringManeuverSpeedMinusExitingSpeedStatistic() {
+    public Double getEnteringManeuverSpeedMinusExitingSpeed() {
         return getManeuverEnteringSpeed() - getManeuverExitingSpeed();
     }
     
     @Override
-    public Double getRatioBetweenInitialAndFinalManeuverSpeedStatistic() {
+    public Double getRatioBetweenManeuverEnteringAndExitingSpeed() {
         return getManeuverEnteringSpeed() / getManeuverExitingSpeed();
     }
 }
