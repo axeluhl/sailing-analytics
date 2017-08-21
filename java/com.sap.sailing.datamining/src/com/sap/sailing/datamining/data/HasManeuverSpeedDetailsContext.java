@@ -32,10 +32,4 @@ public interface HasManeuverSpeedDetailsContext {
     @Statistic(messageKey="HighestRatioToInitialSpeedMinusLowest", ordinal=4, resultDecimals=4)
     Double getHighestRatioToInitialSpeedMinusLowestStatistic();
     
-    @Statistic(messageKey="EnteringManeuverSpeedMinusExitingSpeed", ordinal=7, resultDecimals=4)
-    Double getEnteringManeuverSpeedMinusExitingSpeedStatistic();
-    
-    @Statistic(messageKey="RatioBetweenInitialAndFinalManeuverSpeed", ordinal=6, resultDecimals=4)
-    Double getRatioBetweenInitialAndFinalManeuverSpeedStatistic();
-    
 }

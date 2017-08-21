@@ -42,7 +42,7 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
         if(wind != null) {
             if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null && maneuver.getTimePointBefore().until(maneuver.getTimePointAfter()).asMillis() >= 500) {
                 SpeedPerTWAExtraction speedPerTWAExtraction = extractSpeedPerTWA(trackedRace, trackedLegOfCompetitor.getCompetitor(), wind, maneuver);
-                ManeuverSpeedDetailsWithContext maneuverSpeedDetailsContext = new ManeuverSpeedDetailsWithContext(element, speedPerTWAExtraction.getSpeedPerTWA(), speedPerTWAExtraction.getEnteringTWA(), speedPerTWAExtraction.getExitingTWA(), settings);
+                ManeuverSpeedDetailsWithContext maneuverSpeedDetailsContext = new ManeuverSpeedDetailsWithContext(element, speedPerTWAExtraction.getSpeedPerTWA(), speedPerTWAExtraction.getEnteringTWA(), settings);
                 maneuverSpeedDetails.add(maneuverSpeedDetailsContext);
             }
         }
@@ -119,30 +119,24 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
             previousRoundedTWA = roundedTWA;
             previousSpeed = speed;
         }
-        int exitingTWA = previousRoundedTWA == -1 ? enteringTWA : previousRoundedTWA;
         
-        return new SpeedPerTWAExtraction(speedPerTWA, enteringTWA, exitingTWA);
+        return new SpeedPerTWAExtraction(speedPerTWA, enteringTWA);
     }
     
     private static class SpeedPerTWAExtraction {
         
         private final double[] speedPerTWA;
         private final int enteringTWA;
-        private final int exitingTWA;
         
-        public SpeedPerTWAExtraction(double[] speedPerTWA, int enteringTWA, int exitingTWA) {
+        public SpeedPerTWAExtraction(double[] speedPerTWA, int enteringTWA) {
             this.speedPerTWA = speedPerTWA;
             this.enteringTWA = enteringTWA;
-            this.exitingTWA = exitingTWA;
         }
         public double[] getSpeedPerTWA() {
             return speedPerTWA;
         }
         public int getEnteringTWA() {
             return enteringTWA;
-        }
-        public int getExitingTWA() {
-            return exitingTWA;
         }
     }
     

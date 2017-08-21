@@ -14,14 +14,12 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
     private final HasManeuverContext maneuverContext;
     private final double[] maneuverSpeedPerTWA;
     private int maneuverEnteringTWA;
-    private int maneuverExitingTWA;
     private final ManeuverSpeedDetailsSettings settings;
 
-    public ManeuverSpeedDetailsWithContext(HasManeuverContext maneuverContext, double[] maneuverSpeedPerTWA, int enteringTWA, int exitingTWA, ManeuverSpeedDetailsSettings settings) {
+    public ManeuverSpeedDetailsWithContext(HasManeuverContext maneuverContext, double[] maneuverSpeedPerTWA, int enteringTWA, ManeuverSpeedDetailsSettings settings) {
         this.maneuverContext = maneuverContext;
         this.maneuverSpeedPerTWA = maneuverSpeedPerTWA;
         this.maneuverEnteringTWA = enteringTWA;
-        this.maneuverExitingTWA = exitingTWA;
         this.settings = settings;
     }
 
@@ -56,7 +54,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
     @Override
     public ManeuverSpeedDetailsStatistic getRatioToInitialSpeedStatistic() {
         double[] speedRatioToBeginningSpeedPerTWA = new double[360];
-        double firstSpeedValue = 0;
+        double firstSpeedValue = maneuverContext.getManeuverEnteringSpeed();
         
         Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide(), settings);
         
@@ -135,16 +133,6 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
             }
         }
         return highestSpeedRatio - lowestSpeedRatio;
-    }
-
-    @Override
-    public Double getEnteringManeuverSpeedMinusExitingSpeedStatistic() {
-        return maneuverSpeedPerTWA[maneuverEnteringTWA] - maneuverSpeedPerTWA[maneuverExitingTWA];
-    }
-    
-    @Override
-    public Double getRatioBetweenInitialAndFinalManeuverSpeedStatistic() {
-        return maneuverSpeedPerTWA[maneuverEnteringTWA] / maneuverSpeedPerTWA[maneuverExitingTWA];
     }
 
 }
