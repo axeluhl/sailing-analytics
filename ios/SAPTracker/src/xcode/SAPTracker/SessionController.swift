@@ -53,9 +53,9 @@ class SessionController: NSObject {
             guard self.isTracking else { return }
             guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
             guard locationData.isValid else { return }
-            let gpsFix = CoreDataManager.sharedManager.newGPSFix(checkIn: self.checkIn)
+            let gpsFix = RegattaCoreDataManager.shared.newGPSFix(checkIn: self.checkIn)
             gpsFix.updateWithLocationData(locationData: locationData)
-            CoreDataManager.sharedManager.saveContext()
+            RegattaCoreDataManager.shared.saveContext()
             if self.sendingDate.compare(Date()) == .orderedAscending {
                 self.sendingDate = Date().addingTimeInterval(BatteryManager.sharedManager.sendingPeriod)
                 self.beginGPSFixSendingInBackgroundTask()
@@ -105,7 +105,7 @@ class SessionController: NSObject {
         checkIn.event.updateWithEventData(eventData: checkInData.eventData)
         checkIn.leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
         checkIn.updateWithCheckInData(checkInData: checkInData)
-        CoreDataManager.sharedManager.saveContext()
+        RegattaCoreDataManager.shared.saveContext()
         completion()
     }
     

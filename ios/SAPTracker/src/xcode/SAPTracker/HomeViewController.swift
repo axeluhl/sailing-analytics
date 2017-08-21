@@ -190,7 +190,7 @@ class HomeViewController: UIViewController {
     fileprivate func reviewGPSFixes(completion: @escaping () -> Void) {
         SVProgressHUD.show()
         fetchedResultsController.delegate = nil
-        let checkIns = CoreDataManager.sharedManager.fetchCheckIns() ?? []
+        let checkIns = RegattaCoreDataManager.shared.fetchCheckIns() ?? []
         reviewGPSFixes(checkIns: checkIns) {
             self.reviewGPSFixesCompleted(completion: completion)
         }
@@ -217,7 +217,7 @@ class HomeViewController: UIViewController {
         guard let checkInData = CheckInData(urlString: urlString) else { completion(); return }
         checkInController.checkIn(checkInData: checkInData, completion: { (withSuccess) in
             Preferences.newCheckInURL = nil
-            self.selectedCheckIn = CoreDataManager.sharedManager.fetchCheckIn(checkInData: checkInData)
+            self.selectedCheckIn = RegattaCoreDataManager.shared.fetchCheckIn(checkInData: checkInData)
             completion()
         })
     }
@@ -361,7 +361,7 @@ class HomeViewController: UIViewController {
     }()
     
     fileprivate lazy var fetchedResultsController: NSFetchedResultsController<CheckIn> = {
-        let fetchedResultsController = CoreDataManager.sharedManager.checkInFetchedResultsController()
+        let fetchedResultsController = RegattaCoreDataManager.shared.checkInFetchedResultsController()
         fetchedResultsController.delegate = self
         return fetchedResultsController
     }()

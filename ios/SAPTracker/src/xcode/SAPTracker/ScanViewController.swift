@@ -193,7 +193,7 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     fileprivate func captureOutputSuccess(checkInData: CheckInData) {
         checkInController.checkIn(checkInData: checkInData, completion: { (withSuccess) in
             if withSuccess {
-                self.homeViewController?.selectedCheckIn = CoreDataManager.sharedManager.fetchCheckIn(checkInData: checkInData)
+                self.homeViewController?.selectedCheckIn = RegattaCoreDataManager.shared.fetchCheckIn(checkInData: checkInData)
                 _ = self.navigationController?.popViewController(animated: true)
             } else {
                 self.startScanning()

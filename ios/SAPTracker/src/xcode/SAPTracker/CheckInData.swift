@@ -8,7 +8,7 @@
 
 import Foundation
 
-open class CheckInData: NSObject {
+class CheckInData: NSObject {
     
     fileprivate struct ItemNames {
         static let EventID = "event_id"

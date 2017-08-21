@@ -331,6 +331,8 @@
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
 		C867BD091F4B0274007E78E0 /* TrainingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD081F4B0274007E78E0 /* TrainingViewController.swift */; };
 		C867BD0B1F4B0290007E78E0 /* CreateTrainingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */; };
+		C867BD0D1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0C1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift */; };
+		C867BD0F1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0E1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift */; };
 		C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */; };
 		C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */; };
 		C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */; };
@@ -727,6 +729,8 @@
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
 		C867BD081F4B0274007E78E0 /* TrainingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingViewController.swift; sourceTree = "<group>"; };
 		C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTrainingViewController.swift; sourceTree = "<group>"; };
+		C867BD0C1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCoreDataManager.swift; sourceTree = "<group>"; };
+		C867BD0E1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingCoreDataManager.swift; sourceTree = "<group>"; };
 		C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 2.xcdatamodel"; sourceTree = "<group>"; };
 		C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GPSFix+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
@@ -862,6 +866,8 @@
 				C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */,
 				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
 				C843D48D1EC0999D00250F01 /* Migration */,
+				C867BD0C1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift */,
+				C867BD0E1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -1967,6 +1973,7 @@
 				C8F71EE21D8691F700826DE4 /* AFURLSessionManager.m in Sources */,
 				C843D4821EBC54A300250F01 /* MarkCheckIn.swift in Sources */,
 				C8F71EDD1D8691F700826DE4 /* AFNetworkReachabilityManager.m in Sources */,
+				C867BD0D1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift in Sources */,
 				C843D4801EBC54A300250F01 /* CompetitorCheckIn.swift in Sources */,
 				C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */,
 				C843D48A1EBCADF500250F01 /* MarkSessionController.swift in Sources */,
@@ -1980,6 +1987,7 @@
 				7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */,
 				C8739E181D2BF2DC00A89F3C /* BaseData.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
+				C867BD0F1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift in Sources */,
 				C8B3B9C21F3C6B3900B3B6BA /* SignUpTranslation.swift in Sources */,
 				7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */,
 				C8F71EED1D8691F700826DE4 /* UIImageView+AFNetworking.m in Sources */,

@@ -13,8 +13,8 @@ import CoreData
 class CheckIn: NSManagedObject {
 
     func initialize() {
-        event = CoreDataManager.sharedManager.newEvent(checkIn: self)
-        leaderboard = CoreDataManager.sharedManager.newLeaderboard(checkIn: self)
+        event = RegattaCoreDataManager.shared.newEvent(checkIn: self)
+        leaderboard = RegattaCoreDataManager.shared.newLeaderboard(checkIn: self)
     }
 
     func updateWithCheckInData(checkInData: CheckInData) {

@@ -121,8 +121,8 @@ extension MarkViewController: SessionViewControllerDelegate {
     }
     
     fileprivate func performCheckOutCompleted(withSuccess: Bool) {
-        CoreDataManager.sharedManager.deleteObject(object: markCheckIn)
-        CoreDataManager.sharedManager.saveContext()
+        RegattaCoreDataManager.shared.deleteObject(object: markCheckIn)
+        RegattaCoreDataManager.shared.saveContext()
         self.navigationController!.popViewController(animated: true)
     }
 

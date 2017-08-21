@@ -92,23 +92,23 @@ class CheckInController : NSObject {
     fileprivate func postCheckInSuccess(checkInData: CheckInData, completion: (_ withSuccess: Bool) -> Void) {
         switch checkInData.type {
         case .competitor:
-            let competitorCheckIn = CoreDataManager.sharedManager.fetchCompetitorCheckIn(
+            let competitorCheckIn = RegattaCoreDataManager.shared.fetchCompetitorCheckIn(
                 eventID: checkInData.eventID,
                 leaderboardName: checkInData.leaderboardName,
                 competitorID: checkInData.competitorID!
-            ) ?? CoreDataManager.sharedManager.newCompetitorCheckIn()
+            ) ?? RegattaCoreDataManager.shared.newCompetitorCheckIn()
             competitorCheckIn.updateWithCheckInData(checkInData: checkInData)
-            CoreDataManager.sharedManager.saveContext()
+            RegattaCoreDataManager.shared.saveContext()
             checkInDidFinish(withSuccess: true, completion: completion)
             break
         case .mark:
-            let markCheckIn = CoreDataManager.sharedManager.fetchMarkCheckIn(
+            let markCheckIn = RegattaCoreDataManager.shared.fetchMarkCheckIn(
                 eventID: checkInData.eventID,
                 leaderboardName: checkInData.leaderboardName,
                 markID: checkInData.markID!
-            ) ?? CoreDataManager.sharedManager.newMarkCheckIn()
+            ) ?? RegattaCoreDataManager.shared.newMarkCheckIn()
             markCheckIn.updateWithCheckInData(checkInData: checkInData)
-            CoreDataManager.sharedManager.saveContext()
+            RegattaCoreDataManager.shared.saveContext()
             checkInDidFinish(withSuccess: true, completion: completion)
             break
         }

@@ -173,7 +173,7 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
         teamImageView.image = image
         competitorCheckIn.teamImageRetry = false
         competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
-        CoreDataManager.sharedManager.saveContext()
+        RegattaCoreDataManager.shared.saveContext()
         success()
     }
     
@@ -329,7 +329,7 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
     fileprivate func pickedImage(image: UIImage) {
         teamImageView.image = image
         competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
-        CoreDataManager.sharedManager.saveContext()
+        RegattaCoreDataManager.shared.saveContext()
         if let data = competitorCheckIn.teamImageData {
             uploadTeamImageData(imageData: data)
         }
@@ -354,13 +354,13 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
     fileprivate func uploadTeamImageDataSuccess(teamImageURL: String) {
         competitorCheckIn.teamImageRetry = false
         competitorCheckIn.teamImageURL = teamImageURL
-        CoreDataManager.sharedManager.saveContext()
+        RegattaCoreDataManager.shared.saveContext()
         refreshTeamImage()
     }
     
     fileprivate func uploadTeamImageDataFailure(error: Error) {
         competitorCheckIn.teamImageRetry = true
-        CoreDataManager.sharedManager.saveContext()
+        RegattaCoreDataManager.shared.saveContext()
         showUploadTeamImageFailureAlert(error: error)
         refreshTeamImage()
     }
@@ -391,8 +391,8 @@ extension CompetitorViewController: SessionViewControllerDelegate {
     }
     
     fileprivate func performCheckOutCompleted(withSuccess: Bool) {
-        CoreDataManager.sharedManager.deleteObject(object: competitorCheckIn)
-        CoreDataManager.sharedManager.saveContext()
+        RegattaCoreDataManager.shared.deleteObject(object: competitorCheckIn)
+        RegattaCoreDataManager.shared.saveContext()
         self.navigationController!.popViewController(animated: true)
     }
 

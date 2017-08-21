@@ -127,8 +127,8 @@ class GPSFixController: NSObject {
         DispatchQueue.main.async(execute: {
             self.log(info: "Sending \(gpsFixes.count) GPS fixes was successful")
             self.postModeChangedNotification(mode: BatteryManager.sharedManager.batterySaving ? .BatterySaving : .Online)
-            CoreDataManager.sharedManager.deleteObjects(objects: gpsFixes)
-            CoreDataManager.sharedManager.saveContext()
+            RegattaCoreDataManager.shared.deleteObjects(objects: gpsFixes)
+            RegattaCoreDataManager.shared.saveContext()
             self.log(info: "\(gpsFixes.count) GPS fixes deleted")
             success(gpsFixesLeft)
         })

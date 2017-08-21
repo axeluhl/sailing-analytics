@@ -9,7 +9,7 @@
 import Foundation
 import CoreData
 
-open class CoreDataManager: NSObject {
+class CoreDataManager: NSObject {
     
     fileprivate enum Entities: String {
         case CheckIn
@@ -20,11 +20,11 @@ open class CoreDataManager: NSObject {
         case MarkCheckIn
     }
     
-    open class var sharedManager: CoreDataManager {
-        struct Singleton {
-            static let sharedManager = CoreDataManager()
-        }
-        return Singleton.sharedManager
+    let name: String
+    
+    init(name: String) {
+        self.name = name
+        super.init()
     }
     
     // MARK: - Fetch
@@ -173,7 +173,7 @@ open class CoreDataManager: NSObject {
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url = self.applicationDocumentsDirectory.appendingPathComponent("CoreData.sqlite")
+        let url = self.applicationDocumentsDirectory.appendingPathComponent("\(self.name).sqlite")
         let options = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
         do {
             logInfo(name: "\(#function)", info: "Connecting to database...")
