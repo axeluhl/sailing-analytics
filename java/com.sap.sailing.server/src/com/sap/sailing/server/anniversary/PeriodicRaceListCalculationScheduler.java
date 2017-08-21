@@ -21,42 +21,42 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
  * registered ChangeListeners with a map of all races in the form of {@link SimpleRaceInfo} keyed with
  * {@link RegattaAndRaceIdentifier}
  */
-public class AnniversaryCalculationScheduler implements Runnable {
-    private static final Logger logger = Logger.getLogger(AnniversaryCalculationScheduler.class.getName());
+public class PeriodicRaceListCalculationScheduler implements Runnable {
+    private static final Logger logger = Logger.getLogger(PeriodicRaceListCalculationScheduler.class.getName());
     private static final long INITIAL_DELAY = 1000;
     private static final long DELAY = 50000;
     private final RacingEventService racingEventService;
 
-    private final Set<ChangeListener> listeners;
+    private final Set<PeriodicRaceListCalculator> listeners;
 
-    interface ChangeListener {
+    interface PeriodicRaceListCalculator {
         /**
-         * If the listener is added to the AnniversaryCalculationScheduler , this is called once a minute, and is given
-         * an unsorted list of all races. This list is not modifiable and not threadsafe.
+         * If the listener is added to the {@link PeriodicRaceListCalculationScheduler} , this is called every
+         * {@link DELAY}, and is given an unsorted list of all races. This list is not modifiable and not threadsafe.
          */
         void uponUpdate(Collection<SimpleRaceInfo> collection);
 
         /**
          * Called by the AnniversaryCalculationScheduler, when the ChangeListener is added to the
-         * AnniversaryCalculationScheduler, this allows all ChangeListeners to use getFullAnniversaryData
+         * PeriodicRaceListCalculationScheduler, this allows to use getFullAnniversaryData
          */
-        void setAnniversaryCalculator(AnniversaryCalculationScheduler anniversaryCalculator);
+        void setCalculator(PeriodicRaceListCalculationScheduler anniversaryCalculator);
     }
 
-    public AnniversaryCalculationScheduler(RacingEventServiceImpl racingEventService,
+    public PeriodicRaceListCalculationScheduler(RacingEventServiceImpl racingEventService,
             ScheduledExecutorService scheduledExecutorService) {
         this.racingEventService = racingEventService;
         listeners = new CopyOnWriteArraySet<>();
         scheduledExecutorService.scheduleWithFixedDelay(this, INITIAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
     }
 
-    public void addListener(ChangeListener listener) {
-        listener.setAnniversaryCalculator(this);
+    public void addListener(PeriodicRaceListCalculator listener) {
+        listener.setCalculator(this);
         listeners.add(listener);
     }
 
-    public void removeListener(ChangeListener listener) {
-        listener.setAnniversaryCalculator(null);
+    public void removeListener(PeriodicRaceListCalculator listener) {
+        listener.setCalculator(null);
         listeners.remove(listener);
     }
 
@@ -70,7 +70,7 @@ public class AnniversaryCalculationScheduler implements Runnable {
             store.putAll(racingEventService.getRemoteRaceList());
             store.putAll(racingEventService.getLocalRaceList());
             store = Collections.unmodifiableMap(store);
-            for (ChangeListener listener : listeners) {
+            for (PeriodicRaceListCalculator listener : listeners) {
                 listener.uponUpdate(store.values());
             }
         } catch (Exception e) {

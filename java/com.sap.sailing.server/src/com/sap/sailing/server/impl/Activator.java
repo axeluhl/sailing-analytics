@@ -36,9 +36,10 @@ import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
-import com.sap.sailing.server.anniversary.AnniversaryCalculationScheduler;
-import com.sap.sailing.server.anniversary.AnniversaryDeterminator;
+import com.sap.sailing.server.anniversary.PeriodicRaceListAnniversaryDeterminator;
+import com.sap.sailing.server.anniversary.PeriodicRaceListCalculationScheduler;
 import com.sap.sailing.server.anniversary.checker.QuarterChecker;
+import com.sap.sailing.server.anniversary.checker.SameDigitChecker;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
@@ -124,9 +125,9 @@ public class Activator implements BundleActivator {
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
                 trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
         notificationService.setRacingEventService(racingEventService);
-        AnniversaryCalculationScheduler anniversaryCalculator = new AnniversaryCalculationScheduler(racingEventService,
+        PeriodicRaceListCalculationScheduler raceListScheduler = new PeriodicRaceListCalculationScheduler(racingEventService,
                 ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
-        anniversaryCalculator.addListener(new AnniversaryDeterminator(serviceFinderFactory,new QuarterChecker()));
+        raceListScheduler.addListener(new PeriodicRaceListAnniversaryDeterminator(serviceFinderFactory,new QuarterChecker(),new SameDigitChecker()));
 
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
