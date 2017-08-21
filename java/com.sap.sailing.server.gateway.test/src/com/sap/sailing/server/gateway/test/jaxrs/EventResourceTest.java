@@ -40,6 +40,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     
     @Test
     public void testCreateEvent() throws Exception {         
+        // cave: using null as parameters overrides @DefaultValue Annotation
         Response eventResponse = eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, null, null, null);
         assertTrue(isValidEventResponse(eventResponse));
     }
@@ -49,7 +50,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         Response eventResponse = eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", null, null);
         assertTrue(isValidEventResponse(eventResponse));
         
-        JSONObject objEvent = getEvent(getEntityAsString(eventResponse));
+        JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
         assertTrue(hasDefaultLeaderboardGroup(objEvent));
     }
 
@@ -59,7 +60,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         Response eventResponse = eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", "true", "A_CAT");
         assert(isValidEventResponse(eventResponse));
         
-        JSONObject objEvent = getEvent(getEntityAsString(eventResponse));
+        JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
         assertTrue(hasDefaultLeaderboardGroup(objEvent));
         
         assertTrue(hasAtLeastOneCourseArea(objEvent));
@@ -88,10 +89,10 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         String eventName = randomName();
         
         Response eventResponse = eventsResource.createEvent(eventName, eventName, null, null, eventName, null, null, null, null, null, null, null);
-        String strEventId = getEntityAsString(eventResponse);
+        String strEventId = getIdFromResponse(eventResponse);
         
         Response addLeaderboardGroupResponse = eventsResource.addLeaderboardGroup(strEventId, eventName, eventName, null, null, null, null, null);
-        String strLeaderboardGroupId = getEntityAsString(addLeaderboardGroupResponse);
+        String strLeaderboardGroupId = getIdFromResponse(addLeaderboardGroupResponse);
         assertTrue(isValidLeaderboardGroupResponse(addLeaderboardGroupResponse));
         
         JSONObject objEvent = getEvent(strEventId);
@@ -108,8 +109,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         Response eventResponse = eventsResource.createEvent(eventName, eventName, null, null, eventName, null, null, null, null, null, null, null);
         assertTrue(isValidEventResponse(eventResponse));
         
-        String strEventId = getEntityAsString(eventResponse);
-        Response regattaResponse = eventsResource.addRegatta(eventName, "A_CAT", null, strEventId, null,"true", "LOW_POINT", null, "3.0", "true", "false", "ONE_DESIGN");
+        String strEventId = getIdFromResponse(eventResponse);
+        Response regattaResponse = eventsResource.addRegatta(eventName, "A_CAT", null, strEventId, null, null, null, null, null, null, null, "ONE_DESIGN");
         assertTrue(isValidRegattaResponse(regattaResponse));
         
         JSONObject regatta = getRegatta(eventName);
@@ -134,7 +135,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         Response eventResponse = eventsResource.createEvent(eventName, eventName, null, null, eventName, null, null, null, null, "true", null, null);
         assertTrue(isValidEventResponse(eventResponse));
         
-        String strEventId = getEntityAsString(eventResponse);
+        String strEventId = getIdFromResponse(eventResponse);
         Response regattaResponse = eventsResource.addRegatta(eventName, "A_CAT", null, strEventId, null,"true", "LOW_POINT", null, "3.0", "true", "false", "ONE_DESIGN");
         assertTrue(isValidRegattaResponse(regattaResponse));
         
@@ -182,21 +183,21 @@ public class EventResourceTest extends AbstractJaxRsApiTest
 
     private JSONObject getRegatta(String eventName) {
         Response regattasResponse = regattasResource.getRegatta(eventName);
-        return toJSONObject(getEntityAsString(regattasResponse));
+        return toJSONObject(getIdFromResponse(regattasResponse));
     }
 
     private boolean isValidEventResponse(Response response) {
-        String id = getEntityAsString(response);
+        String id = getIdFromResponse(response);
         return validateUUID(id);
     }
     
     private boolean isValidLeaderboardGroupResponse(Response response) {
-        String id = getEntityAsString(response);
+        String id = getIdFromResponse(response);
         return validateUUID(id);
     }
     
     private boolean isValidRegattaResponse(Response response) {
-        String id = getEntityAsString(response);
+        String id = getIdFromResponse(response);
         return validateUUID(id);
     }
 
@@ -222,14 +223,14 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     
 
     private JSONObject getEntityAsObject(Response leaderboardGroupsResponse) {
-        String strLeaderboardGroup = getEntityAsString(leaderboardGroupsResponse);
+        String strLeaderboardGroup = getIdFromResponse(leaderboardGroupsResponse);
         JSONObject objLeaderboardGroup = toJSONObject(strLeaderboardGroup);
         return objLeaderboardGroup;
     }
 
     private JSONObject getLeaderboardGroup(String strDefaultLeaderboardGroupName) {
         Response leaderboardGroupsResponse = leaderboardGroupsResource.getLeaderboardGroup(strDefaultLeaderboardGroupName);
-        return toJSONObject(getEntityAsString(leaderboardGroupsResponse));
+        return toJSONObject(getIdFromResponse(leaderboardGroupsResponse));
     }
 
     private JSONArray getLeaderboardGroups(JSONObject objEvent) {
@@ -256,7 +257,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     }
     
 
-    private String getEntityAsString(Response eventResponse) {
+    private String getIdFromResponse(Response eventResponse) {
         return (String) eventResponse.getEntity();
     }
 
@@ -266,7 +267,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     
 
     private String getEventAsString(String eventId) {
-        return getEntityAsString(eventsResource.getEvent(eventId));
+        return getIdFromResponse(eventsResource.getEvent(eventId));
     }
 
 
