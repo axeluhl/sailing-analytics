@@ -3925,4 +3925,52 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         return bestMatch;
     }
+    
+    
+    @Override
+    public Integer getNextAnniversary(){
+        return periodicRaceListAnniversaryDeterminator.getNextAnniversaryNumber();
+    }
+    
+    @Override
+    public Pair<Integer, DetailedRaceInfo> getLastAnniversary() {
+        ConcurrentHashMap<Integer, DetailedRaceInfo> allAnniversaries = periodicRaceListAnniversaryDeterminator
+                .getKnownAnniversaries();
+
+        Pair<Integer, DetailedRaceInfo> lastAnniversary = null;
+        if (!allAnniversaries.isEmpty()) {
+            ArrayList<Integer> list = new ArrayList<>(allAnniversaries.keySet());
+            list.sort(new Comparator<Integer>() {
+                @Override
+                public int compare(Integer o1, Integer o2) {
+                    return Integer.compare(o1, o2);
+                }
+            });
+            Integer anniversary = list.get(list.size() - 1);
+            DetailedRaceInfo info = allAnniversaries.get(anniversary);
+            lastAnniversary = new Pair<Integer, DetailedRaceInfo>(anniversary, info);
+        }
+        return lastAnniversary;
+    }
+
+    @Override
+    public Integer getNextAnniversaryCountdown() {
+        Integer current = periodicRaceListAnniversaryDeterminator.getCurrentRaceCount();
+        Integer next = periodicRaceListAnniversaryDeterminator.getNextAnniversaryNumber();
+        Integer countDown = null;
+        if (current != null && next != null) {
+            countDown = next.intValue() - current.intValue();
+        }
+        return countDown;
+    }
+
+    @Override
+    public Integer getCurrentRaceCount() {
+        return periodicRaceListAnniversaryDeterminator.getCurrentRaceCount();
+    }
+
+    @Override
+    public ConcurrentHashMap<Integer, DetailedRaceInfo> getKnownAnniversaries() {
+        return periodicRaceListAnniversaryDeterminator.getKnownAnniversaries();
+    }
 }

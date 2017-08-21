@@ -85,6 +85,7 @@ import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
@@ -733,4 +734,31 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a DetailedRaceInfo object or null if the race could not be resolved
      */
     DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier);
+
+    /**
+     * Returns the number of the next anniversary race. Could return null if no next anniversary can be determined
+     */
+    Integer getNextAnniversary();
+
+    /**
+     * Returns the amount of races required to reach the next anniversary. Could return null if no next anniversary can
+     * be determined
+     */
+    Integer getNextAnniversaryCountdown();
+
+    /**
+     * Returns the amount of currently tracked races with a starttime != null
+     */
+    Integer getCurrentRaceCount();
+
+    /**
+     * Returns a Map of all known anniversaries, keyed with the number of the anniversary race
+     */
+    Map<Integer, DetailedRaceInfo> getKnownAnniversaries();
+
+    /**
+     * Returns a pair with the last anniversary, keyed with the number of the anniversary. Could contain null, last
+     * anniversary is determined based on racenumber from knownAnniversaries alone.
+     */
+    Pair<Integer, DetailedRaceInfo> getLastAnniversary();
 }
