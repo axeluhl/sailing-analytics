@@ -20,11 +20,11 @@ import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 public class PeriodicRaceListAnniversaryDeterminator implements PeriodicRaceListCalculator {
     private static final Logger logger = Logger.getLogger(PeriodicRaceListAnniversaryDeterminator.class.getName());
 
-    private MongoObjectFactory mongoObjectFactory;
+    private final MongoObjectFactory mongoObjectFactory;
     private PeriodicRaceListCalculationScheduler anniversaryCalculator;
 
-    ConcurrentHashMap<Integer, DetailedRaceInfo> knownAnniversaries;
-    CopyOnWriteArrayList<AnniversaryChecker> checkers;
+    private final ConcurrentHashMap<Integer, DetailedRaceInfo> knownAnniversaries;
+    private final CopyOnWriteArrayList<AnniversaryChecker> checkers;
 
     /**
      * Contains the results of the last calculation, a number giving the next anniversary

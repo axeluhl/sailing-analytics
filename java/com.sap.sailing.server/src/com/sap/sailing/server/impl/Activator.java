@@ -122,12 +122,15 @@ public class Activator implements BundleActivator {
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
 
         
+        final PeriodicRaceListAnniversaryDeterminator periodicRaceListAnniversaryDeterminator = new PeriodicRaceListAnniversaryDeterminator(
+                serviceFinderFactory, new QuarterChecker(), new SameDigitChecker());
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
-                trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
+                trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
+                periodicRaceListAnniversaryDeterminator);
         notificationService.setRacingEventService(racingEventService);
         PeriodicRaceListCalculationScheduler raceListScheduler = new PeriodicRaceListCalculationScheduler(racingEventService,
                 ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
-        raceListScheduler.addListener(new PeriodicRaceListAnniversaryDeterminator(serviceFinderFactory,new QuarterChecker(),new SameDigitChecker()));
+        raceListScheduler.addListener(periodicRaceListAnniversaryDeterminator);
 
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
