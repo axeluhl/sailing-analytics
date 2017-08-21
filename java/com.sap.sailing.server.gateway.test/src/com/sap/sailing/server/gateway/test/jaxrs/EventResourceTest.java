@@ -86,15 +86,42 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     }
 
     @Test
+    public void testCreateEventAddLeaderboardGroupTwice() throws Exception {         
+        String eventName = randomName();
+        
+        Response eventResponse = createEvent();
+        String strEventId = getIdFromResponse(eventResponse);
+        
+        String strLeaderboardGroupId = addLeaderboardGroupAndValidate(eventName, strEventId);
+        String strLeaderboardGroupId2 = addLeaderboardGroupAndValidate("anotherName", strEventId);
+        
+        JSONObject objEvent = getEvent(strEventId);
+        
+        JSONObject objLeaderboardGroup = (JSONObject) getLeaderboardGroups(objEvent).get(0);
+        String strEventLeaderboardGroupId = (String) objLeaderboardGroup.get("id");
+        
+        JSONObject objLeaderboardGroup2 = (JSONObject) getLeaderboardGroups(objEvent).get(1);
+        String strEventLeaderboardGroupId2 = (String) objLeaderboardGroup2.get("id");
+        
+        assertTrue(strEventLeaderboardGroupId.equals(strLeaderboardGroupId));
+        assertTrue(strEventLeaderboardGroupId2.equals(strLeaderboardGroupId2));
+    }
+
+    private String addLeaderboardGroupAndValidate(String leaderboardGroupName, String strEventId) throws NotFoundException {
+        Response addLeaderboardGroupResponse = addLeaderboardGroup(leaderboardGroupName, strEventId);
+        String strLeaderboardGroupId = getIdFromResponse(addLeaderboardGroupResponse);
+        assertTrue(isValidLeaderboardGroupResponse(addLeaderboardGroupResponse));
+        return strLeaderboardGroupId;
+    }
+    
+    @Test
     public void testCreateEventAddLeaderboardGroup() throws Exception {         
         String eventName = randomName();
         
         Response eventResponse = createEvent();
         String strEventId = getIdFromResponse(eventResponse);
         
-        Response addLeaderboardGroupResponse = addLeaderboardGroup(eventName, strEventId);
-        String strLeaderboardGroupId = getIdFromResponse(addLeaderboardGroupResponse);
-        assertTrue(isValidLeaderboardGroupResponse(addLeaderboardGroupResponse));
+        String strLeaderboardGroupId = addLeaderboardGroupAndValidate(eventName, strEventId);
         
         JSONObject objEvent = getEvent(strEventId);
         JSONObject objLeaderboardGroup = (JSONObject) getLeaderboardGroups(objEvent).get(0);
@@ -107,7 +134,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     public void testCreateEventAddRegatta() throws Exception {         
         String eventName = randomName();
         
-        Response eventResponse = eventsResource.createEvent(eventName, eventName, null, null, eventName, null, null, null, null, null, null, null);
+        Response eventResponse = createEvent();
         assertTrue(isValidEventResponse(eventResponse));
         
         String strEventId = getIdFromResponse(eventResponse);
@@ -160,11 +187,11 @@ public class EventResourceTest extends AbstractJaxRsApiTest
 
     private Response createEventWithLeaderboardGroup()
             throws MalformedURLException, ParseException, NotFoundException {
-        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", null, null);
+        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", "false", null);
     }
 
     private Response createEvent() throws MalformedURLException, ParseException, NotFoundException {
-        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, null, null, null);
+        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "false", "false", null);
     }
     
     private Response createEventWithLeaderboardGroupAndRegatta()
@@ -173,7 +200,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     }
     
     private Response createRegatta(String eventName, String strEventId) throws ParseException, NotFoundException {
-        return eventsResource.addRegatta(eventName, "A_CAT", null, strEventId, null,null, null, null, null, null, null,null);
+        return eventsResource.addRegatta(eventName, "A_CAT", null, strEventId, null,null, null, null, null, null, null,null,null,null);
     }
 
     private Response addLeaderboardGroup(String leaderboardGroupName, String strEventId) throws NotFoundException {
