@@ -329,6 +329,8 @@
 		C85DB82C1F31AB1A009559CE /* ForgotPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */; };
 		C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82D1F31D804009559CE /* SignUpController.swift */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
+		C867BD091F4B0274007E78E0 /* TrainingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD081F4B0274007E78E0 /* TrainingViewController.swift */; };
+		C867BD0B1F4B0290007E78E0 /* CreateTrainingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */; };
 		C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */; };
 		C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */; };
 		C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */; };
@@ -723,6 +725,8 @@
 		C85DB82D1F31D804009559CE /* SignUpController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpController.swift; sourceTree = "<group>"; };
 		C85FAA501D4F84460087C2A2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
+		C867BD081F4B0274007E78E0 /* TrainingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingViewController.swift; sourceTree = "<group>"; };
+		C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTrainingViewController.swift; sourceTree = "<group>"; };
 		C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 2.xcdatamodel"; sourceTree = "<group>"; };
 		C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GPSFix+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
@@ -865,6 +869,7 @@
 		7F06590119F7FE920077FF95 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				C867BD071F4AFE79007E78E0 /* Training */,
 				C85DB8261F31AAAA009559CE /* SignUp */,
 				C8BBAC781C52649E004CA551 /* LicenseViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
@@ -1271,6 +1276,15 @@
 				C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */,
 			);
 			name = SignUp;
+			sourceTree = "<group>";
+		};
+		C867BD071F4AFE79007E78E0 /* Training */ = {
+			isa = PBXGroup;
+			children = (
+				C867BD081F4B0274007E78E0 /* TrainingViewController.swift */,
+				C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */,
+			);
+			name = Training;
 			sourceTree = "<group>";
 		};
 		C8739D8B1D23C01500A89F3C /* Managers */ = {
@@ -1885,6 +1899,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C867BD091F4B0274007E78E0 /* TrainingViewController.swift in Sources */,
 				C85DB82A1F31AAFD009559CE /* LoginViewController.swift in Sources */,
 				C8F71EDA1D8691F700826DE4 /* AFHTTPRequestOperation.m in Sources */,
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
@@ -1958,6 +1973,7 @@
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
 				C843D4831EBC54A300250F01 /* CheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEC1D8691F700826DE4 /* UIButton+AFNetworking.m in Sources */,
+				C867BD0B1F4B0290007E78E0 /* CreateTrainingViewController.swift in Sources */,
 				C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */,
 				C8F71EE81D8691F700826DE4 /* TSMarkdownParser.m in Sources */,
 				C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */,
