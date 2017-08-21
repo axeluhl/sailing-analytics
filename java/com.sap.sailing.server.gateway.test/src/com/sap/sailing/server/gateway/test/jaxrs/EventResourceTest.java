@@ -2,6 +2,8 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.junit.Assert.assertTrue;
 
+import java.net.MalformedURLException;
+import java.text.ParseException;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
@@ -13,6 +15,7 @@ import org.json.simple.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
@@ -40,14 +43,13 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     
     @Test
     public void testCreateEvent() throws Exception {         
-        // cave: using null as parameters overrides @DefaultValue Annotation
-        Response eventResponse = eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, null, null, null);
+        Response eventResponse = createEvent();
         assertTrue(isValidEventResponse(eventResponse));
     }
     
     @Test
     public void testCreateEventWithLeaderboardGroup() throws Exception {         
-        Response eventResponse = eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", null, null);
+        Response eventResponse = createEventWithLeaderboardGroup();
         assertTrue(isValidEventResponse(eventResponse));
         
         JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
@@ -57,7 +59,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     @Test
     public void testCreateEventWithLeaderboardGroupAndRegatta() throws Exception {         
 
-        Response eventResponse = eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", "true", "A_CAT");
+        Response eventResponse = createEventWithLeaderboardGroupAndRegatta();
         assert(isValidEventResponse(eventResponse));
         
         JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
@@ -83,15 +85,14 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         assertTrue(containsObjectWithAttrbuteNameAndValue(leaderboards, "name", randomName));
     }
 
-    
     @Test
     public void testCreateEventAddLeaderboardGroup() throws Exception {         
         String eventName = randomName();
         
-        Response eventResponse = eventsResource.createEvent(eventName, eventName, null, null, eventName, null, null, null, null, null, null, null);
+        Response eventResponse = createEvent();
         String strEventId = getIdFromResponse(eventResponse);
         
-        Response addLeaderboardGroupResponse = eventsResource.addLeaderboardGroup(strEventId, eventName, eventName, null, null, null, null, null);
+        Response addLeaderboardGroupResponse = addLeaderboardGroup(eventName, strEventId);
         String strLeaderboardGroupId = getIdFromResponse(addLeaderboardGroupResponse);
         assertTrue(isValidLeaderboardGroupResponse(addLeaderboardGroupResponse));
         
@@ -101,7 +102,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         
         assertTrue(strEventLeaderboardGroupId.equals(strLeaderboardGroupId));
     }
-    
+
     @Test
     public void testCreateEventAddRegatta() throws Exception {         
         String eventName = randomName();
@@ -110,7 +111,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         assertTrue(isValidEventResponse(eventResponse));
         
         String strEventId = getIdFromResponse(eventResponse);
-        Response regattaResponse = eventsResource.addRegatta(eventName, "A_CAT", null, strEventId, null, null, null, null, null, null, null, "ONE_DESIGN");
+        Response regattaResponse = createRegatta(eventName, strEventId);
         assertTrue(isValidRegattaResponse(regattaResponse));
         
         JSONObject regatta = getRegatta(eventName);
@@ -132,11 +133,11 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     public void testCreateEventWithLeaderboardGroupAddRegatta() throws Exception {         
         String eventName = randomName();
         
-        Response eventResponse = eventsResource.createEvent(eventName, eventName, null, null, eventName, null, null, null, null, "true", null, null);
+        Response eventResponse = createEventWithLeaderboardGroup();
         assertTrue(isValidEventResponse(eventResponse));
         
         String strEventId = getIdFromResponse(eventResponse);
-        Response regattaResponse = eventsResource.addRegatta(eventName, "A_CAT", null, strEventId, null,"true", "LOW_POINT", null, "3.0", "true", "false", "ONE_DESIGN");
+        Response regattaResponse = createRegatta(eventName, strEventId);
         assertTrue(isValidRegattaResponse(regattaResponse));
         
         JSONObject regatta = getRegatta(eventName);
@@ -156,6 +157,32 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         JSONObject objLeaderboardGroup = getLeaderboardGroup(eventName);
         JSONArray arrLeaderboards = (JSONArray) objLeaderboardGroup.get("leaderboards");
         assertTrue(containsObjectWithAttrbuteNameAndValue(arrLeaderboards, "name", strRegattaName));
+    }
+
+    private Response createEventWithLeaderboardGroup()
+            throws MalformedURLException, ParseException, NotFoundException {
+        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", null, null);
+    }
+
+    private Response createEvent() throws MalformedURLException, ParseException, NotFoundException {
+        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, null, null, null);
+    }
+    
+    private Response createEventWithLeaderboardGroupAndRegatta()
+            throws MalformedURLException, ParseException, NotFoundException {
+        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", "true", "A_CAT");
+    }
+    
+    private Response createRegatta(String eventName, String strEventId) throws ParseException, NotFoundException {
+        return eventsResource.addRegatta(eventName, "A_CAT", null, strEventId, null,null, null, null, null, null, null,null);
+    }
+
+    private Response addLeaderboardGroup(String leaderboardGroupName, String strEventId) throws NotFoundException {
+        return eventsResource.addLeaderboardGroup(strEventId, leaderboardGroupName, leaderboardGroupName, null, null, null, null, null);
+    }
+    
+    private Response getLeaderboard(String name) {
+        return leaderboardsResource.getLeaderboard(name, LeaderboardsResource.ResultStates.Final, null);
     }
     
     private boolean hasAtLeastOneCourseArea(JSONObject objEvent) {
@@ -215,12 +242,11 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     }
 
     private boolean leaderBoardWithNameExists(String name) {
-        Response leaderboardResponse = leaderboardsResource.getLeaderboard(name, LeaderboardsResource.ResultStates.Final, null);
+        Response leaderboardResponse = getLeaderboard(name);
         JSONObject objLeaderboard = getEntityAsObject(leaderboardResponse);
         String strLeaderboardName = (String) objLeaderboard.get("name");
         return strLeaderboardName.equals(name);
     }
-    
 
     private JSONObject getEntityAsObject(Response leaderboardGroupsResponse) {
         String strLeaderboardGroup = getIdFromResponse(leaderboardGroupsResponse);
@@ -265,10 +291,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         return spyResource(resource);
     }
     
-
     private String getEventAsString(String eventId) {
         return getIdFromResponse(eventsResource.getEvent(eventId));
     }
-
 
 }
