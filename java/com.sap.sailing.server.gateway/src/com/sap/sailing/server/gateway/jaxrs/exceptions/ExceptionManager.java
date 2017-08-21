@@ -13,10 +13,7 @@ import org.apache.commons.lang.StringEscapeUtils;
     @Provider
     public class ExceptionManager implements ExceptionMapper<Exception>{
         public Response toResponse(Exception exception) {
-            if(exception instanceof IllegalArgumentException){
-                return Response.status(400).entity("IllegalArgumentException: "+exception.getMessage()).type("text/plain").build();
-            }
-            return Response.status(300).entity("Internal Server Error").type("text/plain").build();
+            return Response.status(400).entity(exception.getMessage()).type("text/plain").build();
         }
         
         public static String invalidDateFormatMsg(String date) {

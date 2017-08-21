@@ -135,8 +135,6 @@ public class EventsResource extends AbstractSailingServerResource {
         return ok(regatta.getId().toString(), MediaType.TEXT_PLAIN);
     }
 
-    
-    
     @POST
     @Path("/addCourseArea")
     @Consumes("text/plain")
