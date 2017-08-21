@@ -194,6 +194,96 @@ public class EventsResource extends AbstractSailingServerResource {
         return ok(leaderboardGroup.getId().toString(), MediaType.TEXT_PLAIN);
     }
     
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic) {
+        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be
+        // authentication aware...
+        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Permission.Mode.READ));
+        JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
+                new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
+        JSONArray result = new JSONArray();
+        for (EventBase event : getService().getAllEvents()) {
+            if ((showNonPublic != null && Boolean.valueOf(showNonPublic)) || event.isPublic()) {
+                result.add(eventSerializer.serialize(event));
+            }
+        }
+        String json = result.toJSONString();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{eventId}")
+    public Response getEvent(@PathParam("eventId") String eventId) {
+        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be
+        // authentication aware...
+        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ,
+        // eventId));
+        Response response;
+        UUID eventUuid;
+        try {
+            eventUuid = toUUID(eventId);
+        } catch (IllegalArgumentException e) {
+            return getBadEventErrorResponse(eventId);
+        }
+        Event event = getService().getEvent(eventUuid);
+        if (event == null) {
+            response = getBadEventErrorResponse(eventId);
+        } else {
+            JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
+                    new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
+            JSONObject eventJson = eventSerializer.serialize(event);
+    
+            String json = eventJson.toJSONString();
+            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{eventId}/racestates")
+    public Response getRaceStates(@PathParam("eventId") String eventId,
+            @QueryParam("filterByLeaderboard") String filterByLeaderboard,
+            @QueryParam("filterByCourseArea") String filterByCourseArea,
+            @QueryParam("filterByDayOffset") String filterByDayOffset,
+            @QueryParam("clientTimeZoneOffsetInMinutes") Integer clientTimeZoneOffsetInMinutes) {
+        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be
+        // authentication aware...
+        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ,
+        // eventId));
+        Response response;
+        UUID eventUuid;
+        try {
+            eventUuid = toUUID(eventId);
+        } catch (IllegalArgumentException e) {
+            return getBadEventErrorResponse(eventId);
+        }
+        Event event = getService().getEvent(eventUuid);
+        if (event == null) {
+            response = getBadEventErrorResponse(eventId);
+        } else {
+            final Duration clientTimeZoneOffset;
+            if (filterByDayOffset != null) {
+                if (clientTimeZoneOffsetInMinutes != null) {
+                    clientTimeZoneOffset = new MillisecondsDurationImpl(1000 * 60 * clientTimeZoneOffsetInMinutes);
+                } else {
+                    clientTimeZoneOffset = Duration.NULL;
+                }
+            } else {
+                clientTimeZoneOffset = null;
+            }
+            EventRaceStatesSerializer eventRaceStatesSerializer = new EventRaceStatesSerializer(filterByCourseArea,
+                    filterByLeaderboard, filterByDayOffset, clientTimeZoneOffset, getService());
+            JSONObject raceStatesJson = eventRaceStatesSerializer
+                    .serialize(new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
+            String json = raceStatesJson.toJSONString();
+            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+        return response;
+    }
+
     private Event validateAndCreateEvent(String eventNameParam, String eventDescriptionParam, String startDateParam, String endDateParam, String venueNameParam,
             String isPublicParam, String officialWebsiteURLParam, String baseURLParam, List<String >leaderboardGroupIdsListParam,
             String createLeaderboardGroupParam, String createRegattaParam, String boatClassNameParam) throws ParseException, MalformedURLException, NotFoundException{
@@ -304,6 +394,18 @@ public class EventsResource extends AbstractSailingServerResource {
                         officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos, leaderboardGroupIds));
     }
     
+    private void updateEvent(Event event, LeaderboardGroup leaderboardGroup){
+        List<UUID> newLeaderboardGroupIds = new ArrayList<>();
+        StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false)
+                .forEach(lg -> newLeaderboardGroupIds.add(lg.getId()));
+        newLeaderboardGroupIds.add(leaderboardGroup.getId());
+    
+        getService().updateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
+                event.getEndDate(), event.getVenue().getName(), event.isPublic(), newLeaderboardGroupIds,
+                event.getOfficialWebsiteURL(), event.getBaseURL(), event.getSailorsInfoWebsiteURLs(), event.getImages(),
+                event.getVideos());
+    }
+
     private CourseArea addCourseArea(UUID eventId, String courseAreaName) {
         String[] courseAreaNames = new String[] { courseAreaName };
         UUID[] courseAreaIds = new UUID[] { UUID.randomUUID() };
@@ -329,40 +431,6 @@ public class EventsResource extends AbstractSailingServerResource {
         addLeaderboard(regattaName, new int[0]);
         
         return regatta;
-    }
-
-    private CourseArea getDefaultCourseArea(Event event) {
-        return stream(event.getVenue().getCourseAreas().spliterator())
-                .filter(c -> c.getName().equals("Default")).findFirst().orElse(null);
-    }
-    
-    
-    private void updateEvent(Event event, LeaderboardGroup leaderboardGroup){
-        List<UUID> newLeaderboardGroupIds = new ArrayList<>();
-        StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false)
-                .forEach(lg -> newLeaderboardGroupIds.add(lg.getId()));
-        newLeaderboardGroupIds.add(leaderboardGroup.getId());
-
-        getService().updateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
-                event.getEndDate(), event.getVenue().getName(), event.isPublic(), newLeaderboardGroupIds,
-                event.getOfficialWebsiteURL(), event.getBaseURL(), event.getSailorsInfoWebsiteURLs(), event.getImages(),
-                event.getVideos());
-    }
-    
-    private RegattaLeaderboard addLeaderboard(String regattaName, int[] discardThresholds) {
-        RegattaLeaderboard leaderboard = null;
-        try {
-            leaderboard = createRegattaLeaderboard(regattaName, discardThresholds);
-        } catch (IllegalArgumentException e) {
-            throw e;
-        }
-        addLeaderboardToDefaultLeaderboardGroup(leaderboard);
-        return leaderboard;
-    }
-
-    private RegattaLeaderboard createRegattaLeaderboard(String regattaName, int[] discardThresholds) {
-        return getService()
-                .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
     }
 
     private void addLeaderboardToDefaultLeaderboardGroup(final RegattaLeaderboard leaderboard) {
@@ -392,121 +460,40 @@ public class EventsResource extends AbstractSailingServerResource {
         }
     }
 
-    private <T> Stream<T> stream(Spliterator<T> spliterator) {
-        return StreamSupport.stream(spliterator, false);
+    private RegattaLeaderboard addLeaderboard(String regattaName, int[] discardThresholds) {
+        RegattaLeaderboard leaderboard = null;
+        try {
+            leaderboard = createRegattaLeaderboard(regattaName, discardThresholds);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        }
+        addLeaderboardToDefaultLeaderboardGroup(leaderboard);
+        return leaderboard;
     }
 
-
-    private <E extends Enum<E>> String getEnumValuesAsString(Class<E> e) {
-        return EnumSet.allOf(e).stream().map(en -> en.name()).collect(Collectors.joining(", "));
+    private CourseArea getDefaultCourseArea(Event event) {
+        return stream(event.getVenue().getCourseAreas().spliterator())
+                .filter(c -> c.getName().equals("Default")).findFirst().orElse(null);
     }
-   
-
-    private LinkedHashMap<String, SeriesCreationParametersDTO> createDefaultSeriesCreationParameters() {
-        final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
-        seriesCreationParameters.put("Default", new SeriesCreationParametersDTO(
-                Arrays.asList(new FleetDTO("Default", 0, null)), false, false, false, false, null, false, null));
-        return seriesCreationParameters;
+    
+    
+    private RegattaLeaderboard createRegattaLeaderboard(String regattaName, int[] discardThresholds) {
+        return getService()
+                .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
     }
 
     private Response ok(String message, String mediaType) {
         return Response.ok(message).header("Content-Type", mediaType + ";charset=UTF-8").build();
     }
 
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    public Response getEvents(@QueryParam("showNonPublic") String showNonPublic) {
-        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be
-        // authentication aware...
-        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Permission.Mode.READ));
-        JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
-                new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
-        JSONArray result = new JSONArray();
-        for (EventBase event : getService().getAllEvents()) {
-            if ((showNonPublic != null && Boolean.valueOf(showNonPublic)) || event.isPublic()) {
-                result.add(eventSerializer.serialize(event));
-            }
-        }
-        String json = result.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-    }
-
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    @Path("{eventId}")
-    public Response getEvent(@PathParam("eventId") String eventId) {
-        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be
-        // authentication aware...
-        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ,
-        // eventId));
-        Response response;
-        UUID eventUuid;
-        try {
-            eventUuid = toUUID(eventId);
-        } catch (IllegalArgumentException e) {
-            return getBadEventErrorResponse(eventId);
-        }
-        Event event = getService().getEvent(eventUuid);
-        if (event == null) {
-            response = getBadEventErrorResponse(eventId);
-        } else {
-            JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
-                    new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
-            JSONObject eventJson = eventSerializer.serialize(event);
-
-            String json = eventJson.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-        }
-        return response;
-    }
-
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    @Path("{eventId}/racestates")
-    public Response getRaceStates(@PathParam("eventId") String eventId,
-            @QueryParam("filterByLeaderboard") String filterByLeaderboard,
-            @QueryParam("filterByCourseArea") String filterByCourseArea,
-            @QueryParam("filterByDayOffset") String filterByDayOffset,
-            @QueryParam("clientTimeZoneOffsetInMinutes") Integer clientTimeZoneOffsetInMinutes) {
-        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be
-        // authentication aware...
-        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ,
-        // eventId));
-        Response response;
-        UUID eventUuid;
-        try {
-            eventUuid = toUUID(eventId);
-        } catch (IllegalArgumentException e) {
-            return getBadEventErrorResponse(eventId);
-        }
-        Event event = getService().getEvent(eventUuid);
-        if (event == null) {
-            response = getBadEventErrorResponse(eventId);
-        } else {
-            final Duration clientTimeZoneOffset;
-            if (filterByDayOffset != null) {
-                if (clientTimeZoneOffsetInMinutes != null) {
-                    clientTimeZoneOffset = new MillisecondsDurationImpl(1000 * 60 * clientTimeZoneOffsetInMinutes);
-                } else {
-                    clientTimeZoneOffset = Duration.NULL;
-                }
-            } else {
-                clientTimeZoneOffset = null;
-            }
-            EventRaceStatesSerializer eventRaceStatesSerializer = new EventRaceStatesSerializer(filterByCourseArea,
-                    filterByLeaderboard, filterByDayOffset, clientTimeZoneOffset, getService());
-            JSONObject raceStatesJson = eventRaceStatesSerializer
-                    .serialize(new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
-            String json = raceStatesJson.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-        }
-        return response;
-    }
-
     private Response getBadEventErrorResponse(String eventId) {
         return Response.status(Status.NOT_FOUND)
                 .entity("Could not find an event with id '" + StringEscapeUtils.escapeHtml(eventId) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private MillisecondsTimePoint now() {
+        return new MillisecondsTimePoint(new Date());
     }
 
     private Date addOneWeek(Date date) {
@@ -522,10 +509,6 @@ public class EventsResource extends AbstractSailingServerResource {
         } catch (ParseException e) {
             throw new ParseException(ExceptionManager.invalidDateFormatMsg(startDateParam),0);
         }
-    }
-
-    private MillisecondsTimePoint now() {
-        return new MillisecondsTimePoint(new Date());
     }
 
     private URL toURL(String url) throws MalformedURLException{
@@ -551,14 +534,13 @@ public class EventsResource extends AbstractSailingServerResource {
        }
     }
     
-    private Event getEvent(UUID eventId) throws NotFoundException{
-        Event event = getService().getEvent(eventId);
-        if(event != null){
-            return event;
-        }
-        throw new NotFoundException(ExceptionManager.objectNotFoundMsg(Event.class.getSimpleName(), eventId));
+    private LinkedHashMap<String, SeriesCreationParametersDTO> createDefaultSeriesCreationParameters() {
+        final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
+        seriesCreationParameters.put("Default", new SeriesCreationParametersDTO(
+                Arrays.asList(new FleetDTO("Default", 0, null)), false, false, false, false, null, false, null));
+        return seriesCreationParameters;
     }
-    
+
     private RankingMetrics createRankingMetric(String rankingMetricParam) {
         try{
             return RankingMetrics.valueOf(rankingMetricParam);
@@ -572,6 +554,10 @@ public class EventsResource extends AbstractSailingServerResource {
     private ScoringScheme createScoringScheme(String scoringSchemeParam) {   
         ScoringScheme scoringScheme = getService().getBaseDomainFactory().createScoringScheme(getScoringSchemeType(scoringSchemeParam));
         return scoringScheme;
+    }
+
+    private <E extends Enum<E>> String getEnumValuesAsString(Class<E> e) {
+        return EnumSet.allOf(e).stream().map(en -> en.name()).collect(Collectors.joining(", "));
     }
 
     private ScoringSchemeType getScoringSchemeType(String scoringSchemeTypeParam) {
@@ -595,6 +581,18 @@ public class EventsResource extends AbstractSailingServerResource {
     
     private Regatta getRegatta(String regattaNameParam) {
         return getService().getRegatta(new RegattaName(regattaNameParam));
+    }
+
+    private Event getEvent(UUID eventId) throws NotFoundException{
+        Event event = getService().getEvent(eventId);
+        if(event != null){
+            return event;
+        }
+        throw new NotFoundException(ExceptionManager.objectNotFoundMsg(Event.class.getSimpleName(), eventId));
+    }
+
+    private <T> Stream<T> stream(Spliterator<T> spliterator) {
+        return StreamSupport.stream(spliterator, false);
     }
 
 }
