@@ -130,9 +130,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     }
     
     @Test
-    public void testCreateEventWithLeaderboardGroupAddRegatta() throws Exception {         
-        String eventName = randomName();
-        
+    public void testCreateEventWithLeaderboardGroupAddRegatta() throws Exception {   
+        String eventName = randomName;
         Response eventResponse = createEventWithLeaderboardGroup();
         assertTrue(isValidEventResponse(eventResponse));
         
