@@ -11,14 +11,16 @@ import UIKit
 class SessionController: NSObject {
         
     weak var checkIn: CheckIn!
+    weak var coreDataManager: CoreDataManager!
     
     var sendingBackgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
     var sendingDate: Date = Date()
     
     fileprivate (set) var isTracking: Bool = false
     
-    init(checkIn: CheckIn) {
+    init(checkIn: CheckIn, coreDataManager: CoreDataManager) {
         self.checkIn = checkIn
+        self.coreDataManager = coreDataManager
         super.init()
         subscribeForNotifications()
     }
@@ -53,9 +55,9 @@ class SessionController: NSObject {
             guard self.isTracking else { return }
             guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
             guard locationData.isValid else { return }
-            let gpsFix = RegattaCoreDataManager.shared.newGPSFix(checkIn: self.checkIn)
+            let gpsFix = self.coreDataManager.newGPSFix(checkIn: self.checkIn)
             gpsFix.updateWithLocationData(locationData: locationData)
-            RegattaCoreDataManager.shared.saveContext()
+            self.coreDataManager.saveContext()
             if self.sendingDate.compare(Date()) == .orderedAscending {
                 self.sendingDate = Date().addingTimeInterval(BatteryManager.sharedManager.sendingPeriod)
                 self.beginGPSFixSendingInBackgroundTask()
@@ -105,7 +107,7 @@ class SessionController: NSObject {
         checkIn.event.updateWithEventData(eventData: checkInData.eventData)
         checkIn.leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
         checkIn.updateWithCheckInData(checkInData: checkInData)
-        RegattaCoreDataManager.shared.saveContext()
+        coreDataManager.saveContext()
         completion()
     }
     
@@ -139,7 +141,7 @@ class SessionController: NSObject {
     // MARK: - Properties
     
     lazy var gpsFixController: GPSFixController = {
-        let gpsFixController = GPSFixController(checkIn: self.checkIn)
+        let gpsFixController = GPSFixController(checkIn: self.checkIn, coreDataManager: self.coreDataManager)
         return gpsFixController
     }()
     

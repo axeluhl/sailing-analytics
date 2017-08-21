@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 if let gpsFixes = checkIn.gpsFixes {
                     if gpsFixes.count > 0 {
                         noData = false
-                        let gpsFixController = GPSFixController(checkIn: checkIn)
+                        let gpsFixController = GPSFixController(checkIn: checkIn, coreDataManager: RegattaCoreDataManager.shared)
                         gpsFixController.sendAll(completion: { (withSuccess) in
                             allSuccess = allSuccess && withSuccess
                         })

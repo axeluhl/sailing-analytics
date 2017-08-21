@@ -18,9 +18,15 @@ import AVFoundation
 
 class CheckInController : NSObject {
     
+    weak var coreDataManager: CoreDataManager!
     weak var delegate: CheckInControllerDelegate?
     
     fileprivate var requestManager = RequestManager()
+    
+    init(coreDataManager: CoreDataManager) {
+        self.coreDataManager = coreDataManager
+        super.init()
+    }
     
     // MARK: - CheckIn
     
@@ -92,23 +98,23 @@ class CheckInController : NSObject {
     fileprivate func postCheckInSuccess(checkInData: CheckInData, completion: (_ withSuccess: Bool) -> Void) {
         switch checkInData.type {
         case .competitor:
-            let competitorCheckIn = RegattaCoreDataManager.shared.fetchCompetitorCheckIn(
+            let competitorCheckIn = coreDataManager.fetchCompetitorCheckIn(
                 eventID: checkInData.eventID,
                 leaderboardName: checkInData.leaderboardName,
                 competitorID: checkInData.competitorID!
-            ) ?? RegattaCoreDataManager.shared.newCompetitorCheckIn()
+            ) ?? coreDataManager.newCompetitorCheckIn()
             competitorCheckIn.updateWithCheckInData(checkInData: checkInData)
-            RegattaCoreDataManager.shared.saveContext()
+            coreDataManager.saveContext()
             checkInDidFinish(withSuccess: true, completion: completion)
             break
         case .mark:
-            let markCheckIn = RegattaCoreDataManager.shared.fetchMarkCheckIn(
+            let markCheckIn = coreDataManager.fetchMarkCheckIn(
                 eventID: checkInData.eventID,
                 leaderboardName: checkInData.leaderboardName,
                 markID: checkInData.markID!
-            ) ?? RegattaCoreDataManager.shared.newMarkCheckIn()
+            ) ?? coreDataManager.newMarkCheckIn()
             markCheckIn.updateWithCheckInData(checkInData: checkInData)
-            RegattaCoreDataManager.shared.saveContext()
+            coreDataManager.saveContext()
             checkInDidFinish(withSuccess: true, completion: completion)
             break
         }

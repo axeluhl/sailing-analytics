@@ -31,6 +31,7 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     @IBOutlet weak var announcementLabel: UILabel!
     
     weak var competitorCheckIn: CompetitorCheckIn!
+    weak var coreDataManager: CoreDataManager!
     
     weak var countdownTimer: Timer?
     
@@ -173,7 +174,7 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
         teamImageView.image = image
         competitorCheckIn.teamImageRetry = false
         competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
-        RegattaCoreDataManager.shared.saveContext()
+        coreDataManager.saveContext()
         success()
     }
     
@@ -300,7 +301,7 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     // MARK: - Properties
     
     fileprivate lazy var competitorSessionController: CompetitorSessionController = {
-        return CompetitorSessionController(checkIn: self.competitorCheckIn)
+        return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.coreDataManager)
     }()
     
 }
@@ -329,7 +330,7 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
     fileprivate func pickedImage(image: UIImage) {
         teamImageView.image = image
         competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
-        RegattaCoreDataManager.shared.saveContext()
+        coreDataManager.saveContext()
         if let data = competitorCheckIn.teamImageData {
             uploadTeamImageData(imageData: data)
         }
@@ -354,13 +355,13 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
     fileprivate func uploadTeamImageDataSuccess(teamImageURL: String) {
         competitorCheckIn.teamImageRetry = false
         competitorCheckIn.teamImageURL = teamImageURL
-        RegattaCoreDataManager.shared.saveContext()
+        coreDataManager.saveContext()
         refreshTeamImage()
     }
     
     fileprivate func uploadTeamImageDataFailure(error: Error) {
         competitorCheckIn.teamImageRetry = true
-        RegattaCoreDataManager.shared.saveContext()
+        coreDataManager.saveContext()
         showUploadTeamImageFailureAlert(error: error)
         refreshTeamImage()
     }
@@ -391,8 +392,8 @@ extension CompetitorViewController: SessionViewControllerDelegate {
     }
     
     fileprivate func performCheckOutCompleted(withSuccess: Bool) {
-        RegattaCoreDataManager.shared.deleteObject(object: competitorCheckIn)
-        RegattaCoreDataManager.shared.saveContext()
+        coreDataManager.deleteObject(object: competitorCheckIn)
+        coreDataManager.saveContext()
         self.navigationController!.popViewController(animated: true)
     }
 

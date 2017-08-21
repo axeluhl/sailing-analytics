@@ -120,13 +120,15 @@ class CoreDataManager: NSObject {
     
     func newCompetitorCheckIn() -> CompetitorCheckIn {
         let checkIn = NSEntityDescription.insertNewObject(forEntityName: Entities.CompetitorCheckIn.rawValue, into: managedObjectContext) as! CompetitorCheckIn
-        checkIn.initialize()
+        checkIn.event = newEvent(checkIn: checkIn)
+        checkIn.leaderboard = newLeaderboard(checkIn: checkIn)
         return checkIn
     }
 
     func newMarkCheckIn() -> MarkCheckIn {
         let checkIn = NSEntityDescription.insertNewObject(forEntityName: Entities.MarkCheckIn.rawValue, into: managedObjectContext) as! MarkCheckIn
-        checkIn.initialize()
+        checkIn.event = newEvent(checkIn: checkIn)
+        checkIn.leaderboard = newLeaderboard(checkIn: checkIn)
         return checkIn
     }
 

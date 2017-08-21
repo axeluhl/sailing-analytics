@@ -198,7 +198,7 @@ class HomeViewController: UIViewController {
     
     fileprivate func reviewGPSFixes(checkIns: [CheckIn], completion: @escaping () -> Void) {
         guard checkIns.count > 0 else { completion(); return }
-        let gpsFixController = GPSFixController.init(checkIn: checkIns[0])
+        let gpsFixController = GPSFixController.init(checkIn: checkIns[0], coreDataManager: RegattaCoreDataManager.shared)
         gpsFixController.sendAll(completion: { (withSuccess) in
             self.reviewGPSFixes(checkIns: Array(checkIns[1..<checkIns.count]), completion: completion)
         })
@@ -340,22 +340,25 @@ class HomeViewController: UIViewController {
             guard let competitorVC = segue.destination as? CompetitorViewController else { return }
             guard let competitorCheckIn = selectedCheckIn as? CompetitorCheckIn else { return }
             competitorVC.competitorCheckIn = competitorCheckIn
+            competitorVC.coreDataManager = RegattaCoreDataManager.shared
             selectedCheckIn = nil
         } else if (segue.identifier == Segue.Mark) {
             guard let markVC = segue.destination as? MarkViewController else { return }
             guard let markCheckIn = selectedCheckIn as? MarkCheckIn else { return }
             markVC.markCheckIn = markCheckIn
+            markVC.coreDataManager = RegattaCoreDataManager.shared
             selectedCheckIn = nil
         } else if (segue.identifier == Segue.Scan) {
             guard let scanVC = segue.destination as? ScanViewController else { return }
-            scanVC.homeViewController = self
+            scanVC.coreDataManager = RegattaCoreDataManager.shared
+            scanVC.delegate = self
         }
     }
     
     // MARK: - Properties
     
     fileprivate lazy var checkInController: CheckInController = {
-        let checkInController = CheckInController()
+        let checkInController = CheckInController(coreDataManager: RegattaCoreDataManager.shared)
         checkInController.delegate = self
         return checkInController
     }()
@@ -365,6 +368,16 @@ class HomeViewController: UIViewController {
         fetchedResultsController.delegate = self
         return fetchedResultsController
     }()
+
+}
+
+// MARK: - ScanViewControllerDelegate
+
+extension HomeViewController: ScanViewControllerDelegate {
+
+    func scanViewController(_ controller: ScanViewController, didScanCheckIn checkIn: CheckIn) {
+        selectedCheckIn = checkIn
+    }
 
 }
 

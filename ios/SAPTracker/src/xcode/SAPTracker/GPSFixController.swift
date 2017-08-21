@@ -40,9 +40,11 @@ class GPSFixController: NSObject {
     }
     
     weak var checkIn: CheckIn!
+    weak var coreDataManager: CoreDataManager!
     
-    init(checkIn: CheckIn) {
+    init(checkIn: CheckIn, coreDataManager: CoreDataManager) {
         self.checkIn = checkIn
+        self.coreDataManager = coreDataManager
     }
     
     // MARK: - Send All
@@ -127,8 +129,8 @@ class GPSFixController: NSObject {
         DispatchQueue.main.async(execute: {
             self.log(info: "Sending \(gpsFixes.count) GPS fixes was successful")
             self.postModeChangedNotification(mode: BatteryManager.sharedManager.batterySaving ? .BatterySaving : .Online)
-            RegattaCoreDataManager.shared.deleteObjects(objects: gpsFixes)
-            RegattaCoreDataManager.shared.saveContext()
+            self.coreDataManager.deleteObjects(objects: gpsFixes)
+            self.coreDataManager.saveContext()
             self.log(info: "\(gpsFixes.count) GPS fixes deleted")
             success(gpsFixesLeft)
         })

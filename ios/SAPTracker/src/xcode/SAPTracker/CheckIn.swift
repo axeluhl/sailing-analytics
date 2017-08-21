@@ -12,11 +12,6 @@ import CoreData
 @objc(CheckIn)
 class CheckIn: NSManagedObject {
 
-    func initialize() {
-        event = RegattaCoreDataManager.shared.newEvent(checkIn: self)
-        leaderboard = RegattaCoreDataManager.shared.newLeaderboard(checkIn: self)
-    }
-
     func updateWithCheckInData(checkInData: CheckInData) {
         serverURL = checkInData.serverURL
         event.updateWithEventData(eventData: checkInData.eventData)

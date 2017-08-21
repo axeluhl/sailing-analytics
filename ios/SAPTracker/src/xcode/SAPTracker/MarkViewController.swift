@@ -13,6 +13,7 @@ class MarkViewController: SessionViewController {
     @IBOutlet weak var markNameLabel: UILabel!
 
     weak var markCheckIn: MarkCheckIn!
+    weak var coreDataManager: CoreDataManager!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -105,7 +106,7 @@ class MarkViewController: SessionViewController {
     // MARK: - Properties
     
     fileprivate lazy var markSessionController: MarkSessionController = {
-        return MarkSessionController(checkIn: self.markCheckIn)
+        return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.coreDataManager)
     }()
 
 }
@@ -121,8 +122,8 @@ extension MarkViewController: SessionViewControllerDelegate {
     }
     
     fileprivate func performCheckOutCompleted(withSuccess: Bool) {
-        RegattaCoreDataManager.shared.deleteObject(object: markCheckIn)
-        RegattaCoreDataManager.shared.saveContext()
+        coreDataManager.deleteObject(object: markCheckIn)
+        coreDataManager.saveContext()
         self.navigationController!.popViewController(animated: true)
     }
 

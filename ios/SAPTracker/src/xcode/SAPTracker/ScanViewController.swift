@@ -9,9 +9,16 @@
 import UIKit
 import AVFoundation
 
+protocol ScanViewControllerDelegate: class {
+
+    func scanViewController(_ controller: ScanViewController, didScanCheckIn checkIn: CheckIn)
+
+}
+
 class ScanViewController: UIViewController {
     
-    weak var homeViewController: HomeViewController?
+    weak var coreDataManager: CoreDataManager!
+    weak var delegate: ScanViewControllerDelegate?
     
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
@@ -137,7 +144,7 @@ class ScanViewController: UIViewController {
     // MARK: - Properties
     
     fileprivate lazy var checkInController: CheckInController = {
-        let checkInController = CheckInController()
+        let checkInController = CheckInController(coreDataManager: self.coreDataManager)
         checkInController.delegate = self
         return checkInController
     }()
@@ -190,11 +197,16 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
         }
     }
     
+    // TODO: remove completion and use a success and failure block
     fileprivate func captureOutputSuccess(checkInData: CheckInData) {
         checkInController.checkIn(checkInData: checkInData, completion: { (withSuccess) in
             if withSuccess {
-                self.homeViewController?.selectedCheckIn = RegattaCoreDataManager.shared.fetchCheckIn(checkInData: checkInData)
-                _ = self.navigationController?.popViewController(animated: true)
+                if let checkIn = self.coreDataManager.fetchCheckIn(checkInData: checkInData) {
+                    self.delegate?.scanViewController(self, didScanCheckIn: checkIn)
+                    _ = self.navigationController?.popViewController(animated: true)
+                } else {
+                    self.startScanning()
+                }
             } else {
                 self.startScanning()
             }
