@@ -1470,7 +1470,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/addracecolumns")
     public Response addRaceColumns(@PathParam("regattaname") String regattaName,
-            @QueryParam("numberofraces") int numberOfRaces, @QueryParam("prefix") String prefix,
+            @QueryParam("numberofraces") Integer numberOfRaces, @QueryParam("prefix") String prefix,
             @QueryParam("toseries") String toSeries) {
         final Response response;
         Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
@@ -1484,7 +1484,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 final String raceNamePrefix = prefix == null ? "R" : prefix;
                 int oneBasedNumberOfLast = Util.size(series.getRaceColumns());
-                for (int i = 1; i <= numberOfRaces; i++) {
+                for (int i = 1; i <= (numberOfRaces==null?1:numberOfRaces); i++) {
                     final int oneBasedNumberOfNext = findNextFreeRaceName(series, raceNamePrefix, oneBasedNumberOfLast);
                     final RaceColumnInSeries raceColumn = addRaceColumn(regattaName, series.getName(), getRaceName(raceNamePrefix, oneBasedNumberOfNext));
                     final JSONObject raceColumnDataAsJson = new JSONObject();
