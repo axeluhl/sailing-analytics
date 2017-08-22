@@ -46,20 +46,18 @@ public abstract class AbstractJaxRsApiTest {
 
     protected <T extends AbstractSailingServerResource> T spyResource(T resource) {
         T spyResource = spy(resource);
-        
         doReturn(racingEventService).when(spyResource).getService();
         return spyResource;
     }    
     
     protected String decodeResponseFromByteArray(Response response) throws UnsupportedEncodingException {
         byte[] entity = (byte[]) response.getEntity();
-        
         return new String(entity, "UTF-8");
     }
 
     protected TimePoint parseTimepointFromJsonNumber(Long timePointAsJsonNumber) throws ParseException {
         TimePoint result = null;
-        if(timePointAsJsonNumber != null) {
+        if (timePointAsJsonNumber != null) {
             result = new MillisecondsTimePoint(timePointAsJsonNumber);
         }
         return result;
@@ -67,7 +65,7 @@ public abstract class AbstractJaxRsApiTest {
 
     protected TimePoint parseTimepointFromJsonString(String timePointAsJsonString) throws ParseException {
         TimePoint result = null;
-        if(timePointAsJsonString != null && !timePointAsJsonString.isEmpty()) {
+        if (timePointAsJsonString != null && !timePointAsJsonString.isEmpty()) {
             Date date = TIMEPOINT_FORMATTER.parse(timePointAsJsonString);
             result = new MillisecondsTimePoint(date);
         }

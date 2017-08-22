@@ -22,9 +22,7 @@ import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.RegattasResource;
 
-public class EventResourceTest extends AbstractJaxRsApiTest 
-
-{
+public class EventResourceTest extends AbstractJaxRsApiTest {
     private EventsResource eventsResource;
     private RegattasResource regattasResource;
     private LeaderboardGroupsResource leaderboardGroupsResource;
@@ -34,7 +32,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     @Before
     public void setUp() {
         super.setUp();
-        eventsResource = createResource(new EventsResource());
+        eventsResource = createResource(new EventsResource(/* enforce security */ false));
         regattasResource = createResource(new RegattasResource());
         leaderboardGroupsResource = createResource(new LeaderboardGroupsResource());
         leaderboardsResource = createResource(new LeaderboardsResource());
@@ -51,135 +49,46 @@ public class EventResourceTest extends AbstractJaxRsApiTest
     public void testCreateEventWithLeaderboardGroup() throws Exception {         
         Response eventResponse = createEventWithLeaderboardGroup();
         assertTrue(isValidEventResponse(eventResponse));
-        
         JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
         assertTrue(hasDefaultLeaderboardGroup(objEvent));
     }
 
     @Test
     public void testCreateEventWithLeaderboardGroupAndRegatta() throws Exception {         
-
         Response eventResponse = createEventWithLeaderboardGroupAndRegatta();
         assert(isValidEventResponse(eventResponse));
-        
         JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
         assertTrue(hasDefaultLeaderboardGroup(objEvent));
-        
         assertTrue(hasAtLeastOneCourseArea(objEvent));
-         
         JSONObject objRegatta = getRegatta(randomName);
         String strRegattaName = (String) objRegatta.get("name");
         String strRegattaCourseAreaId = (String) objRegatta.get("courseAreaId");
         assertTrue(strRegattaCourseAreaId.equals(getDefaultCourseAreaId(objEvent)));
-        
         leaderBoardWithNameExists(strRegattaName);
-        
         JSONArray leaderboardGroups = getLeaderboardGroups(objEvent);
         assertTrue(hasDefaultLeaderboardGroup(objEvent));
-        
         JSONObject objDefaultLeaderboardGroup = (JSONObject) leaderboardGroups.get(0);
         String strDefaultLeaderboardGroupName = (String) objDefaultLeaderboardGroup.get("name");
-        
         JSONObject objLeaderboardGroup = getLeaderboardGroup(strDefaultLeaderboardGroupName);
         JSONArray leaderboards  = (JSONArray) objLeaderboardGroup.get("leaderboards");
         assertTrue(containsObjectWithAttrbuteNameAndValue(leaderboards, "name", randomName));
     }
 
     @Test
-    public void testCreateEventAddLeaderboardGroupTwice() throws Exception {         
-        String eventName = randomName();
-        
-        Response eventResponse = createEvent();
-        String strEventId = getIdFromResponse(eventResponse);
-        
-        String strLeaderboardGroupId = addLeaderboardGroupAndValidate(eventName, strEventId);
-        String strLeaderboardGroupId2 = addLeaderboardGroupAndValidate("anotherName", strEventId);
-        
-        JSONObject objEvent = getEvent(strEventId);
-        
-        JSONObject objLeaderboardGroup = (JSONObject) getLeaderboardGroups(objEvent).get(0);
-        String strEventLeaderboardGroupId = (String) objLeaderboardGroup.get("id");
-        
-        JSONObject objLeaderboardGroup2 = (JSONObject) getLeaderboardGroups(objEvent).get(1);
-        String strEventLeaderboardGroupId2 = (String) objLeaderboardGroup2.get("id");
-        
-        assertTrue(strEventLeaderboardGroupId.equals(strLeaderboardGroupId));
-        assertTrue(strEventLeaderboardGroupId2.equals(strLeaderboardGroupId2));
-    }
-
-    private String addLeaderboardGroupAndValidate(String leaderboardGroupName, String strEventId) throws NotFoundException {
-        Response addLeaderboardGroupResponse = addLeaderboardGroup(leaderboardGroupName, strEventId);
-        String strLeaderboardGroupId = getIdFromResponse(addLeaderboardGroupResponse);
-        assertTrue(isValidLeaderboardGroupResponse(addLeaderboardGroupResponse));
-        return strLeaderboardGroupId;
-    }
-    
-    @Test
-    public void testCreateEventAddLeaderboardGroup() throws Exception {         
-        String eventName = randomName();
-        
-        Response eventResponse = createEvent();
-        String strEventId = getIdFromResponse(eventResponse);
-        
-        String strLeaderboardGroupId = addLeaderboardGroupAndValidate(eventName, strEventId);
-        
-        JSONObject objEvent = getEvent(strEventId);
-        JSONObject objLeaderboardGroup = (JSONObject) getLeaderboardGroups(objEvent).get(0);
-        String strEventLeaderboardGroupId = (String) objLeaderboardGroup.get("id");
-        
-        assertTrue(strEventLeaderboardGroupId.equals(strLeaderboardGroupId));
-    }
-
-    @Test
-    public void testCreateEventAddRegatta() throws Exception {         
-        String eventName = randomName();
-        
-        Response eventResponse = createEvent();
-        assertTrue(isValidEventResponse(eventResponse));
-        
-        String strEventId = getIdFromResponse(eventResponse);
-        Response regattaResponse = createRegatta(eventName, strEventId);
-        assertTrue(isValidRegattaResponse(regattaResponse));
-        
-        JSONObject regatta = getRegatta(eventName);
-        String strRegattaCourseAreaId = (String) regatta.get("courseAreaId");
-        
-        JSONArray arrCourseAreas = getCourseAreasOfEvent(strEventId);
-        assertTrue(arrCourseAreas.size() == 1);
-        
-        JSONObject objCourseArea = (JSONObject) arrCourseAreas.get(0);
-        String strCourseAreaId = (String) objCourseArea.get("id");
-        
-        assertTrue(strCourseAreaId.equals(strRegattaCourseAreaId)); 
-        
-        String strRegattaName = (String) regatta.get("name");
-        assertTrue(leaderBoardWithNameExists(strRegattaName));
-    }
-    
-    @Test
     public void testCreateEventWithLeaderboardGroupAddRegatta() throws Exception {   
         String eventName = randomName;
-        Response eventResponse = createEventWithLeaderboardGroup();
+        Response eventResponse = createEventWithLeaderboardGroupAndRegatta();
         assertTrue(isValidEventResponse(eventResponse));
-        
         String strEventId = getIdFromResponse(eventResponse);
-        Response regattaResponse = createRegatta(eventName, strEventId);
-        assertTrue(isValidRegattaResponse(regattaResponse));
-        
         JSONObject regatta = getRegatta(eventName);
         String strRegattaCourseAreaId = (String) regatta.get("courseAreaId");
-        
         JSONArray arrCourseAreas = getCourseAreasOfEvent(strEventId);
         assertTrue(arrCourseAreas.size() == 1);
-        
         JSONObject objCourseArea = (JSONObject) arrCourseAreas.get(0);
         String strCourseAreaId = (String) objCourseArea.get("id");
-        
         assertTrue(strCourseAreaId.equals(strRegattaCourseAreaId)); 
-        
         String strRegattaName = (String) regatta.get("name");
         assertTrue(leaderBoardWithNameExists(strRegattaName));
-        
         JSONObject objLeaderboardGroup = getLeaderboardGroup(eventName);
         JSONArray arrLeaderboards = (JSONArray) objLeaderboardGroup.get("leaderboards");
         assertTrue(containsObjectWithAttrbuteNameAndValue(arrLeaderboards, "name", strRegattaName));
@@ -187,24 +96,22 @@ public class EventResourceTest extends AbstractJaxRsApiTest
 
     private Response createEventWithLeaderboardGroup()
             throws MalformedURLException, ParseException, NotFoundException {
-        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", "false", null);
+        return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ randomName,
+                        /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
+                        /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "false", /* boatClassNameParam */ null);
     }
 
     private Response createEvent() throws MalformedURLException, ParseException, NotFoundException {
-        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "false", "false", null);
+        return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ randomName,
+                /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
+                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false", /* boatClassNameParam */ null);
     }
     
     private Response createEventWithLeaderboardGroupAndRegatta()
             throws MalformedURLException, ParseException, NotFoundException {
-        return eventsResource.createEvent(randomName, randomName, null, null, randomName, null, null, null, null, "true", "true", "A_CAT");
-    }
-    
-    private Response createRegatta(String eventName, String strEventId) throws ParseException, NotFoundException {
-        return eventsResource.addRegatta(eventName, "A_CAT", null, strEventId, null,null, null, null, null, null, null,null,null,null);
-    }
-
-    private Response addLeaderboardGroup(String leaderboardGroupName, String strEventId) throws NotFoundException {
-        return eventsResource.addLeaderboardGroup(strEventId, leaderboardGroupName, leaderboardGroupName, null, null, null, null, null);
+        return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ randomName,
+                /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
+                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true", /* boatClassNameParam */ "A_CAT");
     }
     
     private Response getLeaderboard(String name) {
@@ -244,19 +151,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest
         return validateUUID(id);
     }
     
-    private boolean isValidLeaderboardGroupResponse(Response response) {
-        String id = getIdFromResponse(response);
-        return validateUUID(id);
-    }
-    
-    private boolean isValidRegattaResponse(Response response) {
-        String id = getIdFromResponse(response);
-        return validateUUID(id);
-    }
-
     private JSONArray getCourseAreasOfEvent(String strEventId) {
         JSONObject objEvent = getEvent(strEventId);
-        
         JSONArray arrCourseAreas = getCourseAreas(objEvent);
         return arrCourseAreas;
     }

@@ -2565,7 +2565,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description, String displayName,
+    public LeaderboardGroup addLeaderboardGroup(UUID leaderboardGroupId, String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         ArrayList<Leaderboard> leaderboards = new ArrayList<>();
@@ -2577,7 +2577,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 leaderboards.add(leaderboard);
             }
         }
-        LeaderboardGroup result = new LeaderboardGroupImpl(id, groupName, description, displayName,
+        LeaderboardGroup result = new LeaderboardGroupImpl(leaderboardGroupId, groupName, description, displayName,
                 displayGroupsInReverseOrder, leaderboards);
         if (overallLeaderboardScoringSchemeType != null) {
             // create overall leaderboard and its discards settings

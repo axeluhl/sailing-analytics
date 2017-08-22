@@ -282,24 +282,24 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
      * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
-     * @param id TODO
      * @param groupName
      *            The name of the new group
      * @param description
      *            The description of the new group
-     * @param displayName TODO
-     * @param displayGroupsInReverseOrder TODO
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description,
-            String displayName, boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    LeaderboardGroup addLeaderboardGroup(UUID leaderboardGroupId, String groupName, String description,
+            String displayName, boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
-     * @param groupName The name of the group which shall be removed.
+     * 
+     * @param groupName
+     *            The name of the group which shall be removed.
      */
     void removeLeaderboardGroup(String groupName);
 
