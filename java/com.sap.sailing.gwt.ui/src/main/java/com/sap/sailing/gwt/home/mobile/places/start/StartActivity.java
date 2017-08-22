@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.places.start.StartView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesPresenter;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
@@ -46,6 +47,9 @@ public class StartActivity extends AbstractActivity implements Presenter {
                 view.setQuickFinderValues(result.getValues());
             }
         });
+
+        AnniversariesPresenter anniversariesPresenter = new AnniversariesPresenter(view.getAnniversariesView());
+        anniversariesPresenter.addAnniversary();
     }
 
     @Override

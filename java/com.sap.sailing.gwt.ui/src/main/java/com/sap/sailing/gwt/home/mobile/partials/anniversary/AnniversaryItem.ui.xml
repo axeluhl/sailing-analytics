@@ -6,10 +6,12 @@
         .content {
             box-shadow: 0 0 10px 2px #008fcc;
             border-radius: .333333333333333em;
-            margin: 0 .7em;
+            margin: 1em .7em 0;
+        }
+        .content:first-child {
+            margin-top: 0;
         }
         .icon {
-            background-image: url('images/mobile/icon_trackedCount.svg');
             background-repeat: no-repeat;
             position: absolute;
             top: 50%;
@@ -32,13 +34,11 @@
             padding: 0 .5em .5em;
         }
     </ui:style>
-    <div class="{res.mediaCss.grid}">
-        <div class="{style.content}">
-            <div class="{style.headerContainer}">
-                <div class="{style.icon}"></div>
-                <div ui:field="teaserUi" class="{style.teaser}"></div>
-            </div>
-            <div ui:field="descriptionUi" class="{style.description}"></div>
+    <div class="{style.content}">
+        <div class="{style.headerContainer}">
+            <div ui:field="iconUi" class="{style.icon}"></div>
+            <div ui:field="teaserUi" class="{style.teaser}"></div>
         </div>
+        <div ui:field="descriptionUi" class="{style.description}"></div>
     </div>
 </ui:UiBinder> 
