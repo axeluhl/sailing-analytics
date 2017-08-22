@@ -11,7 +11,7 @@ import AVFoundation
 
 protocol ScanViewControllerDelegate: class {
 
-    func scanViewController(_ controller: ScanViewController, didScanCheckIn checkIn: CheckIn)
+    func scanViewController(_ controller: ScanViewController, didCheckIn checkIn: CheckIn)
 
 }
 
@@ -145,7 +145,6 @@ class ScanViewController: UIViewController {
     
     fileprivate lazy var checkInController: CheckInController = {
         let checkInController = CheckInController(coreDataManager: self.coreDataManager)
-        checkInController.delegate = self
         return checkInController
     }()
     
@@ -159,16 +158,6 @@ class ScanViewController: UIViewController {
         case .portraitUpsideDown: return .portraitUpsideDown
         case .unknown: return .portrait
         }
-    }
-    
-}
-
-// MARK: - CheckInControllerDelegate
-
-extension ScanViewController: CheckInControllerDelegate {
-    
-    func checkInController(_ sender: CheckInController, show alertController: UIAlertController) {
-        present(alertController, animated: true, completion: nil)
     }
     
 }
@@ -197,39 +186,38 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
         }
     }
     
-    // TODO: remove completion and use a success and failure block
     fileprivate func captureOutputSuccess(checkInData: CheckInData) {
-        checkInController.checkIn(checkInData: checkInData, completion: { (withSuccess) in
-            if withSuccess {
-                if let checkIn = self.coreDataManager.fetchCheckIn(checkInData: checkInData) {
-                    self.delegate?.scanViewController(self, didScanCheckIn: checkIn)
-                    _ = self.navigationController?.popViewController(animated: true)
-                } else {
-                    self.startScanning()
-                }
-            } else {
-                self.startScanning()
-            }
-        })
+        checkIn(withCheckInData: checkInData)
     }
     
     fileprivate func captureOutputFailure() {
-        showIncorrectCodeAlert()
-    }
-    
-    // MARK: - Alerts
-    
-    fileprivate func showIncorrectCodeAlert() {
-        let alertController = UIAlertController(
-            title: Translation.Common.Error.String,
-            message: Translation.ScanView.IncorrectCodeAlert.Message.String,
-            preferredStyle: .alert
-        )
+        let title = Translation.Common.Error.String
+        let message = Translation.ScanView.IncorrectCodeAlert.Message.String
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
             self?.startScanning()
         }
         alertController.addAction(okAction)
         present(alertController, animated: true, completion: nil)
+    }
+    
+    // MARK: - CheckIn
+    
+    fileprivate func checkIn(withCheckInData checkInData: CheckInData) {
+        checkInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] checkIn in
+            self?.checkInSuccess(checkIn: checkIn)
+        }) { [weak self] error in
+            self?.checkInFailure(error: error)
+        }
+    }
+    
+    fileprivate func checkInSuccess(checkIn: CheckIn) {
+        delegate?.scanViewController(self, didCheckIn: checkIn)
+        _ = navigationController?.popViewController(animated: true)
+    }
+    
+    fileprivate func checkInFailure(error: Error) {
+        startScanning()
     }
     
 }

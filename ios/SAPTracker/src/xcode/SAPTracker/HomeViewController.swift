@@ -215,11 +215,14 @@ class HomeViewController: UIViewController {
     fileprivate func reviewNewCheckIn(completion: @escaping () -> Void) {
         guard let urlString = Preferences.newCheckInURL else { completion(); return }
         guard let checkInData = CheckInData(urlString: urlString) else { completion(); return }
-        checkInController.checkIn(checkInData: checkInData, completion: { (withSuccess) in
+        checkInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] checkIn in
+            self?.selectedCheckIn = checkIn
             Preferences.newCheckInURL = nil
-            self.selectedCheckIn = RegattaCoreDataManager.shared.fetchCheckIn(checkInData: checkInData)
             completion()
-        })
+        }) { (error) in
+            Preferences.newCheckInURL = nil // TODO: Ask user for retry, retry later or dismiss before deleting check-in url
+            completion()
+        }
     }
     
     // MARK: 5. Review Selected Check-In
@@ -359,7 +362,6 @@ class HomeViewController: UIViewController {
     
     fileprivate lazy var checkInController: CheckInController = {
         let checkInController = CheckInController(coreDataManager: RegattaCoreDataManager.shared)
-        checkInController.delegate = self
         return checkInController
     }()
     
@@ -375,7 +377,7 @@ class HomeViewController: UIViewController {
 
 extension HomeViewController: ScanViewControllerDelegate {
 
-    func scanViewController(_ controller: ScanViewController, didScanCheckIn checkIn: CheckIn) {
+    func scanViewController(_ controller: ScanViewController, didCheckIn checkIn: CheckIn) {
         selectedCheckIn = checkIn
     }
 
@@ -461,16 +463,6 @@ extension HomeViewController: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
         setupTableViewHeader()
-    }
-    
-}
-
-// MARK: - CheckInControllerDelegate
-
-extension HomeViewController: CheckInControllerDelegate {
-    
-    func checkInController(_ sender: CheckInController, show alertController: UIAlertController) {
-        present(alertController, animated: true, completion: nil)
     }
     
 }
