@@ -1,0 +1,46 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+        .content {
+            box-shadow: 0 0 10px 2px #008fcc;
+            border-radius: .333333333333333em;
+        }
+        .icon {
+            background-image: url('images/mobile/icon_trackedCount.svg');
+            background-repeat: no-repeat;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5em;
+            height: 5em;
+            margin: 0 .5em
+        }
+        .textContainer {
+            position: relative;
+            margin-left: 6em;
+            min-height: 6em;
+            padding: .5em
+        }
+        .teaser {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #008fcc;
+        }
+        .description {
+            padding-top: .5em;
+        }
+    </ui:style>
+    <div class="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.column}">
+            <div class="{style.content}">
+                <div class="{style.icon}"></div>
+                <div class="{style.textContainer}">
+                    <div ui:field="teaserUi" class="{style.teaser}"></div>
+                    <div ui:field="descriptionUi" class="{style.description}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ui:UiBinder> 

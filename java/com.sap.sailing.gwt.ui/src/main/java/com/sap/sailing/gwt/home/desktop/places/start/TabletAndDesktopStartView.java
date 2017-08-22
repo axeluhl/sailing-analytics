@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.start.StartViewDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.partials.anniversary.AnniversaryPanel;
 import com.sap.sailing.gwt.home.desktop.partials.mainevents.MainEvents;
 import com.sap.sailing.gwt.home.desktop.partials.mainmedia.MainMedia;
 import com.sap.sailing.gwt.home.desktop.partials.stage.Stage;
@@ -19,6 +20,7 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     }
 
     @UiField(provided=true) Stage stage;
+    @UiField AnniversaryPanel anniversary;
     // @UiField(provided=true) MainSponsors mainSponsors;
     @UiField(provided=true) MainEvents mainEvents;
     @UiField(provided=true) MainMedia mainMedia;

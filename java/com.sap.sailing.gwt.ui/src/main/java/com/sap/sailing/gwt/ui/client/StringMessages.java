@@ -1885,4 +1885,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorLoadingRegattaStructure(UUID event, String message);
     String showEstimatedDuration();
     String estimatedDuration();
+    String anniversaryMajorCountdownTeaser(int countdown, int anniversary);
+    String anniversaryMajorCountdownDescription(int anniversary);
+    String anniversaryRepdigitCountdownTeaser(int countdown, int anniversary);
+    String anniversaryRepdigitCountdownDescription(int anniversary);
+    String anniversaryAnnouncementTeaser(int anniversary);
+    String anniversaryAnnouncementDescription(String raceDisplayName);
 }
