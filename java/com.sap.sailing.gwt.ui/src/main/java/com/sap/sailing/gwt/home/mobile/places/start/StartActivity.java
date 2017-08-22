@@ -4,6 +4,8 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.communication.anniversary.AnniversaryDTO;
+import com.sap.sailing.gwt.home.communication.anniversary.GetAnniversariesAction;
 import com.sap.sailing.gwt.home.communication.start.EventQuickfinderDTO;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.communication.start.GetRecentEventsAction;
@@ -13,6 +15,7 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.places.start.StartView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesPresenter;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
@@ -46,6 +49,15 @@ public class StartActivity extends AbstractActivity implements Presenter {
                 view.setQuickFinderValues(result.getValues());
             }
         });
+
+        final AnniversariesPresenter anniversariesPresenter = new AnniversariesPresenter(view.getAnniversariesView());
+        clientFactory.getDispatch().execute(new GetAnniversariesAction(),
+                new ActivityCallback<ListResult<AnniversaryDTO>>(clientFactory, panel) {
+                    @Override
+                    public void onSuccess(ListResult<AnniversaryDTO> result) {
+                        result.getValues().forEach(anniversariesPresenter::addAnniversary);
+                    }
+                });
     }
 
     @Override

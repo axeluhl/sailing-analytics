@@ -4,7 +4,7 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <g:HTMLPanel>
         <dp:stage.Stage ui:field='stage'/>
-        <dp:anniversary.AnniversaryPanel ui:field="anniversary" addStyleNames="{res.mainCss.spacermargintopmedium}"/>
+        <dp:anniversary.DesktopAnniversaries ui:field="anniversaries" addStyleNames="{res.mainCss.spacermargintopmedium}"/>
         <!-- <s:mainsponsors.MainSponsors ui:field='mainSponsors'/> -->
         <dp:mainevents.MainEvents ui:field='mainEvents'/>
         <dp:mainmedia.MainMedia ui:field='mainMedia'/>
