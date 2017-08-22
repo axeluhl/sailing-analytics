@@ -2347,7 +2347,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     protected RacingEventService getService() {
-        
         return racingEventServiceTracker.getService(); // grab the service
     }
 
