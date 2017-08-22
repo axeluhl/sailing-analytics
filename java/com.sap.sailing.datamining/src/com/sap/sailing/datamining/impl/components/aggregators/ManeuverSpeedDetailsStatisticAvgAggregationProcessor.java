@@ -1,12 +1,11 @@
 package com.sap.sailing.datamining.impl.components.aggregators;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.ManeuverSpeedDetailsStatistic;
+import com.sap.sailing.datamining.impl.components.aggregators.ManeuverSpeedDetailsStatisticAggregationProcessorHelper.ManeuverSpeedDetailsAggregationCreator;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregationImpl;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
@@ -20,7 +19,7 @@ public class ManeuverSpeedDetailsStatisticAvgAggregationProcessor extends
         AbstractParallelGroupedDataAggregationProcessor<ManeuverSpeedDetailsStatistic, ManeuverSpeedDetailsAggregation> {
 
     private static final String MESSAGE_KEY = "AvgTrendForTWAs";
-    private final Map<GroupKey, AvgManeuverSpeedDetailsAggregation> resultMap = new HashMap<>();
+    private final ManeuverSpeedDetailsStatisticAggregationProcessorHelper helper = new ManeuverSpeedDetailsStatisticAggregationProcessorHelper(AvgManeuverSpeedDetailsAggregationCreator.class);
 
     public ManeuverSpeedDetailsStatisticAvgAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, ManeuverSpeedDetailsAggregation>, ?>> resultReceivers) {
@@ -37,30 +36,18 @@ public class ManeuverSpeedDetailsStatisticAvgAggregationProcessor extends
 
     @Override
     protected void handleElement(GroupedDataEntry<ManeuverSpeedDetailsStatistic> element) {
-        AvgManeuverSpeedDetailsAggregation speedDetailsAggregation = resultMap.get(element.getKey());
-        if (speedDetailsAggregation == null) {
-            speedDetailsAggregation = new AvgManeuverSpeedDetailsAggregation();
-            resultMap.put(element.getKey(), speedDetailsAggregation);
-        }
-        speedDetailsAggregation.addElement(element.getDataEntry());
+        helper.storeElement(element);
     }
 
     @Override
     protected Map<GroupKey, ManeuverSpeedDetailsAggregation> getResult() {
-        Map<GroupKey, ManeuverSpeedDetailsAggregation> convertedResultMap = new HashMap<>();
-        for (Entry<GroupKey, AvgManeuverSpeedDetailsAggregation> entry : resultMap.entrySet()) {
-            convertedResultMap.put(entry.getKey(), entry.getValue().aggregateResult());
-        }
-        return convertedResultMap;
+        return helper.aggregateResult();
     }
 
-    private static class AvgManeuverSpeedDetailsAggregation {
+    static class AvgManeuverSpeedDetailsAggregationCreator implements ManeuverSpeedDetailsAggregationCreator {
         private double[] sumValuesPerTWA = new double[360];
         private int[] countPerTWA = new int[360];
         private int count = 0;
-
-        public AvgManeuverSpeedDetailsAggregation() {
-        }
 
         public void addElement(ManeuverSpeedDetailsStatistic dataEntry) {
             double[] maneuverValuePerTWA = dataEntry.getManeuverValuePerTWA();

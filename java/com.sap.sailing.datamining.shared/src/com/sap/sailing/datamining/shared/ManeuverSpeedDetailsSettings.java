@@ -9,6 +9,7 @@ public abstract class ManeuverSpeedDetailsSettings extends SerializableSettings 
     
     public abstract boolean isNormalizeManeuverDirection();
     public abstract NauticalSide getNormalizedManeuverDirection();
+    public abstract boolean isManeuverDirectionEqualWeightingEnabled();
 
 }
 

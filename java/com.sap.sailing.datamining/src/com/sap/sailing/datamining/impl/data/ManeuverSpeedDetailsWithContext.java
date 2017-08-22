@@ -48,7 +48,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
             }
             lastSpeedValue = maneuverSpeedPerTWA[twa];
         }
-        return new ManeuverSpeedDetailsStatisticImpl(speedSlopePerTWA);
+        return new ManeuverSpeedDetailsStatisticImpl(speedSlopePerTWA, getToSide(), settings.isManeuverDirectionEqualWeightingEnabled());
     }
     
     @Override
@@ -68,7 +68,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
                 speedRatioToBeginningSpeedPerTWA[twa] = maneuverSpeedPerTWA[twa] / firstSpeedValue;
             }
         }
-        return new ManeuverSpeedDetailsStatisticImpl(speedRatioToBeginningSpeedPerTWA);
+        return new ManeuverSpeedDetailsStatisticImpl(speedRatioToBeginningSpeedPerTWA, getToSide(), settings.isManeuverDirectionEqualWeightingEnabled());
     }
 
     @Override
@@ -86,7 +86,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
             }
             lastSpeedValue = maneuverSpeedPerTWA[twa];
         }
-        return new ManeuverSpeedDetailsStatisticImpl(speedRatioToPreviousSpeedPerTWA);
+        return new ManeuverSpeedDetailsStatisticImpl(speedRatioToPreviousSpeedPerTWA, getToSide(), settings.isManeuverDirectionEqualWeightingEnabled());
     }
 
     @Override
