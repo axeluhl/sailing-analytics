@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -73,6 +74,7 @@ public class RemoteSailingServerSet {
     private final StatisticsJsonDeserializer statisticsJsonDeserializer;
     
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedTrackedRacesForRemoteSailingServers;
+    private List<Runnable> remoteRaceResultReceivedCallbacks = new CopyOnWriteArrayList<>();
 
     /**
      * @param scheduler
@@ -172,17 +174,24 @@ public class RemoteSailingServerSet {
                     e);
             result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(/* events */ null, e);
         }
+        // allow the inner update to set this, as the listeners should not fire within the lock
         final Pair<Iterable<SimpleRaceInfo>, Exception> finalResult = result;
         LockUtil.executeWithWriteLock(lock, () -> {
             // check that the server was not removed while no lock was held
             if (remoteSailingServers.containsValue(ref)) {
+                // write the new result
                 cachedTrackedRacesForRemoteSailingServers.put(ref, finalResult);
             } else {
                 logger.fine("Omitted update for " + ref + " as it was removed");
             }
         });
+
+        for (Runnable remoteRaceCountChangedCallback : remoteRaceResultReceivedCallbacks) {
+            remoteRaceCountChangedCallback.run();
+        }
     }
     
+
     private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
         return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/getRaces?transitive=true");
     }
@@ -399,5 +408,13 @@ public class RemoteSailingServerSet {
         } catch (ParseException | IOException e) {
             throw new IllegalStateException("RemoteUrl could not be called ", e);
         }
+    }
+
+    public void addRemoteRaceResultReceivedCallback(Runnable callback) {
+        remoteRaceResultReceivedCallbacks.add(callback);
+    }
+    
+    public void removeRemoteRaceCountChangedCallback(Runnable callback){
+        remoteRaceResultReceivedCallbacks.remove(callback);
     }
 }

@@ -181,6 +181,8 @@ import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.anniversary.PeriodicRaceListAnniversaryDeterminator;
+import com.sap.sailing.server.anniversary.checker.QuarterChecker;
+import com.sap.sailing.server.anniversary.checker.SameDigitChecker;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
@@ -462,7 +464,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
 
-    private final PeriodicRaceListAnniversaryDeterminator periodicRaceListAnniversaryDeterminator;
+    private final PeriodicRaceListAnniversaryDeterminator raceListAnniversaryDeterminator;
+
+    private Runnable anniversaryUpdate;
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -502,12 +506,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.bundleContext = bundleContext;
     }
 
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore,
+            final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
         this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
-                /* periodicRaceListAnniversaryDeterminator */ null);
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
     }
-    
+
     /**
      * Like {@link #RacingEventServiceImpl()}, but allows callers to specify that the persistent competitor collection
      * be cleared before the service starts.
@@ -522,62 +526,105 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * @param trackedRaceStatisticsCache
      *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no detailed
      *            statistics about TrackedRaces will be calculated.
-     * @param periodicRaceListAnniversaryDeterminator
+     * @param raceListAnniversaryDeterminator
      *            a determinator service to periodically check for anniversaries
      */
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
-            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService,
-            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            PeriodicRaceListAnniversaryDeterminator periodicRaceListAnniversaryDeterminator) {
-        this((final RaceLogResolver raceLogResolver)-> {
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore,
+            final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListener trackedRegattaListener,
+            SailingNotificationService sailingNotificationService,
+            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces) {
+        this((final RaceLogResolver raceLogResolver) -> {
             return new ConstructorParameters() {
-            private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
-            private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
-                    PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory),
-                    clearPersistentCompetitorStore, serviceFinderFactory, raceLogResolver);
+                private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
+                        .getDefaultMongoObjectFactory(serviceFinderFactory);
+                private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
+                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory),
+                        clearPersistentCompetitorStore, serviceFinderFactory, raceLogResolver);
 
-            @Override public DomainObjectFactory getDomainObjectFactory() { return competitorStore.getDomainObjectFactory(); }
-            @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
-            @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
-            @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
+                @Override
+                public DomainObjectFactory getDomainObjectFactory() {
+                    return competitorStore.getDomainObjectFactory();
+                }
+
+                @Override
+                public MongoObjectFactory getMongoObjectFactory() {
+                    return mongoObjectFactory;
+                }
+
+                @Override
+                public DomainFactory getBaseDomainFactory() {
+                    return competitorStore.getBaseDomainFactory();
+                }
+
+                @Override
+                public CompetitorStore getCompetitorStore() {
+                    return competitorStore;
+                }
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory, trackedRegattaListener,
-                sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
-                periodicRaceListAnniversaryDeterminator);
+                sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
             SensorFixStore sensorFixStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
             SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
-        this((final RaceLogResolver raceLogResolver)-> {
+        this((final RaceLogResolver raceLogResolver) -> {
             return new ConstructorParameters() {
-            private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
-            private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
-                    mongoObjectFactory,
-                    clearPersistentCompetitorStore, serviceFinderFactory, raceLogResolver);
+                private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
+                        .getDefaultMongoObjectFactory(serviceFinderFactory);
+                private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
+                        mongoObjectFactory, clearPersistentCompetitorStore, serviceFinderFactory, raceLogResolver);
 
-            @Override public DomainObjectFactory getDomainObjectFactory() { return competitorStore.getDomainObjectFactory(); }
-            @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
-            @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
-            @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
+                @Override
+                public DomainObjectFactory getDomainObjectFactory() {
+                    return competitorStore.getDomainObjectFactory();
+                }
+
+                @Override
+                public MongoObjectFactory getMongoObjectFactory() {
+                    return mongoObjectFactory;
+                }
+
+                @Override
+                public DomainFactory getBaseDomainFactory() {
+                    return competitorStore.getBaseDomainFactory();
+                }
+
+                @Override
+                public CompetitorStore getCompetitorStore() {
+                    return competitorStore;
+                }
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null,
-                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
-                /* periodicRaceListAnniversaryDeterminator */ null);
+                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             MediaDB mediaDB, WindStore windStore, SensorFixStore sensorFixStore, boolean restoreTrackedRaces) {
-        this((final RaceLogResolver raceLogResolver)-> {
+        this((final RaceLogResolver raceLogResolver) -> {
             return new ConstructorParameters() {
-            @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
-            @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
-            @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
-            @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
+                @Override
+                public DomainObjectFactory getDomainObjectFactory() {
+                    return domainObjectFactory;
+                }
+
+                @Override
+                public MongoObjectFactory getMongoObjectFactory() {
+                    return mongoObjectFactory;
+                }
+
+                @Override
+                public DomainFactory getBaseDomainFactory() {
+                    return domainObjectFactory.getBaseDomainFactory();
+                }
+
+                @Override
+                public CompetitorStore getCompetitorStore() {
+                    return getBaseDomainFactory().getCompetitorStore();
+                }
             };
         }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
-                /* periodicRaceListAnniversaryDeterminator */ null);
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
     }
 
     /**
@@ -592,23 +639,23 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            a notification service to call upon events worth notifying users about, or {@code null} if no
      *            notification service is available, e.g., in test set-ups
      * @param trackedRaceStatisticsCache
-     *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no
-     *            detailed statistics about TrackedRaces will be calculated.
+     *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no detailed
+     *            statistics about TrackedRaces will be calculated.
      * @param restoreTrackedRaces
      *            if {@code true}, the tracking connectivity parameters for the races last loaded in the server are
-     *            {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>) obtained} from the database,
-     *            and {@link RaceTracker}s are
+     *            {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)
+     *            obtained} from the database, and {@link RaceTracker}s are
      *            {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long) created} for those,
-     *            effectively restoring the server state to what it was last according to the database. If {@code false},
-     *            all restore information is
+     *            effectively restoring the server state to what it was last according to the database. If
+     *            {@code false}, all restore information is
      *            {@link MongoObjectFactory#removeAllConnectivityParametersForRacesToRestore() cleared} from the
      *            database, and the server starts out with an empty list of tracked races.
      */
-    public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider, MediaDB mediaDb,
-            final WindStore windStore, final SensorFixStore sensorFixStore, TypeBasedServiceFinderFactory serviceFinderFactory,
-            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService,
-            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            PeriodicRaceListAnniversaryDeterminator periodicRaceListAnniversaryDeterminator) {
+    public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider,
+            MediaDB mediaDb, final WindStore windStore, final SensorFixStore sensorFixStore,
+            TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListener trackedRegattaListener,
+            SailingNotificationService sailingNotificationService,
+            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces) {
         logger.info("Created " + this);
         this.numberOfTrackedRacesRestored = new AtomicInteger();
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
@@ -699,8 +746,33 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore();
         }
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
-        this.periodicRaceListAnniversaryDeterminator = periodicRaceListAnniversaryDeterminator;
+        raceListAnniversaryDeterminator = new PeriodicRaceListAnniversaryDeterminator(serviceFinderFactory,
+                this, new QuarterChecker(), new SameDigitChecker());
+        setupAnniversaryHandling();
     }
+
+    private void setupAnniversaryHandling() {
+        anniversaryUpdate = new Runnable() {
+            
+            @Override
+            public void run() {
+                ArrayList<SimpleRaceInfo> allRemoteRaces = new ArrayList<>();
+                for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> result : remoteSailingServerSet.getCachedRaceList().entrySet()) {
+                    if (result.getValue().getB() != null) {
+                        logger.warning("Could not update anniversary determinator, because remote server "
+                                + result.getKey().getURL() + " returned error " + result);
+                    } else {
+                        Util.addAll(result.getValue().getA(), allRemoteRaces);
+                    }
+                }
+                raceListAnniversaryDeterminator.uponUpdate(allRemoteRaces,getLocalRaceList().values());
+            }
+        };
+        
+        remoteSailingServerSet.addRemoteRaceResultReceivedCallback(anniversaryUpdate);
+        
+    }
+
 
     private void restoreTrackedRaces() {
         // restore the races by calling addRace one by one, but in a background thread, therefore concurrent to any remaining
@@ -3930,12 +4002,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public Pair<Integer, AnniversaryType> getNextAnniversary() {
-        return periodicRaceListAnniversaryDeterminator.getNextAnniversaryNumber();
+        return raceListAnniversaryDeterminator.getNextAnniversaryNumber();
     }
 
     @Override
     public Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary() {
-        ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> allAnniversaries = periodicRaceListAnniversaryDeterminator
+        ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> allAnniversaries = raceListAnniversaryDeterminator
                 .getKnownAnniversaries();
 
         Triple<Integer, DetailedRaceInfo, AnniversaryType> lastAnniversary = null;
@@ -3957,8 +4029,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Integer getNextAnniversaryCountdown() {
-        Integer current = periodicRaceListAnniversaryDeterminator.getCurrentRaceCount();
-        Pair<Integer, AnniversaryType> next = periodicRaceListAnniversaryDeterminator.getNextAnniversaryNumber();
+        Integer current = raceListAnniversaryDeterminator.getCurrentRaceCount();
+        Pair<Integer, AnniversaryType> next = raceListAnniversaryDeterminator.getNextAnniversaryNumber();
         Integer countDown = null;
         if (current != null && next != null) {
             countDown = next.getA().intValue() - current.intValue();
@@ -3968,11 +4040,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Integer getCurrentRaceCount() {
-        return periodicRaceListAnniversaryDeterminator.getCurrentRaceCount();
+        return raceListAnniversaryDeterminator.getCurrentRaceCount();
     }
 
     @Override
     public ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries() {
-        return periodicRaceListAnniversaryDeterminator.getKnownAnniversaries();
+        return raceListAnniversaryDeterminator.getKnownAnniversaries();
     }
 }

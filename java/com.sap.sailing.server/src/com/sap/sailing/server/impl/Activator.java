@@ -36,10 +36,6 @@ import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
-import com.sap.sailing.server.anniversary.PeriodicRaceListAnniversaryDeterminator;
-import com.sap.sailing.server.anniversary.PeriodicRaceListCalculationScheduler;
-import com.sap.sailing.server.anniversary.checker.QuarterChecker;
-import com.sap.sailing.server.anniversary.checker.SameDigitChecker;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
@@ -55,7 +51,6 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
-import com.sap.sse.util.ThreadPoolUtil;
 
 public class Activator implements BundleActivator {
 
@@ -121,16 +116,9 @@ public class Activator implements BundleActivator {
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
 
-        
-        final PeriodicRaceListAnniversaryDeterminator periodicRaceListAnniversaryDeterminator = new PeriodicRaceListAnniversaryDeterminator(
-                serviceFinderFactory, new QuarterChecker(), new SameDigitChecker());
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
-                trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
-                periodicRaceListAnniversaryDeterminator);
+                trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
         notificationService.setRacingEventService(racingEventService);
-        PeriodicRaceListCalculationScheduler raceListScheduler = new PeriodicRaceListCalculationScheduler(racingEventService,
-                ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
-        raceListScheduler.addListener(periodicRaceListAnniversaryDeterminator);
 
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
