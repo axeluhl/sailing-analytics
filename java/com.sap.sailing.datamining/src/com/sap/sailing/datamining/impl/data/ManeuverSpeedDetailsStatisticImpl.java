@@ -1,18 +1,19 @@
 package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.ManeuverSpeedDetailsStatistic;
+import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.domain.common.NauticalSide;
 
 public class ManeuverSpeedDetailsStatisticImpl implements ManeuverSpeedDetailsStatistic {
     
     private double[] maneuverValuePerTWA;
     private NauticalSide maneuverDirection;
-    private boolean maneuverDirectionEqualWeightingEnabled;
+    private ManeuverSpeedDetailsSettings settings;
 
-    public ManeuverSpeedDetailsStatisticImpl(double[] maneuverValuePerTWA, NauticalSide maneuverDirection, boolean maneuverDirectionEqualWeightingEnabled) {
+    public ManeuverSpeedDetailsStatisticImpl(double[] maneuverValuePerTWA, NauticalSide maneuverDirection, ManeuverSpeedDetailsSettings settings) {
         this.maneuverValuePerTWA = maneuverValuePerTWA;
         this.maneuverDirection = maneuverDirection;
-        this.maneuverDirectionEqualWeightingEnabled = maneuverDirectionEqualWeightingEnabled;
+        this.settings = settings;
     }
 
     @Override
@@ -26,8 +27,8 @@ public class ManeuverSpeedDetailsStatisticImpl implements ManeuverSpeedDetailsSt
     }
     
     @Override
-    public boolean isManeuverDirectionEqualWeightingEnabled() {
-        return maneuverDirectionEqualWeightingEnabled;
+    public ManeuverSpeedDetailsSettings getSettings() {
+        return settings;
     }
 
 }

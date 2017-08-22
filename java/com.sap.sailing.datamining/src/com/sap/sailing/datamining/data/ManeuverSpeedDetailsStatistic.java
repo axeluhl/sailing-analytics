@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.data;
 
+import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.domain.common.NauticalSide;
 
 public interface ManeuverSpeedDetailsStatistic {
@@ -8,6 +9,6 @@ public interface ManeuverSpeedDetailsStatistic {
     
     NauticalSide getManeuverDirection();
     
-    boolean isManeuverDirectionEqualWeightingEnabled();
+    ManeuverSpeedDetailsSettings getSettings();
 
 }

@@ -38,7 +38,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double[] speedSlopePerTWA = new double[360];
         double lastSpeedValue = 0;
         
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide(), settings);
+        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide());
         
         for(int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = forNextTWA.apply(twa)) {
             if(maneuverSpeedPerTWA[twa] == 0 || lastSpeedValue == 0) {
@@ -48,7 +48,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
             }
             lastSpeedValue = maneuverSpeedPerTWA[twa];
         }
-        return new ManeuverSpeedDetailsStatisticImpl(speedSlopePerTWA, getToSide(), settings.isManeuverDirectionEqualWeightingEnabled());
+        return new ManeuverSpeedDetailsStatisticImpl(speedSlopePerTWA, getToSide(), settings);
     }
     
     @Override
@@ -56,7 +56,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double[] speedRatioToBeginningSpeedPerTWA = new double[360];
         double firstSpeedValue = maneuverContext.getManeuverEnteringSpeed();
         
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide(), settings);
+        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide());
         
         for(int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = forNextTWA.apply(twa)) {
             if(firstSpeedValue == 0) {
@@ -68,7 +68,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
                 speedRatioToBeginningSpeedPerTWA[twa] = maneuverSpeedPerTWA[twa] / firstSpeedValue;
             }
         }
-        return new ManeuverSpeedDetailsStatisticImpl(speedRatioToBeginningSpeedPerTWA, getToSide(), settings.isManeuverDirectionEqualWeightingEnabled());
+        return new ManeuverSpeedDetailsStatisticImpl(speedRatioToBeginningSpeedPerTWA, getToSide(), settings);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
         double[] speedRatioToPreviousSpeedPerTWA = new double[360];
         double lastSpeedValue = 0;
         
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide(), settings);
+        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverContext.getToSide());
         
         for(int twa = maneuverEnteringTWA, i = 0; i < 360; ++i, twa = forNextTWA.apply(twa)) {
             if(maneuverSpeedPerTWA[twa] == 0 || lastSpeedValue == 0) {
@@ -86,7 +86,7 @@ public class ManeuverSpeedDetailsWithContext implements HasManeuverSpeedDetailsC
             }
             lastSpeedValue = maneuverSpeedPerTWA[twa];
         }
-        return new ManeuverSpeedDetailsStatisticImpl(speedRatioToPreviousSpeedPerTWA, getToSide(), settings.isManeuverDirectionEqualWeightingEnabled());
+        return new ManeuverSpeedDetailsStatisticImpl(speedRatioToPreviousSpeedPerTWA, getToSide(), settings);
     }
 
     @Override

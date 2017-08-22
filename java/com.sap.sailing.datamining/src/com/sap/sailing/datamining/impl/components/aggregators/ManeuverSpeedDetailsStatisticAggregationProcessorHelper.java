@@ -5,8 +5,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.data.ManeuverSpeedDetailsStatistic;
+import com.sap.sailing.datamining.impl.components.ManeuverSpeedDetailsUtils;
+import com.sap.sailing.datamining.impl.data.ManeuverSpeedDetailsStatisticImpl;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregationImpl;
+import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
@@ -20,12 +23,20 @@ public class ManeuverSpeedDetailsStatisticAggregationProcessorHelper {
     }
     
     protected void storeElement(GroupedDataEntry<ManeuverSpeedDetailsStatistic> element) {
+        ManeuverSpeedDetailsStatistic statistic = element.getDataEntry();
+        ManeuverSpeedDetailsSettings settings = statistic.getSettings();
+        if(settings.isNormalizeManeuverDirection() && statistic.getManeuverDirection() != settings.getNormalizedManeuverDirection()) {
+            double[] newValuesPerTWA = ManeuverSpeedDetailsUtils.flipManeuversDirection(statistic.getManeuverValuePerTWA());
+            statistic = new ManeuverSpeedDetailsStatisticImpl(newValuesPerTWA, statistic.getManeuverDirection(), statistic.getSettings());
+        }
+        
+        
         ManeuverSpeedDetailsAggregationCreatorHelper speedDetailsAggregationHelper = resultMap.get(element.getKey());
         if (speedDetailsAggregationHelper == null) {
             speedDetailsAggregationHelper = new ManeuverSpeedDetailsAggregationCreatorHelper();
             resultMap.put(element.getKey(), speedDetailsAggregationHelper);
         }
-        speedDetailsAggregationHelper.addElement(element.getDataEntry());
+        speedDetailsAggregationHelper.addElement(statistic);
     }
 
     protected Map<GroupKey, ManeuverSpeedDetailsAggregation> aggregateResult() {
@@ -46,7 +57,7 @@ public class ManeuverSpeedDetailsStatisticAggregationProcessorHelper {
         private ManeuverSpeedDetailsAggregationCreator starboardManeuvers = null;
         
         public void addElement(ManeuverSpeedDetailsStatistic statistic) {
-            if(statistic.isManeuverDirectionEqualWeightingEnabled()) {
+            if(statistic.getSettings().isManeuverDirectionEqualWeightingEnabled()) {
                 switch(statistic.getManeuverDirection()) {
                 case PORT:
                     if(portsideManeuvers == null) {

@@ -2,7 +2,6 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.function.Function;
 
-import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.domain.common.NauticalSide;
 
 public class ManeuverSpeedDetailsUtils {
@@ -16,15 +15,9 @@ public class ManeuverSpeedDetailsUtils {
     }
     
     public static Function<Integer, Integer> getNextTWAFunctionForManeuverDirection(
-            NauticalSide toSide) {
-        return getNextTWAFunctionForManeuverDirection(toSide, null);
-    }
-    
-    public static Function<Integer, Integer> getNextTWAFunctionForManeuverDirection(
-            NauticalSide toSide, ManeuverSpeedDetailsSettings settings) {
-        NauticalSide direction = settings != null && settings.isNormalizeManeuverDirection() ? settings.getNormalizedManeuverDirection() : toSide;
+            NauticalSide maneuverDirection) {
         Function<Integer, Integer> forNextTWA = null;
-        switch (direction) {
+        switch (maneuverDirection) {
         case STARBOARD:
             forNextTWA = currentTWA -> (currentTWA + 1) % 360;
             break;
@@ -34,5 +27,13 @@ public class ManeuverSpeedDetailsUtils {
             break;
         }
         return forNextTWA;
+    }
+
+    public static double[] flipManeuversDirection(double[] valuesPerTWA) {
+        double[] newValuesPerTWA = new double[360];
+        for(int i = 0; i < 360; i++) {
+            newValuesPerTWA[(360 - i) % 360] = valuesPerTWA[i];
+        }
+        return newValuesPerTWA;
     }
 }
