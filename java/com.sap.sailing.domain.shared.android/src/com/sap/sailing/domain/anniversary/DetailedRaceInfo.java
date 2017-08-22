@@ -11,6 +11,7 @@ import com.sap.sse.common.TimePoint;
  * this, the object hosts additional information about the leaderboard and the event.
  */
 public class DetailedRaceInfo extends SimpleRaceInfo {
+    private static final long serialVersionUID = 1L;
     private final String leaderboardName;
     private final UUID eventID;
     

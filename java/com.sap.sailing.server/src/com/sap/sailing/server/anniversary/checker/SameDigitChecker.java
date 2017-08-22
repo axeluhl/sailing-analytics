@@ -3,6 +3,7 @@ package com.sap.sailing.server.anniversary.checker;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.server.anniversary.PeriodicRaceListAnniversaryDeterminator.AnniversaryChecker;
 
 /**
@@ -22,7 +23,7 @@ public class SameDigitChecker implements AnniversaryChecker {
 
         int amount = 5;
         while (true) {
-            //we do not use the 9 digit, as it is too close to the 10*x from the Quarterchecker
+            // we do not use the 9 digit, as it is too close to the 10*x from the Quarterchecker
             for (int digit = 1; digit < 8; digit++) {
                 String digitAsString = String.valueOf(digit);
                 String toTest = "";
@@ -37,7 +38,7 @@ public class SameDigitChecker implements AnniversaryChecker {
                     return;
                 }
             }
-            //check one digit more, till the checked number is > the amount of races
+            // check one digit more, till the checked number is > the amount of races
             amount++;
         }
     }
@@ -50,6 +51,11 @@ public class SameDigitChecker implements AnniversaryChecker {
     @Override
     public Integer getNextAnniversary() {
         return nextAnniversary;
+    }
+
+    @Override
+    public AnniversaryType getType() {
+        return AnniversaryType.REPEATED_DIGIT;
     }
 
 }

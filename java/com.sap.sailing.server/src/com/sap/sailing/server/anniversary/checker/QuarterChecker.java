@@ -3,6 +3,7 @@ package com.sap.sailing.server.anniversary.checker;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.server.anniversary.PeriodicRaceListAnniversaryDeterminator.AnniversaryChecker;
 
 /**
@@ -50,6 +51,11 @@ public class QuarterChecker implements AnniversaryChecker {
     @Override
     public Integer getNextAnniversary() {
         return nextAnniversary;
+    }
+
+    @Override
+    public AnniversaryType getType() {
+        return AnniversaryType.QUARTER;
     }
 
 }

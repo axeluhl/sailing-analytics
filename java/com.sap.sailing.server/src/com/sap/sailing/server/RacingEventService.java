@@ -52,6 +52,7 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -738,7 +739,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Returns the number of the next anniversary race. Could return null if no next anniversary can be determined
      */
-    Integer getNextAnniversary();
+    Pair<Integer, AnniversaryType> getNextAnniversary();
 
     /**
      * Returns the amount of races required to reach the next anniversary. Could return null if no next anniversary can
@@ -754,11 +755,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Returns a Map of all known anniversaries, keyed with the number of the anniversary race
      */
-    Map<Integer, DetailedRaceInfo> getKnownAnniversaries();
+    Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries();
 
     /**
      * Returns a pair with the last anniversary, keyed with the number of the anniversary. Could contain null, last
      * anniversary is determined based on racenumber from knownAnniversaries alone.
      */
-    Pair<Integer, DetailedRaceInfo> getLastAnniversary();
+    Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
 }

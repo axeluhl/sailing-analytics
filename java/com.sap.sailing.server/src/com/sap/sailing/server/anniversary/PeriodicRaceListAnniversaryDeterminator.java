@@ -12,9 +12,11 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.server.anniversary.PeriodicRaceListCalculationScheduler.PeriodicRaceListCalculator;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 
 public class PeriodicRaceListAnniversaryDeterminator implements PeriodicRaceListCalculator {
@@ -23,18 +25,18 @@ public class PeriodicRaceListAnniversaryDeterminator implements PeriodicRaceList
     private final MongoObjectFactory mongoObjectFactory;
     private PeriodicRaceListCalculationScheduler anniversaryCalculator;
 
-    private final ConcurrentHashMap<Integer, DetailedRaceInfo> knownAnniversaries;
+    private final ConcurrentHashMap<Integer, Pair<DetailedRaceInfo,AnniversaryType>> knownAnniversaries;
     private final CopyOnWriteArrayList<AnniversaryChecker> checkers;
 
     /**
      * Contains the results of the last calculation, a number giving the next anniversary
      */
-    private Integer nextAnniversaryNumber;
+    private Pair<Integer,AnniversaryType> nextAnniversaryNumber;
     /**
      * Contains the results of the last calculation, a number giving the amount of races existing
      */
     private Integer currentRaceCount;
-
+    
     public interface AnniversaryChecker {
         /**
          * updates the internal state, required to be called if the raceCount has changed as else the getters will
@@ -55,6 +57,8 @@ public class PeriodicRaceListAnniversaryDeterminator implements PeriodicRaceList
          * this checker
          */
         Integer getNextAnniversary();
+        
+        AnniversaryType getType();
     }
 
     public PeriodicRaceListAnniversaryDeterminator(CachedOsgiTypeBasedServiceFinderFactory serviceFinderFactory,
@@ -85,6 +89,7 @@ public class PeriodicRaceListAnniversaryDeterminator implements PeriodicRaceList
         });
         boolean requiresPersist = false;
         Integer nearestNext = Integer.MAX_VALUE;
+        AnniversaryType nearestType = null;
         for (AnniversaryChecker checker : checkers) {
             checker.update(allRaces.size());
             // find past anniversaries
@@ -94,7 +99,7 @@ public class PeriodicRaceListAnniversaryDeterminator implements PeriodicRaceList
                 int index = anniversary - 1;
                 if (!knownAnniversaries.contains(index)) {
                     SimpleRaceInfo anniversaryRace = allRaces.get(index);
-                    insert(anniversary, anniversaryRace);
+                    insert(anniversary, anniversaryRace,checker.getType());
                     requiresPersist = true;
                 }
             }
@@ -102,10 +107,11 @@ public class PeriodicRaceListAnniversaryDeterminator implements PeriodicRaceList
             Integer next = checker.getNextAnniversary();
             if (next != null && next < nearestNext) {
                 nearestNext = next;
+                nearestType = checker.getType();
             }
         }
         if(nearestNext.intValue() != Integer.MAX_VALUE){
-            nextAnniversaryNumber = nearestNext;
+            nextAnniversaryNumber = new Pair<Integer, AnniversaryType>(nearestNext, nearestType);
         }
         currentRaceCount = allRaces.size();
 
@@ -114,10 +120,10 @@ public class PeriodicRaceListAnniversaryDeterminator implements PeriodicRaceList
         }
     }
 
-    private void insert(int anniversaryToCheck, SimpleRaceInfo simpleRaceInfo) {
+    private void insert(int anniversaryToCheck, SimpleRaceInfo simpleRaceInfo, AnniversaryType anniversaryType) {
         System.out.println("New anniversary " + anniversaryToCheck + " " + simpleRaceInfo);
         DetailedRaceInfo fullData = anniversaryCalculator.getFullAnniversaryData(simpleRaceInfo.getIdentifier());
-        knownAnniversaries.put(anniversaryToCheck, fullData);
+        knownAnniversaries.put(anniversaryToCheck, new Pair<>(fullData, anniversaryType));
         // TODO replication here, to ensure all replicas have the exact same race as anniversary!
     }
 
@@ -126,11 +132,11 @@ public class PeriodicRaceListAnniversaryDeterminator implements PeriodicRaceList
         this.anniversaryCalculator = anniversaryCalculator;
     }
     
-    public Integer getNextAnniversaryNumber() {
+    public Pair<Integer, AnniversaryType> getNextAnniversaryNumber() {
         return nextAnniversaryNumber;
     }
     
-    public ConcurrentHashMap<Integer, DetailedRaceInfo> getKnownAnniversaries() {
+    public ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries() {
         return knownAnniversaries;
     }
     

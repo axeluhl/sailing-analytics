@@ -107,6 +107,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
@@ -3928,16 +3929,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     
     @Override
-    public Integer getNextAnniversary(){
+    public Pair<Integer, AnniversaryType> getNextAnniversary() {
         return periodicRaceListAnniversaryDeterminator.getNextAnniversaryNumber();
     }
-    
+
     @Override
-    public Pair<Integer, DetailedRaceInfo> getLastAnniversary() {
-        ConcurrentHashMap<Integer, DetailedRaceInfo> allAnniversaries = periodicRaceListAnniversaryDeterminator
+    public Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary() {
+        ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> allAnniversaries = periodicRaceListAnniversaryDeterminator
                 .getKnownAnniversaries();
 
-        Pair<Integer, DetailedRaceInfo> lastAnniversary = null;
+        Triple<Integer, DetailedRaceInfo, AnniversaryType> lastAnniversary = null;
         if (!allAnniversaries.isEmpty()) {
             ArrayList<Integer> list = new ArrayList<>(allAnniversaries.keySet());
             list.sort(new Comparator<Integer>() {
@@ -3947,8 +3948,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             });
             Integer anniversary = list.get(list.size() - 1);
-            DetailedRaceInfo info = allAnniversaries.get(anniversary);
-            lastAnniversary = new Pair<Integer, DetailedRaceInfo>(anniversary, info);
+            Pair<DetailedRaceInfo, AnniversaryType> info = allAnniversaries.get(anniversary);
+            lastAnniversary = new Triple<Integer, DetailedRaceInfo, AnniversaryType>(anniversary, info.getA(),
+                    info.getB());
         }
         return lastAnniversary;
     }
@@ -3956,10 +3958,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Integer getNextAnniversaryCountdown() {
         Integer current = periodicRaceListAnniversaryDeterminator.getCurrentRaceCount();
-        Integer next = periodicRaceListAnniversaryDeterminator.getNextAnniversaryNumber();
+        Pair<Integer, AnniversaryType> next = periodicRaceListAnniversaryDeterminator.getNextAnniversaryNumber();
         Integer countDown = null;
         if (current != null && next != null) {
-            countDown = next.intValue() - current.intValue();
+            countDown = next.getA().intValue() - current.intValue();
         }
         return countDown;
     }
@@ -3970,7 +3972,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public ConcurrentHashMap<Integer, DetailedRaceInfo> getKnownAnniversaries() {
+    public ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries() {
         return periodicRaceListAnniversaryDeterminator.getKnownAnniversaries();
     }
 }
