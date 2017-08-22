@@ -3,12 +3,16 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.URI;
 import java.text.ParseException;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.json.simple.JSONArray;
@@ -25,6 +29,7 @@ import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.RegattasResource;
+import com.sap.sse.InvalidDateException;
 
 public class EventResourceTest extends AbstractJaxRsApiTest {
     private EventsResource eventsResource;
@@ -32,10 +37,13 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     private LeaderboardGroupsResource leaderboardGroupsResource;
     private LeaderboardsResource leaderboardsResource;
     private String randomName; 
+    private UriInfo uriInfo;
     
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
+        uriInfo = mock(UriInfo.class);
+        when(uriInfo.getBaseUri()).thenReturn(new URI("http://127.0.0.1:8888/"));
         eventsResource = createResource(new EventsResource(/* enforce security */ false));
         regattasResource = createResource(new RegattasResource());
         leaderboardGroupsResource = createResource(new LeaderboardGroupsResource());
@@ -109,33 +117,44 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         assertTrue(containsObjectWithAttrbuteNameAndValue(arrLeaderboards, "name", strRegattaName));
     }
 
-    private Response createEventWithLeaderboardGroup()
-            throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
-        return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ randomName,
-                        /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
-                        /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "false",
-                        /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
-    }
-
-    private Response createEvent() throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
-        return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ randomName,
-                /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
-                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
+    private Response createEventWithLeaderboardGroup() throws ParseException, NotFoundException, NumberFormatException,
+            IOException, org.json.simple.parser.ParseException, InvalidDateException {
+        return eventsResource.createEvent(uriInfo, randomName, randomName, /* startDateParam */ null,
+                /* startDateAsMillis */ null, /* endDateParam */ null, /* endDateAsMillis */ null,
+                /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
+                /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
+                /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "false",
                 /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
     }
 
-    private Response createEventAtLocation(Position location) throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
-        return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ null,
-                /* venueLat */ ""+location.getLatDeg(), /* venueLng */ ""+location.getLngDeg(), /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
-                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
+    private Response createEvent() throws ParseException, NotFoundException, NumberFormatException, IOException,
+            org.json.simple.parser.ParseException, InvalidDateException {
+        return eventsResource.createEvent(uriInfo, randomName, randomName, /* startDateParam */ null,
+                /* startDateAsMillis */ null, /* endDateParam */ null, /* endDateAsMillis */ null,
+                /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
+                /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
+                /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
                 /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
     }
-    
-    private Response createEventWithLeaderboardGroupAndRegatta()
-            throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
-        return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ randomName,
-                /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
-                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
+
+    private Response createEventAtLocation(Position location) throws ParseException, NotFoundException,
+            NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
+        return eventsResource.createEvent(uriInfo, randomName, randomName, /* startDateParam */ null,
+                /* startDateAsMillis */ null, /* endDateParam */ null, /* endDateAsMillis */ null,
+                /* venueNameParam */ null, /* venueLat */ "" + location.getLatDeg(),
+                /* venueLng */ "" + location.getLngDeg(), /* isPublicParam */ null, /* officialWebsiteURLParam */ null,
+                /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
+                /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
+    }
+
+    private Response createEventWithLeaderboardGroupAndRegatta() throws ParseException, NotFoundException,
+            NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
+        return eventsResource.createEvent(uriInfo, randomName, randomName, /* startDateParam */ null,
+                /* startDateAsMillis */ null, /* endDateParam */ null, /* endDateAsMillis */ null,
+                /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
+                /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
+                /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
                 /* boatClassNameParam */ "A_CAT", /* numberOfRacesParam */ null);
     }
     

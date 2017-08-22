@@ -37,7 +37,7 @@ public abstract class AbstractJaxRsApiTest {
     
     protected static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
-    public void setUp() {
+    public void setUp() throws Exception {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().dropDatabase();
         racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
