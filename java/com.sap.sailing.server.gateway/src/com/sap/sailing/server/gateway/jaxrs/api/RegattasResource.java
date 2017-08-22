@@ -16,6 +16,7 @@ import java.util.stream.StreamSupport;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -25,6 +26,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -32,8 +34,10 @@ import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
@@ -44,6 +48,8 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -86,6 +92,7 @@ import com.sap.sailing.server.gateway.serialization.impl.TargetTimeInfoSerialize
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TrackedRaceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
+import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -118,7 +125,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                 .type(MediaType.TEXT_PLAIN).build();
     }
     
-
+    private Response getBadSeriesErrorResponse(String regattaName, String seriesName) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("Could not find a series with name '" + StringEscapeUtils.escapeHtml(seriesName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+    
     private Response getNoTrackedRaceErrorResponse(String regattaName, String raceName) {
         return Response.status(Status.NOT_FOUND)
                 .entity("No tracked race for race with name '" + StringEscapeUtils.escapeHtml(raceName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
@@ -1407,7 +1419,6 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR)
     public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
-        
         Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -1427,7 +1438,6 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/datamining/"+ SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
-        
         Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -1442,7 +1452,6 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
-        
         Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -1455,5 +1464,107 @@ public class RegattasResource extends AbstractSailingServerResource {
             }
         }
         return response;
+    }
+    
+    @POST
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/addracecolumns")
+    public Response addRaceColumns(@PathParam("regattaname") String regattaName,
+            @QueryParam("numberofraces") int numberOfRaces, @QueryParam("prefix") String prefix,
+            @QueryParam("toseries") String toSeries) {
+        final Response response;
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            final JSONArray jsonResponse = new JSONArray();
+            final Series series = getSeriesUsingLastAsDefault(regatta, toSeries);
+            if (series == null) {
+                response = getBadSeriesErrorResponse(regattaName, toSeries);
+            } else {
+                final String raceNamePrefix = prefix == null ? "R" : prefix;
+                int oneBasedNumberOfLast = Util.size(series.getRaceColumns());
+                for (int i = 1; i <= numberOfRaces; i++) {
+                    final int oneBasedNumberOfNext = findNextFreeRaceName(series, raceNamePrefix, oneBasedNumberOfLast);
+                    final RaceColumnInSeries raceColumn = addRaceColumn(regattaName, series.getName(), getRaceName(raceNamePrefix, oneBasedNumberOfNext));
+                    final JSONObject raceColumnDataAsJson = new JSONObject();
+                    raceColumnDataAsJson.put("seriesname", raceColumn.getSeries().getName());
+                    raceColumnDataAsJson.put("racename", raceColumn.getName());
+                    jsonResponse.add(raceColumnDataAsJson);
+                    oneBasedNumberOfLast = oneBasedNumberOfNext;
+                }
+                String json = jsonResponse.toJSONString();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
+        }
+        return response;
+    }
+
+    @POST
+    @Path("{regattaname}/removeracecolumn")
+    public Response addRaceColumns(@PathParam("regattaname") String regattaName,
+            @QueryParam("racecolumn") String raceColumnName) {
+        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+        final Response response;
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            boolean found = false;
+            for (final Series series : regatta.getSeries()) {
+                if (series.getRaceColumnByName(raceColumnName) != null) {
+                    series.removeRaceColumn(raceColumnName);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                response = getBadRaceErrorResponse(regattaName, raceColumnName);
+            } else {
+                response = Response.ok().build();
+            }
+        }
+        return response;
+    }
+
+    private String getRaceName(final String raceNamePrefix, final int number) {
+        return raceNamePrefix+number;
+    }
+    
+    private int findNextFreeRaceName(Series series, String raceNamePrefix, int oneBasedNumberOfLast) {
+        int result = oneBasedNumberOfLast;
+        boolean clash = false;
+        do {
+            result++;
+            clash = false;
+            final String raceNameCandidate = getRaceName(raceNamePrefix, result);
+            for (final RaceColumnInSeries raceColumn : series.getRaceColumns()) {
+                if (raceColumn.getName().equals(raceNameCandidate)) {
+                    clash = true;
+                    break;
+                }
+            }
+        } while (clash);
+        return result;
+    }
+
+    private RaceColumnInSeries addRaceColumn(String regattaName, String seriesName, String columnName) {
+        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+        return getService().apply(new AddColumnToSeries(new RegattaName(regattaName), seriesName, columnName));
+    }
+
+    private Series getSeriesUsingLastAsDefault(Regatta regatta, String seriesName) {
+        final Series result;
+        if (seriesName != null) {
+            result = regatta.getSeriesByName(seriesName);
+        } else {
+            final Iterator<? extends Series> i = regatta.getSeries().iterator();
+            if (i.hasNext()) {
+                result = i.next();
+            } else {
+                result = null;
+            }
+        }
+        return result;
     }
 }
