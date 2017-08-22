@@ -387,7 +387,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Pmf-c9-OVe">
-                                <rect key="frame" x="16" y="8" width="343" height="289.5"/>
+                                <rect key="frame" x="16" y="16" width="343" height="281.5"/>
                                 <color key="backgroundColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
                                 <state key="normal" title="Regatta Button">
@@ -404,7 +404,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TBi-yV-KGH">
-                                <rect key="frame" x="16" y="305.5" width="343" height="289.5"/>
+                                <rect key="frame" x="16" y="305.5" width="343" height="281.5"/>
                                 <color key="backgroundColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
                                 <state key="normal" title="Training Button">
@@ -424,11 +424,11 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="Pmf-c9-OVe" firstAttribute="top" secondItem="8M8-ol-4ku" secondAttribute="bottom" constant="8" id="7Dk-Sx-VTv"/>
+                            <constraint firstItem="Pmf-c9-OVe" firstAttribute="top" secondItem="8M8-ol-4ku" secondAttribute="bottom" constant="16" id="7Dk-Sx-VTv"/>
                             <constraint firstAttribute="trailing" secondItem="Pmf-c9-OVe" secondAttribute="trailing" constant="16" id="Kze-kc-Xzh"/>
                             <constraint firstItem="TBi-yV-KGH" firstAttribute="width" secondItem="Pmf-c9-OVe" secondAttribute="width" id="XnE-OM-vq4"/>
                             <constraint firstItem="TBi-yV-KGH" firstAttribute="top" secondItem="Pmf-c9-OVe" secondAttribute="bottom" constant="8" id="jx9-oP-Cg7"/>
-                            <constraint firstItem="RbV-Vw-aEx" firstAttribute="top" secondItem="TBi-yV-KGH" secondAttribute="bottom" constant="8" id="mFL-wx-fu8"/>
+                            <constraint firstItem="RbV-Vw-aEx" firstAttribute="top" secondItem="TBi-yV-KGH" secondAttribute="bottom" constant="16" id="mFL-wx-fu8"/>
                             <constraint firstItem="Pmf-c9-OVe" firstAttribute="leading" secondItem="UH5-OA-vu5" secondAttribute="leading" constant="16" id="sb9-XI-yDY"/>
                             <constraint firstItem="TBi-yV-KGH" firstAttribute="centerX" secondItem="Pmf-c9-OVe" secondAttribute="centerX" id="tqB-PK-4Jm"/>
                             <constraint firstItem="TBi-yV-KGH" firstAttribute="height" secondItem="Pmf-c9-OVe" secondAttribute="height" id="zFl-ch-sq3"/>
@@ -447,6 +447,22 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="QYW-k3-jSc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="410" y="-307"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="6Ty-cK-spl">
+            <objects>
+                <navigationController id="Pn3-0n-ZdQ" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="McN-2f-sK6">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="RRc-Lh-2o4" kind="relationship" relationship="rootViewController" id="563-CO-bNv"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Lo3-i9-FWc" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1977" y="-2507"/>
         </scene>
         <!--Create Training View Controller-->
         <scene sceneID="zai-sg-LQl">
@@ -469,7 +485,7 @@
                                     </constraint>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
-                                <state key="normal" title="Start Training Button">
+                                <state key="normal" title="Create Training Button">
                                     <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <userDefinedRuntimeAttributes>
@@ -497,6 +513,10 @@
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="INg-vK-nnm"/>
                                 </constraints>
+                                <connections>
+                                    <outlet property="dataSource" destination="RRc-Lh-2o4" id="t6o-Je-VU4"/>
+                                    <outlet property="delegate" destination="RRc-Lh-2o4" id="Q8I-TO-XUL"/>
+                                </connections>
                             </pickerView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -519,11 +539,17 @@
                             </userDefinedRuntimeAttribute>
                         </userDefinedRuntimeAttributes>
                     </view>
-                    <navigationItem key="navigationItem" id="dR9-8n-GwO"/>
+                    <navigationItem key="navigationItem" id="dR9-8n-GwO">
+                        <barButtonItem key="rightBarButtonItem" systemItem="cancel" id="8dp-ku-NGq">
+                            <connections>
+                                <action selector="cancelButtonTapped:" destination="RRc-Lh-2o4" id="ulL-xi-iBi"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kAU-Am-SqM" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1976.8" y="-2507.4962518740631"/>
+            <point key="canvasLocation" x="2737" y="-2507"/>
         </scene>
         <!--Training View Controller-->
         <scene sceneID="Zlq-oI-kok">
@@ -608,10 +634,10 @@
             </objects>
             <point key="canvasLocation" x="1977" y="-1808"/>
         </scene>
-        <!--View Controller-->
+        <!--Training Table View Controller-->
         <scene sceneID="EFQ-Uc-xDt">
             <objects>
-                <viewController id="1ba-kX-Lnq" sceneMemberID="viewController">
+                <viewController id="1ba-kX-Lnq" customClass="TrainingTableViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="Rgw-kx-qOy"/>
                         <viewControllerLayoutGuide type="bottom" id="d4m-uX-YSN"/>
@@ -723,6 +749,10 @@
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="1ba-kX-Lnq" id="NgU-Db-CGc"/>
+                                    <outlet property="delegate" destination="1ba-kX-Lnq" id="tzb-J5-AOZ"/>
+                                </connections>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Pwd-JR-SVL">
                                 <rect key="frame" x="291" y="519" width="64" height="64"/>
@@ -736,7 +766,7 @@
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="RRc-Lh-2o4" kind="show" id="2Wa-Il-Qt2"/>
+                                    <segue destination="Pn3-0n-ZdQ" kind="presentation" id="Kqa-dt-WR3"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -754,6 +784,12 @@
                             <constraint firstItem="d4m-uX-YSN" firstAttribute="top" secondItem="Pwd-JR-SVL" secondAttribute="bottom" constant="20" id="q0p-hA-kVh"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="addButton" destination="Pwd-JR-SVL" id="oQ2-6e-NCD"/>
+                        <outlet property="footerTextView" destination="AW1-r0-JWj" id="BoM-tz-fRo"/>
+                        <outlet property="headerTitleLabel" destination="bx9-EY-ljk" id="91C-Q7-cME"/>
+                        <outlet property="tableView" destination="bav-TA-AP5" id="MUP-iZ-LeY"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1Kb-cO-cLT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -795,7 +831,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mark Name Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="12" adjustsLetterSpacingToFitWidth="YES" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="BQe-Id-ec3">
-                                <rect key="frame" x="101" y="290.5" width="173" height="22"/>
+                                <rect key="frame" x="101.5" y="290.5" width="173" height="22"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="22" id="g3A-7J-yFy"/>
                                 </constraints>
@@ -1001,7 +1037,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6rV-hv-c3D" userLabel="Countdown View">
-                                        <rect key="frame" x="6" y="38" width="363" height="50"/>
+                                        <rect key="frame" x="6.5" y="38" width="363" height="50"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pjH-rV-MGI" userLabel="Days View">
                                                 <rect key="frame" x="0.0" y="0.0" width="121" height="50"/>
@@ -1416,13 +1452,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="r6d-OU-cRI">
-                                                    <rect key="frame" x="20" y="14.5" width="134.5" height="23.5"/>
+                                                    <rect key="frame" x="20" y="14" width="134.5" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="5Xu-6g-tqP">
-                                                    <rect key="frame" x="259" y="14.5" width="96" height="23.5"/>
+                                                    <rect key="frame" x="259" y="14" width="96" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1448,13 +1484,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Xww-rc-pOA">
-                                                    <rect key="frame" x="20" y="14.5" width="130.5" height="23.5"/>
+                                                    <rect key="frame" x="20" y="14" width="130.5" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="tJY-RR-vpe">
-                                                    <rect key="frame" x="262" y="14.5" width="93" height="23.5"/>
+                                                    <rect key="frame" x="262" y="14" width="93" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1480,13 +1516,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Fixes Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Ujw-jg-ilY">
-                                                    <rect key="frame" x="20" y="14.5" width="161" height="23.5"/>
+                                                    <rect key="frame" x="20" y="14" width="161" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Fixes Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="dz3-w7-CCh">
-                                                    <rect key="frame" x="232" y="14.5" width="123" height="23.5"/>
+                                                    <rect key="frame" x="232" y="14" width="123" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1512,13 +1548,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Accuracy Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Z1d-5I-pbj">
-                                                    <rect key="frame" x="20" y="14.5" width="191.5" height="23.5"/>
+                                                    <rect key="frame" x="20" y="14" width="191.5" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Accuracy Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DiM-MR-SGV">
-                                                    <rect key="frame" x="181.5" y="14.5" width="153.5" height="23.5"/>
+                                                    <rect key="frame" x="181.5" y="14" width="153.5" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -1630,7 +1666,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="48" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="mUm-EE-6Is" userLabel="Time Label">
-                                <rect key="frame" x="3" y="244" width="369" height="98.5"/>
+                                <rect key="frame" x="3" y="243.5" width="369" height="98.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -1672,7 +1708,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l5u-i3-029">
-                                <rect key="frame" x="3" y="244" width="369" height="98.5"/>
+                                <rect key="frame" x="3" y="243.5" width="369" height="98.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -1713,7 +1749,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sGK-xV-9a0">
-                                <rect key="frame" x="3" y="244" width="369" height="98.5"/>
+                                <rect key="frame" x="3" y="243.5" width="369" height="98.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -2189,8 +2225,8 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
-        <segue reference="Irs-ey-Uhs"/>
+        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="QMa-LQ-D8c"/>
         <segue reference="fgS-yf-c3u"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

@@ -57,7 +57,6 @@ class HomeViewController: UIViewController {
     fileprivate func setup() {
         setupButtons()
         setupLocalization()
-        setupNavigationBar()
         setupTableView()
         setupTableViewDataSource()
         setupTableViewHeader()
@@ -69,15 +68,12 @@ class HomeViewController: UIViewController {
     }
     
     fileprivate func setupLocalization() {
+        navigationItem.title = "REGATTAS TITLE"
         headerTitleLabel.text = Translation.HomeView.HeaderTitleLabel.Text.String
         scanCodeButton.setTitle(Translation.ScanView.Title.String, for: .normal)
         noCodeButton.setTitle(Translation.HomeView.NoCodeAlert.Title.String, for: .normal)
         infoCodeLabel.text = Translation.HomeView.InfoCodeLabel.Text.String
         footerTextView.text = Translation.HomeView.FooterTextView.Text.String
-    }
-    
-    fileprivate func setupNavigationBar() {
-        navigationItem.title = "REGATTAS TITLE"
     }
     
     fileprivate func setupTableView() {

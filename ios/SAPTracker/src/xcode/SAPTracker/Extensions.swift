@@ -71,3 +71,25 @@ extension UITableViewCell {
     }
     
 }
+
+// MARK: - UIViewController
+
+extension UIViewController {
+    
+    func makeViewRoundWithShadow(_ view: UIView) {
+        
+        // Corner radius
+        view.layer.cornerRadius = view.frame.height / 2
+        
+        // Border
+        view.layer.borderWidth = 1.0
+        view.layer.borderColor = UIColor.black.cgColor
+        
+        // Shadow
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOffset = CGSize(width: 3, height: 3)
+        view.layer.shadowOpacity = 0.2
+        view.layer.shadowRadius = 4.0
+    }
+    
+}

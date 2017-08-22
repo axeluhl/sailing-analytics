@@ -333,6 +333,7 @@
 		C867BD0B1F4B0290007E78E0 /* CreateTrainingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */; };
 		C867BD0D1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0C1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift */; };
 		C867BD0F1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0E1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift */; };
+		C867BD111F4C44E5007E78E0 /* TrainingTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD101F4C44E5007E78E0 /* TrainingTableViewController.swift */; };
 		C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */; };
 		C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */; };
 		C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */; };
@@ -731,6 +732,7 @@
 		C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTrainingViewController.swift; sourceTree = "<group>"; };
 		C867BD0C1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCoreDataManager.swift; sourceTree = "<group>"; };
 		C867BD0E1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingCoreDataManager.swift; sourceTree = "<group>"; };
+		C867BD101F4C44E5007E78E0 /* TrainingTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingTableViewController.swift; sourceTree = "<group>"; };
 		C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 2.xcdatamodel"; sourceTree = "<group>"; };
 		C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GPSFix+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
@@ -1289,6 +1291,7 @@
 			children = (
 				C867BD081F4B0274007E78E0 /* TrainingViewController.swift */,
 				C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */,
+				C867BD101F4C44E5007E78E0 /* TrainingTableViewController.swift */,
 			);
 			name = Training;
 			sourceTree = "<group>";
@@ -1967,6 +1970,7 @@
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */,
 				C8B3B9BC1F39E64400B3B6BA /* Keychain.swift in Sources */,
+				C867BD111F4C44E5007E78E0 /* TrainingTableViewController.swift in Sources */,
 				C8739E141D2BF16300A89F3C /* LeaderboardData.swift in Sources */,
 				C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */,
 				C8F71EEF1D8691F700826DE4 /* UIRefreshControl+AFNetworking.m in Sources */,
