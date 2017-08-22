@@ -9,23 +9,29 @@
 import UIKit
 
 class TrainingTableViewController: UIViewController {
-
+    
+    var login = true
+    
     @IBOutlet weak var headerTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var footerTextView: UITextView!
     @IBOutlet weak var addButton: UIButton!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
         setup()
     }
-
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if login {
+            signUpController.loginWithViewController(self)
+            login = false
+        }
+    }
+    
+    // MARK: - Setup
+    
     fileprivate func setup() {
         setupAddButton()
     }
@@ -33,7 +39,15 @@ class TrainingTableViewController: UIViewController {
     fileprivate func setupAddButton() {
         makeViewRoundWithShadow(addButton)
     }
-
+    
+    // MARK: - Properties
+    
+    fileprivate lazy var signUpController: SignUpController = {
+        let signUpController = SignUpController()
+        signUpController.delegate = self
+        return signUpController
+    }()
+    
 }
 
 // MARK: - UITableViewDataSource
@@ -63,5 +77,19 @@ extension TrainingTableViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 
 extension TrainingTableViewController: UITableViewDelegate {
+    
+}
+
+// MARK: - SignUpControllerDelegate
+
+extension TrainingTableViewController: SignUpControllerDelegate {
+    
+    func signUpControllerDidFinish(_ controller: SignUpController) {
+        
+    }
+    
+    func signUpControllerDidCancel(_ controller: SignUpController) {
+        navigationController?.popViewController(animated: true)
+    }
     
 }

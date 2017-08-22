@@ -9,9 +9,11 @@
 import UIKit
 
 protocol LoginViewControllerDelegate {
-
+    
     func loginViewController(_ controller: LoginViewController, willLoginWithUserName userName: String, password: String)
-
+    
+    func loginViewControllerWillCancel(_ controller: LoginViewController)
+    
 }
 
 class LoginViewController: FormularViewController {
@@ -53,9 +55,9 @@ class LoginViewController: FormularViewController {
     // MARK: - Actions
     
     @IBAction func cancelButtonTapped(_ sender: Any) {
-        presentingViewController!.dismiss(animated: true, completion: nil)
+        signUpController?.loginViewControllerWillCancel(self)
     }
-
+    
     @IBAction func loginButtonTapped(_ sender: Any) {
         signUpController?.loginViewController(
             self,

@@ -57,14 +57,28 @@ class SignUpController: NSObject {
 extension SignUpController: LoginViewControllerDelegate {
     
     func loginViewController(_ controller: LoginViewController, willLoginWithUserName userName: String, password: String) {
-        requestManager.postAccessToken(userName: userName, password: password, success: { (userName, accessToken) in
-            
-        }) { (error, message) in
-            self.showAlert(forError: self.loginViewControllerError(forError: error), andMessage: message, withViewController: controller)
+        requestManager.postAccessToken(userName: userName, password: password, success: { [weak self] userName, accessToken in
+            self?.loginViewController(controller, didFinishLoginWithUserName: userName, password: password)
+        }) { [weak self] error, message in
+            self?.loginViewController(controller, didFailLoginWithError: error, message: message)
         }
     }
     
-    private func loginViewControllerError(forError error: Error) -> Error {
+    func loginViewControllerWillCancel(_ controller: LoginViewController) {
+        controller.presentingViewController?.dismiss(animated: true)
+        self.delegate?.signUpControllerDidCancel(self)
+    }
+    
+    fileprivate func loginViewController(_ controller: LoginViewController, didFinishLoginWithUserName: String, password: String) {
+        controller.presentingViewController?.dismiss(animated: true)
+        self.delegate?.signUpControllerDidFinish(self)
+    }
+    
+    fileprivate func loginViewController(_ controller: LoginViewController, didFailLoginWithError error: Error, message: String?) {
+        self.showAlert(forError: SignUpController.loginViewControllerError(forError: error), andMessage: message, withViewController: controller)
+    }
+    
+    fileprivate static func loginViewControllerError(forError error: Error) -> Error {
         if (error as NSError).domain == NSURLErrorDomain {
             return error
         }
@@ -85,18 +99,32 @@ extension SignUpController: SignUpViewControllerDelegate {
         company: String,
         password: String)
     {
-        requestManager.postCreateUser(userName: userName, email: email, fullName: fullName, company: company, password: password, success: { userName, accessToken in
-            do {
-                try Keychain.userName.savePassword(userName)
-                try Keychain.userPassword.savePassword(password)
-                try Keychain.userAccessToken.savePassword(accessToken)
-                self.delegate?.signUpControllerDidFinish(self)
-            } catch {
-                self.showAlert(forError: error, andMessage: nil, withViewController: controller)
-            }
-        }) { (error, message) in
-            self.showAlert(forError: error, andMessage: message, withViewController: controller)
+        requestManager.postCreateUser(userName: userName, email: email, fullName: fullName, company: company, password: password, success: { [weak self] userName, accessToken in
+            self?.signUpViewController(controller, didFinishSignUpWithUserName: userName, password: password, accessToken: accessToken)
+        }) { [weak self] error, message in
+            self?.signUpViewController(controller, didFailSignUpWithError: error, message: message)
         }
+    }
+    
+    fileprivate func signUpViewController(
+        _ controller: SignUpViewController,
+        didFinishSignUpWithUserName userName: String,
+        password: String,
+        accessToken: String)
+    {
+        do {
+            try Keychain.userName.savePassword(userName)
+            try Keychain.userPassword.savePassword(password)
+            try Keychain.userAccessToken.savePassword(accessToken)
+        } catch {
+            self.showAlert(forError: error, andMessage: nil, withViewController: controller)
+        }
+        controller.presentingViewController?.dismiss(animated: true)
+        self.delegate?.signUpControllerDidFinish(self)
+    }
+    
+    fileprivate func signUpViewController(_ controller: SignUpViewController, didFailSignUpWithError error: Error, message: String?) {
+        self.showAlert(forError: error, andMessage: message, withViewController: controller)
     }
     
 }
@@ -106,19 +134,27 @@ extension SignUpController: SignUpViewControllerDelegate {
 extension SignUpController: ForgotPasswordViewControllerDelegate {
     
     func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForEmail email: String) {
-        requestManager.postForgotPassword(email: email, success: { 
-            
-        }) { (error, message) in
-            self.showAlert(forError: error, andMessage: message, withViewController: controller)
+        requestManager.postForgotPassword(email: email, success: { [weak self] in
+            self?.forgotPasswordViewControllerDidFinishChangePassword(controller)
+        }) { [weak self] error, message in
+            self?.forgotPasswordViewController(controller, didFailChangePasswordWithError: error, message: message)
         }
     }
     
     func forgotPasswordViewController(_ controller: ForgotPasswordViewController, willChangePasswordForUserName userName: String) {
-        requestManager.postForgotPassword(userName: userName, success: {
-            
-        }) { (error, message) in
-            self.showAlert(forError: error, andMessage: message, withViewController: controller)
+        requestManager.postForgotPassword(userName: userName, success: { [weak self] in
+            self?.forgotPasswordViewControllerDidFinishChangePassword(controller)
+        }) { [weak self] error, message in
+            self?.forgotPasswordViewController(controller, didFailChangePasswordWithError: error, message: message)
         }
+    }
+    
+    fileprivate func forgotPasswordViewControllerDidFinishChangePassword(_ controller: ForgotPasswordViewController) {
+        // TODO
+    }
+    
+    fileprivate func forgotPasswordViewController(_ controller: ForgotPasswordViewController, didFailChangePasswordWithError error: Error, message: String?) {
+        self.showAlert(forError: error, andMessage: message, withViewController: controller)
     }
     
 }

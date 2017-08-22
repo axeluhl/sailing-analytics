@@ -26,32 +26,4 @@ class StartViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
     }
     
-    // MARK: - Actions
-
-    @IBAction func trainingButtonTapped(_ sender: Any) {
-        signUpController.loginWithViewController(self)
-    }
-
-    // MARK: - Properties
-    
-    fileprivate lazy var signUpController: SignUpController = {
-        let signUpController = SignUpController()
-        signUpController.delegate = self
-        return signUpController
-    }()
-
-}
-
-// MARK: - SignUpControllerDelegate
-
-extension StartViewController: SignUpControllerDelegate {
-    
-    func signUpControllerDidFinish(_ controller: SignUpController) {
-        
-    }
-    
-    func signUpControllerDidCancel(_ controller: SignUpController) {
-        
-    }
-    
 }
