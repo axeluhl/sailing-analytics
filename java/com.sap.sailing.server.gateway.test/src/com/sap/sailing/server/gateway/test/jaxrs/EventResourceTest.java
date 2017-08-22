@@ -1,8 +1,10 @@
 package com.sap.sailing.server.gateway.test.jaxrs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.UUID;
 
@@ -16,6 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.NotFoundException;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
@@ -40,13 +44,24 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
     
     @Test
-    public void testCreateEvent() throws Exception {         
+    public void testCreateEvent() throws Exception {
         Response eventResponse = createEvent();
         assertTrue(isValidEventResponse(eventResponse));
+        JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
+        assertFalse(hasDefaultLeaderboardGroup(objEvent));
     }
     
     @Test
-    public void testCreateEventWithLeaderboardGroup() throws Exception {         
+    public void testCreateEventInBerlin() throws Exception {
+        Response eventResponse = createEventAtLocation(new DegreePosition(52.514176, 13.411628));
+        assertTrue(isValidEventResponse(eventResponse));
+        JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
+        assertFalse(hasDefaultLeaderboardGroup(objEvent));
+        assertEquals("Nikolaiviertel", ((JSONObject) objEvent.get("venue")).get("name"));
+    }
+    
+    @Test
+    public void testCreateEventWithLeaderboardGroup() throws Exception {
         Response eventResponse = createEventWithLeaderboardGroup();
         assertTrue(isValidEventResponse(eventResponse));
         JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
@@ -54,7 +69,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
 
     @Test
-    public void testCreateEventWithLeaderboardGroupAndRegatta() throws Exception {         
+    public void testCreateEventWithLeaderboardGroupAndRegatta() throws Exception {
         Response eventResponse = createEventWithLeaderboardGroupAndRegatta();
         assert(isValidEventResponse(eventResponse));
         JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
@@ -75,7 +90,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
 
     @Test
-    public void testCreateEventWithLeaderboardGroupAddRegatta() throws Exception {   
+    public void testCreateEventWithLeaderboardGroupAddRegatta() throws Exception {
         String eventName = randomName;
         Response eventResponse = createEventWithLeaderboardGroupAndRegatta();
         assertTrue(isValidEventResponse(eventResponse));
@@ -95,23 +110,33 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
 
     private Response createEventWithLeaderboardGroup()
-            throws MalformedURLException, ParseException, NotFoundException {
+            throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
         return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ randomName,
                         /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
-                        /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "false", /* boatClassNameParam */ null);
+                        /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "false",
+                        /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
     }
 
-    private Response createEvent() throws MalformedURLException, ParseException, NotFoundException {
+    private Response createEvent() throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
         return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ randomName,
                 /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
-                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false", /* boatClassNameParam */ null);
+                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
+    }
+
+    private Response createEventAtLocation(Position location) throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
+        return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ null,
+                /* venueLat */ ""+location.getLatDeg(), /* venueLng */ ""+location.getLngDeg(), /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
+                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null);
     }
     
     private Response createEventWithLeaderboardGroupAndRegatta()
-            throws MalformedURLException, ParseException, NotFoundException {
+            throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
         return eventsResource.createEvent(randomName, randomName, /* startDateParam */ null, /* endDateParam */ null, /* venueNameParam */ randomName,
                 /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null, /* officialWebsiteURLParam */ null, /* baseURLParam */ null,
-                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true", /* boatClassNameParam */ "A_CAT");
+                /* leaderboardGroupIdsListParam */ null, /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
+                /* boatClassNameParam */ "A_CAT", /* numberOfRacesParam */ null);
     }
     
     private Response getLeaderboard(String name) {

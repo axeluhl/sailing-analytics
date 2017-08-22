@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -33,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
@@ -54,6 +54,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -62,6 +63,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.exceptions.ExceptionManager;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -75,6 +77,7 @@ import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -122,33 +125,18 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("leaderboardGroupIds") List<String> leaderboardGroupIdsListParam,
             @FormParam("createLeaderboardGroup") String createLeaderboardGroupParam,
             @FormParam("createRegatta") String createRegattaParam,
-            @FormParam("boatClassName") String boatClassNameParam)
-                    throws MalformedURLException, ParseException, NotFoundException {
+            @FormParam("boatClassName") String boatClassNameParam,
+            @FormParam("numberOfRaces") String numberOfRacesParam)
+                    throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
         if (enforceSecurityChecks) {
             SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
         }
         Event event = validateAndCreateEvent(eventNameParam, eventDescriptionParam, startDateParam, endDateParam, venueNameParam,
                 /* venue latitude */ venueLat, /* venue longitude */ venueLng, isPublicParam, officialWebsiteURLParam,
-                baseURLParam, leaderboardGroupIdsListParam, createLeaderboardGroupParam, createRegattaParam, boatClassNameParam);
+                baseURLParam, leaderboardGroupIdsListParam, createLeaderboardGroupParam, createRegattaParam, boatClassNameParam, numberOfRacesParam);
          return ok(event.getId().toString(), MediaType.TEXT_PLAIN);
     }
     
-    private Response addRegatta(String regattaNameParam, String boatClassNameParam, String startDateParam,
-            String eventIdParam, String endDateParam, String isPersistentParam, String scoringSchemeParam,
-            String courseAreaIdParam, String buoyZoneRadiusInHullLengthsParam, String useStartTimeInterferenceParam,
-            String controlTrackingFromStartAndFinishTimesParam, String rankingMetricParam,
-            List<Integer> leaderboardDiscardThresholdsParam, String numberOfRacesParam)
-            throws ParseException, NotFoundException {
-        if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regattaNameParam));
-            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.READ));
-        }
-        Regatta regatta = validateAndCreateRegatta(regattaNameParam, boatClassNameParam, startDateParam, eventIdParam, endDateParam,
-                isPersistentParam, scoringSchemeParam, courseAreaIdParam, buoyZoneRadiusInHullLengthsParam,
-                useStartTimeInterferenceParam, controlTrackingFromStartAndFinishTimesParam, rankingMetricParam, leaderboardDiscardThresholdsParam, numberOfRacesParam);
-        return ok(regatta.getId().toString(), MediaType.TEXT_PLAIN);
-    }
-
     @POST
     @Path("/addCourseArea")
     @Consumes("text/plain")
@@ -273,13 +261,11 @@ public class EventsResource extends AbstractSailingServerResource {
         return response;
     }
     
-    private Regatta validateAndCreateRegatta(String regattaNameParam, String boatClassNameParam, String startDateParam,
-            String eventIdParam, String endDateParam, String isPersistentParam, String scoringSchemeParam,
-            String courseAreaIdParam, String buoyZoneRadiusInHullLengthsParam, String useStartTimeInterferenceParam,
-            String controlTrackingFromStartAndFinishTimesParam, String rankingMetricParam,
+    private RegattaLeaderboard validateAndCreateRegatta(String regattaNameParam, String boatClassNameParam, String startDateParam,
+            String endDateParam, String scoringSchemeParam, UUID courseAreaId, String buoyZoneRadiusInHullLengthsParam,
+            String useStartTimeInterferenceParam, String controlTrackingFromStartAndFinishTimesParam, String rankingMetricParam,
             List<Integer> leaderboardDiscardThresholdsParam, String numberOfRacesParam)
             throws ParseException, NotFoundException {
-        boolean isPersistent = isPersistentParam == null ? true : Boolean.parseBoolean(isPersistentParam);
         boolean controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesParam == null ? false : Boolean.parseBoolean(controlTrackingFromStartAndFinishTimesParam);
         boolean useStartTimeInterference = useStartTimeInterferenceParam == null ? true : Boolean.parseBoolean(useStartTimeInterferenceParam);
         double buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsParam == null ? 3.0 : Double.parseDouble(buoyZoneRadiusInHullLengthsParam);
@@ -289,41 +275,32 @@ public class EventsResource extends AbstractSailingServerResource {
         if (boatClassNameParam == null) {
             throw new IllegalArgumentException(ExceptionManager.parameterRequiredMsg("boatClassName"));
         }
-        if (eventIdParam == null && courseAreaIdParam == null) {
-            throw new IllegalArgumentException(ExceptionManager.atLeastOneParameterRequiredMsg("eventId", "courseAreaId"));
-        }
         String regattaName = regattaNameParam;
-        UUID eventId = eventIdParam == null ? null : toUUID(eventIdParam);
-        UUID courseAreaId = courseAreaIdParam == null ? null : toUUID(courseAreaIdParam);
         String boatClassName = boatClassNameParam;
         MillisecondsTimePoint startDate = startDateParam == null ? null :  toMillisecondsTimePoint(startDateParam);
         MillisecondsTimePoint endDate = endDateParam == null ? null : toMillisecondsTimePoint(endDateParam) ;
         ScoringScheme scoringScheme = scoringSchemeParam == null ? createScoringScheme("LOW_POINT") : createScoringScheme(scoringSchemeParam);
         RankingMetrics rankingMetric = rankingMetricParam == null ? createRankingMetric("ONE_DESIGN") : createRankingMetric(rankingMetricParam);
         int[] leaderboardDiscardThresholds = leaderboardDiscardThresholdsParam == null ? new int[0] : leaderboardDiscardThresholdsParam.stream().mapToInt(i -> i).toArray();
-        int numberOfRaces = numberOfRacesParam == null ? 3 : Integer.parseInt(numberOfRacesParam);
+        int numberOfRaces = numberOfRacesParam == null ? 0 : Integer.parseInt(numberOfRacesParam);
         RegattaCreationParametersDTO regattaCreationParametersDTO = new RegattaCreationParametersDTO(
                 createDefaultSeriesCreationParameters(regattaName, numberOfRaces));
         UUID regattaId = UUID.randomUUID();
-        // if courseAreaId not provided then get it from eventId
-        if (eventId != null && courseAreaId == null) {
-            courseAreaId = getDefaultCourseArea(getEvent(eventId)).getId();
-        }
-        Regatta regatta = addRegatta(regattaName, isPersistent, controlTrackingFromStartAndFinishTimes,
-                useStartTimeInterference, buoyZoneRadiusInHullLengths, courseAreaId, boatClassName, startDate, endDate,
-                scoringScheme, rankingMetric, regattaId, regattaCreationParametersDTO, leaderboardDiscardThresholds, numberOfRaces);
-        addLeaderboard(regattaName, leaderboardDiscardThresholds);
+        addRegatta(regattaName, controlTrackingFromStartAndFinishTimes, useStartTimeInterference,
+                buoyZoneRadiusInHullLengths, courseAreaId, boatClassName, startDate, endDate, scoringScheme,
+                rankingMetric, regattaId, regattaCreationParametersDTO, leaderboardDiscardThresholds, numberOfRaces);
+        final RegattaLeaderboard leaderboard = addLeaderboard(regattaName, leaderboardDiscardThresholds);
         SeriesCreationParametersDTO defaultSeries = regattaCreationParametersDTO.getSeriesCreationParameters().get("Default");
         addRaceColumns(regattaName, "Default", numberOfRaces, boatClassName);
         updateSeries(regattaName, defaultSeries);
-        return regatta; 
+        return leaderboard; 
     }
 
     private Event validateAndCreateEvent(String eventNameParam, String eventDescriptionParam, String startDateParam,
             String endDateParam, String venueNameParam, String venueLat, String venueLng, String isPublicParam,
             String officialWebsiteURLParam, String baseURLParam, List<String> leaderboardGroupIdsListParam,
-            String createLeaderboardGroupParam, String createRegattaParam, String boatClassNameParam)
-            throws ParseException, MalformedURLException, NotFoundException {
+            String createLeaderboardGroupParam, String createRegattaParam, String boatClassNameParam, String numberOfRacesParam)
+            throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException {
         boolean isPublic = isPublicParam == null ? false : Boolean.parseBoolean(isPublicParam);
         boolean createRegatta = createRegattaParam == null ? true : Boolean.parseBoolean(createRegattaParam);
         boolean createLeaderboardGroup = createLeaderboardGroupParam == null ? true : Boolean.parseBoolean(createLeaderboardGroupParam);
@@ -347,19 +324,27 @@ public class EventsResource extends AbstractSailingServerResource {
         Event event = createEvent(eventName, eventDescription, venueName, isPublic, startDate, endDate, officialWebsiteURL, baseURL,
                 leaderboardGroupIds, eventId, sailorsInfoWebsiteURLs, images, videos);
         CourseArea courseArea = addCourseArea(event.getId(), "Default");
+        final LeaderboardGroup leaderboardGroup;
         if (createLeaderboardGroup) {
-            validateAndAddLeaderboardGroup(event.getId(), event.getName(), event.getDescription(), /* leaderboardGroupDisplayNameParam */ null,
+            leaderboardGroup = validateAndAddLeaderboardGroup(event.getId(), event.getName(), event.getDescription(), /* leaderboardGroupDisplayNameParam */ null,
                     /* displayGroupsInReverseOrderParam */ false, /* leaderboardNamesParam */ null,
                     /* overallLeaderboardDiscardThresholdsParam */ null, /* overallLeaderboardScoringSchemeTypeParam */ null);
+        } else {
+            leaderboardGroup = null;
         }
         if (createRegatta) {
-            addRegatta(event.getName(), boatClassName, /* startDateParam */ null, /* eventIdParam */ null, /* endDateParam */ null,
-                    /* isPersistentParam */ null, /* scoringSchemeParam */ null,
-                    courseArea.getId().toString(), /* buoyZoneRadiusInHullLengthsParam */ null,
-                    /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null, /* rankingMetricParam */ null,
-                    /* leaderboardDiscardThresholdsParam */ null, /* numberOfRacesParam */ null);
+            final RegattaLeaderboard leaderboard = validateAndCreateRegatta(event.getName(), boatClassName,
+                    /* startDateParam */ null, /* endDateParam */ null, /* scoringSchemeParam */ null,
+                    courseArea.getId(), /* buoyZoneRadiusInHullLengthsParam */ null,
+                    /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null,
+                    /* rankingMetricParam */ null, /* leaderboardDiscardThresholdsParam */ null, numberOfRacesParam);
+            if (leaderboardGroup != null) {
+                getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(), leaderboardGroup.getDescription(),
+                        leaderboardGroup.getDisplayName(), Collections.singletonList(leaderboard.getName()),
+                        leaderboardGroup.getOverallLeaderboard() == null ? null : ((ThresholdBasedResultDiscardingRule) leaderboardGroup.getOverallLeaderboard().getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
+                        leaderboardGroup.getOverallLeaderboard() == null ? null : leaderboardGroup.getOverallLeaderboard().getScoringScheme().getType()));
+            }
         }
-        
         return event;
     }
 
@@ -392,10 +377,6 @@ public class EventsResource extends AbstractSailingServerResource {
         return "Session "+username+" "+dateTimeFormat.format(new Date());
     }
 
-    private String randomName() {
-        return RandomStringUtils.randomAlphanumeric(6).toUpperCase();
-    }
-
     private User getCurrentUser() {
         User user = getSecurityService().getCurrentUser();
         return user;
@@ -406,8 +387,8 @@ public class EventsResource extends AbstractSailingServerResource {
         return ServiceTrackerFactory.createAndOpen(context, SecurityService.class).getService();
     }
     
-    private String getDefaultVenueName(String lat, String lng) {
-        return randomName();
+    private String getDefaultVenueName(String lat, String lng) throws NumberFormatException, IOException, org.json.simple.parser.ParseException {
+        return ReverseGeocoder.INSTANCE.getPlacemarkNearest(new DegreePosition(Double.valueOf(lat), Double.valueOf(lng))).getName();
     }
 
     private void updateSeries(String regattaName, SeriesCreationParametersDTO defaultSeries) {
@@ -430,6 +411,13 @@ public class EventsResource extends AbstractSailingServerResource {
         for (int i = 1; i <= numberOfRaces; i++) {
             addRaceColumn(regattaName, seriesName, "R"+oneBasedNumberOfNextRace++);
         }
+    }
+
+    private RaceColumnInSeries addRaceColumn(String regattaName, String seriesName, String columnName) {
+        if (enforceSecurityChecks) {
+            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+        }
+        return getService().apply(new AddColumnToSeries(new RegattaName(regattaName), seriesName, columnName));
     }
 
     private Event createEvent(String eventName, String eventDescription, String venueName, boolean isPublic,
@@ -467,27 +455,20 @@ public class EventsResource extends AbstractSailingServerResource {
         return getService().apply(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds))[0];
     }
 
-    private Regatta addRegatta(String regattaName, boolean isPersistent, boolean controlTrackingFromStartAndFinishTimes,
-            boolean useStartTimeInterference, double buoyZoneRadiusInHullLengths, UUID courseAreaId,
-            String boatClassName, MillisecondsTimePoint startDate, MillisecondsTimePoint endDate,
-            ScoringScheme scoringScheme, RankingMetrics rankingMetric, UUID regattaId,
-            RegattaCreationParametersDTO regattaCreationParametersDTO, int[] leaderboardDiscardThresholds, int numberOfRaces) {
+    private Regatta addRegatta(String regattaName, boolean controlTrackingFromStartAndFinishTimes, boolean useStartTimeInterference,
+            double buoyZoneRadiusInHullLengths, UUID courseAreaId, String boatClassName,
+            MillisecondsTimePoint startDate, MillisecondsTimePoint endDate, ScoringScheme scoringScheme,
+            RankingMetrics rankingMetric, UUID regattaId, RegattaCreationParametersDTO regattaCreationParametersDTO,
+            int[] leaderboardDiscardThresholds, int numberOfRaces) {
         if (enforceSecurityChecks) {
             SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regattaName));
         }
         Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName, startDate, endDate, regattaId,
-                regattaCreationParametersDTO, isPersistent, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths,
+                regattaCreationParametersDTO, /* isPersistent */ true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths,
                 useStartTimeInterference, controlTrackingFromStartAndFinishTimes, rankingMetric));
         return regatta;
     }
     
-    private RaceColumnInSeries addRaceColumn(String regattaName, String seriesName, String columnName) {
-        if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
-        }
-        return getService().apply(new AddColumnToSeries(new RegattaName(regattaName), seriesName, columnName));
-    }
-
     private void addLeaderboardToDefaultLeaderboardGroup(final RegattaLeaderboard leaderboard) {
         LeaderboardGroup defaultLeaderboardGroup = null;
         for (Event event : getService().getAllEvents()) {
@@ -527,16 +508,10 @@ public class EventsResource extends AbstractSailingServerResource {
         } catch (IllegalArgumentException e) {
             throw e;
         }
-        
         addLeaderboardToDefaultLeaderboardGroup(leaderboard);
         return leaderboard;
     }
 
-    private CourseArea getDefaultCourseArea(Event event) {
-        return stream(event.getVenue().getCourseAreas().spliterator())
-                .filter(c -> c.getName().equals("Default")).findFirst().orElse(null);
-    }
-    
     private RegattaLeaderboard createRegattaLeaderboard(String regattaName, int[] discardThresholds) {
         if (enforceSecurityChecks) {
             SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.CREATE, regattaName));
