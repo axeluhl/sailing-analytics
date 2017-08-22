@@ -154,7 +154,7 @@ public class SimulationServiceImpl implements SimulationService {
         protected void defaultAction() {
             if ((!this.covered)&&(legIdentifier!=null)) {
                 this.covered = true;
-                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier, legIdentifier.getLegName());
+                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier.getRaceIdentifier(), legIdentifier.getLegName());
                 scheduler.schedule(() -> triggerUpdate(tmpLegIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
             }
         }
@@ -204,7 +204,9 @@ public class SimulationServiceImpl implements SimulationService {
         @Override
         public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
             // relevant for simulation
-            // TODO: identify influenced legs and update these legs
+            if (this.isLive()) {
+                defaultAction();
+            }
         }
 
         @Override
@@ -328,6 +330,7 @@ public class SimulationServiceImpl implements SimulationService {
         SimulationResults result = null;
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
+            boolean isLive = trackedRace.isLive(simulationStartTime);
             int legNumber = legIdentifier.getLegNumber();
             Course raceCourse = trackedRace.getRace().getCourse();
             Leg leg = raceCourse.getLegs().get(legNumber);
@@ -347,6 +350,8 @@ public class SimulationServiceImpl implements SimulationService {
             }
             if (markPassing != null) {
                 startTimePoint = markPassing.getTimePoint();
+            } else if (isLive && (legNumber == 0)) {
+                startTimePoint = simulationStartTime;
             }
             markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
             if (markPassingIterator.hasNext()) {
@@ -360,6 +365,9 @@ public class SimulationServiceImpl implements SimulationService {
             long legDuration = 0;
             if ((startTimePoint != null) && (endTimePoint != null)) {
                 legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
+            }
+            if (isLive && (markPassing == null)) {
+                endTimePoint = simulationStartTime;
             }
             Position startPosition = null;
             List<Position> startLine = null;

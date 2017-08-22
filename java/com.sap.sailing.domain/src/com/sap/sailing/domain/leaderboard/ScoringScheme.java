@@ -50,7 +50,6 @@ public interface ScoringScheme extends Serializable {
      * If the <code>competitor</code> has no {@link RaceColumn#getTrackedRace(Competitor) tracked race} in the column in which
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race.
-     * @param timePoint TODO
      */
     Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
             int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher,
@@ -62,16 +61,21 @@ public interface ScoringScheme extends Serializable {
      * or regatta.
      * 
      * @param numberOfCompetitorsInLeaderboardFetcher
-     *            if it returns <code>null</code>, the caller cannot determine the number of competitors in the single race;
-     *            otherwise, this parameter tells the number of competitors in the same race as <code>competitor</code>,
-     *            not in the entire <code>raceColumn</code> (those may be more in case of split fleets). The scoring scheme
-     *            may use this number, if available, to infer a penalty score.
+     *            if it returns <code>null</code>, the caller cannot determine the number of competitors in the single
+     *            race; otherwise, this parameter tells the number of competitors in the same race as
+     *            <code>competitor</code>, not in the entire <code>raceColumn</code> (those may be more in case of split
+     *            fleets). The scoring scheme may use this number, if available, to infer a penalty score.
      * @param timePoint
-     * 			  an optional timePoint that may help the scheme to determine the penalty related to a certain point in time only.
+     *            an optional timePoint that may help the scheme to determine the penalty related to a certain point in
+     *            time only.
+     * @param leaderboard
+     *            may be required in case a "penalty" such as a redress needs to inspect the scores of other race
+     *            columns as well; implementations need to take great care not to cause endless recursions by
+     *            naively asking the leaderboard for scores which would recurse into this method
      */
     Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
             Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
-            TimePoint timePoint);
+            TimePoint timePoint, Leaderboard leaderboard);
 
     /**
      * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard

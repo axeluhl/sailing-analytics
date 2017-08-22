@@ -1,12 +1,15 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +21,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoCommandException;
@@ -63,6 +67,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -89,6 +94,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
@@ -1628,6 +1634,53 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void removeAllConnectivityParametersForRacesToRestore() {
         database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name()).drop();
+    }
+
+    @Override
+    public void storeAnniversaryData(Map<Integer, DetailedRaceInfo> data) {
+        try {
+            DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
+            for (Entry<Integer, DetailedRaceInfo> anniversary : data.entrySet()) {
+                BasicDBObject currentProxy = new BasicDBObject("anniversary", anniversary.getKey().intValue());
+                BasicDBObject newValue = new BasicDBObject("anniversary", anniversary.getKey().intValue());
+                newValue.append("race", anniversary.getValue().getIdentifier().getRaceName());
+                newValue.append("regatta", anniversary.getValue().getIdentifier().getRegattaName());
+                newValue.append("leaderboardName", anniversary.getValue().getLeaderboardName());
+                storeTimePoint(anniversary.getValue().getStartOfRace(), newValue, ("startOfRace"));
+                newValue.append("eventID", anniversary.getValue().getEventID().toString());
+                newValue.append("remoteUrl", anniversary.getValue().getRemoteUrl());
+                anniversarysStored.update(currentProxy, newValue, true, false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public Map<Integer, DetailedRaceInfo> getAnniversaryData() throws MalformedURLException {
+        HashMap<Integer, DetailedRaceInfo> fromDb = new HashMap<>();
+        DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
+        DBCursor cursor = anniversarysStored.find();
+        while (cursor.hasNext()) {
+            DBObject toLoad = cursor.next();
+            String leaderboardName = toLoad.get("leaderboardName").toString();
+            String eventID = toLoad.get("eventID").toString();
+
+            TimePoint startOfRace = new MillisecondsTimePoint(((Number) toLoad.get("startOfRace")).longValue());
+            String race = toLoad.get("race").toString();
+            String regatta = toLoad.get("regatta").toString();
+            Object rurl = toLoad.get("remoteUrl");
+            final URL remoteUrlOrNull;
+            if (rurl != null) {
+                remoteUrlOrNull = new URL(rurl.toString());
+            } else {
+                remoteUrlOrNull = null;
+            }
+            DetailedRaceInfo loadedAnniversary = new DetailedRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, UUID.fromString(eventID), remoteUrlOrNull);
+            int anniversary = ((Number) toLoad.get("anniversary")).intValue();
+            fromDb.put(anniversary, loadedAnniversary);
+        }
+        return fromDb;
     }
 
 }

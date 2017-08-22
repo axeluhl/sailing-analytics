@@ -105,6 +105,32 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(competitors, rankedCompetitors);
     }
 
+    @Test
+    public void testAutomaticRdgAdjustment() throws NoWindException {
+        List<Competitor> competitors = createCompetitors(10);
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */4,
+                new String[] { "Default" },
+                /* medal */false, /* medal */ 0, "testOneStartedRaceWithDifferentScores",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_WITH_AUTOMATIC_RDG));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace f1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors);
+        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
+        RaceColumn f2Column = series.get(1).getRaceColumnByName("F2");
+        RaceColumn f3Column = series.get(1).getRaceColumnByName("F3");
+        RaceColumn f4Column = series.get(1).getRaceColumnByName("F4");
+        f1Column.setTrackedRace(f1Column.getFleets().iterator().next(), f1);
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitors.get(3), f1Column, MaxPointsReason.RDG);
+        leaderboard.getScoreCorrection().correctScore(competitors.get(3), f2Column, 7);
+        assertEquals(7, leaderboard.getTotalPoints(competitors.get(3), f1Column, later), 0.0000001);
+        leaderboard.getScoreCorrection().correctScore(competitors.get(3), f3Column, 5);
+        assertEquals(6, leaderboard.getTotalPoints(competitors.get(3), f1Column, later), 0.0000001);
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitors.get(3), f4Column, MaxPointsReason.RDG);
+        assertEquals(6, leaderboard.getTotalPoints(competitors.get(3), f1Column, later), 0.0000001);
+        assertEquals(6, leaderboard.getTotalPoints(competitors.get(3), f4Column, later), 0.0000001);
+    }
+
     /**
      * Regarding bug 912, test adding a disqualification in the middle, with a high-point scoring scheme, and check that
      * all competitors ranked worse advance by one, including getting <em>more</em> points due to the high-point scoring
