@@ -16,15 +16,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class ChartFactory extends Chart {
     
-    public static Chart createPolarChart(boolean setYMinValueZero) {
+    public static Chart createPolarChart() {
         LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1).setMarker(new Marker().setEnabled(false));
         Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
                 .setLinePlotOptions(linePlotOptions)
                 .setPolar(true).setHeight100().setWidth100();
         polarSheetChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
-        if(setYMinValueZero) {
-            polarSheetChart.getYAxis().setMin(0);
-        }
         polarSheetChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
         polarSheetChart.setOption("/pane/startAngle", 180);
         polarSheetChart.setExporting(new Exporting().setEnabled(false));
@@ -62,14 +59,16 @@ public class ChartFactory extends Chart {
     }
     
     public static Chart createLineChartForPolarData(StringMessages stringMessages) {
-        Chart histogramChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
-        histogramChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
-        histogramChart.getYAxis();
-        histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(30).setEnabled(true))
+        LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1).setMarker(new Marker().setEnabled(false));
+        Chart lineChart = new Chart().setType(Series.Type.LINE)
+                .setLinePlotOptions(linePlotOptions).setHeight100().setWidth100();
+        lineChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
+        lineChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
+        lineChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(30).setEnabled(true))
                 .setAxisTitle(new AxisTitle().setText(stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")"));
-        histogramChart.setLegend(new Legend().setEnabled(false));
-        histogramChart.setExporting(new Exporting().setEnabled(false));
-        return histogramChart;
+        lineChart.setLegend(new Legend().setEnabled(false));
+        lineChart.setExporting(new Exporting().setEnabled(false));
+        return lineChart;
     }
 
 }

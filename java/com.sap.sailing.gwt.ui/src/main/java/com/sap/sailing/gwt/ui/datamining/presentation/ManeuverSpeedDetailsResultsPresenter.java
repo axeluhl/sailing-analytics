@@ -10,6 +10,8 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Series;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
@@ -41,12 +43,36 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
     
     private final Chart lineChart;
     private final Chart dataCountHistogramChart;
-    private final DockLayoutPanel histogramChartsWrapperPanel;
+    private final DockLayoutPanel rightSideChartsWrapperPanel;
+
+    private final ManeuverSpeedDetailsChartConfigurationPanel chartConfigPanel;
+
+    private Double minValue;
+
+    private Double maxValue;
+    
+    private boolean flipWindDirection = false;
+
+    private QueryResultDTO<?> result;
     
     public ManeuverSpeedDetailsResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
-        polarChart = ChartFactory.createPolarChart(false);
+        chartConfigPanel = new ManeuverSpeedDetailsChartConfigurationPanel(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                minValue = chartConfigPanel.getMinValue();
+                maxValue = chartConfigPanel.getMaxValue();
+                flipWindDirection = chartConfigPanel.isFlipWindDirection();
+                redrawAllCharts();
+            }
+
+        }, stringMessages);
+        chartConfigPanel.setMinValue(minValue);
+        chartConfigPanel.setMaxValue(maxValue);
+        
+        polarChart = ChartFactory.createPolarChart();
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -60,7 +86,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
         dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.beatAngle() + " ("
                 + stringMessages.degreesShort() + ")", stringMessages);
-        histogramChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
+        rightSideChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
             @Override
             public void onResize() {
                 lineChart.setSizeToMatchContainer();
@@ -69,13 +95,23 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
                 dataCountHistogramChart.redraw();
             }
         };
-        histogramChartsWrapperPanel.addNorth(lineChart, 50);
-        histogramChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
+        rightSideChartsWrapperPanel.addNorth(lineChart, 50);
+        rightSideChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
         
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
+        dockLayoutPanel.addNorth(chartConfigPanel, 10);
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
-        dockLayoutPanel.addEast(histogramChartsWrapperPanel, 60);
+        dockLayoutPanel.addEast(rightSideChartsWrapperPanel, 60);
         
+    }
+    
+    private void redrawAllCharts() {
+        if(result != null) {
+            polarChart.removeAllSeries();
+            lineChart.removeAllSeries();
+            dataCountHistogramChart.removeAllSeries();
+            internalShowResults(result);
+        }
     }
 
     @Override
@@ -85,6 +121,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
     @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
+        this.result = result;
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
         Collections.sort(sortedNaturally, new Comparator<GroupKey>() {
@@ -102,14 +139,15 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
             Series histogramSeries = dataCountHistogramChart.createSeries();
             Series valueSeries = lineChart.createSeries();
             for (int convertedTWA = -179; convertedTWA <= 180; convertedTWA++) {
-                int i = convertedTWA < 0 ? convertedTWA + 360 : convertedTWA;
+                int tempTWA = convertedTWA;
+                if(flipWindDirection) {
+                    tempTWA += convertedTWA <= 0 ? 180 : -180;
+                }
+                int i = tempTWA < 0 ? tempTWA + 360 : tempTWA;
                 double value = valuePerTWA[i];
-                if (value != 0) {
+                if ((minValue == null || value >= minValue) && (maxValue == null || value <= maxValue)) {
                     polarSeries.addPoint(convertedTWA, value, false, false, false);
                     valueSeries.addPoint(convertedTWA, value, false, false, false);
-                }  else {
-                    polarSeries.addPoint(convertedTWA, 0, false, false, false);
-                    valueSeries.addPoint(convertedTWA, 0, false, false, false);
                 }
                 histogramSeries.addPoint(convertedTWA, countPerTWA[i], false, false, false);
             }

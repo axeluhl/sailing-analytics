@@ -72,7 +72,8 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     public PolarResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
-        polarChart = ChartFactory.createPolarChart(true);
+        polarChart = ChartFactory.createPolarChart();
+        polarChart.getYAxis().setMin(0);
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {

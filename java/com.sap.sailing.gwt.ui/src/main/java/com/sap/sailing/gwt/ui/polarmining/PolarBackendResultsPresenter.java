@@ -53,7 +53,8 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
             StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
-        polarChart = ChartFactory.createPolarChart(true);
+        polarChart = ChartFactory.createPolarChart();
+        polarChart.getYAxis().setMin(0);
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {

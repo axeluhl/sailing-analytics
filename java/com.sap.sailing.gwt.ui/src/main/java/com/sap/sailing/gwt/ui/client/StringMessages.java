@@ -1896,4 +1896,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String minManeuverExitingSpeedInKnots();
     String maxManeuverExitingSpeedInKnots();
     String maneuverDirectionEqualWeightingEnabled();
+    String minValue();
+    String maxValue();
+    String flipWindDirection();
 }
