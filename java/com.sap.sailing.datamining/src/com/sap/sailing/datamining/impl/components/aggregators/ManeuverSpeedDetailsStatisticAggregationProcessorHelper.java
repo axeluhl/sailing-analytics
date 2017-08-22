@@ -92,10 +92,10 @@ public class ManeuverSpeedDetailsStatisticAggregationProcessorHelper {
             int count = starboardResult.getCount() + portsideResult.getCount();
             int[] countPerTWA = new int[360];
             double[] valuePerTWA = new double[360];
-            int[] starboardCountPerTWA = starboardResult.getCountPerAngle();
-            int[] portsideCountPerTWA = portsideResult.getCountPerAngle();
-            double[] starboardValuePerTWA = starboardResult.getValuePerAngle();
-            double[] portsideValuePerTWA = portsideResult.getValuePerAngle();
+            int[] starboardCountPerTWA = starboardResult.getCountPerTWA();
+            int[] portsideCountPerTWA = portsideResult.getCountPerTWA();
+            double[] starboardValuePerTWA = starboardResult.getValuePerTWA();
+            double[] portsideValuePerTWA = portsideResult.getValuePerTWA();
             for(int i = 0; i < 360; i++) {
                 countPerTWA[i] = starboardCountPerTWA[i] + portsideCountPerTWA[i];
                 double divisor = starboardValuePerTWA[i] == 0 || portsideValuePerTWA[i] == 0 ? 1 : 2;

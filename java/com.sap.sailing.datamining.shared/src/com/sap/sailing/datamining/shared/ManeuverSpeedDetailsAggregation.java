@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public interface ManeuverSpeedDetailsAggregation extends Serializable {
     
-    double[] getValuePerAngle();
+    double[] getValuePerTWA();
     
-    int[] getCountPerAngle();
+    int[] getCountPerTWA();
     
     int getCount();
 

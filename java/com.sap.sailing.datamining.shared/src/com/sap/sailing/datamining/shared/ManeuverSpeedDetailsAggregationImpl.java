@@ -2,28 +2,28 @@ package com.sap.sailing.datamining.shared;
 
 public class ManeuverSpeedDetailsAggregationImpl implements ManeuverSpeedDetailsAggregation {
     private static final long serialVersionUID = 9177124509619315750L;
-    private double[] valuePerAngle;
-    private int[] countPerAngle;
+    private double[] valuePerTWA;
+    private int[] countPerTWA;
     private int count;
     
     public ManeuverSpeedDetailsAggregationImpl() {
       //GWT
     }
     
-    public ManeuverSpeedDetailsAggregationImpl(double[] valuePerAngle, int[] countPerAngle, int count) {
-        this.valuePerAngle = valuePerAngle;
-        this.countPerAngle = countPerAngle;
+    public ManeuverSpeedDetailsAggregationImpl(double[] valuePerTWA, int[] countPerTWA, int count) {
+        this.valuePerTWA = valuePerTWA;
+        this.countPerTWA = countPerTWA;
         this.count = count;
     }
 
     @Override
-    public double[] getValuePerAngle() {
-        return valuePerAngle;
+    public double[] getValuePerTWA() {
+        return valuePerTWA;
     }
 
     @Override
-    public int[] getCountPerAngle() {
-        return countPerAngle;
+    public int[] getCountPerTWA() {
+        return countPerTWA;
     }
 
     @Override

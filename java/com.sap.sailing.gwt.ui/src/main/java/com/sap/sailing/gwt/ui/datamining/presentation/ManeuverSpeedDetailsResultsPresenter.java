@@ -96,22 +96,22 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         });
         for (GroupKey key : sortedNaturally) {
             ManeuverSpeedDetailsAggregation aggregation = (ManeuverSpeedDetailsAggregation) results.get(key);
-            double[] valuePerAngle = aggregation.getValuePerAngle();
-            int[] countPerAngle = aggregation.getCountPerAngle();
+            double[] valuePerTWA = aggregation.getValuePerTWA();
+            int[] countPerTWA = aggregation.getCountPerTWA();
             Series polarSeries = polarChart.createSeries();
             Series histogramSeries = dataCountHistogramChart.createSeries();
             Series valueSeries = lineChart.createSeries();
-            for (int convertedAngle = -179; convertedAngle <= 180; convertedAngle++) {
-                int i = convertedAngle < 0 ? convertedAngle + 360 : convertedAngle;
-                double value = valuePerAngle[i];
+            for (int convertedTWA = -179; convertedTWA <= 180; convertedTWA++) {
+                int i = convertedTWA < 0 ? convertedTWA + 360 : convertedTWA;
+                double value = valuePerTWA[i];
                 if (value != 0) {
-                    polarSeries.addPoint(convertedAngle, value, false, false, false);
-                    valueSeries.addPoint(convertedAngle, value, false, false, false);
+                    polarSeries.addPoint(convertedTWA, value, false, false, false);
+                    valueSeries.addPoint(convertedTWA, value, false, false, false);
                 }  else {
-                    polarSeries.addPoint(convertedAngle, 0, false, false, false);
-                    valueSeries.addPoint(convertedAngle, 0, false, false, false);
+                    polarSeries.addPoint(convertedTWA, 0, false, false, false);
+                    valueSeries.addPoint(convertedTWA, 0, false, false, false);
                 }
-                histogramSeries.addPoint(convertedAngle, countPerAngle[i], false, false, false);
+                histogramSeries.addPoint(convertedTWA, countPerTWA[i], false, false, false);
             }
             polarSeries.setName(key.asString());
             valueSeries.setName(key.asString());
