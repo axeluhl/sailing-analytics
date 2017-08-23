@@ -10,6 +10,11 @@ import UIKit
 
 class TrainingTableViewController: UIViewController {
     
+    fileprivate struct Segue {
+        static let About = "About"
+        static let Settings = "Settings"
+    }
+    
     var login = true
     
     @IBOutlet weak var headerTitleLabel: UILabel!
@@ -35,9 +40,29 @@ class TrainingTableViewController: UIViewController {
     fileprivate func setup() {
         setupAddButton()
     }
-
+    
     fileprivate func setupAddButton() {
         makeViewRoundWithShadow(addButton)
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func optionButtonTapped(_ sender: Any) {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        if let popoverController = alertController.popoverPresentationController {
+            popoverController.barButtonItem = sender as? UIBarButtonItem
+        }
+        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.Settings, sender: alertController)
+        }
+        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.About, sender: alertController)
+        }
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
+        alertController.addAction(settingsAction)
+        alertController.addAction(aboutAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
     }
     
     // MARK: - Properties

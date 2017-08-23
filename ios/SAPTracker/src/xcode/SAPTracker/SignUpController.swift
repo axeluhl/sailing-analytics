@@ -36,11 +36,18 @@ class SignUpController: NSObject {
     fileprivate let requestManager = SignUpRequestManager(baseURLString: "https://dev.sapsailing.com")
     
     func loginWithViewController(_ controller: UIViewController) {
-        let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
-        let loginNC = storyboard.instantiateInitialViewController() as! UINavigationController
-        let loginVC = loginNC.viewControllers[0] as! LoginViewController
-        loginVC.signUpController = self
-        controller.present(loginNC, animated: true, completion: nil)
+        do {
+            let accessToken = try Keychain.userAccessToken.readPassword()
+            print(accessToken)
+            controller.presentingViewController?.dismiss(animated: true)
+            self.delegate?.signUpControllerDidFinish(self)
+        } catch {
+            let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
+            let loginNC = storyboard.instantiateInitialViewController() as! UINavigationController
+            let loginVC = loginNC.viewControllers[0] as! LoginViewController
+            loginVC.signUpController = self
+            controller.present(loginNC, animated: true, completion: nil)
+        }
     }
     
     fileprivate func showAlert(forError error: Error, andMessage message: String?, withViewController controller: UIViewController) {
