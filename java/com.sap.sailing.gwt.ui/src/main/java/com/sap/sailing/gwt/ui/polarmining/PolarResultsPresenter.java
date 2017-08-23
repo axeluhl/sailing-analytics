@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
+import com.sap.sailing.gwt.ui.datamining.presentation.ExportChartAsCsvToClipboardButton;
 import com.sap.sailing.polars.datamining.shared.PolarAggregation;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.common.settings.Settings;
@@ -101,6 +102,10 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(histogramChartsWrapperPanel, 60);
+        
+        ExportChartAsCsvToClipboardButton exportButton = new ExportChartAsCsvToClipboardButton(stringMessages);
+        exportButton.setChartToExport(polarChart);
+        addControl(exportButton);
         
         setSeriesShowAndHideHandler();
     }

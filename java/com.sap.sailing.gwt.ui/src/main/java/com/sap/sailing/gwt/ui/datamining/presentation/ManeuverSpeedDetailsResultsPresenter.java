@@ -54,6 +54,8 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
     private boolean zeroTo360AxisLabeling = false;
 
     private QueryResultDTO<?> result;
+
+    private ExportChartAsCsvToClipboardButton exportStatisticsCurveToCsvButton;
     
     public ManeuverSpeedDetailsResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
@@ -75,6 +77,9 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         chartConfigPanel.setMaxValue(maxValue);
         
         addControl(chartConfigPanel);
+        
+        exportStatisticsCurveToCsvButton = new ExportChartAsCsvToClipboardButton(stringMessages);
+        addControl(exportStatisticsCurveToCsvButton);
         
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
@@ -128,7 +133,8 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         polarChartWrapperPanel.add(polarChart);
         rightSideChartsWrapperPanel.addNorth(lineChart, 50);
         rightSideChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
-            
+        
+        exportStatisticsCurveToCsvButton.setChartToExport(lineChart);
         if(result != null) {
             internalShowResults(result);
         }
@@ -225,4 +231,5 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
     public String getId() {
         return "ManeuverSpeedDetailsResultsPresenter";
     }
+    
 }

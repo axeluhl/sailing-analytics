@@ -1899,4 +1899,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String minValue();
     String maxValue();
     String zeroTo360AxisLabeling();
+    String exportStatisticsCurveToCsv();
+    String csvCopiedToClipboard();
 }
