@@ -38,11 +38,11 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
     private final DockLayoutPanel dockLayoutPanel;
     
-    private final Chart polarChart;
+    private Chart polarChart;
     private final SimpleLayoutPanel polarChartWrapperPanel;
     
-    private final Chart lineChart;
-    private final Chart dataCountHistogramChart;
+    private Chart lineChart;
+    private Chart dataCountHistogramChart;
     private final DockLayoutPanel rightSideChartsWrapperPanel;
 
     private final ManeuverSpeedDetailsChartConfigurationPanel chartConfigPanel;
@@ -51,7 +51,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
     private Double maxValue;
     
-    private boolean flipWindDirection = false;
+    private boolean zeroTo360AxisLabeling = false;
 
     private QueryResultDTO<?> result;
     
@@ -64,15 +64,18 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
             public void onClick(ClickEvent event) {
                 minValue = chartConfigPanel.getMinValue();
                 maxValue = chartConfigPanel.getMaxValue();
-                flipWindDirection = chartConfigPanel.isFlipWindDirection();
-                redrawAllCharts();
+                zeroTo360AxisLabeling = chartConfigPanel.isZeroTo360AxisLabeling();
+                if(result != null) {
+                    redrawAllCharts();
+                }
             }
 
         }, stringMessages);
         chartConfigPanel.setMinValue(minValue);
         chartConfigPanel.setMaxValue(maxValue);
         
-        polarChart = ChartFactory.createPolarChart();
+        addControl(chartConfigPanel);
+        
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -80,10 +83,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
                 polarChart.redraw();
             }
         };
-        polarChartWrapperPanel.add(polarChart);
         
-        lineChart = ChartFactory.createLineChartForPolarData(stringMessages);
-
         dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.beatAngle() + " ("
                 + stringMessages.degreesShort() + ")", stringMessages);
         rightSideChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
@@ -95,21 +95,41 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
                 dataCountHistogramChart.redraw();
             }
         };
-        rightSideChartsWrapperPanel.addNorth(lineChart, 50);
-        rightSideChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
-        
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
-        dockLayoutPanel.addNorth(chartConfigPanel, 10);
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(rightSideChartsWrapperPanel, 60);
+        
+        redrawAllCharts();
         
     }
     
     private void redrawAllCharts() {
+        if(polarChart != null) {
+            polarChartWrapperPanel.remove(polarChart);
+        }
+        if(lineChart != null) {
+            rightSideChartsWrapperPanel.remove(lineChart);
+        }
+        if(dataCountHistogramChart != null) {
+            rightSideChartsWrapperPanel.remove(dataCountHistogramChart);
+        }
+            
+        int xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
+        int xAxisMax = zeroTo360AxisLabeling ? 360 : 180;
+        
+        polarChart = ChartFactory.createPolarChart();
+        lineChart = ChartFactory.createLineChartForPolarData(stringMessages);
+        dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.beatAngle() + " ("
+                + stringMessages.degreesShort() + ")", stringMessages);
+        polarChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
+        lineChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
+        dataCountHistogramChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
+        
+        polarChartWrapperPanel.add(polarChart);
+        rightSideChartsWrapperPanel.addNorth(lineChart, 50);
+        rightSideChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
+            
         if(result != null) {
-            polarChart.removeAllSeries();
-            lineChart.removeAllSeries();
-            dataCountHistogramChart.removeAllSeries();
             internalShowResults(result);
         }
     }
@@ -138,12 +158,10 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
             Series polarSeries = polarChart.createSeries();
             Series histogramSeries = dataCountHistogramChart.createSeries();
             Series valueSeries = lineChart.createSeries();
-            for (int convertedTWA = -179; convertedTWA <= 180; convertedTWA++) {
-                int tempTWA = convertedTWA;
-                if(flipWindDirection) {
-                    tempTWA += convertedTWA <= 0 ? 180 : -180;
-                }
-                int i = tempTWA < 0 ? tempTWA + 360 : tempTWA;
+            int xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
+            int xAxisMax = zeroTo360AxisLabeling ? 360 : 180;
+            for (int convertedTWA = xAxisMin; convertedTWA <= xAxisMax; convertedTWA++) {
+                int i = convertedTWA < 0 ? convertedTWA + 360 : convertedTWA;
                 double value = valuePerTWA[i];
                 if ((minValue == null || value >= minValue) && (maxValue == null || value <= maxValue)) {
                     polarSeries.addPoint(convertedTWA, value, false, false, false);

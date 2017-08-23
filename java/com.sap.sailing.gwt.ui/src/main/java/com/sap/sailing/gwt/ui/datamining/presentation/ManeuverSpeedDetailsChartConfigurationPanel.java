@@ -12,7 +12,7 @@ public class ManeuverSpeedDetailsChartConfigurationPanel extends HorizontalPanel
     
     private DoubleBox minValueDoubleBox = new DoubleBox();
     private DoubleBox maxValueDoubleBox = new DoubleBox();
-    private CheckBox flipWindDirectionCheckBox = new CheckBox();
+    private CheckBox zeroTo360AxisLabelingCheckBox = new CheckBox();
     
     public ManeuverSpeedDetailsChartConfigurationPanel(ClickHandler applyButtonClickHandler, StringMessages stringMessages) {
         setHorizontalAlignment(ALIGN_LEFT);
@@ -23,8 +23,8 @@ public class ManeuverSpeedDetailsChartConfigurationPanel extends HorizontalPanel
         add(minValueDoubleBox);
         add(new Label(stringMessages.maxValue() + ":"));
         add(maxValueDoubleBox);
-        add(new Label(stringMessages.flipWindDirection() + ":"));
-        add(flipWindDirectionCheckBox);
+        add(new Label(stringMessages.zeroTo360AxisLabeling() + ":"));
+        add(zeroTo360AxisLabelingCheckBox);
         add(applyButton);
     }
     
@@ -40,11 +40,11 @@ public class ManeuverSpeedDetailsChartConfigurationPanel extends HorizontalPanel
     public void setMaxValue(Double maxValue) {
         maxValueDoubleBox.setValue(maxValue);
     }
-    public boolean isFlipWindDirection() {
-        return flipWindDirectionCheckBox.getValue();
+    public boolean isZeroTo360AxisLabeling() {
+        return zeroTo360AxisLabelingCheckBox.getValue();
     }
-    public void setFlipWindDirection(boolean flipWindDirection) {
-        flipWindDirectionCheckBox.setValue(flipWindDirection);
+    public void setZeroTo360AxisLabeling(boolean zeroTo360AxisLabeling) {
+        zeroTo360AxisLabelingCheckBox.setValue(zeroTo360AxisLabeling);
     }
 
 }
