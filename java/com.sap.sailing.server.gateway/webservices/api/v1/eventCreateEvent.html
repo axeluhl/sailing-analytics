@@ -28,7 +28,12 @@ consumption of this service simple.</p>
 	</tr>
 	<tr>
 		<td>Mandatory parameters:</td>
-		<td>None</td>
+		<td>venuename or venuelat/venuelng must be provided, as follows
+			<div>venuename the name of the venue; if not provided, venuelat and venuelng can be used, and the name of
+			     the town nearest to the coordinates will be used as a venue name then</div>
+			<div>venuelat decimal degrees; can be provided instead of a venuename, together with venuelng encoding the location of the event</div>
+			<div>venuelng decimal degrees; can be provided instead of a venuename, together with venuelat encoding the location of the event</div>
+		</td>
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
@@ -40,10 +45,6 @@ consumption of this service simple.</p>
 			<div>startdateasmillis (alternative to startdate) the event start date in milliseconds since the epoch (Unix time)</div>
 			<div>enddate the event end date in ISO format (e.g., 2017-08-19T20:00:00+0200)</div>
 			<div>enddateasmillis (alternative to enddate) the event end date in milliseconds since the epoch (Unix time)</div>
-			<div>venuename the name of the venue; if not provided, venuelat and venuelng can be used, and the name of
-			     the town nearest to the coordinates will be used as a venue name then</div>
-			<div>venuelat decimal degrees; can be provided instead of a venuename, together with venuelng encoding the location of the event</div>
-			<div>venuelng decimal degrees; can be provided instead of a venuename, together with venuelat encoding the location of the event</div>
 			<div>ispublic a booleann value, true/false, telling whether the event shall be public</div>
 			<div>officialwebsiteurl URL of the official web site</div>
 			<div>baseurl event base URL; will be used in e-mails sent out, e.g., for registration; defaults to the base URL of this request</div>
