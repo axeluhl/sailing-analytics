@@ -47,6 +47,8 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
     private final ManeuverSpeedDetailsChartConfigurationPanel chartConfigPanel;
 
+    private Integer minDataCount;
+    
     private Double minValue;
 
     private Double maxValue;
@@ -62,8 +64,10 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         
         chartConfigPanel = new ManeuverSpeedDetailsChartConfigurationPanel(new ClickHandler() {
             
+
             @Override
             public void onClick(ClickEvent event) {
+                minDataCount = chartConfigPanel.getMinDataCount();
                 minValue = chartConfigPanel.getMinValue();
                 maxValue = chartConfigPanel.getMaxValue();
                 zeroTo360AxisLabeling = chartConfigPanel.isZeroTo360AxisLabeling();
@@ -73,8 +77,6 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
             }
 
         }, stringMessages);
-        chartConfigPanel.setMinValue(minValue);
-        chartConfigPanel.setMaxValue(maxValue);
         
         addControl(chartConfigPanel);
         
@@ -91,6 +93,8 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         
         dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.beatAngle() + " ("
                 + stringMessages.degreesShort() + ")", stringMessages);
+        dataCountHistogramChart.getXAxis().setMin(-179);
+        dataCountHistogramChart.getXAxis().setMax(180);
         rightSideChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
             @Override
             public void onResize() {
@@ -120,7 +124,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         }
             
         int xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
-        int xAxisMax = zeroTo360AxisLabeling ? 360 : 180;
+        int xAxisMax = zeroTo360AxisLabeling ? 359 : 180;
         
         polarChart = ChartFactory.createPolarChart();
         lineChart = ChartFactory.createLineChartForPolarData(stringMessages);
@@ -165,18 +169,19 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
             Series histogramSeries = dataCountHistogramChart.createSeries();
             Series valueSeries = lineChart.createSeries();
             int xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
-            int xAxisMax = zeroTo360AxisLabeling ? 360 : 180;
+            int xAxisMax = zeroTo360AxisLabeling ? 359 : 180;
             for (int convertedTWA = xAxisMin; convertedTWA <= xAxisMax; convertedTWA++) {
                 int i = convertedTWA < 0 ? convertedTWA + 360 : convertedTWA;
                 double value = valuePerTWA[i];
-                if ((minValue == null || value >= minValue) && (maxValue == null || value <= maxValue)) {
+                int dataCount = countPerTWA[i];
+                if (value != 0 && (minValue == null || value >= minValue) && (maxValue == null || value <= maxValue) && (minDataCount == null || dataCount >= minDataCount)) {
                     polarSeries.addPoint(convertedTWA, value, false, false, false);
                     valueSeries.addPoint(convertedTWA, value, false, false, false);
                 } else {
                     polarSeries.addPoint(convertedTWA, null, false, false, false);
                     valueSeries.addPoint(convertedTWA, null, false, false, false);
                 }
-                histogramSeries.addPoint(convertedTWA, countPerTWA[i], false, false, false);
+                histogramSeries.addPoint(convertedTWA, dataCount, false, false, false);
             }
             polarSeries.setName(key.asString());
             valueSeries.setName(key.asString());

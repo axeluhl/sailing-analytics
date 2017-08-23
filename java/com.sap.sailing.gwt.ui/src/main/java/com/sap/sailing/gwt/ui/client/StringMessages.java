@@ -1901,4 +1901,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String zeroTo360AxisLabeling();
     String exportStatisticsCurveToCsv();
     String csvCopiedToClipboard();
+    String minDataCount();
 }
