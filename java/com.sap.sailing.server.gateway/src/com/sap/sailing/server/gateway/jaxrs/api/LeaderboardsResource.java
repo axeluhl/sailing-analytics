@@ -37,6 +37,9 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
@@ -84,6 +87,7 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
+import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
@@ -553,6 +557,69 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         return response;
     }
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{leaderboardName}/settrackingtimes")
+    public Response setTrackingTimes(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
+            @QueryParam("startoftracking") String startOfTrackingAsISO,
+            @QueryParam("startoftrackingasmillis") Long startOfTrackingAsMillis,
+            @QueryParam("endoftracking") String endOfTrackingAsISO,
+            @QueryParam("endoftrackingasmillis") Long endOfTrackingAsMillis) throws InvalidDateException {
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        final Response result;
+        if (leaderboard == null) {
+            result = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else if (raceColumnName == null) {
+            result = Response
+                    .status(Status.BAD_REQUEST)
+                    .entity("Specify a valid "+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+" parameter.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else {
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn == null) {
+                result = Response
+                        .status(Status.NOT_FOUND)
+                        .entity("Could not find a race column '" + StringEscapeUtils.escapeHtml(raceColumnName) + "' in leaderboard '"
+                                + StringEscapeUtils.escapeHtml(leaderboardName) + "'.").type(MediaType.TEXT_PLAIN).build();
+            } else if (fleetName != null) {
+                Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet == null) {
+                    result = Response
+                            .status(Status.NOT_FOUND)
+                            .entity("Could not find fleet '" + StringEscapeUtils.escapeHtml(fleetName) + "' in leaderboard '" +
+                                    StringEscapeUtils.escapeHtml(leaderboardName)
+                                    + "' in race column "+raceColumnName+".").type(MediaType.TEXT_PLAIN).build();
+                } else {
+                    final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                    final LogEventAuthorImpl author = new LogEventAuthorImpl(SecurityUtils.getSubject().getPrincipal().toString(), /* priority */ 0);
+                    JSONObject jsonResult = new JSONObject();
+                    if (startOfTrackingAsISO != null || startOfTrackingAsMillis != null) {
+                        final TimePoint startOfTracking = parseTimePoint(startOfTrackingAsISO, startOfTrackingAsMillis, null);
+                        raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
+                        jsonResult.put("startoftracking", startOfTracking == null ? null : startOfTracking.asMillis());
+                    }
+                    if (endOfTrackingAsISO != null || endOfTrackingAsMillis != null) {
+                        final TimePoint endOfTracking = parseTimePoint(endOfTrackingAsISO, endOfTrackingAsMillis, null);
+                        raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
+                        jsonResult.put("endoftracking", endOfTracking == null ? null : endOfTracking.asMillis());
+                    }           
+                    result = Response.ok(jsonResult.toJSONString()).build();
+                }
+            } else {
+                result = Response
+                        .status(Status.BAD_REQUEST)
+                        .entity("Specify a valid "+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+" parameter.")
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+        }
+        return result;
+    }
+    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{leaderboardName}/marks")
