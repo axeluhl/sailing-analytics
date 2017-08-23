@@ -560,7 +560,6 @@ public class EventsResource extends AbstractSailingServerResource {
                 .collect(Collectors.toList());
     }
 
-
     private UUID toUUID(String id) {
         try {
             return UUID.fromString(id);
