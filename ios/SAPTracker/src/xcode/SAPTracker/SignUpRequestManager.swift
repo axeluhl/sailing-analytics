@@ -245,11 +245,39 @@ class SignUpRequestManager: NSObject {
         failure(error, stringForError(error))
     }
     
+    // MARK: - Logout
+    
+    func postLogout(
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let urlString = "\(basePathString)/logout/"
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postLogoutSuccess(success: success)
+        }) { (requestOperation, error) in
+            self.postLogoutFailure(error: error, failure: failure)
+        }
+    }
+    
+    fileprivate func postLogoutSuccess(success: () -> Void) {
+        logInfo(name: "\(#function)", info: "success")
+        success()
+    }
+    
+    fileprivate func postLogoutFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(error, stringForError(error))
+    }
+    
     // MARK: - Helper
     
     fileprivate func stringForError(_ error: Error) -> String? {
         guard let data = ((error as NSError).userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] as? NSData) else { return nil }
         return String(data: data as Data, encoding: String.Encoding.utf8)
+    }
+    
+    fileprivate func jsessionCookie() -> HTTPCookie? {
+        return HTTPCookieStorage.shared.cookies?.first(where: { $0.name == "JSESSIONID" })
     }
     
 }
