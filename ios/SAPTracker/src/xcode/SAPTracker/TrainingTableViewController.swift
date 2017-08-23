@@ -52,6 +52,9 @@ class TrainingTableViewController: UIViewController {
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
+        let logoutAction = UIAlertAction(title: "LOGOUT ACTION", style: .default) { [weak self] action in
+            self?.logout()
+        }
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
             self?.performSegue(withIdentifier: Segue.Settings, sender: alertController)
         }
@@ -59,10 +62,15 @@ class TrainingTableViewController: UIViewController {
             self?.performSegue(withIdentifier: Segue.About, sender: alertController)
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
+        alertController.addAction(logoutAction)
         alertController.addAction(settingsAction)
         alertController.addAction(aboutAction)
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
+    }
+    
+    fileprivate func logout() {
+        signUpController.logoutWithViewController(self)
     }
     
     // MARK: - Properties
@@ -115,6 +123,10 @@ extension TrainingTableViewController: SignUpControllerDelegate {
     
     func signUpControllerDidCancel(_ controller: SignUpController) {
         navigationController?.popViewController(animated: true)
+    }
+    
+    func signUpControllerDidLogout(_ controller: SignUpController) {
+        navigationController?.popToRootViewController(animated: true)
     }
     
 }

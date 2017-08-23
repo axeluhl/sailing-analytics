@@ -27,6 +27,8 @@ extension SignUpControllerError: LocalizedError {
     
     func signUpControllerDidCancel(_ controller: SignUpController)
     
+    func signUpControllerDidLogout(_ controller: SignUpController)
+    
 }
 
 class SignUpController: NSObject {
@@ -48,6 +50,17 @@ class SignUpController: NSObject {
             loginVC.signUpController = self
             controller.present(loginNC, animated: true, completion: nil)
         }
+    }
+    
+    func logoutWithViewController(_ controller: UIViewController) {
+        do {
+            try Keychain.userName.deleteItem()
+            try Keychain.userPassword.deleteItem()
+            try Keychain.userAccessToken.deleteItem()
+        } catch {
+            self.showAlert(forError: error, andMessage: nil, withViewController: controller)
+        }
+        delegate?.signUpControllerDidLogout(self)
     }
     
     fileprivate func showAlert(forError error: Error, andMessage message: String?, withViewController controller: UIViewController) {
