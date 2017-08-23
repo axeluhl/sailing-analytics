@@ -172,6 +172,9 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
                 if ((minValue == null || value >= minValue) && (maxValue == null || value <= maxValue)) {
                     polarSeries.addPoint(convertedTWA, value, false, false, false);
                     valueSeries.addPoint(convertedTWA, value, false, false, false);
+                } else {
+                    polarSeries.addPoint(convertedTWA, null, false, false, false);
+                    valueSeries.addPoint(convertedTWA, null, false, false, false);
                 }
                 histogramSeries.addPoint(convertedTWA, countPerTWA[i], false, false, false);
             }
