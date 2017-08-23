@@ -248,8 +248,8 @@ class SignUpRequestManager: NSObject {
     // MARK: - Helper
     
     fileprivate func stringForError(_ error: Error) -> String? {
-        guard let data = ((error as NSError).userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] as? NSData) as? Data else { return nil }
-        return String(data: data, encoding: String.Encoding.utf8)
+        guard let data = ((error as NSError).userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] as? NSData) else { return nil }
+        return String(data: data as Data, encoding: String.Encoding.utf8)
     }
     
 }
