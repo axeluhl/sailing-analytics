@@ -3420,7 +3420,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public AbstractLogEventAuthor getServerAuthor() {
-        final Subject subject = SecurityUtils.getSubject();
+        Subject subject  = null;
+        try {
+            subject = SecurityUtils.getSubject();
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Couldn't access security manager's subject; using default server author", e);
+        }
         final AbstractLogEventAuthor result;
         if (subject != null && subject.getPrincipal() != null) {
             result = new LogEventAuthorImpl(subject.getPrincipal().toString(), /* priority */ 0);
