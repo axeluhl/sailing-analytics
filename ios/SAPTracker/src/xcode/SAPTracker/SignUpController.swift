@@ -35,24 +35,42 @@ class SignUpController: NSObject {
 
     weak var delegate: SignUpControllerDelegate?
     
-    fileprivate let requestManager = SignUpRequestManager(baseURLString: "https://dev.sapsailing.com")
+    fileprivate let requestManager = SignUpRequestManager(baseURLString: "https://ubilabstest.sapsailing.com")
     
     func loginWithViewController(_ controller: UIViewController) {
-        do {
-            let userName = try Keychain.userName.readPassword()
-            let password = try Keychain.userPassword.readPassword()
-            requestManager.postHello(userName: userName, password: password, success: { (principal, authenticated, remembered) in
-                
-            }) { (error, message) in
-                
+        requestManager.postHello(success: { (principal, authenticated, remembered) in
+            
+            // Test create event
+            self.requestManager.postCreateEvent(success: {
+            }, failure: { (error, message) in
+            })
+            
+        }) { (error, message) in
+            do {
+                let userName = try Keychain.userName.readPassword()
+                let password = try Keychain.userPassword.readPassword()
+                self.requestManager.postAccessToken(userName: userName, password: password, success: { (userName, accessToken) in
+                    do {
+                        try Keychain.userName.savePassword(userName)
+                        try Keychain.userAccessToken.savePassword(accessToken)
+                    } catch {
+                        self.showAlert(forError: error, andMessage: message, withViewController: controller)
+                    }
+                }, failure: { (error, message) in
+                    self.loginWithViewControllerFailure(controller)
+                })
+            } catch {
+                self.loginWithViewControllerFailure(controller)
             }
-        } catch {
-            let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
-            let loginNC = storyboard.instantiateInitialViewController() as! UINavigationController
-            let loginVC = loginNC.viewControllers[0] as! LoginViewController
-            loginVC.signUpController = self
-            controller.present(loginNC, animated: true, completion: nil)
         }
+    }
+    
+    fileprivate func loginWithViewControllerFailure(_ controller: UIViewController) {
+        let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
+        let loginNC = storyboard.instantiateInitialViewController() as! UINavigationController
+        let loginVC = loginNC.viewControllers[0] as! LoginViewController
+        loginVC.signUpController = self
+        controller.present(loginNC, animated: true, completion: nil)
     }
     
     func logoutWithViewController(_ controller: UIViewController) {

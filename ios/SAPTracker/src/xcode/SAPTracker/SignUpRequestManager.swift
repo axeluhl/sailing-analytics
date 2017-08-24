@@ -97,6 +97,56 @@ class SignUpRequestManager: NSObject {
         failure(error, stringForError(error))
     }
     
+    // MARK: - CreateEvent
+    
+    func postCreateEvent(
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let urlString = "/sailingserver/api/v1/events/createEvent"
+        
+        var body = [String: AnyObject]()
+//        body["eventname"] = "raimund" as AnyObject
+//        body["eventdescription"] = "raimund" as AnyObject
+//        body["startdate"] = "" as AnyObject
+//        body["startdateasmillis"] = "" as AnyObject
+//        body["enddate"] = "" as AnyObject
+//        body["enddateasmillis"] = "" as AnyObject
+        body["venuename"] = "hamburg" as AnyObject
+//        body["venuelat"] = "" as AnyObject
+//        body["venuelng"] = "" as AnyObject
+//        body["ispublic"] = "" as AnyObject
+//        body["officialwebsiteurl"] = "" as AnyObject
+//        body["baseurl"] = "" as AnyObject
+//        body["leaderboardgroupids"] = "" as AnyObject
+//        body["createleaderboardgroup"] = "" as AnyObject
+        body["createregatta"] = "true" as AnyObject
+        body["boatclassname"] = "J80" as AnyObject
+//        body["numberofraces"] = "" as AnyObject
+        
+        manager.requestSerializer = AFHTTPRequestSerializer()
+        manager.responseSerializer = AFHTTPResponseSerializer()
+        
+        do {
+            let accessToken = try Keychain.userAccessToken.readPassword()
+            manager.requestSerializer.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        } catch {
+            
+        }
+        
+        manager.post(urlString, parameters: body, success: { (requestOperation, responseObject) in
+            debugPrint("\(responseObject)")
+            success()
+        }) { (requestOperation, error) in
+            if let request = requestOperation?.request {
+                debugPrint(request)
+            }
+            debugPrint(requestOperation)
+            debugPrint(self.stringForError(error))
+            failure(error, self.stringForError(error))
+        }
+    }
+    
     // MARK: - CreateUser
     
     func postCreateUser(
@@ -201,13 +251,10 @@ class SignUpRequestManager: NSObject {
     // MARK: - Hello
     
     func postHello(
-        userName: String,
-        password: String,
         success: @escaping (_ principal: String, _ authenticated: Bool, _ remembered: Bool) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let urlString = "\(basePathString)/hello"
-        manager.requestSerializer.setAuthorizationHeaderFieldWithUsername(userName, password: password)
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
             self.postHelloSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
