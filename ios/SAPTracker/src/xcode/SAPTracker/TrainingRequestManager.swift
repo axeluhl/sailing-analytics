@@ -8,6 +8,12 @@
 
 import UIKit
 
+enum TrainingRequestManagerError: Error {
+    case checkInDataIsIncomplete
+    case communicationFailed
+    case postCreateEventFailed
+}
+
 class TrainingRequestManager: NSObject {
     
     fileprivate let basePathString = "/sailingserver/api/v1"
@@ -29,11 +35,11 @@ class TrainingRequestManager: NSObject {
     // MARK: - CreateEvent
     
     func postCreateEvent(
+        boatClassName: String,
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let urlString = "/sailingserver/api/v1/events/createEvent"
-        
         var body = [String: AnyObject]()
         //        body["eventname"] = "raimund" as AnyObject
         //        body["eventdescription"] = "raimund" as AnyObject
@@ -50,17 +56,30 @@ class TrainingRequestManager: NSObject {
         //        body["leaderboardgroupids"] = "" as AnyObject
         //        body["createleaderboardgroup"] = "" as AnyObject
         body["createregatta"] = "true" as AnyObject
-        body["boatclassname"] = "J80" as AnyObject
+        body["boatclassname"] = boatClassName as AnyObject
         //        body["numberofraces"] = "" as AnyObject
-
         manager.post(urlString, parameters: body, success: { (requestOperation, responseObject) in
-            success()
+            self.postCreateEventSuccess(responseObject: responseObject, success: success)
         }) { (requestOperation, error) in
-            failure(error, self.stringForError(error))
+            self.postCreateEventFailure(error: error, failure: failure)
         }
     }
     
+    fileprivate func postCreateEventSuccess(responseObject: Any, success: () -> Void) {
+        logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
+        success()
+    }
+    
+    fileprivate func postCreateEventFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(TrainingRequestManagerError.postCreateEventFailed, stringForError(error))
+    }
+    
     // MARK: - Helper
+    
+    fileprivate func responseObjectToString(responseObject: Any?) -> String {
+        return (responseObject as? String) ?? "response object is empty or cannot be casted"
+    }
     
     fileprivate func stringForError(_ error: Error) -> String? {
         guard let data = ((error as NSError).userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] as? NSData) else { return nil }

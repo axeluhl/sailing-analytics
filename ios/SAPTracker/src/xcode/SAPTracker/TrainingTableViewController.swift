@@ -76,7 +76,7 @@ class TrainingTableViewController: UIViewController {
     // MARK: - Properties
     
     fileprivate lazy var signUpController: SignUpController = {
-        let signUpController = SignUpController()
+        let signUpController = SignUpController(baseURLString: "https://ubilabstest.sapsailing.com")
         signUpController.delegate = self
         return signUpController
     }()

@@ -35,22 +35,22 @@ class SignUpController: NSObject {
 
     weak var delegate: SignUpControllerDelegate?
     
-    fileprivate let requestManager = SignUpRequestManager(baseURLString: "https://ubilabstest.sapsailing.com")
+    fileprivate let requestManager: SignUpRequestManager
+    
+    init(baseURLString: String) {
+        requestManager = SignUpRequestManager(baseURLString: baseURLString)
+        super.init()
+    }
     
     func loginWithViewController(_ controller: UIViewController) {
         requestManager.postHello(success: { (principal, authenticated, remembered) in
-            
-            // Test create event
-            let trainingRequestManager = TrainingRequestManager(baseURLString: self.requestManager.baseURLString)
-            trainingRequestManager.postCreateEvent(success: {
-            }, failure: { (error, message) in
-            })
-            
+            // Login success
         }) { (error, message) in
             do {
                 let userName = try Keychain.userName.readPassword()
                 let password = try Keychain.userPassword.readPassword()
                 self.requestManager.postAccessToken(userName: userName, password: password, success: { (userName, accessToken) in
+                    // Login success, save access token
                     do {
                         try Keychain.userName.savePassword(userName)
                         try Keychain.userAccessToken.savePassword(accessToken)
