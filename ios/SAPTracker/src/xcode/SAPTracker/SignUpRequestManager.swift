@@ -76,23 +76,26 @@ class SignUpRequestManager: NSObject {
         success: (_ userName: String, _ accessToken: String) -> Void,
         failure: (_ error: Error, _ message: String?) -> Void)
     {
+        manager.requestSerializer.clearAuthorizationHeader()
         guard let response = responseObject as? Dictionary<String, AnyObject> else {
-            postCreateUserFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            postAccessTokenFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
             return
         }
         guard let userName = response[BodyKeys.UserName] as? String else {
-            postCreateUserFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            postAccessTokenFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
             return
         }
         guard let accessToken = response[BodyKeys.AccessToken] as? String else {
-            postCreateUserFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
+            postAccessTokenFailure(error: SignUpRequestManagerError.invalidResponse, failure: failure)
             return
         }
+        manager.requestSerializer.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         logInfo(name: "\(#function)", info: response.description)
         success(userName, accessToken)
     }
     
     fileprivate func postAccessTokenFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
+        manager.requestSerializer.clearAuthorizationHeader()
         logError(name: "\(#function)", error: error)
         failure(error, stringForError(error))
     }
