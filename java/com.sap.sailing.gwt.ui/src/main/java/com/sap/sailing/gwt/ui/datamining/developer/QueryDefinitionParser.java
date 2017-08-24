@@ -253,6 +253,9 @@ public class QueryDefinitionParser {
         if (value instanceof Integer) {
             return value.toString();
         }
+        if (value instanceof Enum) {
+            return ((Enum<?>) value).name();
+        }
         throw new IllegalArgumentException("Can't create literal for values of type " + value.getClass().getName());
     }
     
