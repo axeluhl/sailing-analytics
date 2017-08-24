@@ -346,6 +346,7 @@
 		C8739E161D2BF17900A89F3C /* CompetitorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E151D2BF17900A89F3C /* CompetitorData.swift */; };
 		C8739E181D2BF2DC00A89F3C /* BaseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E171D2BF2DC00A89F3C /* BaseData.swift */; };
 		C8739E1C1D2D5F1700A89F3C /* LocationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E1B1D2D5F1700A89F3C /* LocationData.swift */; };
+		C87A74E11F4EE570003DE396 /* TrainingRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E01F4EE570003DE396 /* TrainingRequestManager.swift */; };
 		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
 		C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */; };
 		C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */; };
@@ -746,6 +747,7 @@
 		C8739E151D2BF17900A89F3C /* CompetitorData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorData.swift; sourceTree = "<group>"; };
 		C8739E171D2BF2DC00A89F3C /* BaseData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseData.swift; sourceTree = "<group>"; };
 		C8739E1B1D2D5F1700A89F3C /* LocationData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationData.swift; sourceTree = "<group>"; };
+		C87A74E01F4EE570003DE396 /* TrainingRequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingRequestManager.swift; sourceTree = "<group>"; };
 		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewStatusCell.swift; sourceTree = "<group>"; };
 		C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSAccuracyCell.swift; sourceTree = "<group>"; };
@@ -1303,6 +1305,7 @@
 				7F2C605919F160E400C32D93 /* LocationManager.swift */,
 				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
 				C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */,
+				C87A74E01F4EE570003DE396 /* TrainingRequestManager.swift */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -1929,6 +1932,7 @@
 				C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */,
 				C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */,
 				C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */,
+				C87A74E11F4EE570003DE396 /* TrainingRequestManager.swift in Sources */,
 				C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEE1D8691F700826DE4 /* UIProgressView+AFNetworking.m in Sources */,
 				C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */,

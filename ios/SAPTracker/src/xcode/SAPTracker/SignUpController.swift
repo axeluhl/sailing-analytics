@@ -41,7 +41,8 @@ class SignUpController: NSObject {
         requestManager.postHello(success: { (principal, authenticated, remembered) in
             
             // Test create event
-            self.requestManager.postCreateEvent(success: {
+            let trainingRequestManager = TrainingRequestManager(baseURLString: self.requestManager.baseURLString)
+            trainingRequestManager.postCreateEvent(success: {
             }, failure: { (error, message) in
             })
             
