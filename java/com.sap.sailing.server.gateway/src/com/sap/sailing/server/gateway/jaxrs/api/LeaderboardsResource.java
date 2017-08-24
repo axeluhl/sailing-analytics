@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -52,6 +53,8 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -694,6 +697,34 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination);
             jsonResult.put("regatta", raceHandle.getRegatta().getName());
             result = Response.ok(jsonResult.toJSONString()).build();
+        } else {
+            result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
+        }
+        return result;
+    }
+    
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{leaderboardName}/stoptracking")
+    public Response stopTracking(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) throws MalformedURLException, IOException, InterruptedException {
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
+        final Response result;
+        if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
+            JSONObject jsonResult = new JSONObject();
+            final TrackedRace trackedRace = leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn().getTrackedRace(leaderboardAndRaceColumnAndFleetAndResponse.getFleet());
+            if (trackedRace == null) {
+                result = Response.status(Status.PRECONDITION_FAILED).entity("no tracked race").build();
+            } else {
+                final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
+                final RaceDefinition race = trackedRace.getRace();
+                getService().stopTracking(regatta, race);
+                jsonResult.put("regatta", regatta.getName());
+                jsonResult.put("race", race.getName());
+                result = Response.ok(jsonResult.toJSONString()).build();
+            }
         } else {
             result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
         }

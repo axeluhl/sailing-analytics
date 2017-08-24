@@ -12,15 +12,7 @@
 <h2>URL: /api/v1/leaderboards/{name}/settrackingtimes?race_column={name}&amp;fleet={name}</h2>
 
 <b>Description:</b>
-<p>Modifies the tracking start/finish times for a race. If nothing is specified about the start
-of tracking time (none of the parameters startoftracking and startoftrackingasmillis present),
-no modification will be applied to the tracking start time, and no race log entry will be created
-for it. If one of the two parameters is provided but with an empty value, the tracking start time
-will be set to <tt>null</tt> explicitly.</p>
-<p>Likewise, the same holds for endoftracking and endoftrackingmillis, accordingly.
-</p>
-<p>The resulting JSON document tells which of the startoftracking and endoftracking times have been
-set for the race and to which value.
+<p>Starts tracking for a race. By default, wind tracking is activated, 
 </p>
 <br/>
 <table>
@@ -55,10 +47,11 @@ set for the race and to which value.
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td>http://127.0.0.1:8888/sailingserver/api/v1/leaderboards/TracTrac%20Virtual%20Course%20Marks%20Test/settrackingtimes?race_column=R1&fleet=Default&startoftracking=2007-01-03T13:05:00Z<br>
+		<td>http://127.0.0.1:8888/sailingserver/api/v1/leaderboards/TracTrac%20Virtual%20Course%20Marks%20Test/starttracking?race_column=R1&fleet=Default<br>
 		delivers <pre>
 		{
-			"startoftracking": 1167829500000
+			"addeddenotation": true
+			"regatta": "TracTrac Virtual Course Marks Test"
 		}
 		</pre></td>
 	</tr>
