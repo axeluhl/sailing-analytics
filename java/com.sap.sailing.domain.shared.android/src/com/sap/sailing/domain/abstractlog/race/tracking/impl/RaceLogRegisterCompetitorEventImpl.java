@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventDataImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.impl.BaseRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEventImpl<RaceLogEventVisitor> implements
@@ -23,7 +24,7 @@ public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEv
      *             if {@code competitor} is null
      */
     public RaceLogRegisterCompetitorEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable id, int passId, Competitor competitor)
+            AbstractLogEventAuthor author, Serializable id, int passId, CompetitorWithBoat competitor)
             throws IllegalArgumentException {
         super(createdAt, logicalTimePoint, author, id, competitor);
         this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
@@ -34,7 +35,7 @@ public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEv
      *             if {@code competitor} is null
      */
     public RaceLogRegisterCompetitorEventImpl(TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, int passId, Competitor competitor)
+            AbstractLogEventAuthor author, int passId, CompetitorWithBoat competitor)
             throws IllegalArgumentException {
         this(now(), logicalTimePoint, author, randId(), passId, competitor);
     }
@@ -45,8 +46,8 @@ public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEv
     }
 
     @Override
-    public List<Competitor> getInvolvedBoats() {
-        return Collections.singletonList(getCompetitor());
+    public List<Competitor> getInvolvedCompetitors() {
+        return Collections.singletonList((Competitor) getCompetitor());
     }
 
     @Override

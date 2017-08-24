@@ -14,11 +14,11 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterBoatEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.BoatDeregistrator;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.BoatsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterEntryEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatDeregistrator;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogEntriesInLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -52,12 +52,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      * tracked races} associated with this leaderboard. Updated when the set of tracked races changes.
      */
     private transient CompetitorProviderFromRaceColumnsAndRegattaLike competitorsProvider;
-
-    /**
-     * Cache for the combined boats of this leaderboard; taken from the {@link TrackedRace#getRace() races of the
-     * tracked races} associated with this leaderboard. Updated when the set of tracked races changes.
-     */
-    private transient BoatProviderFromRaceColumnsAndRegattaLike boatsProvider;
 
     private final AbstractLogEventAuthor regattaLogEventAuthorForAbstractLeaderboard = new LogEventAuthorImpl(
             AbstractLeaderboardImpl.class.getName(), 0);
@@ -124,14 +118,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
             competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
         }
         return competitorsProvider;
-    }
-
-    @Override
-    public BoatProviderFromRaceColumnsAndRegattaLike getOrCreateBoatsProvider() {
-        if (boatsProvider == null) {
-            boatsProvider = new BoatProviderFromRaceColumnsAndRegattaLike(this);
-        }
-        return boatsProvider;
     }
 
     @Override
@@ -221,7 +207,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     @Override
     public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
-        CompetitorsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new CompetitorsInLogAnalyzer<>(
+        RegattaLogEntriesInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new RegattaLogEntriesInLogAnalyzer<>(
                 regattaLog);
         return analyzer.analyze();
     }
@@ -237,7 +223,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         TimePoint now = MillisecondsTimePoint.now();
         
         for (Competitor competitor : competitors) {
-            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
+            regattaLog.add(new RegattaLogRegisterEntryEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
                     UUID.randomUUID(), competitor));
         }
     }
@@ -261,14 +247,14 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      */
     @Override
     public Iterable<Boat> getAllBoats() {
-        return getOrCreateBoatsProvider().getAllBoats();
+        return getBoatsRegisteredInRegattaLog();
     }
 
     
     @Override
     public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
-        BoatsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new BoatsInLogAnalyzer<>(
+        RegattaLogBoatsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new RegattaLogBoatsInLogAnalyzer<>(
                 regattaLog);
         return analyzer.analyze();
     }
@@ -297,7 +283,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     @Override
     public void deregisterBoats(Iterable<Boat> boats) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
-        BoatDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new BoatDeregistrator<>(regattaLog, boats, regattaLogEventAuthorForAbstractLeaderboard);
+        RegattaLogBoatDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new RegattaLogBoatDeregistrator<>(regattaLog, boats, regattaLogEventAuthorForAbstractLeaderboard);
         deregisterer.deregister(deregisterer.analyze());
     }
 }

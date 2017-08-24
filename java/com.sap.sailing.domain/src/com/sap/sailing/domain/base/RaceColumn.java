@@ -309,26 +309,15 @@ public interface RaceColumn extends Named {
     Iterable<Mark> getAvailableMarks(Fleet fleet);
 
     /**
-     * Returns the competitor set registered in the race column's race log associated to the passed fleet. If competitor
-     * registration in RaceLog is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled} or in case of a
+     * Returns the competitor and their boats registered in the race column's race log associated to the passed fleet. If competitor
+     * registration in RaceLog is {@link #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet) disabled} or in case of a
      * MetaLeaderboardColumn an empty set is returned.
      * 
-     * @return competitors in RaceLog if registration {@link #enableCompetitorRegistrationOnRaceLog(Fleet) enabled} or
-     *         empty set in case registration is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled} or this
+     * @return competitors and boats in RaceLog if registration {@link #enableCompetitorAndBoatRegistrationOnRaceLog(Fleet) enabled} or
+     *         empty set in case registration is {@link #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet) disabled} or this
      *         column belongs to a {@link MetaLeaderboard}
      */
-    Iterable<Competitor> getCompetitorsRegisteredInRacelog(Fleet fleet);
-
-    /**
-     * Checks whether competitor registration on RaceLog is enabled.
-     * 
-     * @return boolean if competitor registration on the RaceLog is enabled, false in case this column belongs to a
-     *         {@link MetaLeaderboard}
-     *         
-     * @see #enableCompetitorRegistrationOnRaceLog(Fleet)
-     * @see #disableCompetitorRegistrationOnRaceLog(Fleet)
-     */
-    boolean isCompetitorRegistrationInRacelogEnabled(Fleet fleet);
+    Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRacelog(Fleet fleet);
 
     /**
      * Checks whether competitor and boat registration on RaceLog is enabled.
@@ -340,28 +329,7 @@ public interface RaceColumn extends Named {
      * @see #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet)
      */
     boolean isCompetitorAndBoatRegistrationInRacelogEnabled(Fleet fleet);
-
-    /**
-     * Activates competitor registration on the race column's race log associated to the passed fleet. As a result,
-     * competitor registrations that were added to the race log before this was disabled by
-     * {@link #disableCompetitorRegistrationOnRaceLog(Fleet)} will again be honored.<p>
-     * 
-     * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
-     */
-    void enableCompetitorRegistrationOnRaceLog(Fleet fleet);
     
-    /**
-     * Disables competitor registration on the race column's race log associated to the passed fleet. Performs nothing
-     * in case this column belongs to a {@link MetaLeaderboard}. If there are already competitor registrations on the
-     * race log, those will not be removed from the log but they will be ignored, and the regatta log's competitor
-     * registrations will be used instead. Re-{@link #enableCompetitorRegistrationOnRaceLog(Fleet) enabling} competitor
-     * registrations in the race log will cause such existing registrations to be honored again.
-     * <p>
-     * 
-     * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
-     */
-    void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException;
-
     /**
      * Activates competitor and boat registration on the race column's race log associated to the passed fleet. As a result,
      * competitor and boat registrations that were added to the race log before this was disabled by
@@ -384,22 +352,22 @@ public interface RaceColumn extends Named {
     void disableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException;
 
     /**
-     * Registers a competitor on the the race column's race log associated to the passed fleet.
+     * Registers a competitor and his boat on the the race column's race log associated to the passed fleet.
      * 
-     * @throws CompetitorRegistrationOnRaceLogDisabledException
-     *             thrown if competitor registration is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled}
+     * @throws CompetitorAndBoatRegistrationOnRaceLogDisabledException
+     *             thrown if competitor registration is {@link #disableCompetitorAndBoatRegistrationOnRaceLog(Fleet) disabled}
      *             on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
      */
-    void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+    void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException;
 
     /**
-     * Registers competitors on the the race column's race log associated to the passed fleet.
+     * Registers competitors and their boats on the the race column's race log associated to the passed fleet.
      * 
-     * @throws CompetitorRegistrationOnRaceLogDisabledException
+     * @throws CompetitorAndBoatRegistrationOnRaceLogDisabledException
      *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
      *             {@link MetaLeaderboard}
      */
-    void registerCompetitors(Iterable<Competitor> competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+    void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException;
     
     /**
      * Deregisters a competitor on the the race column's race log associated to the passed fleet.
@@ -418,7 +386,4 @@ public interface RaceColumn extends Named {
      *             {@link MetaLeaderboard}
      */
     void deregisterCompetitors(Iterable<Competitor> currentlyRegisteredCompetitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
-
-    void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException;
-    void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException;
 }

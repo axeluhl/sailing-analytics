@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -43,7 +44,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorAndBoatRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -139,9 +140,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             RegattaLeaderboard rLeaderboard = (RegattaLeaderboard) leaderboard;
             boatClass = rLeaderboard.getRegatta().getBoatClass();
         } else {
-            if (!Util.isEmpty(raceColumn.getAllCompetitors(fleet))) {
+            if (!Util.isEmpty(raceColumn.getAllCompetitorsAndTheirBoats(fleet).values())) {
                 boatClass = findDominatingBoatClass(raceColumn.getAllCompetitorsAndTheirBoats(fleet).values());
-            } else if (!Util.isEmpty(raceColumn.getAllCompetitors())) {
+            } else if (!Util.isEmpty(raceColumn.getAllCompetitorsAndTheirBoats().values())) {
                 boatClass = findDominatingBoatClass(raceColumn.getAllCompetitorsAndTheirBoats().values());
             } else if (!Util.isEmpty(leaderboard.getAllCompetitors())) {
                 boatClass = leaderboard.getBoatClass();
@@ -223,18 +224,18 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void copyCompetitors(final RaceColumn fromRaceColumn, final Fleet fromFleet, final Iterable<Pair<RaceColumn, Fleet>> toRaces) {
-        Iterable<Competitor> competitorsToCopy = fromRaceColumn.getAllCompetitors(fromFleet);
+        Map<Competitor, Boat> competitorsAndBoatsToCopy = fromRaceColumn.getAllCompetitorsAndTheirBoats(fromFleet);
         for (Pair<RaceColumn, Fleet> toRace : toRaces) {
             final RaceColumn toRaceColumn = toRace.getA();
             final Fleet toFleet = toRace.getB();
             try {
-                if (toRaceColumn.isCompetitorRegistrationInRacelogEnabled(toFleet)) {
-                    toRaceColumn.registerCompetitors(competitorsToCopy, toFleet);
+                if (toRaceColumn.isCompetitorAndBoatRegistrationInRacelogEnabled(toFleet)) {
+                    toRaceColumn.registerCompetitorsAndBoats(competitorsAndBoatsToCopy, toFleet);
                 } else {
-                    toRaceColumn.enableCompetitorRegistrationOnRaceLog(toFleet);
-                    toRaceColumn.registerCompetitors(competitorsToCopy, toFleet);
+                    toRaceColumn.enableCompetitorAndBoatRegistrationOnRaceLog(toFleet);
+                    toRaceColumn.registerCompetitorsAndBoats(competitorsAndBoatsToCopy, toFleet);
                 }
-            } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {
+            } catch (CompetitorAndBoatRegistrationOnRaceLogDisabledException e1) {
                 // cannot happen as we explicitly checked successfully before, or enabled it when the check failed; still produce a log documenting this strangeness:
                 logger.log(Level.WARNING, "Internal error: race column "+toRaceColumn.getName()+" does not accept competitor registration although it should", e1);
             }

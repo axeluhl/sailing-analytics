@@ -51,13 +51,18 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory, serviceFinderFactory);
         this.storeTo = storeTo;
         if (clearCompetitorsAndBaots) {
+            storeTo.removeAllCompetitorsWithBoat();
             storeTo.removeAllCompetitors();
             storeTo.removeAllBoats();
         } else {
             // TODO bug2822: How to migrate the competitors with contained boats to competitors with separate boat
-            Collection<CompetitorWithBoat> allCompetitors = loadFrom.loadAllCompetitors();
-            for (CompetitorWithBoat competitor : allCompetitors) {
+            Collection<Competitor> allCompetitors = loadFrom.loadAllCompetitors();
+            for (Competitor competitor : allCompetitors) {
                 addCompetitorToTransientStore(competitor.getId(), competitor);
+            }
+            Collection<CompetitorWithBoat> allCompetitorsWithBoat = loadFrom.loadAllCompetitorsWithBoat();
+            for (CompetitorWithBoat competitor : allCompetitorsWithBoat) {
+                addCompetitorWithBoatToTransientStore(competitor.getId(), competitor);
             }
             Collection<Boat> allBoats = loadFrom.loadAllBoats();
             for (Boat boat: allBoats) {
@@ -86,8 +91,15 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         ois.defaultReadObject();
         storeTo = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
     }
-    
-    private void addCompetitorToTransientStore(Serializable id, CompetitorWithBoat competitor) {
+
+    @Override
+    public void migrateCompetitorToHaveASeparateBoat(Competitor existingCompetitor, Boat separateBoat) {
+        storeTo.storeCompetitor(existingCompetitor);
+        storeTo.storeBoat(separateBoat);
+        super.addNewBoat(separateBoat.getId(), separateBoat);
+    }
+
+    private void addCompetitorToTransientStore(Serializable id, Competitor competitor) {
         super.addNewCompetitor(id, competitor);
     }
 
@@ -124,6 +136,46 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo.storeCompetitors(competitors);
         super.addCompetitors(competitors);
     }
+
+    /////////////
+    private void addCompetitorWithBoatToTransientStore(Serializable id, CompetitorWithBoat competitor) {
+        super.addNewCompetitorWithBoat(id, competitor);
+    }
+
+    @Override
+    protected void addNewCompetitorWithBoat(Serializable id, CompetitorWithBoat competitor) {
+        storeTo.storeCompetitorWithBoat(competitor);
+        super.addNewCompetitorWithBoat(id, competitor);
+    }
+
+    @Override
+    public void clearCompetitorsWithBoat() {
+        storeTo.removeAllCompetitorsWithBoat();
+        super.clearCompetitorsWithBoat();
+    }
+
+    @Override
+    public void removeCompetitorWithBoat(CompetitorWithBoat competitor) {
+        storeTo.removeCompetitorWithBoat(competitor);
+        super.removeCompetitorWithBoat(competitor);
+    }
+
+    @Override
+    public CompetitorWithBoat updateCompetitorWithBoat(String idAsString, String newName, String newShortName, Color newRgbDisplayColor, String newEmail,
+            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile,
+            String searchTag) {
+        CompetitorWithBoat result = super.updateCompetitorWithBoat(idAsString, newName, newShortName, newRgbDisplayColor, newEmail, newNationality,
+                newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+        storeTo.storeCompetitorWithBoat(result);
+        return result;
+    }
+    
+    @Override
+    public void addCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
+        storeTo.storeCompetitorsWithBoat(competitors);
+        super.addCompetitorsWithBoat(competitors);
+    }
+
     
     private void addBoatToTransientStore(Serializable id, Boat boat) {
         super.addNewBoat(id, boat);

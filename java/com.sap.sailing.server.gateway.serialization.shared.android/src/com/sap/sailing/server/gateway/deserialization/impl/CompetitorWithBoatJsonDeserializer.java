@@ -8,11 +8,9 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CompetitorWithBoatFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
@@ -24,7 +22,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 
 public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<CompetitorWithBoat> {
-    protected final CompetitorFactory competitorFactory;
+    protected final CompetitorWithBoatFactory competitorWithBoatFactory;
     protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
     private static final Logger logger = Logger.getLogger(CompetitorWithBoatJsonDeserializer.class.getName());
@@ -34,12 +32,12 @@ public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<Comp
                 new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
     }
 
-    public CompetitorWithBoatJsonDeserializer(CompetitorFactory competitorFactory) {
-        this(competitorFactory, null, /* boatDeserializer */ null);
+    public CompetitorWithBoatJsonDeserializer(CompetitorWithBoatFactory competitorWithBoatFactory) {
+        this(competitorWithBoatFactory, null, /* boatDeserializer */ null);
     }
 
-    public CompetitorWithBoatJsonDeserializer(CompetitorFactory competitorFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
-        this.competitorFactory = competitorFactory;
+    public CompetitorWithBoatJsonDeserializer(CompetitorWithBoatFactory competitorWithBoatFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
+        this.competitorWithBoatFactory = competitorWithBoatFactory;
         this.teamJsonDeserializer = teamJsonDeserializer;
         this.boatJsonDeserializer = boatDeserializer;
     }
@@ -92,12 +90,12 @@ public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<Comp
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
-            Competitor competitor = competitorFactory.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
+            CompetitorWithBoat competitorWithBoat = competitorWithBoatFactory.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
                     flagImageURI, team, timeOnTimeFactor,
-                    timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null :
-                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
+                    timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null : 
+                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, boat);
             
-            return new CompetitorWithBoatImpl(competitor, boat);
+            return competitorWithBoat;
         } catch (Exception e) {
             throw new JsonDeserializationException(e);
         }

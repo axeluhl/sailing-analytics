@@ -63,12 +63,14 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMap
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterEntryEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
@@ -121,6 +123,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 import com.sap.sse.common.Duration;
@@ -138,6 +141,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
+    private final CompetitorWithBoatJsonSerializer competitorWithBoatSerializer = CompetitorWithBoatJsonSerializer.create();
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
     private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
@@ -1146,7 +1150,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeTimePoint(event.getCreatedAt(), result, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
         result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
-        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedBoats()));
+        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedCompetitors()));
         storeRaceLogEventAuthor(result, event.getAuthor());
     }
 
@@ -1317,10 +1321,33 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         return passing;
     }
-    
+
+    @Override
+    public void storeCompetitorWithBoat(CompetitorWithBoat competitor) {
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        JSONObject json = competitorWithBoatSerializer.serialize(competitor);
+        DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
+        DBObject entry = (DBObject) JSON.parse(json.toString());
+        collection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void storeCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
+        if (competitors != null && !Util.isEmpty(competitors)) {
+            DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+            List<DBObject> competitorsDB = new ArrayList<>();
+            for (CompetitorWithBoat competitor : competitors) {
+                JSONObject json = competitorWithBoatSerializer.serialize(competitor);
+                DBObject entry = (DBObject) JSON.parse(json.toString());
+                competitorsDB.add(entry);
+            }
+            collection.insert(competitorsDB);
+        }
+    }
+
     @Override
     public void storeCompetitor(Competitor competitor) {
-        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
         JSONObject json = competitorSerializer.serialize(competitor);
         DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
         DBObject entry = (DBObject) JSON.parse(json.toString());
@@ -1330,7 +1357,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeCompetitors(Iterable<Competitor> competitors) {
         if (competitors != null && !Util.isEmpty(competitors)) {
-            DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+            DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
             List<DBObject> competitorsDB = new ArrayList<>();
             for (Competitor competitor : competitors) {
                 JSONObject json = competitorSerializer.serialize(competitor);
@@ -1344,12 +1371,27 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void removeAllCompetitors() {
         logger.info("Removing all persistent competitors");
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
+        collection.drop();
+    }
+
+    @Override
+    public void removeAllCompetitorsWithBoat() {
+        logger.info("Removing all persistent competitors");
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         collection.drop();
     }
 
     @Override
     public void removeCompetitor(Competitor competitor) {
+        logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
+        DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
+        collection.remove(query, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void removeCompetitorWithBoat(CompetitorWithBoat competitor) {
         logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
@@ -1561,6 +1603,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRegisterBoatEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_BOAT_ID.name(), event.getBoat().getId());
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogRegisterEntryEvent event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogRegisterEntryEvent.class.getSimpleName());
+        result.put(FieldNames.REGATTA_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
         storeRegattaLogEvent(regattaLikeId, result);
     }
 

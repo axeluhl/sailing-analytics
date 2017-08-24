@@ -36,7 +36,8 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -67,7 +68,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.AbstractTrackedRaceDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
@@ -211,7 +212,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                CompetitorAndBoatJsonSerializer competitorJsonSerializer = CompetitorAndBoatJsonSerializer.create();
+                CompetitorWithBoatJsonSerializer competitorJsonSerializer = CompetitorWithBoatJsonSerializer.create();
                 JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(competitorJsonSerializer);
                 JSONObject serializedRaceEntries = raceEntriesSerializer.serialize(race);
     
@@ -861,7 +862,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(new CompetitorAndBoatJsonSerializer(),
+                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(new CompetitorWithBoatJsonSerializer(),
                         new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
@@ -930,11 +931,11 @@ public class RegattasResource extends AbstractSailingServerResource {
                         return result;
                     });
                 }
-                CompetitorAndBoatJsonSerializer serializer = new CompetitorAndBoatJsonSerializer();
+                CompetitorWithBoatJsonSerializer serializer = new CompetitorWithBoatJsonSerializer();
                 JSONArray result = new JSONArray();
                 for (final Competitor c : competitors) {
                     Boat boat = trackedRace.getBoatOfCompetitor(c);
-                    JSONObject jsonCompetitor = serializer.serialize(new CompetitorAndBoatImpl(c, boat));
+                    JSONObject jsonCompetitor = serializer.serialize(new CompetitorWithBoatImpl(c, (DynamicBoat) boat));
                     result.add(jsonCompetitor);
                 }
                 String json = result.toJSONString();

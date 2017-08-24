@@ -185,10 +185,6 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getOrCreateCompetitorsProvider();
     }
 
-    public BoatProviderFromRaceColumnsAndRegattaLike getOrCreateBoatsProvider() {
-        return getFullLeaderboard().getOrCreateBoatsProvider();
-    }
-
     public Regatta getRegatta() {
         return getFullLeaderboard().getRegatta();
     }

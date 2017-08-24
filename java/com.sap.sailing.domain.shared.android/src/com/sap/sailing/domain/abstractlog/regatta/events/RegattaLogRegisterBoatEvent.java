@@ -1,10 +1,9 @@
 package com.sap.sailing.domain.abstractlog.regatta.events;
 
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.shared.events.RegisterBoatEvent;
+import com.sap.sailing.domain.base.Boat;
 
-public interface RegattaLogRegisterBoatEvent extends RegattaLogEvent,
-RegisterBoatEvent<RegattaLogEventVisitor> {
-
+public interface RegattaLogRegisterBoatEvent extends RegattaLogEvent, Revokable {
+    Boat getBoat();
 }

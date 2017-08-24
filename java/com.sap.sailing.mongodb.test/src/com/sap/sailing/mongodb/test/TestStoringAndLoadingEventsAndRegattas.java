@@ -27,9 +27,9 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterEntryEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoat;
@@ -418,18 +418,18 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 "123", regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
                 /* defaultCourseAreaId */ null, /*buoyZoneRadiusInHullLengths*/ 2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
-        CompetitorAndBoat competitorAndBoat1 = AbstractLeaderboardTest.createCompetitorAndBoat("Humba1");
-        CompetitorAndBoat competitorAndBoat2 = AbstractLeaderboardTest.createCompetitorAndBoat("Humba2");
-        res.getCompetitorStore().addCompetitors(Arrays.asList(competitorAndBoat1.getCompetitor(), competitorAndBoat2.getCompetitor()));
-        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitorAndBoat1.getCompetitor()));
-        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitorAndBoat2.getCompetitor()));
-        assertTrue(Util.contains(regatta.getAllCompetitors(), competitorAndBoat1));
-        assertTrue(Util.contains(regatta.getAllCompetitors(), competitorAndBoat2));
+        Competitor competitor1 = AbstractLeaderboardTest.createCompetitor("Humba1");
+        Competitor competitor2 = AbstractLeaderboardTest.createCompetitor("Humba2");
+        res.getCompetitorStore().addCompetitors(Arrays.asList(competitor1, competitor2));
+        regatta.getRegattaLog().add(new RegattaLogRegisterEntryEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor1));
+        regatta.getRegattaLog().add(new RegattaLogRegisterEntryEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor2));
+        assertTrue(Util.contains(regatta.getAllCompetitors(), competitor1));
+        assertTrue(Util.contains(regatta.getAllCompetitors(), competitor2));
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         RegattaLeaderboard fullLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), null, new int[] { 3, 5 });
         // use the set-up and add a regatta leaderboard with eliminations that wraps the regatta leaderboard
         RegattaLeaderboardWithEliminations withEliminations = res.addRegattaLeaderboardWithEliminations("U16", /* leaderboardDisplayName */ "Display Name", fullLeaderboard);
-        res.apply(new UpdateEliminatedCompetitorsInLeaderboard(withEliminations.getName(), Collections.singleton(competitorAndBoat1.getCompetitor())));
+        res.apply(new UpdateEliminatedCompetitorsInLeaderboard(withEliminations.getName(), Collections.singleton(competitor1)));
 
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
@@ -451,8 +451,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertTrue(loadedLeaderboardWithEliminations instanceof RegattaLeaderboardWithEliminations);
         assertEquals("Display Name", loadedLeaderboardWithEliminations.getDisplayName());
         assertEquals(withEliminations.getAllCompetitors(), loadedLeaderboardWithEliminations.getAllCompetitors());
-        assertTrue(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitorAndBoat1.getCompetitor()));
-        assertFalse(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitorAndBoat2.getCompetitor()));
+        assertTrue(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitor1));
+        assertFalse(((RegattaLeaderboardWithEliminations) loadedLeaderboardWithEliminations).isEliminated(competitor2));
     }
     
     @Test

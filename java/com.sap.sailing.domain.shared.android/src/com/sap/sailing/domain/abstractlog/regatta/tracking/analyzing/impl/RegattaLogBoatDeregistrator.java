@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.abstractlog.shared.analyzing;
+package com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -9,7 +9,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.shared.events.RegisterBoatEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sse.common.Util;
@@ -28,14 +28,14 @@ import com.sap.sse.common.Util;
  * @author Frank Mittag
  *
  */
-public class BoatDeregistrator<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT>
+public class RegattaLogBoatDeregistrator<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT>
 extends BaseLogAnalyzer<LogT, EventT, VisitorT, Set<EventT>> {
 
-    private static final Logger logger = Logger.getLogger(BoatDeregistrator.class.getName());
+    private static final Logger logger = Logger.getLogger(RegattaLogBoatDeregistrator.class.getName());
     protected final Iterable<Boat> boatsToDeregister;
     private AbstractLogEventAuthor eventAuthor;
 
-    public BoatDeregistrator(LogT log, Iterable<Boat> boatsToDeregister, AbstractLogEventAuthor eventAuthor) {
+    public RegattaLogBoatDeregistrator(LogT log, Iterable<Boat> boatsToDeregister, AbstractLogEventAuthor eventAuthor) {
         super(log);
         this.boatsToDeregister = boatsToDeregister;
         this.eventAuthor = eventAuthor;
@@ -47,8 +47,8 @@ extends BaseLogAnalyzer<LogT, EventT, VisitorT, Set<EventT>> {
         final HashSet<Boat> boatSet = new HashSet<Boat>();
         Util.addAll(boatsToDeregister, boatSet);
         for (EventT event : log.getUnrevokedEventsDescending()) {
-            if (event instanceof RegisterBoatEvent) {
-                RegisterBoatEvent<?> registerEvent = (RegisterBoatEvent<?>) event;
+            if (event instanceof RegattaLogRegisterBoatEvent) {
+                RegattaLogRegisterBoatEvent registerEvent = (RegattaLogRegisterBoatEvent) event;
                 if (boatSet.contains(registerEvent.getBoat())) {
                     result.add(event);
                 }

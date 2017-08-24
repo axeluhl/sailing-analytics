@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sse.common.Color;
 
-public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
+public interface SharedDomainFactory extends CompetitorFactory, CompetitorWithBoatFactory, BoatFactory {
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the

@@ -36,21 +36,34 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 public class TransientCompetitorStoreImpl implements CompetitorStore, Serializable {
     private static final Logger logger = Logger.getLogger(TransientCompetitorStoreImpl.class.getName());
     private static final long serialVersionUID = -4198298775476586931L;
+
     private final Map<Serializable, Competitor> competitorCache;
     private final Map<String, Competitor> competitorsByIdAsString;
     private transient Set<CompetitorUpdateListener> competitorUpdateListeners;
+    
+    private final Map<Serializable, CompetitorWithBoat> competitorWithBoatCache;
+    private final Map<String, CompetitorWithBoat> competitorsWithBoatByIdAsString;
+    private transient Set<CompetitorWithBoatUpdateListener> competitorWithBoatUpdateListeners;
+
     private final Map<Serializable, Boat> boatCache;
     private final Map<String, Boat> boatsByIdAsString;
     private transient Set<BoatUpdateListener> boatUpdateListeners;
     
     /**
      * The competitors contained in this map will have their changeable properties
-     * {@link #updateCompetitor(String, String, String, Nationality) updated} upon the next call to
-     * {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} for their ID.
+     * {@link #updateCompetitor() updated} upon the next call to {@link #getOrCreateCompetitor()} for their ID.
      */
     private final Set<Competitor> competitorsToUpdateDuringGetOrCreate;
     
     private transient WeakHashMap<Competitor, CompetitorWithoutBoatDTO> weakCompetitorDTOCache;
+
+    /**
+     * The competitors contained in this map will have their changeable properties
+     * {@link #updateCompetitor() updated} upon the next call to {@link #getOrCreateCompetitor()} for their ID.
+     */
+    private final Set<CompetitorWithBoat> competitorsWithBoatToUpdateDuringGetOrCreate;
+    
+    private transient WeakHashMap<CompetitorWithBoat, CompetitorDTO> weakCompetitorWithBoatDTOCache;
 
     private final Set<Boat> boatsToUpdateDuringGetOrCreate;
     
@@ -65,6 +78,13 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         competitorsToUpdateDuringGetOrCreate = new HashSet<Competitor>();
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorWithoutBoatDTO>();
         competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
+
+        competitorWithBoatCache = new HashMap<Serializable, CompetitorWithBoat>();
+        competitorsWithBoatByIdAsString = new HashMap<String, CompetitorWithBoat>();
+        competitorsWithBoatToUpdateDuringGetOrCreate = new HashSet<CompetitorWithBoat>();
+        weakCompetitorWithBoatDTOCache = new WeakHashMap<CompetitorWithBoat, CompetitorDTO>();
+        competitorWithBoatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorWithBoatUpdateListener>());
+
         boatCache = new HashMap<Serializable, Boat>();
         boatsByIdAsString = new HashMap<String, Boat>();
         boatsToUpdateDuringGetOrCreate = new HashSet<Boat>();
@@ -76,6 +96,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         ois.defaultReadObject();
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorWithoutBoatDTO>();
         competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
+        weakCompetitorWithBoatDTOCache = new WeakHashMap<CompetitorWithBoat, CompetitorDTO>();
+        competitorWithBoatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorWithBoatUpdateListener>());
         weakBoatDTOCache = new WeakHashMap<Boat, BoatDTO>();
         boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.BoatUpdateListener>());
     }
@@ -99,6 +121,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
         return result;
+    }
+
+    @Override
+    public void migrateCompetitorToHaveASeparateBoat(Competitor existingCompetitor, Boat separateBoat) {
+        addNewBoat(separateBoat.getId(), separateBoat);
     }
 
     /**
@@ -281,11 +308,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             }
         }
     }
-
-    @Override
-    public CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat competitorWithBoat) {
-        return convertToCompetitorDTO(competitorWithBoat, competitorWithBoat.getBoat());
-    }
     
     @Override
     public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
@@ -322,6 +344,204 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             for (Competitor competitor: competitors) {
                 competitorCache.put(competitor.getId(), competitor);
                 competitorsByIdAsString.put(competitor.getId().toString(), competitor);
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+
+    /** CompetitorWithBoat stuff starts here */
+
+    @Override
+    public void addCompetitorWithBoatUpdateListener(CompetitorWithBoatUpdateListener listener) {
+        competitorWithBoatUpdateListeners.add(listener);
+    }
+
+    @Override
+    public void removeCompetitorWithBoatUpdateListener(CompetitorWithBoatUpdateListener listener) {
+        competitorWithBoatUpdateListeners.remove(listener);
+    }
+
+    private CompetitorWithBoat createCompetitorWithBoat(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
+            DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+        CompetitorWithBoat result = new CompetitorWithBoatImpl(id, name, shortName, displayColor, email, flagImage, team,
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+        addNewCompetitorWithBoat(id, result);
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
+        }
+        return result;
+    }
+
+    /**
+     * Adds the <code>competitor</code> to this transient competitor collection so that it is available in
+     * {@link #getExistingCompetitorById(Serializable)}. Subclasses may override in case they need to take additional
+     * measures such as durably storing the competitor. Overriding implementations must call this implementation.
+     */
+    protected void addNewCompetitorWithBoat(Serializable id, CompetitorWithBoat competitor) {
+        LockUtil.lockForWrite(lock);
+        try {
+            competitorWithBoatCache.put(id, competitor);
+            competitorsWithBoatByIdAsString.put(id.toString(), competitor);
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+    
+    @Override
+    public CompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName, Color displayColor, String email,
+            URI flagImage, DynamicTeam team, Double timeOnTimeFactor,
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+        CompetitorWithBoat result = getExistingCompetitorWithBoatById(competitorId); // avoid synchronization for successful read access
+        if (result == null) {
+            LockUtil.lockForWrite(lock);
+            try {
+                result = getExistingCompetitorWithBoatById(competitorId); // try again, now while holding the write lock
+                if (result == null) {
+                    result = createCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImage, team,
+                            timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+                }
+            } finally {
+                LockUtil.unlockAfterWrite(lock);
+            }
+        } else if (isCompetitorWithBoatToUpdateDuringGetOrCreate(result)) {
+            updateCompetitorWithBoat(result.getId().toString(), name, shortName, displayColor, email, team.getNationality(),
+                    team.getImage(), flagImage, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+            competitorWithBoatNoLongerToUpdateDuringGetOrCreate(result);
+        }
+        return result;
+    }
+    
+    private void competitorWithBoatNoLongerToUpdateDuringGetOrCreate(CompetitorWithBoat competitor) {
+        competitorsWithBoatToUpdateDuringGetOrCreate.remove(competitor);
+    }
+
+    @Override
+    public boolean isCompetitorWithBoatToUpdateDuringGetOrCreate(CompetitorWithBoat competitor) {
+        return competitorsWithBoatToUpdateDuringGetOrCreate.contains(competitor);
+    }
+
+    @Override
+    public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorWithBoatId) {
+        LockUtil.lockForRead(lock);
+        try {
+            return competitorWithBoatCache.get(competitorWithBoatId);
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    @Override
+    public CompetitorWithBoat getExistingCompetitorWithBoatByIdAsString(String competitorWithBoatIdAsString) {
+        LockUtil.lockForRead(lock);
+        try {
+            return competitorsWithBoatByIdAsString.get(competitorWithBoatIdAsString);
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    @Override
+    public int getCompetitorsWithBoatCount() {
+        LockUtil.lockForRead(lock);
+        try {
+             return competitorWithBoatCache.size();
+       } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    @Override
+    public void clearCompetitorsWithBoat() {
+        LockUtil.lockForWrite(lock);
+        try {
+            competitorWithBoatCache.clear();
+            competitorsWithBoatByIdAsString.clear();
+            competitorsWithBoatToUpdateDuringGetOrCreate.clear();
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "Clearing competitorWithBoat store "+this, new Exception("here is where it happened"));
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+    
+    @Override
+    public Iterable<CompetitorWithBoat> getCompetitorsWithBoat() {
+        LockUtil.lockForRead(lock);
+        try {
+            return new ArrayList<CompetitorWithBoat>(competitorWithBoatCache.values());
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    @Override
+    public void removeCompetitorWithBoat(CompetitorWithBoat competitor) {
+        LockUtil.lockForWrite(lock);
+        try {
+            logger.fine("removing competitor "+competitor+" from competitor store "+this);
+            competitorWithBoatCache.remove(competitor.getId());
+            competitorsWithBoatByIdAsString.remove(competitor.getId().toString());  
+            weakCompetitorWithBoatDTOCache.remove(competitor);
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+
+    @Override
+    public CompetitorWithBoat updateCompetitorWithBoat(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
+            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag) {
+        DynamicCompetitorWithBoat competitor = (DynamicCompetitorWithBoat) getExistingCompetitorWithBoatByIdAsString(idAsString);
+        if (competitor != null) {
+            LockUtil.lockForWrite(lock);
+            try {
+                competitor.setName(newName);
+                competitor.setShortName(newShortName);
+                competitor.setColor(newDisplayColor);
+                competitor.setEmail(newEmail);
+                competitor.setFlagImage(newFlagImageUri);
+                competitor.getTeam().setNationality(newNationality);
+                competitor.getTeam().setImage(newTeamImageUri);
+                competitor.setTimeOnTimeFactor(timeOnTimeFactor);
+                competitor.setTimeOnDistanceAllowancePerNauticalMile(timeOnDistanceAllowancePerNauticalMile);
+                competitor.setSearchTag(newSearchTag);
+                weakCompetitorDTOCache.remove(competitor);
+            } finally {
+                LockUtil.unlockAfterWrite(lock);
+            }
+        }
+        synchronized (competitorUpdateListeners) {
+            for (CompetitorUpdateListener listener : competitorUpdateListeners) {
+                listener.competitorUpdated(competitor);
+            }
+        }
+        return (CompetitorWithBoat) competitor;
+    }
+
+    @Override
+    public CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat competitorWithBoat) {
+        return convertToCompetitorDTO(competitorWithBoat, competitorWithBoat.getBoat());
+    }
+    
+    @Override
+    public void allowCompetitorWithBoatResetToDefaults(CompetitorWithBoat competitor) {
+        LockUtil.lockForWrite(lock);
+        try {
+            competitorsWithBoatToUpdateDuringGetOrCreate.add(competitor);
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+
+    @Override
+    public void addCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
+        LockUtil.lockForWrite(lock);
+        try {
+            for (CompetitorWithBoat competitor: competitors) {
+                competitorWithBoatCache.put(competitor.getId(), competitor);
+                competitorsWithBoatByIdAsString.put(competitor.getId().toString(), competitor);
             }
         } finally {
             LockUtil.unlockAfterWrite(lock);

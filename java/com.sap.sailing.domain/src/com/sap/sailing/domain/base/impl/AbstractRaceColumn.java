@@ -21,13 +21,9 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAndBoatsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorAndBoatEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsAndBoatsFromRaceLogEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
@@ -264,19 +260,8 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
-        final Iterable<Competitor> result;
-        TrackedRace trackedRace = getTrackedRace(fleet);
-        if (trackedRace != null) {
-            result = trackedRace.getRace().getCompetitors();
-        } else {
-            // if no tracked race is found, use competitors from race/regatta log depending on whether
-            // the mapping event is present or not; this assumes that if a tracked
-            // race exists, its competitors set takes precedence over what's in the race log. Usually,
-            // the tracked race will have the same competitors as those in the race log, or more because
-            // those from the regatta log are added to the tracked race as well.
-            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
-            result = viaRaceLog;
-        }
+        Set<Competitor> result = new HashSet<>();
+        Util.addAll(getAllCompetitorsAndTheirBoats(fleet).keySet(), result);
         return result;
     }
     
@@ -307,26 +292,6 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
 
     @Override
-    public void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
-        registerCompetitors(Collections.singleton(competitor), fleet);
-    }
-    
-    @Override
-    public void registerCompetitors(Iterable<Competitor> competitors, Fleet fleet)
-            throws CompetitorRegistrationOnRaceLogDisabledException {
-        if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
-            throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed  for fleet "+fleet+" in column "+this);
-        }
-        TimePoint now = MillisecondsTimePoint.now();
-        RaceLog raceLog = getRaceLog(fleet);
-        int passId = raceLog.getCurrentPassId();
-        for (Competitor competitor : competitors) {
-            raceLog.add(new RaceLogRegisterCompetitorEventImpl(now, now, raceLogEventAuthorForRaceColumn, 
-                    UUID.randomUUID(), passId, competitor));
-        }
-    }
-
-    @Override
     public void registerCompetitorAndBoat(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorAndBoatRegistrationOnRaceLogDisabledException {
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(competitor, boat);
@@ -337,7 +302,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
             throws CompetitorAndBoatRegistrationOnRaceLogDisabledException {
         if (!isCompetitorAndBoatRegistrationInRacelogEnabled(fleet)) {
-            throw new CompetitorAndBoatRegistrationOnRaceLogDisabledException("Competitor and boat registration not allowed  for fleet "+fleet+" in column "+this);
+            throw new CompetitorAndBoatRegistrationOnRaceLogDisabledException("Competitor registration not allowed for fleet "+fleet+" in column "+this);
         }
         TimePoint now = MillisecondsTimePoint.now();
         RaceLog raceLog = getRaceLog(fleet);
@@ -357,7 +322,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public void deregisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
-        if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
+        if (!isCompetitorAndBoatRegistrationInRacelogEnabled(fleet)) {
             throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed for fleet "+fleet+" in column "+this);
         }
         HashSet<Competitor> competitorSet = new HashSet<Competitor>();
@@ -436,31 +401,6 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         return result;
     }
 
-    @Override
-    public void enableCompetitorRegistrationOnRaceLog(Fleet fleet) {
-        TimePoint now = MillisecondsTimePoint.now();
-        RaceLog raceLog = getRaceLog(fleet);
-        int passId = raceLog.getCurrentPassId();
-        raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(now, raceLogEventAuthorForRaceColumn, now, UUID.randomUUID(), passId));
-    }
-    
-    @Override
-    public void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException {
-        RaceLog raceLog = getRaceLog(fleet);
-        List<RaceLogEvent> events = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogUseCompetitorsFromRaceLogEvent.class).analyze();
-        for (RaceLogEvent event : events) {
-            raceLog.lockForRead();
-            try {
-                event = raceLog.getEventById(event.getId());
-            } finally {
-                raceLog.unlockAfterRead();
-            }
-            if (event != null) {
-                raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, event, "revoke triggered by GWT user action");
-            }
-        }
-    }
-    
     @Override
     public void enableCompetitorAndBoatRegistrationOnRaceLog(Fleet fleet) {
         TimePoint now = MillisecondsTimePoint.now();

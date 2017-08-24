@@ -78,8 +78,8 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(event.getCourseDesignerMode(), deserializedEvent.getCourseDesignerMode());
-        assertEquals(0, Util.size(event.getInvolvedBoats()));
-        assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
+        assertEquals(0, Util.size(event.getInvolvedCompetitors()));
+        assertEquals(0, Util.size(deserializedEvent.getInvolvedCompetitors()));
 
         compareCourseData(event.getCourseDesign(), deserializedEvent.getCourseDesign());
     }

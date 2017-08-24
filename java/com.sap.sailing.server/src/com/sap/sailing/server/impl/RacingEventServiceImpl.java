@@ -471,18 +471,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
-     * store} for competitor management. This base domain factory is then also used for the construction of the
-     * {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection,
-     * hence removes all previously persistent competitors. This is the default for testing and for backward
-     * compatibility with prior releases that did not support a persistent competitor collection.
+     * store} for competitor and boat management. This base domain factory is then also used for the construction of the
+     * {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor and boat collections,
+     * hence removes all previously persistent competitors and boats. This is the default for testing and for backward
+     * compatibility with prior releases that did not support a persistent competitor and boat collection.
      */
     public RacingEventServiceImpl() {
-        this(/* clearPersistentCompetitorStore */ true, /* serviceFinderFactory */ null, /* restoreTrackedRaces */ false);
+        this(/* clearPersistentCompetitorAndBoatStore */ true, /* serviceFinderFactory */ null, /* restoreTrackedRaces */ false);
     }
 
     public RacingEventServiceImpl(WindStore windStore, SensorFixStore sensorFixStore,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(/* clearPersistentCompetitorStore */ true, windStore, sensorFixStore, serviceFinderFactory,
+        this(/* clearPersistentCompetitorAndBoatStore */ true, windStore, sensorFixStore, serviceFinderFactory,
                 /* sailingNotificationService */ null, /* restoreTrackedRaces */ false);
     }
 
@@ -490,8 +490,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.bundleContext = bundleContext;
     }
 
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
-        this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null, restoreTrackedRaces);
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
+        this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null, restoreTrackedRaces);
     }
     
     /**
@@ -506,14 +506,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            a notification service to call upon events worth notifying users about, or {@code null} if no
      *            notification service is available, e.g., in test set-ups
      */
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
             TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
             private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
                     PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory),
-                    clearPersistentCompetitorStore, serviceFinderFactory, raceLogResolver);
+                    clearPersistentCompetitorAndBoatStore, serviceFinderFactory, raceLogResolver);
 
             @Override public DomainObjectFactory getDomainObjectFactory() { return competitorStore.getDomainObjectFactory(); }
             @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }

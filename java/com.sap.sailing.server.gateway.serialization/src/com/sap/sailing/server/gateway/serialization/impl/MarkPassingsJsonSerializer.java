@@ -11,7 +11,8 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -26,7 +27,7 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
     public JSONObject serialize(TrackedRace trackedRace) {
         final Course course = trackedRace.getRace().getCourse();
         JSONObject result = new JSONObject();
-        CompetitorAndBoatJsonSerializer competitorWithBoatSerializer = CompetitorAndBoatJsonSerializer.create();
+        CompetitorWithBoatJsonSerializer competitorWithBoatSerializer = CompetitorWithBoatJsonSerializer.create();
         CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
         JSONArray byCompetitorJson = new JSONArray();
         result.put(BYCOMPETITOR, byCompetitorJson);
@@ -35,7 +36,7 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
             Boat boat = competitorAndBoatEntry.getValue();
             JSONObject forCompetitorJson = new JSONObject();
             byCompetitorJson.add(forCompetitorJson);
-            forCompetitorJson.put(COMPETITOR, competitorWithBoatSerializer.serialize(new CompetitorAndBoatImpl(competitor, boat)));
+            forCompetitorJson.put(COMPETITOR, competitorWithBoatSerializer.serialize(new CompetitorWithBoatImpl(competitor, (DynamicBoat) boat)));
             final NavigableSet<MarkPassing> markPassingsForCompetitor = trackedRace.getMarkPassings(competitor);
             JSONArray markPassingsForCompetitorJson = new JSONArray();
             forCompetitorJson.put(MARKPASSINGS, markPassingsForCompetitorJson);

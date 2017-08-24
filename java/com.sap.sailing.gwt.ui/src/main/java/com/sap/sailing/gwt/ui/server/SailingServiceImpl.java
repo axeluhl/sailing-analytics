@@ -1086,6 +1086,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     /**
+     * TODO: bug 2822 Is this still required? 
      * Converts the {@link Competitor} objects passed as {@code iterable} to {@link CompetitorDTO} objects.
      * The iteration order in the result matches that of the {@code iterable} passed.
      */
@@ -1098,6 +1099,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    /**
+     * Converts the {@link Competitor} objects passed as {@code iterable} to {@link CompetitorDTO} objects.
+     * The iteration order in the result matches that of the {@code iterable} passed.
+     */
+    private List<CompetitorDTO> convertToCompetitorDTOs(Map<Competitor, Boat> competitorsAndBoats) {
+        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
+        for (Entry<Competitor, Boat> competitorAndBoatEntry : competitorsAndBoats.entrySet()) {
+            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitorAndBoatEntry.getKey(), competitorAndBoatEntry.getValue());
+            result.add(competitorDTO);
+        }
+        return result;
+    }
+    
     private List<BoatDTO> convertToBoatDTOs(Iterable<? extends Boat> iterable) {
         List<BoatDTO> result = new ArrayList<BoatDTO>();
         for (Boat b : iterable) {
@@ -2524,7 +2538,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final RaceLogTrackingState raceLogTrackingState = raceLog == null ? RaceLogTrackingState.NOT_A_RACELOG_TRACKED_RACE :
                     new RaceLogTrackingStateAnalyzer(raceLog).analyze();
                 final boolean raceLogTrackerExists = raceLog == null ? false : getService().getRaceTrackerById(raceLog.getId()) != null;
-                final boolean competitorRegistrationsExist = raceLog == null ? false : !Util.isEmpty(raceColumn.getAllCompetitors(fleet));
+                final boolean competitorRegistrationsExist = raceLog == null ? false : !Util.isEmpty(raceColumn.getAllCompetitorsAndTheirBoats(fleet).keySet());
                 final boolean courseExist = raceLog == null ? false : !Util.isEmpty(raceColumn.getCourseMarks(fleet));
                 final RaceLogTrackingInfoDTO raceLogTrackingInfo = new RaceLogTrackingInfoDTO(raceLogTrackerExists,
                         competitorRegistrationsExist, courseExist, raceLogTrackingState);
@@ -5466,7 +5480,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private Competitor getCompetitor(CompetitorDTO dto) {
         return getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
     }
-    
+
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
@@ -5477,13 +5491,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        Iterable<Competitor> competitorsToRemove = raceColumn.getCompetitorsRegisteredInRacelog(fleet);
+        Map<Competitor, Boat> competitorsToRemove = raceColumn.getCompetitorsAndBoatsRegisteredInRacelog(fleet);
         HashSet<Competitor> competitorSetToRemove = new HashSet<>();
-        Util.addAll(competitorsToRemove, competitorSetToRemove);
+        Util.addAll(competitorsToRemove.keySet(), competitorSetToRemove);
         filterDuplicates(competitorsToRegister, competitorSetToRemove);
         
         raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
-        raceColumn.registerCompetitors(competitorsToRegister, fleet);
+        
+        // TODO bug 2822: temporary commented out -> needs first cleanup of CompetitorDTO and BoatDTO passing  
+        // raceColumn.registerCompetitors(competitorsToRegister, fleet);
     }
     
     @Override
@@ -6053,7 +6069,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Competitor competitor = getCompetitor(competitorDTO);
         RaceLogFixedMarkPassingEvent oldFixedMarkPassingEvent = null;
         for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
-            if (event instanceof RaceLogFixedMarkPassingEventImpl && event.getInvolvedBoats().contains(competitor)) {
+            if (event instanceof RaceLogFixedMarkPassingEventImpl && event.getInvolvedCompetitors().contains(competitor)) {
                 RaceLogFixedMarkPassingEvent fixedEvent = (RaceLogFixedMarkPassingEvent) event;
                 if (Util.equalsWithNull(fixedEvent.getZeroBasedIndexOfPassedWaypoint(), indexOfWaypoint)) {
                     oldFixedMarkPassingEvent = fixedEvent;
@@ -6082,7 +6098,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Competitor competitor = getCompetitor(competitorDTO);
         NavigableSet<RaceLogEvent> unrevokedEvents = raceLog.getUnrevokedEvents();
         for (RaceLogEvent event : unrevokedEvents) {
-            if (event instanceof RaceLogSuppressedMarkPassingsEvent && event.getInvolvedBoats().contains(competitor)) {
+            if (event instanceof RaceLogSuppressedMarkPassingsEvent && event.getInvolvedCompetitors().contains(competitor)) {
                 oldSuppressedMarkPassingEvent = (RaceLogSuppressedMarkPassingsEvent) event;
                 break;
             }
@@ -6357,7 +6373,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fleetName) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        return convertToCompetitorDTOs(raceColumn.getAllCompetitors(fleet));
+        return convertToCompetitorDTOs(raceColumn.getAllCompetitorsAndTheirBoats(fleet).keySet());
     }
     
     @Override
@@ -6381,7 +6397,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fleetName) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        return convertToCompetitorDTOs(raceColumn.getCompetitorsRegisteredInRacelog(fleet));
+        return convertToCompetitorDTOs(raceColumn.getCompetitorsAndBoatsRegisteredInRacelog(fleet));
     }
 
     @Override
@@ -6389,7 +6405,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fleetName) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        return raceColumn.isCompetitorRegistrationInRacelogEnabled(fleet);
+        return raceColumn.isCompetitorAndBoatRegistrationInRacelogEnabled(fleet);
     }
     
     private Fleet getFleetByName(RaceColumn raceColumn, String fleetName) throws NotFoundException{
@@ -6424,7 +6440,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void disableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException, NotFoundException {
         if (areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
             RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
-            raceColumn.disableCompetitorRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
+            raceColumn.disableCompetitorAndBoatRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
         }
     }
 
@@ -6432,7 +6448,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void enableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws IllegalArgumentException, NotFoundException {
         if (!areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
             RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
-            raceColumn.enableCompetitorRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
+            raceColumn.enableCompetitorAndBoatRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
         }
     }
 

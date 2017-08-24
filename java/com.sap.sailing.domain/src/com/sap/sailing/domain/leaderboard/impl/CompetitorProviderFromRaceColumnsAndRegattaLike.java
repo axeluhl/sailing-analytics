@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -11,14 +12,18 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsAndBoatsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsAndBoatsInLogAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -37,8 +42,8 @@ import com.sap.sse.common.Util.Pair;
  * <li>a competitor is registered with or unregistered from a race log of any of the race columns or the regatta log</li>
  * <li>a race column is added or removed</li>
  * <li>a tracked race is linked to or unlinked from any of the race columns</li>
- * <li>the racelog is marked as providing it's own competitors via the {@link RaceLogUseCompetitorsFromRaceLogEvent}</li>
- * <li>the racelog is marked as no longer providing it's own competitors by revoking an event of type {@link RaceLogUseCompetitorsFromRaceLogEvent}</li>
+ * <li>the racelog is marked as providing it's own competitors via the {@link RaceLogUseCompetitorsAndBoatsFromRaceLogEvent}</li>
+ * <li>the racelog is marked as no longer providing it's own competitors by revoking an event of type {@link RaceLogUseCompetitorsAndBoatsFromRaceLogEvent}</li>
  * </ul>
  * 
  * Note that objects of this type are not serializable. Classes using such objects shall not assign them to non-transient
@@ -80,11 +85,15 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                 invalidateAllCompetitorsCaches();
             }
 
+            public void visit(RegattaLogRegisterCompetitorAndBoatEvent event) {
+                invalidateAllCompetitorsCaches();
+            }
+
             @Override
             public void visit(RegattaLogRevokeEvent event) {
                 try {
-                    if (RegattaLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event
-                            .getRevokedEventType()))) {
+                    if (RegattaLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType())) ||
+                        RegattaLogRegisterCompetitorAndBoatEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
                         invalidateAllCompetitorsCaches();
                     }
                 } catch (ClassNotFoundException e) {
@@ -100,7 +109,17 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             }
 
             @Override
+            public void visit(RaceLogRegisterCompetitorAndBoatEvent event) {
+                invalidateAllCompetitorsCaches();
+            }
+
+            @Override
             public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
+                invalidateAllCompetitorsCaches();
+            }
+
+            @Override
+            public void visit(RaceLogUseCompetitorsAndBoatsFromRaceLogEvent event) {
                 invalidateAllCompetitorsCaches();
             }
 
@@ -110,7 +129,9 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                     final Class<?> revokedEventClass = Class.forName(event.getRevokedEventType());
                     // 
                     if (RaceLogRegisterCompetitorEvent.class.isAssignableFrom(revokedEventClass) ||
-                            RaceLogUseCompetitorsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass)) {
+                        RaceLogUseCompetitorsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass) ||
+                        RaceLogRegisterCompetitorAndBoatEvent.class.isAssignableFrom(revokedEventClass) ||
+                        RaceLogUseCompetitorsAndBoatsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass)) {
                         invalidateAllCompetitorsCaches();
                     }
                 } catch (ClassNotFoundException e) {
@@ -171,8 +192,8 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             if (!hasRaceColumns) {
                 // If no race exists, the regatta log-provided competitor registrations will not have
                 // been considered yet; add them:
-                final Set<Competitor> regattaLogProvidedCompetitors = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
-                result.addAll(regattaLogProvidedCompetitors);
+                final Map<Competitor, Boat> regattaLogProvidedCompetitors = new CompetitorsAndBoatsInLogAnalyzer<>(regattaLog).analyze();
+                result.addAll(regattaLogProvidedCompetitors.keySet());
             }
             // else, don't add regatta log competitors because they have been added in each column already.
             // The competitors are collected from the races. Those, however, will be the regatta log

@@ -34,12 +34,13 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorAndBoatEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -53,6 +54,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
+    private final static BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
 
     protected MongoObjectFactoryImpl mongoFactory = (MongoObjectFactoryImpl) PersistenceFactory.INSTANCE
             .getMongoObjectFactory(getMongoService(), new MockSmartphoneImeiServiceFinderFactory());
@@ -84,7 +86,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         assertEquals(expectedEvent.getCreatedAt(), actualEvent.getCreatedAt());
         assertEquals(expectedEvent.getLogicalTimePoint(), actualEvent.getLogicalTimePoint());
         assertEquals(expectedEvent.getId(), actualEvent.getId());
-        assertEquals(expectedEvent.getInvolvedBoats().size(), Util.size(actualEvent.getInvolvedBoats()));
+        assertEquals(expectedEvent.getInvolvedCompetitors().size(), Util.size(actualEvent.getInvolvedCompetitors()));
         assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
     }
 
@@ -209,14 +211,15 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     }
 
     @Test
-    public void testStoreAndLoadRegisterCompetitorEvent() {
-        RaceLogRegisterCompetitorEvent expectedEvent = new RaceLogRegisterCompetitorEventImpl(expectedEventTime,
+    public void testStoreAndLoadRegisterCompetitorAndBoatEvent() {
+        RaceLogRegisterCompetitorAndBoatEvent expectedEvent = new RaceLogRegisterCompetitorAndBoatEventImpl(expectedEventTime,
                 expectedEventTime, author, expectedId, expectedPassId, DomainFactory.INSTANCE.getOrCreateCompetitor(
                         "comp", "comp", "c", null, null, null, null,
-                        /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */null, null));
+                        /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */null, null),
+                DomainFactory.INSTANCE.getOrCreateBoat("boat", "b", boatClass, null, null));
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RaceLogRegisterCompetitorEvent actualEvent = loadEvent(dbObject);
+        RaceLogRegisterCompetitorAndBoatEvent actualEvent = loadEvent(dbObject);
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getCompetitor(), actualEvent.getCompetitor());

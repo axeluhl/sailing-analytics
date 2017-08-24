@@ -181,7 +181,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
             assertEquals(courseDesignChangedEvent.getPassId(), replicatedEvent.getPassId());
             assertEquals(courseDesignChangedEvent.getCreatedAt(), replicatedEvent.getCreatedAt());
             assertEquals(courseDesignChangedEvent.getLogicalTimePoint(), replicatedEvent.getLogicalTimePoint());
-            assertEquals(Util.size(courseDesignChangedEvent.getInvolvedBoats()), Util.size(replicatedEvent.getInvolvedBoats()));
+            assertEquals(Util.size(courseDesignChangedEvent.getInvolvedCompetitors()), Util.size(replicatedEvent.getInvolvedCompetitors()));
             compareCourseBase(courseDesignChangedEvent.getCourseDesign(), replicatedEvent.getCourseDesign());
         } finally {
             replicaLog.unlockAfterRead();

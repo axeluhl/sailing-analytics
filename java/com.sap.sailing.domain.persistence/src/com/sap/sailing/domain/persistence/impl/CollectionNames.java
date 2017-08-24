@@ -71,9 +71,14 @@ public enum CollectionNames {
 
     
     /**
-     * Stores competitors.
+     * Stores competitors with boats.
      */
     COMPETITORS,
+
+    /**
+     * Stores competitors with boats.
+     */
+    COMPETITORS_WITHOUT_BOAT,
 
     /**
      * Stores boats.

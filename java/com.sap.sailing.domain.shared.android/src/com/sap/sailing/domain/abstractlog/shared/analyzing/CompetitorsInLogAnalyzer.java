@@ -10,7 +10,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogRegisteredC
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 
 /**
  * This class searches for RegisterCompetitorEvents in the given log.
@@ -27,15 +27,15 @@ import com.sap.sailing.domain.base.Competitor;
  *
  */
 public class CompetitorsInLogAnalyzer<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT>
-        extends BaseLogAnalyzer<LogT, EventT, VisitorT, Set<Competitor>> {
+        extends BaseLogAnalyzer<LogT, EventT, VisitorT, Set<CompetitorWithBoat>> {
 
     public CompetitorsInLogAnalyzer(LogT log) {
         super(log);
     }
 
     @Override
-    protected Set<Competitor> performAnalysis() {
-        Set<Competitor> result = new HashSet<Competitor>();
+    protected Set<CompetitorWithBoat> performAnalysis() {
+        Set<CompetitorWithBoat> result = new HashSet<>();
 
         for (EventT event : getLog().getUnrevokedEvents()) {
             if (event instanceof RegisterCompetitorEvent) {

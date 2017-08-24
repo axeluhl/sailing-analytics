@@ -1,12 +1,15 @@
 package com.sap.sailing.domain.abstractlog.shared.events;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.IsManagedByCache;
 
 /**
- * Register a competitor together with a boat for {@link RaceLog} and {@link RegattaLog} trackeds race and regattas.
+ * Register a competitor together with a boat for {@link RaceLog} and {@link RegattaLog} tracked races and regattas.
  * 
  * A dummy {@link Competitor} implementation with only an {@link Competitor#getId() id} may be used,
  * if the competitor is known to already exist on the server, as it is
@@ -15,5 +18,8 @@ import com.sap.sse.common.IsManagedByCache;
  * @author Frank Mittag
  *
  */
-public interface RegisterCompetitorAndBoatEvent<VisitorT> extends RegisterBoatEvent<VisitorT>, RegisterCompetitorEvent<VisitorT> {
+public interface RegisterCompetitorAndBoatEvent<VisitorT> extends AbstractLogEvent<VisitorT>, Revokable {
+    Competitor getCompetitor();
+
+    Boat getBoat();
 }

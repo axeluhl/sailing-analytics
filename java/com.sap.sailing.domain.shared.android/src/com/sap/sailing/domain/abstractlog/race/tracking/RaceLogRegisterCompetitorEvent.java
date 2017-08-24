@@ -4,7 +4,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 
-public interface RaceLogRegisterCompetitorEvent extends RaceLogEvent,
-RegisterCompetitorEvent<RaceLogEventVisitor> {
+/**
+ * ATTENTION: This is the old legacy race log event for a competitor registration from the time before bug2822 
+ * DON'T delete or rename for backward compatibility
+ */
+public interface RaceLogRegisterCompetitorEvent extends RaceLogEvent, RegisterCompetitorEvent<RaceLogEventVisitor> {
 
 }

@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.impl.BaseRegisterCompetitorEventImpl;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sse.common.TimePoint;
 
 public class RegattaLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEventImpl<RegattaLogEventVisitor>
@@ -18,7 +18,7 @@ public class RegattaLogRegisterCompetitorEventImpl extends BaseRegisterCompetito
      *             if {@code competitor} is null
      */
     public RegattaLogRegisterCompetitorEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Serializable id, Competitor competitor) throws IllegalArgumentException {
+            AbstractLogEventAuthor author, Serializable id, CompetitorWithBoat competitor) throws IllegalArgumentException {
         super(createdAt, logicalTimePoint, author, id, competitor);
     }
 
@@ -27,7 +27,7 @@ public class RegattaLogRegisterCompetitorEventImpl extends BaseRegisterCompetito
      *             if {@code competitor} is null
      */
     public RegattaLogRegisterCompetitorEventImpl(TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Competitor competitor) throws IllegalArgumentException {
+            AbstractLogEventAuthor author, CompetitorWithBoat competitor) throws IllegalArgumentException {
         super(logicalTimePoint, author, competitor);
     }
 

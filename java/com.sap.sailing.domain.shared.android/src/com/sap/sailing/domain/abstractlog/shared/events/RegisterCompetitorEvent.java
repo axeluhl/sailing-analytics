@@ -5,9 +5,13 @@ import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sse.common.IsManagedByCache;
 
 /**
+ * ATTENTION: This is the old legacy log event for a competitor registration from the time before bug2822 
+ * DON'T delete or rename for backward compatibility
+ * 
  * Register a competitor for {@link RaceLog} and {@link RegattaLog} tracked races and regattas.
  * 
  * A dummy {@link Competitor} implementation with only an {@link Competitor#getId() id} may be used,
@@ -18,5 +22,5 @@ import com.sap.sse.common.IsManagedByCache;
  *
  */
 public interface RegisterCompetitorEvent<VisitorT> extends AbstractLogEvent<VisitorT>, Revokable {
-    Competitor getCompetitor();
+    CompetitorWithBoat getCompetitor();
 }

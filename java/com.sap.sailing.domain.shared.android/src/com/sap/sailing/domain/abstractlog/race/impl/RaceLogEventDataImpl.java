@@ -21,7 +21,7 @@ public class RaceLogEventDataImpl implements RaceLogEventData {
     }
 
     @Override
-    public List<Competitor> getInvolvedBoats() {
+    public List<Competitor> getInvolvedCompetitors() {
         return involvedBoats;
     }
 
@@ -32,6 +32,6 @@ public class RaceLogEventDataImpl implements RaceLogEventData {
     
     @Override
     public String toString() {
-        return super.toString() + ", involvedBoats: " + getInvolvedBoats() + ", passId: " + getPassId();
+        return super.toString() + ", involvedBoats: " + getInvolvedCompetitors() + ", passId: " + getPassId();
     }
 }

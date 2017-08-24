@@ -7,7 +7,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.CompetitorAndBoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -16,10 +17,10 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class ManeuversJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
     public final static String MANEUVERS = "maneuvers";
     
-    private final CompetitorAndBoatJsonSerializer competitorSerializer;
+    private final CompetitorWithBoatJsonSerializer competitorSerializer;
     private final ManeuverJsonSerializer maneuverSerializer;
 
-    public ManeuversJsonSerializer(CompetitorAndBoatJsonSerializer competitorSerializer, ManeuverJsonSerializer maneuverSerializer) {
+    public ManeuversJsonSerializer(CompetitorWithBoatJsonSerializer competitorSerializer, ManeuverJsonSerializer maneuverSerializer) {
         super();
         this.competitorSerializer = competitorSerializer;
         this.maneuverSerializer = maneuverSerializer;
@@ -35,7 +36,7 @@ public class ManeuversJsonSerializer extends AbstractTrackedRaceDataJsonSerializ
             Boat boat = competitorAndBoatEntry.getValue();
             final JSONObject forCompetitorJson = new JSONObject();
             byCompetitorJson.add(forCompetitorJson);
-            forCompetitorJson.put(COMPETITOR, competitorSerializer.serialize(new CompetitorAndBoatImpl(competitor, boat)));
+            forCompetitorJson.put(COMPETITOR, competitorSerializer.serialize(new CompetitorWithBoatImpl(competitor, (DynamicBoat) boat)));
             final JSONArray maneuvers = new JSONArray();
             forCompetitorJson.put(MANEUVERS, maneuvers);
             for (final Maneuver maneuver : getManeuversDuringRace(trackedRace, competitor)) {

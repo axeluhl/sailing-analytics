@@ -12,15 +12,19 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
 /**
- * Manages a set of {@link Competitor} and {@link Boat} objects. There may be a transient implementation based on a simple cache,
+ * Manages a set of {@link Competitor}, {@link CompetitorWithBoat} and {@link Boat} objects. There may be a transient implementation based on a simple cache,
  * and there may be persistent implementations.
  * 
  * @author Axel Uhl (d043530)
  *
  */
-public interface CompetitorStore extends CompetitorFactory, BoatFactory {
+public interface CompetitorStore extends CompetitorFactory, BoatFactory, CompetitorWithBoatFactory {
     public interface CompetitorUpdateListener {
         void competitorUpdated(Competitor competitor);
+    }
+
+    public interface CompetitorWithBoatUpdateListener {
+        void competitorWithBoatUpdated(CompetitorWithBoat competitorWithBoat);
     }
 
     public interface BoatUpdateListener {
@@ -36,14 +40,14 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
     Competitor getExistingCompetitorByIdAsString(String idAsString);
     
     /**
-     * When a competitor is queried using {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)}
+     * When a competitor is queried using {@link #getOrCreateCompetitor()}
      * , and the competitor object for that ID already exists, it is generally returned unchanged, and the name, team
      * and boat parameters are not evaluated. This makes the data in this competitor store generally "write-once." This
      * method can be used to reset a competitor object to what a tracking provider or an external system supplies to
-     * {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)}. After calling this method, the
-     * next call to {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} with
+     * {@link #getOrCreateCompetitor()}. After calling this method, the
+     * next call to {@link #getOrCreateCompetitor()} with
      * <code>competitor</code>'s {@link Competitor#getId() ID} will
-     * {@link #updateCompetitor(String, String, String, Nationality)} the competitor in its updatable properties such as
+     * {@link #updateCompetitor()} the competitor in its updatable properties such as
      * the name, the sail ID and the nationality.
      */
     void allowCompetitorResetToDefaults(Competitor competitor);
@@ -78,8 +82,6 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
 
     CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c);
 
-    CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat c);
-
     CompetitorDTO convertToCompetitorDTO(Competitor c, Boat b);
 
     /**
@@ -89,6 +91,63 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
     void addCompetitorUpdateListener(CompetitorUpdateListener listener);
     
     void removeCompetitorUpdateListener(CompetitorUpdateListener listener);
+    
+    /**
+     * If a valid competitor is returned and the caller has information available that could be used to update the competitor,
+     * the caller must check the result of {@link #isCompetitorWithBoatToUpdateDuringGetOrCreate(CompetitorWithBoat)}, and if <code>true</code>,
+     * must call {@link #getOrCreateCompetitorWithBoat()} to cause an update of the competitor's values.
+     */
+    CompetitorWithBoat getExistingCompetitorWithBoatByIdAsString(String idAsString);
+    
+    /**
+     * When a competitor is queried using {@link #getOrCreateCompetitorWithBoat()}
+     * and the competitorWithBoat object for that ID already exists, it is generally returned unchanged, and the name, team
+     * and boat parameters are not evaluated. This makes the data in this competitor store generally "write-once." This
+     * method can be used to reset a competitorWithBoat object to what a tracking provider or an external system supplies to
+     * {@link #getOrCreateCompetitorWithBoat()}. After calling this method, the
+     * next call to {@link #getOrCreateCompetitorWithBoat()} with <code>competitor</code>'s {@link CompetitorWithBoat#getId() ID} will
+     * {@link #updateCompetitorWithBoat()} the competitorWithBoat in its updatable properties such as
+     * the name, the sail ID and the nationality.
+     */
+    void allowCompetitorWithBoatResetToDefaults(CompetitorWithBoat competitor);
+
+    int getCompetitorsWithBoatCount();
+
+    /**
+     * Removes all competitors from this store. Use with due care.
+     */
+    void clearCompetitorsWithBoat();
+    
+    /**
+     * Obtains a non-live snapshot of the list of competitors managed by this store.
+     */
+    Iterable<CompetitorWithBoat> getCompetitorsWithBoat();
+    
+    void removeCompetitorWithBoat(CompetitorWithBoat competitor);
+
+    /**
+     * Updates the competitor with {@link Competitor#getId() ID} <code>id</code> by setting the name, sail ID and nationality to
+     * the values provided. Doing so will not fire any events nor will it replicate this change from a master to any replicas.
+     * The calling client has to make sure that the changes applied will reach replicas and all other interested clients. It will
+     * be sufficient to ensure that subsequent DTOs produced from the competitor modified will reflect the changes.<p>
+     * 
+     * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an exception.
+     */
+    CompetitorWithBoat updateCompetitorWithBoat(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
+            Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
+    
+    void addCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors);
+
+    CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat c);
+
+    /**
+     * Listeners added here are notified whenever {@link #updateCompetitorWithBoat()} is called
+     * for any competitor in this store.
+     */
+    void addCompetitorWithBoatUpdateListener(CompetitorWithBoatUpdateListener listener);
+    
+    void removeCompetitorWithBoatUpdateListener(CompetitorWithBoatUpdateListener listener);
     
     /**
      * If a valid boat is returned and the caller has information available that could be used to update the boat,
@@ -122,6 +181,8 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
     
     void removeBoat(Boat boat);
 
+    void migrateCompetitorToHaveASeparateBoat(Competitor existingCompetitor, Boat separateBoat);
+    
     /**
      * Updates the boat with {@link Boat#getId() ID} <code>id</code> by setting the name, sail ID, etc. to
      * the values provided. Doing so will not fire any events nor will it replicate this change from a master to any replicas.

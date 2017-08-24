@@ -49,8 +49,8 @@ public class RaceLogFixedMarkPassingEventImpl extends RaceLogEventImpl implement
 
     @Override
     public String getShortInfo() {
-        return (getInvolvedBoats() == null || getInvolvedBoats().get(0) == null ? "Unknown" :
-            getInvolvedBoats().get(0).getName()) + " at mark " + getZeroBasedIndexOfPassedWaypoint() + " at "
+        return (getInvolvedCompetitors() == null || getInvolvedCompetitors().get(0) == null ? "Unknown" :
+            getInvolvedCompetitors().get(0).getName()) + " at mark " + getZeroBasedIndexOfPassedWaypoint() + " at "
                 + getTimePointOfFixedPassing();
     }
 }

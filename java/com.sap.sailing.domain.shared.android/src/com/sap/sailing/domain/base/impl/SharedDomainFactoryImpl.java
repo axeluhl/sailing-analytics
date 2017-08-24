@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
@@ -343,6 +344,11 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
+    public CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId) {
+        return getCompetitorStore().getExistingCompetitorWithBoatById(competitorId);
+    }
+
+    @Override
     public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor competitor) {
         return getCompetitorStore().isCompetitorToUpdateDuringGetOrCreate(competitor);
     }
@@ -359,6 +365,17 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
+    public CompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName,
+            Color displayColor, String email, URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "getting or creating competitor "+name+" with ID "+competitorId+" in domain factory "+this);
+        }
+        return getCompetitorStore().getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email, flagImageURI, team,
+                timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+    }
+
+    @Override
     public Boat getExistingBoatById(Serializable boatId) {
         return getCompetitorStore().getExistingBoatById(boatId);
     }
@@ -366,6 +383,11 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     @Override
     public boolean isBoatToUpdateDuringGetOrCreate(Boat boat) {
         return getCompetitorStore().isBoatToUpdateDuringGetOrCreate(boat);
+    }
+
+    @Override
+    public boolean isCompetitorWithBoatToUpdateDuringGetOrCreate(CompetitorWithBoat competitor) {
+        return getCompetitorStore().isCompetitorWithBoatToUpdateDuringGetOrCreate(competitor);
     }
 
     @Override

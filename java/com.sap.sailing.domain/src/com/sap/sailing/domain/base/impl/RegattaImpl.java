@@ -26,11 +26,11 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterBoatEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.BoatDeregistrator;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.BoatsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterEntryEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatDeregistrator;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogBoatsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogEntriesInLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -54,7 +54,6 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.AbstractLeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.BoatProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -159,7 +158,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private boolean useStartTimeInference;
 
     private transient CompetitorProviderFromRaceColumnsAndRegattaLike competitorsProvider;
-    private transient BoatProviderFromRaceColumnsAndRegattaLike boatsProvider;
+
     private AbstractLogEventAuthor regattaLogEventAuthorForRegatta = new LogEventAuthorImpl(
             AbstractLeaderboardImpl.class.getName(), 0);
     
@@ -423,14 +422,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
         }
         return competitorsProvider;
-    }
-
-    @Override
-    public BoatProviderFromRaceColumnsAndRegattaLike getOrCreateBoatsProvider() {
-        if (boatsProvider == null) {
-            boatsProvider = new BoatProviderFromRaceColumnsAndRegattaLike(this);
-        }
-        return boatsProvider;
     }
 
     @Override
@@ -865,7 +856,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
         RegattaLog regattaLog = getRegattaLog();
-        CompetitorsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new CompetitorsInLogAnalyzer<>(
+        RegattaLogEntriesInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new RegattaLogEntriesInLogAnalyzer<>(
                 regattaLog);
         return analyzer.analyze();
     }
@@ -881,7 +872,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         TimePoint now = MillisecondsTimePoint.now();
         
         for (Competitor competitor : competitors) {
-            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForRegatta,
+            regattaLog.add(new RegattaLogRegisterEntryEventImpl(now, now, regattaLogEventAuthorForRegatta,
                     UUID.randomUUID(), competitor));
         }
     }
@@ -902,7 +893,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public Iterable<Boat> getBoatsRegisteredInRegattaLog() {
         RegattaLog regattaLog = getRegattaLog();
-        BoatsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new BoatsInLogAnalyzer<>(
+        RegattaLogBoatsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new RegattaLogBoatsInLogAnalyzer<>(
                 regattaLog);
         return analyzer.analyze();
     }
@@ -931,7 +922,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void deregisterBoats(Iterable<Boat> boats) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
-        BoatDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new BoatDeregistrator<>(regattaLog, boats, regattaLogEventAuthorForRegatta);
+        RegattaLogBoatDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new RegattaLogBoatDeregistrator<>(regattaLog, boats, regattaLogEventAuthorForRegatta);
         deregisterer.deregister(deregisterer.analyze());
     }
 

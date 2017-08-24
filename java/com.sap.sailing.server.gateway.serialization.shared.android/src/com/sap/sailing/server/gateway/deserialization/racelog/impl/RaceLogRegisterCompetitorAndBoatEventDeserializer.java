@@ -25,7 +25,7 @@ public class RaceLogRegisterCompetitorAndBoatEventDeserializer extends BaseRaceL
 
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
-        assert competitors.size() == 1 : "Expected exactly one competitor for RegisterCompetitorEvent";
+        assert competitors.size() == 1 : "Expected exactly one competitor for RegisterCompetitorAndBoatEvent";
         Boat boat = boatDeserializer.deserialize(object);
     	return new RaceLogRegisterCompetitorAndBoatEventImpl(createdAt, timePoint, author, id, passId, competitors.get(0), boat);
     }

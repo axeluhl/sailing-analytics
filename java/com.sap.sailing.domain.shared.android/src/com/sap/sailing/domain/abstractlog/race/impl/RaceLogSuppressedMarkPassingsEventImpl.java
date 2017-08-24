@@ -42,6 +42,6 @@ public class RaceLogSuppressedMarkPassingsEventImpl extends RaceLogEventImpl imp
 
     @Override
     public String getShortInfo() {
-        return getInvolvedBoats().get(0).getName() + " at mark " + getZeroBasedIndexOfFirstSuppressedWaypoint();
+        return getInvolvedCompetitors().get(0).getName() + " at mark " + getZeroBasedIndexOfFirstSuppressedWaypoint();
     }
 }

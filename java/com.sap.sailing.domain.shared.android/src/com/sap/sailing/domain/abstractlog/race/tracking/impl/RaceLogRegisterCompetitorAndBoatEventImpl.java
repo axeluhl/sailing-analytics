@@ -46,7 +46,7 @@ public class RaceLogRegisterCompetitorAndBoatEventImpl extends BaseRegisterCompe
     }
 
     @Override
-    public List<Competitor> getInvolvedBoats() {
+    public List<Competitor> getInvolvedCompetitors() {
         return Collections.singletonList(getCompetitor());
     }
 

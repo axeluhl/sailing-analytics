@@ -2,10 +2,12 @@ package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -15,20 +17,51 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.domain.base.impl.NationalityImpl;
+import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
-import com.sap.sailing.domain.test.AbstractLeaderboardTest;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 
 public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     private DomainFactory domainFactory;
+
+    private final static BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
     
+    public static Competitor createCompetitor(String competitorName) {
+        return createCompetitor(competitorName, competitorName);
+    }
+
+    public static Competitor createCompetitor(String competitorName, Serializable id) {
+        return new CompetitorImpl(id, competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+                        new PersonImpl(competitorName, new NationalityImpl("GER"),
+                        /* dateOfBirth */ null, "This is famous "+competitorName)),
+                        new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")),
+                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    }
+
+    public static CompetitorWithBoat createCompetitorWithBoat(String competitorName) {
+        Competitor c = createCompetitor(competitorName);
+        DynamicBoat b = new BoatImpl("id12345", competitorName + "'s boat", boatClass, /* sailID */ null);
+        return new CompetitorWithBoatImpl(c, b);
+    }
+
     public StoreAndLoadCompetitorsTest() throws UnknownHostException, MongoException {
         super();
     }
@@ -59,12 +92,12 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
-        DynamicCompetitor c = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat(competitorName1).getCompetitor();
+        DynamicCompetitor c = (DynamicCompetitor) createCompetitor(competitorName1);
         c.setShortName(competitorShortName1);
         c.setFlagImage(flagImageURI1);
         mongoObjectFactory.storeCompetitor(c);
         
-        Collection<CompetitorWithBoat> allCompetitors = domainObjectFactory.loadAllCompetitors();
+        Collection<Competitor> allCompetitors = domainObjectFactory.loadAllCompetitors();
         assertEquals(1, Util.size(allCompetitors));
         DynamicCompetitor loadedCompetitor = (DynamicCompetitor) allCompetitors.iterator().next();
         assertEquals(flagImageURI1, loadedCompetitor.getFlagImage());
@@ -90,7 +123,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
 
-        DynamicCompetitor c = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Hasso", UUID.randomUUID()).getCompetitor();
+        DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso", UUID.randomUUID());
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
         c.setName("Hasso Plattner");
@@ -104,7 +137,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
-        DynamicCompetitor c = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Hasso").getCompetitor();
+        DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso");
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
 
@@ -118,7 +151,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
-        DynamicCompetitor c = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Hasso", UUID.randomUUID()).getCompetitor();
+        DynamicCompetitor c = (DynamicCompetitor) createCompetitor("Hasso", UUID.randomUUID());
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
 
