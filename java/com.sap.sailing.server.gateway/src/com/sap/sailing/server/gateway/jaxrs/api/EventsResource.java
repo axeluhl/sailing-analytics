@@ -303,10 +303,12 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     private Event validateAndCreateEvent(UriInfo uriInfo, String eventNameParam, String eventDescriptionParam,
-            String startDateParam, Long startDateAsMillis, String endDateParam, Long endDateAsMillis, String venueNameParam,
-            String venueLat, String venueLng, String isPublicParam,
-            String officialWebsiteURLParam, String baseURLParam, List<String> leaderboardGroupIdsListParam, String createLeaderboardGroupParam, String createRegattaParam, String boatClassNameParam, String numberOfRacesParam)
-            throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
+            String startDateParam, Long startDateAsMillis, String endDateParam, Long endDateAsMillis,
+            String venueNameParam, String venueLat, String venueLng, String isPublicParam,
+            String officialWebsiteURLParam, String baseURLParam, List<String> leaderboardGroupIdsListParam,
+            String createLeaderboardGroupParam, String createRegattaParam, String boatClassNameParam,
+            String numberOfRacesParam) throws ParseException, NotFoundException, NumberFormatException, IOException,
+            org.json.simple.parser.ParseException, InvalidDateException {
         boolean isPublic = isPublicParam == null ? false : Boolean.parseBoolean(isPublicParam);
         boolean createRegatta = createRegattaParam == null ? true : Boolean.parseBoolean(createRegattaParam);
         boolean createLeaderboardGroup = createLeaderboardGroupParam == null ? true : Boolean.parseBoolean(createLeaderboardGroupParam);

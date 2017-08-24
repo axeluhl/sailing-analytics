@@ -65,6 +65,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -78,6 +79,7 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -557,6 +559,81 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         return response;
     }
 
+    private static class LeaderboardAndRaceColumnAndFleetAndResponse {
+        private final Leaderboard leaderboard;
+        private final RaceColumn raceColumn;
+        private final Fleet fleet;
+        private final Response response;
+        public LeaderboardAndRaceColumnAndFleetAndResponse(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, Response response) {
+            super();
+            this.leaderboard = leaderboard;
+            this.raceColumn = raceColumn;
+            this.fleet = fleet;
+            this.response = response;
+        }
+        public Leaderboard getLeaderboard() {
+            return leaderboard;
+        }
+        public RaceColumn getRaceColumn() {
+            return raceColumn;
+        }
+        public Fleet getFleet() {
+            return fleet;
+        }
+        public Response getResponse() {
+            return response;
+        }
+    }
+    
+    private LeaderboardAndRaceColumnAndFleetAndResponse getLeaderboardAndRaceColumnAndFleet(String leaderboardName,
+            String raceColumnName, String fleetName) {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        final Response result;
+        final RaceColumn raceColumn;
+        final Fleet fleet;
+        if (leaderboard == null) {
+            result = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+            raceColumn = null;
+            fleet = null;
+        } else if (raceColumnName == null) {
+            result = Response
+                    .status(Status.BAD_REQUEST)
+                    .entity("Specify a valid "+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+" parameter.")
+                    .type(MediaType.TEXT_PLAIN).build();
+            raceColumn = null;
+            fleet = null;
+        } else {
+            raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn == null) {
+                result = Response
+                        .status(Status.NOT_FOUND)
+                        .entity("Could not find a race column '" + StringEscapeUtils.escapeHtml(raceColumnName) + "' in leaderboard '"
+                                + StringEscapeUtils.escapeHtml(leaderboardName) + "'.").type(MediaType.TEXT_PLAIN).build();
+                fleet = null;
+            } else if (fleetName == null) {
+                result = Response
+                        .status(Status.BAD_REQUEST)
+                        .entity("Specify a valid "+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+" parameter.")
+                        .type(MediaType.TEXT_PLAIN).build();
+                fleet = null;
+            } else {
+                fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet == null) {
+                    result = Response
+                            .status(Status.NOT_FOUND)
+                            .entity("Could not find fleet '" + StringEscapeUtils.escapeHtml(fleetName) + "' in leaderboard '" +
+                                    StringEscapeUtils.escapeHtml(leaderboardName)
+                                    + "' in race column "+raceColumnName+".").type(MediaType.TEXT_PLAIN).build();
+                } else {
+                    result = Response.ok().build(); // a simple OK as a default response; callers may of course override
+                }
+            }
+        }
+        return new LeaderboardAndRaceColumnAndFleetAndResponse(leaderboard, raceColumn, fleet, result);
+    }
+                
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{leaderboardName}/settrackingtimes")
@@ -568,54 +645,57 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             @QueryParam("endoftracking") String endOfTrackingAsISO,
             @QueryParam("endoftrackingasmillis") Long endOfTrackingAsMillis) throws InvalidDateException {
         SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
         final Response result;
-        if (leaderboard == null) {
-            result = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
-                    .type(MediaType.TEXT_PLAIN).build();
-        } else if (raceColumnName == null) {
-            result = Response
-                    .status(Status.BAD_REQUEST)
-                    .entity("Specify a valid "+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+" parameter.")
-                    .type(MediaType.TEXT_PLAIN).build();
-        } else {
-            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-            if (raceColumn == null) {
-                result = Response
-                        .status(Status.NOT_FOUND)
-                        .entity("Could not find a race column '" + StringEscapeUtils.escapeHtml(raceColumnName) + "' in leaderboard '"
-                                + StringEscapeUtils.escapeHtml(leaderboardName) + "'.").type(MediaType.TEXT_PLAIN).build();
-            } else if (fleetName != null) {
-                Fleet fleet = raceColumn.getFleetByName(fleetName);
-                if (fleet == null) {
-                    result = Response
-                            .status(Status.NOT_FOUND)
-                            .entity("Could not find fleet '" + StringEscapeUtils.escapeHtml(fleetName) + "' in leaderboard '" +
-                                    StringEscapeUtils.escapeHtml(leaderboardName)
-                                    + "' in race column "+raceColumnName+".").type(MediaType.TEXT_PLAIN).build();
-                } else {
-                    final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    final LogEventAuthorImpl author = new LogEventAuthorImpl(SecurityUtils.getSubject().getPrincipal().toString(), /* priority */ 0);
-                    JSONObject jsonResult = new JSONObject();
-                    if (startOfTrackingAsISO != null || startOfTrackingAsMillis != null) {
-                        final TimePoint startOfTracking = parseTimePoint(startOfTrackingAsISO, startOfTrackingAsMillis, null);
-                        raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
-                        jsonResult.put("startoftracking", startOfTracking == null ? null : startOfTracking.asMillis());
-                    }
-                    if (endOfTrackingAsISO != null || endOfTrackingAsMillis != null) {
-                        final TimePoint endOfTracking = parseTimePoint(endOfTrackingAsISO, endOfTrackingAsMillis, null);
-                        raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
-                        jsonResult.put("endoftracking", endOfTracking == null ? null : endOfTracking.asMillis());
-                    }           
-                    result = Response.ok(jsonResult.toJSONString()).build();
-                }
-            } else {
-                result = Response
-                        .status(Status.BAD_REQUEST)
-                        .entity("Specify a valid "+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+" parameter.")
-                        .type(MediaType.TEXT_PLAIN).build();
+        if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
+            final RaceLog raceLog = leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn().getRaceLog(leaderboardAndRaceColumnAndFleetAndResponse.getFleet());
+            final LogEventAuthorImpl author = new LogEventAuthorImpl(SecurityUtils.getSubject().getPrincipal().toString(), /* priority */ 0);
+            JSONObject jsonResult = new JSONObject();
+            if (startOfTrackingAsISO != null || startOfTrackingAsMillis != null) {
+                final TimePoint startOfTracking = parseTimePoint(startOfTrackingAsISO, startOfTrackingAsMillis, null);
+                raceLog.add(new RaceLogStartOfTrackingEventImpl(startOfTracking, author, raceLog.getCurrentPassId()));
+                jsonResult.put("startoftracking", startOfTracking == null ? null : startOfTracking.asMillis());
             }
+            if (endOfTrackingAsISO != null || endOfTrackingAsMillis != null) {
+                final TimePoint endOfTracking = parseTimePoint(endOfTrackingAsISO, endOfTrackingAsMillis, null);
+                raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTracking, author, raceLog.getCurrentPassId()));
+                jsonResult.put("endoftracking", endOfTracking == null ? null : endOfTracking.asMillis());
+            }           
+            result = Response.ok(jsonResult.toJSONString()).build();
+        } else {
+            result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
+        }
+        return result;
+    }
+    
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{leaderboardName}/starttracking")
+    public Response startRaceLogTracking(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
+            @QueryParam(RaceLogServletConstants.PARAMS_TRACK_WIND) Boolean trackWind,
+            @QueryParam(RaceLogServletConstants.PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION) Boolean correctWindDirectionByMagneticDeclination)
+                    throws NotDenotedForRaceLogTrackingException, Exception {
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
+        final Response result;
+        if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
+            JSONObject jsonResult = new JSONObject();
+            final RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
+            jsonResult.put("addeddenotation", adapter.denoteRaceForRaceLogTracking(getService(),
+                    leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard(),
+                    leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
+                    leaderboardAndRaceColumnAndFleetAndResponse.getFleet(), /* use default race name */ null));
+            final RaceHandle raceHandle = adapter.startTracking(getService(), leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard(),
+                    leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
+                    leaderboardAndRaceColumnAndFleetAndResponse.getFleet(),
+                    trackWind == null ? true : trackWind,
+                    correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination);
+            jsonResult.put("regatta", raceHandle.getRegatta().getName());
+            result = Response.ok(jsonResult.toJSONString()).build();
+        } else {
+            result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
         }
         return result;
     }
