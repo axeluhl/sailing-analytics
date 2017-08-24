@@ -5165,8 +5165,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> times;
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> times = new TrackingTimesFinder(raceLog).analyze();
+        if (raceLog != null) {
+            times = new TrackingTimesFinder(raceLog).analyze();
+        } else {
+            times = null;
+        }
         return times;
     }
 
