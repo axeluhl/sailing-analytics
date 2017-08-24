@@ -113,7 +113,7 @@ public class EventsResource extends AbstractSailingServerResource {
     
     @POST
     @Path("/createEvent")
-    @Consumes("text/plain")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("text/plain")
     public Response createEvent(
             @Context UriInfo uriInfo,
@@ -138,12 +138,18 @@ public class EventsResource extends AbstractSailingServerResource {
         if (enforceSecurityChecks) {
             SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
         }
-        Event event = validateAndCreateEvent(uriInfo, eventNameParam, eventDescriptionParam, startDateParam,
-                startDateAsMillis, endDateParam, endDateAsMillis, venueNameParam,
-                /* venue latitude */ venueLat, /* venue longitude */ venueLng, isPublicParam, officialWebsiteURLParam,
-                baseURLParam, leaderboardGroupIdsListParam, createLeaderboardGroupParam, createRegattaParam,
-                boatClassNameParam, numberOfRacesParam);
-        return ok(event.getId().toString(), MediaType.TEXT_PLAIN);
+        final Response response;
+        if (venueNameParam == null && (venueLat == null || venueLng == null)) {
+            response = Response.status(Status.PRECONDITION_FAILED).entity("No venue specified; provide either venuename or venuelat/venuelng").build();
+        } else {
+            Event event = validateAndCreateEvent(uriInfo, eventNameParam, eventDescriptionParam, startDateParam,
+                    startDateAsMillis, endDateParam, endDateAsMillis, venueNameParam,
+                    /* venue latitude */ venueLat, /* venue longitude */ venueLng, isPublicParam, officialWebsiteURLParam,
+                    baseURLParam, leaderboardGroupIdsListParam, createLeaderboardGroupParam, createRegattaParam,
+                    boatClassNameParam, numberOfRacesParam);
+            response = ok(event.getId().toString(), MediaType.TEXT_PLAIN);
+        }
+        return response;
     }
     
     @POST
