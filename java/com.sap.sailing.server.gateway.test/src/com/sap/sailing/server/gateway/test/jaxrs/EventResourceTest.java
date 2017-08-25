@@ -187,7 +187,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
 
     private JSONObject getRegatta(String eventName) {
         Response regattasResponse = regattasResource.getRegatta(eventName);
-        return toJSONObject(getIdFromRegattasResponse(regattasResponse));
+        return toJSONObject((String) regattasResponse.getEntity());
     }
 
     private boolean isValidCreateEventResponse(Response response) {
@@ -215,7 +215,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
 
     private JSONObject getLeaderboardAsJsonObject(Response leaderboardResponse) {
-        String strLeaderboardGroup = getIdFromLeaderboardResponse(leaderboardResponse);
+        String strLeaderboardGroup = (String) leaderboardResponse.getEntity();
         JSONObject objLeaderboardGroup = toJSONObject(strLeaderboardGroup);
         return objLeaderboardGroup;
     }
@@ -249,20 +249,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
     
 
-    private String getIdFromEventResponse(Response eventResponse) {
-        return (String) toJSONObject((String) eventResponse.getEntity()).get("id");
-    }
-
-    private String getIdFromLeaderboardResponse(Response leaderboardResponse) {
-        return (String) toJSONObject((String) leaderboardResponse.getEntity()).get("id");
-    }
-
     private String getIdFromCreateEventResponse(Response createEventResponse) {
         return (String) toJSONObject((String) createEventResponse.getEntity()).get("eventid");
-    }
-
-    private String getIdFromRegattasResponse(Response eventResponse) {
-        return (String) toJSONObject((String) eventResponse.getEntity()).get("name");
     }
 
     private <T extends AbstractSailingServerResource> T createResource(T resource){
