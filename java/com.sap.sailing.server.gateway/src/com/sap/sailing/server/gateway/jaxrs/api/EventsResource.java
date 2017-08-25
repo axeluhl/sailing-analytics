@@ -148,12 +148,12 @@ public class EventsResource extends AbstractSailingServerResource {
                     baseURLParam, leaderboardGroupIdsListParam, createLeaderboardGroupParam, createRegattaParam,
                     boatClassNameParam, numberOfRacesParam);
             final JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("eventid", eventAndLeaderboardGroupAndLeaderboard.getA().getId());
+            jsonResponse.put("eventid", eventAndLeaderboardGroupAndLeaderboard.getA().getId().toString());
             jsonResponse.put("eventname", eventAndLeaderboardGroupAndLeaderboard.getA().getName());
             jsonResponse.put("eventstartdate", eventAndLeaderboardGroupAndLeaderboard.getA().getStartDate()==null?null:eventAndLeaderboardGroupAndLeaderboard.getA().getStartDate().asMillis());
             jsonResponse.put("eventenddate", eventAndLeaderboardGroupAndLeaderboard.getA().getEndDate()==null?null:eventAndLeaderboardGroupAndLeaderboard.getA().getEndDate().asMillis());
             if (eventAndLeaderboardGroupAndLeaderboard.getB() != null) {
-                jsonResponse.put("leaderboardgroupid", eventAndLeaderboardGroupAndLeaderboard.getB().getId());
+                jsonResponse.put("leaderboardgroupid", eventAndLeaderboardGroupAndLeaderboard.getB().getId().toString());
             }
             if (eventAndLeaderboardGroupAndLeaderboard.getC() != null) {
                 jsonResponse.put("regatta", eventAndLeaderboardGroupAndLeaderboard.getC().getRegatta().getName());
