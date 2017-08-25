@@ -494,6 +494,7 @@
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
+                                    <action selector="createTrainingButtonTapped:" destination="RRc-Lh-2o4" eventType="touchUpInside" id="kIk-FP-clA"/>
                                     <action selector="startTrackingButtonTapped:" destination="dMx-RA-QpG" eventType="touchUpInside" id="JOf-ml-Kyg"/>
                                     <action selector="startTrackingButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="VMQ-cx-5yE"/>
                                 </connections>
@@ -545,6 +546,9 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="boatClassPickerView" destination="SQb-uc-DaV" id="wQ5-3s-ZkY"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kAU-Am-SqM" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -765,7 +769,7 @@
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="Pn3-0n-ZdQ" kind="presentation" id="Kqa-dt-WR3"/>
+                                    <segue destination="Pn3-0n-ZdQ" kind="presentation" identifier="CreateTraining" id="Kqa-dt-WR3"/>
                                 </connections>
                             </button>
                         </subviews>

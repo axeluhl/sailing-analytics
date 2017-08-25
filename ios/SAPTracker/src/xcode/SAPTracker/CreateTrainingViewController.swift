@@ -9,13 +9,17 @@
 import UIKit
 
 class CreateTrainingViewController: UIViewController {
-
+    
+    weak var trainingController: TrainingController!
+    
+    @IBOutlet weak var boatClassPickerView: UIPickerView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
     }
     
-    // Setup
+    // MARK: - Setup
     
     fileprivate func setup() {
         setupLocalization()
@@ -30,12 +34,17 @@ class CreateTrainingViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
     }
     
-    // Actions
+    // MARK: - Actions
     
     @IBAction func cancelButtonTapped(_ sender: Any) {
         presentingViewController?.dismiss(animated: true)
     }
-
+    
+    @IBAction func createTrainingButtonTapped(_ sender: Any) {
+        let boatClassName = BoatClassNames[boatClassPickerView.selectedRow(inComponent: 0)]
+        trainingController.createEvent(boatClassName: boatClassName)
+    }
+    
 }
 
 // MARK: - UIPickerViewDataSource
@@ -47,7 +56,7 @@ extension CreateTrainingViewController: UIPickerViewDataSource {
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return BoatClasses.count
+        return BoatClassNames.count
     }
     
 }
@@ -57,7 +66,7 @@ extension CreateTrainingViewController: UIPickerViewDataSource {
 extension CreateTrainingViewController: UIPickerViewDelegate {
 
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return BoatClasses[row]
+        return BoatClassNames[row]
     }
 
 }

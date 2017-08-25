@@ -12,6 +12,7 @@ class TrainingTableViewController: UIViewController {
     
     fileprivate struct Segue {
         static let About = "About"
+        static let CreateTraining = "CreateTraining"
         static let Settings = "Settings"
     }
     
@@ -73,12 +74,27 @@ class TrainingTableViewController: UIViewController {
         signUpController.logoutWithViewController(self)
     }
     
+    // MARK: - Segues
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if (segue.identifier == Segue.CreateTraining) {
+            let createTrainingNC = segue.destination as! UINavigationController
+            let createTrainingVC = createTrainingNC.viewControllers[0] as! CreateTrainingViewController
+            createTrainingVC.trainingController = trainingController
+        }
+    }
+    
     // MARK: - Properties
     
     fileprivate lazy var signUpController: SignUpController = {
         let signUpController = SignUpController(baseURLString: "https://ubilabstest.sapsailing.com")
         signUpController.delegate = self
         return signUpController
+    }()
+    
+    fileprivate lazy var trainingController: TrainingController = {
+        let trainingController = TrainingController(baseURLString: "https://ubilabstest.sapsailing.com")
+        return trainingController
     }()
     
 }

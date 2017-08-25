@@ -9,8 +9,7 @@
 import UIKit
 
 enum TrainingRequestManagerError: Error {
-    case checkInDataIsIncomplete
-    case communicationFailed
+    case invalidResponse
     case postCreateEventFailed
 }
 
@@ -59,15 +58,24 @@ class TrainingRequestManager: NSObject {
         body["boatclassname"] = boatClassName as AnyObject
         //        body["numberofraces"] = "" as AnyObject
         manager.post(urlString, parameters: body, success: { (requestOperation, responseObject) in
-            self.postCreateEventSuccess(responseObject: responseObject, success: success)
+            self.postCreateEventSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
             self.postCreateEventFailure(error: error, failure: failure)
         }
     }
     
-    fileprivate func postCreateEventSuccess(responseObject: Any, success: () -> Void) {
-        logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
-        success()
+    fileprivate func postCreateEventSuccess(responseObject: Any?, success: () -> Void, failure: (_ error: Error, _ message: String?) -> Void) {
+        if let data = responseObject as? Data {
+            do {
+                let jsonObject = try JSONSerialization.jsonObject(with: fixJSON(data: data))
+                print(jsonObject)
+                success()
+            } catch {
+                postCreateEventFailure(error: TrainingRequestManagerError.invalidResponse, failure: failure)
+            }
+        } else {
+            postCreateEventFailure(error: TrainingRequestManagerError.invalidResponse, failure: failure)
+        }
     }
     
     fileprivate func postCreateEventFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
@@ -86,4 +94,22 @@ class TrainingRequestManager: NSObject {
         return String(data: data as Data, encoding: String.Encoding.utf8)
     }
     
+    func fixJSON(data: Data) -> Data {
+        guard let json = String(data: data, encoding: String.Encoding.utf8) else { return data }
+        guard let newData = fixJSON(string: json).data(using: String.Encoding.utf8) else { return data }
+        return newData
+    }
+    
+    func fixJSON(string: String) -> String {
+        let pattern = "[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}"
+        let regex = try! NSRegularExpression(pattern: pattern, options: [])
+        let matches = regex.matches(in: string, options: [], range: NSRange(location: 0, length: string.characters.count))
+        var newString = string
+        matches.forEach { (match) in
+            let uuid = (string as NSString).substring(with: match.range)
+            newString = newString.replacingOccurrences(of: uuid, with: "\"\(uuid)\"")
+        }
+        return newString
+    }
+
 }

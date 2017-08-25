@@ -52,7 +52,7 @@ struct Images {
     static let RedHighlighted = UIImage(color: Colors.RedHighlighted)
 }
 
-let BoatClasses = [
+let BoatClassNames = [
     "18Footer",
     "2.4 Meter",
     "12 Meter",
