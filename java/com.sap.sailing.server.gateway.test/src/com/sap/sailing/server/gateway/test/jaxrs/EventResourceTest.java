@@ -241,7 +241,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
 
     private boolean validateUUID(String eventId) {
-        return UUID.fromString(eventId) != null;
+        return UUID.fromString(toJSONObject(eventId).get("eventid")) != null;
     }
 
     private String randomName() {
