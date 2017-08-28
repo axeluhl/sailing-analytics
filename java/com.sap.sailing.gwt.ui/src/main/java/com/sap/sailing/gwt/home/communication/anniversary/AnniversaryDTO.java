@@ -70,6 +70,11 @@ public class AnniversaryDTO implements DTO {
         return raceName;
     }
 
+    public boolean isAnnouncement() {
+        return eventID != null && leaderBoardName != null && remoteUrl != null && regattaName != null
+                && raceName != null;
+    }
+
     @Override
     public String toString() {
         return "AnniversaryInformation [target=" + target + ", countDown=" + countDown + ", type=" + type + ", eventID="
