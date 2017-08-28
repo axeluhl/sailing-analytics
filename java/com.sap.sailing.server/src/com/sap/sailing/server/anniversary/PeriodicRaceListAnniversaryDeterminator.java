@@ -2,16 +2,17 @@ package com.sap.sailing.server.anniversary;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -37,11 +38,6 @@ public class PeriodicRaceListAnniversaryDeterminator {
     private Integer currentRaceCount;
 
     private final RacingEventService raceService;
-
-    /**
-     * Internal known races count, skip all updates, if the amount did not change
-     */
-    private int lastAmount;
 
     public interface AnniversaryChecker {
         /**
@@ -83,21 +79,17 @@ public class PeriodicRaceListAnniversaryDeterminator {
         }
     }
 
-    public void uponUpdate(Collection<SimpleRaceInfo> remoteRaces, Collection<SimpleRaceInfo> localRaces) {
-        int amount = remoteRaces.size()+localRaces.size();
-        if(amount != lastAmount){
-            checkForNewAnniversaries(remoteRaces, localRaces);
+    public void uponUpdate(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
+        int amount = races.size();
+        if (currentRaceCount == null || amount != currentRaceCount) {
+            checkForNewAnniversaries(races);
         }
-        lastAmount = amount;
+        currentRaceCount = amount;
     }
 
-    private void checkForNewAnniversaries(Collection<SimpleRaceInfo> remoteRaces,
-            Collection<SimpleRaceInfo> localRaces) {
-        ArrayList<SimpleRaceInfo> allRaces = new ArrayList<>(remoteRaces);
-        allRaces.addAll(localRaces);
-
+    private void checkForNewAnniversaries(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
+        ArrayList<SimpleRaceInfo> allRaces = new ArrayList<>(races.values());
         Collections.sort(allRaces, new Comparator<SimpleRaceInfo>() {
-
             @Override
             public int compare(SimpleRaceInfo o1, SimpleRaceInfo o2) {
                 return o1.getStartOfRace().compareTo(o2.getStartOfRace());
@@ -130,7 +122,6 @@ public class PeriodicRaceListAnniversaryDeterminator {
             nextAnniversaryNumber = new Pair<Integer, AnniversaryType>(nearestNext, nearestType);
         }
         currentRaceCount = allRaces.size();
-
         if (requiresPersist) {
             mongoObjectFactory.storeAnniversaryData(knownAnniversaries);
         }

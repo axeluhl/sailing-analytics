@@ -753,24 +753,29 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private void setupAnniversaryHandling() {
         anniversaryUpdate = new Runnable() {
-            
+
             @Override
             public void run() {
-                ArrayList<SimpleRaceInfo> allRemoteRaces = new ArrayList<>();
-                for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> result : remoteSailingServerSet.getCachedRaceList().entrySet()) {
+                // we must push all races trough this map, to eleminate duplicates based on the RegattaAndRaceIdentifier
+                Map<RegattaAndRaceIdentifier, SimpleRaceInfo> allRaces = new HashMap<>();
+                for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> result : remoteSailingServerSet
+                        .getCachedRaceList().entrySet()) {
                     if (result.getValue().getB() != null) {
                         logger.warning("Could not update anniversary determinator, because remote server "
                                 + result.getKey().getURL() + " returned error " + result);
                     } else {
-                        Util.addAll(result.getValue().getA(), allRemoteRaces);
+                        for (SimpleRaceInfo race : result.getValue().getA()) {
+                            allRaces.put(race.getIdentifier(), race);
+                        }
                     }
                 }
-                raceListAnniversaryDeterminator.uponUpdate(allRemoteRaces,getLocalRaceList().values());
+                allRaces.putAll(getLocalRaceList());
+                raceListAnniversaryDeterminator.uponUpdate(allRaces);
             }
         };
-        
+
         remoteSailingServerSet.addRemoteRaceResultReceivedCallback(anniversaryUpdate);
-        
+
     }
 
 
