@@ -25,7 +25,6 @@ public class AnniversarySameDigitCheckerTest {
     public void at10000() {
         AnniversaryChecker checker = new SameDigitChecker();
         checker.update(10000);
-        System.out.println(checker.getAnniversaries());
         Assert.assertEquals(11111, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.REPEATED_DIGIT, checker.getType());
     }
@@ -34,7 +33,6 @@ public class AnniversarySameDigitCheckerTest {
     public void at11111() {
         AnniversaryChecker checker = new SameDigitChecker();
         checker.update(11111);
-        System.out.println(checker.getAnniversaries());
         Assert.assertEquals(Arrays.asList(new Integer[] { 11111 }), checker.getAnniversaries());
         Assert.assertEquals(22222, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.REPEATED_DIGIT, checker.getType());
