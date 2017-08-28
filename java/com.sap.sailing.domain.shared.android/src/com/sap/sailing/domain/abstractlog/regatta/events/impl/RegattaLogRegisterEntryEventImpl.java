@@ -7,7 +7,6 @@ import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterEntryEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sse.common.TimePoint;
 
 public class RegattaLogRegisterEntryEventImpl extends AbstractLogEventImpl<RegattaLogEventVisitor>
