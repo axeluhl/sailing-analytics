@@ -19,19 +19,22 @@ public class SameDigitChecker implements AnniversaryChecker {
 
     @Override
     public void update(int raceCount) {
+        if (raceCount < 0) {
+            throw new IllegalStateException("Negative Raceamount " + raceCount);
+        }
         pastAnniversaries.clear();
 
         int amount = 5;
         while (true) {
             // we do not use the 9 digit, as it is too close to the 10*x from the Quarterchecker
-            for (int digit = 1; digit < 8; digit++) {
+            for (int digit = 1; digit < 9; digit++) {
                 String digitAsString = String.valueOf(digit);
                 String toTest = "";
                 for (int magnitude = 0; magnitude < amount; magnitude++) {
                     toTest += digitAsString;
                 }
                 int candidate = Integer.parseInt(toTest);
-                if (candidate < raceCount) {
+                if (candidate <= raceCount) {
                     pastAnniversaries.add(candidate);
                 } else {
                     nextAnniversary = candidate;
