@@ -21,7 +21,7 @@ public class QuarterChecker implements AnniversaryChecker {
 
     @Override
     public void update(int raceCount) {
-        if(raceCount < 0){
+        if (raceCount < 0) {
             throw new IllegalStateException("Negative Raceamount " + raceCount);
         }
         pastAnniversaries.clear();
@@ -32,7 +32,8 @@ public class QuarterChecker implements AnniversaryChecker {
             for (int anniversary : ANNIVERSARIES) {
                 int anniversaryToCheck = anniversary * factor;
                 if (anniversaryToCheck < 0) {
-                    throw new IllegalStateException("overflow safeguard " + anniversary + " " + factor + " " + anniversaryToCheck);
+                    throw new IllegalStateException(
+                            "overflow safeguard " + anniversary + " " + factor + " " + anniversaryToCheck);
                 }
                 if (anniversaryToCheck > raceCount) {
                     nextAnniversary = anniversaryToCheck;

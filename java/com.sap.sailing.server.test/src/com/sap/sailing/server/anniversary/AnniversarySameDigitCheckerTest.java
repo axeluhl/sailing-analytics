@@ -64,7 +64,7 @@ public class AnniversarySameDigitCheckerTest {
     public void after22221() {
         AnniversaryChecker checker = new SameDigitChecker();
         checker.update(22221);
-        Assert.assertTrue(checker.getAnniversaries().contains(11111));
+        Assert.assertEquals(Arrays.asList(new Integer[] { 11111 }), checker.getAnniversaries());
         Assert.assertEquals(22222, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.REPEATED_DIGIT, checker.getType());
     }

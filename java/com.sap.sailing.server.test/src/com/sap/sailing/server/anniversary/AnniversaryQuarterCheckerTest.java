@@ -61,7 +61,7 @@ public class AnniversaryQuarterCheckerTest {
     public void after25000() {
         AnniversaryChecker checker = new QuarterChecker();
         checker.update(25000);
-        Assert.assertEquals(Arrays.asList(new Integer[] { 10000,25000 }), checker.getAnniversaries());
+        Assert.assertEquals(Arrays.asList(new Integer[] { 10000, 25000 }), checker.getAnniversaries());
         Assert.assertEquals(50000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
@@ -70,7 +70,7 @@ public class AnniversaryQuarterCheckerTest {
     public void after25001() {
         AnniversaryChecker checker = new QuarterChecker();
         checker.update(25001);
-        Assert.assertEquals(Arrays.asList(new Integer[] { 10000,25000 }), checker.getAnniversaries());
+        Assert.assertEquals(Arrays.asList(new Integer[] { 10000, 25000 }), checker.getAnniversaries());
         Assert.assertEquals(50000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
@@ -79,7 +79,10 @@ public class AnniversaryQuarterCheckerTest {
     public void afterMaxValidRaceCount() {
         AnniversaryChecker checker = new QuarterChecker();
         checker.update(999999999);
-        Assert.assertEquals(Arrays.asList(new Integer[] { 10000,25000,50000,75000,100000,250000,500000,750000,1000000,2500000,5000000,7500000,10000000,25000000,50000000,75000000,100000000,250000000,500000000,750000000 }), checker.getAnniversaries());
+        Assert.assertEquals(Arrays.asList(
+                new Integer[] { 10000, 25000, 50000, 75000, 100000, 250000, 500000, 750000, 1000000, 2500000, 5000000,
+                        7500000, 10000000, 25000000, 50000000, 75000000, 100000000, 250000000, 500000000, 750000000 }),
+                checker.getAnniversaries());
         Assert.assertEquals(1000000000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
