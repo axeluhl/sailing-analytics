@@ -1,5 +1,7 @@
 package com.sap.sailing.server.anniversary;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.dto.AnniversaryType;
@@ -23,8 +25,7 @@ public class AnniversaryQuarterCheckerTest {
     public void at10000() {
         AnniversaryChecker checker = new QuarterChecker();
         checker.update(10000);
-        System.out.println(checker.getAnniversaries());
-        Assert.assertTrue(checker.getAnniversaries().contains(10000));
+        Assert.assertEquals(Arrays.asList(new Integer[] { 10000 }), checker.getAnniversaries());
         Assert.assertEquals(25000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
@@ -33,7 +34,7 @@ public class AnniversaryQuarterCheckerTest {
     public void after10001() {
         AnniversaryChecker checker = new QuarterChecker();
         checker.update(10001);
-        Assert.assertTrue(checker.getAnniversaries().contains(10000));
+        Assert.assertEquals(Arrays.asList(new Integer[] { 10000 }), checker.getAnniversaries());
         Assert.assertEquals(25000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
@@ -41,8 +42,8 @@ public class AnniversaryQuarterCheckerTest {
     @Test
     public void after11111() {
         AnniversaryChecker checker = new QuarterChecker();
-        checker.update(10001);
-        Assert.assertTrue(checker.getAnniversaries().contains(10000));
+        checker.update(11111);
+        Assert.assertEquals(Arrays.asList(new Integer[] { 10000 }), checker.getAnniversaries());
         Assert.assertEquals(25000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
@@ -51,7 +52,7 @@ public class AnniversaryQuarterCheckerTest {
     public void after24999() {
         AnniversaryChecker checker = new QuarterChecker();
         checker.update(24999);
-        Assert.assertTrue(checker.getAnniversaries().contains(10000));
+        Assert.assertEquals(Arrays.asList(new Integer[] { 10000 }), checker.getAnniversaries());
         Assert.assertEquals(25000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
@@ -60,8 +61,7 @@ public class AnniversaryQuarterCheckerTest {
     public void after25000() {
         AnniversaryChecker checker = new QuarterChecker();
         checker.update(25000);
-        Assert.assertTrue(checker.getAnniversaries().contains(10000));
-        Assert.assertTrue(checker.getAnniversaries().contains(25000));
+        Assert.assertEquals(Arrays.asList(new Integer[] { 10000,25000 }), checker.getAnniversaries());
         Assert.assertEquals(50000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
@@ -70,8 +70,7 @@ public class AnniversaryQuarterCheckerTest {
     public void after25001() {
         AnniversaryChecker checker = new QuarterChecker();
         checker.update(25001);
-        Assert.assertTrue(checker.getAnniversaries().contains(10000));
-        Assert.assertTrue(checker.getAnniversaries().contains(25000));
+        Assert.assertEquals(Arrays.asList(new Integer[] { 10000,25000 }), checker.getAnniversaries());
         Assert.assertEquals(50000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
@@ -80,26 +79,7 @@ public class AnniversaryQuarterCheckerTest {
     public void afterMaxValidRaceCount() {
         AnniversaryChecker checker = new QuarterChecker();
         checker.update(999999999);
-        Assert.assertTrue(checker.getAnniversaries().contains(10000));
-        Assert.assertTrue(checker.getAnniversaries().contains(25000));
-        Assert.assertTrue(checker.getAnniversaries().contains(50000));
-        Assert.assertTrue(checker.getAnniversaries().contains(75000));
-        Assert.assertTrue(checker.getAnniversaries().contains(100000));
-        Assert.assertTrue(checker.getAnniversaries().contains(250000));
-        Assert.assertTrue(checker.getAnniversaries().contains(500000));
-        Assert.assertTrue(checker.getAnniversaries().contains(750000));
-        Assert.assertTrue(checker.getAnniversaries().contains(1000000));
-        Assert.assertTrue(checker.getAnniversaries().contains(2500000));
-        Assert.assertTrue(checker.getAnniversaries().contains(5000000));
-        Assert.assertTrue(checker.getAnniversaries().contains(7500000));
-        Assert.assertTrue(checker.getAnniversaries().contains(10000000));
-        Assert.assertTrue(checker.getAnniversaries().contains(25000000));
-        Assert.assertTrue(checker.getAnniversaries().contains(50000000));
-        Assert.assertTrue(checker.getAnniversaries().contains(75000000));
-        Assert.assertTrue(checker.getAnniversaries().contains(100000000));
-        Assert.assertTrue(checker.getAnniversaries().contains(250000000));
-        Assert.assertTrue(checker.getAnniversaries().contains(500000000));
-        Assert.assertTrue(checker.getAnniversaries().contains(750000000));
+        Assert.assertEquals(Arrays.asList(new Integer[] { 10000,25000,50000,75000,100000,250000,500000,750000,1000000,2500000,5000000,7500000,10000000,25000000,50000000,75000000,100000000,250000000,500000000,750000000 }), checker.getAnniversaries());
         Assert.assertEquals(1000000000, checker.getNextAnniversary().intValue());
         Assert.assertEquals(AnniversaryType.QUARTER, checker.getType());
     }
