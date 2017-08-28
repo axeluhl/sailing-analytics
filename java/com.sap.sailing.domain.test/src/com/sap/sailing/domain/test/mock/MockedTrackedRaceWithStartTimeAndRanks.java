@@ -708,4 +708,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
+
+    public Distance getEstimatedDistanceToComplete(TimePoint now) {
+        return null;
+    }
 }

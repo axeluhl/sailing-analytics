@@ -90,7 +90,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     public void forPlaceSelection(PlaceCallback callback) {
         EventViewDTO event = eventDTO;
         if (event.getType() == EventType.SERIES_EVENT) {
-            for(EventReferenceWithStateDTO seriesEvent : event.getEventsOfSeries()) {
+            for(EventReferenceWithStateDTO seriesEvent : event.getEventsOfSeriesSorted()) {
                 if(seriesEvent.getState() != EventState.PLANNED) {
                     AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));
                     callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())));

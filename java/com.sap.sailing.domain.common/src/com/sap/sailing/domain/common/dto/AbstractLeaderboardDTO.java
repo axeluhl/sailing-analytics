@@ -439,4 +439,9 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         }
         return result;
     }
+
+    public String getName() {
+        return name;
+    }
+
 }

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
@@ -95,7 +96,10 @@ public class CompetitorImpl implements DynamicCompetitor {
         return team;
     }
 
-    @Override
+    public Nationality getNationality() {
+        return getTeam() == null ? null : getTeam().getNationality();
+    }
+
     public Competitor resolve(SharedDomainFactory domainFactory) {
         Competitor result = domainFactory
                 .getOrCreateCompetitor(getId(), getName(), getShortName(), getColor(), getEmail(), getFlagImage(), getTeam(),

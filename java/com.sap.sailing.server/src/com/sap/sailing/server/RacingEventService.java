@@ -14,11 +14,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.apache.shiro.subject.Subject;
+
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
+import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -68,6 +72,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
+import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -280,24 +285,24 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
      * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
-     * @param id TODO
      * @param groupName
      *            The name of the new group
      * @param description
      *            The description of the new group
-     * @param displayName TODO
-     * @param displayGroupsInReverseOrder TODO
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description,
-            String displayName, boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    LeaderboardGroup addLeaderboardGroup(UUID leaderboardGroupId, String groupName, String description,
+            String displayName, boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
-     * @param groupName The name of the group which shall be removed.
+     * 
+     * @param groupName
+     *            The name of the group which shall be removed.
      */
     void removeLeaderboardGroup(String groupName);
 
@@ -564,6 +569,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     RaceTracker getRaceTrackerById(Object id);
     
+    /**
+     * Tries to obtain a priority-0 author from a currently logged-in {@link Subject}. If no user
+     * is currently logged on or subject's {@link Subject#getPrincipal() principal} is not set,
+     * a default server author object with priority 0 is returned as default.
+     */
     AbstractLogEventAuthor getServerAuthor();
     
     CompetitorStore getCompetitorStore();
@@ -668,4 +678,69 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @see #getNumberOfTrackedRacesToRestore()
      */
     int getNumberOfTrackedRacesRestored();
+
+    /**
+     * Provides {@link Statistics statistic information} for every year which is covered by the local
+     * server.
+     * 
+     * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
+     */
+    Map<Integer, Statistics> getLocalStatisticsByYear();
+
+    /**
+     * Provides {@link Statistics statistic information} for every year which is covered by the local and
+     * all remote servers.
+     * 
+     * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
+     */
+    Map<Integer, Statistics> getOverallStatisticsByYear();
+
+    /**
+     * Obtains information about all {@link TrackedRace}s connected to {@link Event}s managed locally on this server
+     * instance or reachable through a remote server reference, having a non-{@code null}
+     * {@link TrackedRace#getStartOfRace() start time}. Being "connected" here means that the race is linked to a
+     * {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
+     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
+     * 
+     * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
+     *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
+     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null} for races managed locally on this server;
+     *         for races obtained through remote server references, the remote URL will be that of the remote server
+     *         reference. Callers may modify the map as each call to this method will produce a new copy.
+     */
+    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList();
+
+    /**
+     * Obtains information about all {@link TrackedRace}s connected to {@link Event}s managed locally on this server
+     * instance, having a non-{@code null} {@link TrackedRace#getStartOfRace() start time}. Being "connected" here means
+     * that the race is linked to a {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
+     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
+     * 
+     * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
+     *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
+     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null}, meaning that the tracked races live
+     *         locally on this server. Callers may modify the map as each call to this method will produce a new copy.
+     */
+    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
+
+    /**
+     * Provides a {@link DetailedRaceInfo} for the given {@link RegattaAndRaceIdentifier}. The algorithm first tries to
+     * resolve this via {@link getFullDetailsForRaceLocal(RegattaAndRaceIdentifier)}, if no local result can be
+     * determined, the identifier is resolved against the cached remote race list in the
+     * {@link com.sap.sailing.server.impl.RemoteSailingServerSet}. If a match is found, the remoteUrl stored in the
+     * match is used to make a remote REST call to retrieve the required information from the remote server. This method
+     * is intended to be used to resolve detailed information for determined anniversary races.
+     * 
+     * @return a DetailedRaceInfo object or null if the race could not be resolved
+     */
+    DetailedRaceInfo getFullDetailsForRaceCascading(RegattaAndRaceIdentifier regattaNameAndRaceName);
+
+    /**
+     * Provides a {@link DetailedRaceInfo} for the given {@link RegattaAndRaceIdentifier}. This method only tries to
+     * resolve the race against locally tracked races reachable from an event that have a startOfRace that is not
+     * {@code null}.
+     * 
+     * @return a DetailedRaceInfo object or null if the race could not be resolved
+     */
+    DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier);
 }

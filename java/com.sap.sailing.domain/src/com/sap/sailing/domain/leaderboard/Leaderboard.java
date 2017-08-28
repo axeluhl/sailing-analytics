@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.Distance;
@@ -98,6 +99,13 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @return all competitors in this leaderboard, including the suppressed ones.
      */
     Iterable<Competitor> getAllCompetitors();
+
+    /**
+     * Same as {@link #getAllCompetitors()}, only that additionally the method returns as a first element in a pair
+     * which {@link RaceDefinition}s were used in order to fetch their {@link RaceDefinition#getCompetitors()} to
+     * assemble the results.
+     */
+    Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered();
 
     /**
      * Retrieves all competitors expected to race in the fleet and column specified.

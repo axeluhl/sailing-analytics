@@ -4,12 +4,42 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
     <div class="innerContent">
+        <h5 class="articleSubheadline">August 2017</h5>
+        <ul class="bulletList">
+           <li>In the list of past events, you can now find some statistics for the current and past years.
+               The statistics can be found at the end of the list of events for a year.
+               To see statistics of a past year, you need to expand the list of events for that year.
+           </li>
+           <li>The simulation overlay is now also available prior to the start of a live race. It can
+               therefore, e.g., be used to "predict" the best course on the first upwind leg based on
+               the latest wind measurements.
+           </li>
+           <li>In several places you can now find statistics regarding the highest speed and the competitor that produced it (fastest competitor).
+               These statistics are available for events and regattas as well as in the yearly statistics.
+           </li>
+        </ul>
+        
         <h5 class="articleSubheadline">July 2017</h5>
         <ul class="bulletList">
            <li>When using Smartphone Tracking, mark positions obtained by pinging or tracking or manually
                assigning a static position can now be removed using the "Delete Fix" pop-up menu item
                in the Mark Position Editor. It will require removing and re-tracking the race to make
                the removal take effect.
+           </li>
+           <li>In <code>/gwt/RaceBoard.html</code> it's now possible to display an overlay that shows
+               the estimated duration based on the course and the current wind conditions. To show this information,
+               you need to select the respective option in the map's settings dialog. The option's visibility
+               depends on the availability of sufficient polar data for the boat class.
+           </li>
+           <li>In <code>/gwt/RaceBoard.html</code> it isn't possible anymore to select other races to be shown in the embedded leaderboard.
+               This possibility caused several problems in the past. The leaderboard will now always stick to the single race for which the raceboard was opened.
+           </li>
+           <li>The autoplay sites have been re-implemented from ground up:
+               <ul>
+                    <li>Autoplay now uses the new settings framework</li>
+                    <li>Classic-Autoplay represents the old autoplay  </li>
+                    <li>Sixty-Inch-Autoplay is a new, more complex, redesigned,  multiview autoplay targeted at big screen displays</li>
+               </ul> 
            </li>
         </ul>
         

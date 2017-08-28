@@ -41,12 +41,14 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedWithDegreeBearingImpl;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeed;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.impl.DistanceCache;
@@ -107,6 +109,20 @@ public class TrackTest {
         track.addGPSFix(gpsFix3);
         track.addGPSFix(gpsFix4);
         track.addGPSFix(gpsFix5);
+    }
+    
+    @Test
+    public void bearingInterpolationTest() {
+        TimePoint betweenFirstAndSecond = gpsFix1.getTimePoint().plus(gpsFix1.getTimePoint().until(gpsFix2.getTimePoint()).divide(2));
+        Bearing bearingBetweenFirstAndSecond = track.getInterpolatedValue(betweenFirstAndSecond, f->new ScalableBearing(f.getSpeed().getBearing()));
+        assertEquals(bearingBetweenFirstAndSecond.getDegrees(), gpsFix1.getSpeed().getBearing().middle(gpsFix2.getSpeed().getBearing()).getDegrees(), 0.00001);
+    }
+    
+    @Test
+    public void speedInterpolationTest() {
+        TimePoint betweenFirstAndSecond = gpsFix1.getTimePoint().plus(gpsFix1.getTimePoint().until(gpsFix2.getTimePoint()).divide(2));
+        Speed speedBetweenFirstAndSecond = track.getInterpolatedValue(betweenFirstAndSecond, f->new ScalableSpeed(f.getSpeed()));
+        assertEquals(speedBetweenFirstAndSecond.getKnots(), (gpsFix1.getSpeed().getKnots()+gpsFix2.getSpeed().getKnots())/2, 0.01);
     }
     
     /**

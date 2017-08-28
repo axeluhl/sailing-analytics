@@ -1,12 +1,15 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +21,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoCommandException;
@@ -68,6 +72,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -96,6 +101,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
@@ -241,11 +247,28 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public DBCollection getGPSFixCollection() {
         DBCollection gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
+        
+        // Removes old indexes not needed anymore
+        dropIndexSafe(gpsFixCollection, "DEVICE_ID.DEVICE_TYPE_SPECIFIC_ID_1_GPSFIX.TIME_AS_MILLIS_1");
+        dropIndexSafe(gpsFixCollection, "DEVICE_ID_1_GPSFIX.TIME_AS_MILLIS_1");
+        
         DBObject index = new BasicDBObject();
-        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
-        index.put(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name(), 1);
+        index.put(FieldNames.DEVICE_ID.name(), 1);
+        index.put(FieldNames.TIME_AS_MILLIS.name(), 1);
         gpsFixCollection.createIndex(index);
         return gpsFixCollection;
+    }
+    
+    /**
+     * Dropping an index that does not exist causes an exception. This method first checks if the index exist to prevent
+     * an exception from occurring.
+     */
+    private void dropIndexSafe(DBCollection collection, String indexName) {
+        collection.getIndexInfo().forEach(indexInfo -> {
+            if (indexName.equals(indexInfo.get("name"))) {
+                collection.dropIndex(indexName);
+            }
+        });
     }
 
     public DBCollection getGPSFixMetadataCollection() {
@@ -1752,6 +1775,53 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void removeAllConnectivityParametersForRacesToRestore() {
         database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name()).drop();
+    }
+
+    @Override
+    public void storeAnniversaryData(Map<Integer, DetailedRaceInfo> data) {
+        try {
+            DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
+            for (Entry<Integer, DetailedRaceInfo> anniversary : data.entrySet()) {
+                BasicDBObject currentProxy = new BasicDBObject("anniversary", anniversary.getKey().intValue());
+                BasicDBObject newValue = new BasicDBObject("anniversary", anniversary.getKey().intValue());
+                newValue.append("race", anniversary.getValue().getIdentifier().getRaceName());
+                newValue.append("regatta", anniversary.getValue().getIdentifier().getRegattaName());
+                newValue.append("leaderboardName", anniversary.getValue().getLeaderboardName());
+                storeTimePoint(anniversary.getValue().getStartOfRace(), newValue, ("startOfRace"));
+                newValue.append("eventID", anniversary.getValue().getEventID().toString());
+                newValue.append("remoteUrl", anniversary.getValue().getRemoteUrl());
+                anniversarysStored.update(currentProxy, newValue, true, false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public Map<Integer, DetailedRaceInfo> getAnniversaryData() throws MalformedURLException {
+        HashMap<Integer, DetailedRaceInfo> fromDb = new HashMap<>();
+        DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
+        DBCursor cursor = anniversarysStored.find();
+        while (cursor.hasNext()) {
+            DBObject toLoad = cursor.next();
+            String leaderboardName = toLoad.get("leaderboardName").toString();
+            String eventID = toLoad.get("eventID").toString();
+
+            TimePoint startOfRace = new MillisecondsTimePoint(((Number) toLoad.get("startOfRace")).longValue());
+            String race = toLoad.get("race").toString();
+            String regatta = toLoad.get("regatta").toString();
+            Object rurl = toLoad.get("remoteUrl");
+            final URL remoteUrlOrNull;
+            if (rurl != null) {
+                remoteUrlOrNull = new URL(rurl.toString());
+            } else {
+                remoteUrlOrNull = null;
+            }
+            DetailedRaceInfo loadedAnniversary = new DetailedRaceInfo(new RegattaNameAndRaceName(regatta, race), leaderboardName , startOfRace, UUID.fromString(eventID), remoteUrlOrNull);
+            int anniversary = ((Number) toLoad.get("anniversary")).intValue();
+            fromDb.put(anniversary, loadedAnniversary);
+        }
+        return fromDb;
     }
 
 }

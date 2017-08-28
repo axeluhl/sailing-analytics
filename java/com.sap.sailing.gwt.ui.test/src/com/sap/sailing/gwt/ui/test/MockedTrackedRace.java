@@ -876,4 +876,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Boat getBoatOfCompetitor(Competitor competitor) {
         return null;
     }
+
+    public Distance getEstimatedDistanceToComplete(TimePoint now) {
+        return null;
+    }
 }

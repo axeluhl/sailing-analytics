@@ -244,7 +244,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         
         checkToEnableSettingsButton();
     }
-    
+
     private void checkToEnableSettingsButton() {
         if (eventDTO != null && raceGroupDTOs.size() > 0) {
             settingsButton.setEnabled(true);
@@ -255,4 +255,5 @@ public class RegattaOverviewPanel extends SimplePanel {
         eventDTO = event;
         fireEvent(new EventDTOLoadedEvent(eventDTO));
     }
+        
 }

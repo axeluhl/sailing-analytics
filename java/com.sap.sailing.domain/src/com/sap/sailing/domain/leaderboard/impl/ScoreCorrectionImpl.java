@@ -370,7 +370,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     @Override
     public Result getCorrectedScore(final Callable<Integer> trackedRankProvider, final Competitor competitor,
-            final RaceColumn raceColumn, final TimePoint timePoint,
+            final RaceColumn raceColumn, Leaderboard leaderboard, final TimePoint timePoint,
             final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
             final ScoringScheme scoringScheme) {
         Double result;
@@ -390,7 +390,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             if (correctedNonMaxedScore == null) {
                 result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason.getMaxPointsReason(),
                         getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher),
-                        numberOfCompetitorsInLeaderboardFetcher, timePoint);
+                        numberOfCompetitorsInLeaderboardFetcher, timePoint, leaderboard);
             } else {
                 result = correctedNonMaxedScore;
             }

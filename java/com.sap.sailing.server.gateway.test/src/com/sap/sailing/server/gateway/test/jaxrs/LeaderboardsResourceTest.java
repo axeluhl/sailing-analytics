@@ -42,7 +42,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     private String regattaBaseName = "TestRegatta";
     
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
     }
     

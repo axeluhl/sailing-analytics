@@ -13,8 +13,10 @@ import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.util.RegattaUtil;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * The name shall be unique across all regattas tracked concurrently. In particular, if you want to keep apart regattas
@@ -120,6 +122,13 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
     Iterable<Competitor> getAllCompetitors();
 
     Iterable<Boat> getAllBoats();
+
+    /**
+     * Same as {@link #getAllCompetitors()}, only that additionally the method returns as a first element of a pair
+     * which {@link RaceDefinition}s' {@link RaceDefinition#getCompetitors() competitors} were used in assembling the
+     * result.
+     */
+    Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered();
 
     /**
      * Will remove the series from this regatta. Will also call {@link RaceColumn#removeRaceIdentifier(Fleet)} to make

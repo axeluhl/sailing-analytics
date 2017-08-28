@@ -31,6 +31,7 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -94,11 +95,11 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
 
     /**
      * This default implementation collects all competitors by visiting all {@link TrackedRace}s associated with this
-     * leaderboard's columns (see {@link #getTrackedRaces()}).
+     * leaderboard's columns (see {@link #getTrackedRaces()}) and considering the race and regatta logs.
      */
     @Override
-    public Iterable<Competitor> getAllCompetitors() {
-        return getOrCreateCompetitorsProvider().getAllCompetitors();
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        return getOrCreateCompetitorsProvider().getAllCompetitorsWithRaceDefinitionsConsidered();
     }
 
     @Override

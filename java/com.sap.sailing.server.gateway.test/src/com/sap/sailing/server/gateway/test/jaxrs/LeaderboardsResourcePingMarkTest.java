@@ -57,9 +57,8 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
             "    }";
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
-        
         mark = racingEventService.getBaseDomainFactory().getOrCreateMark("id", "name");
         Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), /* canBoatsOfCompetitorsChangePerRace */ true, MillisecondsTimePoint.now(),
                 MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections

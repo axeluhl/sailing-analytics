@@ -35,19 +35,19 @@ class LocationManager: NSObject {
         }
     }
     
-    enum LocationManagerError: ErrorType {
-        case LocationServicesDenied
-        case LocationServicesDisabled
+    enum LocationManagerError: Error {
+        case locationServicesDenied
+        case locationServicesDisabled
         var description: String {
             switch self {
-            case .LocationServicesDenied: return Translation.LocationManager.LocationServicesDeniedError.String
-            case .LocationServicesDisabled: return Translation.LocationManager.LocationServicesDisabledError.String
+            case .locationServicesDenied: return Translation.LocationManager.LocationServicesDeniedError.String
+            case .locationServicesDisabled: return Translation.LocationManager.LocationServicesDisabledError.String
             }
         }
     }
     
-    private let locationManager: CLLocationManager!
-    private (set) var isTracking: Bool = false
+    fileprivate let locationManager: CLLocationManager!
+    fileprivate (set) var isTracking: Bool = false
     
     class var sharedManager: LocationManager {
         struct Singleton {
@@ -64,15 +64,16 @@ class LocationManager: NSObject {
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupLocationManager()
     }
     
-    private func setupLocationManager() {
+    fileprivate func setupLocationManager() {
         locationManager.pausesLocationUpdatesAutomatically = false;
         if #available(iOS 9, *) {
             locationManager.allowsBackgroundLocationUpdates = true;
         }
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.delegate = self
     }
     
@@ -80,10 +81,10 @@ class LocationManager: NSObject {
     
     func startTracking() throws {
         guard CLLocationManager.locationServicesEnabled() else {
-            throw LocationManagerError.LocationServicesDisabled
+            throw LocationManagerError.locationServicesDisabled
         }
-        guard CLLocationManager.authorizationStatus() != CLAuthorizationStatus.Denied else {
-            throw LocationManagerError.LocationServicesDenied
+        guard CLLocationManager.authorizationStatus() != CLAuthorizationStatus.denied else {
+            throw LocationManagerError.locationServicesDenied
         }
 
         // Ask user to always track location
@@ -95,8 +96,8 @@ class LocationManager: NSObject {
         isTracking = true;
         
         // Send notification
-        let notification = NSNotification(name: NotificationType.Started, object: self)
-        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+        let notification = Notification(name: Notification.Name(rawValue: NotificationType.Started), object: self)
+        NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
     }
     
     func stopTracking() {
@@ -107,8 +108,8 @@ class LocationManager: NSObject {
         isTracking = false;
         
         // Send notification
-        let notification = NSNotification(name: NotificationType.Stopped, object: self)
-        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+        let notification = Notification(name: Notification.Name(rawValue: NotificationType.Stopped), object: self)
+        NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
     }
     
 }
@@ -117,18 +118,18 @@ class LocationManager: NSObject {
 
 extension LocationManager: CLLocationManagerDelegate {
         
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         let locationData = LocationData(location: location)
         let userInfo = [UserInfo.LocationData: locationData]
-        let notification = NSNotification(name: NotificationType.Updated, object: self, userInfo: userInfo)
-        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+        let notification = Notification(name: Notification.Name(rawValue: NotificationType.Updated), object: self, userInfo: userInfo)
+        NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
     }
 
-    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         let userInfo = [UserInfo.Error: error]
-        let notification = NSNotification(name: NotificationType.Failed, object: self, userInfo: userInfo)
-        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+        let notification = Notification(name: Notification.Name(rawValue: NotificationType.Failed), object: self, userInfo: userInfo)
+        NotificationQueue.default.enqueue(notification, postingStyle: NotificationQueue.PostingStyle.asap)
     }
     
 }

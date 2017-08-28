@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -141,9 +142,17 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardRemoveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboards())) {
+                if(askUserForConfirmation()){
                     removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
                 }
+            }
+
+            private boolean askUserForConfirmation() {
+                if (leaderboardSelectionModel.itemIsSelectedButNotVisible(leaderboardTable.getVisibleItems())) {
+                    final String leaderboardNames = leaderboardSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
+                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboards(leaderboardNames));
+                } 
+                return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboards());
             }
         });
         controlsPanel.add(leaderboardRemoveButton);
@@ -774,7 +783,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     
     @Override
     protected void leaderboardSelectionChanged() {
-        leaderboardRemoveButton.setEnabled(!leaderboardSelectionModel.getSelectedSet().isEmpty());
+        Set<StrippedLeaderboardDTO> selectedLeaderboards = leaderboardSelectionModel.getSelectedSet();
+        leaderboardRemoveButton.setEnabled(!selectedLeaderboards.isEmpty());
+        leaderboardRemoveButton.setText(selectedLeaderboards.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(selectedLeaderboards.size()));
+        
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
