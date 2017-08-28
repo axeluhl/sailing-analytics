@@ -25,6 +25,7 @@ import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedRaceInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
@@ -67,11 +68,11 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     @Produces(CONTENT_TYPE_JSON_UTF8)
     @Path("getRaces")
     public Response raceList(@QueryParam("transitive") Boolean transitive) {
-        HashMap<URL, List<SimpleRaceInfo>> raceData = new HashMap<>();
+        HashMap<String, List<SimpleRaceInfo>> raceData = new HashMap<>();
         raceData.put(null, new ArrayList<>(getService().getLocalRaceList().values()));
         if (transitive != null && Boolean.TRUE.equals(transitive)) {
             for (SimpleRaceInfo remoteRace : getService().getRemoteRaceList().values()) {
-                URL remoteUrl = remoteRace.getRemoteUrl();
+                String remoteUrl = remoteRace.getRemoteUrl().toExternalForm();
                 List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
                 if (remoteList == null) {
                     remoteList = new ArrayList<>();
@@ -81,14 +82,13 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             }
         }
         JSONArray json = new JSONArray();
-        for (Entry<URL, List<SimpleRaceInfo>> raced : raceData.entrySet()) {
+        for (Entry<String, List<SimpleRaceInfo>> raced : raceData.entrySet()) {
             JSONArray list = new JSONArray();
             for (SimpleRaceInfo simpleRaceInfo : raced.getValue()) {
                 list.add(simpleRaceListJsonSerializer.serialize(simpleRaceInfo));
             }
             JSONObject remote = new JSONObject();
-            final URL remoteURL = raced.getKey();
-            remote.put(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL, remoteURL == null ? null : remoteURL.toExternalForm());
+            remote.put(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL, raced.getKey());
             remote.put(DetailedRaceInfoJsonSerializer.FIELD_RACES, list);
             json.add(remote);
         }
