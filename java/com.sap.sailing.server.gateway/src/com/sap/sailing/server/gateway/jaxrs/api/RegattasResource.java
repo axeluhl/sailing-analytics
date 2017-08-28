@@ -37,6 +37,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -44,9 +45,9 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Distance;
@@ -325,19 +326,20 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadBoatClassResponse(boatClassName);
         } else {
             final User user = getService(SecurityService.class).getCurrentUser();
-            final Competitor competitor = getService().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
-                    user.getFullName() == null ? user.getName() : user.getFullName(),
+            final Boat boat = new BoatImpl(UUID.randomUUID(), user.getName(),
+                    getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true),
+                    sailId);
+            final CompetitorWithBoat competitor = getService().getCompetitorStore().getOrCreateCompetitorWithBoat(UUID.randomUUID(),
+                    user.getFullName() == null ? user.getName() : user.getFullName(), /* shortName */ null,
                     /* displayColor */ null, user.getEmail(), /* flagImageURI */ null,
                     new TeamImpl(user.getName(), Collections.singleton(new PersonImpl(user.getFullName() == null ? user.getName() : user.getFullName(),
                             getService().getBaseDomainFactory().getOrCreateNationality(nationalityThreeLetterIOCCode),
                             /* dateOfBirth */ null, /* description */ null)),
-                            /* coach */ null), new BoatImpl(user.getName(),
-                                    getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true),
-                                    sailId), timeOnTimeFactor,
+                            /* coach */ null), timeOnTimeFactor,
                     timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
-                            searchTag);
+                    searchTag, (DynamicBoat) boat);
             regatta.registerCompetitor(competitor);
-            response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString()).
+            response = Response.ok(CompetitorWithBoatJsonSerializer.create().serialize(competitor).toJSONString()).
                     header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
