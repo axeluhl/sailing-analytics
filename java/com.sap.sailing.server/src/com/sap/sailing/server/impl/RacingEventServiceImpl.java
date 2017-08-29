@@ -4004,7 +4004,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return bestMatch;
     }
     
-    
     @Override
     public Pair<Integer, AnniversaryType> getNextAnniversary() {
         return raceListAnniversaryDeterminator.getNextAnniversaryNumber();
@@ -4012,30 +4011,23 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary() {
-        ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> allAnniversaries = raceListAnniversaryDeterminator
+        Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> allAnniversaries = raceListAnniversaryDeterminator
                 .getKnownAnniversaries();
-
         Triple<Integer, DetailedRaceInfo, AnniversaryType> lastAnniversary = null;
         if (!allAnniversaries.isEmpty()) {
             ArrayList<Integer> list = new ArrayList<>(allAnniversaries.keySet());
-            list.sort(new Comparator<Integer>() {
-                @Override
-                public int compare(Integer o1, Integer o2) {
-                    return Integer.compare(o1, o2);
-                }
-            });
+            list.sort(Integer::compare);
             Integer anniversary = list.get(list.size() - 1);
             Pair<DetailedRaceInfo, AnniversaryType> info = allAnniversaries.get(anniversary);
-            lastAnniversary = new Triple<Integer, DetailedRaceInfo, AnniversaryType>(anniversary, info.getA(),
-                    info.getB());
+            lastAnniversary = new Triple<>(anniversary, info.getA(), info.getB());
         }
         return lastAnniversary;
     }
 
     @Override
     public Integer getNextAnniversaryCountdown() {
-        Integer current = raceListAnniversaryDeterminator.getCurrentRaceCount();
-        Pair<Integer, AnniversaryType> next = raceListAnniversaryDeterminator.getNextAnniversaryNumber();
+        final Integer current = raceListAnniversaryDeterminator.getCurrentRaceCount();
+        final Pair<Integer, AnniversaryType> next = raceListAnniversaryDeterminator.getNextAnniversaryNumber();
         Integer countDown = null;
         if (current != null && next != null) {
             countDown = next.getA().intValue() - current.intValue();
@@ -4044,12 +4036,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Integer getCurrentRaceCount() {
-        return raceListAnniversaryDeterminator.getCurrentRaceCount();
-    }
-
-    @Override
-    public ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries() {
+    public Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries() {
         return raceListAnniversaryDeterminator.getKnownAnniversaries();
     }
 }

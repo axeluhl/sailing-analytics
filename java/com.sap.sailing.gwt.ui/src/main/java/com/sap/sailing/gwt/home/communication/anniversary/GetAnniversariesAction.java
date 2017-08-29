@@ -1,9 +1,6 @@
 package com.sap.sailing.gwt.home.communication.anniversary;
 
 import java.net.URL;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
@@ -30,27 +27,22 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
     public ResultWithTTL<AnniversariesDTO> execute(SailingDispatchContext context) {
         final AnniversariesDTO anniversaries = new AnniversariesDTO();
         final RacingEventService service = context.getRacingEventService();
-        Integer nextCountdown = service.getNextAnniversaryCountdown();
+        final Integer nextCountdown = service.getNextAnniversaryCountdown();
+
         if (nextCountdown != null && nextCountdown < SHOW_IF_LESS_RACES_TILL_NEXT_ANNIVERSARY) {
-            Pair<Integer, AnniversaryType> next = service.getNextAnniversary();
+            final Pair<Integer, AnniversaryType> next = service.getNextAnniversary();
             anniversaries.addValue(new AnniversaryDTO(next.getA(), nextCountdown, next.getB()));
         }
 
-        Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = service.getKnownAnniversaries();
-        for (Entry<Integer, Pair<DetailedRaceInfo, AnniversaryType>> anniversary : knownAnniversaries.entrySet()) {
-            int daysSinceAnniversary = Math
-                    .abs(DateUtil.daysFromNow(anniversary.getValue().getA().getStartOfRace().asDate()));
-            if (daysSinceAnniversary < DAYS_TO_SHOW_PAST_ANNIVERSARY) {
-                DetailedRaceInfo raceinfo = anniversary.getValue().getA();
-                AnniversaryType anniversaryType = anniversary.getValue().getB();
-                String raceName = raceinfo.getIdentifier().getRaceName();
-                String regattaName = raceinfo.getIdentifier().getRegattaName();
-                UUID eventID = raceinfo.getEventID();
-                anniversaries.addValue(new AnniversaryDTO(anniversary.getKey(), -daysSinceAnniversary, anniversaryType,
-                        eventID, raceinfo.getLeaderboardName(), raceinfo.getRemoteUrl().toExternalForm(), raceName,
-                        regattaName));
+        service.getKnownAnniversaries().forEach((target, anniversaryInfo) -> {
+            final DetailedRaceInfo raceinfo = anniversaryInfo.getA();
+            if (DateUtil.daysUntilNow(raceinfo.getStartOfRace().asDate()) < DAYS_TO_SHOW_PAST_ANNIVERSARY) {
+                anniversaries.addValue(new AnniversaryDTO(target, anniversaryInfo.getB(), raceinfo.getEventID(),
+                        raceinfo.getLeaderboardName(), raceinfo.getRemoteUrl().toExternalForm(),
+                        raceinfo.getIdentifier().getRaceName(), raceinfo.getIdentifier().getRegattaName()));
             }
-        }
+        });
+
         TimeToLiveCalculator timeToLiveCalculator = new TimeToLiveCalculator();
         HomeServiceUtil.forAllPublicEvents(service, context.getRequest(), timeToLiveCalculator);
         return new ResultWithTTL<AnniversariesDTO>(timeToLiveCalculator.getTimeToLive(), anniversaries);

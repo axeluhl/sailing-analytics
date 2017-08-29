@@ -5,6 +5,9 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
+/**
+ * {@link DTO} object representing an anniversary entry (count-down or announcement) to be shown on the start page.
+ */
 public class AnniversaryDTO implements DTO {
 
     private int target;
@@ -28,9 +31,9 @@ public class AnniversaryDTO implements DTO {
         this.type = type;
     }
 
-    AnniversaryDTO(int target, Integer countDown, AnniversaryType type, UUID eventID,
-            String leaderBoardName, String remoteUrl, String raceName, String regattaName) {
-        this(target, countDown, type);
+    AnniversaryDTO(int target, AnniversaryType type, UUID eventID, String leaderBoardName, String remoteUrl,
+            String raceName, String regattaName) {
+        this(target, null, type);
         this.eventID = eventID;
         this.leaderBoardName = leaderBoardName;
         this.remoteUrl = remoteUrl;
@@ -71,7 +74,7 @@ public class AnniversaryDTO implements DTO {
     }
 
     public boolean isAnnouncement() {
-        return eventID != null && leaderBoardName != null && remoteUrl != null && regattaName != null
+        return countDown == null && eventID != null && leaderBoardName != null && regattaName != null
                 && raceName != null;
     }
 

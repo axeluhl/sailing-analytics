@@ -737,29 +737,34 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
-     * Returns the number of the next anniversary race. Could return null if no next anniversary can be determined
+     * Provides number and {@link AnniversaryType type} information for the next anniversary race.
+     * 
+     * @return a {@link Pair} containing the next anniversary number and {@link AnniversaryType type}, or
+     *         <code>null</code> if next anniversary can't be determined
      */
     Pair<Integer, AnniversaryType> getNextAnniversary();
 
     /**
-     * Returns the amount of races required to reach the next anniversary. Could return null if no next anniversary can
-     * be determined
+     * Determines the amount of races required to reach the next anniversary.
+     * 
+     * @return the amount of races until next anniversary, or <code>null</code> if next anniversary can't be determined
      */
     Integer getNextAnniversaryCountdown();
 
     /**
-     * Returns the amount of currently tracked races with a starttime != null
-     */
-    Integer getCurrentRaceCount();
-
-    /**
-     * Returns a Map of all known anniversaries, keyed with the number of the anniversary race
+     * Provides a {@link Map} of all known anniversaries, keyed by the number of the anniversary race.
+     * 
+     * @return the {@link Map} of known anniversaries (key = anniversary number / value = {@link Pair} containing
+     *         {@link DetailedRaceInfo race} and {@link AnniversaryType type} information)
      */
     Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries();
 
     /**
-     * Returns a pair with the last anniversary, keyed with the number of the anniversary. Could contain null, last
-     * anniversary is determined based on racenumber from knownAnniversaries alone.
+     * Provides the number, {@link DetailedRaceInfo race} and {@link AnniversaryType type} information for the latest
+     * anniversary race.
+     * 
+     * @return {@link Triple} containing the last anniversary number, {@link DetailedRaceInfo race} and
+     *         {@link AnniversaryType type}, or <code>null</code> if there's no anniversary so far
      */
     Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
 }
