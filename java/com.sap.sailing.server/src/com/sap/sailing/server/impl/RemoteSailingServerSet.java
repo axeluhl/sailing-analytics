@@ -134,63 +134,41 @@ public class RemoteSailingServerSet {
     }
 
     private void updateRemoteServerTrackedRacesCacheSynchronously(RemoteSailingServerReference ref) {
-        BufferedReader bufferedReader = null;
         Util.Pair<Iterable<SimpleRaceInfo>, Exception> result;
         try {
-            try {
-                final URL raceListURL = getRaceListURL(ref.getURL());
-                logger.fine("Updating racelist for remote server " + ref + " from URL " + raceListURL);
-                URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(raceListURL);
-                bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
-                SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
-                final Set<SimpleRaceInfo> races = new HashSet<>();
-                JSONParser parser = new JSONParser();
-                JSONArray racesGroupedByRemoteAsObject = (JSONArray) parser.parse(bufferedReader);
-                for (Object remoteWithRaces : racesGroupedByRemoteAsObject) {
-                    JSONObject remoteWithRacesAsJson = (JSONObject) remoteWithRaces;
-                    String remoteUrlAsString = (String) remoteWithRacesAsJson.get(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL);
-                    URL remoteUrl;
-                    if (remoteUrlAsString != null && !remoteUrlAsString.isEmpty()) {
-                        remoteUrl = new URL(remoteUrlAsString);
-                    } else {
-                        // the race was local to the remote server, indicated by a null URL; use the remote reference's URL for those
-                        remoteUrl = ref.getURL();
-                    }
-                    JSONArray raceListForOneRemote = (JSONArray) remoteWithRacesAsJson.get(DetailedRaceInfoJsonSerializer.FIELD_RACES);
-                    for (Object remoteRace : raceListForOneRemote) {
-                        JSONObject remoteRaceAsJson = (JSONObject) remoteRace;
-                        SimpleRaceInfo event = deserializer.deserialize(remoteRaceAsJson, remoteUrl);
-                        races.add(event);
-                    }
+            final URL raceListURL = getRaceListURL(ref.getURL());
+            logger.fine("Updating racelist for remote server " + ref + " from URL " + raceListURL);
+            final SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
+            final Set<SimpleRaceInfo> races = new HashSet<>();
+            for (Object remoteWithRaces : getJsonFromRemoteServerSynchronously(ref, raceListURL)) {
+                JSONObject remoteWithRacesAsJson = (JSONObject) remoteWithRaces;
+                String remoteUrlAsString = (String) remoteWithRacesAsJson
+                        .get(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL);
+                URL remoteUrl;
+                if (remoteUrlAsString != null && !remoteUrlAsString.isEmpty()) {
+                    remoteUrl = new URL(remoteUrlAsString);
+                } else {
+                    // if the race was local to the remote server, indicated by a null URL; use the remote server's URL
+                    remoteUrl = ref.getURL();
                 }
-                result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(races, /* exception */ null);
-            } finally {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
+                JSONArray raceListForOneRemote = (JSONArray) remoteWithRacesAsJson
+                        .get(DetailedRaceInfoJsonSerializer.FIELD_RACES);
+                for (Object remoteRace : raceListForOneRemote) {
+                    JSONObject remoteRaceAsJson = (JSONObject) remoteRace;
+                    SimpleRaceInfo event = deserializer.deserialize(remoteRaceAsJson, remoteUrl);
+                    races.add(event);
                 }
             }
-        } catch (IOException | ParseException e) {
-            logger.log(Level.INFO, "Exception trying to fetch AnniversaryRaceData from remote server " + ref + ": " + e.getMessage(),
+            result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(races, /* exception */ null);
+        } catch (Exception e) {
+            logger.log(Level.INFO,
+                    "Exception trying to fetch AnniversaryRaceData from remote server " + ref + ": " + e.getMessage(),
                     e);
             result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(/* events */ null, e);
         }
-        // allow the inner update to set this, as the listeners should not fire within the lock
-        final Pair<Iterable<SimpleRaceInfo>, Exception> finalResult = result;
-        LockUtil.executeWithWriteLock(lock, () -> {
-            // check that the server was not removed while no lock was held
-            if (remoteSailingServers.containsValue(ref)) {
-                // write the new result
-                cachedTrackedRacesForRemoteSailingServers.put(ref, finalResult);
-            } else {
-                logger.fine("Omitted update for " + ref + " as it was removed");
-            }
-        });
-
-        for (Runnable remoteRaceCountChangedCallback : remoteRaceResultReceivedCallbacks) {
-            remoteRaceCountChangedCallback.run();
-        }
+        updateCache(ref, result, cachedTrackedRacesForRemoteSailingServers::put);
+        remoteRaceResultReceivedCallbacks.forEach(Runnable::run);
     }
-    
 
     private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
         return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/getRaces?transitive=true");
