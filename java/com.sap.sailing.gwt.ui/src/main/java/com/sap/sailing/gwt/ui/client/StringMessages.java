@@ -1890,5 +1890,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String anniversaryRepdigitCountdownTeaser(int countdown, int anniversary);
     String anniversaryRepdigitCountdownDescription(int anniversary);
     String anniversaryAnnouncementTeaser(int anniversary);
-    String anniversaryAnnouncementDescription(String raceDisplayName);
+    String anniversaryAnnouncementDescription(String raceDisplayName, String raceBoardUrl);
 }

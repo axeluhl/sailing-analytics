@@ -21,7 +21,7 @@ public class AnniversaryItem extends Widget {
         setElement(uiBinder.createAndBindUi(this));
         this.iconUi.getStyle().setBackgroundImage("url('" + iconUrl + "')");
         this.teaserUi.setInnerText(teaser);
-        this.descriptionUi.setInnerText(description);
+        this.descriptionUi.setInnerHTML(description);
     }
 
 }
