@@ -10,7 +10,6 @@ import UIKit
 
 enum TrainingRequestManagerError: Error {
     case invalidResponse
-    case postCreateEventFailed
 }
 
 class TrainingRequestManager: NSObject {
@@ -35,10 +34,10 @@ class TrainingRequestManager: NSObject {
     
     func postCreateEvent(
         boatClassName: String,
-        success: @escaping () -> Void,
+        success: @escaping (_ createEventData: CreateEventData) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
-        let urlString = "/sailingserver/api/v1/events/createEvent"
+        let urlString = "\(basePathString)/events/createEvent"
         var body = [String: AnyObject]()
         //        body["eventname"] = "raimund" as AnyObject
         //        body["eventdescription"] = "raimund" as AnyObject
@@ -64,12 +63,11 @@ class TrainingRequestManager: NSObject {
         }
     }
     
-    fileprivate func postCreateEventSuccess(responseObject: Any?, success: () -> Void, failure: (_ error: Error, _ message: String?) -> Void) {
+    fileprivate func postCreateEventSuccess(responseObject: Any?, success: (_ createEventData: CreateEventData) -> Void, failure: (_ error: Error, _ message: String?) -> Void) {
         if let data = responseObject as? Data {
             do {
                 let jsonObject = try JSONSerialization.jsonObject(with: fixJSON(data: data))
-                print(jsonObject)
-                success()
+                success(CreateEventData(dictionary: jsonObject as? [String: AnyObject]))
             } catch {
                 postCreateEventFailure(error: TrainingRequestManagerError.invalidResponse, failure: failure)
             }
@@ -80,7 +78,51 @@ class TrainingRequestManager: NSObject {
     
     fileprivate func postCreateEventFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(TrainingRequestManagerError.postCreateEventFailed, stringForError(error))
+        failure(error, stringForError(error))
+    }
+    
+    // MARK: - CompetitorCreateAndAdd
+    
+    func postCompetitorCreateAndAdd(
+        regatta: String,
+        boatClassName: String,
+        sailID: String,
+        nationality: String,
+        success: @escaping (_ competitorCreateAndAddData: CompetitorCreateAndAddData) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let encodedRegatta = regatta.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let encodedBoatClassName = boatClassName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedSailID = sailID.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedNationality = nationality.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "\(basePathString)/regattas/\(encodedRegatta)/competitors/createandadd?boatclass=\(encodedBoatClassName)&sailid=\(encodedSailID)&nationalityIOC=\(encodedNationality)"
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postCompetitorCreateAndAddSuccess(responseObject: responseObject, success: success, failure: failure)
+        }) { (requestOperation, error) in
+            self.postCompetitorCreateAndAddFailure(error: error, failure: failure)
+        }
+    }
+    
+    fileprivate func postCompetitorCreateAndAddSuccess(
+        responseObject: Any?,
+        success: @escaping (_ competitorCreateAndAddData: CompetitorCreateAndAddData) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        if let data = responseObject as? Data {
+            do {
+                let jsonObject = try JSONSerialization.jsonObject(with: data)
+                success(CompetitorCreateAndAddData(dictionary: jsonObject as? [String: AnyObject]))
+            } catch {
+                self.postCompetitorCreateAndAddFailure(error: error, failure: failure)
+            }
+        } else {
+            self.postCompetitorCreateAndAddFailure(error: TrainingRequestManagerError.invalidResponse, failure: failure)
+        }
+    }
+    
+    fileprivate func postCompetitorCreateAndAddFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(error, stringForError(error))
     }
     
     // MARK: - Helper

@@ -42,8 +42,37 @@ class CreateTrainingViewController: UIViewController {
     
     @IBAction func createTrainingButtonTapped(_ sender: Any) {
         let boatClassName = BoatClassNames[boatClassPickerView.selectedRow(inComponent: 0)]
-        trainingController.createEvent(boatClassName: boatClassName)
+        createTraining(boatClassName: boatClassName)
     }
+    
+    // MARK: - CreateTraining
+    
+    fileprivate func createTraining(boatClassName: String) {
+        trainingController.createTraining(forBoatClassName: boatClassName, success: { checkInData in
+            self.createTrainingSuccess(checkInData: checkInData)
+        }) { (error) in
+            self.createTrainingFailure(error: error)
+        }
+    }
+    
+    fileprivate func createTrainingSuccess(checkInData: CheckInData) {
+        checkInController.checkInWithViewController(self, checkInData: checkInData, success: { checkIn in
+            // TODO
+        }) { error in
+            self.createTrainingFailure(error: error)
+        }
+    }
+    
+    fileprivate func createTrainingFailure(error: Error) {
+        // TODO
+    }
+    
+    // MARK: - Propeties
+    
+    fileprivate lazy var checkInController: CheckInController = {
+        let checkInController = CheckInController(coreDataManager: RegattaCoreDataManager.shared)
+        return checkInController
+    }()
     
 }
 

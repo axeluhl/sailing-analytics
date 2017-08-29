@@ -132,7 +132,19 @@ class CheckInData: NSObject {
             return nil
         }
     }
-
+    
+    convenience init?(createTrainingData: CreateTrainingData) {
+        guard let eventID = createTrainingData.createEventData?.eventID else { return nil }
+        guard let leaderboardName = createTrainingData.createEventData?.leaderboardName else { return nil }
+        guard let competitorID = createTrainingData.competitorCreateAndAddData?.competitorID else { return nil }
+        self.init(
+            serverURL: createTrainingData.serverURL,
+            eventID: eventID,
+            leaderboardName: leaderboardName,
+            competitorID: competitorID
+        )
+    }
+    
     // MARK: - Helper
     
     class fileprivate func queryItemValue(queryItems: [URLQueryItem]?, itemName: String) -> String? {
