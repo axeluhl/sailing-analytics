@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -78,6 +79,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
@@ -389,8 +391,23 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
             }
-            Future<List<CompetitorDTO>> task = executor.submit(
-                    () -> baseDomainFactory.getCompetitorDTOListTemp(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
+            Future<List<CompetitorDTO>> task = executor.submit(new Callable<List<CompetitorDTO>>() {
+                public List<CompetitorDTO> call() throws NoWindException {
+                    Iterable<Competitor> competitorsFromBestToWorst = AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(raceColumn, timePoint);
+                    List<Pair<Competitor, Boat>> orderedeCompetitorsWithBoats = new ArrayList<>();
+                    Map<Competitor, Boat> allCompetitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats();
+                    for (Competitor c: competitorsFromBestToWorst) {
+                        Boat boat = null;
+                        if (!isMetaLeaderboardColumn) {
+                            boat = allCompetitorsAndTheirBoats.get(c);
+                        }
+                        orderedeCompetitorsWithBoats.add(new Pair<Competitor, Boat>(c, boat));
+                    }
+                    return baseDomainFactory.getCompetitorDTOList(orderedeCompetitorsWithBoats);
+                }
+            });
+//            Future<List<CompetitorDTO>> task = executor.submit(
+//                    () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data

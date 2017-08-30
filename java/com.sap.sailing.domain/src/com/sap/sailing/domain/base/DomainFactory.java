@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.Placemark;
@@ -10,7 +11,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public interface DomainFactory extends SharedDomainFactory {
@@ -63,8 +64,6 @@ public interface DomainFactory extends SharedDomainFactory {
     CompetitorDTO convertToCompetitorDTO(Competitor c);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c, Boat b);
-    
-    CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c);
 
     BoatDTO convertToBoatDTO(Boat boat);
 
@@ -77,13 +76,12 @@ public interface DomainFactory extends SharedDomainFactory {
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 
-    List<CompetitorDTO> getCompetitorDTOList(Iterable<CompetitorWithBoat> competitors);
+    List<CompetitorDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors);
 
-    /** Temporary function -> REMOVE later on */
-    List<CompetitorWithoutBoatDTO> getCompetitorWithoutBoatDTOListTemp(Iterable<Competitor> competitors);
+    List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors);
 
-    List<CompetitorDTO> getCompetitorDTOListTemp(Iterable<Competitor> competitors);
-
+    List<CompetitorDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors);
+    
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 
     TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard, RaceColumn raceColumn,

@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -27,7 +29,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorWithoutBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
@@ -70,6 +71,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
@@ -157,11 +159,6 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     @Override
     public CompetitorDTO convertToCompetitorDTO(CompetitorWithBoat c) {
         return competitorAndBoatStore.convertToCompetitorDTO(c);
-    }
-
-    @Override
-    public CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c) {
-        return competitorAndBoatStore.convertToCompetitorWithoutBoatDTO(c);
     }
 
     @Override
@@ -367,16 +364,16 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorDTOList(Iterable<CompetitorWithBoat> competitors) {
+    public List<CompetitorDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
-        for (CompetitorWithBoat competitor : competitors) {
-            result.add(convertToCompetitorDTO(competitor));
+        for (Entry<Competitor, Boat> competitorAndBoatEntry : competitors.entrySet()) {
+            result.add(convertToCompetitorDTO(competitorAndBoatEntry.getKey(), competitorAndBoatEntry.getValue()));
         }
         return result;
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorDTOListTemp(Iterable<Competitor> competitors) {
+    public List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
         for (Competitor competitor : competitors) {
             result.add(convertToCompetitorDTO(competitor));
@@ -384,11 +381,10 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         return result;
     }
     
-    @Override
-    public List<CompetitorWithoutBoatDTO> getCompetitorWithoutBoatDTOListTemp(Iterable<Competitor> competitors) {
-        List<CompetitorWithoutBoatDTO> result = new ArrayList<CompetitorWithoutBoatDTO>();
-        for (Competitor competitor : competitors) {
-            result.add(convertToCompetitorWithoutBoatDTO(competitor));
+    public List<CompetitorDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors) {
+        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
+        for (Pair<Competitor, Boat> competitorAndBoat : competitors) {
+            result.add(convertToCompetitorDTO(competitorAndBoat.getA(), competitorAndBoat.getB()));
         }
         return result;
     }
