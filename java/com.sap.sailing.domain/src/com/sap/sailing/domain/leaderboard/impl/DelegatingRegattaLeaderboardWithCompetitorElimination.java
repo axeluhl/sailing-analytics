@@ -21,7 +21,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -182,7 +181,7 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     }
 
     // --------------------- Delegate Pattern Implementation ----------------------
-    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+    public CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
         return getFullLeaderboard().getOrCreateCompetitorsProvider();
     }
 
@@ -190,8 +189,8 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getRegatta();
     }
 
-    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
-        return getFullLeaderboard().getCompetitorsRegisteredInRegattaLog();
+    public Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRegattaLog() {
+        return getFullLeaderboard().getCompetitorsAndBoatsRegisteredInRegattaLog();
     }
 
     public IsRegattaLike getRegattaLike() {
@@ -202,12 +201,12 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getRacelog(raceColumnName, fleetName);
     }
 
-    public void registerCompetitor(Competitor competitor) {
-        getFullLeaderboard().registerCompetitor(competitor);
+    public void registerCompetitorAndBoat(Competitor competitor, Boat boat) {
+        getFullLeaderboard().registerCompetitorAndBoat(competitor, boat);
     }
 
-    public void registerCompetitors(Iterable<Competitor> competitor) {
-        getFullLeaderboard().registerCompetitors(competitor);
+    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats) {
+        getFullLeaderboard().registerCompetitorsAndBoats(competitorsAndBoats);
     }
 
     public void deregisterCompetitor(Competitor competitor) {
@@ -217,14 +216,13 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     public void deregisterCompetitors(Iterable<Competitor> competitor) {
         getFullLeaderboard().deregisterCompetitors(competitor);
     }
-    
+
     public Iterable<Competitor> getAllCompetitors() {
         return getFullLeaderboard().getAllCompetitors();
     }
 
-    @Override
-    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
-        return getFullLeaderboard().getAllCompetitorsWithRaceDefinitionsConsidered();
+    public Map<Competitor, Boat> getAllCompetitorsAndBoats() {
+        return getFullLeaderboard().getAllCompetitorsAndBoats();
     }
 
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {

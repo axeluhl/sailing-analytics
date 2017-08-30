@@ -28,7 +28,7 @@ import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterEntryEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -420,9 +420,12 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         Competitor competitor1 = AbstractLeaderboardTest.createCompetitor("Humba1");
         Competitor competitor2 = AbstractLeaderboardTest.createCompetitor("Humba2");
+        Boat boat1= AbstractLeaderboardTest.createBoat("Humba1 Boot");
+        Boat boat2 = AbstractLeaderboardTest.createBoat("Humba2 Boot");
         res.getCompetitorStore().addCompetitors(Arrays.asList(competitor1, competitor2));
-        regatta.getRegattaLog().add(new RegattaLogRegisterEntryEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor1));
-        regatta.getRegattaLog().add(new RegattaLogRegisterEntryEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor2));
+        res.getCompetitorStore().addBoats(Arrays.asList(boat1, boat2));
+        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor1, boat1));
+        regatta.getRegattaLog().add(new RegattaLogRegisterCompetitorAndBoatEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Axel", 0), competitor2, boat2));
         assertTrue(Util.contains(regatta.getAllCompetitors(), competitor1));
         assertTrue(Util.contains(regatta.getAllCompetitors(), competitor2));
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);

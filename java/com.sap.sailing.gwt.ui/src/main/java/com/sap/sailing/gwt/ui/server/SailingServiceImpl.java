@@ -5558,7 +5558,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         filterDuplicates(competitorsToRegister, competitorSetToRemove);
         
         hasRegattaLike.deregisterCompetitors(competitorSetToRemove);
-        hasRegattaLike.registerCompetitors(competitorsToRegister);
+
+        // TODO bug 2822: temporary commented out -> needs first cleanup of CompetitorDTO and BoatDTO passing  
+        // hasRegattaLike.registerCompetitors(competitorsToRegister);
     }
 
     private HashSet<Competitor> filterDuplicates(Set<Competitor> competitorsToRegister, HashSet<Competitor> competitorSetToRemove) {
@@ -6430,7 +6432,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new DoesNotHaveRegattaLogException();
         }
         HasRegattaLike regattaLikeLeaderboard = ((HasRegattaLike) leaderboard);
-        return convertToCompetitorDTOs(regattaLikeLeaderboard.getCompetitorsRegisteredInRegattaLog());
+        return convertToCompetitorDTOs(regattaLikeLeaderboard.getCompetitorsAndBoatsRegisteredInRegattaLog());
     }
     
     @Override

@@ -109,7 +109,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMap
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorAndBoatEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterEntryEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
@@ -121,7 +120,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMa
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorAndBoatEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterEntryEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnTimeFactorEventImpl;
@@ -1915,8 +1913,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRegattaLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRegisterBoatEvent.class.getSimpleName())) {
             return loadRegattaLogRegisterBoatEvent(createdAt, author, logicalTimePoint, id, dbObject);
-        } else if (eventClass.equals(RegattaLogRegisterEntryEvent.class.getSimpleName())) {
-            return loadRegattaLogRegisterEntryEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRegisterCompetitorEvent.class.getSimpleName())) {
             return loadRegattaLogRegisterCompetitorEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRegisterCompetitorAndBoatEvent.class.getSimpleName())) {
@@ -2015,21 +2011,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                             + " from registration event with ID " + id + ". Skipping this boat registration.");
         } else {
             result = new RegattaLogRegisterBoatEventImpl(createdAt, logicalTimePoint, author, id, boat);
-        }
-        return result;
-    }
-
-    private RegattaLogRegisterEntryEvent loadRegattaLogRegisterEntryEvent(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
-        Competitor comp = getCompetitorByID(dbObject);
-        final RegattaLogRegisterEntryEvent result;
-        if (comp == null) {
-            result = null;
-            logger.log(Level.SEVERE,
-                    "Couldn't resolve competitor with ID " + dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name())
-                            + " from registration event with ID " + id + ". Skipping this competitor registration.");
-        } else {
-            result = new RegattaLogRegisterEntryEventImpl(createdAt, logicalTimePoint, author, id, comp);
         }
         return result;
     }

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test.mock;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -46,7 +47,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
@@ -88,7 +89,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
     private static final long serialVersionUID = 5827912985564121181L;
@@ -327,11 +327,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public Iterable<Boat> getAllBoats() {
+                    public Map<Competitor, Boat> getAllCompetitorsAndBoats() {
                         return null;
                     }
 
-                    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+                    @Override
+                    public Iterable<Boat> getAllBoats() {
                         return null;
                     }
 
@@ -535,16 +536,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
+                    public Map<Competitor, Boat> getCompetitorsAndBoatsRegisteredInRegattaLog() {
                         return null;
                     }
 
                     @Override
-                    public void registerCompetitor(Competitor competitor) {
+                    public void registerCompetitorAndBoat(Competitor competitor, Boat boat) {
                     }
 
                     @Override
-                    public void registerCompetitors(Iterable<Competitor> competitor) {
+                    public void registerCompetitorsAndBoats(Map<Competitor, Boat> competitorsAndBoats) {
                     }
 
                     @Override
@@ -556,7 +557,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+                    public CompetitorAndBoatProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
                         return null;
                     }
 

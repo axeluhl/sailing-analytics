@@ -17,7 +17,6 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -30,7 +29,6 @@ import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * A leaderboard whose columns are defined by leaderboards. This can be useful for a regatta series where many regattas
@@ -141,17 +139,14 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     public MetaLeaderboardScoreCorrection getScoreCorrection() {
         return (MetaLeaderboardScoreCorrection) super.getScoreCorrection();
     }
-    
+
     @Override
-    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
-        Set<Competitor> competitors = new HashSet<Competitor>();
-        Set<RaceDefinition> raceDefinitionsConsidered = new HashSet<>();
+    public Iterable<Competitor> getAllCompetitors() {
+        Set<Competitor> result = new HashSet<Competitor>();
         for (Leaderboard leaderboard : getLeaderboards()) {
-            final Pair<Iterable<RaceDefinition>, Iterable<Competitor>> allCompetitorsFromLeaderboardWithRaceDefinitionsConsidered = leaderboard.getAllCompetitorsWithRaceDefinitionsConsidered();
-            Util.addAll(allCompetitorsFromLeaderboardWithRaceDefinitionsConsidered.getA(), raceDefinitionsConsidered);
-            Util.addAll(allCompetitorsFromLeaderboardWithRaceDefinitionsConsidered.getB(), competitors);
+            Util.addAll(leaderboard.getCompetitors(), result);
         }
-        return new Pair<>(raceDefinitionsConsidered, competitors);
+        return result;
     }
 
     @Override
