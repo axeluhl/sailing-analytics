@@ -24,7 +24,7 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.mongodb.MongoDBService;
 
 /**
- * Manages a persistent set of {@link Competitor}s and {@link Boat}s using a {@link MongoObjectFactory} to update the persistent store,
+ * Manages a persistent set of {@link Competitor}s, {@link CompetitorWithBoat}s and {@link Boat}s using a {@link MongoObjectFactory} to update the persistent store,
  * and a {@link DomainObjectFactory} for initially filling this store's in-memory representation from the persistent
  * store.<p>
  * 
@@ -91,14 +91,19 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         ois.defaultReadObject();
         storeTo = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
     }
-
+/**
     @Override
-    public void migrateCompetitorToHaveASeparateBoat(Competitor existingCompetitor, Boat separateBoat) {
-        storeTo.storeCompetitor(existingCompetitor);
-        storeTo.storeBoat(separateBoat);
-        super.addNewBoat(separateBoat.getId(), separateBoat);
+    public Pair<Competitor, Boat> migrateCompetitorToHaveASeparateBoat(Serializable boatId, CompetitorWithBoat competitorWithBoat) {
+        Boat existingBoat = competitorWithBoat.getBoat();
+        Competitor newCompetitor = getOrCreateCompetitor(competitorWithBoat.getId(), competitorWithBoat.getName(), competitorWithBoat.getShortName(),
+                competitorWithBoat.getColor(), competitorWithBoat.getEmail(), competitorWithBoat.getFlagImage(), (DynamicTeam) competitorWithBoat.getTeam(),
+                competitorWithBoat.getTimeOnTimeFactor(), competitorWithBoat.getTimeOnDistanceAllowancePerNauticalMile(), competitorWithBoat.getSearchTag());
+        Boat newBoat = getOrCreateBoat(boatId, existingBoat.getName(), existingBoat.getBoatClass(), existingBoat.getSailID(), existingBoat.getColor());
+        addNewCompetitor(newCompetitor.getId(), newCompetitor);
+        addNewBoat(newBoat.getId(), newBoat);
+        return new Pair<>(newCompetitor, newBoat);
     }
-
+*/
     private void addCompetitorToTransientStore(Serializable id, Competitor competitor) {
         super.addNewCompetitor(id, competitor);
     }
@@ -137,7 +142,6 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         super.addCompetitors(competitors);
     }
 
-    /////////////
     private void addCompetitorWithBoatToTransientStore(Serializable id, CompetitorWithBoat competitor) {
         super.addNewCompetitorWithBoat(id, competitor);
     }

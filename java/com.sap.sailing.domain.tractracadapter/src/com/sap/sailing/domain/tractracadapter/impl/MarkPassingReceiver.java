@@ -72,8 +72,8 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
                         Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint);
 	                if (passed != null) {
 	                    TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
-	                    MarkPassing markPassing = getDomainFactory().createMarkPassing(time, passed,
-                            getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
+	                    Competitor competitor = getDomainFactory().resolveCompetitor(event.getA().getCompetitor());
+	                    MarkPassing markPassing = getDomainFactory().createMarkPassing(time, passed, competitor);
 	                    passingsByWaypoint.put(passed, markPassing);
 	                } else {
 	                    logger.warning("Didn't find waypoint in course " + course + " for mark passing around "
@@ -88,11 +88,15 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
 	                }
 	            }
 	            logger.fine("Received mark passings in race "+trackedRace.getRace().getName()+": "+markPassings);
-	            Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
-	            if (getSimulator() != null) {
-	                getSimulator().delayMarkPassings(competitor, markPassings);
+	            Competitor competitor = getDomainFactory().resolveCompetitor(event.getA().getCompetitor());
+	            if (competitor != null) {
+                        if (getSimulator() != null) {
+                            getSimulator().delayMarkPassings(competitor, markPassings);
+                        } else {
+                            trackedRace.updateMarkPassings(competitor, markPassings);
+                        }
 	            } else {
-	                trackedRace.updateMarkPassings(competitor, markPassings);
+                        logger.warning("Didn't find competitor for mark passings");
 	            }
 	        } else {
 	            logger.warning("Couldn't find tracked race for race " + event.getA().getRace().getName()

@@ -83,11 +83,12 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.base.Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor);
 
-    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
+    com.sap.sailing.domain.base.Competitor resolveCompetitor(ICompetitor competitor);
 
-    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
-            String nationalityAsString, String name, String shortName, float timeOnTimeFactor, float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag);
+//    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
 
+//    com.sap.sailing.domain.base.CompetitorWithBoat getOrCreateCompetitorWithBoat(ICompetitor competitor);
+    
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
      * nationality's name.
