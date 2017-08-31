@@ -116,6 +116,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
@@ -811,7 +812,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         if (startLine != null) {
             waypoints.add(startLine);
         }
-        final Waypoint finishLine = inferFinishLine(trackedRace, regattaLog);
+        final Waypoint finishLine = inferFinishLine(trackedRace, regattaLog, startLine);
         if (finishLine != null) {
             waypoints.add(finishLine);
         }
@@ -827,9 +828,32 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
      * such inference seems to make sense, the {@code regattaLog} remains unchanged, and {@code null}
      * is returned.
      */
-    private Waypoint inferFinishLine(TrackedRace trackedRace, RegattaLog regattaLog) {
-        // TODO Auto-generated method stub
-        return null;
+    private Waypoint inferFinishLine(TrackedRace trackedRace, RegattaLog regattaLog, Waypoint startLine) {
+        final TimePoint when = getEndTime(trackedRace);
+        return createLineEnclosingTracks(trackedRace, regattaLog, when, /* extrapolate */ true);
+    }
+
+    private TimePoint getEndTime(TrackedRace trackedRace) {
+        final TimePoint when;
+        if (trackedRace.getEndOfRace() != null) {
+            when = trackedRace.getEndOfRace();
+        } else {
+            if (trackedRace.getFinishedTime() != null) {
+                when = trackedRace.getFinishedTime();
+            } else {
+                if (trackedRace.getEndOfTracking() != null) {
+                    when = trackedRace.getEndOfTracking();
+                } else {
+                    if (getStartTime(trackedRace) != null) {
+                        // assume 12h of sailing
+                        when = getStartTime(trackedRace).plus(Duration.ONE_HOUR.times(12));
+                    } else {
+                        when = null;
+                    }
+                }
+            }
+        }
+        return when;
     }
 
     /**
@@ -840,17 +864,16 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
      * such inference seems to make sense, the {@code regattaLog} remains unchanged, and {@code null}
      * is returned.
      */
-    private static final Distance LINE_MARGIN = new MeterDistance(20);
     private Waypoint inferStartLine(TrackedRace trackedRace, RegattaLog regattaLog) {
-        final TimePoint when;
+        final TimePoint when = getStartTime(trackedRace);
+        return createLineEnclosingTracks(trackedRace, regattaLog, when, /* extrapolate */ false);
+    }
+
+    private static final Distance LINE_MARGIN = new MeterDistance(20);
+    private Waypoint createLineEnclosingTracks(TrackedRace trackedRace, RegattaLog regattaLog, final TimePoint when, boolean extrapolate) {
         final Waypoint result;
-        if (trackedRace.getStartOfRace() != null) {
-            when = trackedRace.getStartOfRace();
-        } else {
-            when = trackedRace.getStartOfTracking();
-        }
         if (when != null) {
-            final Iterable<Pair<Position, SpeedWithBearing>> positionsAndCogsAndSogs = getPositionsAndCogsAndSogs(trackedRace, when); 
+            final Iterable<Pair<Position, SpeedWithBearing>> positionsAndCogsAndSogs = getPositionsAndCogsAndSogs(trackedRace, when, extrapolate); 
             final Bearing averageCourse = getAverageCourse(positionsAndCogsAndSogs);
             final Bearing fromStartBoatToPinEnd = averageCourse.add(new DegreeBearingImpl(-90));
             final Pair<Position, Position> leftmostAndRightmostPositionsAtStart = getPositionsFarthestAheadAndFurthestBack(positionsAndCogsAndSogs,
@@ -884,6 +907,16 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         return result;
     }
 
+    private TimePoint getStartTime(TrackedRace trackedRace) {
+        final TimePoint when;
+        if (trackedRace.getStartOfRace() != null) {
+            when = trackedRace.getStartOfRace();
+        } else {
+            when = trackedRace.getStartOfTracking();
+        }
+        return when;
+    }
+
     private Pair<Position, Position> getPositionsFarthestAheadAndFurthestBack(Iterable<Pair<Position, SpeedWithBearing>> positionsAndCogsAndSogs,
             Bearing averageCourse) {
         Position base = null;
@@ -914,12 +947,12 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     }
 
     private Iterable<Pair<Position, SpeedWithBearing>> getPositionsAndCogsAndSogs(TrackedRace trackedRace,
-            TimePoint when) {
+            TimePoint when, boolean extrapolate) {
         final List<Pair<Position, SpeedWithBearing>> result = new ArrayList<>();
         for (final Competitor c : trackedRace.getRace().getCompetitors()) {
             final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(c);
             if (track != null) {
-                final Position position = track.getEstimatedPosition(when, /* extrapolate */ false);
+                final Position position = track.getEstimatedPosition(when, extrapolate);
                 final SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(when);
                 if (position != null && speedWithBearing != null) {
                     result.add(new Pair<>(position, speedWithBearing));
