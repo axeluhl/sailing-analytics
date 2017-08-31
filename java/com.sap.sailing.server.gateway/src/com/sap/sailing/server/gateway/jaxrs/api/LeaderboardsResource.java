@@ -832,7 +832,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
      */
     private Waypoint inferFinishLine(TrackedRace trackedRace, RegattaLog regattaLog, Waypoint startLine) {
         final TimePoint when = getEndTime(trackedRace);
-        return createLineEnclosingTracks(trackedRace, regattaLog, when, /* extrapolate */ true);
+        return createLineEnclosingTracks(trackedRace, regattaLog, when, /* extrapolate */ true, /* waypoint name */ "Finish");
     }
 
     private TimePoint getEndTime(TrackedRace trackedRace) {
@@ -868,11 +868,11 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
      */
     private Waypoint inferStartLine(TrackedRace trackedRace, RegattaLog regattaLog) {
         final TimePoint when = getStartTime(trackedRace);
-        return createLineEnclosingTracks(trackedRace, regattaLog, when, /* extrapolate */ false);
+        return createLineEnclosingTracks(trackedRace, regattaLog, when, /* extrapolate */ false, /* waypoint name */ "Start");
     }
 
     private static final Distance LINE_MARGIN = new MeterDistance(20);
-    private Waypoint createLineEnclosingTracks(TrackedRace trackedRace, RegattaLog regattaLog, final TimePoint when, boolean extrapolate) {
+    private Waypoint createLineEnclosingTracks(TrackedRace trackedRace, RegattaLog regattaLog, final TimePoint when, boolean extrapolate, String waypointName) {
         final Waypoint result;
         if (when != null) {
             final Iterable<Pair<Position, SpeedWithBearing>> positionsAndCogsAndSogs = getPositionsAndCogsAndSogs(trackedRace, when, extrapolate); 
@@ -887,11 +887,11 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                         fromStartBoatToPinEnd.reverse(), LINE_MARGIN);
                 final Position pinEndPosition = leftmostAndRightmostPositionsAtStart.getA().translateGreatCircle(
                         fromStartBoatToPinEnd, LINE_MARGIN);
-                final Mark startBoat = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto Start Boat");
+                final Mark startBoat = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Boat");
                 RegattaLogDefineMarkEventImpl defineStartBoatEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                         getService().getServerAuthor(), when, UUID.randomUUID(), startBoat);
                 regattaLog.add(defineStartBoatEvent);
-                final Mark pinEnd = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto Pin End");
+                final Mark pinEnd = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Pin End");
                 RegattaLogDefineMarkEventImpl definePinEndEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                         getService().getServerAuthor(), when, UUID.randomUUID(), pinEnd);
                 regattaLog.add(definePinEndEvent);
