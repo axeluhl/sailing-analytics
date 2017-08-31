@@ -11,6 +11,7 @@ import UIKit
 class CreateTrainingViewController: UIViewController {
     
     weak var trainingController: TrainingController!
+    weak var trainingCoreDataManager: TrainingCoreDataManager!
     
     @IBOutlet weak var boatClassPickerView: UIPickerView!
     
@@ -70,7 +71,7 @@ class CreateTrainingViewController: UIViewController {
     // MARK: - Propeties
     
     fileprivate lazy var checkInController: CheckInController = {
-        let checkInController = CheckInController(coreDataManager: RegattaCoreDataManager.shared)
+        let checkInController = CheckInController(coreDataManager: self.trainingCoreDataManager)
         return checkInController
     }()
     

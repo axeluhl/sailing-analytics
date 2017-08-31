@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class TrainingTableViewController: UIViewController {
     
@@ -16,7 +17,10 @@ class TrainingTableViewController: UIViewController {
         static let Settings = "Settings"
     }
     
-    var login = true
+    var signUpController: SignUpController!
+    var userName: String!
+    
+    @IBOutlet var headerView: UIView!
     
     @IBOutlet weak var headerTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
@@ -28,24 +32,40 @@ class TrainingTableViewController: UIViewController {
         setup()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if login {
-            signUpController.loginWithViewController(self)
-            login = false
-        }
-    }
-    
     // MARK: - Setup
     
     fileprivate func setup() {
         setupAddButton()
+        setupTableView()
+        setupTableViewDataSource()
+        setupTableViewHeader()
     }
     
     fileprivate func setupAddButton() {
         makeViewRoundWithShadow(addButton)
     }
     
+    fileprivate func setupTableView() {
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 140
+    }
+    
+    fileprivate func setupTableViewDataSource() {
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            logError(name: "\(#function)", error: error)
+        }
+    }
+    
+    fileprivate func setupTableViewHeader() {
+        if fetchedResultsController.sections?[0].numberOfObjects ?? 0 == 0 {
+            tableView.tableHeaderView = nil
+        } else {
+            tableView.tableHeaderView = headerView
+        }
+    }
+
     // MARK: - Actions
     
     @IBAction func optionButtonTapped(_ sender: Any) {
@@ -80,21 +100,27 @@ class TrainingTableViewController: UIViewController {
         if (segue.identifier == Segue.CreateTraining) {
             let createTrainingNC = segue.destination as! UINavigationController
             let createTrainingVC = createTrainingNC.viewControllers[0] as! CreateTrainingViewController
+            createTrainingVC.trainingCoreDataManager = trainingCoreDataManager;
             createTrainingVC.trainingController = trainingController
         }
     }
     
     // MARK: - Properties
     
-    fileprivate lazy var signUpController: SignUpController = {
-        let signUpController = SignUpController(baseURLString: "https://ubilabstest.sapsailing.com")
-        signUpController.delegate = self
-        return signUpController
-    }()
-    
     fileprivate lazy var trainingController: TrainingController = {
         let trainingController = TrainingController(baseURLString: "https://ubilabstest.sapsailing.com")
         return trainingController
+    }()
+    
+    fileprivate lazy var trainingCoreDataManager: TrainingCoreDataManager = {
+        let trainingCoreDataManager = TrainingCoreDataManager(name: self.userName)
+        return trainingCoreDataManager
+    }()
+    
+    fileprivate lazy var fetchedResultsController: NSFetchedResultsController<CheckIn> = {
+        let fetchedResultsController = self.trainingCoreDataManager.checkInFetchedResultsController()
+        fetchedResultsController.delegate = self
+        return fetchedResultsController
     }()
     
 }
@@ -104,7 +130,7 @@ class TrainingTableViewController: UIViewController {
 extension TrainingTableViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
+        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -114,11 +140,11 @@ extension TrainingTableViewController: UITableViewDataSource {
     }
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
-//        guard let homeViewCell = cell as? HomeViewCell else { return }
-//        let checkIn = fetchedResultsController.object(at: indexPath)
-//        homeViewCell.eventLabel.text = checkIn.event.name
-//        homeViewCell.leaderboardLabel.text = checkIn.leaderboard.name
-//        homeViewCell.competitorLabel.text = checkIn.name
+        guard let trainingTableViewCell = cell as? TrainingTableViewCell else { return }
+        let checkIn = fetchedResultsController.object(at: indexPath)
+        trainingTableViewCell.eventLabel.text = checkIn.event.name
+        trainingTableViewCell.leaderboardLabel.text = checkIn.leaderboard.name
+        trainingTableViewCell.competitorLabel.text = checkIn.name
     }
     
 }
@@ -129,20 +155,42 @@ extension TrainingTableViewController: UITableViewDelegate {
     
 }
 
-// MARK: - SignUpControllerDelegate
 
-extension TrainingTableViewController: SignUpControllerDelegate {
+// MARK: - NSFetchedResultsControllerDelegate
+
+extension TrainingTableViewController: NSFetchedResultsControllerDelegate {
     
-    func signUpControllerDidFinish(_ controller: SignUpController) {
-        
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        tableView.beginUpdates()
     }
     
-    func signUpControllerDidCancel(_ controller: SignUpController) {
-        navigationController?.popViewController(animated: true)
+    func controller(
+        _ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange object: Any,
+        at indexPath: IndexPath?,
+        for type: NSFetchedResultsChangeType,
+        newIndexPath: IndexPath?)
+    {
+        switch type {
+        case .insert:
+            tableView.insertRows(at: [newIndexPath!], with: UITableViewRowAnimation.automatic)
+        case .update:
+            let cell = tableView.cellForRow(at: indexPath!)
+            if cell != nil {
+                configureCell(cell: cell!, atIndexPath: indexPath!)
+                tableView.reloadRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
+            }
+        case .move:
+            tableView.deleteRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
+            tableView.insertRows(at: [newIndexPath!], with: .automatic)
+        case .delete:
+            tableView.deleteRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
+        }
     }
     
-    func signUpControllerDidLogout(_ controller: SignUpController) {
-        navigationController?.popToRootViewController(animated: true)
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        tableView.endUpdates()
+        setupTableViewHeader()
     }
     
 }
