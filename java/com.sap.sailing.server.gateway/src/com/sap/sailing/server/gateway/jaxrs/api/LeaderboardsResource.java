@@ -733,9 +733,10 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
      * {@code RaceLogRaceTracker} will take the event and update a {@link TrackedRace}'s course accordingly.
      * <p>
      * 
-     * <b>Note:</b> An existing course layout for the race identified will be replaced by the new, automatic
-     * course layout. New marks will be added. Repeated execution for the same race, while possible, is not
-     * recommended as it will lead to multiple marks with the same name.<p>
+     * <b>Note:</b> An existing course layout for the race identified will be replaced by the new, automatic course
+     * layout. New marks will be added. Repeated execution for the same race, while possible, is not recommended as it
+     * will lead to multiple marks with the same name.
+     * <p>
      * 
      * Several "magical" and heuristic rules are applied to find a course that is better than no course. For this, the
      * method looks for tracks recorded in the {@link TrackedRace}. If no track is found for any of the competitors, no
@@ -745,21 +746,22 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
      * 
      * <b>Start:</b> When a {@link TrackedRace#getStartOfRace() race start time} or at least a
      * {@link TrackedRace#getStartOfTracking() tracking start time} has been set for the race, the tracks are analyzed
-     * around that time. A start line is defined as the course's first waypoint such that a majority of the tracks
-     * cross that start line, with a "start boat" on the starboard side of the line when viewed in crossing
-     * direction, and oriented such that it is perpendicular to the average course of those tracks that cross
-     * it.<p>
+     * around that time. A start line is defined as the course's first waypoint such that a majority of the tracks cross
+     * that start line, with a "start boat" on the starboard side of the line when viewed in crossing direction, and
+     * oriented such that it is perpendicular to the average course of those tracks that cross it.
+     * <p>
      * 
-     * <b>Finish:</b> When no {@link TrackedRace#getEndOfRace() end of race}, {@link TrackedRace#getFinishedTime() finish time}
-     * nor a {@link TrackedRace#getEndOfTracking() tracking end time} has been set, a hypothetical finish line is "guessed"
-     * such that it is 100 nautical miles away from the latest positions on the tracks, positioned such that the extension
-     * of the tracks with their average course over ground leads perpendicularly into the finish line.<p>
+     * <b>Finish:</b> When no {@link TrackedRace#getEndOfRace() end of race}, {@link TrackedRace#getFinishedTime()
+     * finish time} nor a {@link TrackedRace#getEndOfTracking() tracking end time} has been set, a hypothetical finish
+     * line is "guessed" as 12h after the start time, spanning the tracks at that time with the leader just crossing it.
+     * <p>
      * 
      * <b>Other course marks:</b> If a wind direction is known from a source other than the race course-based
-     * estimation, e.g., a maneuver-based wind estimation, a manual entry, or a sensor measurement, transitions
-     * between upwind, downwind, and reaching sections will be separated by adding a {@link ControlPoint} with a
-     * corresponding {@link Waypoint} such that the waypoint is passed at the leg type transition. This will allow
-     * for better analysis of legs split by their type.<p>
+     * estimation, e.g., a maneuver-based wind estimation, a manual entry, or a sensor measurement, transitions between
+     * upwind, downwind, and reaching sections will be separated by adding a {@link ControlPoint} with a corresponding
+     * {@link Waypoint} such that the waypoint is passed at the leg type transition. This will allow for better analysis
+     * of legs split by their type.
+     * <p>
      * 
      * TODO The implementation of this method will improve over time. We'll start with start and finish line for now...
      */
