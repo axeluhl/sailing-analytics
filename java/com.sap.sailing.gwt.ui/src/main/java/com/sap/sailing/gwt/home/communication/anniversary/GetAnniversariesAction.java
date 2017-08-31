@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.home.communication.anniversary;
 
 import java.net.URL;
+import java.util.Date;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -36,7 +36,7 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
 
         service.getKnownAnniversaries().forEach((target, anniversaryInfo) -> {
             final DetailedRaceInfo raceinfo = anniversaryInfo.getA();
-            if (DateUtil.daysUntilNow(raceinfo.getStartOfRace().asDate()) < DAYS_TO_SHOW_PAST_ANNIVERSARY) {
+            if (daysUntilNow(raceinfo.getStartOfRace().asDate()) < DAYS_TO_SHOW_PAST_ANNIVERSARY) {
                 anniversaries.addValue(new AnniversaryDTO(target, anniversaryInfo.getB(), raceinfo.getEventID(),
                         raceinfo.getLeaderboardName(), raceinfo.getRemoteUrl().toExternalForm(),
                         raceinfo.getIdentifier().getRaceName(), raceinfo.getIdentifier().getRegattaName()));
@@ -64,5 +64,11 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
             return timeToLive;
         }
 
+    }
+
+    // FIXME Remove as soon as DateUtil is refactored to work on server-side too
+    private static int daysUntilNow(Date date) {
+        final long dayInMillis = 1000 * 60 * 60 * 24;
+        return (int) (new Date().getTime() / dayInMillis - date.getTime() / dayInMillis);
     }
 }

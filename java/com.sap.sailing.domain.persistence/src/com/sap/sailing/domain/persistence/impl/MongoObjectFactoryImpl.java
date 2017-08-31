@@ -1685,7 +1685,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 newValue.append(FieldNames.LEADERBOARD_NAME.name(), raceInfo.getLeaderboardName());
                 storeTimePoint(raceInfo.getStartOfRace(), newValue, (FieldNames.START_OF_RACE.name()));
                 newValue.append(FieldNames.EVENT_ID.name(), raceInfo.getEventID().toString());
-                newValue.append(FieldNames.REMOTE_URL.name(), raceInfo.getRemoteUrl());
+                final URL remoteUrl = raceInfo.getRemoteUrl();
+                newValue.append(FieldNames.REMOTE_URL.name(), remoteUrl == null ? null : remoteUrl.toExternalForm());
                 newValue.append(FieldNames.ANNIVERSARY_TYPE.name(), anniversary.getValue().getB().toString());
                 anniversarysStored.update(currentProxy, newValue, true, false);
             }
