@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -15,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -29,6 +32,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -152,21 +156,22 @@ public class LeaderboardCourseChangeTest {
 
     private RaceDefinition createMockedRace(Course course, BoatClass boatClass) {
         RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);
-        when(mockedRaceDefinition.getCompetitors()).thenReturn(new HashSet<Competitor>());
         when(mockedRaceDefinition.getCourse()).thenReturn(course);
         when(mockedRaceDefinition.getBoatClass()).thenReturn(new BoatClassImpl("TestClass", true));
         when(mockedRaceDefinition.getName()).thenReturn("TestRace");
-        Iterable<Competitor> competitorSet = createCompetitorSet(boatClass);
-        when(mockedRaceDefinition.getCompetitors()).thenReturn(competitorSet);
+        Map<Competitor, Boat> competitorAndBoatMap = createCompetitorAndBoatMap(boatClass);
+        when(mockedRaceDefinition.getCompetitors()).thenReturn(competitorAndBoatMap.keySet());
+        when(mockedRaceDefinition.getCompetitorsAndTheirBoats()).thenReturn(competitorAndBoatMap);
         return mockedRaceDefinition;
     }
 
-    private Iterable<Competitor> createCompetitorSet(BoatClass boatClass) {
-        Set<Competitor> competitors = new HashSet<>();
-        
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", "BYC", Color.BLACK, null, null,
+    private Map<Competitor, Boat> createCompetitorAndBoatMap(BoatClass boatClass) {
+        Map<Competitor, Boat> competitors = new HashMap<>();
+        Competitor c = new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", "BYC", Color.BLACK, null, null,
                 mock(DynamicTeam.class),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat b = new BoatImpl("Boot", "b", boatClass, null);
+        competitors.put(c, b);
         return competitors;
     }
 
