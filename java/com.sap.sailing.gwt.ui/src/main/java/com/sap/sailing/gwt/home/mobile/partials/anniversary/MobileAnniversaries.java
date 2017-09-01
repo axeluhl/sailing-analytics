@@ -4,6 +4,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView;
 
+/**
+ * {@link AnniversariesView} implementation for mobile.
+ */
 public class MobileAnniversaries extends Composite implements AnniversariesView {
 
     private final FlowPanel panel;
