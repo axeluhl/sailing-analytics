@@ -55,7 +55,7 @@ class TrainingRequestManager: NSObject {
         //        body["createleaderboardgroup"] = "" as AnyObject
         body["createregatta"] = "true" as AnyObject
         body["boatclassname"] = boatClassName as AnyObject
-        //        body["numberofraces"] = "" as AnyObject
+        body["numberofraces"] = "1" as AnyObject
         manager.post(urlString, parameters: body, success: { (requestOperation, responseObject) in
             self.postCreateEventSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
@@ -125,7 +125,42 @@ class TrainingRequestManager: NSObject {
         failure(error, stringForError(error))
     }
     
+    // MARK: - SetTrackingTimes
+    
+    func postSetTrackingTimes(
+        leaderboardName: String,
+        raceName: String,
+        fleetName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedFleetName = fleetName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/settrackingtimes?race_column=\(encodedRaceName)&fleet=\(encodedFleetName)&startoftrackingasmillis=\(millisSince1970())"
+        manager.responseSerializer = AFJSONResponseSerializer()
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postSetTrackingTimesSuccess(responseObject: responseObject, success: success)
+        }) { (requestOperation, error) in
+            self.postSetTrackingTimesFailure(error: error, failure: failure)
+        }
+    }
+    
+    fileprivate func postSetTrackingTimesSuccess(responseObject: Any?, success: @escaping () -> Void) {
+        logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
+        success()
+    }
+    
+    fileprivate func postSetTrackingTimesFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(error, stringForError(error))
+    }
+    
     // MARK: - Helper
+    
+    fileprivate func millisSince1970() -> NSNumber {
+        return NSNumber(value: Int64(Date().timeIntervalSince1970 * 1000) as Int64)
+    }
     
     fileprivate func responseObjectToString(responseObject: Any?) -> String {
         return (responseObject as? String) ?? "response object is empty or cannot be casted"

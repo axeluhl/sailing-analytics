@@ -115,10 +115,7 @@ class TrainingController: NSObject {
         }
     }
     
-    fileprivate func competitorCreateAndAddSuccess(
-        collector: CreateTrainingData,
-        success: (_ createTrainingData: CreateTrainingData) -> Void)
-    {
+    fileprivate func competitorCreateAndAddSuccess(collector: CreateTrainingData, success: (_ createTrainingData: CreateTrainingData) -> Void) {
         success(collector)
     }
     
