@@ -19,7 +19,7 @@
             text-align: center;
         }
         .buttonContainer {
-            margin: 1em 10px 0;
+            margin: 2em 10px 0;
         
 }
     </ui:style>    

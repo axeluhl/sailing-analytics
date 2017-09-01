@@ -8,6 +8,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class AnniversaryItem extends Widget {
 
@@ -17,9 +18,11 @@ public class AnniversaryItem extends Widget {
     }
 
     @UiField
+    StringMessages i18n;
+    @UiField
     Style style;
     @UiField
-    DivElement countUi, iconUi, teaserUi, descriptionUi;
+    DivElement iconUi, countUi, unitUi, teaserUi, descriptionUi;
     @UiField
     AnchorElement linkUi;
 
@@ -41,6 +44,7 @@ public class AnniversaryItem extends Widget {
         this(teaser, description);
         this.iconUi.removeFromParent();
         this.countUi.setInnerText(String.valueOf(countdown));
+        this.unitUi.setInnerText(countdown == 1 ? i18n.anniversaryUnitTextRace() : i18n.anniversaryUnitTextRaces());
         this.linkUi.removeFromParent();
     }
 

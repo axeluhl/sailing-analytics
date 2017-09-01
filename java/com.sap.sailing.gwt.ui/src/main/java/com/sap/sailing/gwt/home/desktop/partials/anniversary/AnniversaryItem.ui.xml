@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:style field="style" type="com.sap.sailing.gwt.home.desktop.partials.anniversary.AnniversaryItem.Style">
         .main {
@@ -73,7 +74,7 @@
             <div class="{style.symbolContainer}">
 	            <div ui:field="iconUi" class="{style.icon}"></div>
                 <div ui:field="countUi" class="{style.count}"></div>
-                <div class="{style.unit}">Races</div>
+                <div ui:field="unitUi" class="{style.unit}"></div>
             </div>
             <div class="{style.textContainer}">
                 <div ui:field="teaserUi" class="{style.teaser}"></div>
@@ -81,7 +82,9 @@
             </div>
         </div>
         <div class="{style.linkContainer}">
-            <a ui:field="linkUi" target="_blank" class="{res.mainCss.button}">Show anniversary race</a>
+            <a ui:field="linkUi" target="_blank" class="{res.mainCss.button}">
+                <ui:text from="{i18n.anniversaryRaceLinkText}" />
+            </a>
         </div>
     </div>
 </ui:UiBinder> 

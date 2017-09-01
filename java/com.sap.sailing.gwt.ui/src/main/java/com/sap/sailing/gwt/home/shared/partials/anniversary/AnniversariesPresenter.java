@@ -44,7 +44,8 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
         final int target = anniversary.getTarget();
         if (anniversary.isAnnouncement()) {
             final String teaser = StringMessages.INSTANCE.anniversaryAnnouncementTeaser(target);
-            final String description = this.getAnnouncementDescription(anniversary);
+            final String raceDisplayName = anniversary.getRaceName() + " - " + anniversary.getLeaderBoardName();
+            final String description = StringMessages.INSTANCE.anniversaryAnnouncementDescription(raceDisplayName);
             this.view.addAnnouncement(ANNOUNCEMENT_ICON, target, teaser, description, getRaceBoardLink(anniversary));
         } else {
             final int countDown = anniversary.getCountDown();
@@ -58,12 +59,6 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
                 this.view.addCountdown(anniversary.getCountDown(), teaser, description);
             }
         }
-    }
-
-    private String getAnnouncementDescription(AnniversaryDTO anniversary) {
-        final String raceDisplayName = anniversary.getRaceName() + " - " + anniversary.getLeaderBoardName();
-        final String raceBoardUrl = getRaceBoardLink(anniversary);
-        return StringMessages.INSTANCE.anniversaryAnnouncementDescription(raceDisplayName, raceBoardUrl);
     }
 
     private String getRaceBoardLink(AnniversaryDTO anniversary) {
