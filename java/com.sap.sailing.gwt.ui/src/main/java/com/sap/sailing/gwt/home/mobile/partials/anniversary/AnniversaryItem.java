@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.home.mobile.partials.anniversary;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
@@ -15,13 +17,36 @@ public class AnniversaryItem extends Widget {
     }
 
     @UiField
-    DivElement iconUi, teaserUi, descriptionUi;
+    Style style;
+    @UiField
+    DivElement countUi, iconUi, teaserUi, descriptionUi;
+    @UiField
+    AnchorElement linkUi;
 
-    AnniversaryItem(String iconUrl, String teaser, String description) {
+    private AnniversaryItem(String teaser, String description) {
         setElement(uiBinder.createAndBindUi(this));
-        this.iconUi.getStyle().setBackgroundImage("url('" + iconUrl + "')");
         this.teaserUi.setInnerText(teaser);
         this.descriptionUi.setInnerHTML(description);
+    }
+
+    AnniversaryItem(String iconUrl, int target, String teaser, String description, String linkUrl) {
+        this(teaser, description);
+        this.iconUi.getStyle().setBackgroundImage("url('" + iconUrl + "')");
+        this.countUi.setInnerText(String.valueOf(target));
+        this.linkUi.setHref(linkUrl);
+        this.addStyleName(style.announcement());
+    }
+
+    AnniversaryItem(int countdown, String teaser, String description) {
+        this(teaser, description);
+        this.iconUi.removeFromParent();
+        this.countUi.setInnerText(String.valueOf(countdown));
+        this.linkUi.removeFromParent();
+    }
+
+    interface Style extends CssResource {
+
+        String announcement();
     }
 
 }

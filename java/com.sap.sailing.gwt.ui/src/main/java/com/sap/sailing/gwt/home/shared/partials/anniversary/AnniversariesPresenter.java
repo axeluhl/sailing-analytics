@@ -19,9 +19,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
  */
 public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDTO> {
 
-    private static final String COUNTDOWN_MAJOR_ICON = "images/mobile/icon_trackedCount.svg";
-    private static final String COUNTDOWN_REPDIGIT_ICON = "images/mobile/icon_trackedCount.svg";
-    private static final String ANNOUNCEMENT_ICON = "images/mobile/icon_trackedCount.svg";
+    private static final String ANNOUNCEMENT_ICON = "images/mobile/icon-bottle-white.png";
 
     private AnniversariesView view;
 
@@ -44,33 +42,36 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
 
     private void addAnniversary(AnniversaryDTO anniversary) {
         final int target = anniversary.getTarget();
-        final String iconUrl, teaser, description;
         if (anniversary.isAnnouncement()) {
-            iconUrl = ANNOUNCEMENT_ICON;
-            teaser = StringMessages.INSTANCE.anniversaryAnnouncementTeaser(target);
-            description = this.getAnnouncementDescription(anniversary);
-        } else if (anniversary.getType() == AnniversaryType.QUARTER) {
-            iconUrl = COUNTDOWN_MAJOR_ICON;
-            teaser = StringMessages.INSTANCE.anniversaryMajorCountdownTeaser(anniversary.getCountDown(), target);
-            description = StringMessages.INSTANCE.anniversaryMajorCountdownDescription(target);
-        } else if (anniversary.getType() == AnniversaryType.REPEATED_DIGIT) {
-            iconUrl = COUNTDOWN_REPDIGIT_ICON;
-            teaser = StringMessages.INSTANCE.anniversaryRepdigitCountdownTeaser(anniversary.getCountDown(), target);
-            description = StringMessages.INSTANCE.anniversaryRepdigitCountdownDescription(target);
+            final String teaser = StringMessages.INSTANCE.anniversaryAnnouncementTeaser(target);
+            final String description = this.getAnnouncementDescription(anniversary);
+            this.view.addAnnouncement(ANNOUNCEMENT_ICON, target, teaser, description, getRaceBoardLink(anniversary));
         } else {
-            return;
+            final int countDown = anniversary.getCountDown();
+            if (anniversary.getType() == AnniversaryType.QUARTER) {
+                final String teaser = StringMessages.INSTANCE.anniversaryMajorCountdownTeaser(countDown, target);
+                final String description = StringMessages.INSTANCE.anniversaryMajorCountdownDescription(target);
+                this.view.addCountdown(countDown, teaser, description);
+            } else if (anniversary.getType() == AnniversaryType.REPEATED_DIGIT) {
+                final String teaser = StringMessages.INSTANCE.anniversaryRepdigitCountdownTeaser(countDown, target);
+                final String description = StringMessages.INSTANCE.anniversaryRepdigitCountdownDescription(target);
+                this.view.addCountdown(anniversary.getCountDown(), teaser, description);
+            }
         }
-        this.view.addAnniversary(iconUrl, teaser, description);
     }
 
     private String getAnnouncementDescription(AnniversaryDTO anniversary) {
         final String raceDisplayName = anniversary.getRaceName() + " - " + anniversary.getLeaderBoardName();
-        final String raceBoardUrl = EntryPointWithSettingsLinkFactory.createRaceBoardLink(anniversary.getRemoteUrl(),
+        final String raceBoardUrl = getRaceBoardLink(anniversary);
+        return StringMessages.INSTANCE.anniversaryAnnouncementDescription(raceDisplayName, raceBoardUrl);
+    }
+
+    private String getRaceBoardLink(AnniversaryDTO anniversary) {
+        return EntryPointWithSettingsLinkFactory.createRaceBoardLink(anniversary.getRemoteUrl(),
                 new RaceboardContextDefinition(anniversary.getRegattaName(), anniversary.getRaceName(),
                         anniversary.getLeaderBoardName(), null, anniversary.getEventID(), null),
                 new PerspectiveCompositeSettings<>(new RaceBoardPerspectiveOwnSettings(), Collections
                         .singletonMap(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true))));
-        return StringMessages.INSTANCE.anniversaryAnnouncementDescription(raceDisplayName, raceBoardUrl);
     }
 
 }

@@ -28,7 +28,7 @@
             <mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
         </div>
         <mp:stage.Stage ui:field='stage'/>
-        <mp:anniversary.MobileAnniversaries ui:field="anniversariesUi" addStyleNames="{res.mainCss.spacermargintopsmall}"/>
+        <mp:anniversary.MobileAnniversaries ui:field="anniversariesUi"/>
         <div class="{style.buttonContainer}">
             <a ui:field="showAllEventsUi" class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite} {style.action}"><ui:text from='{i18n.mainEventShowAll}'/></a>
         </div>

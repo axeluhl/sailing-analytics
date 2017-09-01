@@ -2,43 +2,72 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
+    <ui:style field="style" type="com.sap.sailing.gwt.home.mobile.partials.anniversary.AnniversaryItem.Style">
         .content {
-            box-shadow: 0 0 10px 2px #008fcc;
-            border-radius: .333333333333333em;
-            margin: 1em .7em 0;
+            padding: 1em .7em;
+            background-color: #f8f8f8;
+            margin-bottom: 1em; 
         }
-        .content:first-child {
-            margin-top: 0;
+        .symbolContainer {
+            width: 7em;
+            height: 7em;
+            margin: auto;
+            border: 0.2em solid #fff;
+            background: #008fcc;
+            color: #fff;
+            text-align: center;
+            padding: 0.5em 0.333333333333333em;
+            border-radius: 0.666666666666667em;
+            box-shadow: 0 0 18px rgba(0,0,0,0.13), 0 2px 6px rgba(0,0,0,0.25);
+            text-transform: uppercase;
         }
         .icon {
             background-repeat: no-repeat;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
+            background-size: contain;
             width: 3em;
             height: 3em;
+            margin: 0 1.75em;
         }
-        .headerContainer {
-            position: relative;
-            min-height: 4em;
-            padding: .5em;
+        .count {
+            font-weight: bold;
+            font-size: 3em;
+        }
+        .unit {
+            line-height: .75em;
+            font-size: 1.25em;
+        }
+        .announcement .count {
+            font-size: 1.5em;
+        }
+        .announcement .unit {
+            font-size: 0.833333333333333em;
+        }
+        .teaser, .description {
+            padding: 0 .5em;
+        }
+        .teaser, .description, .link {
+            margin-top: 1em;
         }
         .teaser {
-            margin-left: 3.25em;
-            font-size: 1.2em;
+            font-size: 1.333333333333333em;
             font-weight: bold;
             color: #008fcc;
         }
-        .description {
-            padding: 0 .5em .5em;
+        .link {
+            width: 100%;
+            text-align: center;
+            border-radius: .3846154em;
         }
     </ui:style>
     <div class="{style.content}">
-        <div class="{style.headerContainer}">
+        <div class="{style.symbolContainer}">
             <div ui:field="iconUi" class="{style.icon}"></div>
-            <div ui:field="teaserUi" class="{style.teaser}"></div>
+            <div ui:field="countUi" class="{style.count}"></div>
+            <div class="{style.unit}">Races</div>
         </div>
+        <div ui:field="teaserUi" class="{style.teaser}"></div>
         <div ui:field="descriptionUi" class="{style.description}"></div>
+        <a ui:field="linkUi" target="_blank" class="{res.mainCss.button} {res.mainCss.buttonstrong} 
+                {res.mainCss.buttonarrowrightwhite} {style.link}">Show anniversary race</a>
     </div>
 </ui:UiBinder> 
