@@ -11,13 +11,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class AnniversaryItem extends Widget {
+class AnniversaryItem extends Widget {
 
-    private static UpcomingAnniversaryUiBinder uiBinder = GWT.create(UpcomingAnniversaryUiBinder.class);
-
-    interface UpcomingAnniversaryUiBinder extends UiBinder<Element, AnniversaryItem> {
+    interface AnniversaryItemUiBinder extends UiBinder<Element, AnniversaryItem> {
     }
 
+    private static AnniversaryItemUiBinder uiBinder = GWT.create(AnniversaryItemUiBinder.class);
     private static NumberFormat numberFormat = NumberFormat.getFormat("#,###");
 
     @UiField
@@ -39,7 +38,7 @@ public class AnniversaryItem extends Widget {
         this(teaser, description);
         this.iconUi.getStyle().setBackgroundImage("url('" + iconUrl + "')");
         this.countUi.setInnerText(numberFormat.format(target));
-        this.unitUi.setInnerText(i18n.anniversaryUnitTextRaces());
+        this.unitUi.setInnerText(i18n.anniversaryUnitText(target));
         this.linkUi.setHref(linkUrl);
         this.addStyleName(style.announcement());
     }
@@ -48,7 +47,7 @@ public class AnniversaryItem extends Widget {
         this(teaser, description);
         this.iconUi.removeFromParent();
         this.countUi.setInnerText(numberFormat.format(countdown));
-        this.unitUi.setInnerText(countdown == 1 ? i18n.anniversaryUnitTextRace() : i18n.anniversaryUnitTextRaces());
+        this.unitUi.setInnerText(i18n.anniversaryUnitText(countdown));
         this.linkUi.removeFromParent();
     }
 
