@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.anniversary;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.Map;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
@@ -27,14 +28,17 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
     public ResultWithTTL<AnniversariesDTO> execute(SailingDispatchContext context) {
         final AnniversariesDTO anniversaries = new AnniversariesDTO();
         final RacingEventService service = context.getRacingEventService();
+        final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnnivs = service.getKnownAnniversaries();
         final Integer nextCountdown = service.getNextAnniversaryCountdown();
 
         if (nextCountdown != null && nextCountdown < SHOW_IF_LESS_RACES_TILL_NEXT_ANNIVERSARY) {
             final Pair<Integer, AnniversaryType> next = service.getNextAnniversary();
-            anniversaries.addValue(new AnniversaryDTO(next.getA(), nextCountdown, next.getB()));
+            if (!knownAnnivs.containsKey(next.getA())) {
+                anniversaries.addValue(new AnniversaryDTO(next.getA(), nextCountdown, next.getB()));
+            }
         }
 
-        service.getKnownAnniversaries().forEach((target, anniversaryInfo) -> {
+        knownAnnivs.forEach((target, anniversaryInfo) -> {
             final DetailedRaceInfo raceinfo = anniversaryInfo.getA();
             if (daysUntilNow(raceinfo.getStartOfRace().asDate()) < DAYS_TO_SHOW_PAST_ANNIVERSARY) {
                 anniversaries.addValue(new AnniversaryDTO(target, anniversaryInfo.getB(), raceinfo.getEventID(),
