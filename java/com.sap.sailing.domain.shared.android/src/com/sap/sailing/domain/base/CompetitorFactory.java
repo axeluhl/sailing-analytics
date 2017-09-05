@@ -15,10 +15,12 @@ public interface CompetitorFactory {
     /**
      * If a valid competitor is returned and the caller has information available that could be used to update the competitor,
      * the caller must check the result of {@link #isCompetitorToUpdateDuringGetOrCreate(Competitor)}, and if <code>true</code>,
-     * must call {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} to cause an update of the
+     * must call {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam...)} to cause an update of the
      * competitor's values.
      */
     Competitor getExistingCompetitorById(Serializable competitorId);
+
+    CompetitorWithBoat getExistingCompetitorWithBoatById(Serializable competitorId);
 
     /**
      * Checks if the <code>competitor</code> shall be updated from the default provided by, e.g., a tracking infrastructure.
@@ -30,4 +32,8 @@ public interface CompetitorFactory {
 
     Competitor getOrCreateCompetitor(Serializable competitorId, String name, String shortName, Color displayColor, String email,
             URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
+    
+    CompetitorWithBoat getOrCreateCompetitorWithBoat(Serializable competitorId, String name, String shortName, Color displayColor, String email,
+            URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat);
+
 }

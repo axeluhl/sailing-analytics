@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -62,7 +63,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
             }
             Collection<CompetitorWithBoat> allCompetitorsWithBoat = loadFrom.loadAllCompetitorsWithBoat();
             for (CompetitorWithBoat competitor : allCompetitorsWithBoat) {
-                addCompetitorWithBoatToTransientStore(competitor.getId(), competitor);
+                addCompetitorToTransientStore(competitor.getId(), competitor);
             }
             Collection<Boat> allBoats = loadFrom.loadAllBoats();
             for (Boat boat: allBoats) {
@@ -142,44 +143,15 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         super.addCompetitors(competitors);
     }
 
-    private void addCompetitorWithBoatToTransientStore(Serializable id, CompetitorWithBoat competitor) {
-        super.addNewCompetitorWithBoat(id, competitor);
-    }
-
-    @Override
-    protected void addNewCompetitorWithBoat(Serializable id, CompetitorWithBoat competitor) {
-        storeTo.storeCompetitorWithBoat(competitor);
-        super.addNewCompetitorWithBoat(id, competitor);
-    }
-
-    @Override
-    public void clearCompetitorsWithBoat() {
-        storeTo.removeAllCompetitorsWithBoat();
-        super.clearCompetitorsWithBoat();
-    }
-
-    @Override
-    public void removeCompetitorWithBoat(CompetitorWithBoat competitor) {
-        storeTo.removeCompetitorWithBoat(competitor);
-        super.removeCompetitorWithBoat(competitor);
-    }
-
     @Override
     public CompetitorWithBoat updateCompetitorWithBoat(String idAsString, String newName, String newShortName, Color newRgbDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile,
-            String searchTag) {
+            String searchTag, DynamicBoat boat) {
         CompetitorWithBoat result = super.updateCompetitorWithBoat(idAsString, newName, newShortName, newRgbDisplayColor, newEmail, newNationality,
-                newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
+                newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
         storeTo.storeCompetitorWithBoat(result);
         return result;
     }
-    
-    @Override
-    public void addCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
-        storeTo.storeCompetitorsWithBoat(competitors);
-        super.addCompetitorsWithBoat(competitors);
-    }
-
     
     private void addBoatToTransientStore(Serializable id, Boat boat) {
         super.addNewBoat(id, boat);

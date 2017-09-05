@@ -8,8 +8,8 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
-import com.sap.sailing.domain.base.CompetitorWithBoatFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -22,7 +22,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 
 public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<CompetitorWithBoat> {
-    protected final CompetitorWithBoatFactory competitorWithBoatFactory;
+    protected final CompetitorFactory competitorWithBoatFactory;
     protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
     private static final Logger logger = Logger.getLogger(CompetitorWithBoatJsonDeserializer.class.getName());
@@ -32,11 +32,11 @@ public class CompetitorWithBoatJsonDeserializer implements JsonDeserializer<Comp
                 new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
     }
 
-    public CompetitorWithBoatJsonDeserializer(CompetitorWithBoatFactory competitorWithBoatFactory) {
+    public CompetitorWithBoatJsonDeserializer(CompetitorFactory competitorWithBoatFactory) {
         this(competitorWithBoatFactory, null, /* boatDeserializer */ null);
     }
 
-    public CompetitorWithBoatJsonDeserializer(CompetitorWithBoatFactory competitorWithBoatFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
+    public CompetitorWithBoatJsonDeserializer(CompetitorFactory competitorWithBoatFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
         this.competitorWithBoatFactory = competitorWithBoatFactory;
         this.teamJsonDeserializer = teamJsonDeserializer;
         this.boatJsonDeserializer = boatDeserializer;

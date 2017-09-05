@@ -121,7 +121,7 @@ public class CompetitorStoreTest {
         assertEquals(competitor.getTeam().getNationality(), competitor3.getTeam().getNationality()); // no updatability requested; nationality
                                                                                                      // expected to remain unchanged
         // now mark the competitor as to update from defaults
-        persistentStore2.allowCompetitorWithBoatResetToDefaults(competitor2);
+        persistentStore2.allowCompetitorResetToDefaults(competitor2);
         CompetitorWithBoat competitor4 = persistentStore2.getOrCreateCompetitorWithBoat(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, /* timeOnTimeFactor */
                 null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */null, null, template.getBoat());

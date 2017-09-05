@@ -386,11 +386,6 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public boolean isCompetitorWithBoatToUpdateDuringGetOrCreate(CompetitorWithBoat competitor) {
-        return getCompetitorStore().isCompetitorWithBoatToUpdateDuringGetOrCreate(competitor);
-    }
-
-    @Override
     public Boat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
         return getCompetitorStore().getOrCreateBoat(id, name, boatClass, sailId, color);
     }

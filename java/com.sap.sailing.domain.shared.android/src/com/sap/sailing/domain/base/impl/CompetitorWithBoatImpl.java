@@ -9,7 +9,7 @@ import com.sap.sse.common.Duration;
 
 public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCompetitorWithBoat {
     private static final long serialVersionUID = 22679449208503264L;
-    private final DynamicBoat boat;
+    private DynamicBoat boat;
     
     public CompetitorWithBoatImpl(Serializable id, String name, String shortName, Color color, String email,
             URI flagImage, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile,
@@ -28,5 +28,10 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
     @Override
     public DynamicBoat getBoat() {
         return boat;
+    }
+
+    @Override
+    public void setBoat(DynamicBoat boat) {
+        this.boat = boat;
     }
 }
