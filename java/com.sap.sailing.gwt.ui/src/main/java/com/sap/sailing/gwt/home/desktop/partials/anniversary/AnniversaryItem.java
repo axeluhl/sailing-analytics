@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -16,6 +17,8 @@ class AnniversaryItem extends Widget {
 
     interface UpcomingAnniversaryUiBinder extends UiBinder<Element, AnniversaryItem> {
     }
+
+    private static NumberFormat numberFormat = NumberFormat.getFormat("#,###");
 
     @UiField
     StringMessages i18n;
@@ -35,7 +38,8 @@ class AnniversaryItem extends Widget {
     AnniversaryItem(String iconUrl, int target, String teaser, String description, String linkUrl) {
         this(teaser, description);
         this.iconUi.getStyle().setBackgroundImage("url('" + iconUrl + "')");
-        this.countUi.setInnerText(String.valueOf(target));
+        this.countUi.setInnerText(numberFormat.format(target));
+        this.unitUi.setInnerText(i18n.anniversaryUnitTextRaces());
         this.linkUi.setHref(linkUrl);
         this.addStyleName(style.announcement());
     }
@@ -43,7 +47,7 @@ class AnniversaryItem extends Widget {
     AnniversaryItem(int countdown, String teaser, String description) {
         this(teaser, description);
         this.iconUi.removeFromParent();
-        this.countUi.setInnerText(String.valueOf(countdown));
+        this.countUi.setInnerText(numberFormat.format(countdown));
         this.unitUi.setInnerText(countdown == 1 ? i18n.anniversaryUnitTextRace() : i18n.anniversaryUnitTextRaces());
         this.linkUi.removeFromParent();
     }
