@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
+import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
@@ -130,8 +132,12 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
         if (result == null) {
             return "";
         } else {
-            Integer intResult = ((int) (double) result);
-            return intResult.toString();
+            Integer timeInSeconds = ((int) (double) result);
+            int hh = (int) (timeInSeconds / 3600);
+            int mm = (int) ((timeInSeconds - 3600 * hh) / 60);
+            int ss = (int) (timeInSeconds - 3600 * hh - 60 * mm);
+            NumberFormat numberFormat = NumberFormatterFactory.getDecimalFormat(2, 0);
+            return "" + numberFormat.format(hh) + ":" + numberFormat.format(mm) + ":" + numberFormat.format(ss);
         }
     }
 
