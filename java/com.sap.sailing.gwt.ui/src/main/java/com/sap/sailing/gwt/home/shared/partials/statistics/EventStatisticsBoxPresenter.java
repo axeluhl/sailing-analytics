@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.partials.statistics;
 
 import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_COMPATITORS_COUNT;
 import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_FASTEST_SAILOR;
+import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_MAX_SPEED;
 import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_RACES_COUNT;
 import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_RAW_GPS_FIX;
 import static com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxConstants.ICON_REGATTAS_FOUGHT;
@@ -37,6 +38,6 @@ public class EventStatisticsBoxPresenter extends AbstractStatisticsBoxPresenter 
         addItemWithCompactFormat(ICON_WIND_FIX, MSG.numberWindFixes(), statistics.getNumberOfWindFixes());
         addItemWithCompactFormat(ICON_SUM_MILES, MSG.sailedMiles(), statistics.getTotalDistanceTraveled() == null ? null : statistics.getTotalDistanceTraveled().getSeaMiles());
         addCompetitorItem(ICON_FASTEST_SAILOR, MSG.fastestSailor(), statistics.getFastestCompetitor());
-        addKnotsItem(ICON_FASTEST_SAILOR, MSG.highestSpeed(), statistics.getFastestCompetitorSpeedInKnots());
+        addKnotsItem(ICON_MAX_SPEED, MSG.highestSpeed(), statistics.getFastestCompetitorSpeedInKnots());
     }
 }

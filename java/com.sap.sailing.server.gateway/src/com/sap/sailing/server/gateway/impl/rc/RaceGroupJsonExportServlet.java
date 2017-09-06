@@ -45,7 +45,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String courseAreaFilter = request.getParameter(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER);
+        String courseAreaFilter = request.getParameter(RaceLogServletConstants.PARAMS_COURSE_AREA_FILTER);
         if (courseAreaFilter == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Need to set a course area filter.");
             return;

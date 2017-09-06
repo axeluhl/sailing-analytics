@@ -109,6 +109,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
     @Override
     protected void handleEvent(Triple<IControlRoute, Long, Void> event) {
         System.out.print("R");
+        ensureAllSingleMarksOfCourseAreaAreCreated(tractracRace); // this way, single marks will be known by their original name, even if used as virtual marks in gates/lines
         final IRoute route = event.getA();
         final String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
         final LinkedHashMap<IControl, TracTracControlPoint> ttControlPointsForAllOriginalEventControlPoints = new LinkedHashMap<>();
