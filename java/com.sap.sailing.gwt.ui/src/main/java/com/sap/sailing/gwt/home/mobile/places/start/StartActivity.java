@@ -14,7 +14,6 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.places.start.StartView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesPresenter;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
@@ -51,10 +50,9 @@ public class StartActivity extends AbstractActivity implements Presenter {
             }
         });
 
-        final AnniversariesPresenter anniversariesPresenter = new AnniversariesPresenter(view.getAnniversariesView());
         final RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(view.asWidget(), panel,
                 clientFactory.getDispatch(), clientFactory);
-        refreshManager.add(anniversariesPresenter, new GetAnniversariesAction());
+        refreshManager.add(view.getAnniversariesView(), new GetAnniversariesAction());
     }
 
     @Override

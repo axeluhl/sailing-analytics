@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.home.shared.partials.anniversary;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sap.sailing.gwt.home.communication.anniversary.AnniversariesDTO;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 
 /**
  * Interface for UI component showing anniversary information.
  */
-public interface AnniversariesView extends IsWidget {
+public interface AnniversariesView extends IsWidget, RefreshableWidget<AnniversariesDTO> {
 
     /**
      * Clear all existing anniversary information.
@@ -13,30 +15,65 @@ public interface AnniversariesView extends IsWidget {
     void clearAnniversaries();
 
     /**
-     * Add countdown information for an upcoming anniversary.
+     * Add an {@link AnniversaryCountdown item} which can hold countdown information for an upcoming anniversary.
      * 
-     * @param countdown
-     *            number of races until anniversary
-     * @param teaser
-     *            teaser headerline for anniversary countdown
-     * @param description
-     *            describing text for anniversary countdown
+     * @return the added {@link AnniversaryCountdown} instance
      */
-    void addCountdown(int countdown, String teaser, String description);
+    AnniversaryCountdown addCountdown();
 
     /**
-     * Add announcement information for a reached anniversary.
+     * Add an {@link AnniversaryAnnouncement item} which can hold announcement information for a reached anniversary.
      * 
-     * @param iconUrl
-     *            URL of the icon to show
-     * @param target
-     *            the number of races which were the anniversary's target
-     * @param teaser
-     *            teaser headerline for anniversary announcement
-     * @param description
-     *            describing text for anniversary announcement
-     * @param linkUrl
-     *            URL to the RaceBoard show the anniversary race
+     * @return the added {@link AnniversaryAnnouncement} instance
      */
-    void addAnnouncement(String iconUrl, int target, String teaser, String description, String linkUrl);
+    AnniversaryAnnouncement addAnnouncement();
+
+    /**
+     * Interface representing an anniversary item which can hold countdown information for an upcoming anniversary.
+     */
+    public interface AnniversaryCountdown {
+
+        /**
+         * @param count
+         *            a formatted {@link String count} to show in anniversary item
+         */
+        void setCount(String count);
+
+        /**
+         * @param unit
+         *            the <code>count</code>'s {@link String unit} to show in anniversary item
+         */
+        void setUnit(String unit);
+
+        /**
+         * @param teaser
+         *            the teaser headerline to show in anniversary item
+         */
+        void setTeaser(String teaser);
+
+        /**
+         * @param desciption
+         *            describing text to show in anniversary item
+         */
+        void setDescription(String desciption);
+
+    }
+
+    /**
+     * Interface representing an anniversary item which can hold announcement information for a reached anniversary.
+     */
+    public interface AnniversaryAnnouncement extends AnniversaryCountdown {
+
+        /**
+         * @param iconUrl
+         *            URL of the icon to show in anniversary item
+         */
+        void setIconUrl(String iconUrl);
+
+        /**
+         * @param linkUrl
+         *            URL where the link shown in anniversary item refers to
+         */
+        void setLinkUrl(String linkUrl);
+    }
 }

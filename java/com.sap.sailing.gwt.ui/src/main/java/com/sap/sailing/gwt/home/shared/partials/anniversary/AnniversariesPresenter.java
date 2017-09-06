@@ -2,9 +2,12 @@ package com.sap.sailing.gwt.home.shared.partials.anniversary;
 
 import java.util.Collections;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.gwt.home.communication.anniversary.AnniversariesDTO;
 import com.sap.sailing.gwt.home.communication.anniversary.AnniversaryDTO;
+import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView.AnniversaryAnnouncement;
+import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView.AnniversaryCountdown;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
@@ -20,6 +23,8 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDTO> {
 
     private static final String ANNOUNCEMENT_ICON = "images/mobile/icon-bottle-white.svg";
+    private static final StringMessages I18N = StringMessages.INSTANCE;
+    private static final NumberFormat COUNT_FORMAT = NumberFormat.getFormat("#,###");
 
     private AnniversariesView view;
 
@@ -43,22 +48,30 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
     private void addAnniversary(AnniversaryDTO anniversary) {
         final int target = anniversary.getTarget();
         if (anniversary.isAnnouncement()) {
-            final String teaser = StringMessages.INSTANCE.anniversaryAnnouncementTeaser(target);
-            final String raceDisplayName = anniversary.getRaceName() + " - " + anniversary.getLeaderBoardName();
-            final String description = StringMessages.INSTANCE.anniversaryAnnouncementDescription(raceDisplayName);
-            this.view.addAnnouncement(ANNOUNCEMENT_ICON, target, teaser, description, getRaceBoardLink(anniversary));
+            final AnniversaryAnnouncement item = view.addAnnouncement();
+            item.setIconUrl(ANNOUNCEMENT_ICON);
+            item.setCount(COUNT_FORMAT.format(target));
+            item.setUnit(I18N.anniversaryUnitText(target));
+            item.setTeaser(I18N.anniversaryAnnouncementTeaser(target));
+            item.setDescription(I18N.anniversaryAnnouncementDescription(getRaceDisplayName(anniversary)));
+            item.setLinkUrl(this.getRaceBoardLink(anniversary));
         } else {
-            final int countDown = anniversary.getCountDown();
+            final int countdown = anniversary.getCountDown();
+            final AnniversaryCountdown item = view.addCountdown();
+            item.setCount(COUNT_FORMAT.format(countdown));
+            item.setUnit(I18N.anniversaryUnitText(countdown));
             if (anniversary.getType() == AnniversaryType.QUARTER) {
-                final String teaser = StringMessages.INSTANCE.anniversaryMajorCountdownTeaser(countDown, target);
-                final String description = StringMessages.INSTANCE.anniversaryMajorCountdownDescription(target);
-                this.view.addCountdown(countDown, teaser, description);
+                item.setTeaser(I18N.anniversaryMajorCountdownTeaser(countdown, target));
+                item.setDescription(I18N.anniversaryMajorCountdownDescription(target));
             } else if (anniversary.getType() == AnniversaryType.REPEATED_DIGIT) {
-                final String teaser = StringMessages.INSTANCE.anniversaryRepdigitCountdownTeaser(countDown, target);
-                final String description = StringMessages.INSTANCE.anniversaryRepdigitCountdownDescription(target);
-                this.view.addCountdown(anniversary.getCountDown(), teaser, description);
+                item.setTeaser(I18N.anniversaryRepdigitCountdownTeaser(countdown, target));
+                item.setDescription(I18N.anniversaryRepdigitCountdownDescription(target));
             }
         }
+    }
+
+    private String getRaceDisplayName(AnniversaryDTO anniversary) {
+        return anniversary.getRaceName() + " - " + anniversary.getLeaderBoardName();
     }
 
     private String getRaceBoardLink(AnniversaryDTO anniversary) {
