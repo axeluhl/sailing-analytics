@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
@@ -180,6 +182,28 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
+    private class TimeTraveledLegDetailsColumn extends FormattedDoubleDetailTypeColumn {
+        public TimeTraveledLegDetailsColumn(String headerStyle, String columnStyle) {
+            super(DetailType.TIME_TRAVELED, new TimeTraveledInSeconds(), headerStyle, columnStyle, getLeaderboardPanel());
+        }
+        
+        @Override
+        public String getValue(LeaderboardRowDTO row) {
+            Double timeInSeconds = getFieldValue(row);
+            String result;
+            if (timeInSeconds == null) {
+                result = null;
+            } else {
+                int hh = (int) (timeInSeconds / 3600);
+                int mm = (int) ((timeInSeconds - 3600 * hh) / 60);
+                int ss = (int) (timeInSeconds - 3600 * hh - 60 * mm);
+                NumberFormat numberFormat = NumberFormatterFactory.getDecimalFormat(2, 0);
+                result = "" + numberFormat.format(hh) + ":" + numberFormat.format(mm) + ":" + numberFormat.format(ss);
+            }
+            return result;
+        }
+    }
+    
     private class ManeuverCountLegDetailsColumn extends FormattedDoubleDetailTypeColumn {
         public ManeuverCountLegDetailsColumn(String headerStyle, String columnStyle) {
             super(DetailType.NUMBER_OF_MANEUVERS, null, headerStyle, columnStyle, getLeaderboardPanel());
@@ -318,8 +342,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 new FormattedDoubleDetailTypeColumn(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new WindwardDistanceToGoInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.RANK_GAIN, new RankGainColumn(stringMessages.rankGain(), new RankGain(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.TIME_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.TIME_TRAVELED, new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.TIME_TRAVELED, new TimeTraveledLegDetailsColumn(detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.CORRECTED_TIME_TRAVELED,
                 new FormattedDoubleDetailTypeColumn(DetailType.CORRECTED_TIME_TRAVELED, new CorrectedTimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, 

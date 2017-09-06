@@ -210,7 +210,6 @@ public class DetailTypeFormatter {
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
-        case TIME_TRAVELED:
         case CORRECTED_TIME_TRAVELED:
         case RACE_CALCULATED_TIME_TRAVELED:
         case RACE_TIME_TRAVELED_DOWNWIND:
@@ -231,6 +230,7 @@ public class DetailTypeFormatter {
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
         case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
         case RACE_TIME_TRAVELED:
+        case TIME_TRAVELED:
             return stringMessages.hhmmssUnit();
 
         // Cases for detail types without unit, so that an empty string is returned.
