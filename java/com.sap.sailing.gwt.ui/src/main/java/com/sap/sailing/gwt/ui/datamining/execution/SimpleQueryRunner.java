@@ -103,7 +103,7 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
                     resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
                 @Override
-                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
+                protected void handleSuccess(QueryResultDTO<Serializable> result) {
                     resultsPresenter.showResult(result);
                 }
             });

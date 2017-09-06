@@ -14,6 +14,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.apache.shiro.subject.Subject;
+
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -282,24 +284,24 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
      * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
-     * @param id TODO
      * @param groupName
      *            The name of the new group
      * @param description
      *            The description of the new group
-     * @param displayName TODO
-     * @param displayGroupsInReverseOrder TODO
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description,
-            String displayName, boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    LeaderboardGroup addLeaderboardGroup(UUID leaderboardGroupId, String groupName, String description,
+            String displayName, boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
-     * @param groupName The name of the group which shall be removed.
+     * 
+     * @param groupName
+     *            The name of the group which shall be removed.
      */
     void removeLeaderboardGroup(String groupName);
 
@@ -564,6 +566,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     RaceTracker getRaceTrackerById(Object id);
     
+    /**
+     * Tries to obtain a priority-0 author from a currently logged-in {@link Subject}. If no user
+     * is currently logged on or subject's {@link Subject#getPrincipal() principal} is not set,
+     * a default server author object with priority 0 is returned as default.
+     */
     AbstractLogEventAuthor getServerAuthor();
     
     CompetitorStore getCompetitorStore();
