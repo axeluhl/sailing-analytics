@@ -67,7 +67,7 @@ public class AutoplayHelper {
     public static void getLiveRace(SailingServiceAsync sailingService, ErrorReporter errorReporter, EventDTO event,
             String leaderBoardName, SailingDispatchSystem dispatch,
             AsyncCallback<Pair<Long, RegattaAndRaceIdentifier>> callback) {
-        raceboardTimer.setLivePlayDelayInMillis(1000);
+        raceboardTimer.setLivePlayDelayInMillis(5000);
         raceboardTimer.setRefreshInterval(1000);
 
         if (raceTimesInfoProvider == null) {
@@ -170,7 +170,7 @@ public class AutoplayHelper {
             UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
             RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
         GWT.log("Creating map for " + regattaAndRaceIdentifier);
-        raceboardTimer.setLivePlayDelayInMillis(1000);
+        raceboardTimer.setLivePlayDelayInMillis(5000);
         raceboardTimer.setRefreshInterval(1000);
 
         if (raceTimesInfoProvider == null) {
