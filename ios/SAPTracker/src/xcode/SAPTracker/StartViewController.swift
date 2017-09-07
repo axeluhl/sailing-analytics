@@ -81,6 +81,7 @@ extension StartViewController: SignUpControllerDelegate {
     
     func signUpControllerDidLogout(_ controller: SignUpController) {
         userName = nil
+        navigationController?.popToRootViewController(animated: true)
     }
     
 }

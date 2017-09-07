@@ -66,9 +66,10 @@ class TrainingRequestManager: NSObject {
     fileprivate func postCreateEventSuccess(responseObject: Any?, success: (_ createEventData: CreateEventData) -> Void, failure: (_ error: Error, _ message: String?) -> Void) {
         if let data = responseObject as? Data {
             do {
-                let jsonObject = try JSONSerialization.jsonObject(with: fixJSON(data: data))
+                let jsonObject = try JSONSerialization.jsonObject(with: data)
                 success(CreateEventData(dictionary: jsonObject as? [String: AnyObject]))
             } catch {
+                logError(name: "\(#function)", error: error)
                 postCreateEventFailure(error: TrainingRequestManagerError.invalidResponse, failure: failure)
             }
         } else {
