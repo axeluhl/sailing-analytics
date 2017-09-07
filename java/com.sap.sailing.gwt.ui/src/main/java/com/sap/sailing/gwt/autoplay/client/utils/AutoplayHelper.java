@@ -89,7 +89,6 @@ public class AutoplayHelper {
             throw new IllegalStateException(
                     "No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
         }
-        raceTimesInfoProvider.forceTimesInfosUpdate();
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
             private boolean alreadyfired;
 
@@ -109,7 +108,7 @@ public class AutoplayHelper {
                 callback.onSuccess(timeToStartAndRaceIdentifier);
             }
         });
-
+        raceTimesInfoProvider.forceTimesInfosUpdate();
     }
 
     /**
