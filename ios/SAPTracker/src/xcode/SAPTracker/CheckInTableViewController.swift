@@ -13,6 +13,8 @@ protocol CheckInTableViewControllerDelegate {
     
     var coreDataManager: CoreDataManager { get }
     
+    var checkInController: CheckInController { get }
+    
     func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn)
     
     func checkInTableViewController(
@@ -150,12 +152,7 @@ class CheckInTableViewController: UIViewController {
     }
     
     // MARK: - Properties
-    
-    lazy var checkInController: CheckInController = {
-        let checkInController = CheckInController(coreDataManager: self.delegate.coreDataManager)
-        return checkInController
-    }()
-    
+        
     lazy var fetchedResultsController: NSFetchedResultsController<CheckIn> = {
         let fetchedResultsController = self.delegate.coreDataManager.checkInFetchedResultsController()
         fetchedResultsController.delegate = self

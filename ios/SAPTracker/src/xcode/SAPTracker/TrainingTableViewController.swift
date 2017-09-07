@@ -80,6 +80,11 @@ class TrainingTableViewController: CheckInTableViewController {
     
     // MARK: - Properties
     
+    fileprivate lazy var trainingCheckInController: TrainingCheckInController = {
+        let trainingCheckInController = TrainingCheckInController(coreDataManager: self.trainingCoreDataManager)
+        return trainingCheckInController
+    }()
+    
     fileprivate lazy var trainingController: TrainingController = {
         let trainingController = TrainingController(baseURLString: "https://ubilabstest.sapsailing.com")
         return trainingController
@@ -95,6 +100,12 @@ class TrainingTableViewController: CheckInTableViewController {
 // MARK: - CheckInTableViewControllerDelegate
 
 extension TrainingTableViewController: CheckInTableViewControllerDelegate {
+    
+    var checkInController: CheckInController {
+        get {
+            return trainingCheckInController
+        }
+    }
     
     var coreDataManager: CoreDataManager {
         get {

@@ -254,15 +254,32 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
         }
     }
     
+    // MARK: - Properties
+    
+    lazy var regattaCheckInController: CheckInController = {
+        let checkInController = CheckInController(coreDataManager: self.regattaCoreDataManager)
+        return checkInController
+    }()
+    
+    lazy var regattaCoreDataManager: RegattaCoreDataManager = {
+        return RegattaCoreDataManager.shared
+    }()
+    
 }
 
 // MARK: - CheckInTableViewControllerDelegate
 
 extension RegattaCheckInTableViewController: CheckInTableViewControllerDelegate {
     
+    var checkInController: CheckInController {
+        get {
+            return regattaCheckInController
+        }
+    }
+    
     var coreDataManager: CoreDataManager {
         get {
-            return RegattaCoreDataManager.shared
+            return regattaCoreDataManager
         }
     }
     

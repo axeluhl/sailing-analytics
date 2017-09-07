@@ -10,7 +10,7 @@ import UIKit
 
 class RegattaCoreDataManager: CoreDataManager {
 
-    class var shared: CoreDataManager {
+    class var shared: RegattaCoreDataManager {
         struct Singleton {
             static let shared = RegattaCoreDataManager(name: "CoreData")
         }
