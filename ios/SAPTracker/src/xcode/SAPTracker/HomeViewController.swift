@@ -303,10 +303,10 @@ extension HomeViewController: CheckInTableViewControllerDelegate {
     }
     
     func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn) {
-        guard let homeViewCell = cell as? HomeViewCell else { return }
-        homeViewCell.eventLabel.text = checkIn.event.name
-        homeViewCell.leaderboardLabel.text = checkIn.leaderboard.name
-        homeViewCell.competitorLabel.text = checkIn.name
+        guard let regattaCheckInTableViewCell = cell as? RegattaCheckInTableViewCell else { return }
+        regattaCheckInTableViewCell.eventLabel.text = checkIn.event.name
+        regattaCheckInTableViewCell.leaderboardLabel.text = checkIn.leaderboard.name
+        regattaCheckInTableViewCell.competitorLabel.text = checkIn.name
     }
     
     var coreDataManager: CoreDataManager {

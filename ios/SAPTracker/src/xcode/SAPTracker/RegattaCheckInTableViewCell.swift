@@ -1,5 +1,5 @@
 //
-//  HomeViewCell.swift
+//  RegattaCheckInTableViewCell.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 26.07.16.
@@ -8,10 +8,10 @@
 
 import UIKit
 
-class HomeViewCell: UITableViewCell {
-
+class RegattaCheckInTableViewCell: UITableViewCell {
+    
     @IBOutlet weak var eventLabel: UILabel!
     @IBOutlet weak var leaderboardLabel: UILabel!
     @IBOutlet weak var competitorLabel: UILabel!
-
+    
 }
