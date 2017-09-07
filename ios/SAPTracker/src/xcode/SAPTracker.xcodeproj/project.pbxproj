@@ -368,6 +368,7 @@
 		C8E0BD0A1F39A08B002FCCA5 /* FormularViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */; };
 		C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */; };
 		C8E0D3041F5808E3001EEF5C /* TrainingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0D3031F5808E3001EEF5C /* TrainingTableViewCell.swift */; };
+		C8E0D3131F59475B001EEF5C /* CheckInTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0D3121F59475B001EEF5C /* CheckInTableViewController.swift */; };
 		C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F1B1E01D488B6D004C3379 /* Translation.swift */; };
 		C8F71EDA1D8691F700826DE4 /* AFHTTPRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EA61D8691F700826DE4 /* AFHTTPRequestOperation.m */; };
 		C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EA81D8691F700826DE4 /* AFHTTPRequestOperationManager.m */; };
@@ -775,6 +776,7 @@
 		C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormularViewController.swift; sourceTree = "<group>"; };
 		C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeychainPasswordItem.swift; sourceTree = "<group>"; };
 		C8E0D3031F5808E3001EEF5C /* TrainingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingTableViewCell.swift; sourceTree = "<group>"; };
+		C8E0D3121F59475B001EEF5C /* CheckInTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInTableViewController.swift; sourceTree = "<group>"; };
 		C8F1B1E01D488B6D004C3379 /* Translation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translation.swift; sourceTree = "<group>"; };
 		C8F71EA51D8691F700826DE4 /* AFHTTPRequestOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPRequestOperation.h; sourceTree = "<group>"; };
 		C8F71EA61D8691F700826DE4 /* AFHTTPRequestOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPRequestOperation.m; sourceTree = "<group>"; };
@@ -899,6 +901,7 @@
 				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
 				C89C60101D0FF036002AAAD2 /* Session */,
 				C8B3B9BD1F3AF46000B3B6BA /* StartViewController.swift */,
+				C8E0D3121F59475B001EEF5C /* CheckInTableViewController.swift */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
@@ -2044,6 +2047,7 @@
 				C8F71EED1D8691F700826DE4 /* UIImageView+AFNetworking.m in Sources */,
 				C8F71EEB1D8691F700826DE4 /* UIAlertView+AFNetworking.m in Sources */,
 				C87A74EA1F5053AE003DE396 /* CompetitorCreateAndAddData.swift in Sources */,
+				C8E0D3131F59475B001EEF5C /* CheckInTableViewController.swift in Sources */,
 				C843D48C1EBCB36900250F01 /* SessionViewController.swift in Sources */,
 				C85DB8281F31AAE0009559CE /* SignUpViewController.swift in Sources */,
 				C89C5FCE1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift in Sources */,

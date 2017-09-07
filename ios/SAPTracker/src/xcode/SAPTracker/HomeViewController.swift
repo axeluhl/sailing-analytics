@@ -7,9 +7,8 @@
 //
 
 import UIKit
-import CoreData
 
-class HomeViewController: UIViewController {
+class HomeViewController: CheckInTableViewController {
     
     fileprivate struct Segue {
         static let About = "About"
@@ -19,19 +18,14 @@ class HomeViewController: UIViewController {
         static let Settings = "Settings"
     }
     
-    var selectedCheckIn: CheckIn?
+    var segueCheckIn: CheckIn?
     
-    @IBOutlet var headerView: UIView! // Strong reference needed to avoid deallocation when not attached to table view
-    
-    @IBOutlet weak var headerTitleLabel: UILabel!
-    @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var scanCodeButton: UIButton!
     @IBOutlet weak var noCodeButton: UIButton!
     @IBOutlet weak var infoCodeLabel: UILabel!
-    @IBOutlet weak var footerView: UIView!
-    @IBOutlet weak var footerTextView: UITextView!
     
     override func viewDidLoad() {
+        delegate = self
         super.viewDidLoad()
         setup()
     }
@@ -43,13 +37,8 @@ class HomeViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
         unsubscribeFromNewCheckInURLNotifications()
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        layout()
+        super.viewWillDisappear(animated)
     }
     
     // MARK: - Setup
@@ -57,9 +46,6 @@ class HomeViewController: UIViewController {
     fileprivate func setup() {
         setupButtons()
         setupLocalization()
-        setupTableView()
-        setupTableViewDataSource()
-        setupTableViewHeader()
     }
     
     fileprivate func setupButtons() {
@@ -76,43 +62,6 @@ class HomeViewController: UIViewController {
         footerTextView.text = Translation.HomeView.FooterTextView.Text.String
     }
     
-    fileprivate func setupTableView() {
-        tableView.rowHeight = UITableViewAutomaticDimension
-        tableView.estimatedRowHeight = 140
-    }
-    
-    fileprivate func setupTableViewDataSource() {
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            logError(name: "\(#function)", error: error)
-        }
-    }
-    
-    fileprivate func setupTableViewHeader() {
-        if fetchedResultsController.sections?[0].numberOfObjects ?? 0 == 0 {
-            tableView.tableHeaderView = nil
-        } else {
-            tableView.tableHeaderView = headerView
-        }
-    }
-    
-    // MARK: - Layout
-    
-    fileprivate func layout() {
-        self.layoutFooterView()
-    }
-    
-    fileprivate func layoutFooterView() {
-        let height = footerTextView.sizeThatFits(CGSize(width: footerView.frame.width, height: CGFloat.greatestFiniteMagnitude)).height
-        footerView.frame = CGRect(
-            x: footerView.frame.origin.x,
-            y: footerView.frame.origin.y,
-            width: footerView.frame.width,
-            height: height
-        )
-    }
-    
     // MARK: - Review
     
     fileprivate func review() {
@@ -122,11 +71,9 @@ class HomeViewController: UIViewController {
                 logInfo(name: "\(#function)", info: "Review code convention done.")
                 self.reviewGPSFixes(completion: {
                     logInfo(name: "\(#function)", info: "Review GPS fixes done.")
-                    self.reviewNewCheckIn(completion: {
+                    self.reviewNewCheckIn(completion: { checkIn in
                         logInfo(name: "\(#function)", info: "Review new check-in done.")
-                        self.reviewSelectedCheckIn(completion: {
-                            logInfo(name: "\(#function)", info: "Review selected check-in done.")
-                        })
+                        self.performSegue(forCheckIn: checkIn)
                     })
                 })
             })
@@ -208,28 +155,16 @@ class HomeViewController: UIViewController {
     
     // MARK: 4. Review New Check-In
     
-    fileprivate func reviewNewCheckIn(completion: @escaping () -> Void) {
-        guard let urlString = Preferences.newCheckInURL else { completion(); return }
-        guard let checkInData = CheckInData(urlString: urlString) else { completion(); return }
-        checkInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] checkIn in
-            self?.selectedCheckIn = checkIn
+    fileprivate func reviewNewCheckIn(completion: @escaping (_ checkIn: CheckIn?) -> Void) {
+        guard let urlString = Preferences.newCheckInURL else { completion(nil); return }
+        guard let checkInData = CheckInData(urlString: urlString) else { completion(nil); return }
+        checkInController.checkInWithViewController(self, checkInData: checkInData, success: { checkIn in
             Preferences.newCheckInURL = nil
-            completion()
+            completion(checkIn)
         }) { (error) in
             Preferences.newCheckInURL = nil // TODO: Ask user for retry, retry later or dismiss before deleting check-in url
-            completion()
+            completion(nil)
         }
-    }
-    
-    // MARK: 5. Review Selected Check-In
-    
-    fileprivate func reviewSelectedCheckIn(completion: () -> Void) {
-        if shouldPerformCompetitorSegue() {
-            performSegue(withIdentifier: Segue.Competitor, sender: self)
-        } else if shouldPerformMarkSegue() {
-            performSegue(withIdentifier: Segue.Mark, sender: self)
-        }
-        completion()
     }
     
     // MARK: - Notifications
@@ -249,11 +184,9 @@ class HomeViewController: UIViewController {
     
     @objc fileprivate func newCheckInURLNotification(_ notification: Notification) {
         DispatchQueue.main.async(execute: {
-            self.reviewNewCheckIn(completion: {
+            self.reviewNewCheckIn(completion: { checkIn in
                 logInfo(name: "\(#function)", info: "Review new check-in done.")
-                self.reviewSelectedCheckIn(completion: {
-                    logInfo(name: "\(#function)", info: "Review selected check-in done.")
-                })
+                self.performSegue(forCheckIn: checkIn)
             })
         })
     }
@@ -316,149 +249,80 @@ class HomeViewController: UIViewController {
     
     // MARK: - Segues
     
-    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        if (identifier == Segue.Competitor) {
-            return shouldPerformCompetitorSegue()
-        } else if (identifier == Segue.Mark) {
-            return shouldPerformMarkSegue()
+    fileprivate func performSegue(forCheckIn checkIn: CheckIn?) {
+        segueCheckIn = checkIn
+        guard segueCheckIn != nil else {
+            logInfo(name: "\(#function)", info: "check-in is nil")
+            return
+        }
+        if (segueCheckIn is CompetitorCheckIn) {
+            performSegue(withIdentifier: Segue.Competitor, sender: self)
+        } else if (segueCheckIn is MarkCheckIn) {
+            performSegue(withIdentifier: Segue.Mark, sender: self)
         } else {
-            return true
+            logInfo(name: "\(#function)", info: "unknown check-in type")
         }
     }
     
-    fileprivate func shouldPerformCompetitorSegue() -> Bool {
-        return selectedCheckIn != nil && selectedCheckIn is CompetitorCheckIn
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        if (identifier == Segue.Competitor) {
+            return segueCheckIn != nil && segueCheckIn is CompetitorCheckIn
+        } else if (identifier == Segue.Mark) {
+            return segueCheckIn != nil && segueCheckIn is MarkCheckIn
+        }
+        return true
     }
-
-    fileprivate func shouldPerformMarkSegue() -> Bool {
-        return selectedCheckIn != nil && selectedCheckIn is MarkCheckIn
-    }
-
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == Segue.Competitor) {
             guard let competitorVC = segue.destination as? CompetitorViewController else { return }
-            guard let competitorCheckIn = selectedCheckIn as? CompetitorCheckIn else { return }
+            guard let competitorCheckIn = segueCheckIn as? CompetitorCheckIn else { return }
             competitorVC.competitorCheckIn = competitorCheckIn
-            competitorVC.coreDataManager = RegattaCoreDataManager.shared
-            selectedCheckIn = nil
+            competitorVC.coreDataManager = coreDataManager
         } else if (segue.identifier == Segue.Mark) {
             guard let markVC = segue.destination as? MarkViewController else { return }
-            guard let markCheckIn = selectedCheckIn as? MarkCheckIn else { return }
+            guard let markCheckIn = segueCheckIn as? MarkCheckIn else { return }
             markVC.markCheckIn = markCheckIn
-            markVC.coreDataManager = RegattaCoreDataManager.shared
-            selectedCheckIn = nil
+            markVC.coreDataManager = coreDataManager
         } else if (segue.identifier == Segue.Scan) {
             guard let scanVC = segue.destination as? ScanViewController else { return }
-            scanVC.coreDataManager = RegattaCoreDataManager.shared
+            scanVC.coreDataManager = coreDataManager
             scanVC.delegate = self
         }
+        segueCheckIn = nil
     }
     
-    // MARK: - Properties
-    
-    fileprivate lazy var checkInController: CheckInController = {
-        let checkInController = CheckInController(coreDataManager: RegattaCoreDataManager.shared)
-        return checkInController
-    }()
-    
-    fileprivate lazy var fetchedResultsController: NSFetchedResultsController<CheckIn> = {
-        let fetchedResultsController = RegattaCoreDataManager.shared.checkInFetchedResultsController()
-        fetchedResultsController.delegate = self
-        return fetchedResultsController
-    }()
-
 }
 
-// MARK: - ScanViewControllerDelegate
+// MARK: - CheckInTableViewControllerDelegate
 
-extension HomeViewController: ScanViewControllerDelegate {
-
-    func scanViewController(_ controller: ScanViewController, didCheckIn checkIn: CheckIn) {
-        selectedCheckIn = checkIn
-    }
-
-}
-
-// MARK: - UITableViewDataSource
-
-extension HomeViewController: UITableViewDataSource {
+extension HomeViewController: CheckInTableViewControllerDelegate {
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
+    func checkInTableViewController(_ controller: CheckInTableViewController, didSelectCheckIn checkIn: CheckIn) {
+        performSegue(forCheckIn: checkIn)
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") ?? UITableViewCell()
-        self.configureCell(cell: cell, atIndexPath: indexPath)
-        return cell
-    }
-    
-    func configureCell(cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
+    func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn) {
         guard let homeViewCell = cell as? HomeViewCell else { return }
-        let checkIn = fetchedResultsController.object(at: indexPath)
         homeViewCell.eventLabel.text = checkIn.event.name
         homeViewCell.leaderboardLabel.text = checkIn.leaderboard.name
         homeViewCell.competitorLabel.text = checkIn.name
     }
     
-}
-
-// MARK: - UITableViewDelegate
-
-extension HomeViewController: UITableViewDelegate {
-    
-    func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-        selectedCheckIn = fetchedResultsController.object(at: indexPath)
-        return indexPath
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        reviewSelectedCheckIn { 
-            tableView.deselectRow(at: indexPath, animated: true)
+    var coreDataManager: CoreDataManager {
+        get {
+            return RegattaCoreDataManager.shared
         }
-    }
-    
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cell.removeSeparatorInset()
     }
     
 }
 
-// MARK: - NSFetchedResultsControllerDelegate
+// MARK: - ScanViewControllerDelegate
 
-extension HomeViewController: NSFetchedResultsControllerDelegate {
+extension HomeViewController: ScanViewControllerDelegate {
     
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        tableView.beginUpdates()
-    }
-    
-    func controller(
-        _ controller: NSFetchedResultsController<NSFetchRequestResult>,
-        didChange object: Any,
-        at indexPath: IndexPath?,
-        for type: NSFetchedResultsChangeType,
-        newIndexPath: IndexPath?)
-    {
-        switch type {
-        case .insert:
-            tableView.insertRows(at: [newIndexPath!], with: UITableViewRowAnimation.automatic)
-        case .update:
-            let cell = tableView.cellForRow(at: indexPath!)
-            if cell != nil {
-                configureCell(cell: cell!, atIndexPath: indexPath!)
-                tableView.reloadRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
-            }
-        case .move:
-            tableView.deleteRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
-            tableView.insertRows(at: [newIndexPath!], with: .automatic)
-        case .delete:
-            tableView.deleteRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
-        }
-    }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        tableView.endUpdates()
-        setupTableViewHeader()
+    func scanViewController(_ controller: ScanViewController, didCheckIn checkIn: CheckIn) {
+        performSegue(forCheckIn: checkIn)
     }
     
 }

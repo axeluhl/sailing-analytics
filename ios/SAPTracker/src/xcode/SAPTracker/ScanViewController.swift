@@ -212,8 +212,8 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     }
     
     fileprivate func checkInSuccess(checkIn: CheckIn) {
-        delegate?.scanViewController(self, didCheckIn: checkIn)
         _ = navigationController?.popViewController(animated: true)
+        delegate?.scanViewController(self, didCheckIn: checkIn)
     }
     
     fileprivate func checkInFailure(error: Error) {
