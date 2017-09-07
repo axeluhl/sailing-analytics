@@ -172,25 +172,25 @@ class Translation: NSObject {
         }
     }
     
-    // MARK: - HomeView
+    // MARK: - RegattaCheckInListView
     
-    struct HomeView { static let Key = "\(HomeView.self)"
-        struct HeaderTitleLabel { static let Key = "\(HomeView.Key).\(HeaderTitleLabel.self)"
+    struct RegattaCheckInListView { static let Key = "\(RegattaCheckInListView.self)"
+        struct HeaderTitleLabel { static let Key = "\(RegattaCheckInListView.Key).\(HeaderTitleLabel.self)"
             struct Text { static let Key = "\(HeaderTitleLabel.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct FooterTextView { static let Key = "\(HomeView.Key).\(FooterTextView.self)"
+        struct FooterTextView { static let Key = "\(RegattaCheckInListView.Key).\(FooterTextView.self)"
             struct Text { static let Key = "\(FooterTextView.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct InfoCodeLabel { static let Key = "\(HomeView.Key).\(InfoCodeLabel.self)"
+        struct InfoCodeLabel { static let Key = "\(RegattaCheckInListView.Key).\(InfoCodeLabel.self)"
             struct Text { static let Key = "\(InfoCodeLabel.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct TermsAlert { static let Key = "\(HomeView.Key).\(TermsAlert.self)"
+        struct TermsAlert { static let Key = "\(RegattaCheckInListView.Key).\(TermsAlert.self)"
             struct Title { static let Key = "\(TermsAlert.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
@@ -208,12 +208,12 @@ class Translation: NSObject {
                 }
             }
         }
-        struct NoCameraAlert { static let Key = "\(HomeView.Key).\(NoCameraAlert.self)"
+        struct NoCameraAlert { static let Key = "\(RegattaCheckInListView.Key).\(NoCameraAlert.self)"
             struct Message { static let Key = "\(NoCameraAlert.Key).\(Message.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct NoCodeAlert { static let Key = "\(HomeView.Key).\(NoCodeAlert.self)"
+        struct NoCodeAlert { static let Key = "\(RegattaCheckInListView.Key).\(NoCodeAlert.self)"
             struct Title { static let Key = "\(NoCodeAlert.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }

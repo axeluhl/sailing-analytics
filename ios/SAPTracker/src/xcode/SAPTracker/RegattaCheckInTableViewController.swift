@@ -55,11 +55,11 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     
     fileprivate func setupLocalization() {
         navigationItem.title = "REGATTAS TITLE"
-        headerTitleLabel.text = Translation.HomeView.HeaderTitleLabel.Text.String
+        headerTitleLabel.text = Translation.RegattaCheckInListView.HeaderTitleLabel.Text.String
         scanCodeButton.setTitle(Translation.ScanView.Title.String, for: .normal)
-        noCodeButton.setTitle(Translation.HomeView.NoCodeAlert.Title.String, for: .normal)
-        infoCodeLabel.text = Translation.HomeView.InfoCodeLabel.Text.String
-        footerTextView.text = Translation.HomeView.FooterTextView.Text.String
+        noCodeButton.setTitle(Translation.RegattaCheckInListView.NoCodeAlert.Title.String, for: .normal)
+        infoCodeLabel.text = Translation.RegattaCheckInListView.InfoCodeLabel.Text.String
+        footerTextView.text = Translation.RegattaCheckInListView.FooterTextView.Text.String
     }
     
     // MARK: - Review
@@ -85,15 +85,15 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     fileprivate func reviewTerms(completion: @escaping () -> Void) {
         guard Preferences.termsAccepted == false else { completion(); return }
         let alertController = UIAlertController(
-            title: Translation.HomeView.TermsAlert.Title.String,
-            message: Translation.HomeView.TermsAlert.Message.String,
+            title: Translation.RegattaCheckInListView.TermsAlert.Title.String,
+            message: Translation.RegattaCheckInListView.TermsAlert.Message.String,
             preferredStyle: .alert
         )
-        let showTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.ShowTermsAction.Title.String, style: .default) { [weak self] action in
+        let showTermsAction = UIAlertAction(title: Translation.RegattaCheckInListView.TermsAlert.ShowTermsAction.Title.String, style: .default) { [weak self] action in
             UIApplication.shared.openURL(URLs.Terms)
             self?.reviewTerms(completion: completion) // Review terms until user accepted terms
         }
-        let acceptTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.AcceptTermsAction.Title.String, style: .default) { action in
+        let acceptTermsAction = UIAlertAction(title: Translation.RegattaCheckInListView.TermsAlert.AcceptTermsAction.Title.String, style: .default) { action in
             Preferences.termsAccepted = true
             completion() // Terms accepted
         }
@@ -228,7 +228,7 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     fileprivate func showNoCameraAlert() {
         let alertController = UIAlertController(
             title: Translation.Common.Error.String,
-            message: Translation.HomeView.NoCameraAlert.Message.String,
+            message: Translation.RegattaCheckInListView.NoCameraAlert.Message.String,
             preferredStyle: .alert
         )
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default, handler: nil)
@@ -238,8 +238,8 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     
     fileprivate func showNoCodeAlert() {
         let alertController = UIAlertController(
-            title: Translation.HomeView.NoCodeAlert.Title.String,
-            message: Translation.HomeView.NoCodeAlert.Message.String,
+            title: Translation.RegattaCheckInListView.NoCodeAlert.Title.String,
+            message: Translation.RegattaCheckInListView.NoCodeAlert.Message.String,
             preferredStyle: .alert
         )
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default, handler: nil)
