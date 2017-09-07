@@ -252,6 +252,7 @@ class SignUpRequestManager: NSObject {
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let urlString = "\(basePathString)/logout/"
+        manager.requestSerializer.clearAuthorizationHeader()
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
             self.postLogoutSuccess(success: success)
         }) { (requestOperation, error) in
