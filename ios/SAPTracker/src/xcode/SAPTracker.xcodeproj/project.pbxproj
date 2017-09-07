@@ -913,8 +913,10 @@
 		7F06590219F7FEA40077FF95 /* DataController */ = {
 			isa = PBXGroup;
 			children = (
+				C8CF22A71F619B5F00A01E0A /* GPSFix */,
+				C8CF22A61F619B4800A01E0A /* Session */,
 				C87A74E61F504CB4003DE396 /* SignUp */,
-				C87A74E51F504CA7003DE396 /* Regatta */,
+				C87A74E51F504CA7003DE396 /* CheckIn */,
 				C87A74E41F504C97003DE396 /* Training */,
 				C8739E101D2BF13200A89F3C /* Data */,
 			);
@@ -1364,18 +1366,14 @@
 			name = Training;
 			sourceTree = "<group>";
 		};
-		C87A74E51F504CA7003DE396 /* Regatta */ = {
+		C87A74E51F504CA7003DE396 /* CheckIn */ = {
 			isa = PBXGroup;
 			children = (
-				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
-				C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */,
-				C84936171D40D295000F30E8 /* GPSFixController.swift */,
-				C843D4891EBCADF500250F01 /* MarkSessionController.swift */,
-				C8739E0E1D2BEE7900A89F3C /* SessionController.swift */,
-				C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */,
 				C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */,
+				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
+				C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */,
 			);
-			name = Regatta;
+			name = CheckIn;
 			sourceTree = "<group>";
 		};
 		C87A74E61F504CB4003DE396 /* SignUp */ = {
@@ -1468,6 +1466,24 @@
 			);
 			name = SMTWiFiStatus;
 			path = ..;
+			sourceTree = "<group>";
+		};
+		C8CF22A61F619B4800A01E0A /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */,
+				C843D4891EBCADF500250F01 /* MarkSessionController.swift */,
+				C8739E0E1D2BEE7900A89F3C /* SessionController.swift */,
+			);
+			name = Session;
+			sourceTree = "<group>";
+		};
+		C8CF22A71F619B5F00A01E0A /* GPSFix */ = {
+			isa = PBXGroup;
+			children = (
+				C84936171D40D295000F30E8 /* GPSFixController.swift */,
+			);
+			name = GPSFix;
 			sourceTree = "<group>";
 		};
 		C8F71EA31D8691F700826DE4 /* Libraries */ = {
