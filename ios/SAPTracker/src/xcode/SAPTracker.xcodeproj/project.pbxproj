@@ -280,7 +280,7 @@
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
-		7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* HomeViewController.swift */; };
+		7F83F15819F154F000C53328 /* RegattaCheckInTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* RegattaCheckInTableViewController.swift */; };
 		7F83F16C19F154F000C53328 /* SAPTrackerAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */; };
 		7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
 		7F87CAA11A2CCE8B0076C617 /* OpenSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */; };
@@ -684,7 +684,7 @@
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F15419F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F15519F154F000C53328 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		7F83F15719F154F000C53328 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
+		7F83F15719F154F000C53328 /* RegattaCheckInTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegattaCheckInTableViewController.swift; sourceTree = "<group>"; };
 		7F83F16519F154F000C53328 /* SAPTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SAPTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F16A19F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAPTrackerAPITests.swift; sourceTree = "<group>"; };
@@ -896,7 +896,7 @@
 				C8BBAC781C52649E004CA551 /* LicenseViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
-				7F83F15719F154F000C53328 /* HomeViewController.swift */,
+				7F83F15719F154F000C53328 /* RegattaCheckInTableViewController.swift */,
 				C84936281D47645F000F30E8 /* RegattaCheckInTableViewCell.swift */,
 				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
 				C89C60101D0FF036002AAAD2 /* Session */,
@@ -1965,7 +1965,7 @@
 				C8B3B9BE1F3AF46000B3B6BA /* StartViewController.swift in Sources */,
 				C8739E0F1D2BEE7900A89F3C /* SessionController.swift in Sources */,
 				C8739E1C1D2D5F1700A89F3C /* LocationData.swift in Sources */,
-				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
+				7F83F15819F154F000C53328 /* RegattaCheckInTableViewController.swift in Sources */,
 				C85DB82C1F31AB1A009559CE /* ForgotPasswordViewController.swift in Sources */,
 				7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,

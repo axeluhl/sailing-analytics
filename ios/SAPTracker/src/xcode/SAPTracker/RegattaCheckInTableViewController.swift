@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  RegattaCheckInTableViewController.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 17/10/14.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class HomeViewController: CheckInTableViewController {
+class RegattaCheckInTableViewController: CheckInTableViewController {
     
     fileprivate struct Segue {
         static let About = "About"
@@ -172,7 +172,7 @@ class HomeViewController: CheckInTableViewController {
     fileprivate func subscribeForNewCheckInURLNotifications() {
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(HomeViewController.newCheckInURLNotification(_:)),
+            selector: #selector(RegattaCheckInTableViewController.newCheckInURLNotification(_:)),
             name: NSNotification.Name(rawValue: Preferences.NotificationType.NewCheckInURLChanged),
             object: nil
         )
@@ -296,7 +296,7 @@ class HomeViewController: CheckInTableViewController {
 
 // MARK: - CheckInTableViewControllerDelegate
 
-extension HomeViewController: CheckInTableViewControllerDelegate {
+extension RegattaCheckInTableViewController: CheckInTableViewControllerDelegate {
     
     func checkInTableViewController(_ controller: CheckInTableViewController, didSelectCheckIn checkIn: CheckIn) {
         performSegue(forCheckIn: checkIn)
@@ -319,7 +319,7 @@ extension HomeViewController: CheckInTableViewControllerDelegate {
 
 // MARK: - ScanViewControllerDelegate
 
-extension HomeViewController: ScanViewControllerDelegate {
+extension RegattaCheckInTableViewController: ScanViewControllerDelegate {
     
     func scanViewController(_ controller: ScanViewController, didCheckIn checkIn: CheckIn) {
         performSegue(forCheckIn: checkIn)
