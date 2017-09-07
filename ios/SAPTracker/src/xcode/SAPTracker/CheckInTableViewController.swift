@@ -15,13 +15,28 @@ protocol CheckInTableViewControllerDelegate {
     
     func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn)
     
-    func checkInTableViewController(_ controller: CheckInTableViewController, didSelectCheckIn checkIn: CheckIn)
+    func checkInTableViewController(
+        _ controller: CheckInTableViewController,
+        prepareForSegue segue: UIStoryboardSegue,
+        andCompetitorCheckIn checkIn: CompetitorCheckIn)
+    
+    func checkInTableViewController(
+        _ controller: CheckInTableViewController,
+        prepareForSegue segue: UIStoryboardSegue,
+        andMarkCheckIn checkIn: MarkCheckIn)
     
 }
 
 class CheckInTableViewController: UIViewController {
     
+    struct CheckInSegue {
+        static let Competitor = "Competitor"
+        static let Mark = "Mark"
+    }
+    
     var delegate: CheckInTableViewControllerDelegate!
+    
+    var segueCheckIn: CheckIn?
     
     @IBOutlet var headerView: UIView! // Strong reference needed to avoid deallocation when not attached to table view
     
@@ -98,6 +113,42 @@ class CheckInTableViewController: UIViewController {
         }
     }
     
+    // MARK: - Segues
+    
+    func performSegue(forCheckIn checkIn: CheckIn?) {
+        segueCheckIn = checkIn
+        guard segueCheckIn != nil else {
+            logInfo(name: "\(#function)", info: "check-in is nil")
+            return
+        }
+        if (segueCheckIn is CompetitorCheckIn) {
+            performSegue(withIdentifier: CheckInSegue.Competitor, sender: self)
+        } else if (segueCheckIn is MarkCheckIn) {
+            performSegue(withIdentifier: CheckInSegue.Mark, sender: self)
+        } else {
+            logInfo(name: "\(#function)", info: "unknown check-in type")
+        }
+    }
+    
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        if (identifier == CheckInSegue.Competitor) {
+            return segueCheckIn != nil && segueCheckIn is CompetitorCheckIn
+        } else if (identifier == CheckInSegue.Mark) {
+            return segueCheckIn != nil && segueCheckIn is MarkCheckIn
+        }
+        return true
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if (segue.identifier == CheckInSegue.Competitor) {
+            guard let competitorCheckIn = segueCheckIn as? CompetitorCheckIn else { return }
+            delegate.checkInTableViewController(self, prepareForSegue: segue, andCompetitorCheckIn: competitorCheckIn)
+        } else if (segue.identifier == CheckInSegue.Mark) {
+            guard let markCheckIn = segueCheckIn as? MarkCheckIn else { return }
+            delegate.checkInTableViewController(self, prepareForSegue: segue, andMarkCheckIn: markCheckIn)
+        }
+    }
+    
     // MARK: - Properties
     
     lazy var checkInController: CheckInController = {
@@ -134,7 +185,7 @@ extension CheckInTableViewController: UITableViewDataSource {
 extension CheckInTableViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        delegate.checkInTableViewController(self, didSelectCheckIn: fetchedResultsController.object(at: indexPath))
+        performSegue(forCheckIn: fetchedResultsController.object(at: indexPath))
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

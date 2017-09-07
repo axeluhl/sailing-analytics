@@ -12,13 +12,9 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     
     fileprivate struct Segue {
         static let About = "About"
-        static let Competitor = "Competitor"
-        static let Mark = "Mark"
         static let Scan = "Scan"
         static let Settings = "Settings"
     }
-    
-    var segueCheckIn: CheckIn?
     
     @IBOutlet weak var scanCodeButton: UIButton!
     @IBOutlet weak var noCodeButton: UIButton!
@@ -249,47 +245,13 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     
     // MARK: - Segues
     
-    fileprivate func performSegue(forCheckIn checkIn: CheckIn?) {
-        segueCheckIn = checkIn
-        guard segueCheckIn != nil else {
-            logInfo(name: "\(#function)", info: "check-in is nil")
-            return
-        }
-        if (segueCheckIn is CompetitorCheckIn) {
-            performSegue(withIdentifier: Segue.Competitor, sender: self)
-        } else if (segueCheckIn is MarkCheckIn) {
-            performSegue(withIdentifier: Segue.Mark, sender: self)
-        } else {
-            logInfo(name: "\(#function)", info: "unknown check-in type")
-        }
-    }
-    
-    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        if (identifier == Segue.Competitor) {
-            return segueCheckIn != nil && segueCheckIn is CompetitorCheckIn
-        } else if (identifier == Segue.Mark) {
-            return segueCheckIn != nil && segueCheckIn is MarkCheckIn
-        }
-        return true
-    }
-    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if (segue.identifier == Segue.Competitor) {
-            guard let competitorVC = segue.destination as? CompetitorViewController else { return }
-            guard let competitorCheckIn = segueCheckIn as? CompetitorCheckIn else { return }
-            competitorVC.competitorCheckIn = competitorCheckIn
-            competitorVC.coreDataManager = coreDataManager
-        } else if (segue.identifier == Segue.Mark) {
-            guard let markVC = segue.destination as? MarkViewController else { return }
-            guard let markCheckIn = segueCheckIn as? MarkCheckIn else { return }
-            markVC.markCheckIn = markCheckIn
-            markVC.coreDataManager = coreDataManager
-        } else if (segue.identifier == Segue.Scan) {
+        super.prepare(for: segue, sender: sender)
+        if (segue.identifier == Segue.Scan) {
             guard let scanVC = segue.destination as? ScanViewController else { return }
             scanVC.coreDataManager = coreDataManager
             scanVC.delegate = self
         }
-        segueCheckIn = nil
     }
     
 }
@@ -298,8 +260,10 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
 
 extension RegattaCheckInTableViewController: CheckInTableViewControllerDelegate {
     
-    func checkInTableViewController(_ controller: CheckInTableViewController, didSelectCheckIn checkIn: CheckIn) {
-        performSegue(forCheckIn: checkIn)
+    var coreDataManager: CoreDataManager {
+        get {
+            return RegattaCoreDataManager.shared
+        }
     }
     
     func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn) {
@@ -309,10 +273,18 @@ extension RegattaCheckInTableViewController: CheckInTableViewControllerDelegate 
         regattaCheckInTableViewCell.competitorLabel.text = checkIn.name
     }
     
-    var coreDataManager: CoreDataManager {
-        get {
-            return RegattaCoreDataManager.shared
-        }
+    func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andCompetitorCheckIn checkIn: CompetitorCheckIn) {
+        guard let competitorVC = segue.destination as? CompetitorViewController else { return }
+        guard let competitorCheckIn = segueCheckIn as? CompetitorCheckIn else { return }
+        competitorVC.competitorCheckIn = competitorCheckIn
+        competitorVC.coreDataManager = coreDataManager
+    }
+    
+    func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andMarkCheckIn checkIn: MarkCheckIn) {
+        guard let markVC = segue.destination as? MarkViewController else { return }
+        guard let markCheckIn = segueCheckIn as? MarkCheckIn else { return }
+        markVC.markCheckIn = markCheckIn
+        markVC.coreDataManager = coreDataManager
     }
     
 }
