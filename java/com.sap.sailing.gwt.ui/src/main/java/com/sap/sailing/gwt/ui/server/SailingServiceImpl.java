@@ -4767,6 +4767,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
                     importer.importFromStream(inputStream, importOperationId, override);
                 } catch (Exception e) {
+                    // do not assume that RuntimeException is logged properly
+                    logger.log(Level.SEVERE, e.getMessage(), e);
                     getService()
                             .setDataImportFailedWithReplication(
                                     importOperationId,
@@ -5278,6 +5280,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private class TimeoutExtendingInputStream extends FilterInputStream {
 
+    	// default timeout is high to ensure that long running client operations
+    	// such as compressing data will not have the server run into a timeout
+    	private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*10;
+
         private final HttpURLConnection connection;
 
         protected TimeoutExtendingInputStream(InputStream in, HttpURLConnection connection) {
@@ -5287,19 +5293,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         @Override
         public int read() throws IOException {
-            connection.setReadTimeout(10000);
+            connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
             return super.read();
         }
 
         @Override
         public int read(byte[] b) throws IOException {
-            connection.setReadTimeout(10000);
+            connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
             return super.read(b);
         }
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            connection.setReadTimeout(10000);
+            connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
             return super.read(b, off, len);
         }
 
