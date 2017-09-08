@@ -126,9 +126,9 @@ class TrainingRequestManager: NSObject {
         failure(error, stringForError(error))
     }
     
-    // MARK: - SetTrackingTimes
+    // MARK: - LeaderboardSetTrackingTime
     
-    func postSetTrackingTimes(
+    func postLeaderboardSetTrackingTime(
         leaderboardName: String,
         raceName: String,
         fleetName: String,
@@ -139,20 +139,79 @@ class TrainingRequestManager: NSObject {
         let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let encodedFleetName = fleetName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/settrackingtimes?race_column=\(encodedRaceName)&fleet=\(encodedFleetName)&startoftrackingasmillis=\(millisSince1970())"
-        manager.responseSerializer = AFJSONResponseSerializer()
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
-            self.postSetTrackingTimesSuccess(responseObject: responseObject, success: success)
+            self.postLeaderboardSetTrackingTimeSuccess(responseObject: responseObject, success: success)
         }) { (requestOperation, error) in
-            self.postSetTrackingTimesFailure(error: error, failure: failure)
+            self.postLeaderboardSetTrackingTimeFailure(error: error, failure: failure)
         }
     }
     
-    fileprivate func postSetTrackingTimesSuccess(responseObject: Any?, success: @escaping () -> Void) {
+    fileprivate func postLeaderboardSetTrackingTimeSuccess(responseObject: Any?, success: @escaping () -> Void) {
         logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
         success()
     }
     
-    fileprivate func postSetTrackingTimesFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+    fileprivate func postLeaderboardSetTrackingTimeFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(error, stringForError(error))
+    }
+    
+    // MARK: - LeaderboardStartTracking
+    
+    func postLeaderboardStartTracking(
+        leaderboardName: String,
+        raceName: String,
+        fleetName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedFleetName = fleetName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/starttracking?race_column=\(encodedRaceName)&fleet=\(encodedFleetName)"
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postLeaderboardStartTrackingSuccess(responseObject: responseObject, success: success)
+        }) { (requestOperation, error) in
+            self.postLeaderboardStartTrackingFailure(error: error, failure: failure)
+        }
+    }
+    
+    fileprivate func postLeaderboardStartTrackingSuccess(responseObject: Any?, success: @escaping () -> Void) {
+        logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
+        success()
+    }
+    
+    fileprivate func postLeaderboardStartTrackingFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(error, stringForError(error))
+    }
+    
+    // MARK: - LeaderboardAutoCourse
+    
+    func postLeaderboardAutoCourse(
+        leaderboardName: String,
+        raceName: String,
+        fleetName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedFleetName = fleetName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/autocourse?race_column=\(encodedRaceName)&fleet=\(encodedFleetName)"
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postLeaderboardAutoCourseSuccess(responseObject: responseObject, success: success)
+        }) { (requestOperation, error) in
+            self.postLeaderboardAutoCourseFailure(error: error, failure: failure)
+        }
+    }
+    
+    fileprivate func postLeaderboardAutoCourseSuccess(responseObject: Any?, success: @escaping () -> Void) {
+        logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
+        success()
+    }
+    
+    fileprivate func postLeaderboardAutoCourseFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
         failure(error, stringForError(error))
     }

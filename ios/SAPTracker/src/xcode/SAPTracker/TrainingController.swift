@@ -109,14 +109,33 @@ class TrainingController: NSObject {
         
         requestManager.postCompetitorCreateAndAdd(regatta: regatta, boatClassName: boatClassName, sailID: sailID, nationality: nationality, success: { competitorCreateAndAddData in
             collector.competitorCreateAndAddData = competitorCreateAndAddData
-            self.competitorCreateAndAddSuccess(collector: collector, success: success)
+            self.competitorCreateAndAddSuccess(collector: collector, success: success, failure: failure)
         }) { (error, message) in
             self.competitorCreateAndAddFailure(error: error, failure: failure)
         }
     }
     
-    fileprivate func competitorCreateAndAddSuccess(collector: CreateTrainingData, success: (_ createTrainingData: CreateTrainingData) -> Void) {
-        success(collector)
+    fileprivate func competitorCreateAndAddSuccess(
+        collector: CreateTrainingData,
+        success: @escaping (_ createTrainingData: CreateTrainingData) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        let leaderboardName = collector.createEventData?.leaderboardName ?? ""
+        let raceName = "R1"
+        let fleetName = "Default"
+        requestManager.postLeaderboardSetTrackingTime(leaderboardName: leaderboardName, raceName: raceName, fleetName: fleetName, success: {
+            self.requestManager.postLeaderboardStartTracking(leaderboardName: leaderboardName, raceName: raceName, fleetName: fleetName, success: {
+                self.requestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceName: raceName, fleetName: fleetName, success: {
+                    success(collector)
+                }) { (error, message) in
+                    failure(error)
+                }
+            }) { (error, message) in
+                failure(error)
+            }
+        }) { (error, message) in
+            failure(error)
+        }
     }
     
     fileprivate func competitorCreateAndAddFailure(error: Error, failure: (_ error: Error) -> Void) {
