@@ -23,10 +23,10 @@ extension CheckInDataCollectorError: LocalizedError {
 
 class CheckInDataCollector: NSObject {
     
-    fileprivate let requestManager: RequestManager
+    fileprivate let checkInRequestManager: CheckInRequestManager
     
     init(checkInData: CheckInData) {
-        requestManager = RequestManager(baseURLString: checkInData.serverURL)
+        checkInRequestManager = CheckInRequestManager(baseURLString: checkInData.serverURL)
         super.init()
     }
     
@@ -45,7 +45,7 @@ class CheckInDataCollector: NSObject {
         success: @escaping (_ collector: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        requestManager.getEvent(eventID: collector.eventID, success: { (eventData) in
+        checkInRequestManager.getEvent(eventID: collector.eventID, success: { (eventData) in
             collector.eventData = eventData
             self.getLeaderboardData(collector: collector, success: success, failure: failure)
         }) { (error) in
@@ -60,7 +60,7 @@ class CheckInDataCollector: NSObject {
         success: @escaping (_ collector: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        requestManager.getLeaderboard(leaderboardName: collector.leaderboardName, success: { (leaderboardData) in
+        checkInRequestManager.getLeaderboard(leaderboardName: collector.leaderboardName, success: { (leaderboardData) in
             collector.leaderboardData = leaderboardData
             self.getLeaderboardDataSuccess(collector: collector, success: success, failure: failure)
         }) { (error) in
@@ -88,7 +88,7 @@ class CheckInDataCollector: NSObject {
         success: @escaping (_ collector: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        requestManager.getCompetitor(competitorID: competitorID, success: { (competitorData) in
+        checkInRequestManager.getCompetitor(competitorID: competitorID, success: { (competitorData) in
             collector.competitorData = competitorData
             self.getCompetitorDataSuccess(
                 collector: collector,
@@ -107,7 +107,7 @@ class CheckInDataCollector: NSObject {
         success: @escaping (_ collector: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        requestManager.getTeamImageURL(competitorID: competitorID, result: { (imageURL) in
+        checkInRequestManager.getTeamImageURL(competitorID: competitorID, result: { (imageURL) in
             collector.teamImageURL = imageURL
             success(collector)
         })
@@ -121,7 +121,7 @@ class CheckInDataCollector: NSObject {
         success: @escaping (_ collector: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        requestManager.getMark(leaderboardName: collector.leaderboardName, markID: markID, success: { (markData) in
+        checkInRequestManager.getMark(leaderboardName: collector.leaderboardName, markID: markID, success: { (markData) in
             collector.markData = markData
             success(collector)
         }) { error in

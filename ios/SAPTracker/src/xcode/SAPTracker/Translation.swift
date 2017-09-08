@@ -106,40 +106,40 @@ class Translation: NSObject {
         }
     }
     
-    // MARK: - RequestManagerError
+    // MARK: - CheckInRequestManagerError
     
-    struct RequestManagerError { static let Key = "\(RequestManagerError.self)"
-        struct CommunicationFailed { static let Key = "\(RequestManagerError.Key).\(CommunicationFailed.self)"
+    struct CheckInRequestManagerError { static let Key = "\(CheckInRequestManagerError.self)"
+        struct CommunicationFailed { static let Key = "\(CheckInRequestManagerError.Key).\(CommunicationFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct GetCompetitorFailed { static let Key = "\(RequestManagerError.Key).\(GetCompetitorFailed.self)"
+        struct GetCompetitorFailed { static let Key = "\(CheckInRequestManagerError.Key).\(GetCompetitorFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct GetEventFailed { static let Key = "\(RequestManagerError.Key).\(GetEventFailed.self)"
+        struct GetEventFailed { static let Key = "\(CheckInRequestManagerError.Key).\(GetEventFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct GetLeaderboardFailed { static let Key = "\(RequestManagerError.Key).\(GetLeaderboardFailed.self)"
+        struct GetLeaderboardFailed { static let Key = "\(CheckInRequestManagerError.Key).\(GetLeaderboardFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct GetMarkFailed { static let Key = "\(RequestManagerError.Key).\(GetMarkFailed.self)"
+        struct GetMarkFailed { static let Key = "\(CheckInRequestManagerError.Key).\(GetMarkFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct GetTeamFailed { static let Key = "\(RequestManagerError.Key).\(GetTeamFailed.self)"
+        struct GetTeamFailed { static let Key = "\(CheckInRequestManagerError.Key).\(GetTeamFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct PostCheckInFailed { static let Key = "\(RequestManagerError.Key).\(PostCheckInFailed.self)"
+        struct PostCheckInFailed { static let Key = "\(CheckInRequestManagerError.Key).\(PostCheckInFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct PostCheckOutFailed { static let Key = "\(RequestManagerError.Key).\(PostCheckOutFailed.self)"
+        struct PostCheckOutFailed { static let Key = "\(CheckInRequestManagerError.Key).\(PostCheckOutFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct PostGPSFixFailed { static let Key = "\(RequestManagerError.Key).\(PostGPSFixFailed.self)"
+        struct PostGPSFixFailed { static let Key = "\(CheckInRequestManagerError.Key).\(PostGPSFixFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct PostTeamImageFailed { static let Key = "\(RequestManagerError.Key).\(PostTeamImageFailed.self)"
+        struct PostTeamImageFailed { static let Key = "\(CheckInRequestManagerError.Key).\(PostTeamImageFailed.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct TeamImageURLIsInvalid { static let Key = "\(RequestManagerError.Key).\(TeamImageURLIsInvalid.self)"
+        struct TeamImageURLIsInvalid { static let Key = "\(CheckInRequestManagerError.Key).\(TeamImageURLIsInvalid.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
     }

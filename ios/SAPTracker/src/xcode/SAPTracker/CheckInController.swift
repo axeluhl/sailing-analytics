@@ -17,8 +17,8 @@ class CheckInController : NSObject {
     }
     
     fileprivate unowned let coreDataManager: CoreDataManager
+    
     fileprivate weak var viewController: UIViewController?
-    fileprivate var requestManager = RequestManager()
     
     init(coreDataManager: CoreDataManager) {
         self.coreDataManager = coreDataManager
@@ -34,7 +34,6 @@ class CheckInController : NSObject {
         failure: @escaping (_ error: Error) -> Void)
     {
         self.viewController = viewController
-        requestManager = RequestManager(baseURLString: checkInData.serverURL)
         collectCheckInData(checkInData: checkInData, success: success, failure: failure)
     }
     
@@ -90,7 +89,8 @@ class CheckInController : NSObject {
         failure: @escaping (_ error: Error) -> Void)
     {
         SVProgressHUD.show()
-        requestManager.postCheckIn(checkInData: checkInData, success: { [weak self] () in
+        let checkInRequestManager = CheckInRequestManager(baseURLString: checkInData.serverURL)
+        checkInRequestManager.postCheckIn(checkInData: checkInData, success: { [weak self] () in
             SVProgressHUD.popActivity()
             self?.postCheckInSuccess(checkInData: checkInData, success: success)
         }) { [weak self] error in

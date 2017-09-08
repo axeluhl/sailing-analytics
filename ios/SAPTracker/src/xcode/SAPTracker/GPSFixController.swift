@@ -114,11 +114,11 @@ class GPSFixController: NSObject {
         failure: @escaping (_ error: Error, _ gpsFixesLeft: Set<GPSFix>) -> Void)
     {
         log(info: "\(gpsFixes.count) GPS fixes will be sent and \(gpsFixesLeft.count) will be left")
-        requestManager.postGPSFixes(
-            gpsFixes: gpsFixes,
-            success: { () in self.sendSliceSuccess(gpsFixes: gpsFixes, gpsFixesLeft: gpsFixesLeft, success: success) },
-            failure: { (error) in self.sendSliceFailure(error: error, gpsFixesLeft: gpsFixesLeft, failure: failure) }
-        )
+        checkInRequestManager.postGPSFixes(gpsFixes: gpsFixes, success: { () in
+            self.sendSliceSuccess(gpsFixes: gpsFixes, gpsFixesLeft: gpsFixesLeft, success: success)
+        }) { (error) in
+            self.sendSliceFailure(error: error, gpsFixesLeft: gpsFixesLeft, failure: failure)
+        }
     }
     
     fileprivate func sendSliceSuccess(
@@ -158,9 +158,8 @@ class GPSFixController: NSObject {
     
     // MARK: - Properties
     
-    fileprivate lazy var requestManager: RequestManager = {
-        let requestManager = RequestManager(baseURLString: self.checkIn.serverURL)
-        return requestManager
+    fileprivate lazy var checkInRequestManager: CheckInRequestManager = {
+        return CheckInRequestManager(baseURLString: self.checkIn.serverURL)
     }()
     
     // MARK: - Helper

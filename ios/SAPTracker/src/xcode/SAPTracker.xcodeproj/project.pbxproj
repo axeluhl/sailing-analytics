@@ -321,7 +321,7 @@
 		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
 		C84936291D47645F000F30E8 /* RegattaCheckInTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* RegattaCheckInTableViewCell.swift */; };
 		C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C85291511D48FB91009E9A9D /* Localizable.strings */; };
-		C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */; };
+		C852BAA21CF5E1EA0093B0C5 /* CheckInRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* CheckInRequestManager.swift */; };
 		C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAA1CF736680093B0C5 /* Preferences.swift */; };
 		C85DB8251F30B680009559CE /* SignUp.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C85DB8241F30B680009559CE /* SignUp.storyboard */; };
 		C85DB8281F31AAE0009559CE /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB8271F31AAE0009559CE /* SignUpViewController.swift */; };
@@ -729,7 +729,7 @@
 		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
 		C84936281D47645F000F30E8 /* RegattaCheckInTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCheckInTableViewCell.swift; sourceTree = "<group>"; };
 		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
-		C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestManager.swift; sourceTree = "<group>"; };
+		C852BAA11CF5E1EA0093B0C5 /* CheckInRequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInRequestManager.swift; sourceTree = "<group>"; };
 		C852BAAA1CF736680093B0C5 /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		C85DB8241F30B680009559CE /* SignUp.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = SignUp.storyboard; sourceTree = "<group>"; };
 		C85DB8271F31AAE0009559CE /* SignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
@@ -1323,7 +1323,7 @@
 				C8289F391F386D8300A76953 /* SignUpRequestManager.swift */,
 				7F2C605919F160E400C32D93 /* LocationManager.swift */,
 				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
-				C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */,
+				C852BAA11CF5E1EA0093B0C5 /* CheckInRequestManager.swift */,
 				C87A74E01F4EE570003DE396 /* TrainingRequestManager.swift */,
 			);
 			name = Managers;
@@ -2011,7 +2011,7 @@
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
 				7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */,
 				C8F71EE71D8691F700826DE4 /* SVRadialGradientLayer.m in Sources */,
-				C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */,
+				C852BAA21CF5E1EA0093B0C5 /* CheckInRequestManager.swift in Sources */,
 				C8F71EE01D8691F700826DE4 /* AFURLRequestSerialization.m in Sources */,
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
 				C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */,

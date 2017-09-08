@@ -135,7 +135,7 @@ class SessionController: NSObject {
     // MARK: - CheckOut
     
     func checkOut(completion: @escaping (_ withSuccess: Bool) -> Void) {
-        requestManager.postCheckOut(
+        checkInRequestManager.postCheckOut(
             checkIn,
             success: { () in completion(true) },
             failure: { (error) in completion(false) }
@@ -145,13 +145,11 @@ class SessionController: NSObject {
     // MARK: - Properties
     
     lazy var gpsFixController: GPSFixController = {
-        let gpsFixController = GPSFixController(checkIn: self.checkIn, coreDataManager: self.coreDataManager)
-        return gpsFixController
+        return GPSFixController(checkIn: self.checkIn, coreDataManager: self.coreDataManager)
     }()
     
-    lazy var requestManager: RequestManager = {
-        let requestManager = RequestManager(baseURLString: self.checkIn.serverURL)
-        return requestManager
+    lazy var checkInRequestManager: CheckInRequestManager = {
+        return CheckInRequestManager(baseURLString: self.checkIn.serverURL)
     }()
     
 }

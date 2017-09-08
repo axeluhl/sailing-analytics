@@ -1,5 +1,5 @@
 //
-//  RequestManager.swift
+//  CheckInRequestManager.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 25.05.16.
@@ -9,7 +9,7 @@
 
 import UIKit
 
-enum RequestManagerError: Error {
+enum CheckInRequestManagerError: Error {
     case communicationFailed
     case getCompetitorFailed
     case getEventFailed
@@ -23,36 +23,36 @@ enum RequestManagerError: Error {
     case teamImageURLIsInvalid
 }
 
-extension RequestManagerError: LocalizedError {
+extension CheckInRequestManagerError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .communicationFailed:
-            return Translation.RequestManagerError.CommunicationFailed.String
+            return Translation.CheckInRequestManagerError.CommunicationFailed.String
         case .getCompetitorFailed:
-            return Translation.RequestManagerError.GetCompetitorFailed.String
+            return Translation.CheckInRequestManagerError.GetCompetitorFailed.String
         case .getEventFailed:
-            return Translation.RequestManagerError.GetEventFailed.String
+            return Translation.CheckInRequestManagerError.GetEventFailed.String
         case .getLeaderboardFailed:
-            return Translation.RequestManagerError.GetLeaderboardFailed.String
+            return Translation.CheckInRequestManagerError.GetLeaderboardFailed.String
         case .getMarkFailed:
-            return Translation.RequestManagerError.GetMarkFailed.String
+            return Translation.CheckInRequestManagerError.GetMarkFailed.String
         case .getTeamFailed:
-            return Translation.RequestManagerError.GetTeamFailed.String
+            return Translation.CheckInRequestManagerError.GetTeamFailed.String
         case .postCheckInFailed:
-            return Translation.RequestManagerError.PostCheckInFailed.String
+            return Translation.CheckInRequestManagerError.PostCheckInFailed.String
         case .postCheckOutFailed:
-            return Translation.RequestManagerError.PostCheckOutFailed.String
+            return Translation.CheckInRequestManagerError.PostCheckOutFailed.String
         case .postGPSFixFailed:
-            return Translation.RequestManagerError.PostGPSFixFailed.String
+            return Translation.CheckInRequestManagerError.PostGPSFixFailed.String
         case .postTeamImageFailed:
-            return Translation.RequestManagerError.PostTeamImageFailed.String
+            return Translation.CheckInRequestManagerError.PostTeamImageFailed.String
         case .teamImageURLIsInvalid:
-            return Translation.RequestManagerError.TeamImageURLIsInvalid.String
+            return Translation.CheckInRequestManagerError.TeamImageURLIsInvalid.String
         }
     }
 }
 
-class RequestManager: NSObject {
+class CheckInRequestManager: NSObject {
     
     fileprivate let basePathString = "/sailingserver/api/v1"
     
@@ -118,7 +118,7 @@ class RequestManager: NSObject {
     
     fileprivate func getEventFailure(error: Error, failure: (_ error: Error) -> Void) -> Void {
         logError(name: "\(#function)", error: error)
-        failure(RequestManagerError.getEventFailed)
+        failure(CheckInRequestManagerError.getEventFailed)
     }
     
     // MARK: - Leaderboard
@@ -145,7 +145,7 @@ class RequestManager: NSObject {
     
     fileprivate func getLeaderboardFailure(error: Error, failure: (_ error: Error) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(RequestManagerError.getLeaderboardFailed)
+        failure(CheckInRequestManagerError.getLeaderboardFailed)
     }
     
     // MARK: - Competitor
@@ -172,7 +172,7 @@ class RequestManager: NSObject {
     
     fileprivate func getCompetitorFailure(error: Error, failure: (_ error: Error) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(RequestManagerError.getCompetitorFailed)
+        failure(CheckInRequestManagerError.getCompetitorFailed)
     }
     
     // MARK: - Mark
@@ -201,7 +201,7 @@ class RequestManager: NSObject {
     
     fileprivate func getMarkFailure(error: Error, failure: (_ error: Error) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(RequestManagerError.getMarkFailed)
+        failure(CheckInRequestManagerError.getMarkFailed)
     }
 
     // MARK: - Team
@@ -228,7 +228,7 @@ class RequestManager: NSObject {
     
     fileprivate func getTeamFailure(error: Error, failure: (_ error: Error) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(RequestManagerError.getTeamFailed)
+        failure(CheckInRequestManagerError.getTeamFailed)
     }
     
     func getTeamImageURL(competitorID: String, result: @escaping (_ imageURL: String?) -> Void) {
@@ -278,7 +278,7 @@ class RequestManager: NSObject {
     
     fileprivate func postCheckInFailure(error: Error, failure: (_ error: Error) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(RequestManagerError.postCheckInFailed)
+        failure(CheckInRequestManagerError.postCheckInFailed)
     }
     
     // MARK: - CheckOut
@@ -317,7 +317,7 @@ class RequestManager: NSObject {
     
     fileprivate func postCheckOutFailure(error: Error, failure: (_ error: Error) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(RequestManagerError.postCheckOutFailed)
+        failure(CheckInRequestManagerError.postCheckOutFailed)
     }
     
     // MARK: - GPSFixes
@@ -358,7 +358,7 @@ class RequestManager: NSObject {
     
     fileprivate func postGPSFixesFailure(error: Error, failure: (_ error: Error) -> Void) {
         logError(name: "\(#function)", error: error)
-        failure(RequestManagerError.postGPSFixFailed)
+        failure(CheckInRequestManagerError.postGPSFixFailed)
     }
     
     // MARK: - TeamImage
@@ -370,7 +370,7 @@ class RequestManager: NSObject {
         failure: @escaping (_ error: Error) -> Void)
     {
         guard let teamImageURL = URL(string: "\(baseURLString)\(basePathString)/competitors/\(competitorID)/team/image") else {
-            failure(RequestManagerError.teamImageURLIsInvalid)
+            failure(CheckInRequestManagerError.teamImageURLIsInvalid)
             return
         }
         
@@ -408,11 +408,11 @@ class RequestManager: NSObject {
         failure: (_ error: Error) -> Void)
     {
         guard let teamImageDictionary = responseObject as? [String: AnyObject] else {
-            postTeamImageDataFailure(error: RequestManagerError.communicationFailed, failure: failure)
+            postTeamImageDataFailure(error: CheckInRequestManagerError.communicationFailed, failure: failure)
             return
         }
         guard let teamImageURL = teamImageDictionary[TeamImageKeys.TeamImageURL] as? String else {
-            postTeamImageDataFailure(error: RequestManagerError.communicationFailed, failure: failure)
+            postTeamImageDataFailure(error: CheckInRequestManagerError.communicationFailed, failure: failure)
             return
         }
         
