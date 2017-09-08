@@ -143,9 +143,8 @@ class ScanViewController: UIViewController {
     
     // MARK: - Properties
     
-    fileprivate lazy var checkInController: CheckInController = {
-        let checkInController = CheckInController(coreDataManager: self.coreDataManager)
-        return checkInController
+    fileprivate lazy var regattaCheckInController: RegattaCheckInController = {
+        return RegattaCheckInController(coreDataManager: self.coreDataManager)
     }()
     
     // MARK: - Helper
@@ -204,7 +203,7 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     // MARK: - CheckIn
     
     fileprivate func checkIn(withCheckInData checkInData: CheckInData) {
-        checkInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] checkIn in
+        regattaCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] (checkIn) in
             self?.checkInSuccess(checkIn: checkIn)
         }) { [weak self] error in
             self?.checkInFailure(error: error)

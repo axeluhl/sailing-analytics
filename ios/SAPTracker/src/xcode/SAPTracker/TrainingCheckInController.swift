@@ -9,5 +9,14 @@
 import UIKit
 
 class TrainingCheckInController: CheckInController {
+    
+    override init(coreDataManager: CoreDataManager) {
+        super.init(coreDataManager: coreDataManager)
+        delegate = self
+    }
+    
+}
 
+extension TrainingCheckInController: CheckInControllerDelegate {
+    
 }

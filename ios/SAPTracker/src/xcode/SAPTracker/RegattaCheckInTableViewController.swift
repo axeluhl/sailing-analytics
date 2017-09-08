@@ -157,7 +157,7 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     fileprivate func reviewNewCheckIn(completion: @escaping (_ checkIn: CheckIn?) -> Void) {
         guard let urlString = Preferences.newCheckInURL else { completion(nil); return }
         guard let checkInData = CheckInData(urlString: urlString) else { completion(nil); return }
-        checkInController.checkInWithViewController(self, checkInData: checkInData, success: { checkIn in
+        regattaCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { (checkIn) in
             Preferences.newCheckInURL = nil
             completion(checkIn)
         }) { (error) in
@@ -259,9 +259,8 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     
     // MARK: - Properties
     
-    lazy var regattaCheckInController: CheckInController = {
-        let checkInController = CheckInController(coreDataManager: self.regattaCoreDataManager)
-        return checkInController
+    lazy var regattaCheckInController: RegattaCheckInController = {
+        return RegattaCheckInController(coreDataManager: self.regattaCoreDataManager)
     }()
     
     lazy var regattaCoreDataManager: RegattaCoreDataManager = {

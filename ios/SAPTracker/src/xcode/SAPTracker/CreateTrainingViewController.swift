@@ -57,7 +57,7 @@ class CreateTrainingViewController: UIViewController {
     }
     
     fileprivate func createTrainingSuccess(checkInData: CheckInData) {
-        checkInController.checkInWithViewController(self, checkInData: checkInData, success: { checkIn in
+        trainingCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { checkIn in
             // TODO
         }) { error in
             self.createTrainingFailure(error: error)
@@ -70,9 +70,8 @@ class CreateTrainingViewController: UIViewController {
     
     // MARK: - Propeties
     
-    fileprivate lazy var checkInController: CheckInController = {
-        let checkInController = CheckInController(coreDataManager: self.trainingCoreDataManager)
-        return checkInController
+    fileprivate lazy var trainingCheckInController: TrainingCheckInController = {
+        return TrainingCheckInController(coreDataManager: self.trainingCoreDataManager)
     }()
     
 }

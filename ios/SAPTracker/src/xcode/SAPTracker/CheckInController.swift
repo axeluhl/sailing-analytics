@@ -10,6 +10,44 @@ import Foundation
 import UIKit
 import AVFoundation
 
+protocol CheckInControllerDelegate: class {
+    
+    func checkInController(
+        _ controller: CheckInController, postCompetitorCheckIn
+        checkInData: CheckInData,
+        success: @escaping (_ checkIn: CheckIn) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    
+    func checkInController(
+        _ controller: CheckInController, postMarkCheckIn
+        checkInData: CheckInData,
+        success: @escaping (_ checkIn: CheckIn) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    
+}
+
+extension CheckInControllerDelegate {
+    
+    func checkInController(
+        _ controller: CheckInController, postCompetitorCheckIn
+        checkInData: CheckInData,
+        success: @escaping (_ checkIn: CheckIn) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        controller.postCheckIn(checkInData: checkInData, success: success, failure: failure)
+    }
+    
+    func checkInController(
+        _ controller: CheckInController, postMarkCheckIn
+        checkInData: CheckInData,
+        success: @escaping (_ checkIn: CheckIn) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        controller.postCheckIn(checkInData: checkInData, success: success, failure: failure)
+    }
+    
+}
+
 class CheckInController : NSObject {
     
     enum CheckInControllerError: Error {
@@ -18,7 +56,8 @@ class CheckInController : NSObject {
     
     fileprivate unowned let coreDataManager: CoreDataManager
     
-    fileprivate weak var viewController: UIViewController?
+    weak var viewController: UIViewController?
+    weak var delegate: CheckInControllerDelegate?
     
     init(coreDataManager: CoreDataManager) {
         self.coreDataManager = coreDataManager
@@ -62,28 +101,17 @@ class CheckInController : NSObject {
     {
         switch checkInData.type {
         case .competitor:
-            let title = String(format: Translation.CheckInController.WelcomeAlert.Title.String, checkInData.competitorData.name)
-            let message = String(format: Translation.CheckInController.WelcomeAlert.Message.String, checkInData.competitorData.sailID)
-            let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
-                self?.postCheckIn(checkInData: checkInData, success: success, failure: failure)
-            }
-            let cancelAction = UIAlertAction(title: Translation.CheckInController.WelcomeAlert.CancelAction.Title.String, style: .cancel) { [weak self] action in
-                self?.didCancelCheckIn(failure: failure)
-            }
-            alertController.addAction(okAction)
-            alertController.addAction(cancelAction)
-            viewController?.present(alertController, animated: true)
+            delegate?.checkInController(self, postCompetitorCheckIn: checkInData, success: success, failure: failure)
             break
         case .mark:
-            self.postCheckIn(checkInData: checkInData, success: success, failure: failure)
+            delegate?.checkInController(self, postMarkCheckIn: checkInData, success: success, failure: failure)
             break
         }
     }
     
     // MARK: - PostCheckIn
     
-    fileprivate func postCheckIn(
+    func postCheckIn(
         checkInData: CheckInData,
         success: @escaping (_ checkIn: CheckIn) -> Void,
         failure: @escaping (_ error: Error) -> Void)
@@ -129,15 +157,15 @@ class CheckInController : NSObject {
     
     // MARK: - Finish, Cancel, Fail
     
-    fileprivate func didFinishCheckIn(_ checkIn: CheckIn, success:(_ checkIn: CheckIn) -> Void) {
+    func didFinishCheckIn(_ checkIn: CheckIn, success:(_ checkIn: CheckIn) -> Void) {
         success(checkIn)
     }
     
-    fileprivate func didCancelCheckIn(failure:(_ error: Error) -> Void) {
+    func didCancelCheckIn(failure:(_ error: Error) -> Void) {
         failure(CheckInControllerError.cancelled)
     }
     
-    fileprivate func didFailCheckIn(withError error: Error, failure: @escaping (_ error: Error) -> Void) {
+    func didFailCheckIn(withError error: Error, failure: @escaping (_ error: Error) -> Void) {
         let alertController = UIAlertController(title: Translation.Common.Error.String, message: error.localizedDescription, preferredStyle: .alert)
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { action in
             failure(error)

@@ -81,18 +81,15 @@ class TrainingTableViewController: CheckInTableViewController {
     // MARK: - Properties
     
     fileprivate lazy var trainingCheckInController: TrainingCheckInController = {
-        let trainingCheckInController = TrainingCheckInController(coreDataManager: self.trainingCoreDataManager)
-        return trainingCheckInController
+        return TrainingCheckInController(coreDataManager: self.trainingCoreDataManager)
     }()
     
     fileprivate lazy var trainingController: TrainingController = {
-        let trainingController = TrainingController(baseURLString: "https://ubilabstest.sapsailing.com")
-        return trainingController
+        return TrainingController(baseURLString: "https://ubilabstest.sapsailing.com")
     }()
     
     fileprivate lazy var trainingCoreDataManager: TrainingCoreDataManager = {
-        let trainingCoreDataManager = TrainingCoreDataManager(name: self.userName)
-        return trainingCoreDataManager
+        return TrainingCoreDataManager(name: self.userName)
     }()
     
 }

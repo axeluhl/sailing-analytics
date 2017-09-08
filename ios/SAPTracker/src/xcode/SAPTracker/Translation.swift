@@ -37,10 +37,10 @@ class Translation: NSObject {
         }
     }
     
-    // MARK: - CheckInController
+    // MARK: - RegattaCheckInController
     
-    struct CheckInController { static let Key = "\(CheckInController.self)"
-        struct WelcomeAlert { static let Key = "\(CheckInController.Key).\(WelcomeAlert.self)"
+    struct RegattaCheckInController { static let Key = "\(RegattaCheckInController.self)"
+        struct WelcomeAlert { static let Key = "\(RegattaCheckInController.Key).\(WelcomeAlert.self)"
             struct Title { static let Key = "\(WelcomeAlert.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
