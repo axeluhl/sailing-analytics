@@ -104,10 +104,8 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
     // MARK: - Update
     
     fileprivate func update() {
-        SVProgressHUD.show()
-        competitorSessionController.update {
-            self.refresh()
-            SVProgressHUD.popActivity()
+        competitorSessionController.update { [weak self] in
+            self?.refresh()
         }
     }
     
