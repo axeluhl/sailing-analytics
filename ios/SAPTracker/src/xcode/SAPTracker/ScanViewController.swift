@@ -10,9 +10,9 @@ import UIKit
 import AVFoundation
 
 protocol ScanViewControllerDelegate: class {
-
+    
     func scanViewController(_ controller: ScanViewController, didCheckIn checkIn: CheckIn)
-
+    
 }
 
 class ScanViewController: UIViewController {
@@ -205,7 +205,7 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     fileprivate func checkIn(withCheckInData checkInData: CheckInData) {
         regattaCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] (checkIn) in
             self?.checkInSuccess(checkIn: checkIn)
-        }) { [weak self] error in
+        }) { [weak self] (error) in
             self?.checkInFailure(error: error)
         }
     }

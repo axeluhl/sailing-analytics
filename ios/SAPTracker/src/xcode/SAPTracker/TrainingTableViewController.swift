@@ -73,6 +73,7 @@ class TrainingTableViewController: CheckInTableViewController {
         if (segue.identifier == Segue.CreateTraining) {
             guard let createTrainingNC = segue.destination as? UINavigationController else { return }
             guard let createTrainingVC = createTrainingNC.viewControllers[0] as? CreateTrainingViewController else { return }
+            createTrainingVC.delegate = self
             createTrainingVC.trainingCoreDataManager = trainingCoreDataManager;
             createTrainingVC.trainingController = trainingController
         }
@@ -123,6 +124,16 @@ extension TrainingTableViewController: CheckInTableViewControllerDelegate {
     
     func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andMarkCheckIn checkIn: MarkCheckIn) {
         
+    }
+    
+}
+
+// MARK: - CreateTrainingViewControllerDelegate
+
+extension TrainingTableViewController: CreateTrainingViewControllerDelegate {
+    
+    func createTrainingViewController(_ controller: CreateTrainingViewController, didCheckIn checkIn: CheckIn) {
+        performSegue(forCheckIn: checkIn)
     }
     
 }

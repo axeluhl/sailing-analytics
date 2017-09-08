@@ -8,7 +8,15 @@
 
 import UIKit
 
+protocol CreateTrainingViewControllerDelegate: class {
+    
+    func createTrainingViewController(_ controller: CreateTrainingViewController, didCheckIn checkIn: CheckIn)
+    
+}
+
 class CreateTrainingViewController: UIViewController {
+    
+    weak var delegate: CreateTrainingViewControllerDelegate?
     
     weak var trainingController: TrainingController!
     weak var trainingCoreDataManager: TrainingCoreDataManager!
@@ -57,10 +65,16 @@ class CreateTrainingViewController: UIViewController {
     }
     
     fileprivate func createTrainingSuccess(checkInData: CheckInData) {
-        trainingCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { checkIn in
-            // TODO
-        }) { error in
+        trainingCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { (checkIn) in
+            self.createTrainingSuccess(checkIn: checkIn)
+        }) { (error) in
             self.createTrainingFailure(error: error)
+        }
+    }
+    
+    fileprivate func createTrainingSuccess(checkIn: CheckIn) {
+        dismiss(animated: true) { 
+            self.delegate?.createTrainingViewController(self, didCheckIn: checkIn)
         }
     }
     
