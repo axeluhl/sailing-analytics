@@ -10,7 +10,6 @@
 import UIKit
 
 enum RequestManagerError: Error {
-    case checkInDataIsIncomplete
     case communicationFailed
     case getCompetitorFailed
     case getEventFailed
@@ -27,8 +26,6 @@ enum RequestManagerError: Error {
 extension RequestManagerError: LocalizedError {
     var errorDescription: String? {
         switch self {
-        case .checkInDataIsIncomplete:
-            return Translation.RequestManagerError.CheckInDataIsIncomplete.String
         case .communicationFailed:
             return Translation.RequestManagerError.CommunicationFailed.String
         case .getCompetitorFailed:
@@ -97,127 +94,9 @@ class RequestManager: NSObject {
         super.init()
     }
     
-    // MARK: - CheckIn
-    
-    func getCheckInData(
-        checkInData: CheckInData,
-        success: @escaping (_ checkInData: CheckInData) -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        getEventData(checkInData: checkInData, success: success, failure: failure)
-    }
-    
-    fileprivate func getEventData(
-        checkInData: CheckInData,
-        success: @escaping (_ checkInData: CheckInData) -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        getEvent(
-            eventID: checkInData.eventID,
-            success: { (data) in self.getEventDataSuccess(eventData: data, checkInData: checkInData, success: success, failure: failure) },
-            failure: { (error) in failure(error) }
-        )
-    }
-    
-    fileprivate func getEventDataSuccess(
-        eventData: EventData,
-        checkInData: CheckInData,
-        success: @escaping (_ checkInData: CheckInData) -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        checkInData.eventData = eventData
-        getLeaderboardData(checkInData: checkInData, success: success, failure: failure)
-    }
-    
-    fileprivate func getLeaderboardData(
-        checkInData: CheckInData,
-        success: @escaping (_ checkInData: CheckInData) -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        getLeaderboard(
-            leaderboardName: checkInData.leaderboardName,
-            success: { (data) in self.getLeaderboardDataSuccess(leaderboardData: data, checkInData: checkInData, success: success, failure: failure) },
-            failure: { (error) in failure(error) }
-        )
-    }
-    
-    fileprivate func getLeaderboardDataSuccess(
-        leaderboardData: LeaderboardData,
-        checkInData: CheckInData,
-        success: @escaping (_ checkInData: CheckInData) -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        checkInData.leaderboardData = leaderboardData
-        if (checkInData.competitorID != nil) {
-            getCompetitorData(checkInData: checkInData, competitorID: checkInData.competitorID!, success: success, failure: failure)
-        } else if (checkInData.markID != nil) {
-            getMarkData(checkInData: checkInData, markID: checkInData.markID!, success: success, failure: failure)
-        } else {
-            failure(RequestManagerError.checkInDataIsIncomplete)
-        }
-    }
-    
-    fileprivate func getCompetitorData(
-        checkInData: CheckInData,
-        competitorID: String,
-        success: @escaping (_ checkInData: CheckInData) -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        getCompetitor(competitorID: competitorID,
-                      success: { (data) in
-                        self.getCompetitorDataSuccess(
-                            competitorData: data,
-                            checkInData: checkInData,
-                            competitorID: competitorID,
-                            success: success,
-                            failure: failure
-                        )},
-                      failure: { (error) in
-                        failure(error)
-        })
-    }
-    
-    fileprivate func getCompetitorDataSuccess(
-        competitorData: CompetitorData,
-        checkInData: CheckInData,
-        competitorID: String,
-        success: @escaping (_ checkInData: CheckInData) -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        checkInData.competitorData = competitorData
-        getTeamImageURL(competitorID: competitorID, result: { (imageURL) in
-            checkInData.teamImageURL = imageURL
-            success(checkInData)
-        })
-    }
-
-    fileprivate func getMarkData(
-        checkInData: CheckInData,
-        markID: String,
-        success: @escaping (_ checkInData: CheckInData) -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        getMark(
-            leaderboardName: checkInData.leaderboardName,
-            markID: markID,
-            success: { (data) in self.getMarkDataSuccess(markData: data, checkInData: checkInData, success: success, failure: failure) },
-            failure: { (error) in failure(error) }
-        )
-    }
-
-    fileprivate func getMarkDataSuccess(
-        markData: MarkData,
-        checkInData: CheckInData,
-        success: (_ checkInData: CheckInData) -> Void,
-        failure: (_ error: Error) -> Void)
-    {
-        checkInData.markData = markData
-        success(checkInData)
-    }
-
     // MARK: - Event
     
-    fileprivate func getEvent(
+    func getEvent(
         eventID: String,
         success: @escaping (_ eventData: EventData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
@@ -244,7 +123,7 @@ class RequestManager: NSObject {
     
     // MARK: - Leaderboard
     
-    fileprivate func getLeaderboard(
+    func getLeaderboard(
         leaderboardName: String,
         success: @escaping (_ leaderboardData: LeaderboardData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
@@ -271,7 +150,7 @@ class RequestManager: NSObject {
     
     // MARK: - Competitor
     
-    fileprivate func getCompetitor(
+    func getCompetitor(
         competitorID: String,
         success: @escaping (_ competitorData: CompetitorData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
@@ -298,7 +177,7 @@ class RequestManager: NSObject {
     
     // MARK: - Mark
 
-    fileprivate func getMark(
+    func getMark(
         leaderboardName: String,
         markID: String,
         success: @escaping (_ markData: MarkData) -> Void,
@@ -327,7 +206,7 @@ class RequestManager: NSObject {
 
     // MARK: - Team
     
-    fileprivate func getTeam(
+    func getTeam(
         competitorID: String,
         success: @escaping (_ teamData: TeamData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
@@ -352,7 +231,7 @@ class RequestManager: NSObject {
         failure(RequestManagerError.getTeamFailed)
     }
     
-    fileprivate func getTeamImageURL(competitorID: String, result: @escaping (_ imageURL: String?) -> Void) {
+    func getTeamImageURL(competitorID: String, result: @escaping (_ imageURL: String?) -> Void) {
         getTeam(
             competitorID: competitorID,
             success: { (teamData) in result(teamData.imageURL) },

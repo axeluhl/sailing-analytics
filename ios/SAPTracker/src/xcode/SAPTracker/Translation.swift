@@ -98,13 +98,18 @@ class Translation: NSObject {
         }
     }
     
+    // MARK: - CheckInDataCollectorError
+    
+    struct CheckInDataCollectorError { static let Key = "\(CheckInDataCollectorError.self)"
+        struct CheckInDataIsIncomplete { static let Key = "\(CheckInDataCollectorError.Key).\(CheckInDataIsIncomplete.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
+    }
+    
     // MARK: - RequestManagerError
     
     struct RequestManagerError { static let Key = "\(RequestManagerError.self)"
         struct CommunicationFailed { static let Key = "\(RequestManagerError.Key).\(CommunicationFailed.self)"
-            static let String = NSLocalizedString(Key, comment: "")
-        }
-        struct CheckInDataIsIncomplete { static let Key = "\(RequestManagerError.Key).\(CheckInDataIsIncomplete.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
         struct GetCompetitorFailed { static let Key = "\(RequestManagerError.Key).\(GetCompetitorFailed.self)"

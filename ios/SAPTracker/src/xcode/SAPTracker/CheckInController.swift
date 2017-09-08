@@ -34,18 +34,29 @@ class CheckInController : NSObject {
         failure: @escaping (_ error: Error) -> Void)
     {
         self.viewController = viewController
-        SVProgressHUD.show()
         requestManager = RequestManager(baseURLString: checkInData.serverURL)
-        requestManager.getCheckInData(checkInData: checkInData, success: { [weak self] checkInData in
+        collectCheckInData(checkInData: checkInData, success: success, failure: failure)
+    }
+    
+    // MARK: - CollectCheckInData
+    
+    fileprivate func collectCheckInData(
+        checkInData: CheckInData,
+        success: @escaping (_ checkIn: CheckIn) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        SVProgressHUD.show()
+        let checkInDataCollector = CheckInDataCollector(checkInData: checkInData)
+        checkInDataCollector.collect(checkInData: checkInData, success: { [weak self] checkInData in
             SVProgressHUD.popActivity()
-            self?.checkInSuccess(checkInData: checkInData, success: success, failure: failure)
+            self?.collectCheckInDataSuccess(checkInData: checkInData, success: success, failure: failure)
         }) { [weak self] error in
             SVProgressHUD.popActivity()
             self?.didFailCheckIn(withError: error, failure: failure)
         }
     }
     
-    fileprivate func checkInSuccess(
+    fileprivate func collectCheckInDataSuccess(
         checkInData: CheckInData,
         success: @escaping (_ checkIn: CheckIn) -> Void,
         failure: @escaping (_ error: Error) -> Void)

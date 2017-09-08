@@ -366,6 +366,7 @@
 		C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */; };
 		C8CF22A31F6194C600A01E0A /* RegattaCheckInController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */; };
 		C8CF22A51F61965C00A01E0A /* TrainingCheckInController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */; };
+		C8CF22A91F62780C00A01E0A /* CheckInDataCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
 		C8E0BD0A1F39A08B002FCCA5 /* FormularViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */; };
 		C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */; };
@@ -775,6 +776,7 @@
 		C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
 		C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCheckInController.swift; sourceTree = "<group>"; };
 		C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingCheckInController.swift; sourceTree = "<group>"; };
+		C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInDataCollector.swift; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 3.xcdatamodel"; sourceTree = "<group>"; };
 		C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormularViewController.swift; sourceTree = "<group>"; };
@@ -1372,6 +1374,7 @@
 				C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */,
 				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
 				C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */,
+				C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */,
 			);
 			name = CheckIn;
 			sourceTree = "<group>";
@@ -1999,6 +2002,7 @@
 				C87A74E11F4EE570003DE396 /* TrainingRequestManager.swift in Sources */,
 				C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEE1D8691F700826DE4 /* UIProgressView+AFNetworking.m in Sources */,
+				C8CF22A91F62780C00A01E0A /* CheckInDataCollector.swift in Sources */,
 				C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */,

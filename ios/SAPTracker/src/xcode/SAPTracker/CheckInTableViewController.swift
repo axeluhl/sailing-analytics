@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-protocol CheckInTableViewControllerDelegate {
+protocol CheckInTableViewControllerDelegate: class {
     
     var coreDataManager: CoreDataManager { get }
     
@@ -36,7 +36,7 @@ class CheckInTableViewController: UIViewController {
         static let Mark = "Mark"
     }
     
-    var delegate: CheckInTableViewControllerDelegate!
+    weak var delegate: CheckInTableViewControllerDelegate?
     
     var segueCheckIn: CheckIn?
     
@@ -77,14 +77,14 @@ class CheckInTableViewController: UIViewController {
     
     fileprivate func setupTableViewDataSource() {
         do {
-            try fetchedResultsController.performFetch()
+            try fetchedResultsController?.performFetch()
         } catch {
             logError(name: "\(#function)", error: error)
         }
     }
     
     fileprivate func setupTableViewHeader() {
-        if fetchedResultsController.sections?[0].numberOfObjects ?? 0 == 0 {
+        if fetchedResultsController?.sections?[0].numberOfObjects ?? 0 == 0 {
             tableView.tableHeaderView = nil
         } else {
             tableView.tableHeaderView = headerView
@@ -144,18 +144,18 @@ class CheckInTableViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == CheckInSegue.Competitor) {
             guard let competitorCheckIn = segueCheckIn as? CompetitorCheckIn else { return }
-            delegate.checkInTableViewController(self, prepareForSegue: segue, andCompetitorCheckIn: competitorCheckIn)
+            delegate?.checkInTableViewController(self, prepareForSegue: segue, andCompetitorCheckIn: competitorCheckIn)
         } else if (segue.identifier == CheckInSegue.Mark) {
             guard let markCheckIn = segueCheckIn as? MarkCheckIn else { return }
-            delegate.checkInTableViewController(self, prepareForSegue: segue, andMarkCheckIn: markCheckIn)
+            delegate?.checkInTableViewController(self, prepareForSegue: segue, andMarkCheckIn: markCheckIn)
         }
     }
     
     // MARK: - Properties
         
-    lazy var fetchedResultsController: NSFetchedResultsController<CheckIn> = {
-        let fetchedResultsController = self.delegate.coreDataManager.checkInFetchedResultsController()
-        fetchedResultsController.delegate = self
+    lazy var fetchedResultsController: NSFetchedResultsController<CheckIn>? = {
+        let fetchedResultsController = self.delegate?.coreDataManager.checkInFetchedResultsController()
+        fetchedResultsController?.delegate = self
         return fetchedResultsController
     }()
     
@@ -166,12 +166,14 @@ class CheckInTableViewController: UIViewController {
 extension CheckInTableViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
+        return fetchedResultsController?.sections?[section].numberOfObjects ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") ?? UITableViewCell()
-        delegate.checkInTableViewController(self, configureCell: cell, forCheckIn: fetchedResultsController.object(at: indexPath))
+        if let checkIn = fetchedResultsController?.object(at: indexPath) {
+            delegate?.checkInTableViewController(self, configureCell: cell, forCheckIn: checkIn)
+        }
         return cell
     }
     
@@ -182,7 +184,7 @@ extension CheckInTableViewController: UITableViewDataSource {
 extension CheckInTableViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(forCheckIn: fetchedResultsController.object(at: indexPath))
+        performSegue(forCheckIn: fetchedResultsController?.object(at: indexPath))
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -211,8 +213,9 @@ extension CheckInTableViewController: NSFetchedResultsControllerDelegate {
             tableView.insertRows(at: [newIndexPath!], with: UITableViewRowAnimation.automatic)
         case .update:
             if let cell = tableView.cellForRow(at: indexPath!) {
-                let checkIn = fetchedResultsController.object(at: indexPath!)
-                delegate.checkInTableViewController(self, configureCell: cell, forCheckIn: checkIn)
+                if let checkIn = fetchedResultsController?.object(at: indexPath!) {
+                    delegate?.checkInTableViewController(self, configureCell: cell, forCheckIn: checkIn)
+                }
                 tableView.reloadRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
             }
         case .move:

@@ -95,15 +95,19 @@ class SessionController: NSObject {
     // MARK: - Update
     
     func update(completion: @escaping () -> Void) {
-        guard let checkInData = CheckInData(checkIn: checkIn) else { updateFailure(completion: completion); return }
-        requestManager.getCheckInData(
-            checkInData: checkInData,
-            success: { (checkInData) in self.updateSuccess(checkInData: checkInData, completion: completion) },
-            failure: { (error) in self.updateFailure(completion: completion) }
-        )
+        guard let checkInData = CheckInData(checkIn: checkIn) else {
+            updateFailure(completion: completion)
+            return
+        }
+        let checkInDataCollector = CheckInDataCollector(checkInData: checkInData)
+        checkInDataCollector.collect(checkInData: checkInData, success: { [weak self] (checkInData) in
+            self?.updateSuccess(checkInData: checkInData, completion: completion)
+        }) { [weak self] (error) in
+            self?.updateFailure(completion: completion)
+        }
     }
     
-    func updateSuccess(checkInData: CheckInData, completion: () -> Void) {
+    fileprivate func updateSuccess(checkInData: CheckInData, completion: () -> Void) {
         checkIn.event.updateWithEventData(eventData: checkInData.eventData)
         checkIn.leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
         checkIn.updateWithCheckInData(checkInData: checkInData)
@@ -111,7 +115,7 @@ class SessionController: NSObject {
         completion()
     }
     
-    func updateFailure(completion: () -> Void) {
+    fileprivate func updateFailure(completion: () -> Void) {
         completion()
     }
     
