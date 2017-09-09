@@ -10,7 +10,7 @@ import com.sap.sse.common.Color;
 
 public class CircleVectorGraphics extends BoatClassVectorGraphics {
     private static final double doublePi = 2 * Math.PI;
-    
+
     public CircleVectorGraphics(BoatClassMasterdata... compatibleBoatClasses) {
         super(100, 100, 100, compatibleBoatClasses);
     }
@@ -21,7 +21,8 @@ public class CircleVectorGraphics extends BoatClassVectorGraphics {
         ctx.save();
         ctx.clearRect(0, 0, width, height);
         ctx.translate(width / 2.0, height / 2.0);
-        ctx.scale(scaleFactor.getHeight(), scaleFactor.getHeight()); // the scale factor MUST be the same for x and y, otherwise we don't get a circle 
+        ctx.scale(scaleFactor.getHeight(), scaleFactor.getHeight()); // the scale factor MUST be the same for x and y,
+                                                                     // otherwise we don't get a circle
         ctx.translate(-getHullLengthInPx() / 2.0, -getBeamInPx() / 2.0);
         drawBoat(ctx, displayMode, color.getAsHtml());
         ctx.restore();
@@ -30,31 +31,28 @@ public class CircleVectorGraphics extends BoatClassVectorGraphics {
     @Override
     protected void drawBoat(Context2d ctx, DisplayMode displayMode, String color) {
         ctx.save();
-        
-        //draw the circle        
-        switch (displayMode){
+        // draw the circle
+        switch (displayMode) {
         case DEFAULT:
-            ctx.setFillStyle (color);
+            ctx.setFillStyle(color);
             ctx.setStrokeStyle("#FFFFFF");
             break;
         case SELECTED:
-            ctx.setFillStyle (color);
+            ctx.setFillStyle(color);
             ctx.setStrokeStyle(color);
             break;
         case NOT_SELECTED:
             ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
-            ctx.setFillStyle (color);
+            ctx.setFillStyle(color);
             ctx.setStrokeStyle("#FFFFFF");
             break;
         }
-        
         ctx.setLineWidth(5);
         ctx.beginPath();
         ctx.arc(50, 50, 50, 0, doublePi);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-
         ctx.restore();
     }
 
