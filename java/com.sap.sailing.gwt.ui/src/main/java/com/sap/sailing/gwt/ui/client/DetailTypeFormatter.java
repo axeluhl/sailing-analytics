@@ -212,9 +212,6 @@ public class DetailTypeFormatter {
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
         case CORRECTED_TIME_TRAVELED:
         case RACE_CALCULATED_TIME_TRAVELED:
-        case RACE_TIME_TRAVELED_DOWNWIND:
-        case RACE_TIME_TRAVELED_REACHING:
-        case RACE_TIME_TRAVELED_UPWIND:
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
         case RACE_CALCULATED_TIME_AT_ESTIMATED_ARRIVAL_AT_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.secondsUnit();
@@ -230,6 +227,9 @@ public class DetailTypeFormatter {
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
         case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
         case RACE_TIME_TRAVELED:
+        case RACE_TIME_TRAVELED_DOWNWIND:
+        case RACE_TIME_TRAVELED_REACHING:
+        case RACE_TIME_TRAVELED_UPWIND:
         case TIME_TRAVELED:
             return stringMessages.hhmmssUnit();
 
