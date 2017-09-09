@@ -28,6 +28,14 @@ public class CircleVectorGraphics extends BoatClassVectorGraphics {
         ctx.restore();
     }
 
+    public double getMinHullLengthInPx() {
+        return 10;
+    }
+
+    public double getMinBeamLengthInPx() {
+        return 10;
+    }
+
     @Override
     protected void drawBoat(Context2d ctx, DisplayMode displayMode, String color) {
         ctx.save();
