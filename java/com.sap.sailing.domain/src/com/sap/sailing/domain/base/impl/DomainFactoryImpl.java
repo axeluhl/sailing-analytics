@@ -372,11 +372,12 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         return result;
     }
 
+    /** TODO bug2822: Check usage of this method */ 
     @Override
     public List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
         for (Competitor competitor : competitors) {
-            result.add(convertToCompetitorDTO(competitor));
+            result.add(convertToCompetitorDTO(competitor, null));
         }
         return result;
     }
