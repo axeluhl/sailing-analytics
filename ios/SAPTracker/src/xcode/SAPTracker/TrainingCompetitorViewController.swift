@@ -63,19 +63,6 @@ class TrainingCompetitorViewController: SessionViewController {
         return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.trainingCoreDataManager)
     }()
     
-    fileprivate lazy var trainingCompetitorOptionSheet: UIAlertController = {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-//        if let popoverController = alertController.popoverPresentationController {
-//            popoverController.barButtonItem = sender as? UIBarButtonItem
-//        }
-        alertController.addAction(self.actionSettings)
-        alertController.addAction(self.actionCheckOut)
-        alertController.addAction(self.actionUpdate)
-        alertController.addAction(self.actionInfo)
-        alertController.addAction(self.actionCancel)
-        return alertController
-    }()
-    
 }
 
 // MARK: - SessionViewControllerDelegate
@@ -86,11 +73,11 @@ extension TrainingCompetitorViewController: SessionViewControllerDelegate {
     
     var coreDataManager: CoreDataManager { get { return trainingCoreDataManager } }
     
-    var optionSheet: UIAlertController { get { return trainingCompetitorOptionSheet } }
-    
     var sessionController: SessionController { get { return competitorSessionController } }
     
-    // MARK: - Refresh
+    func makeOptionSheet() -> UIAlertController {
+        return makeDefaultOptionSheet()
+    }
     
     func refresh() {
         trainingNameLabel.text = competitorCheckIn.event.name

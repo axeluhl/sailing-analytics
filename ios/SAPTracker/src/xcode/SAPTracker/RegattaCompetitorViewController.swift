@@ -102,7 +102,7 @@ class RegattaCompetitorViewController : SessionViewController, UINavigationContr
     }
     
     // MARK: - TeamImage
-
+    
     fileprivate func setTeamImageWithURLRequest(urlString: String?, completion: @escaping (_ withSuccess: Bool) -> Void) {
         setTeamImageWithURLRequest(urlString: urlString, success: { () in
             completion(true)
@@ -222,28 +222,8 @@ class RegattaCompetitorViewController : SessionViewController, UINavigationContr
     
     // MARK: - Properties
     
-    fileprivate lazy var actionReplaceImage: UIAlertAction = {
-        return UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { [weak self] action in
-            self?.showSelectImageAlert()
-        }
-    }()
-    
     fileprivate lazy var competitorSessionController: CompetitorSessionController = {
         return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.regattaCoreDataManager)
-    }()
-    
-    lazy var regattaCompetitorOptionSheet: UIAlertController = {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        //            if let popoverController = alertController.popoverPresentationController {
-        //                popoverController.barButtonItem = sender as? UIBarButtonItem
-        //            }
-        alertController.addAction(self.actionSettings)
-        alertController.addAction(self.actionCheckOut)
-        alertController.addAction(self.actionReplaceImage)
-        alertController.addAction(self.actionUpdate)
-        alertController.addAction(self.actionInfo)
-        alertController.addAction(self.actionCancel)
-        return alertController
     }()
     
 }
@@ -328,9 +308,29 @@ extension RegattaCompetitorViewController: SessionViewControllerDelegate {
     
     var coreDataManager: CoreDataManager { get { return regattaCoreDataManager } }
     
-    var optionSheet: UIAlertController { get { return regattaCompetitorOptionSheet } }
-    
     var sessionController: SessionController { get { return competitorSessionController } }
+    
+    // MARK: - OptionSheet
+    
+    func makeOptionSheet() -> UIAlertController {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        if let popoverController = alertController.popoverPresentationController {
+            popoverController.barButtonItem = self.optionButton
+        }
+        alertController.addAction(self.makeActionSettings())
+        alertController.addAction(self.makeActionCheckOut())
+        alertController.addAction(self.makeActionReplaceImage())
+        alertController.addAction(self.makeActionUpdate())
+        alertController.addAction(self.makeActionInfo())
+        alertController.addAction(self.makeActionCancel())
+        return alertController
+    }
+    
+    fileprivate func makeActionReplaceImage() -> UIAlertAction {
+        return UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { [weak self] action in
+            self?.showSelectImageAlert()
+        }
+    }
     
     // MARK: - Refresh
     
