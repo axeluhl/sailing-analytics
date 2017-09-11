@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.AnniversaryEventRaceType;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -16,9 +17,11 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
     private final String leaderboardDisplayName;
     private final String leaderboardName;
     private final UUID eventID;
+    private AnniversaryEventRaceType eventRaceType;
 
     public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, String leaderboardDisplayName,
-            TimePoint timePoint, UUID eventId, String eventName, URL remoteUrl) {
+            TimePoint timePoint, UUID eventId, String eventName, AnniversaryEventRaceType eventRaceType,
+            URL remoteUrl) {
         super(identifier, timePoint, remoteUrl);
         if (leaderboardName == null || eventId == null) {
             throw new IllegalStateException("DetailedRaceInfo Data is not allowed to contain any null values!");
@@ -27,6 +30,7 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
         this.leaderboardDisplayName = leaderboardDisplayName;
         this.eventName = eventName;
         this.eventID = eventId;
+        this.eventRaceType = eventRaceType;
     }
 
     /**
@@ -34,7 +38,7 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
      */
     public DetailedRaceInfo(DetailedRaceInfo copy, URL remoteUrl) {
         this(copy.getIdentifier(), copy.getLeaderboardName(), copy.getLeaderboardDisplayName(), copy.getStartOfRace(),
-                copy.getEventID(), copy.getEventName(), remoteUrl);
+                copy.getEventID(), copy.getEventName(), copy.getEventRaceType(), remoteUrl);
     }
 
     public String getLeaderboardDisplayName() {
@@ -57,5 +61,9 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
     public String toString() {
         return "DetailedRaceInfo [identifier=" + getIdentifier() + ", leaderboardName=" + leaderboardName
                 + ", startOfRace=" + getStartOfRace() + ", eventID=" + eventID + "]";
+    }
+
+    public AnniversaryEventRaceType getEventRaceType() {
+        return eventRaceType;
     }
 }

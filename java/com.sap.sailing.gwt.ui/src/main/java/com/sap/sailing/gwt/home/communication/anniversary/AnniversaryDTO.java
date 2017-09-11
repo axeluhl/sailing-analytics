@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.anniversary;
 
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.dto.AnniversaryEventRaceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
@@ -12,12 +13,15 @@ public class AnniversaryDTO implements DTO {
 
     private int target;
     private Integer countDown;
+    private AnniversaryEventRaceType eventRaceType;
     private AnniversaryType type;
     private UUID eventID;
     private String leaderBoardName;
     private String remoteUrl;
     private String regattaName;
     private String raceName;
+    private String leaderBoardDisplayName;
+    private String eventName;
 
     /**
      * Gwt Serialisation only constructor
@@ -32,17 +36,33 @@ public class AnniversaryDTO implements DTO {
     }
 
     AnniversaryDTO(int target, AnniversaryType type, UUID eventID, String leaderBoardName, String remoteUrl,
-            String raceName, String regattaName) {
+            String raceName, String regattaName, String eventName, String leaderBoardDisplayName,
+            AnniversaryEventRaceType eventRaceType) {
         this(target, null, type);
         this.eventID = eventID;
         this.leaderBoardName = leaderBoardName;
         this.remoteUrl = remoteUrl;
         this.raceName = raceName;
         this.regattaName = regattaName;
+        this.eventName = eventName;
+        this.leaderBoardDisplayName = leaderBoardDisplayName;
+        this.eventRaceType = eventRaceType;
+    }
+
+    public AnniversaryEventRaceType getEventRaceType() {
+        return eventRaceType;
     }
 
     public int getTarget() {
         return target;
+    }
+
+    public String getEventName() {
+        return eventName;
+    }
+
+    public String getLeaderBoardDisplayName() {
+        return leaderBoardDisplayName;
     }
 
     public Integer getCountDown() {

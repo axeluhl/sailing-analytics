@@ -43,7 +43,8 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
             if (daysUntilNow(raceinfo.getStartOfRace().asDate()) < DAYS_TO_SHOW_PAST_ANNIVERSARY) {
                 anniversaries.addValue(new AnniversaryDTO(target, anniversaryInfo.getB(), raceinfo.getEventID(),
                         raceinfo.getLeaderboardName(), raceinfo.getRemoteUrl().toExternalForm(),
-                        raceinfo.getIdentifier().getRaceName(), raceinfo.getIdentifier().getRegattaName()));
+                        raceinfo.getIdentifier().getRaceName(), raceinfo.getIdentifier().getRegattaName(),
+                        raceinfo.getEventName(), raceinfo.getLeaderboardDisplayName(), raceinfo.getEventRaceType()));
             }
         });
 

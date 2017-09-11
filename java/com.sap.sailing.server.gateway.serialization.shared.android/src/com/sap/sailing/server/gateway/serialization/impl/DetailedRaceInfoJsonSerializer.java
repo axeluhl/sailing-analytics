@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.AnniversaryEventRaceType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -19,6 +20,7 @@ public class DetailedRaceInfoJsonSerializer
 
     public static final String FIELD_EVENT_ID = "eventID";
     public static final String FIELD_EVENT_NAME = "eventName";
+    public static final String FIELD_EVENT_RACE_TYPE = "eventRaceType";
     public static final String FIELD_LEADERBOARD_NAME = "leaderboardName";
     public static final String FIELD_LEADERBOARD_DISPLAY_NAME = "leaderboardDisplayName";
     public static final String FIELD_REMOTEURL = "remoteUrl";
@@ -28,7 +30,7 @@ public class DetailedRaceInfoJsonSerializer
     public JSONObject serialize(DetailedRaceInfo object) {
         JSONObject result = new JSONObject();
         result.put(FIELD_EVENT_ID, object.getEventID().toString());
-        result.put(FIELD_EVENT_NAME, object.getEventName().toString());
+        result.put(FIELD_EVENT_RACE_TYPE, object.getEventName().toString());
         result.put(SimpleRaceInfoJsonSerializer.FIELD_RACE_NAME, object.getIdentifier().getRaceName());
         result.put(SimpleRaceInfoJsonSerializer.FIELD_REGATTA_NAME, object.getIdentifier().getRegattaName());
         result.put(FIELD_LEADERBOARD_NAME, object.getLeaderboardName());
@@ -52,12 +54,19 @@ public class DetailedRaceInfoJsonSerializer
         } else {
             leaderboardDisplayName = leaderboardDisplayNameJson.toString();
         }
-        final Object eventNameJson = object.get(FIELD_EVENT_NAME);
+        final Object eventNameJson = object.get(FIELD_EVENT_RACE_TYPE);
         final String eventName;
         if (eventNameJson == null) {
             eventName = null;
         } else {
             eventName = eventNameJson.toString();
+        }
+        final Object typeJson = object.get(FIELD_EVENT_RACE_TYPE);
+        final AnniversaryEventRaceType type;
+        if (typeJson == null) {
+            type = null;
+        } else {
+            type = AnniversaryEventRaceType.valueOf(typeJson.toString());
         }
         TimePoint startOfRace = new MillisecondsTimePoint(
                 ((Number) object.get(SimpleRaceInfoJsonSerializer.FIELD_START_OF_RACE)).longValue());
@@ -71,6 +80,6 @@ public class DetailedRaceInfoJsonSerializer
             }
         }
         return new DetailedRaceInfo(new RegattaNameAndRaceName(regattaName, raceName), leaderboardName,
-                leaderboardDisplayName, startOfRace, UUID.fromString(eventId), eventName, remoteUrlObj);
+                leaderboardDisplayName, startOfRace, UUID.fromString(eventId), eventName, type, remoteUrlObj);
     }
 }
