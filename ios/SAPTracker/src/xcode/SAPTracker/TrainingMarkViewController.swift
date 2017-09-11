@@ -46,17 +46,6 @@ class TrainingMarkViewController: SessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
-    // MARK: - Segues
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if (segue.identifier == Segue.Tracking) {
-            let trackingNC = segue.destination as! UINavigationController
-            let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
-            trackingVC.checkIn = markCheckIn
-            trackingVC.sessionController = markSessionController
-        }
-    }
-    
     // MARK: - Properties
     
     fileprivate lazy var markSessionController: MarkSessionController = {

@@ -205,21 +205,6 @@ class RegattaCompetitorViewController : SessionViewController, UINavigationContr
         }
     }
     
-    // MARK: - Segues
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if (segue.identifier == Segue.Tracking) {
-            let trackingNC = segue.destination as! UINavigationController
-            let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
-            trackingVC.checkIn = competitorCheckIn
-            trackingVC.sessionController = competitorSessionController
-        } else if (segue.identifier == Segue.Leaderboard) {
-            let leaderboardNC = segue.destination as! UINavigationController
-            let leaderboardVC = leaderboardNC.viewControllers[0] as! LeaderboardViewController
-            leaderboardVC.checkIn = competitorCheckIn
-        }
-    }
-    
     // MARK: - Properties
     
     fileprivate lazy var competitorSessionController: CompetitorSessionController = {

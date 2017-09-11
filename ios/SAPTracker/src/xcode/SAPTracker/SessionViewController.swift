@@ -24,7 +24,7 @@ protocol SessionViewControllerDelegate: class {
 
 class SessionViewController: UIViewController {
     
-    struct Segue {
+    struct SessionSegue {
         static let About = "About"
         static let Leaderboard = "Leaderboard"
         static let Settings = "Settings"
@@ -36,23 +36,12 @@ class SessionViewController: UIViewController {
     
     weak var delegate: SessionViewControllerDelegate!
     
-    // MARK: - Actions
-    
-    @IBAction func startTrackingButtonTapped(_ sender: AnyObject) {
-        // TODO: Add or add not WiFi Alert?
-        //if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {
-        //    showStartTrackingWiFiAlert()
-        //} else {
-        startTracking()
-        //}
-    }
-    
     // MARK: - Tracking
     
     fileprivate func startTracking() {
         do {
             try delegate.sessionController.startTracking()
-            performSegue(withIdentifier: Segue.Tracking, sender: self)
+            performSegue(withIdentifier: SessionSegue.Tracking, sender: self)
         } catch let error as LocationManager.LocationManagerError {
             showStartTrackingFailureAlert(message: error.description)
         } catch {
@@ -72,6 +61,21 @@ class SessionViewController: UIViewController {
     
     func checkOut() {
         showCheckOutAlert()
+    }
+    
+    // MARK: - Segues
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if (segue.identifier == SessionSegue.Tracking) {
+            let trackingNC = segue.destination as! UINavigationController
+            let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
+            trackingVC.checkIn = delegate.checkIn
+            trackingVC.sessionController = delegate.sessionController
+        } else if (segue.identifier == SessionSegue.Leaderboard) {
+            let leaderboardNC = segue.destination as! UINavigationController
+            let leaderboardVC = leaderboardNC.viewControllers[0] as! LeaderboardViewController
+            leaderboardVC.checkIn = delegate.checkIn
+        }
     }
     
     // MARK: - Actions
@@ -105,13 +109,13 @@ class SessionViewController: UIViewController {
     
     func makeActionInfo() -> UIAlertAction {
         return UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.About, sender: action)
+            self?.performSegue(withIdentifier: SessionSegue.About, sender: action)
         }
     }
     
     func makeActionSettings() -> UIAlertAction {
         return UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.Settings, sender: self)
+            self?.performSegue(withIdentifier: SessionSegue.Settings, sender: self)
         }
     }
     
@@ -119,6 +123,15 @@ class SessionViewController: UIViewController {
         return UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { [weak self] action in
             self?.update()
         }
+    }
+    
+    @IBAction func startTrackingButtonTapped(_ sender: AnyObject) {
+        // TODO: Add or add not WiFi Alert?
+        //if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {
+        //    showStartTrackingWiFiAlert()
+        //} else {
+        startTracking()
+        //}
     }
     
     // MARK: - Alerts

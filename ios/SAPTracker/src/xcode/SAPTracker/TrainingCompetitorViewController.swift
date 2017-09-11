@@ -46,17 +46,6 @@ class TrainingCompetitorViewController: SessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
-    // MARK: - Segues
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if (segue.identifier == Segue.Tracking) {
-            let trackingNC = segue.destination as! UINavigationController
-            let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
-            trackingVC.checkIn = competitorCheckIn
-            trackingVC.sessionController = competitorSessionController
-        }
-    }
-    
     // MARK: - Properties
     
     fileprivate lazy var competitorSessionController: CompetitorSessionController = {
