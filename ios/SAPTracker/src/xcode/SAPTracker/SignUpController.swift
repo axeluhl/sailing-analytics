@@ -45,8 +45,9 @@ class SignUpController: NSObject {
     // MARK: - Login
     
     func loginWithViewController(_ controller: UIViewController) {
+        SVProgressHUD.show()
         requestManager.postHello(success: { (principal, authenticated, remembered) in
-            self.didFinishLoginWithViewController(controller)
+            self.loginWithViewControllerSuccess(controller)
         }) { (error, message) in
             do {
                 let userName = try Keychain.userName.readPassword()
@@ -58,7 +59,7 @@ class SignUpController: NSObject {
                     } catch {
                         self.showAlert(forError: error, andMessage: message, withViewController: controller)
                     }
-                    self.didFinishLoginWithViewController(controller)
+                    self.loginWithViewControllerSuccess(controller)
                 }, failure: { (error, message) in
                     self.loginWithViewControllerFailure(controller)
                 })
@@ -68,7 +69,13 @@ class SignUpController: NSObject {
         }
     }
     
+    fileprivate func loginWithViewControllerSuccess(_ controller: UIViewController) {
+        SVProgressHUD.dismiss()
+        self.didFinishLoginWithViewController(controller)
+    }
+    
     fileprivate func loginWithViewControllerFailure(_ controller: UIViewController) {
+        SVProgressHUD.dismiss()
         let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
         let loginNC = storyboard.instantiateInitialViewController() as! UINavigationController
         let loginVC = loginNC.viewControllers[0] as! LoginViewController
