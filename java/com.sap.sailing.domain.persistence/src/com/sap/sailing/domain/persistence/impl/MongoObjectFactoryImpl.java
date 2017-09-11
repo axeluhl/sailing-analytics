@@ -1,15 +1,12 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +19,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoCommandException;
@@ -95,7 +91,6 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
@@ -1640,36 +1635,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException {
-        HashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> fromDb = new HashMap<>();
-        DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
-        DBCursor cursor = anniversarysStored.find();
-        while (cursor.hasNext()) {
-            DBObject toLoad = cursor.next();
-            String leaderboardName = toLoad.get(FieldNames.LEADERBOARD_NAME.name()).toString();
-            String eventID = toLoad.get(FieldNames.EVENT_ID.name()).toString();
-
-            TimePoint startOfRace = new MillisecondsTimePoint(
-                    ((Number) toLoad.get(FieldNames.START_OF_RACE.name())).longValue());
-            String race = toLoad.get(FieldNames.RACE_NAME.name()).toString();
-            String regatta = toLoad.get(FieldNames.REGATTA_NAME.name()).toString();
-            Object rurl = toLoad.get(FieldNames.REMOTE_URL.name());
-            final URL remoteUrlOrNull;
-            if (rurl != null) {
-                remoteUrlOrNull = new URL(rurl.toString());
-            } else {
-                remoteUrlOrNull = null;
-            }
-            DetailedRaceInfo loadedAnniversary = new DetailedRaceInfo(new RegattaNameAndRaceName(regatta, race),
-                    leaderboardName, startOfRace, UUID.fromString(eventID), remoteUrlOrNull);
-            int anniversary = ((Number) toLoad.get(FieldNames.ANNIVERSARY_NUMBER.name())).intValue();
-            String type = toLoad.get(FieldNames.ANNIVERSARY_TYPE.name()).toString();
-            fromDb.put(anniversary, new Pair<>(loadedAnniversary, AnniversaryType.valueOf(type)));
-        }
-        return fromDb;
-    }
-
-    @Override
     public void storeAnniversaryData(
             ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries) {
         try {
@@ -1683,8 +1648,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 newValue.append(FieldNames.RACE_NAME.name(), raceInfo.getIdentifier().getRaceName());
                 newValue.append(FieldNames.REGATTA_NAME.name(), raceInfo.getIdentifier().getRegattaName());
                 newValue.append(FieldNames.LEADERBOARD_NAME.name(), raceInfo.getLeaderboardName());
+                newValue.append(FieldNames.LEADERBOARD_DISPLAY_NAME.name(), raceInfo.getLeaderboardDisplayName());
                 storeTimePoint(raceInfo.getStartOfRace(), newValue, (FieldNames.START_OF_RACE.name()));
                 newValue.append(FieldNames.EVENT_ID.name(), raceInfo.getEventID().toString());
+                newValue.append(FieldNames.EVENT_NAME.name(), raceInfo.getEventName());
+                
                 final URL remoteUrl = raceInfo.getRemoteUrl();
                 newValue.append(FieldNames.REMOTE_URL.name(), remoteUrl == null ? null : remoteUrl.toExternalForm());
                 newValue.append(FieldNames.ANNIVERSARY_TYPE.name(), anniversary.getValue().getB().toString());

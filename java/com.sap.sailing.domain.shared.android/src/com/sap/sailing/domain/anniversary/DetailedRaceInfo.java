@@ -12,24 +12,37 @@ import com.sap.sse.common.TimePoint;
  */
 public class DetailedRaceInfo extends SimpleRaceInfo {
     private static final long serialVersionUID = 1L;
+    private final String eventName;
+    private final String leaderboardDisplayName;
     private final String leaderboardName;
     private final UUID eventID;
-    
-    public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, TimePoint timePoint,
-            UUID eventId, URL remoteUrl) {
+
+    public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, String leaderboardDisplayName,
+            TimePoint timePoint, UUID eventId, String eventName, URL remoteUrl) {
         super(identifier, timePoint, remoteUrl);
         if (leaderboardName == null || eventId == null) {
             throw new IllegalStateException("DetailedRaceInfo Data is not allowed to contain any null values!");
         }
         this.leaderboardName = leaderboardName;
+        this.leaderboardDisplayName = leaderboardDisplayName;
+        this.eventName = eventName;
         this.eventID = eventId;
     }
 
     /**
-     * Copy constructor to easily switch remoteUrl value 
+     * Copy constructor to easily switch remoteUrl value
      */
     public DetailedRaceInfo(DetailedRaceInfo copy, URL remoteUrl) {
-        this(copy.getIdentifier(), copy.getLeaderboardName(), copy.getStartOfRace(), copy.getEventID(), remoteUrl);
+        this(copy.getIdentifier(), copy.getLeaderboardName(), copy.getLeaderboardDisplayName(), copy.getStartOfRace(),
+                copy.getEventID(), copy.getEventName(), remoteUrl);
+    }
+
+    public String getLeaderboardDisplayName() {
+        return leaderboardDisplayName;
+    }
+
+    public String getEventName() {
+        return eventName;
     }
 
     public String getLeaderboardName() {

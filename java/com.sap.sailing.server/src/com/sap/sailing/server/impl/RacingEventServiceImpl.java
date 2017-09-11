@@ -3985,7 +3985,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                                     if (bestMatch == null
                                             || (leaderboard.getName().equals(trackedRaceIdentifier.getRegattaName()))) {
                                         bestMatch = new DetailedRaceInfo(trackedRaceIdentifier, leaderboard.getName(),
-                                                trackedRace.getStartOfRace(), event.getId(), null);
+                                                leaderboard.getDisplayName(), trackedRace.getStartOfRace(),
+                                                event.getId(), event.getName(), null);
                                     }
                                 }
                             }

@@ -14,16 +14,12 @@ import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util.Pair;
 
 public class PeriodicRaceListAnniversaryDeterminator {
     private static final Logger logger = Logger.getLogger(PeriodicRaceListAnniversaryDeterminator.class.getName());
-
-    private final MongoObjectFactory mongoObjectFactory;
 
     private final ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries;
     private final CopyOnWriteArrayList<AnniversaryChecker> checkers;
@@ -79,9 +75,9 @@ public class PeriodicRaceListAnniversaryDeterminator {
             RacingEventService raceService, AnniversaryChecker... checkerToUse) {
         this.raceService = raceService;
         knownAnniversaries = new ConcurrentHashMap<>();
-        mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
+
         try {
-            knownAnniversaries.putAll(mongoObjectFactory.getAnniversaryData());
+            knownAnniversaries.putAll(raceService.getDomainObjectFactory().getAnniversaryData());
         } catch (MalformedURLException e) {
             logger.warning("Could not load anniversaries from MongoDb");
         }
@@ -131,7 +127,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
         }
         currentRaceCount = allRaces.size();
         if (requiresPersist) {
-            mongoObjectFactory.storeAnniversaryData(knownAnniversaries);
+            raceService.getMongoObjectFactory().storeAnniversaryData(knownAnniversaries);
         }
     }
 

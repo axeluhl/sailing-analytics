@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.mongodb.DB;
@@ -192,10 +190,4 @@ public interface MongoObjectFactory {
      * Currently unused, meant to store determined Anniversaries related to bug4227 
      */
     void storeAnniversaryData(ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries);
-
-    /**
-     * Currently unused, meant to store determined Anniversaries related to bug4227 
-     * @throws MalformedURLException 
-     */
-    Map<? extends Integer, ? extends Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException;
 }
