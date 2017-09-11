@@ -1,5 +1,5 @@
 //
-//  MarkViewController.swift
+//  RegattaMarkViewController.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 05.05.17.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MarkViewController: SessionViewController {
+class RegattaMarkViewController: SessionViewController {
 
     @IBOutlet weak var markNameLabel: UILabel!
 
@@ -51,10 +51,8 @@ class MarkViewController: SessionViewController {
     // MARK: - Update
     
     fileprivate func update() {
-        SVProgressHUD.show()
-        markSessionController.update {
-            self.refresh()
-            SVProgressHUD.popActivity()
+        markSessionController.update { [weak self] in
+            self?.refresh()
         }
     }
     
@@ -113,7 +111,7 @@ class MarkViewController: SessionViewController {
 
 // MARK: SessionViewControllerDelegate
 
-extension MarkViewController: SessionViewControllerDelegate {
+extension RegattaMarkViewController: SessionViewControllerDelegate {
 
     func performCheckOut() {
         markSessionController.checkOut { (withSuccess) in

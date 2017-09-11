@@ -1,5 +1,5 @@
 //
-//  CompetitorViewController.swift
+//  RegattaCompetitorViewController.swift
 //  SAPTracker
 //
 //  Created by computing on 10/11/14.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-class CompetitorViewController : SessionViewController, UINavigationControllerDelegate {
+class RegattaCompetitorViewController : SessionViewController, UINavigationControllerDelegate {
     
     @IBOutlet weak var teamImageView: UIImageView!
     @IBOutlet weak var teamImageAddButton: UIButton!
@@ -306,7 +306,7 @@ class CompetitorViewController : SessionViewController, UINavigationControllerDe
 
 // MARK: - UIImagePickerControllerDelegate
 
-extension CompetitorViewController: UIImagePickerControllerDelegate {
+extension RegattaCompetitorViewController: UIImagePickerControllerDelegate {
     
     fileprivate func showImagePicker(sourceType: UIImagePickerControllerSourceType) {
         let imagePickerController = UIImagePickerController()
@@ -381,7 +381,7 @@ extension CompetitorViewController: UIImagePickerControllerDelegate {
 
 // MARK: SessionViewControllerDelegate
 
-extension CompetitorViewController: SessionViewControllerDelegate {
+extension RegattaCompetitorViewController: SessionViewControllerDelegate {
 
     func performCheckOut() {
         competitorSessionController.checkOut { (withSuccess) in
