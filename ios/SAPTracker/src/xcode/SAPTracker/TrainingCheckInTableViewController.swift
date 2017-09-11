@@ -1,5 +1,5 @@
 //
-//  TrainingTableViewController.swift
+//  TrainingCheckInTableViewController.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 22.08.17.
@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class TrainingTableViewController: CheckInTableViewController {
+class TrainingCheckInTableViewController: CheckInTableViewController {
     
     fileprivate struct Segue {
         static let About = "About"
@@ -97,7 +97,7 @@ class TrainingTableViewController: CheckInTableViewController {
 
 // MARK: - CheckInTableViewControllerDelegate
 
-extension TrainingTableViewController: CheckInTableViewControllerDelegate {
+extension TrainingCheckInTableViewController: CheckInTableViewControllerDelegate {
     
     var checkInController: CheckInController {
         get {
@@ -112,10 +112,10 @@ extension TrainingTableViewController: CheckInTableViewControllerDelegate {
     }
     
     func checkInTableViewController(_ controller: CheckInTableViewController, configureCell cell: UITableViewCell, forCheckIn checkIn: CheckIn) {
-        guard let trainingTableViewCell = cell as? TrainingTableViewCell else { return }
-        trainingTableViewCell.eventLabel.text = checkIn.event.name
-        trainingTableViewCell.leaderboardLabel.text = checkIn.leaderboard.name
-        trainingTableViewCell.competitorLabel.text = checkIn.name
+        guard let trainingCheckInTableViewCell = cell as? TrainingCheckInTableViewCell else { return }
+        trainingCheckInTableViewCell.eventLabel.text = checkIn.event.name
+        trainingCheckInTableViewCell.leaderboardLabel.text = checkIn.leaderboard.name
+        trainingCheckInTableViewCell.competitorLabel.text = checkIn.name
     }
     
     func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andCompetitorCheckIn competitorCheckIn: CompetitorCheckIn) {
@@ -134,7 +134,7 @@ extension TrainingTableViewController: CheckInTableViewControllerDelegate {
 
 // MARK: - CreateTrainingViewControllerDelegate
 
-extension TrainingTableViewController: CreateTrainingViewControllerDelegate {
+extension TrainingCheckInTableViewController: CreateTrainingViewControllerDelegate {
     
     func createTrainingViewController(_ controller: CreateTrainingViewController, didCheckIn checkIn: CheckIn) {
         performSegue(forCheckIn: checkIn)

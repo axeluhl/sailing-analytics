@@ -50,9 +50,9 @@ class StartViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == Segue.Training) {
-            guard let trainingTVC = segue.destination as? TrainingTableViewController else { return }
-            trainingTVC.userName = userName
-            trainingTVC.signUpController = signUpController
+            guard let trainingCheckInTVC = segue.destination as? TrainingCheckInTableViewController else { return }
+            trainingCheckInTVC.userName = userName
+            trainingCheckInTVC.signUpController = signUpController
         }
     }
     

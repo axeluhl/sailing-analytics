@@ -1,5 +1,5 @@
 //
-//  TrainingTableViewCell.swift
+//  TrainingCheckInTableViewCell.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 31.08.17.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class TrainingTableViewCell: UITableViewCell {
+class TrainingCheckInTableViewCell: UITableViewCell {
     
     @IBOutlet weak var eventLabel: UILabel!
     @IBOutlet weak var competitorLabel: UILabel!
