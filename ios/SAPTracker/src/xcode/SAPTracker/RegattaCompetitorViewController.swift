@@ -101,52 +101,6 @@ class RegattaCompetitorViewController : SessionViewController, UINavigationContr
         navigationController?.navigationBar.setNeedsLayout()
     }
     
-    // MARK: - Update
-    
-    fileprivate func update() {
-        competitorSessionController.update { [weak self] in
-            self?.refresh()
-        }
-    }
-    
-    // MARK: - Refresh
-    
-    fileprivate func refresh() {
-        refreshCompetitor()
-        refreshTeamImage()
-    }
-    
-    fileprivate func refreshCompetitor() {
-        competitorNameLabel.text = competitorCheckIn.name
-        competitorFlagImageView.image = UIImage(named: competitorCheckIn.countryCode)
-        competitorSailLabel.text = competitorCheckIn.sailID
-    }
-    
-    fileprivate func refreshTeamImage() {
-        if let imageData = competitorCheckIn.teamImageData {
-            teamImageView.image = UIImage(data: imageData as Data)
-            if competitorCheckIn.teamImageRetry {
-                refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: true)
-            } else {
-                refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
-                setTeamImageWithURLRequest(urlString: competitorCheckIn.teamImageURL, completion: { (withSuccess) in
-                    self.refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
-                })
-            }
-        } else {
-            self.refreshTeamImageButtons(showAddButton: true, showEditButton: false, showRetryButton: false)
-            setTeamImageWithURLRequest(urlString: competitorCheckIn.teamImageURL, completion: { (withSuccess) in
-                self.refreshTeamImageButtons(showAddButton: !withSuccess, showEditButton: withSuccess, showRetryButton: false)
-            })
-        }
-    }
-    
-    fileprivate func refreshTeamImageButtons(showAddButton: Bool, showEditButton: Bool, showRetryButton: Bool) {
-        teamImageAddButton.isHidden = !showAddButton
-        teamImageEditButton.isHidden = !showEditButton
-        teamImageRetryButton.isHidden = !showRetryButton
-    }
-    
     // MARK: - TeamImage
 
     fileprivate func setTeamImageWithURLRequest(urlString: String?, completion: @escaping (_ withSuccess: Bool) -> Void) {
@@ -225,36 +179,6 @@ class RegattaCompetitorViewController : SessionViewController, UINavigationContr
         }
     }
     
-    @IBAction func optionButtonTapped(_ sender: AnyObject) {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        if let popoverController = alertController.popoverPresentationController {
-            popoverController.barButtonItem = sender as? UIBarButtonItem
-        }
-        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.Settings, sender: self)
-        }
-        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { [weak self] action in
-            self?.checkOut()
-        }
-        let replaceImageAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { [weak self] action in
-            self?.showSelectImageAlert()
-        }
-        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { [weak self] action in
-            self?.update()
-        }
-        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.About, sender: alertController)
-        }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
-        alertController.addAction(settingsAction)
-        alertController.addAction(checkOutAction)
-        alertController.addAction(replaceImageAction)
-        alertController.addAction(updateAction)
-        alertController.addAction(aboutAction)
-        alertController.addAction(cancelAction)
-        present(alertController, animated: true, completion: nil)
-    }
-    
     // MARK: - Alerts
     
     fileprivate func showSelectImageAlert() {
@@ -298,8 +222,28 @@ class RegattaCompetitorViewController : SessionViewController, UINavigationContr
     
     // MARK: - Properties
     
+    fileprivate lazy var actionReplaceImage: UIAlertAction = {
+        return UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { [weak self] action in
+            self?.showSelectImageAlert()
+        }
+    }()
+    
     fileprivate lazy var competitorSessionController: CompetitorSessionController = {
         return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.regattaCoreDataManager)
+    }()
+    
+    lazy var regattaCompetitorOptionSheet: UIAlertController = {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        //            if let popoverController = alertController.popoverPresentationController {
+        //                popoverController.barButtonItem = sender as? UIBarButtonItem
+        //            }
+        alertController.addAction(self.actionSettings)
+        alertController.addAction(self.actionCheckOut)
+        alertController.addAction(self.actionReplaceImage)
+        alertController.addAction(self.actionUpdate)
+        alertController.addAction(self.actionInfo)
+        alertController.addAction(self.actionCancel)
+        return alertController
     }()
     
 }
@@ -384,6 +328,46 @@ extension RegattaCompetitorViewController: SessionViewControllerDelegate {
     
     var coreDataManager: CoreDataManager { get { return regattaCoreDataManager } }
     
+    var optionSheet: UIAlertController { get { return regattaCompetitorOptionSheet } }
+    
     var sessionController: SessionController { get { return competitorSessionController } }
+    
+    // MARK: - Refresh
+    
+    func refresh() {
+        refreshCompetitor()
+        refreshTeamImage()
+    }
+    
+    fileprivate func refreshCompetitor() {
+        competitorNameLabel.text = competitorCheckIn.name
+        competitorFlagImageView.image = UIImage(named: competitorCheckIn.countryCode)
+        competitorSailLabel.text = competitorCheckIn.sailID
+    }
+    
+    fileprivate func refreshTeamImage() {
+        if let imageData = competitorCheckIn.teamImageData {
+            teamImageView.image = UIImage(data: imageData as Data)
+            if competitorCheckIn.teamImageRetry {
+                refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: true)
+            } else {
+                refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
+                setTeamImageWithURLRequest(urlString: competitorCheckIn.teamImageURL, completion: { (withSuccess) in
+                    self.refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
+                })
+            }
+        } else {
+            self.refreshTeamImageButtons(showAddButton: true, showEditButton: false, showRetryButton: false)
+            setTeamImageWithURLRequest(urlString: competitorCheckIn.teamImageURL, completion: { (withSuccess) in
+                self.refreshTeamImageButtons(showAddButton: !withSuccess, showEditButton: withSuccess, showRetryButton: false)
+            })
+        }
+    }
+    
+    fileprivate func refreshTeamImageButtons(showAddButton: Bool, showEditButton: Bool, showRetryButton: Bool) {
+        teamImageAddButton.isHidden = !showAddButton
+        teamImageEditButton.isHidden = !showEditButton
+        teamImageRetryButton.isHidden = !showRetryButton
+    }
     
 }

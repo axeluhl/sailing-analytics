@@ -14,7 +14,11 @@ protocol SessionViewControllerDelegate: class {
     
     var coreDataManager: CoreDataManager { get }
     
+    var optionSheet: UIAlertController { get }
+    
     var sessionController: SessionController { get }
+    
+    func refresh()
     
 }
 
@@ -55,10 +59,24 @@ class SessionViewController: UIViewController {
         }
     }
     
+    // MARK: - Update
+    
+    func update() {
+        delegate.sessionController.update { [weak self] in
+            self?.delegate.refresh()
+        }
+    }
+    
     // MARK: - CheckOut
     
     func checkOut() {
         showCheckOutAlert()
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func optionButtonTapped(_ sender: AnyObject) {
+        present(delegate.optionSheet, animated: true, completion: nil)
     }
     
     // MARK: - Alerts
@@ -127,5 +145,35 @@ class SessionViewController: UIViewController {
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
     }
+    
+    // MARK: - Properties
+    
+    lazy var actionCancel: UIAlertAction = {
+        return UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
+    }()
+    
+    lazy var actionCheckOut: UIAlertAction = {
+        return UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { [weak self] action in
+            self?.checkOut()
+        }
+    }()
+    
+    lazy var actionInfo: UIAlertAction = {
+        return UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.About, sender: action)
+        }
+    }()
+    
+    lazy var actionSettings: UIAlertAction = {
+        return UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
+            self?.performSegue(withIdentifier: Segue.Settings, sender: self)
+        }
+    }()
+    
+    lazy var actionUpdate: UIAlertAction = {
+        return UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { [weak self] action in
+            self?.update()
+        }
+    }()
     
 }

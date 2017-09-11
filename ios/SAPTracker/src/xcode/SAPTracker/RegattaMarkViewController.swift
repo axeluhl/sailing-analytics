@@ -48,48 +48,6 @@ class RegattaMarkViewController: SessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
-    // MARK: - Update
-    
-    fileprivate func update() {
-        markSessionController.update { [weak self] in
-            self?.refresh()
-        }
-    }
-    
-    // MARK: - Refresh
-    
-    fileprivate func refresh() {
-        markNameLabel.text = markCheckIn.name
-    }
-    
-    // MARK: - Actions
-    
-    @IBAction func optionButtonTapped(_ sender: AnyObject) {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        if let popoverController = alertController.popoverPresentationController {
-            popoverController.barButtonItem = sender as? UIBarButtonItem
-        }
-        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.Settings, sender: self)
-        }
-        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { [weak self] action in
-            self?.checkOut()
-        }
-        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { [weak self] action in
-            self?.update()
-        }
-        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.About, sender: alertController)
-        }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
-        alertController.addAction(settingsAction)
-        alertController.addAction(checkOutAction)
-        alertController.addAction(updateAction)
-        alertController.addAction(aboutAction)
-        alertController.addAction(cancelAction)
-        present(alertController, animated: true, completion: nil)
-    }
-    
     // MARK: - Segues
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -107,6 +65,19 @@ class RegattaMarkViewController: SessionViewController {
         return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.regattaCoreDataManager)
     }()
     
+    fileprivate lazy var regattaMarkOptionSheet: UIAlertController = {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+//        if let popoverController = alertController.popoverPresentationController {
+//            popoverController.barButtonItem = sender as? UIBarButtonItem
+//        }
+        alertController.addAction(self.actionSettings)
+        alertController.addAction(self.actionCheckOut)
+        alertController.addAction(self.actionUpdate)
+        alertController.addAction(self.actionInfo)
+        alertController.addAction(self.actionCancel)
+        return alertController
+    }()
+    
 }
 
 // MARK: SessionViewControllerDelegate
@@ -117,6 +88,14 @@ extension RegattaMarkViewController: SessionViewControllerDelegate {
     
     var coreDataManager: CoreDataManager { get { return regattaCoreDataManager } }
     
+    var optionSheet: UIAlertController { get { return regattaMarkOptionSheet } }
+    
     var sessionController: SessionController { get { return markSessionController } }
+    
+    // MARK: - Refresh
+    
+    func refresh() {
+        markNameLabel.text = markCheckIn.name
+    }
     
 }

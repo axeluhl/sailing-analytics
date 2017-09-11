@@ -46,48 +46,6 @@ class TrainingCompetitorViewController: SessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
-    // MARK: - Update
-    
-    fileprivate func update() {
-        competitorSessionController.update { [weak self] in
-            self?.refresh()
-        }
-    }
-    
-    // MARK: - Refresh
-    
-    fileprivate func refresh() {
-        trainingNameLabel.text = competitorCheckIn.event.name
-    }
-    
-    // MARK: - Actions
-    
-    @IBAction func optionButtonTapped(_ sender: AnyObject) {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        if let popoverController = alertController.popoverPresentationController {
-            popoverController.barButtonItem = sender as? UIBarButtonItem
-        }
-        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.Settings, sender: self)
-        }
-        let checkOutAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.CheckOutAction.Title.String, style: .default) { [weak self] action in
-            self?.checkOut()
-        }
-        let updateAction = UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { [weak self] action in
-            self?.update()
-        }
-        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.About, sender: alertController)
-        }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
-        alertController.addAction(settingsAction)
-        alertController.addAction(checkOutAction)
-        alertController.addAction(updateAction)
-        alertController.addAction(aboutAction)
-        alertController.addAction(cancelAction)
-        present(alertController, animated: true, completion: nil)
-    }
-    
     // MARK: - Segues
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -105,6 +63,19 @@ class TrainingCompetitorViewController: SessionViewController {
         return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.trainingCoreDataManager)
     }()
     
+    fileprivate lazy var trainingCompetitorOptionSheet: UIAlertController = {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+//        if let popoverController = alertController.popoverPresentationController {
+//            popoverController.barButtonItem = sender as? UIBarButtonItem
+//        }
+        alertController.addAction(self.actionSettings)
+        alertController.addAction(self.actionCheckOut)
+        alertController.addAction(self.actionUpdate)
+        alertController.addAction(self.actionInfo)
+        alertController.addAction(self.actionCancel)
+        return alertController
+    }()
+    
 }
 
 // MARK: - SessionViewControllerDelegate
@@ -115,6 +86,14 @@ extension TrainingCompetitorViewController: SessionViewControllerDelegate {
     
     var coreDataManager: CoreDataManager { get { return trainingCoreDataManager } }
     
+    var optionSheet: UIAlertController { get { return trainingCompetitorOptionSheet } }
+    
     var sessionController: SessionController { get { return competitorSessionController } }
+    
+    // MARK: - Refresh
+    
+    func refresh() {
+        trainingNameLabel.text = competitorCheckIn.event.name
+    }
     
 }
