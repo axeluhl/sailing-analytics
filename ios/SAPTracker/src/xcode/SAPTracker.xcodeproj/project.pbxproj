@@ -888,10 +888,10 @@
 				C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */,
 				C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */,
 				C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */,
-				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
-				C843D48D1EC0999D00250F01 /* Migration */,
 				C867BD0C1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift */,
 				C867BD0E1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift */,
+				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
+				C843D48D1EC0999D00250F01 /* Migration */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -899,17 +899,13 @@
 		7F06590119F7FE920077FF95 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				C867BD071F4AFE79007E78E0 /* Training */,
-				C85DB8261F31AAAA009559CE /* SignUp */,
+				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
 				C8BBAC781C52649E004CA551 /* LicenseViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
-				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
-				7F83F15719F154F000C53328 /* RegattaCheckInTableViewController.swift */,
-				C84936281D47645F000F30E8 /* RegattaCheckInTableViewCell.swift */,
-				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
-				C89C60101D0FF036002AAAD2 /* Session */,
 				C8B3B9BD1F3AF46000B3B6BA /* StartViewController.swift */,
-				C8E0D3121F59475B001EEF5C /* CheckInTableViewController.swift */,
+				C8CF22B01F669CA700A01E0A /* CheckIn */,
+				C89C60101D0FF036002AAAD2 /* Session */,
+				C85DB8261F31AAAA009559CE /* SignUp */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
@@ -917,12 +913,12 @@
 		7F06590219F7FEA40077FF95 /* DataController */ = {
 			isa = PBXGroup;
 			children = (
+				C87A74E51F504CA7003DE396 /* CheckIn */,
+				C8739E101D2BF13200A89F3C /* Data */,
 				C8CF22A71F619B5F00A01E0A /* GPSFix */,
 				C8CF22A61F619B4800A01E0A /* Session */,
 				C87A74E61F504CB4003DE396 /* SignUp */,
-				C87A74E51F504CA7003DE396 /* CheckIn */,
 				C87A74E41F504C97003DE396 /* Training */,
-				C8739E101D2BF13200A89F3C /* Data */,
 			);
 			name = DataController;
 			sourceTree = "<group>";
@@ -1200,10 +1196,10 @@
 		7F83F14719F154F000C53328 = {
 			isa = PBXGroup;
 			children = (
+				7AC6457280AEA3EC18F5E846 /* Frameworks */,
+				7F83F15119F154F000C53328 /* Products */,
 				7F83F15219F154F000C53328 /* SAPTracker */,
 				7F83F16819F154F000C53328 /* SAPTrackerTests */,
-				7F83F15119F154F000C53328 /* Products */,
-				7AC6457280AEA3EC18F5E846 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1219,9 +1215,9 @@
 		7F83F15219F154F000C53328 /* SAPTracker */ = {
 			isa = PBXGroup;
 			children = (
-				C8F71EA31D8691F700826DE4 /* Libraries */,
 				7F83F15519F154F000C53328 /* AppDelegate.swift */,
 				C8739DC71D2A653F00A89F3C /* Classes */,
+				C8F71EA31D8691F700826DE4 /* Libraries */,
 				C89C60131D0FF61E002AAAD2 /* Resources */,
 				7F83F15319F154F000C53328 /* Supporting Files */,
 			);
@@ -1231,21 +1227,21 @@
 		7F83F15319F154F000C53328 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				C85291511D48FB91009E9A9D /* Localizable.strings */,
-				C8D5E81C1D479FA800DA0D61 /* Main.storyboard */,
-				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
-				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
-				7FD9D3021A1236080058FEAD /* Extensions.swift */,
-				9E95C3D51C723AB30016632B /* Constants.swift */,
+				C8A4400A1C18153600DF70A0 /* Settings.bundle */,
+				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
 				C8603D491C528832002B2F28 /* Acknowledgements.markdown */,
 				7F83F15419F154F000C53328 /* Info.plist */,
-				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
-				C8A4400A1C18153600DF70A0 /* Settings.bundle */,
-				C8F1B1E01D488B6D004C3379 /* Translation.swift */,
-				C8150BA71DCC6FDB0087C9C2 /* InfoPlist.strings */,
+				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
+				C8D5E81C1D479FA800DA0D61 /* Main.storyboard */,
 				C85DB8241F30B680009559CE /* SignUp.storyboard */,
 				C8B3B9BF1F3C3B4400B3B6BA /* SignUp.strings */,
+				9E95C3D51C723AB30016632B /* Constants.swift */,
+				7FD9D3021A1236080058FEAD /* Extensions.swift */,
 				C8B3B9C11F3C6B3900B3B6BA /* SignUpTranslation.swift */,
+				C8F1B1E01D488B6D004C3379 /* Translation.swift */,
+				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
+				C8150BA71DCC6FDB0087C9C2 /* InfoPlist.strings */,
+				C85291511D48FB91009E9A9D /* Localizable.strings */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1281,8 +1277,8 @@
 		C843D48D1EC0999D00250F01 /* Migration */ = {
 			isa = PBXGroup;
 			children = (
-				C843D48E1EC099EB00250F01 /* CoreData2-3.xcmappingmodel */,
 				C843D4901EC0A93600250F01 /* CoreData1-3.xcmappingmodel */,
+				C843D48E1EC099EB00250F01 /* CoreData2-3.xcmappingmodel */,
 			);
 			name = Migration;
 			sourceTree = "<group>";
@@ -1290,9 +1286,9 @@
 		C852BAA91CF736440093B0C5 /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
+				C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */,
 				C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */,
 				C852BAAA1CF736680093B0C5 /* Preferences.swift */,
-				C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */,
 			);
 			name = Preferences;
 			sourceTree = "<group>";
@@ -1300,10 +1296,10 @@
 		C85DB8261F31AAAA009559CE /* SignUp */ = {
 			isa = PBXGroup;
 			children = (
-				C85DB8271F31AAE0009559CE /* SignUpViewController.swift */,
-				C85DB8291F31AAFD009559CE /* LoginViewController.swift */,
 				C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */,
 				C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */,
+				C85DB8291F31AAFD009559CE /* LoginViewController.swift */,
+				C85DB8271F31AAE0009559CE /* SignUpViewController.swift */,
 			);
 			name = SignUp;
 			sourceTree = "<group>";
@@ -1311,11 +1307,9 @@
 		C867BD071F4AFE79007E78E0 /* Training */ = {
 			isa = PBXGroup;
 			children = (
-				C867BD081F4B0274007E78E0 /* TrainingCompetitorViewController.swift */,
 				C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */,
-				C867BD101F4C44E5007E78E0 /* TrainingTableViewController.swift */,
 				C8E0D3031F5808E3001EEF5C /* TrainingTableViewCell.swift */,
-				C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */,
+				C867BD101F4C44E5007E78E0 /* TrainingTableViewController.swift */,
 			);
 			name = Training;
 			sourceTree = "<group>";
@@ -1323,11 +1317,9 @@
 		C8739D8B1D23C01500A89F3C /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				C8289F391F386D8300A76953 /* SignUpRequestManager.swift */,
-				7F2C605919F160E400C32D93 /* LocationManager.swift */,
 				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
-				C852BAA11CF5E1EA0093B0C5 /* CheckInRequestManager.swift */,
-				C87A74E01F4EE570003DE396 /* TrainingRequestManager.swift */,
+				7F2C605919F160E400C32D93 /* LocationManager.swift */,
+				C8CF22AE1F669C1A00A01E0A /* Request */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -1348,17 +1340,17 @@
 		C8739E101D2BF13200A89F3C /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				C8739E171D2BF2DC00A89F3C /* BaseData.swift */,
 				7F0658FE19F7EE910077FF95 /* CheckInData.swift */,
+				C87A74E91F5053AE003DE396 /* CompetitorCreateAndAddData.swift */,
+				C8739E151D2BF17900A89F3C /* CompetitorData.swift */,
+				C87A74E71F504EBB003DE396 /* CreateEventData.swift */,
+				C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */,
 				C8739E111D2BF14F00A89F3C /* EventData.swift */,
 				C8739E131D2BF16300A89F3C /* LeaderboardData.swift */,
-				C8739E151D2BF17900A89F3C /* CompetitorData.swift */,
-				C8739E171D2BF2DC00A89F3C /* BaseData.swift */,
 				C8739E1B1D2D5F1700A89F3C /* LocationData.swift */,
-				C8BFCCC31D51C53500FC1A27 /* TeamData.swift */,
 				C8FF5B7B1EB8CF2C00CF9764 /* MarkData.swift */,
-				C87A74E71F504EBB003DE396 /* CreateEventData.swift */,
-				C87A74E91F5053AE003DE396 /* CompetitorCreateAndAddData.swift */,
-				C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */,
+				C8BFCCC31D51C53500FC1A27 /* TeamData.swift */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -1374,10 +1366,10 @@
 		C87A74E51F504CA7003DE396 /* CheckIn */ = {
 			isa = PBXGroup;
 			children = (
-				C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */,
 				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
-				C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */,
 				C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */,
+				C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */,
+				C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */,
 			);
 			name = CheckIn;
 			sourceTree = "<group>";
@@ -1403,10 +1395,10 @@
 		C89C5FC61D06CE62002AAAD2 /* Tracking */ = {
 			isa = PBXGroup;
 			children = (
+				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
+				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
 				C89C5FC81D06CEA0002AAAD2 /* Cells */,
 				C89C5FC71D06CE87002AAAD2 /* Pages */,
-				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
-				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
 			);
 			name = Tracking;
 			sourceTree = "<group>";
@@ -1414,9 +1406,9 @@
 		C89C5FC71D06CE87002AAAD2 /* Pages */ = {
 			isa = PBXGroup;
 			children = (
-				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
-				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
 				7F8B8D421A373D4400C34B88 /* CourseViewController.swift */,
+				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
+				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
 			);
 			name = Pages;
 			sourceTree = "<group>";
@@ -1424,10 +1416,10 @@
 		C89C5FC81D06CEA0002AAAD2 /* Cells */ = {
 			isa = PBXGroup;
 			children = (
-				C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */,
 				C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */,
 				C89C5FCD1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift */,
 				C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */,
+				C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */,
 			);
 			name = Cells;
 			sourceTree = "<group>";
@@ -1435,11 +1427,11 @@
 		C89C60101D0FF036002AAAD2 /* Session */ = {
 			isa = PBXGroup;
 			children = (
-				7F99DE3B1A126554009B3619 /* RegattaCompetitorViewController.swift */,
 				7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */,
-				C843D4851EBC927800250F01 /* RegattaMarkViewController.swift */,
 				C843D48B1EBCB36900250F01 /* SessionViewController.swift */,
+				C8CF22B11F669DA700A01E0A /* Regatta */,
 				C89C5FC61D06CE62002AAAD2 /* Tracking */,
+				C8CF22B21F669DB100A01E0A /* Training */,
 			);
 			name = Session;
 			sourceTree = "<group>";
@@ -1490,6 +1482,54 @@
 				C84936171D40D295000F30E8 /* GPSFixController.swift */,
 			);
 			name = GPSFix;
+			sourceTree = "<group>";
+		};
+		C8CF22AE1F669C1A00A01E0A /* Request */ = {
+			isa = PBXGroup;
+			children = (
+				C852BAA11CF5E1EA0093B0C5 /* CheckInRequestManager.swift */,
+				C8289F391F386D8300A76953 /* SignUpRequestManager.swift */,
+				C87A74E01F4EE570003DE396 /* TrainingRequestManager.swift */,
+			);
+			name = Request;
+			sourceTree = "<group>";
+		};
+		C8CF22AF1F669C8F00A01E0A /* Regatta */ = {
+			isa = PBXGroup;
+			children = (
+				C84936281D47645F000F30E8 /* RegattaCheckInTableViewCell.swift */,
+				7F83F15719F154F000C53328 /* RegattaCheckInTableViewController.swift */,
+				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
+			);
+			name = Regatta;
+			sourceTree = "<group>";
+		};
+		C8CF22B01F669CA700A01E0A /* CheckIn */ = {
+			isa = PBXGroup;
+			children = (
+				C8E0D3121F59475B001EEF5C /* CheckInTableViewController.swift */,
+				C8CF22AF1F669C8F00A01E0A /* Regatta */,
+				C867BD071F4AFE79007E78E0 /* Training */,
+			);
+			name = CheckIn;
+			sourceTree = "<group>";
+		};
+		C8CF22B11F669DA700A01E0A /* Regatta */ = {
+			isa = PBXGroup;
+			children = (
+				7F99DE3B1A126554009B3619 /* RegattaCompetitorViewController.swift */,
+				C843D4851EBC927800250F01 /* RegattaMarkViewController.swift */,
+			);
+			name = Regatta;
+			sourceTree = "<group>";
+		};
+		C8CF22B21F669DB100A01E0A /* Training */ = {
+			isa = PBXGroup;
+			children = (
+				C867BD081F4B0274007E78E0 /* TrainingCompetitorViewController.swift */,
+				C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */,
+			);
+			name = Training;
 			sourceTree = "<group>";
 		};
 		C8F71EA31D8691F700826DE4 /* Libraries */ = {
