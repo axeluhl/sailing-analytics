@@ -105,7 +105,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     fileprivate func setupSVProgressHUD() {
-        SVProgressHUD.setDefaultMaskType(.gradient)
+        SVProgressHUD.setDefaultMaskType(.clear)
     }
     
     // MARK: - Helper
