@@ -13,6 +13,7 @@ class TrainingMarkViewController: SessionViewController {
     weak var markCheckIn: MarkCheckIn!
     weak var trainingCoreDataManager: CoreDataManager!
     
+    @IBOutlet weak var stopTrainingButton: UIButton!
     @IBOutlet weak var trainingNameLabel: UILabel!
     
     override func viewDidLoad() {
@@ -46,10 +47,24 @@ class TrainingMarkViewController: SessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
+    // MARK: - Actions
+    
+    @IBAction func stopTrainingButtonTapped(_ sender: Any) {
+        trainingController.leaderboardStopTracking(forCheckIn: markCheckIn, success: {
+            
+        }) { (error) in
+            
+        }
+    }
+    
     // MARK: - Properties
     
     fileprivate lazy var markSessionController: MarkSessionController = {
         return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.trainingCoreDataManager)
+    }()
+    
+    fileprivate lazy var trainingController: TrainingController = {
+        return TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: self.markCheckIn.serverURL)
     }()
     
 }

@@ -13,6 +13,7 @@ class TrainingCompetitorViewController: SessionViewController {
     weak var competitorCheckIn: CompetitorCheckIn!
     weak var trainingCoreDataManager: CoreDataManager!
     
+    @IBOutlet weak var stopTrainingButton: UIButton!
     @IBOutlet weak var trainingNameLabel: UILabel!
     
     override func viewDidLoad() {
@@ -46,10 +47,24 @@ class TrainingCompetitorViewController: SessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
+    // MARK: - Actions
+    
+    @IBAction func stopTrainingButtonTapped(_ sender: Any) {
+        trainingController.leaderboardStopTracking(forCheckIn: competitorCheckIn, success: {
+            
+        }) { (error) in
+            
+        }
+    }
+    
     // MARK: - Properties
     
     fileprivate lazy var competitorSessionController: CompetitorSessionController = {
         return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.trainingCoreDataManager)
+    }()
+    
+    fileprivate lazy var trainingController: TrainingController = {
+        return TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: self.competitorCheckIn.serverURL)
     }()
     
 }

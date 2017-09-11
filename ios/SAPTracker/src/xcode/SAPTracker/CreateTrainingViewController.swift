@@ -73,7 +73,7 @@ class CreateTrainingViewController: UIViewController {
     }
     
     fileprivate func leaderboardSetup(forCheckIn checkIn: CheckIn) {
-        trainingController.leaderboardSetup(checkIn: checkIn, success: { 
+        trainingController.leaderboardStartTracking(forCheckIn: checkIn, success: {
             self.createTrainingSuccess(checkIn: checkIn)
         }) { (error) in
             logError(name: "\(#function)", error: error)
