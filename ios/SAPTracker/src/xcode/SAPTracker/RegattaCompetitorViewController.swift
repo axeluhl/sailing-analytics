@@ -338,16 +338,13 @@ extension RegattaCompetitorViewController: UIImagePickerControllerDelegate {
     
     fileprivate func uploadTeamImageData(imageData: Data!) {
         SVProgressHUD.show()
-        competitorSessionController.postTeamImageData(imageData: imageData, competitorID: competitorCheckIn.competitorID,
-                                            success: { (teamImageURL) in
-                                                SVProgressHUD.popActivity()
-                                                self.uploadTeamImageDataSuccess(teamImageURL: teamImageURL)
-            },
-                                            failure: { (error) in
-                                                SVProgressHUD.popActivity()
-                                                self.uploadTeamImageDataFailure(error: error)
-            }
-        )
+        competitorSessionController.postTeamImageData(imageData: imageData, competitorID: competitorCheckIn.competitorID, success: { (teamImageURL) in
+            SVProgressHUD.popActivity()
+            self.uploadTeamImageDataSuccess(teamImageURL: teamImageURL)
+        }) { (error) in
+            SVProgressHUD.popActivity()
+            self.uploadTeamImageDataFailure(error: error)
+        }
     }
     
     fileprivate func uploadTeamImageDataSuccess(teamImageURL: String) {
