@@ -45,7 +45,7 @@ public class DetailedRaceInfoJsonSerializer
         String raceName = object.get(SimpleRaceInfoJsonSerializer.FIELD_RACE_NAME).toString();
         String regattaName = object.get(SimpleRaceInfoJsonSerializer.FIELD_REGATTA_NAME).toString();
         String leaderboardName = object.get(FIELD_LEADERBOARD_NAME).toString();
-        final Object leaderboardDisplayNameJson = object.get(FIELD_LEADERBOARD_NAME);
+        final Object leaderboardDisplayNameJson = object.get(FIELD_LEADERBOARD_DISPLAY_NAME);
         final String leaderboardDisplayName;
         if (leaderboardDisplayNameJson == null) {
             leaderboardDisplayName = null;
