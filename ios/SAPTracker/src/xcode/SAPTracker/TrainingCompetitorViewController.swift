@@ -11,7 +11,7 @@ import UIKit
 class TrainingCompetitorViewController: SessionViewController {
     
     weak var competitorCheckIn: CompetitorCheckIn!
-    weak var coreDataManager: CoreDataManager!
+    weak var trainingCoreDataManager: CoreDataManager!
     
     @IBOutlet weak var trainingNameLabel: UILabel!
     
@@ -102,7 +102,7 @@ class TrainingCompetitorViewController: SessionViewController {
     // MARK: - Properties
     
     fileprivate lazy var competitorSessionController: CompetitorSessionController = {
-        return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.coreDataManager)
+        return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.trainingCoreDataManager)
     }()
     
 }
@@ -111,20 +111,10 @@ class TrainingCompetitorViewController: SessionViewController {
 
 extension TrainingCompetitorViewController: SessionViewControllerDelegate {
     
-    func performCheckOut() {
-        competitorSessionController.checkOut { (withSuccess) in
-            self.performCheckOutCompleted(withSuccess: withSuccess)
-        }
-    }
+    var checkIn: CheckIn { get { return competitorCheckIn } }
     
-    fileprivate func performCheckOutCompleted(withSuccess: Bool) {
-        coreDataManager.deleteObject(object: competitorCheckIn)
-        coreDataManager.saveContext()
-        navigationController?.popViewController(animated: true)
-    }
+    var coreDataManager: CoreDataManager { get { return trainingCoreDataManager } }
     
-    func startTracking() throws {
-        try competitorSessionController.startTracking()
-    }
+    var sessionController: SessionController { get { return competitorSessionController } }
     
 }

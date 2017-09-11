@@ -11,7 +11,7 @@ import UIKit
 class TrainingMarkViewController: SessionViewController {
     
     weak var markCheckIn: MarkCheckIn!
-    weak var coreDataManager: CoreDataManager!
+    weak var trainingCoreDataManager: CoreDataManager!
     
     @IBOutlet weak var trainingNameLabel: UILabel!
     
@@ -102,7 +102,7 @@ class TrainingMarkViewController: SessionViewController {
     // MARK: - Properties
     
     fileprivate lazy var markSessionController: MarkSessionController = {
-        return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.coreDataManager)
+        return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.trainingCoreDataManager)
     }()
     
 }
@@ -111,20 +111,10 @@ class TrainingMarkViewController: SessionViewController {
 
 extension TrainingMarkViewController: SessionViewControllerDelegate {
     
-    func performCheckOut() {
-        markSessionController.checkOut { (withSuccess) in
-            self.performCheckOutCompleted(withSuccess: withSuccess)
-        }
-    }
+    var checkIn: CheckIn { get { return markCheckIn } }
     
-    fileprivate func performCheckOutCompleted(withSuccess: Bool) {
-        coreDataManager.deleteObject(object: markCheckIn)
-        coreDataManager.saveContext()
-        navigationController?.popViewController(animated: true)
-    }
+    var coreDataManager: CoreDataManager { get { return trainingCoreDataManager } }
     
-    func startTracking() throws {
-        try markSessionController.startTracking()
-    }
+    var sessionController: SessionController { get { return markSessionController } }
     
 }

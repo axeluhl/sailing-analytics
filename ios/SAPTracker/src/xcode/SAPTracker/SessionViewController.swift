@@ -9,28 +9,30 @@
 import UIKit
 
 protocol SessionViewControllerDelegate: class {
-
-    func performCheckOut()
-
-    func startTracking() throws
-
+    
+    var checkIn: CheckIn { get }
+    
+    var coreDataManager: CoreDataManager { get }
+    
+    var sessionController: SessionController { get }
+    
 }
 
 class SessionViewController: UIViewController {
-
+    
     struct Segue {
         static let About = "About"
         static let Leaderboard = "Leaderboard"
         static let Settings = "Settings"
         static let Tracking = "Tracking"
     }
-
+    
     @IBOutlet weak var startTrackingButton: UIButton!
-
+    
     weak var delegate: SessionViewControllerDelegate!
     
     // MARK: - Actions
-
+    
     @IBAction func startTrackingButtonTapped(_ sender: AnyObject) {
         // TODO: Add or add not WiFi Alert?
         //if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {
@@ -39,12 +41,12 @@ class SessionViewController: UIViewController {
         startTracking()
         //}
     }
-
+    
     // MARK: - Tracking
-
+    
     fileprivate func startTracking() {
         do {
-            try delegate.startTracking()
+            try delegate.sessionController.startTracking()
             performSegue(withIdentifier: Segue.Tracking, sender: self)
         } catch let error as LocationManager.LocationManagerError {
             showStartTrackingFailureAlert(message: error.description)
@@ -68,14 +70,26 @@ class SessionViewController: UIViewController {
             preferredStyle: .alert
         )
         let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .default) { [weak self] action in
-            self?.delegate.performCheckOut()
+            self?.performCheckOut()
         }
         let noAction = UIAlertAction(title: Translation.Common.No.String, style: .cancel, handler: nil)
         alertController.addAction(yesAction)
         alertController.addAction(noAction)
         present(alertController, animated: true, completion: nil)
     }
-
+    
+    fileprivate func performCheckOut() {
+        delegate.sessionController.checkOut { [weak self] (withSuccess) in
+            self?.performCheckOutCompleted(withSuccess: withSuccess)
+        }
+    }
+    
+    fileprivate func performCheckOutCompleted(withSuccess: Bool) {
+        delegate.coreDataManager.deleteObject(object: delegate.checkIn)
+        delegate.coreDataManager.saveContext()
+        navigationController?.popViewController(animated: true)
+    }
+    
     fileprivate func showStartTrackingWiFiAlert() {
         let alertController = UIAlertController(
             title: "INFO",
@@ -113,5 +127,5 @@ class SessionViewController: UIViewController {
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
     }
-
+    
 }

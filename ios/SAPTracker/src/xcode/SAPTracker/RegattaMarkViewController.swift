@@ -9,26 +9,26 @@
 import UIKit
 
 class RegattaMarkViewController: SessionViewController {
-
+    
     @IBOutlet weak var markNameLabel: UILabel!
-
+    
     weak var markCheckIn: MarkCheckIn!
-    weak var coreDataManager: CoreDataManager!
-
+    weak var regattaCoreDataManager: CoreDataManager!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         delegate = self
         setup()
         update()
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refresh()
     }
-
+    
     // MARK: - Setup
-
+    
     fileprivate func setup() {
         setupButtons()
         setupLocalization()
@@ -38,16 +38,16 @@ class RegattaMarkViewController: SessionViewController {
     fileprivate func setupButtons() {
         startTrackingButton.setBackgroundImage(Images.GreenHighlighted, for: .highlighted)
     }
-
+    
     fileprivate func setupLocalization() {
         startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, for: .normal)
     }
-
+    
     fileprivate func setupNavigationBar() {
         navigationItem.titleView = TitleView(title: markCheckIn.event.name, subtitle: markCheckIn.leaderboard.name)
         navigationController?.navigationBar.setNeedsLayout()
     }
-
+    
     // MARK: - Update
     
     fileprivate func update() {
@@ -61,7 +61,7 @@ class RegattaMarkViewController: SessionViewController {
     fileprivate func refresh() {
         markNameLabel.text = markCheckIn.name
     }
-
+    
     // MARK: - Actions
     
     @IBAction func optionButtonTapped(_ sender: AnyObject) {
@@ -104,29 +104,19 @@ class RegattaMarkViewController: SessionViewController {
     // MARK: - Properties
     
     fileprivate lazy var markSessionController: MarkSessionController = {
-        return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.coreDataManager)
+        return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.regattaCoreDataManager)
     }()
-
+    
 }
 
 // MARK: SessionViewControllerDelegate
 
 extension RegattaMarkViewController: SessionViewControllerDelegate {
-
-    func performCheckOut() {
-        markSessionController.checkOut { (withSuccess) in
-            self.performCheckOutCompleted(withSuccess: withSuccess)
-        }
-    }
     
-    fileprivate func performCheckOutCompleted(withSuccess: Bool) {
-        coreDataManager.deleteObject(object: markCheckIn)
-        coreDataManager.saveContext()
-        self.navigationController!.popViewController(animated: true)
-    }
-
-    func startTracking() throws {
-        try markSessionController.startTracking()
-    }
-
+    var checkIn: CheckIn { get { return markCheckIn } }
+    
+    var coreDataManager: CoreDataManager { get { return regattaCoreDataManager } }
+    
+    var sessionController: SessionController { get { return markSessionController } }
+    
 }

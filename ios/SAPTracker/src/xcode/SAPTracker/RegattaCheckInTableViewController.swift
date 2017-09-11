@@ -295,13 +295,13 @@ extension RegattaCheckInTableViewController: CheckInTableViewControllerDelegate 
     func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andCompetitorCheckIn competitorCheckIn: CompetitorCheckIn) {
         guard let regattaCompetitorVC = segue.destination as? RegattaCompetitorViewController else { return }
         regattaCompetitorVC.competitorCheckIn = competitorCheckIn
-        regattaCompetitorVC.coreDataManager = coreDataManager
+        regattaCompetitorVC.regattaCoreDataManager = coreDataManager
     }
     
     func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andMarkCheckIn markCheckIn: MarkCheckIn) {
         guard let regattaMarkVC = segue.destination as? RegattaMarkViewController else { return }
         regattaMarkVC.markCheckIn = markCheckIn
-        regattaMarkVC.coreDataManager = coreDataManager
+        regattaMarkVC.regattaCoreDataManager = coreDataManager
     }
     
 }
