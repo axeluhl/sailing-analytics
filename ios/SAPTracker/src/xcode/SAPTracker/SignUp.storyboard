@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1421" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="CdT-Wl-cUy">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="CdT-Wl-cUy">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <customFonts key="customFonts">
@@ -44,7 +44,7 @@
                                                 <rect key="frame" x="16" y="38" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="qY9-7D-Xs4" id="A2D-0m-ZdZ"/>
                                                 </connections>
@@ -59,7 +59,7 @@
                                                 <rect key="frame" x="16" y="106" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" returnKeyType="done" secureTextEntry="YES"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done" secureTextEntry="YES"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="qY9-7D-Xs4" id="A2H-jw-bqU"/>
                                                 </connections>
@@ -199,7 +199,7 @@
                                                 <rect key="frame" x="16" y="166" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="4nf-v9-ceh"/>
                                                 </connections>
@@ -225,7 +225,7 @@
                                                 <rect key="frame" x="16" y="98" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" keyboardType="emailAddress" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" returnKeyType="continue"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="GsQ-rL-e2I"/>
                                                 </connections>
@@ -240,7 +240,7 @@
                                                 <rect key="frame" x="16" y="234" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="0Np-hm-IiX"/>
                                                 </connections>
@@ -255,7 +255,7 @@
                                                 <rect key="frame" x="16" y="302" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" returnKeyType="continue"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="Vn3-PT-tWR"/>
                                                 </connections>
@@ -270,7 +270,7 @@
                                                 <rect key="frame" x="16" y="370" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" returnKeyType="continue" secureTextEntry="YES"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="continue" secureTextEntry="YES"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="YME-gJ-Cea"/>
                                                 </connections>
@@ -285,7 +285,7 @@
                                                 <rect key="frame" x="16" y="438" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" returnKeyType="done" secureTextEntry="YES"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done" secureTextEntry="YES"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="RaV-Fc-BeU"/>
                                                 </connections>
@@ -437,7 +437,7 @@
                                                 <rect key="frame" x="16" y="136" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="lJd-XI-EoH" id="ce5-uK-odp"/>
                                                 </connections>
@@ -458,7 +458,7 @@
                                                 <rect key="frame" x="16" y="68" width="343" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
-                                                <textInputTraits key="textInputTraits" keyboardType="emailAddress" returnKeyType="done"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" returnKeyType="done"/>
                                                 <connections>
                                                     <outlet property="delegate" destination="lJd-XI-EoH" id="DUv-BG-qCc"/>
                                                 </connections>
@@ -556,7 +556,7 @@
         <scene sceneID="lbf-Ic-ArT">
             <objects>
                 <navigationController storyboardIdentifier="rootViewController" id="CdT-Wl-cUy" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="xQu-r9-hhZ">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="xQu-r9-hhZ">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
