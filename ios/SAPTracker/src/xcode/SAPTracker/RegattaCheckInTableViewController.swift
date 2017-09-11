@@ -292,16 +292,14 @@ extension RegattaCheckInTableViewController: CheckInTableViewControllerDelegate 
         regattaCheckInTableViewCell.competitorLabel.text = checkIn.name
     }
     
-    func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andCompetitorCheckIn checkIn: CompetitorCheckIn) {
+    func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andCompetitorCheckIn competitorCheckIn: CompetitorCheckIn) {
         guard let competitorVC = segue.destination as? CompetitorViewController else { return }
-        guard let competitorCheckIn = segueCheckIn as? CompetitorCheckIn else { return }
         competitorVC.competitorCheckIn = competitorCheckIn
         competitorVC.coreDataManager = coreDataManager
     }
     
-    func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andMarkCheckIn checkIn: MarkCheckIn) {
+    func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andMarkCheckIn markCheckIn: MarkCheckIn) {
         guard let markVC = segue.destination as? MarkViewController else { return }
-        guard let markCheckIn = segueCheckIn as? MarkCheckIn else { return }
         markVC.markCheckIn = markCheckIn
         markVC.coreDataManager = coreDataManager
     }

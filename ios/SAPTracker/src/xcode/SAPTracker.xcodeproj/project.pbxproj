@@ -329,7 +329,7 @@
 		C85DB82C1F31AB1A009559CE /* ForgotPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */; };
 		C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82D1F31D804009559CE /* SignUpController.swift */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
-		C867BD091F4B0274007E78E0 /* TrainingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD081F4B0274007E78E0 /* TrainingViewController.swift */; };
+		C867BD091F4B0274007E78E0 /* TrainingCompetitorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD081F4B0274007E78E0 /* TrainingCompetitorViewController.swift */; };
 		C867BD0B1F4B0290007E78E0 /* CreateTrainingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */; };
 		C867BD0D1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0C1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift */; };
 		C867BD0F1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0E1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift */; };
@@ -367,6 +367,7 @@
 		C8CF22A31F6194C600A01E0A /* RegattaCheckInController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */; };
 		C8CF22A51F61965C00A01E0A /* TrainingCheckInController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */; };
 		C8CF22A91F62780C00A01E0A /* CheckInDataCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */; };
+		C8CF22AD1F668BAB00A01E0A /* TrainingMarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
 		C8E0BD0A1F39A08B002FCCA5 /* FormularViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */; };
 		C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */; };
@@ -738,7 +739,7 @@
 		C85DB82D1F31D804009559CE /* SignUpController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpController.swift; sourceTree = "<group>"; };
 		C85FAA501D4F84460087C2A2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
-		C867BD081F4B0274007E78E0 /* TrainingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingViewController.swift; sourceTree = "<group>"; };
+		C867BD081F4B0274007E78E0 /* TrainingCompetitorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingCompetitorViewController.swift; sourceTree = "<group>"; };
 		C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTrainingViewController.swift; sourceTree = "<group>"; };
 		C867BD0C1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCoreDataManager.swift; sourceTree = "<group>"; };
 		C867BD0E1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingCoreDataManager.swift; sourceTree = "<group>"; };
@@ -777,6 +778,7 @@
 		C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCheckInController.swift; sourceTree = "<group>"; };
 		C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingCheckInController.swift; sourceTree = "<group>"; };
 		C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInDataCollector.swift; sourceTree = "<group>"; };
+		C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingMarkViewController.swift; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 3.xcdatamodel"; sourceTree = "<group>"; };
 		C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormularViewController.swift; sourceTree = "<group>"; };
@@ -1309,10 +1311,11 @@
 		C867BD071F4AFE79007E78E0 /* Training */ = {
 			isa = PBXGroup;
 			children = (
-				C867BD081F4B0274007E78E0 /* TrainingViewController.swift */,
+				C867BD081F4B0274007E78E0 /* TrainingCompetitorViewController.swift */,
 				C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */,
 				C867BD101F4C44E5007E78E0 /* TrainingTableViewController.swift */,
 				C8E0D3031F5808E3001EEF5C /* TrainingTableViewCell.swift */,
+				C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */,
 			);
 			name = Training;
 			sourceTree = "<group>";
@@ -1978,7 +1981,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C867BD091F4B0274007E78E0 /* TrainingViewController.swift in Sources */,
+				C867BD091F4B0274007E78E0 /* TrainingCompetitorViewController.swift in Sources */,
 				C85DB82A1F31AAFD009559CE /* LoginViewController.swift in Sources */,
 				C8F71EDA1D8691F700826DE4 /* AFHTTPRequestOperation.m in Sources */,
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
@@ -2004,6 +2007,7 @@
 				C8F71EEE1D8691F700826DE4 /* UIProgressView+AFNetworking.m in Sources */,
 				C8CF22A91F62780C00A01E0A /* CheckInDataCollector.swift in Sources */,
 				C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */,
+				C8CF22AD1F668BAB00A01E0A /* TrainingMarkViewController.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */,
 				C8FF5B7C1EB8CF2C00CF9764 /* MarkData.swift in Sources */,

@@ -154,11 +154,12 @@ class TrainingController: NSObject {
         let fleetName = "Default"
         self.trainingRequestManager.postLeaderboardSetTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
             self.trainingRequestManager.postLeaderboardStartTracking(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-                self.trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-                    success()
-                }) { (error, message) in
-                    failure(error)
-                }
+//                self.trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+//                    success()
+//                }) { (error, message) in
+//                    failure(error)
+//                }
+                success()
             }) { (error, message) in
                 failure(error)
             }

@@ -20,12 +20,12 @@ protocol CheckInTableViewControllerDelegate: class {
     func checkInTableViewController(
         _ controller: CheckInTableViewController,
         prepareForSegue segue: UIStoryboardSegue,
-        andCompetitorCheckIn checkIn: CompetitorCheckIn)
+        andCompetitorCheckIn competitorCheckIn: CompetitorCheckIn)
     
     func checkInTableViewController(
         _ controller: CheckInTableViewController,
         prepareForSegue segue: UIStoryboardSegue,
-        andMarkCheckIn checkIn: MarkCheckIn)
+        andMarkCheckIn markCheckIn: MarkCheckIn)
     
 }
 
