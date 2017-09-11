@@ -86,7 +86,7 @@ class TrainingTableViewController: CheckInTableViewController {
     }()
     
     fileprivate lazy var trainingController: TrainingController = {
-        return TrainingController(baseURLString: "https://ubilabstest.sapsailing.com")
+        return TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: "https://ubilabstest.sapsailing.com")
     }()
     
     fileprivate lazy var trainingCoreDataManager: TrainingCoreDataManager = {

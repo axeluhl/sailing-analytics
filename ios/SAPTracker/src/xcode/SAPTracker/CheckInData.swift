@@ -136,7 +136,7 @@ class CheckInData: NSObject {
     convenience init?(createTrainingData: CreateTrainingData) {
         guard let eventID = createTrainingData.createEventData?.eventID else { return nil }
         guard let leaderboardName = createTrainingData.createEventData?.leaderboardName else { return nil }
-        guard let competitorID = createTrainingData.competitorCreateAndAddData?.competitorID else { return nil }
+        guard let competitorID = createTrainingData.competitorID else { return nil }
         self.init(
             serverURL: createTrainingData.serverURL,
             eventID: eventID,

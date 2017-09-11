@@ -51,35 +51,39 @@ class CreateTrainingViewController: UIViewController {
     
     @IBAction func createTrainingButtonTapped(_ sender: Any) {
         let boatClassName = BoatClassNames[boatClassPickerView.selectedRow(inComponent: 0)]
-        createTraining(boatClassName: boatClassName)
+        createTraining(forBoatClassName: boatClassName)
     }
     
     // MARK: - CreateTraining
     
-    fileprivate func createTraining(boatClassName: String) {
+    fileprivate func createTraining(forBoatClassName boatClassName: String) {
         trainingController.createTraining(forBoatClassName: boatClassName, success: { checkInData in
-            self.createTrainingSuccess(checkInData: checkInData)
+            self.checkIn(withCheckInData: checkInData)
         }) { (error) in
-            self.createTrainingFailure(error: error)
+            logError(name: "\(#function)", error: error)
         }
     }
     
-    fileprivate func createTrainingSuccess(checkInData: CheckInData) {
+    fileprivate func checkIn(withCheckInData checkInData: CheckInData) {
         trainingCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { (checkIn) in
+            self.leaderboardSetup(forCheckIn: checkIn)
+        }) { (error) in
+            logError(name: "\(#function)", error: error)
+        }
+    }
+    
+    fileprivate func leaderboardSetup(forCheckIn checkIn: CheckIn) {
+        trainingController.leaderboardSetup(checkIn: checkIn, success: { 
             self.createTrainingSuccess(checkIn: checkIn)
         }) { (error) in
-            self.createTrainingFailure(error: error)
+            logError(name: "\(#function)", error: error)
         }
     }
     
     fileprivate func createTrainingSuccess(checkIn: CheckIn) {
-        dismiss(animated: true) { 
+        dismiss(animated: true) {
             self.delegate?.createTrainingViewController(self, didCheckIn: checkIn)
         }
-    }
-    
-    fileprivate func createTrainingFailure(error: Error) {
-        // TODO
     }
     
     // MARK: - Propeties

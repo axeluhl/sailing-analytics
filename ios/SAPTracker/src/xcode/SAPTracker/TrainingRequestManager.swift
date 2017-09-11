@@ -82,21 +82,49 @@ class TrainingRequestManager: NSObject {
         failure(error, stringForError(error))
     }
     
+    // MARK: - RegattaCompetitorAdd
+    
+    func postRegattaCompetitorAdd(
+        regattaName: String,
+        competitorID: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let encodedRegattaName = regattaName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let encodedCompetitorID = competitorID.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "\(basePathString)/regattas/\(encodedRegattaName)/competitors/\(encodedCompetitorID)/add"
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postRegattaCompetitorAddSuccess(responseObject: responseObject, success: success)
+        }) { (requestOperation, error) in
+            self.postRegattaCompetitorAddFailure(error: error, failure: failure)
+        }
+    }
+    
+    fileprivate func postRegattaCompetitorAddSuccess(responseObject: Any?, success: @escaping () -> Void) {
+        logInfo(name: "\(#function)", info: responseObjectToString(responseObject: responseObject))
+        success()
+    }
+    
+    fileprivate func postRegattaCompetitorAddFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(error, stringForError(error))
+    }
+    
     // MARK: - CompetitorCreateAndAdd
     
     func postCompetitorCreateAndAdd(
-        regatta: String,
+        regattaName: String,
         boatClassName: String,
         sailID: String,
         nationality: String,
         success: @escaping (_ competitorCreateAndAddData: CompetitorCreateAndAddData) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
-        let encodedRegatta = regatta.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let encodedRegattaName = regattaName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         let encodedBoatClassName = boatClassName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let encodedSailID = sailID.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let encodedNationality = nationality.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(basePathString)/regattas/\(encodedRegatta)/competitors/createandadd?boatclass=\(encodedBoatClassName)&sailid=\(encodedSailID)&nationalityIOC=\(encodedNationality)"
+        let urlString = "\(basePathString)/regattas/\(encodedRegattaName)/competitors/createandadd?boatclass=\(encodedBoatClassName)&sailid=\(encodedSailID)&nationalityIOC=\(encodedNationality)"
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
             self.postCompetitorCreateAndAddSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
@@ -130,15 +158,15 @@ class TrainingRequestManager: NSObject {
     
     func postLeaderboardSetTrackingTime(
         leaderboardName: String,
-        raceName: String,
+        raceColumnName: String,
         fleetName: String,
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedRaceColumnName = raceColumnName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let encodedFleetName = fleetName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/settrackingtimes?race_column=\(encodedRaceName)&fleet=\(encodedFleetName)&startoftrackingasmillis=\(millisSince1970())"
+        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/settrackingtimes?race_column=\(encodedRaceColumnName)&fleet=\(encodedFleetName)&startoftrackingasmillis=\(millisSince1970())"
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
             self.postLeaderboardSetTrackingTimeSuccess(responseObject: responseObject, success: success)
         }) { (requestOperation, error) in
@@ -160,15 +188,15 @@ class TrainingRequestManager: NSObject {
     
     func postLeaderboardStartTracking(
         leaderboardName: String,
-        raceName: String,
+        raceColumnName: String,
         fleetName: String,
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedRaceColumnName = raceColumnName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let encodedFleetName = fleetName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/starttracking?race_column=\(encodedRaceName)&fleet=\(encodedFleetName)"
+        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/starttracking?race_column=\(encodedRaceColumnName)&fleet=\(encodedFleetName)"
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
             self.postLeaderboardStartTrackingSuccess(responseObject: responseObject, success: success)
         }) { (requestOperation, error) in
@@ -190,15 +218,15 @@ class TrainingRequestManager: NSObject {
     
     func postLeaderboardAutoCourse(
         leaderboardName: String,
-        raceName: String,
+        raceColumnName: String,
         fleetName: String,
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        let encodedRaceName = raceName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedRaceColumnName = raceColumnName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let encodedFleetName = fleetName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/autocourse?race_column=\(encodedRaceName)&fleet=\(encodedFleetName)"
+        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/autocourse?race_column=\(encodedRaceColumnName)&fleet=\(encodedFleetName)"
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
             self.postLeaderboardAutoCourseSuccess(responseObject: responseObject, success: success)
         }) { (requestOperation, error) in

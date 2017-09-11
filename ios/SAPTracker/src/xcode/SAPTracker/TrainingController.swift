@@ -9,16 +9,19 @@
 import UIKit
 
 enum TrainingControllerError: Error {
-    case regattaIsMissing
     case checkInDataIsIncomplete
+    case regattaIsMissing
 }
 
 class TrainingController: NSObject {
     
-    let requestManager: TrainingRequestManager
-
-    init(baseURLString: String) {
-        requestManager = TrainingRequestManager(baseURLString: baseURLString)
+    fileprivate unowned let coreDataManager: CoreDataManager
+    
+    fileprivate let trainingRequestManager: TrainingRequestManager
+    
+    init(coreDataManager: CoreDataManager, baseURLString: String) {
+        self.coreDataManager = coreDataManager
+        trainingRequestManager = TrainingRequestManager(baseURLString: baseURLString)
         super.init()
     }
     
@@ -29,19 +32,11 @@ class TrainingController: NSObject {
         success: @escaping (_ checkInData: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        let collector = CreateTrainingData.init(serverURL: requestManager.baseURLString, boatClassName: boatClassName)
-        createTraining(collector: collector, success: success, failure: failure)
-    }
-    
-    fileprivate func createTraining(
-        collector: CreateTrainingData,
-        success: @escaping (_ checkInData: CheckInData) -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        createEvent(collector: collector, success: { createTrainingData in
+        let collector = CreateTrainingData.init(serverURL: trainingRequestManager.baseURLString, boatClassName: boatClassName)
+        createEvent(collector: collector, success: { (createTrainingData) in
             self.createTrainingSuccess(collector: createTrainingData, success: success, failure: failure)
-        }) { error in
-            self.createTrainingFailure(error: error, failure: failure)
+        }) { (error) in
+            failure(error)
         }
     }
     
@@ -57,46 +52,78 @@ class TrainingController: NSObject {
         }
     }
     
-    fileprivate func createTrainingFailure(error: Error, failure: (_ error: Error) -> Void) {
-        failure(error)
-    }
-    
     // MARK: - CreateEvent
     
     fileprivate func createEvent(
         collector: CreateTrainingData,
-        success: @escaping (_ createTrainingData: CreateTrainingData) -> Void,
+        success: @escaping (_ collector: CreateTrainingData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        requestManager.postCreateEvent(boatClassName: collector.boatClassName, success: { createEventData in
+        trainingRequestManager.postCreateEvent(boatClassName: collector.boatClassName, success: { (createEventData) in
             collector.createEventData = createEventData
             self.createEventSuccess(collector: collector, success: success, failure: failure)
         }) { (error, message) in
-            self.createEventFailure(error: error, message: message, failure: failure)
+            failure(error)
         }
     }
     
     fileprivate func createEventSuccess(
         collector: CreateTrainingData,
-        success: @escaping (_ createTrainingData: CreateTrainingData) -> Void,
+        success: @escaping (_ collector: CreateTrainingData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
         do {
-            try competitorCreateAndAdd(collector: collector, success: success, failure: failure)
+            try regattaCompetitorAdd(collector: collector, success: success, failure: failure)
         } catch {
-            failure(error)
+            do {
+                try competitorCreateAndAdd(collector: collector, success: success, failure: failure)
+            } catch {
+                failure(error)
+            }
         }
     }
     
-    fileprivate func createEventFailure(error: Error, message: String?, failure: (_ error: Error) -> Void) {
-        failure(error)
+    // MARK: - RegattaCompetitorAdd
+    
+    fileprivate func regattaCompetitorAdd(
+        collector: CreateTrainingData,
+        success: @escaping (_ collector: CreateTrainingData) -> Void,
+        failure: @escaping (_ error: Error) -> Void) throws
+    {
+        guard let regatta = collector.createEventData?.regatta else {
+            throw TrainingControllerError.regattaIsMissing
+        }
+        
+        let competitorCheckIns = coreDataManager.fetchCompetitorCheckIn(serverURL: collector.serverURL, boatClassName: collector.boatClassName) ?? []
+        if let competitorID = competitorCheckIns.first?.competitorID {
+            trainingRequestManager.postRegattaCompetitorAdd(regattaName: regatta, competitorID: competitorID, success: {
+                collector.competitorID = competitorID
+                success(collector)
+            }) { (error, message) in
+                self.regattaCompetitorAddFailure(collector: collector, success: success, failure: failure)
+            }
+        } else {
+            self.regattaCompetitorAddFailure(collector: collector, success: success, failure: failure)
+        }
+    }
+    
+    fileprivate func regattaCompetitorAddFailure(
+        collector: CreateTrainingData,
+        success: @escaping (_ collector: CreateTrainingData) -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        do {
+            try self.competitorCreateAndAdd(collector: collector, success: success, failure: failure)
+        } catch {
+            failure(error)
+        }
     }
     
     // MARK: - CompetitorCreateAndAdd
     
     fileprivate func competitorCreateAndAdd(
         collector: CreateTrainingData,
-        success: @escaping (_ createTrainingData: CreateTrainingData) -> Void,
+        success: @escaping (_ collector: CreateTrainingData) -> Void,
         failure: @escaping (_ error: Error) -> Void) throws
     {
         guard let regatta = collector.createEventData?.regatta else {
@@ -107,26 +134,28 @@ class TrainingController: NSObject {
         let sailID = collector.sailID
         let nationality = collector.nationality
         
-        requestManager.postCompetitorCreateAndAdd(regatta: regatta, boatClassName: boatClassName, sailID: sailID, nationality: nationality, success: { competitorCreateAndAddData in
-            collector.competitorCreateAndAddData = competitorCreateAndAddData
-            self.competitorCreateAndAddSuccess(collector: collector, success: success, failure: failure)
+        trainingRequestManager.postCompetitorCreateAndAdd(regattaName: regatta, boatClassName: boatClassName, sailID: sailID, nationality: nationality, success: { competitorCreateAndAddData in
+            collector.competitorID = competitorCreateAndAddData.competitorID
+            success(collector)
         }) { (error, message) in
-            self.competitorCreateAndAddFailure(error: error, failure: failure)
+            failure(error)
         }
     }
     
-    fileprivate func competitorCreateAndAddSuccess(
-        collector: CreateTrainingData,
-        success: @escaping (_ createTrainingData: CreateTrainingData) -> Void,
+    // MARK: - LeaderboardSetup
+    
+    func leaderboardSetup(
+        checkIn: CheckIn,
+        success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        let leaderboardName = collector.createEventData?.leaderboardName ?? ""
-        let raceName = "R1"
+        let leaderboardName = checkIn.leaderboard.name
+        let raceColumnName = "R1"
         let fleetName = "Default"
-        requestManager.postLeaderboardSetTrackingTime(leaderboardName: leaderboardName, raceName: raceName, fleetName: fleetName, success: {
-            self.requestManager.postLeaderboardStartTracking(leaderboardName: leaderboardName, raceName: raceName, fleetName: fleetName, success: {
-                self.requestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceName: raceName, fleetName: fleetName, success: {
-                    success(collector)
+        self.trainingRequestManager.postLeaderboardSetTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+            self.trainingRequestManager.postLeaderboardStartTracking(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+                self.trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+                    success()
                 }) { (error, message) in
                     failure(error)
                 }
@@ -136,10 +165,6 @@ class TrainingController: NSObject {
         }) { (error, message) in
             failure(error)
         }
-    }
-    
-    fileprivate func competitorCreateAndAddFailure(error: Error, failure: (_ error: Error) -> Void) {
-        failure(error)
     }
     
 }

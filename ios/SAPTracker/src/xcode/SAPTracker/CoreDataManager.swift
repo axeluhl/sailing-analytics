@@ -58,7 +58,21 @@ class CoreDataManager: NSObject {
             )
         }
     }
-
+    
+    func fetchCompetitorCheckIn(serverURL: String, boatClassName: String) -> [CompetitorCheckIn]? {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
+        fetchRequest.entity = NSEntityDescription.entity(forEntityName: Entities.CompetitorCheckIn.rawValue, in: managedObjectContext)
+        fetchRequest.includesSubentities = true
+        fetchRequest.predicate = NSPredicate(format: "serverURL = %@ AND boatClassName = %@", serverURL, boatClassName)
+        var checkIns: [AnyObject]?
+        do {
+            checkIns = try managedObjectContext.fetch(fetchRequest)
+        } catch {
+            logError(name: "\(#function)", error: error)
+        }
+        return checkIns as? [CompetitorCheckIn]
+    }
+    
     func fetchCompetitorCheckIn(eventID: String, leaderboardName: String, competitorID: String) -> CompetitorCheckIn? {
         let fetchRequest = NSFetchRequest<CompetitorCheckIn>()
         fetchRequest.entity = NSEntityDescription.entity(

@@ -16,7 +16,7 @@ class CreateTrainingData: NSObject {
     let nationality: String = "GER"
     
     var createEventData: CreateEventData?
-    var competitorCreateAndAddData: CompetitorCreateAndAddData?
+    var competitorID: String?
     
     init(serverURL: String, boatClassName: String) {
         self.serverURL = serverURL
