@@ -30,6 +30,7 @@ public class DetailedRaceInfoJsonSerializer
     public JSONObject serialize(DetailedRaceInfo object) {
         JSONObject result = new JSONObject();
         result.put(FIELD_EVENT_ID, object.getEventID().toString());
+        result.put(FIELD_EVENT_NAME, object.getEventName());
         result.put(FIELD_EVENT_RACE_TYPE, object.getEventName().toString());
         result.put(SimpleRaceInfoJsonSerializer.FIELD_RACE_NAME, object.getIdentifier().getRaceName());
         result.put(SimpleRaceInfoJsonSerializer.FIELD_REGATTA_NAME, object.getIdentifier().getRegattaName());
