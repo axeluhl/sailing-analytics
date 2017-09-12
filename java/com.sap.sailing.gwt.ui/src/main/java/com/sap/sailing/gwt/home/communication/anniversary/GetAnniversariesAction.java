@@ -44,7 +44,7 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
                 anniversaries.addValue(new AnniversaryDTO(target, anniversaryInfo.getB(), raceinfo.getEventID(),
                         raceinfo.getLeaderboardName(), raceinfo.getRemoteUrl().toExternalForm(),
                         raceinfo.getIdentifier().getRaceName(), raceinfo.getIdentifier().getRegattaName(),
-                        raceinfo.getEventName(), raceinfo.getLeaderboardDisplayName(), raceinfo.getEventRaceType()));
+                        raceinfo.getEventName(), raceinfo.getLeaderboardDisplayName(), raceinfo.getEventType()));
             }
         });
 

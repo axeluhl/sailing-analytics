@@ -17,10 +17,10 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
     private final String leaderboardDisplayName;
     private final String leaderboardName;
     private final UUID eventID;
-    private EventType eventRaceType;
+    private EventType eventType;
 
     public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, String leaderboardDisplayName,
-            TimePoint timePoint, UUID eventId, String eventName, EventType eventRaceType,
+            TimePoint timePoint, UUID eventId, String eventName, EventType eventType,
             URL remoteUrl) {
         super(identifier, timePoint, remoteUrl);
         if (leaderboardName == null || eventId == null) {
@@ -30,7 +30,7 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
         this.leaderboardDisplayName = leaderboardDisplayName;
         this.eventName = eventName;
         this.eventID = eventId;
-        this.eventRaceType = eventRaceType;
+        this.eventType = eventType;
     }
 
     /**
@@ -38,7 +38,7 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
      */
     public DetailedRaceInfo(DetailedRaceInfo copy, URL remoteUrl) {
         this(copy.getIdentifier(), copy.getLeaderboardName(), copy.getLeaderboardDisplayName(), copy.getStartOfRace(),
-                copy.getEventID(), copy.getEventName(), copy.getEventRaceType(), remoteUrl);
+                copy.getEventID(), copy.getEventName(), copy.getEventType(), remoteUrl);
     }
 
     public String getLeaderboardDisplayName() {
@@ -63,7 +63,7 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
                 + ", startOfRace=" + getStartOfRace() + ", eventID=" + eventID + "]";
     }
 
-    public EventType getEventRaceType() {
-        return eventRaceType;
+    public EventType getEventType() {
+        return eventType;
     }
 }
