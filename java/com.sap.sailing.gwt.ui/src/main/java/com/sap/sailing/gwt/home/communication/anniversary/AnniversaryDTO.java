@@ -13,7 +13,7 @@ public class AnniversaryDTO implements DTO {
 
     private int target;
     private Integer countDown;
-    private EventType eventRaceType;
+    private EventType eventType;
     private AnniversaryType type;
     private UUID eventID;
     private String leaderBoardName;
@@ -37,7 +37,7 @@ public class AnniversaryDTO implements DTO {
 
     AnniversaryDTO(int target, AnniversaryType type, UUID eventID, String leaderBoardName, String remoteUrl,
             String raceName, String regattaName, String eventName, String leaderBoardDisplayName,
-            EventType eventRaceType) {
+            EventType eventType) {
         this(target, null, type);
         this.eventID = eventID;
         this.leaderBoardName = leaderBoardName;
@@ -46,11 +46,11 @@ public class AnniversaryDTO implements DTO {
         this.regattaName = regattaName;
         this.eventName = eventName;
         this.leaderBoardDisplayName = leaderBoardDisplayName;
-        this.eventRaceType = eventRaceType;
+        this.eventType = eventType;
     }
 
-    public EventType getEventRaceType() {
-        return eventRaceType;
+    public EventType getEventType() {
+        return eventType;
     }
 
     public int getTarget() {
