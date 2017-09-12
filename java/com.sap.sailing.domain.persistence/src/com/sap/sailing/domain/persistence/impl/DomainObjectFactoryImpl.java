@@ -2406,7 +2406,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             } else {
                 remoteUrlOrNull = null;
             }
-            final Object typeJson = toLoad.get(FieldNames.ANNIVERSARY_RACE_TYPE.name());
+            final Object typeJson = toLoad.get(FieldNames.EVENT_TYPE.name());
             final EventType eventType;
             if (typeJson == null) {
                 eventType = null;
