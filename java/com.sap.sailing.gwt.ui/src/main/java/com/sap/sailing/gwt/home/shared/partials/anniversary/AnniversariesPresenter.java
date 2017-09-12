@@ -57,7 +57,7 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
             item.setDescription(I18N.anniversaryAnnouncementDescription(getRaceDisplayName(anniversary)));
             item.setLinkUrl(this.getRaceBoardLink(anniversary));
         } else {
-            final int countdown = anniversary.getCountDown();
+            final int countdown = anniversary.getCountdown();
             final AnniversaryCountdown item = view.addCountdown();
             item.setCount(COUNT_FORMAT.format(countdown));
             item.setUnit(I18N.anniversaryUnitText(countdown));

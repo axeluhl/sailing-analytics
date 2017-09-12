@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.home.communication.anniversary;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 /**
@@ -12,7 +12,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 public class AnniversaryDTO implements DTO {
 
     private int target;
-    private Integer countDown;
+    private Integer countdown;
     private EventType eventType;
     private AnniversaryType type;
     private UUID eventID;
@@ -29,9 +29,9 @@ public class AnniversaryDTO implements DTO {
     protected AnniversaryDTO() {
     }
 
-    AnniversaryDTO(int target, Integer countDown, AnniversaryType type) {
+    AnniversaryDTO(int target, Integer countdown, AnniversaryType type) {
         this.target = target;
-        this.countDown = countDown;
+        this.countdown = countdown;
         this.type = type;
     }
 
@@ -65,8 +65,8 @@ public class AnniversaryDTO implements DTO {
         return leaderboardDisplayName;
     }
 
-    public Integer getCountDown() {
-        return countDown;
+    public Integer getCountdown() {
+        return countdown;
     }
 
     public AnniversaryType getType() {
@@ -94,13 +94,13 @@ public class AnniversaryDTO implements DTO {
     }
 
     public boolean isAnnouncement() {
-        return countDown == null && eventID != null && leaderboardName != null && regattaName != null
+        return countdown == null && eventID != null && leaderboardName != null && regattaName != null
                 && raceName != null;
     }
 
     @Override
     public String toString() {
-        return "AnniversaryInformation [target=" + target + ", countDown=" + countDown + ", type=" + type + ", eventID="
+        return "AnniversaryInformation [target=" + target + ", countdown=" + countdown + ", type=" + type + ", eventID="
                 + eventID + ", leaderboardName=" + leaderboardName + ", remoteUrl=" + remoteUrl + ", regattaName="
                 + regattaName + ", raceName=" + raceName + "]";
     }
