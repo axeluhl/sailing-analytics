@@ -3018,6 +3018,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             // we create a PENALTY_CIRCLE maneuver and recurse for the time interval after the first penalty circle has completed.
             if (numberOfTacks>0 && numberOfJibes>0 && markPassingTimePoint == null) {
                 TimePointAndTotalCourseChangeInDegrees firstPenaltyCircleCompletedAt = getTimePointOfCompletionOfFirstPenaltyCircle(competitor, timePointBeforeManeuver, courseBeforeManeuver, refinedManeuverDetails.getManeuverBearingSteps(), wind);
+                if(firstPenaltyCircleCompletedAt == null) {
+                    //This should really not happen!
+                    logger.warning("Maneuver detection has failed to process penaulty circle maneuver correctly, because getTimePointOfCompletionOfFirstPenaltyCircle() returned null");
+                    //Use already detected maneuver details as fallback data to prevent Nullpointer
+                    firstPenaltyCircleCompletedAt = new TimePointAndTotalCourseChangeInDegrees(timePointAfterManeuver, totalCourseChangeInDegrees);
+                }
                 maneuverType = ManeuverType.PENALTY_CIRCLE;
                 if (legBeforeManeuver != null) {
                     maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, firstPenaltyCircleCompletedAt.getTimePoint());

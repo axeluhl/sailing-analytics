@@ -10,6 +10,8 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Series;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
@@ -36,17 +38,51 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
     private final DockLayoutPanel dockLayoutPanel;
     
-    private final Chart polarChart;
+    private Chart polarChart;
     private final SimpleLayoutPanel polarChartWrapperPanel;
     
-    private final Chart lineChart;
-    private final Chart dataCountHistogramChart;
-    private final DockLayoutPanel histogramChartsWrapperPanel;
+    private Chart lineChart;
+    private Chart dataCountHistogramChart;
+    private final DockLayoutPanel rightSideChartsWrapperPanel;
+
+    private final ManeuverSpeedDetailsChartConfigurationPanel chartConfigPanel;
+
+    private Integer minDataCount;
+    
+    private Double minValue;
+
+    private Double maxValue;
+    
+    private boolean zeroTo360AxisLabeling = false;
+
+    private QueryResultDTO<?> result;
+
+    private ExportChartAsCsvToClipboardButton exportStatisticsCurveToCsvButton;
     
     public ManeuverSpeedDetailsResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
-        polarChart = ChartFactory.createPolarChart(false);
+        chartConfigPanel = new ManeuverSpeedDetailsChartConfigurationPanel(new ClickHandler() {
+            
+
+            @Override
+            public void onClick(ClickEvent event) {
+                minDataCount = chartConfigPanel.getMinDataCount();
+                minValue = chartConfigPanel.getMinValue();
+                maxValue = chartConfigPanel.getMaxValue();
+                zeroTo360AxisLabeling = chartConfigPanel.isZeroTo360AxisLabeling();
+                if(result != null) {
+                    redrawAllCharts();
+                }
+            }
+
+        }, stringMessages);
+        
+        addControl(chartConfigPanel);
+        
+        exportStatisticsCurveToCsvButton = new ExportChartAsCsvToClipboardButton(stringMessages);
+        addControl(exportStatisticsCurveToCsvButton);
+        
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -54,13 +90,12 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
                 polarChart.redraw();
             }
         };
-        polarChartWrapperPanel.add(polarChart);
         
-        lineChart = ChartFactory.createLineChartForPolarData(stringMessages);
-
         dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.beatAngle() + " ("
                 + stringMessages.degreesShort() + ")", stringMessages);
-        histogramChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
+        dataCountHistogramChart.getXAxis().setMin(-179);
+        dataCountHistogramChart.getXAxis().setMax(180);
+        rightSideChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
             @Override
             public void onResize() {
                 lineChart.setSizeToMatchContainer();
@@ -69,13 +104,44 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
                 dataCountHistogramChart.redraw();
             }
         };
-        histogramChartsWrapperPanel.addNorth(lineChart, 50);
-        histogramChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
-        
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
-        dockLayoutPanel.addEast(histogramChartsWrapperPanel, 60);
+        dockLayoutPanel.addEast(rightSideChartsWrapperPanel, 60);
         
+        redrawAllCharts();
+        
+    }
+    
+    private void redrawAllCharts() {
+        if(polarChart != null) {
+            polarChartWrapperPanel.remove(polarChart);
+        }
+        if(lineChart != null) {
+            rightSideChartsWrapperPanel.remove(lineChart);
+        }
+        if(dataCountHistogramChart != null) {
+            rightSideChartsWrapperPanel.remove(dataCountHistogramChart);
+        }
+            
+        int xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
+        int xAxisMax = zeroTo360AxisLabeling ? 359 : 180;
+        
+        polarChart = ChartFactory.createPolarChart();
+        lineChart = ChartFactory.createLineChartForPolarData(stringMessages);
+        dataCountHistogramChart = ChartFactory.createDataCountHistogramChart(stringMessages.beatAngle() + " ("
+                + stringMessages.degreesShort() + ")", stringMessages);
+        polarChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
+        lineChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
+        dataCountHistogramChart.getXAxis().setMin(xAxisMin).setMax(xAxisMax);
+        
+        polarChartWrapperPanel.add(polarChart);
+        rightSideChartsWrapperPanel.addNorth(lineChart, 50);
+        rightSideChartsWrapperPanel.addSouth(dataCountHistogramChart, 50);
+        
+        exportStatisticsCurveToCsvButton.setChartToExport(lineChart);
+        if(result != null) {
+            internalShowResults(result);
+        }
     }
 
     @Override
@@ -85,6 +151,7 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
 
     @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
+        this.result = result;
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
         Collections.sort(sortedNaturally, new Comparator<GroupKey>() {
@@ -96,22 +163,25 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
         });
         for (GroupKey key : sortedNaturally) {
             ManeuverSpeedDetailsAggregation aggregation = (ManeuverSpeedDetailsAggregation) results.get(key);
-            double[] valuePerAngle = aggregation.getValuePerAngle();
-            int[] countPerAngle = aggregation.getCountPerAngle();
+            double[] valuePerTWA = aggregation.getValuePerTWA();
+            int[] countPerTWA = aggregation.getCountPerTWA();
             Series polarSeries = polarChart.createSeries();
             Series histogramSeries = dataCountHistogramChart.createSeries();
             Series valueSeries = lineChart.createSeries();
-            for (int convertedAngle = -179; convertedAngle <= 180; convertedAngle++) {
-                int i = convertedAngle < 0 ? convertedAngle + 360 : convertedAngle;
-                double value = valuePerAngle[i];
-                if (value != 0) {
-                    polarSeries.addPoint(convertedAngle, value, false, false, false);
-                    valueSeries.addPoint(convertedAngle, value, false, false, false);
-                }  else {
-                    polarSeries.addPoint(convertedAngle, 0, false, false, false);
-                    valueSeries.addPoint(convertedAngle, 0, false, false, false);
+            int xAxisMin = zeroTo360AxisLabeling ? 0 : -179;
+            int xAxisMax = zeroTo360AxisLabeling ? 359 : 180;
+            for (int convertedTWA = xAxisMin; convertedTWA <= xAxisMax; convertedTWA++) {
+                int i = convertedTWA < 0 ? convertedTWA + 360 : convertedTWA;
+                double value = valuePerTWA[i];
+                int dataCount = countPerTWA[i];
+                if (value != 0 && (minValue == null || value >= minValue) && (maxValue == null || value <= maxValue) && (minDataCount == null || dataCount >= minDataCount)) {
+                    polarSeries.addPoint(convertedTWA, value, false, false, false);
+                    valueSeries.addPoint(convertedTWA, value, false, false, false);
+                } else {
+                    polarSeries.addPoint(convertedTWA, null, false, false, false);
+                    valueSeries.addPoint(convertedTWA, null, false, false, false);
                 }
-                histogramSeries.addPoint(convertedAngle, countPerAngle[i], false, false, false);
+                histogramSeries.addPoint(convertedTWA, dataCount, false, false, false);
             }
             polarSeries.setName(key.asString());
             valueSeries.setName(key.asString());
@@ -169,4 +239,5 @@ public class ManeuverSpeedDetailsResultsPresenter extends AbstractResultsPresent
     public String getId() {
         return "ManeuverSpeedDetailsResultsPresenter";
     }
+    
 }

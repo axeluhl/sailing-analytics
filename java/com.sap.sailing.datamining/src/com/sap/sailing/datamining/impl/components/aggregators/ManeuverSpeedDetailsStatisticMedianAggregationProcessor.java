@@ -3,12 +3,11 @@ package com.sap.sailing.datamining.impl.components.aggregators;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.ManeuverSpeedDetailsStatistic;
+import com.sap.sailing.datamining.impl.components.aggregators.ManeuverSpeedDetailsStatisticAggregationProcessorHelper.ManeuverSpeedDetailsAggregationCreator;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregation;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsAggregationImpl;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
@@ -22,7 +21,7 @@ public class ManeuverSpeedDetailsStatisticMedianAggregationProcessor extends
         AbstractParallelGroupedDataStoringAggregationProcessor<ManeuverSpeedDetailsStatistic, ManeuverSpeedDetailsAggregation> {
 
     private static final String MESSAGE_KEY = "MedianTrendForTWAs";
-    private final Map<GroupKey, MedianManeuverSpeedDetailsAggregation> resultMap = new HashMap<>();
+    private final ManeuverSpeedDetailsStatisticAggregationProcessorHelper helper = new ManeuverSpeedDetailsStatisticAggregationProcessorHelper(MedianManeuverSpeedDetailsAggregationCreator.class);
 
     public ManeuverSpeedDetailsStatisticMedianAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, ManeuverSpeedDetailsAggregation>, ?>> resultReceivers) {
@@ -39,24 +38,15 @@ public class ManeuverSpeedDetailsStatisticMedianAggregationProcessor extends
 
     @Override
     protected void storeElement(GroupedDataEntry<ManeuverSpeedDetailsStatistic> element) {
-        MedianManeuverSpeedDetailsAggregation speedDetailsAggregation = resultMap.get(element.getKey());
-        if (speedDetailsAggregation == null) {
-            speedDetailsAggregation = new MedianManeuverSpeedDetailsAggregation();
-            resultMap.put(element.getKey(), speedDetailsAggregation);
-        }
-        speedDetailsAggregation.addElement(element.getDataEntry());
+        helper.storeElement(element);
     }
 
     @Override
     protected Map<GroupKey, ManeuverSpeedDetailsAggregation> aggregateResult() {
-        Map<GroupKey, ManeuverSpeedDetailsAggregation> convertedResultMap = new HashMap<>();
-        for (Entry<GroupKey, MedianManeuverSpeedDetailsAggregation> entry : resultMap.entrySet()) {
-            convertedResultMap.put(entry.getKey(), entry.getValue().aggregateResult());
-        }
-        return convertedResultMap;
+        return helper.aggregateResult();
     }
 
-    private static class MedianManeuverSpeedDetailsAggregation {
+    static class MedianManeuverSpeedDetailsAggregationCreator implements ManeuverSpeedDetailsAggregationCreator {
         private int count = 0;
         private ArrayList<Double>[] valuesPerTWA = initValuesPerAngle();
 

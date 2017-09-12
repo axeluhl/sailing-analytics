@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
+import com.sap.sailing.gwt.ui.datamining.presentation.ExportChartAsCsvToClipboardButton;
 import com.sap.sailing.polars.datamining.shared.PolarBackendData;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
@@ -53,7 +54,8 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
             StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
-        polarChart = ChartFactory.createPolarChart(true);
+        polarChart = ChartFactory.createPolarChart();
+        polarChart.getYAxis().setMin(0);
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
@@ -80,6 +82,10 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(speedAndAngleChart, 60);
+        
+        ExportChartAsCsvToClipboardButton exportButton = new ExportChartAsCsvToClipboardButton(stringMessages);
+        exportButton.setChartToExport(polarChart);
+        addControl(exportButton);
     }
     
     @Override

@@ -64,7 +64,7 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
         
         NauticalSide maneuverDirection = maneuver.getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
         double totalCourseChangeSignum = Math.signum(maneuver.getDirectionChangeInDegrees());
-        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverDirection, settings);
+        Function<Integer, Integer> forNextTWA = ManeuverSpeedDetailsUtils.getNextTWAFunctionForManeuverDirection(maneuverDirection);
         
         double[] speedPerTWA = new double[360];
         int previousRoundedTWA = -1;
@@ -90,11 +90,6 @@ public class ManeuverSpeedDetailsRetrievalProcessor extends AbstractRetrievalPro
                 continue;
             }
             
-            if(settings.isNormalizeManeuverDirection()) {
-                if(maneuverDirection != settings.getNormalizedManeuverDirection()) {
-                    roundedTWA = (360 - roundedTWA) % 360;
-                }
-            }
             //Neglect speed differences between TWA resolution < 1 Deg
             //First twa/speed tuple gets priority over next tuples due it its "speed change freshness" regarding the whole twa sequence
             if(speedPerTWA[roundedTWA] == 0) {

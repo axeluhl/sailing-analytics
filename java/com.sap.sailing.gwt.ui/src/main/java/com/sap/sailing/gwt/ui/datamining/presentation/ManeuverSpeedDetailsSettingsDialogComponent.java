@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -21,6 +22,7 @@ public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDial
     private RadioButton maneuverDirectionNoNormalizationRadioButton;
     private RadioButton maneuverDirectionStarboardNormalizationRadioButton;
     private RadioButton maneuverDirectionPortNormalizationRadioButton;
+    private CheckBox maneuverDirectionEqualWeightingEnabledCheckBox;
 
     public ManeuverSpeedDetailsSettingsDialogComponent(ManeuverSpeedDetailsSettings settings) {
         this.settings = settings;
@@ -30,7 +32,7 @@ public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDial
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        Grid grid = new Grid(1, 2);
+        Grid grid = new Grid(2, 2);
         grid.setCellPadding(5);
         vp.add(grid);
         setupGrid(grid, dialog);
@@ -55,6 +57,12 @@ public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDial
         vp.add(maneuverDirectionStarboardNormalizationRadioButton);
         vp.add(maneuverDirectionPortNormalizationRadioButton);
         grid.setWidget(0, 1, vp);
+        
+        Label maneuverDirectionEqualWeightingEnabledLabel = dialog.createLabel(stringMessages.maneuverDirectionEqualWeightingEnabled());
+        grid.setWidget(1, 0, maneuverDirectionEqualWeightingEnabledLabel);
+        maneuverDirectionEqualWeightingEnabledCheckBox = dialog.createCheckbox("");
+        maneuverDirectionEqualWeightingEnabledCheckBox.setValue(settings.isManeuverDirectionEqualWeightingEnabled());
+        grid.setWidget(1, 1, maneuverDirectionEqualWeightingEnabledCheckBox);
     }
 
     @Override
@@ -67,7 +75,7 @@ public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDial
         } else {
             nauticalSide = null;
         }
-        return new ManeuverSpeedDetailsSettingsImpl(nauticalSide);
+        return new ManeuverSpeedDetailsSettingsImpl(nauticalSide, maneuverDirectionEqualWeightingEnabledCheckBox.getValue());
     }
 
     @Override
