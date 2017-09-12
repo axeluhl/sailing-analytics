@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.home.communication.anniversary.AnniversariesDTO;
 import com.sap.sailing.gwt.home.communication.anniversary.AnniversaryDTO;
 import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView.AnniversaryAnnouncement;
@@ -71,7 +72,15 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
     }
 
     private String getRaceDisplayName(AnniversaryDTO anniversary) {
-        return anniversary.getRaceName() + " - " + anniversary.getLeaderBoardName();
+        final String eventName = anniversary.getEventName();
+        final String leaderboardDisplayName = anniversary.getLeaderBoardDisplayName() != null
+                ? anniversary.getLeaderBoardDisplayName() : anniversary.getLeaderBoardName();
+        final String leaderboardAndRaceName = leaderboardDisplayName + " - " + anniversary.getRaceName();
+        if (anniversary.getEventType() == EventType.MULTI_REGATTA) {
+            return eventName == null ? leaderboardAndRaceName : eventName + " - " + leaderboardAndRaceName;
+        } else {
+            return eventName == null ? leaderboardAndRaceName : eventName + " - " + anniversary.getRaceName();
+        }
     }
 
     private String getRaceBoardLink(AnniversaryDTO anniversary) {
