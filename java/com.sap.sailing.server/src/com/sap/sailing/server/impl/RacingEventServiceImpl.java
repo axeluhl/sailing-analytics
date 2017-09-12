@@ -469,8 +469,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final PeriodicRaceListAnniversaryDeterminator raceListAnniversaryDeterminator;
 
-    private Runnable anniversaryUpdate;
-
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -749,38 +747,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore();
         }
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
-        raceListAnniversaryDeterminator = new PeriodicRaceListAnniversaryDeterminator(serviceFinderFactory,
-                this, new QuarterChecker(), new SameDigitChecker());
-        setupAnniversaryHandling();
+        raceListAnniversaryDeterminator = new PeriodicRaceListAnniversaryDeterminator(this, remoteSailingServerSet,
+                new QuarterChecker(), new SameDigitChecker());
     }
-
-    private void setupAnniversaryHandling() {
-        anniversaryUpdate = new Runnable() {
-
-            @Override
-            public void run() {
-                // we must push all races trough this map, to eleminate duplicates based on the RegattaAndRaceIdentifier
-                Map<RegattaAndRaceIdentifier, SimpleRaceInfo> allRaces = new HashMap<>();
-                for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> result : remoteSailingServerSet
-                        .getCachedRaceList().entrySet()) {
-                    if (result.getValue().getB() != null) {
-                        logger.warning("Could not update anniversary determinator, because remote server "
-                                + result.getKey().getURL() + " returned error " + result);
-                    } else {
-                        for (SimpleRaceInfo race : result.getValue().getA()) {
-                            allRaces.put(race.getIdentifier(), race);
-                        }
-                    }
-                }
-                allRaces.putAll(getLocalRaceList());
-                raceListAnniversaryDeterminator.uponUpdate(allRaces);
-            }
-        };
-
-        remoteSailingServerSet.addRemoteRaceResultReceivedCallback(anniversaryUpdate);
-
-    }
-
 
     private void restoreTrackedRaces() {
         // restore the races by calling addRace one by one, but in a background thread, therefore concurrent to any remaining

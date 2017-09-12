@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +16,7 @@ import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.common.TypeBasedServiceFinderFactory;
+import com.sap.sailing.server.impl.RemoteSailingServerSet;
 import com.sap.sse.common.Util.Pair;
 
 public class PeriodicRaceListAnniversaryDeterminator {
@@ -35,6 +36,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
     private Integer currentRaceCount;
 
     private final RacingEventService raceService;
+    private final RemoteSailingServerSet remoteSailingServerSet;
 
     public interface AnniversaryChecker {
 
@@ -71,10 +73,11 @@ public class PeriodicRaceListAnniversaryDeterminator {
         AnniversaryType getType();
     }
 
-    public PeriodicRaceListAnniversaryDeterminator(TypeBasedServiceFinderFactory serviceFinderFactory,
-            RacingEventService raceService, AnniversaryChecker... checkerToUse) {
+    public PeriodicRaceListAnniversaryDeterminator(RacingEventService raceService,
+            RemoteSailingServerSet remoteSailingServerSet, AnniversaryChecker... checkerToUse) {
         this.raceService = raceService;
-        knownAnniversaries = new ConcurrentHashMap<>();
+        this.remoteSailingServerSet = remoteSailingServerSet;
+        this.knownAnniversaries = new ConcurrentHashMap<>();
 
         try {
             knownAnniversaries.putAll(raceService.getDomainObjectFactory().getAnniversaryData());
@@ -85,11 +88,23 @@ public class PeriodicRaceListAnniversaryDeterminator {
         for (AnniversaryChecker toAdd : checkerToUse) {
             checkers.add(toAdd);
         }
+        remoteSailingServerSet.addRemoteRaceResultReceivedCallback(this::update);
     }
 
-    public void uponUpdate(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
-        if (currentRaceCount == null || races.size() != currentRaceCount) {
-            checkForNewAnniversaries(races);
+    private void update() {
+        // All races need to be passed through this map to eliminate duplicates based on the RegattaAndRaceIdentifier
+        final Map<RegattaAndRaceIdentifier, SimpleRaceInfo> allRaces = new HashMap<>();
+        remoteSailingServerSet.getCachedRaceList().forEach((remoteServer, result) -> {
+            if (result.getB() != null) {
+                logger.warning("Could not update anniversary determinator, because remote server "
+                        + remoteServer.getURL() + " returned error " + result.getB());
+            } else {
+                result.getA().forEach(race -> allRaces.put(race.getIdentifier(), race));
+            }
+        });
+        allRaces.putAll(raceService.getLocalRaceList());
+        if (currentRaceCount == null || allRaces.size() != currentRaceCount) {
+            checkForNewAnniversaries(allRaces);
         }
     }
 
