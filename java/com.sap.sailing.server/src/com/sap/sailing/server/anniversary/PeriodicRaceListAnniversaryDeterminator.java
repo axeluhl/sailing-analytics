@@ -158,7 +158,14 @@ public class PeriodicRaceListAnniversaryDeterminator {
     }
 
     public Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries() {
-        return knownAnniversaries;
+        return new HashMap<>(knownAnniversaries);
+    }
+    
+    public synchronized void setKnownAnniversaries(Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> anniversaries) {
+        knownAnniversaries.clear();
+        if (anniversaries != null) {
+            knownAnniversaries.putAll(anniversaries);
+        }
     }
 
     public Integer getCurrentRaceCount() {
