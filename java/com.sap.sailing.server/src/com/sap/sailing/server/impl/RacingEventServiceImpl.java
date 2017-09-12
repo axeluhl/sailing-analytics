@@ -110,6 +110,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
@@ -3971,6 +3972,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // race identifier, this wouldn't tell a valid event and leaderboard combination through which
         // to navigate to it
         for (Event event : this.getAllEvents()) {
+            final EventType eventType = EventUtil.getEventType(event);
             for (LeaderboardGroup group : event.getLeaderboardGroups()) {
                 for (Leaderboard leaderboard : group.getLeaderboards()) {
                     for (RaceColumn race : leaderboard.getRaceColumns()) {
@@ -3986,7 +3988,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                                             || (leaderboard.getName().equals(trackedRaceIdentifier.getRegattaName()))) {
                                         bestMatch = new DetailedRaceInfo(trackedRaceIdentifier, leaderboard.getName(),
                                                 leaderboard.getDisplayName(), trackedRace.getStartOfRace(),
-                                                event.getId(), event.getName(), null, null);
+                                                event.getId(), event.getName(), eventType, null);
                                     }
                                 }
                             }
