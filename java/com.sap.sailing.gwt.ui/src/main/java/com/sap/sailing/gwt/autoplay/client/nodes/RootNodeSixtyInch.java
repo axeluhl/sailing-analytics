@@ -16,22 +16,23 @@ public class RootNodeSixtyInch extends RootNodeBase {
     private final AutoPlayLoopNode liveRaceLoop;
     private final AutoPlaySequenceNode afterLiveRaceLoop;
     protected boolean afterRaceFinished = true;
+    private AutoPlayLoopNode preEvent;
 
     public RootNodeSixtyInch(AutoPlayClientFactory cf) {
         super(RaceEndWithCompetitorsFlagsNode.class.getName(), cf);
-        this.idleLoop = new AutoPlayLoopNode("IdleLoop", 30, new IdleUpNextNode(cf),
-                new IdleOverallLeaderBoardNode(cf), new VideoNode(cf));
-        this.preLiveRaceLoop = new AutoPlayLoopNode("PreLiveRaceLoop", 90, new PreLiveRaceLeaderBoardWithCompetitorsNode(cf),
-                new PreLiveRaceWithRacemapNode(cf));
+        this.idleLoop = new AutoPlayLoopNode("IdleLoop", 30, new IdleUpNextNode(cf), new IdleOverallLeaderBoardNode(cf),
+                new VideoNode(cf));
+        this.preEvent = new AutoPlayLoopNode("PreEvent", 30, new IdlePreEventNode(cf), new VideoNode(cf));
+        this.preLiveRaceLoop = new AutoPlayLoopNode("PreLiveRaceLoop", 90,
+                new PreLiveRaceLeaderBoardWithCompetitorsNode(cf), new PreLiveRaceWithRacemapNode(cf));
         this.liveRaceLoop = new AutoPlayLoopNode("LiveRaceLoop", 30, new LiveRaceWithRacemapNode(cf));
         this.afterLiveRaceLoop = new AutoPlaySequenceNode("AfterLiveRaceLoop", 30,
-                new RaceEndWithCompetitorsBoatsNode(cf),
-                new RaceEndWithCompetitorsFlagsNode(cf));
+                new RaceEndWithCompetitorsBoatsNode(cf), new RaceEndWithCompetitorsFlagsNode(cf));
 
         afterLiveRaceLoop.setOnSequenceEnd(new Command() {
             @Override
             public void execute() {
-                afterRaceFinished  = true;
+                afterRaceFinished = true;
             }
         });
     }
@@ -40,14 +41,17 @@ public class RootNodeSixtyInch extends RootNodeBase {
             RegattaAndRaceIdentifier currentLiveRace, RootNodeState goingTo, RootNodeState comingFrom) {
         // block transitions, until the afterLiveRaceLoop is finished
         if (comingFrom == RootNodeState.AFTER_LIVE) {
-            if(afterRaceFinished){
+            if (afterRaceFinished) {
                 afterRaceFinished = false;
-            }else{
+            } else {
                 return true;
             }
         }
         getClientFactory().getAutoPlayCtx().updateLiveRace(currentPreLiveRace, currentLiveRace);
         switch (goingTo) {
+        case PRE_EVENT:
+            transitionTo(preEvent);
+            break;
         case IDLE:
             transitionTo(idleLoop);
             break;

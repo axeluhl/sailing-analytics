@@ -325,9 +325,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             throws TransformationException, NoCorrespondingServiceRegisteredException {
         Map<DeviceIdentifier, FixT> result = new HashMap<>();
         for (final DeviceIdentifier deviceIdentifier : forDevices) {
-            final DBObject deviceQuery = new BasicDBObject(
-                    FieldNames.DEVICE_ID.name() + "." + FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(),
-                    deviceIdentifier.getStringRepresentation());
+            final DBObject deviceQuery = getDeviceQuery(deviceIdentifier);
             final DBObject orderBy = new BasicDBObject(
                     FieldNames.GPSFIX.name() + "." + FieldNames.TIME_AS_MILLIS.name(), -1);
             DBCursor lastFixForDeviceCursor = fixesCollection.find(deviceQuery).sort(orderBy).limit(1);

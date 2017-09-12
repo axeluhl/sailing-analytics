@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
+import com.sap.sailing.gwt.ui.client.DurationAsHoursMinutesSecondsFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
@@ -87,13 +88,13 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
         Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new HashMap<>();
 
         result.put(DetailType.RACE_TIME_TRAVELED_UPWIND,
-                new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_UPWIND, new RaceTimeTraveledUpwindInSeconds(),
+                new TotalTimeColumn(DetailType.RACE_TIME_TRAVELED_UPWIND, new RaceTimeTraveledUpwindInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.RACE_TIME_TRAVELED_DOWNWIND,
-                new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_DOWNWIND, new RaceTimeTraveledDownwindInSeconds(),
+                new TotalTimeColumn(DetailType.RACE_TIME_TRAVELED_DOWNWIND, new RaceTimeTraveledDownwindInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.RACE_TIME_TRAVELED_REACHING,
-                new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_REACHING, new RaceTimeTraveledReachingInSeconds(),
+                new TotalTimeColumn(DetailType.RACE_TIME_TRAVELED_REACHING, new RaceTimeTraveledReachingInSeconds(),
                         detailHeaderStyle, detailColumnStyle, leaderboardPanel));
 
         return result;
@@ -126,13 +127,8 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
 
     @Override
     public String getValue(LeaderboardRowDTO object) {
-        Double result = getDoubleValue(object);
-        if (result == null) {
-            return "";
-        } else {
-            Integer intResult = ((int) (double) result);
-            return intResult.toString();
-        }
+        Double durationInSeconds = getDoubleValue(object);
+        return new DurationAsHoursMinutesSecondsFormatter().getHoursMinutesSeconds(durationInSeconds);
     }
 
     @Override
@@ -159,7 +155,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
     @Override
     public String getStringValueToRender(LeaderboardRowDTO row) {
         String result = getValue(row);
-        if (!result.equals("")) {
+        if (result == null || !result.equals("")) {
             return result;
         } else {
             return null;

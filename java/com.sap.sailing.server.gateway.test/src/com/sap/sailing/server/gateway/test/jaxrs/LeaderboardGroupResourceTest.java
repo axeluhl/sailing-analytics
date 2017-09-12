@@ -39,7 +39,7 @@ public class LeaderboardGroupResourceTest extends AbstractJaxRsApiTest {
     private String leaderboardGroupName = "TestLeaderboardGroup";
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
