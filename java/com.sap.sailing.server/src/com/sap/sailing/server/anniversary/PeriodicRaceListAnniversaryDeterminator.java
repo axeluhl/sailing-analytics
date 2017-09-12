@@ -195,7 +195,9 @@ public class PeriodicRaceListAnniversaryDeterminator {
         clear();
     }
 
-    public void clear() {
+    public synchronized void clear() {
         knownAnniversaries.clear();
+        nextAnniversaryNumber = null;
+        currentRaceCount = null;
     }
 }
