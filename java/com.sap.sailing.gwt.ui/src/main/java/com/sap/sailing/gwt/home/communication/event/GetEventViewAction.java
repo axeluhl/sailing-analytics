@@ -7,11 +7,11 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
@@ -85,7 +85,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         });
         
         if (isFakeSeries) {
-            dto.setType(EventType.SERIES_EVENT);
+            dto.setType(EventType.SERIES);
             
             LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
             dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(overallLeaderboardGroup));
