@@ -76,7 +76,7 @@ class TrainingController: NSObject {
             try regattaCompetitorAdd(collector: collector, success: success, failure: failure)
         } catch {
             do {
-                try competitorCreateAndAdd(collector: collector, success: success, failure: failure)
+                try regattaCompetitorCreateAndAdd(collector: collector, success: success, failure: failure)
             } catch {
                 failure(error)
             }
@@ -113,15 +113,15 @@ class TrainingController: NSObject {
         failure: @escaping (_ error: Error) -> Void)
     {
         do {
-            try self.competitorCreateAndAdd(collector: collector, success: success, failure: failure)
+            try self.regattaCompetitorCreateAndAdd(collector: collector, success: success, failure: failure)
         } catch {
             failure(error)
         }
     }
     
-    // MARK: - CompetitorCreateAndAdd
+    // MARK: - RegattaCompetitorCreateAndAdd
     
-    fileprivate func competitorCreateAndAdd(
+    fileprivate func regattaCompetitorCreateAndAdd(
         collector: CreateTrainingData,
         success: @escaping (_ collector: CreateTrainingData) -> Void,
         failure: @escaping (_ error: Error) -> Void) throws
@@ -134,8 +134,8 @@ class TrainingController: NSObject {
         let sailID = collector.sailID
         let nationality = collector.nationality
         
-        trainingRequestManager.postCompetitorCreateAndAdd(regattaName: regatta, boatClassName: boatClassName, sailID: sailID, nationality: nationality, success: { competitorCreateAndAddData in
-            collector.competitorID = competitorCreateAndAddData.competitorID
+        trainingRequestManager.postRegattaCompetitorCreateAndAdd(regattaName: regatta, boatClassName: boatClassName, sailID: sailID, nationality: nationality, success: { regattaCompetitorCreateAndAddData in
+            collector.competitorID = regattaCompetitorCreateAndAddData.competitorID
             success(collector)
         }) { (error, message) in
             failure(error)
@@ -150,14 +150,19 @@ class TrainingController: NSObject {
         failure: @escaping (_ error: Error) -> Void)
     {
         let leaderboardName = checkIn.leaderboard.name
-        let raceColumnName = "R1"
-        let fleetName = "Default"
-        self.trainingRequestManager.postLeaderboardSetTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-            self.trainingRequestManager.postLeaderboardStartTracking(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-                success()
-            }, failure: { (error, message) in
+        let regattaName = checkIn.event.name
+        self.trainingRequestManager.postRegattaRaceColumnAdd(regattaName: regattaName, success: { (regattaRaceColumnAddData) in
+            let raceColumnName = regattaRaceColumnAddData.raceColumnName
+            let fleetName = regattaRaceColumnAddData.fleetName
+            self.trainingRequestManager.postLeaderboardSetTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+                self.trainingRequestManager.postLeaderboardStartTracking(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+                    success()
+                }, failure: { (error, message) in
+                    failure(error)
+                })
+            }) { (error, message) in
                 failure(error)
-            })
+            }
         }) { (error, message) in
             failure(error)
         }

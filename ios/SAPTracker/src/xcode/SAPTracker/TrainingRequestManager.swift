@@ -55,7 +55,7 @@ class TrainingRequestManager: NSObject {
         //        body["createleaderboardgroup"] = "" as AnyObject
         body["createregatta"] = "true" as AnyObject
         body["boatclassname"] = boatClassName as AnyObject
-        body["numberofraces"] = "1" as AnyObject
+        body["numberofraces"] = "0" as AnyObject
         manager.post(urlString, parameters: body, success: { (requestOperation, responseObject) in
             self.postCreateEventSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
@@ -110,14 +110,14 @@ class TrainingRequestManager: NSObject {
         failure(error, stringForError(error))
     }
     
-    // MARK: - CompetitorCreateAndAdd
+    // MARK: - RegattaCompetitorCreateAndAdd
     
-    func postCompetitorCreateAndAdd(
+    func postRegattaCompetitorCreateAndAdd(
         regattaName: String,
         boatClassName: String,
         sailID: String,
         nationality: String,
-        success: @escaping (_ competitorCreateAndAddData: CompetitorCreateAndAddData) -> Void,
+        success: @escaping (_ regattaCompetitorCreateAndAddData: RegattaCompetitorCreateAndAddData) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         let encodedRegattaName = regattaName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -126,30 +126,68 @@ class TrainingRequestManager: NSObject {
         let encodedNationality = nationality.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "\(basePathString)/regattas/\(encodedRegattaName)/competitors/createandadd?boatclass=\(encodedBoatClassName)&sailid=\(encodedSailID)&nationalityIOC=\(encodedNationality)"
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
-            self.postCompetitorCreateAndAddSuccess(responseObject: responseObject, success: success, failure: failure)
+            self.postRegattaCompetitorCreateAndAddSuccess(responseObject: responseObject, success: success, failure: failure)
         }) { (requestOperation, error) in
-            self.postCompetitorCreateAndAddFailure(error: error, failure: failure)
+            self.postRegattaCompetitorCreateAndAddFailure(error: error, failure: failure)
         }
     }
     
-    fileprivate func postCompetitorCreateAndAddSuccess(
+    fileprivate func postRegattaCompetitorCreateAndAddSuccess(
         responseObject: Any?,
-        success: @escaping (_ competitorCreateAndAddData: CompetitorCreateAndAddData) -> Void,
+        success: @escaping (_ regattaCompetitorCreateAndAddData: RegattaCompetitorCreateAndAddData) -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
         if let data = responseObject as? Data {
             do {
                 let jsonObject = try JSONSerialization.jsonObject(with: data)
-                success(CompetitorCreateAndAddData(dictionary: jsonObject as? [String: AnyObject]))
+                success(RegattaCompetitorCreateAndAddData(dictionary: jsonObject as? [String: AnyObject]))
             } catch {
-                self.postCompetitorCreateAndAddFailure(error: error, failure: failure)
+                self.postRegattaCompetitorCreateAndAddFailure(error: error, failure: failure)
             }
         } else {
-            self.postCompetitorCreateAndAddFailure(error: TrainingRequestManagerError.invalidResponse, failure: failure)
+            self.postRegattaCompetitorCreateAndAddFailure(error: TrainingRequestManagerError.invalidResponse, failure: failure)
         }
     }
     
-    fileprivate func postCompetitorCreateAndAddFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+    fileprivate func postRegattaCompetitorCreateAndAddFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
+        logError(name: "\(#function)", error: error)
+        failure(error, stringForError(error))
+    }
+    
+    // MARK: - RegattaRaceColumnAdd
+    
+    func postRegattaRaceColumnAdd(
+        regattaName: String,
+        success: @escaping (_ regattaRaceColummAddData: RegattaRaceColumnAddData) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let encodedRegattaName = regattaName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let urlString = "\(basePathString)/regattas/\(encodedRegattaName)/addracecolumns"
+        manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
+            self.postRegattaRaceColumnAddSuccess(responseObject: responseObject, success: success, failure: failure)
+        }) { (requestOperation, error) in
+            self.postRegattaRaceColumnAddAddFailure(error: error, failure: failure)
+        }
+    }
+    
+    fileprivate func postRegattaRaceColumnAddSuccess(
+        responseObject: Any?,
+        success: @escaping (_ regattaRaceColumnAddData: RegattaRaceColumnAddData) -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        if let data = responseObject as? Data {
+            do {
+                let jsonObject = try JSONSerialization.jsonObject(with: data)
+                success(RegattaRaceColumnAddData(dictionary: (jsonObject as? [AnyObject])?.first as? [String: AnyObject]))
+            } catch {
+                self.postRegattaRaceColumnAddAddFailure(error: error, failure: failure)
+            }
+        } else {
+            self.postRegattaRaceColumnAddAddFailure(error: TrainingRequestManagerError.invalidResponse, failure: failure)
+        }
+    }
+    
+    fileprivate func postRegattaRaceColumnAddAddFailure(error: Error, failure: @escaping (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
         failure(error, stringForError(error))
     }

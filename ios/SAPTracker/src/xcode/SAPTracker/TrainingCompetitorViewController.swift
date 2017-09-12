@@ -49,6 +49,15 @@ class TrainingCompetitorViewController: SessionViewController {
     
     // MARK: - Actions
     
+    override func startTrackingButtonTapped(_ sender: AnyObject) {
+        trainingController.leaderboardStartTracking(forCheckIn: competitorCheckIn, success: { 
+            super.startTrackingButtonTapped(sender)
+        }) { (error) in
+            // TODO
+            logError(name: "\(#function)", error: error)
+        }
+    }
+    
     @IBAction func stopTrainingButtonTapped(_ sender: Any) {
         trainingController.leaderboardStopTracking(forCheckIn: competitorCheckIn, success: {
             

@@ -1,5 +1,5 @@
 //
-//  CompetitorCreateAndAddData.swift
+//  RegattaCompetitorCreateAndAddData.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 25.08.17.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CompetitorCreateAndAddData: BaseData {
+class RegattaCompetitorCreateAndAddData: BaseData {
     
     fileprivate struct Keys {
         static let ID = "id"
