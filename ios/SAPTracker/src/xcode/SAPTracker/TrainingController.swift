@@ -34,21 +34,76 @@ class TrainingController: NSObject {
     {
         let collector = CreateTrainingData.init(serverURL: trainingRequestManager.baseURLString, boatClassName: boatClassName)
         createEvent(collector: collector, success: { (createTrainingData) in
-            self.createTrainingSuccess(collector: createTrainingData, success: success, failure: failure)
+            if let checkInData = CheckInData.init(createTrainingData: collector) {
+                success(checkInData)
+            } else {
+                failure(TrainingControllerError.checkInDataIsIncomplete)
+            }
         }) { (error) in
             failure(error)
         }
     }
     
-    fileprivate func createTrainingSuccess(
-        collector: CreateTrainingData,
-        success:(_ checkInData: CheckInData) -> Void,
+    // MARK: StopActiveRace
+    
+    func stopActiveRace(
+        success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        if let checkInData = CheckInData.init(createTrainingData: collector) {
-            success(checkInData)
-        } else {
-            failure(TrainingControllerError.checkInDataIsIncomplete)
+        guard let activeTrainingRaceData = Preferences.activeTrainingRaceData else {
+            success()
+            return
+        }
+        
+        self.leaderboardRaceStopTracking(forTrainingRaceData: activeTrainingRaceData, success: {
+            self.autoCourseRace(forTrainingRaceData: activeTrainingRaceData) { (withSuccess) in
+                Preferences.activeTrainingRaceData = nil
+                success()
+            }
+        }) { (error) in
+            failure(error)
+        }
+    }
+    
+    // StartNewRace
+    
+    func startNewRace(
+        forCheckIn checkIn: CheckIn,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        leaderboardRaceStartTracking(forCheckIn: checkIn, success: { (trainingRaceData) in
+            Preferences.activeTrainingRaceData = trainingRaceData
+            success()
+        }) { (error) in
+            failure(error)
+        }
+    }
+    
+    // AutoCourseRace
+    
+    func autoCourseRace(
+        forTrainingRaceData trainingRaceData: TrainingRaceData,
+        completion: @escaping () -> Void)
+    {
+        autoCourseRace(
+            leaderboardName: trainingRaceData.leaderboardName,
+            raceColumnName: trainingRaceData.raceColumnName,
+            fleetName: trainingRaceData.fleetName,
+            completion: completion
+        )
+    }
+    
+    func autoCourseRace(
+        leaderboardName: String,
+        raceColumnName: String,
+        fleetName: String,
+        completion: @escaping () -> Void)
+    {
+        leaderboardRaceAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+            completion()
+        }) { (error) in
+            completion()
         }
     }
     
@@ -144,7 +199,7 @@ class TrainingController: NSObject {
     
     // MARK: - LeaderboardRaceStartTracking
     
-    func leaderboardRaceStartTracking(
+    fileprivate func leaderboardRaceStartTracking(
         forCheckIn checkIn: CheckIn,
         success: @escaping (_ trainingRaceData: TrainingRaceData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
@@ -177,7 +232,7 @@ class TrainingController: NSObject {
     
     // MARK: - LeaderboardRaceStopTracking
     
-    func leaderboardRaceStopTracking(
+    fileprivate func leaderboardRaceStopTracking(
         forTrainingRaceData data: TrainingRaceData,
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
@@ -213,7 +268,7 @@ class TrainingController: NSObject {
     
     // MARK: - LeaderboardRaceAutoCourse
     
-    func leaderboardRaceAutoCourse(
+    fileprivate func leaderboardRaceAutoCourse(
         leaderboardName: String,
         raceColumnName: String,
         fleetName: String,

@@ -47,6 +47,20 @@ class TrainingMarkViewController: SessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
+    // MARK: - Actions
+    
+    override func startTrackingButtonTapped(_ sender: AnyObject) {
+        self.trainingController.stopActiveRace(success: {
+            self.trainingController.startNewRace(forCheckIn: self.markCheckIn, success: {
+                super.startTrackingButtonTapped(sender)
+            }) { [weak self] (error) in
+                self?.showAlert(forError: error)
+            }
+        }) { [weak self] (error) in
+            self?.showAlert(forError: error)
+        }
+    }
+    
     // MARK: - Properties
     
     fileprivate lazy var markSessionController: MarkSessionController = {
