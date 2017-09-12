@@ -28,6 +28,9 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.raceboard
 import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardPresenterImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.racemapwithleaderboard.LiveRaceWithRacemapAndLeaderBoardViewImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preevent.IdlePreEventPlace;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preevent.IdlePreEventPresenterImpl;
+import com.sap.sailing.gwt.autoplay.client.places.screens.preevent.IdlePreEventViewImpl;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsFlagsPlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsImagePlace;
 import com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.competitors.PreRaceCompetitorsPresenterImpl;
@@ -66,11 +69,14 @@ public class AutoPlayActivityMapperImpl implements ActivityMapper {
                     clientFactory, new PreLiveRaceLeaderBoardWithImageViewImpl(new CompetitorImageProvider()));
         }
         if (place instanceof PreRaceLeaderBoardWithFlagPlace) {
-            return new PreLiveRaceLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithFlagPlace) place, clientFactory,
-                    new PreLiveRaceLeaderBoardWithImageViewImpl(new FlagImageProvider()));
+            return new PreLiveRaceLeaderBoardWithImagePresenterImpl((PreRaceLeaderBoardWithFlagPlace) place,
+                    clientFactory, new PreLiveRaceLeaderBoardWithImageViewImpl(new FlagImageProvider()));
         }
         if (place instanceof IdleUpNextPlace) {
             return new IdleUpNextPresenterImpl((IdleUpNextPlace) place, clientFactory, new IdleNextUpViewImpl());
+        }
+        if (place instanceof IdlePreEventPlace) {
+            return new IdlePreEventPresenterImpl((IdlePreEventPlace) place, clientFactory, new IdlePreEventViewImpl());
         }
         if (place instanceof VideoPlace) {
             return new VideoPresenterImpl((VideoPlace) place, clientFactory, new VideoViewImpl());
