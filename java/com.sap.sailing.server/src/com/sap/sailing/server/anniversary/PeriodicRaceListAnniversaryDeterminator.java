@@ -174,7 +174,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
     }
     
     public synchronized void setKnownAnniversaries(Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> anniversaries) {
-        knownAnniversaries.clear();
+        clear();
         if (anniversaries != null) {
             knownAnniversaries.putAll(anniversaries);
         }
@@ -192,6 +192,10 @@ public class PeriodicRaceListAnniversaryDeterminator {
     public synchronized void clearAndStop() {
         isStarted.set(false);
         remoteSailingServerSet.removeRemoteRaceResultReceivedCallback(raceChangedListener);
+        clear();
+    }
+
+    public void clear() {
         knownAnniversaries.clear();
     }
 }

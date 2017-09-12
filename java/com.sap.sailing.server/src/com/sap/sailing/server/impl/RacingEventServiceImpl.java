@@ -820,6 +820,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.windStore.clear();
         getRaceLogStore().clear();
         getRegattaLogStore().clear();
+        raceListAnniversaryDeterminator.clear();
     }
 
     @Override
@@ -3064,6 +3065,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             notificationService.stop();
             notificationService = new EmptySailingNotificationService();
         }
+        raceListAnniversaryDeterminator.clearAndStop();
     }
 
     // Used for TESTING only
@@ -3648,6 +3650,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
         this.replicatingFromMaster = null;
+        raceListAnniversaryDeterminator.start();
     }
 
     @Override
