@@ -4,8 +4,12 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Iterator;
 
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
+import com.sap.sailing.domain.common.dto.EventType;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sse.common.Util;
 
 public interface EventUtil {
 
@@ -33,5 +37,25 @@ public interface EventUtil {
             return false;
         }
         return lg.hasOverallLeaderboard();
+    }
+    
+    public static EventType getEventType(Event event) {
+        final EventType eventType;
+        if (isFakeSeries(event)) {
+            eventType = EventType.SERIES;
+        } else {
+            final Iterator<? extends LeaderboardGroup> leaderboardGroups = event.getLeaderboardGroups().iterator();
+            if (leaderboardGroups.hasNext()) {
+                final LeaderboardGroup leaderboardGroup = leaderboardGroups.next();
+                if (!leaderboardGroups.hasNext() && Util.size(leaderboardGroup.getLeaderboards()) == 1) {
+                    eventType = EventType.SINGLE_REGATTA;
+                } else {
+                    eventType = EventType.MULTI_REGATTA;
+                }
+            } else {
+                eventType = EventType.MULTI_REGATTA;
+            }
+        }
+        return eventType;
     }
 }

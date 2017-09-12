@@ -68,7 +68,10 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         // bug2982: always show leaderboard and competitor analytics 
         dto.setHasAnalytics(true);
 
-        final boolean isFakeSeries = EventUtil.isFakeSeries(event);
+        final EventType eventType = EventUtil.getEventType(event);
+        dto.setType(eventType);
+        
+        final boolean isFakeSeries = eventType == EventType.SERIES;
         
         EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
             @Override
@@ -86,8 +89,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         });
         
         if (isFakeSeries) {
-            dto.setType(EventType.SERIES);
-            
             LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
             dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(overallLeaderboardGroup));
             
@@ -100,8 +101,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                 EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
                 dto.addEventToSeries(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
             }
-        } else {
-            dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
         }
         return dto;
     }
