@@ -160,11 +160,13 @@ public class PeriodicRaceListAnniversaryDeterminator {
         DetailedRaceInfo fullData = raceService.getFullDetailsForRaceCascading(simpleRaceInfo.getIdentifier());
         logger.info("Determined new Anniversary! " + anniversaryToCheck + " - " + anniversaryType + " - " + fullData);
         final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData = new Pair<>(fullData, anniversaryType);
-        raceService.apply(new AddAnniversaryOperation(anniversaryToCheck, anniversaryData));
+        if (!knownAnniversaries.containsKey(anniversaryToCheck)) {
+            raceService.apply(new AddAnniversaryOperation(anniversaryToCheck, anniversaryData));
+        }
     }
 
     synchronized void addAnniversary(int anniversaryToCheck, final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData) {
-        knownAnniversaries.putIfAbsent(anniversaryToCheck, anniversaryData);
+        knownAnniversaries.put(anniversaryToCheck, anniversaryData);
     }
 
     public Pair<Integer, AnniversaryType> getNextAnniversaryNumber() {
