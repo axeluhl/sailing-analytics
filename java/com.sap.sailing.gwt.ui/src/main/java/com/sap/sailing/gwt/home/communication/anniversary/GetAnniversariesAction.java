@@ -21,7 +21,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 public class GetAnniversariesAction implements SailingAction<ResultWithTTL<AnniversariesDTO>> {
 
     private static final int SHOW_IF_LESS_RACES_TILL_NEXT_ANNIVERSARY = 500;
-    private static final int DAYS_TO_SHOW_PAST_ANNIVERSARY = 14;
+    private static final int DAYS_TO_SHOW_PAST_ANNIVERSARY = 16;
 
     @Override
     @GwtIncompatible

@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
+import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -67,7 +68,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         // bug2982: always show leaderboard and competitor analytics 
         dto.setHasAnalytics(true);
 
-        final boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
+        final boolean isFakeSeries = EventUtil.isFakeSeries(event);
         
         EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
             @Override
