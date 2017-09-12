@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -74,7 +73,7 @@ public class RemoteSailingServerSet {
     private final StatisticsJsonDeserializer statisticsJsonDeserializer;
     
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedTrackedRacesForRemoteSailingServers;
-    private List<Runnable> remoteRaceResultReceivedCallbacks = new CopyOnWriteArrayList<>();
+    private final Set<Runnable> remoteRaceResultReceivedCallbacks = ConcurrentHashMap.newKeySet();
 
     /**
      * @param scheduler
@@ -167,7 +166,7 @@ public class RemoteSailingServerSet {
             result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(/* events */ null, e);
         }
         updateCache(ref, result, cachedTrackedRacesForRemoteSailingServers::put);
-        remoteRaceResultReceivedCallbacks.forEach(Runnable::run);
+        new HashSet<>(remoteRaceResultReceivedCallbacks).forEach(Runnable::run);
     }
 
     private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
@@ -389,10 +388,10 @@ public class RemoteSailingServerSet {
     }
 
     public void addRemoteRaceResultReceivedCallback(Runnable callback) {
-        remoteRaceResultReceivedCallbacks.add(callback);
+        this.remoteRaceResultReceivedCallbacks.add(callback);
     }
     
-    public void removeRemoteRaceCountChangedCallback(Runnable callback){
-        remoteRaceResultReceivedCallbacks.remove(callback);
+    public void removeRemoteRaceResultReceivedCallback(Runnable callback){
+        this.remoteRaceResultReceivedCallbacks.remove(callback);
     }
 }

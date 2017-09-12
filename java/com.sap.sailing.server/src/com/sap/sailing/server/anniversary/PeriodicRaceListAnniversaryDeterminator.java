@@ -191,7 +191,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
     
     public synchronized void clearAndStop() {
         isStarted.set(false);
-        remoteSailingServerSet.removeRemoteRaceCountChangedCallback(raceChangedListener);
+        remoteSailingServerSet.removeRemoteRaceResultReceivedCallback(raceChangedListener);
         knownAnniversaries.clear();
     }
 }
