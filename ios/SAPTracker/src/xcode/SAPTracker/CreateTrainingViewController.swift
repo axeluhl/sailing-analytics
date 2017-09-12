@@ -57,10 +57,13 @@ class CreateTrainingViewController: UIViewController {
     // MARK: - CreateTraining
     
     fileprivate func createTraining(forBoatClassName boatClassName: String) {
+        SVProgressHUD.show()
         trainingController.createTraining(forBoatClassName: boatClassName, success: { checkInData in
+            SVProgressHUD.dismiss()
             self.checkIn(withCheckInData: checkInData)
         }) { (error) in
-            logError(name: "\(#function)", error: error)
+            SVProgressHUD.dismiss()
+            self.showAlert(forError: error)
         }
     }
     
@@ -68,8 +71,7 @@ class CreateTrainingViewController: UIViewController {
         trainingCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { (checkIn) in
             self.createTrainingSuccess(checkIn: checkIn)
         }) { (error) in
-            // TODO
-            logError(name: "\(#function)", error: error)
+            self.showAlert(forError: error)
         }
     }
     

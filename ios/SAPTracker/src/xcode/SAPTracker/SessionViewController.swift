@@ -201,15 +201,4 @@ class SessionViewController: UIViewController {
         present(alertController, animated: true, completion: nil)
     }
     
-    func showAlert(forError error: Error) {
-        let alertController = UIAlertController(
-            title: Translation.Common.Error.String,
-            message: error.localizedDescription,
-            preferredStyle: .alert
-        )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default, handler: nil)
-        alertController.addAction(okAction)
-        present(alertController, animated: true, completion: nil)
-    }
-    
 }
