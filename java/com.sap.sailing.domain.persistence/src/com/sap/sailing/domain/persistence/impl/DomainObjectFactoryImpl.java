@@ -164,7 +164,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.dto.AnniversaryEventRaceType;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -2407,11 +2407,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 remoteUrlOrNull = null;
             }
             final Object typeJson = toLoad.get(FieldNames.ANNIVERSARY_RACE_TYPE.name());
-            final AnniversaryEventRaceType eventType;
+            final EventType eventType;
             if (typeJson == null) {
                 eventType = null;
             } else {
-                eventType = AnniversaryEventRaceType.valueOf(typeJson.toString());
+                eventType = EventType.valueOf(typeJson.toString());
             }
             DetailedRaceInfo loadedAnniversary = new DetailedRaceInfo(new RegattaNameAndRaceName(regatta, race),
                     leaderboardName, leaderboardDisplayName, startOfRace, UUID.fromString(eventID), eventName, eventType,

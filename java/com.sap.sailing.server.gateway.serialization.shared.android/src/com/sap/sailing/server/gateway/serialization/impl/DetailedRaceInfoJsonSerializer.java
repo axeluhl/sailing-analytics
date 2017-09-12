@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.dto.AnniversaryEventRaceType;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -62,11 +62,11 @@ public class DetailedRaceInfoJsonSerializer
             eventName = eventNameJson.toString();
         }
         final Object typeJson = object.get(FIELD_EVENT_RACE_TYPE);
-        final AnniversaryEventRaceType type;
+        final EventType type;
         if (typeJson == null) {
             type = null;
         } else {
-            type = AnniversaryEventRaceType.valueOf(typeJson.toString());
+            type = EventType.valueOf(typeJson.toString());
         }
         TimePoint startOfRace = new MillisecondsTimePoint(
                 ((Number) object.get(SimpleRaceInfoJsonSerializer.FIELD_START_OF_RACE)).longValue());

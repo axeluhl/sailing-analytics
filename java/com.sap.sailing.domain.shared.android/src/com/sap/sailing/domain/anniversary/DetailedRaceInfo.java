@@ -4,7 +4,7 @@ import java.net.URL;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.AnniversaryEventRaceType;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -17,10 +17,10 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
     private final String leaderboardDisplayName;
     private final String leaderboardName;
     private final UUID eventID;
-    private AnniversaryEventRaceType eventRaceType;
+    private EventType eventRaceType;
 
     public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, String leaderboardDisplayName,
-            TimePoint timePoint, UUID eventId, String eventName, AnniversaryEventRaceType eventRaceType,
+            TimePoint timePoint, UUID eventId, String eventName, EventType eventRaceType,
             URL remoteUrl) {
         super(identifier, timePoint, remoteUrl);
         if (leaderboardName == null || eventId == null) {
@@ -63,7 +63,7 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
                 + ", startOfRace=" + getStartOfRace() + ", eventID=" + eventID + "]";
     }
 
-    public AnniversaryEventRaceType getEventRaceType() {
+    public EventType getEventRaceType() {
         return eventRaceType;
     }
 }

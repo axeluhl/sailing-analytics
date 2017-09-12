@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.communication.anniversary;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.common.dto.AnniversaryEventRaceType;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
@@ -13,7 +13,7 @@ public class AnniversaryDTO implements DTO {
 
     private int target;
     private Integer countDown;
-    private AnniversaryEventRaceType eventRaceType;
+    private EventType eventRaceType;
     private AnniversaryType type;
     private UUID eventID;
     private String leaderBoardName;
@@ -37,7 +37,7 @@ public class AnniversaryDTO implements DTO {
 
     AnniversaryDTO(int target, AnniversaryType type, UUID eventID, String leaderBoardName, String remoteUrl,
             String raceName, String regattaName, String eventName, String leaderBoardDisplayName,
-            AnniversaryEventRaceType eventRaceType) {
+            EventType eventRaceType) {
         this(target, null, type);
         this.eventID = eventID;
         this.leaderBoardName = leaderBoardName;
@@ -49,7 +49,7 @@ public class AnniversaryDTO implements DTO {
         this.eventRaceType = eventRaceType;
     }
 
-    public AnniversaryEventRaceType getEventRaceType() {
+    public EventType getEventRaceType() {
         return eventRaceType;
     }
 
