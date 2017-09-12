@@ -124,7 +124,10 @@ public enum BoatClassMasterdata {
     ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int."),
     
     // Performance Handicap Racing Fleet (PHRF) is a handicap system used for racing in North America
-    PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true);
+    PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
+
+    // a 'boat class' to track runners at runnng events 
+    RUNNING ("Runner", true, 1.0, 1.0, BoatHullType.NO_HULL, false, "Running");
 
     private final String displayName;
     private final String[] alternativeNames;

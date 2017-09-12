@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
+import com.sap.sailing.gwt.ui.shared.racemap.CircleVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.DinghyWithSpinnakerVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.Extreme40VectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.GC32VectorGraphics;
@@ -53,9 +54,10 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.RS200, BoatClassMasterdata.RS400, BoatClassMasterdata.RS500, BoatClassMasterdata.RS800,
                 BoatClassMasterdata.STREAMLINE, BoatClassMasterdata.SWAN_45, BoatClassMasterdata.TEENY, BoatClassMasterdata.X_99,
                 BoatClassMasterdata.TRIAS);
+        BoatClassVectorGraphics circle = new CircleVectorGraphics(BoatClassMasterdata.RUNNING);
 
         defaultBoatVectorGraphics = dinghyWithSpinnaker; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.
-        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker, dinghyWithSpinnaker, gc32}) {
+        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker, dinghyWithSpinnaker, gc32, circle}) {
             for (BoatClassMasterdata b : g.getCompatibleBoatClasses()) {
                 compatibleBoatVectorGraphicsMap.put(b, g);
             }

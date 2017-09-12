@@ -84,7 +84,7 @@ public class FormattedDoubleDetailTypeColumn extends DetailTypeColumn<Double, St
     @Override
     public String getStringValueToRender(LeaderboardRowDTO object) {
         String value = getValue(object);
-        if (!value.isEmpty() && value != null) {
+        if (value != null && !value.isEmpty()) {
             return getValue(object);
         }
         return null;
