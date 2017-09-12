@@ -3,7 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style field="style" type="com.sap.sailing.gwt.home.mobile.partials.anniversary.AnniversaryItem.Style">
+    <ui:style field="style" type="com.sap.sailing.gwt.home.shared.partials.anniversary.AbstractAnniversaryItem.Style">
         .content {
             padding: 1em .7em;
             background-color: #f8f8f8;
