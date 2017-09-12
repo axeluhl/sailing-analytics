@@ -174,7 +174,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
     }
     
     public synchronized void setKnownAnniversaries(Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> anniversaries) {
-        clear();
+        knownAnniversaries.clear();
         if (anniversaries != null) {
             knownAnniversaries.putAll(anniversaries);
         }
