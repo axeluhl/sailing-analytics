@@ -2868,6 +2868,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logoutput.append(String.format("%3s\n", matcher.toString()));
         }
 
+        logger.info("Serializing anniversary races...");
+        final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = raceListAnniversaryDeterminator
+                .getKnownAnniversaries();
+        oos.writeObject(knownAnniversaries);
+        logoutput.append("Serialized " + knownAnniversaries.size() + " anniversary races\n");
+
         logger.info("Serializing remote sailing server references...");
         final ArrayList<RemoteSailingServerReference> remoteServerReferences = new ArrayList<>(remoteSailingServerSet
                 .getCachedEventsForRemoteSailingServers().keySet());
@@ -2968,6 +2974,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
             logoutput.append(String.format("%3s\n", matcher.toString()));
         }
+
+        logger.info("Reading anniversary races...");
+        final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = (Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>>) ois
+                .readObject();
+        raceListAnniversaryDeterminator.setKnownAnniversaries(knownAnniversaries);
+        logoutput.append("Received " + knownAnniversaries.size() + " anniversary races\n");
 
         logger.info("Reading remote sailing server references...");
         for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois
