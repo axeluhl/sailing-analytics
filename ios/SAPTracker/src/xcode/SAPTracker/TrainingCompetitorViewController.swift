@@ -50,20 +50,83 @@ class TrainingCompetitorViewController: SessionViewController {
     // MARK: - Actions
     
     override func startTrackingButtonTapped(_ sender: AnyObject) {
-        trainingController.leaderboardStartTracking(forCheckIn: competitorCheckIn, success: { 
-            super.startTrackingButtonTapped(sender)
-        }) { (error) in
-            // TODO
-            logError(name: "\(#function)", error: error)
+        self.stopActiveTrainingRace(success: {
+            self.startNewTrainingRace(success: {
+                super.startTrackingButtonTapped(sender)
+            }) { [weak self] (error) in
+                self?.showAlert(forError: error)
+            }
+        }) { [weak self] (error) in
+            self?.showAlert(forError: error)
         }
     }
     
-    @IBAction func stopTrainingButtonTapped(_ sender: Any) {
-        trainingController.leaderboardStopTracking(forCheckIn: competitorCheckIn, success: {
-            
-        }) { (error) in
-            
+    fileprivate func stopActiveTrainingRace(
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        if let activeTrainingRaceData = Preferences.activeTrainingRaceData {
+            trainingController.leaderboardRaceStopTracking(forTrainingRaceData: activeTrainingRaceData, success: {
+                self.autoCourseTrainingRace(forTrainingRaceData: activeTrainingRaceData) { (withSuccess) in
+                    Preferences.activeTrainingRaceData = nil
+                    success()
+                }
+            }) { (error) in
+                failure(error)
+            }
+        } else {
+            success()
         }
+    }
+    
+    fileprivate func startNewTrainingRace(
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        trainingController.leaderboardRaceStartTracking(forCheckIn: competitorCheckIn, success: { (trainingRaceData) in
+            Preferences.activeTrainingRaceData = trainingRaceData
+            success()
+        }) { (error) in
+            failure(error)
+        }
+    }
+    
+    fileprivate func autoCourseTrainingRace(
+        forTrainingRaceData trainingRaceData: TrainingRaceData,
+        completion: @escaping (_ withSuccess: Bool) -> Void)
+    {
+        autoCourseTrainingRace(
+            leaderboardName: trainingRaceData.leaderboardName,
+            raceColumnName: trainingRaceData.raceColumnName,
+            fleetName: trainingRaceData.fleetName,
+            completion: completion
+        )
+    }
+    
+    fileprivate func autoCourseTrainingRace(
+        leaderboardName: String,
+        raceColumnName: String,
+        fleetName: String,
+        completion: @escaping (_ withSuccess: Bool) -> Void)
+    {
+        trainingController.leaderboardRaceAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+            completion(true)
+        }) { (error) in
+            completion(false)
+        }
+    }
+    
+    // MARK: - Alerts
+    
+    fileprivate func showAlert(forError error: Error) {
+        let alertController = UIAlertController(
+            title: Translation.Common.Error.String,
+            message: error.localizedDescription,
+            preferredStyle: .alert
+        )
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default, handler: nil)
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
     }
     
     // MARK: - Properties

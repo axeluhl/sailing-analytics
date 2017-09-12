@@ -47,16 +47,6 @@ class TrainingMarkViewController: SessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
-    // MARK: - Actions
-    
-    @IBAction func stopTrainingButtonTapped(_ sender: Any) {
-        trainingController.leaderboardStopTracking(forCheckIn: markCheckIn, success: {
-            
-        }) { (error) in
-            
-        }
-    }
-    
     // MARK: - Properties
     
     fileprivate lazy var markSessionController: MarkSessionController = {

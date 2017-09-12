@@ -142,11 +142,11 @@ class TrainingController: NSObject {
         }
     }
     
-    // MARK: - LeaderboardStartTracking
+    // MARK: - LeaderboardRaceStartTracking
     
-    func leaderboardStartTracking(
+    func leaderboardRaceStartTracking(
         forCheckIn checkIn: CheckIn,
-        success: @escaping () -> Void,
+        success: @escaping (_ trainingRaceData: TrainingRaceData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
         let leaderboardName = checkIn.leaderboard.name
@@ -156,7 +156,14 @@ class TrainingController: NSObject {
             let fleetName = regattaRaceColumnAddData.fleetName
             self.trainingRequestManager.postLeaderboardRaceSetStartTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
                 self.trainingRequestManager.postLeaderboardStartTracking(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-                    success()
+                    success(
+                        TrainingRaceData(
+                            leaderboardName: leaderboardName,
+                            regattaName: regattaName,
+                            raceColumnName: raceColumnName,
+                            fleetName: fleetName
+                        )
+                    )
                 }, failure: { (error, message) in
                     failure(error)
                 })
@@ -168,17 +175,52 @@ class TrainingController: NSObject {
         }
     }
     
-    // MARK: - LeaderboardStopTracking
+    // MARK: - LeaderboardRaceStopTracking
     
-    func leaderboardStopTracking(
-        forCheckIn checkIn: CheckIn,
+    func leaderboardRaceStopTracking(
+        forTrainingRaceData data: TrainingRaceData,
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        let leaderboardName = checkIn.leaderboard.name
-        let raceColumnName = "R1"
-        let fleetName = "Default"
-        self.trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+        leaderboardRaceStopTracking(
+            leaderboardName: data.leaderboardName,
+            regattaName: data.regattaName,
+            raceColumnName: data.raceColumnName,
+            fleetName: data.fleetName,
+            success: success,
+            failure: failure
+        )
+    }
+    
+    fileprivate func leaderboardRaceStopTracking(
+        leaderboardName: String,
+        regattaName: String,
+        raceColumnName: String,
+        fleetName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        self.trainingRequestManager.postLeaderboardStopTracking(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+            self.trainingRequestManager.postLeaderboardRaceSetStopTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+                success()
+            }) { (error, message) in
+                failure(error)
+            }
+        }) { (error, message) in
+            failure(error)
+        }
+    }
+    
+    // MARK: - LeaderboardRaceAutoCourse
+    
+    func leaderboardRaceAutoCourse(
+        leaderboardName: String,
+        raceColumnName: String,
+        fleetName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
             success()
         }) { (error, message) in
             failure(error)

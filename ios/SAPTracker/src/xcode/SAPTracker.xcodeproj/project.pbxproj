@@ -369,6 +369,7 @@
 		C8CF22A91F62780C00A01E0A /* CheckInDataCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */; };
 		C8CF22AD1F668BAB00A01E0A /* TrainingMarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */; };
 		C8CF22B41F67C4D800A01E0A /* RegattaRaceColumnAddData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */; };
+		C8CF22B81F68133000A01E0A /* TrainingRaceData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
 		C8E0BD0A1F39A08B002FCCA5 /* FormularViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */; };
 		C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */; };
@@ -781,6 +782,7 @@
 		C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInDataCollector.swift; sourceTree = "<group>"; };
 		C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingMarkViewController.swift; sourceTree = "<group>"; };
 		C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaRaceColumnAddData.swift; sourceTree = "<group>"; };
+		C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingRaceData.swift; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 3.xcdatamodel"; sourceTree = "<group>"; };
 		C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormularViewController.swift; sourceTree = "<group>"; };
@@ -1354,6 +1356,7 @@
 				C8FF5B7B1EB8CF2C00CF9764 /* MarkData.swift */,
 				C8BFCCC31D51C53500FC1A27 /* TeamData.swift */,
 				C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */,
+				C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -2076,6 +2079,7 @@
 				C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
 				C843D48F1EC099EB00250F01 /* CoreData2-3.xcmappingmodel in Sources */,
+				C8CF22B81F68133000A01E0A /* TrainingRaceData.swift in Sources */,
 				C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaCompetitorViewController.swift in Sources */,
 				C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */,

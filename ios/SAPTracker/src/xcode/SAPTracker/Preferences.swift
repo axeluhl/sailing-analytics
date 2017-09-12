@@ -21,6 +21,7 @@ class Preferences: NSObject {
     }
     
     struct PreferenceKey {
+        static let ActiveTrainingRaceData = "ActiveTrainingRaceData"
         static let CodeConventionRead = "CodeConventionRead"
         static let BatterySaving = "BatterySaving"
         static let NewCheckInURL = "NewCheckInURL"
@@ -29,6 +30,25 @@ class Preferences: NSObject {
     }
     
     fileprivate static let preferences = UserDefaults.standard
+    
+    // MARK: - ActiveTrainingRaceData
+    
+    class var activeTrainingRaceData: TrainingRaceData? {
+        get {
+            guard let data = preferences.data(forKey: PreferenceKey.ActiveTrainingRaceData) else { return nil }
+            guard let trainingRaceData = NSKeyedUnarchiver.unarchiveObject(with: data) as? TrainingRaceData else { return nil }
+            return trainingRaceData
+        }
+        set (value) {
+            if let rootObject = value {
+                let data = NSKeyedArchiver.archivedData(withRootObject: rootObject)
+                preferences.set(data, forKey: PreferenceKey.ActiveTrainingRaceData)
+            } else {
+                preferences.set(nil, forKey: PreferenceKey.ActiveTrainingRaceData)
+            }
+            preferences.synchronize()
+        }
+    }
     
     // MARK: - CodeConventionRead
     
