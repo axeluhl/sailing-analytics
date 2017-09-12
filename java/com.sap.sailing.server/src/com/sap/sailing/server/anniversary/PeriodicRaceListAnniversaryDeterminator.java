@@ -36,12 +36,10 @@ public class PeriodicRaceListAnniversaryDeterminator {
      */
     private Integer currentRaceCount;
 
-    private final RacingEventService raceService;
+    private final RacingEventService raceEventService;
     private final RemoteSailingServerSet remoteSailingServerSet;
-
     private final Runnable raceChangedListener;
-    
-    private AtomicBoolean isStarted = new AtomicBoolean(false);
+    private final AtomicBoolean isStarted = new AtomicBoolean(false);
 
     public interface AnniversaryChecker {
 
@@ -78,14 +76,14 @@ public class PeriodicRaceListAnniversaryDeterminator {
         AnniversaryType getType();
     }
 
-    public PeriodicRaceListAnniversaryDeterminator(RacingEventService raceService,
+    public PeriodicRaceListAnniversaryDeterminator(RacingEventService raceEventService,
             RemoteSailingServerSet remoteSailingServerSet, AnniversaryChecker... checkerToUse) {
-        this.raceService = raceService;
+        this.raceEventService = raceEventService;
         this.remoteSailingServerSet = remoteSailingServerSet;
         this.knownAnniversaries = new ConcurrentHashMap<>();
 
         try {
-            knownAnniversaries.putAll(raceService.getDomainObjectFactory().getAnniversaryData());
+            knownAnniversaries.putAll(raceEventService.getDomainObjectFactory().getAnniversaryData());
         } catch (MalformedURLException e) {
             logger.warning("Could not load anniversaries from MongoDb");
         }
@@ -109,7 +107,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
                     result.getA().forEach(race -> allRaces.put(race.getIdentifier(), race));
                 }
             });
-            allRaces.putAll(raceService.getLocalRaceList());
+            allRaces.putAll(raceEventService.getLocalRaceList());
             if (currentRaceCount == null || allRaces.size() != currentRaceCount) {
                 checkForNewAnniversaries(allRaces);
             }
@@ -151,17 +149,17 @@ public class PeriodicRaceListAnniversaryDeterminator {
             }
             currentRaceCount = allRaces.size();
             if (requiresPersist) {
-                raceService.getMongoObjectFactory().storeAnniversaryData(knownAnniversaries);
+                raceEventService.getMongoObjectFactory().storeAnniversaryData(knownAnniversaries);
             }
         }
     }
 
     private void insert(int anniversaryToCheck, SimpleRaceInfo simpleRaceInfo, AnniversaryType anniversaryType) {
-        DetailedRaceInfo fullData = raceService.getFullDetailsForRaceCascading(simpleRaceInfo.getIdentifier());
+        DetailedRaceInfo fullData = raceEventService.getFullDetailsForRaceCascading(simpleRaceInfo.getIdentifier());
         logger.info("Determined new Anniversary! " + anniversaryToCheck + " - " + anniversaryType + " - " + fullData);
         final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData = new Pair<>(fullData, anniversaryType);
         if (!knownAnniversaries.containsKey(anniversaryToCheck)) {
-            raceService.apply(new AddAnniversaryOperation(anniversaryToCheck, anniversaryData));
+            raceEventService.apply(new AddAnniversaryOperation(anniversaryToCheck, anniversaryData));
         }
     }
 
