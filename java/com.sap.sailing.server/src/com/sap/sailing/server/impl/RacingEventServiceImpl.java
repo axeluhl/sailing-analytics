@@ -4037,4 +4037,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries() {
         return raceListAnniversaryDeterminator.getKnownAnniversaries();
     }
+    
+    @Override
+    public PeriodicRaceListAnniversaryDeterminator getAnniversaryRaceDeterminator() {
+        return raceListAnniversaryDeterminator;
+    }
 }

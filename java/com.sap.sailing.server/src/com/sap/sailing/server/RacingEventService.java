@@ -83,6 +83,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.server.anniversary.PeriodicRaceListAnniversaryDeterminator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sse.common.TimePoint;
@@ -774,4 +775,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         {@link AnniversaryType type}, or <code>null</code> if there's no anniversary so far
      */
     Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
+    
+    PeriodicRaceListAnniversaryDeterminator getAnniversaryRaceDeterminator();
 }

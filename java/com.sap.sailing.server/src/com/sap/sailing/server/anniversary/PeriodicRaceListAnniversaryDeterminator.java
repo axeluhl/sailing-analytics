@@ -149,8 +149,12 @@ public class PeriodicRaceListAnniversaryDeterminator {
     private void insert(int anniversaryToCheck, SimpleRaceInfo simpleRaceInfo, AnniversaryType anniversaryType) {
         DetailedRaceInfo fullData = raceService.getFullDetailsForRaceCascading(simpleRaceInfo.getIdentifier());
         logger.info("Determined new Anniversary! " + anniversaryToCheck + " - " + anniversaryType + " - " + fullData);
-        knownAnniversaries.putIfAbsent(anniversaryToCheck, new Pair<>(fullData, anniversaryType));
-        // TODO replication here, to ensure all replicas have the exact same race as anniversary!
+        final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData = new Pair<>(fullData, anniversaryType);
+        raceService.apply(new AddAnniversaryOperation(anniversaryToCheck, anniversaryData));
+    }
+
+    synchronized void addAnniversary(int anniversaryToCheck, final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData) {
+        knownAnniversaries.putIfAbsent(anniversaryToCheck, anniversaryData);
     }
 
     public Pair<Integer, AnniversaryType> getNextAnniversaryNumber() {
