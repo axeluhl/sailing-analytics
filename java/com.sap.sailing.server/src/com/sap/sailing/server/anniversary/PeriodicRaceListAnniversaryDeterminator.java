@@ -116,41 +116,43 @@ public class PeriodicRaceListAnniversaryDeterminator {
         }
     }
 
-    private void checkForNewAnniversaries(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
-        ArrayList<SimpleRaceInfo> allRaces = new ArrayList<>(races.values());
-        Collections.sort(allRaces, new Comparator<SimpleRaceInfo>() {
-            @Override
-            public int compare(SimpleRaceInfo o1, SimpleRaceInfo o2) {
-                return o1.getStartOfRace().compareTo(o2.getStartOfRace());
-            }
-        });
-        boolean requiresPersist = false;
-        Integer nearestNext = Integer.MAX_VALUE;
-        AnniversaryType nearestType = null;
-        for (AnniversaryChecker checker : checkers) {
-            checker.update(allRaces.size());
-            // find past anniversaries
-            for (Integer anniversary : checker.getAnniversaries()) {
-                if (!knownAnniversaries.containsKey(anniversary)) {
-                    // adjust for zero started counting of the allRaceslist
-                    SimpleRaceInfo anniversaryRace = allRaces.get(anniversary - 1);
-                    insert(anniversary, anniversaryRace, checker.getType());
-                    requiresPersist = true;
+    private synchronized void checkForNewAnniversaries(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
+        if (isStarted.get()) {
+            ArrayList<SimpleRaceInfo> allRaces = new ArrayList<>(races.values());
+            Collections.sort(allRaces, new Comparator<SimpleRaceInfo>() {
+                @Override
+                public int compare(SimpleRaceInfo o1, SimpleRaceInfo o2) {
+                    return o1.getStartOfRace().compareTo(o2.getStartOfRace());
+                }
+            });
+            boolean requiresPersist = false;
+            Integer nearestNext = Integer.MAX_VALUE;
+            AnniversaryType nearestType = null;
+            for (AnniversaryChecker checker : checkers) {
+                checker.update(allRaces.size());
+                // find past anniversaries
+                for (Integer anniversary : checker.getAnniversaries()) {
+                    if (!knownAnniversaries.containsKey(anniversary)) {
+                        // adjust for zero started counting of the allRaceslist
+                        SimpleRaceInfo anniversaryRace = allRaces.get(anniversary - 1);
+                        insert(anniversary, anniversaryRace, checker.getType());
+                        requiresPersist = true;
+                    }
+                }
+                // find next anniversaries
+                Integer next = checker.getNextAnniversary();
+                if (next != null && next < nearestNext) {
+                    nearestNext = next;
+                    nearestType = checker.getType();
                 }
             }
-            // find next anniversaries
-            Integer next = checker.getNextAnniversary();
-            if (next != null && next < nearestNext) {
-                nearestNext = next;
-                nearestType = checker.getType();
+            if (nearestNext.intValue() != Integer.MAX_VALUE) {
+                nextAnniversaryNumber = new Pair<Integer, AnniversaryType>(nearestNext, nearestType);
             }
-        }
-        if (nearestNext.intValue() != Integer.MAX_VALUE) {
-            nextAnniversaryNumber = new Pair<Integer, AnniversaryType>(nearestNext, nearestType);
-        }
-        currentRaceCount = allRaces.size();
-        if (requiresPersist) {
-            raceService.getMongoObjectFactory().storeAnniversaryData(knownAnniversaries);
+            currentRaceCount = allRaces.size();
+            if (requiresPersist) {
+                raceService.getMongoObjectFactory().storeAnniversaryData(knownAnniversaries);
+            }
         }
     }
 
