@@ -73,8 +73,8 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
 
     private String getRaceDisplayName(AnniversaryDTO anniversary) {
         final String eventName = anniversary.getEventName();
-        final String leaderboardDisplayName = anniversary.getLeaderBoardDisplayName() != null
-                ? anniversary.getLeaderBoardDisplayName() : anniversary.getLeaderBoardName();
+        final String leaderboardDisplayName = anniversary.getLeaderboardDisplayName() != null
+                ? anniversary.getLeaderboardDisplayName() : anniversary.getLeaderboardName();
         final String leaderboardAndRaceName = leaderboardDisplayName + " - " + anniversary.getRaceName();
         if (anniversary.getEventType() == EventType.MULTI_REGATTA) {
             return eventName == null ? leaderboardAndRaceName : eventName + " - " + leaderboardAndRaceName;
@@ -86,7 +86,7 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
     private String getRaceBoardLink(AnniversaryDTO anniversary) {
         return EntryPointWithSettingsLinkFactory.createRaceBoardLink(anniversary.getRemoteUrl(),
                 new RaceboardContextDefinition(anniversary.getRegattaName(), anniversary.getRaceName(),
-                        anniversary.getLeaderBoardName(), null, anniversary.getEventID(), null),
+                        anniversary.getLeaderboardName(), null, anniversary.getEventID(), null),
                 new PerspectiveCompositeSettings<>(new RaceBoardPerspectiveOwnSettings(), Collections
                         .singletonMap(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true))));
     }

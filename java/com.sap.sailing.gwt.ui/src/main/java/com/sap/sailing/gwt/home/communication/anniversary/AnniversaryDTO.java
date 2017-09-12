@@ -16,11 +16,11 @@ public class AnniversaryDTO implements DTO {
     private EventType eventType;
     private AnniversaryType type;
     private UUID eventID;
-    private String leaderBoardName;
+    private String leaderboardName;
     private String remoteUrl;
     private String regattaName;
     private String raceName;
-    private String leaderBoardDisplayName;
+    private String leaderboardDisplayName;
     private String eventName;
 
     /**
@@ -35,17 +35,17 @@ public class AnniversaryDTO implements DTO {
         this.type = type;
     }
 
-    AnniversaryDTO(int target, AnniversaryType type, UUID eventID, String leaderBoardName, String remoteUrl,
-            String raceName, String regattaName, String eventName, String leaderBoardDisplayName,
+    AnniversaryDTO(int target, AnniversaryType type, UUID eventID, String leaderboardName, String remoteUrl,
+            String raceName, String regattaName, String eventName, String leaderboardDisplayName,
             EventType eventType) {
         this(target, null, type);
         this.eventID = eventID;
-        this.leaderBoardName = leaderBoardName;
+        this.leaderboardName = leaderboardName;
         this.remoteUrl = remoteUrl;
         this.raceName = raceName;
         this.regattaName = regattaName;
         this.eventName = eventName;
-        this.leaderBoardDisplayName = leaderBoardDisplayName;
+        this.leaderboardDisplayName = leaderboardDisplayName;
         this.eventType = eventType;
     }
 
@@ -61,8 +61,8 @@ public class AnniversaryDTO implements DTO {
         return eventName;
     }
 
-    public String getLeaderBoardDisplayName() {
-        return leaderBoardDisplayName;
+    public String getLeaderboardDisplayName() {
+        return leaderboardDisplayName;
     }
 
     public Integer getCountDown() {
@@ -77,8 +77,8 @@ public class AnniversaryDTO implements DTO {
         return eventID;
     }
 
-    public String getLeaderBoardName() {
-        return leaderBoardName;
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
 
     public String getRemoteUrl() {
@@ -94,14 +94,14 @@ public class AnniversaryDTO implements DTO {
     }
 
     public boolean isAnnouncement() {
-        return countDown == null && eventID != null && leaderBoardName != null && regattaName != null
+        return countDown == null && eventID != null && leaderboardName != null && regattaName != null
                 && raceName != null;
     }
 
     @Override
     public String toString() {
         return "AnniversaryInformation [target=" + target + ", countDown=" + countDown + ", type=" + type + ", eventID="
-                + eventID + ", leaderBoardName=" + leaderBoardName + ", remoteUrl=" + remoteUrl + ", regattaName="
+                + eventID + ", leaderboardName=" + leaderboardName + ", remoteUrl=" + remoteUrl + ", regattaName="
                 + regattaName + ", raceName=" + raceName + "]";
     }
 }
