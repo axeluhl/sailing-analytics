@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
@@ -37,6 +38,10 @@ public class PeriodicRaceListAnniversaryDeterminator {
 
     private final RacingEventService raceService;
     private final RemoteSailingServerSet remoteSailingServerSet;
+
+    private final Runnable raceChangedListener;
+    
+    private AtomicBoolean isStarted = new AtomicBoolean(false);
 
     public interface AnniversaryChecker {
 
@@ -88,23 +93,26 @@ public class PeriodicRaceListAnniversaryDeterminator {
         for (AnniversaryChecker toAdd : checkerToUse) {
             checkers.add(toAdd);
         }
-        remoteSailingServerSet.addRemoteRaceResultReceivedCallback(this::update);
+        raceChangedListener = this::update;
+        start();
     }
 
     private void update() {
-        // All races need to be passed through this map to eliminate duplicates based on the RegattaAndRaceIdentifier
-        final Map<RegattaAndRaceIdentifier, SimpleRaceInfo> allRaces = new HashMap<>();
-        remoteSailingServerSet.getCachedRaceList().forEach((remoteServer, result) -> {
-            if (result.getB() != null) {
-                logger.warning("Could not update anniversary determinator, because remote server "
-                        + remoteServer.getURL() + " returned error " + result.getB());
-            } else {
-                result.getA().forEach(race -> allRaces.put(race.getIdentifier(), race));
+        if (isStarted.get()) {
+            // All races need to be passed through this map to eliminate duplicates based on the RegattaAndRaceIdentifier
+            final Map<RegattaAndRaceIdentifier, SimpleRaceInfo> allRaces = new HashMap<>();
+            remoteSailingServerSet.getCachedRaceList().forEach((remoteServer, result) -> {
+                if (result.getB() != null) {
+                    logger.warning("Could not update anniversary determinator, because remote server "
+                            + remoteServer.getURL() + " returned error " + result.getB());
+                } else {
+                    result.getA().forEach(race -> allRaces.put(race.getIdentifier(), race));
+                }
+            });
+            allRaces.putAll(raceService.getLocalRaceList());
+            if (currentRaceCount == null || allRaces.size() != currentRaceCount) {
+                checkForNewAnniversaries(allRaces);
             }
-        });
-        allRaces.putAll(raceService.getLocalRaceList());
-        if (currentRaceCount == null || allRaces.size() != currentRaceCount) {
-            checkForNewAnniversaries(allRaces);
         }
     }
 
@@ -174,5 +182,16 @@ public class PeriodicRaceListAnniversaryDeterminator {
 
     public Integer getCurrentRaceCount() {
         return currentRaceCount;
+    }
+    
+    public void start() {
+        isStarted.set(true);
+        remoteSailingServerSet.addRemoteRaceResultReceivedCallback(raceChangedListener);
+    }
+    
+    public synchronized void clearAndStop() {
+        isStarted.set(false);
+        remoteSailingServerSet.removeRemoteRaceCountChangedCallback(raceChangedListener);
+        knownAnniversaries.clear();
     }
 }
