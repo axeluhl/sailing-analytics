@@ -61,98 +61,11 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     // MARK: - Review
     
     fileprivate func review() {
-        self.reviewTerms(completion: {
-            logInfo(name: "\(#function)", info: "Review terms done.")
-            self.reviewCodeConvention(completion: {
-                logInfo(name: "\(#function)", info: "Review code convention done.")
-                self.reviewGPSFixes(completion: {
-                    logInfo(name: "\(#function)", info: "Review GPS fixes done.")
-                    self.reviewNewCheckIn(completion: { (checkIn) in
-                        logInfo(name: "\(#function)", info: "Review new check-in done.")
-                        self.performSegue(forCheckIn: checkIn)
-                    })
-                })
-            })
+        reviewNewCheckIn(completion: { [weak self] (checkIn) in
+            logInfo(name: "\(#function)", info: "Review new check-in done.")
+            self?.performSegue(forCheckIn: checkIn)
         })
     }
-    
-    // MARK: 1. Review Terms
-    
-    fileprivate func reviewTerms(completion: @escaping () -> Void) {
-        guard Preferences.termsAccepted == false else {
-            completion()
-            return
-        }
-        let alertController = UIAlertController(
-            title: Translation.RegattaCheckInListView.TermsAlert.Title.String,
-            message: Translation.RegattaCheckInListView.TermsAlert.Message.String,
-            preferredStyle: .alert
-        )
-        let showTermsAction = UIAlertAction(title: Translation.RegattaCheckInListView.TermsAlert.ShowTermsAction.Title.String, style: .default) { [weak self] (action) in
-            UIApplication.shared.openURL(URLs.Terms)
-            self?.reviewTerms(completion: completion) // Review terms until user accepted terms
-        }
-        let acceptTermsAction = UIAlertAction(title: Translation.RegattaCheckInListView.TermsAlert.AcceptTermsAction.Title.String, style: .default) { (action) in
-            Preferences.termsAccepted = true
-            completion() // Terms accepted
-        }
-        alertController.addAction(showTermsAction)
-        alertController.addAction(acceptTermsAction)
-        present(alertController, animated: true, completion: nil)
-    }
-    
-    // MARK: 2. Review Code Convention
-    
-    fileprivate func reviewCodeConvention(completion: @escaping () -> Void) {
-        #if DEBUG
-            guard Preferences.codeConventionRead == false else { completion(); return }
-            let alertController = UIAlertController(
-                title: "Code Convention",
-                message: "Please try to respect the code convention which is used for this project.",
-                preferredStyle: .alert
-            )
-            let showCodeConventionAction = UIAlertAction(title: "Code Convention", style: .default) { [weak self] (action) in
-                UIApplication.shared.openURL(URLs.CodeConvention)
-                self?.reviewCodeConvention(completion: completion)
-            }
-            let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
-                Preferences.codeConventionRead = true
-                completion()
-            }
-            alertController.addAction(showCodeConventionAction)
-            alertController.addAction(okAction)
-            present(alertController, animated: true, completion: nil)
-        #else
-            completion()
-        #endif
-    }
-    
-    // MARK: 3. Review GPS Fixes
-    
-    fileprivate func reviewGPSFixes(completion: @escaping () -> Void) {
-        SVProgressHUD.show()
-        fetchedResultsController?.delegate = nil
-        let checkIns = regattaCoreDataManager.fetchCheckIns() ?? []
-        reviewGPSFixes(checkIns: checkIns) { [weak self] in
-            self?.reviewGPSFixesCompleted(completion: completion)
-        }
-    }
-    
-    fileprivate func reviewGPSFixes(checkIns: [CheckIn], completion: @escaping () -> Void) {
-        guard checkIns.count > 0 else { completion(); return }
-        let gpsFixController = GPSFixController.init(checkIn: checkIns[0], coreDataManager: RegattaCoreDataManager.shared)
-        gpsFixController.sendAll(completion: { [weak self] (withSuccess) in
-            self?.reviewGPSFixes(checkIns: Array(checkIns[1..<checkIns.count]), completion: completion)
-        })
-    }
-    
-    fileprivate func reviewGPSFixesCompleted(completion: () -> Void) {
-        SVProgressHUD.popActivity()
-        fetchedResultsController?.delegate = self
-        completion()
-    }
-    
-    // MARK: 4. Review New Check-In
     
     fileprivate func reviewNewCheckIn(completion: @escaping (_ checkIn: CheckIn?) -> Void) {
         guard let urlString = Preferences.newCheckInURL else { completion(nil); return }
