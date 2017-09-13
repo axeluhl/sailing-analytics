@@ -50,13 +50,17 @@ class TrainingCompetitorViewController: SessionViewController {
     // MARK: - Actions
     
     override func startTrackingButtonTapped(_ sender: AnyObject) {
+        SVProgressHUD.show()
         self.trainingController.stopActiveRace(success: { 
             self.trainingController.startNewRace(forCheckIn: self.competitorCheckIn, success: {
+                SVProgressHUD.dismiss()
                 super.startTrackingButtonTapped(sender)
             }) { [weak self] (error) in
+                SVProgressHUD.dismiss()
                 self?.showAlert(forError: error)
             }
         }) { [weak self] (error) in
+            SVProgressHUD.dismiss()
             self?.showAlert(forError: error)
         }
     }
