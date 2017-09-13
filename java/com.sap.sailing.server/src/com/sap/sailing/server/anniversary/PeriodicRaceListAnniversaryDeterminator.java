@@ -142,8 +142,8 @@ public class PeriodicRaceListAnniversaryDeterminator {
             }
             
             synchronized (this) {
-                if (nearestNext.intValue() != Integer.MAX_VALUE) {
-                    nextAnniversaryNumber = new Pair<Integer, AnniversaryType>(nearestNext, nearestType);
+                if (nearestNext != null && (nextAnniversaryNumber == null || nearestNext.compareTo(nextAnniversaryNumber.getA()) > 0)) {
+                    racingEventService.apply(new UpdateNextAnniversaryOperation(new Pair<Integer, AnniversaryType>(nearestNext, nearestType)));
                 }
                 
                 boolean requiresPersist = false;
@@ -156,7 +156,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
                         requiresPersist = true;
                     }
                 }
-                currentRaceCount = allRaces.size();
+                racingEventService.apply(new UpdateRaceCountOperation(allRaces.size()));
                 if (requiresPersist) {
                     racingEventService.getMongoObjectFactory().storeAnniversaryData(knownAnniversaries);
                 }
@@ -173,6 +173,14 @@ public class PeriodicRaceListAnniversaryDeterminator {
 
     synchronized void addAnniversary(int anniversaryToCheck, final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData) {
         knownAnniversaries.put(anniversaryToCheck, anniversaryData);
+    }
+    
+    synchronized void setNextAnniversary(Pair<Integer, AnniversaryType> nextAnniversary) {
+        nextAnniversaryNumber = nextAnniversary;
+    }
+    
+    synchronized void setRaceCount(int raceCount) {
+        currentRaceCount = raceCount;
     }
 
     public Pair<Integer, AnniversaryType> getNextAnniversaryNumber() {
