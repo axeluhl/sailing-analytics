@@ -22,6 +22,7 @@ class TrainingViewController: UIViewController {
     weak var trainingCoreDataManager: CoreDataManager!
     
     @IBOutlet weak var stopTrainingButton: UIButton!
+    @IBOutlet weak var stopTrainingButtonZeroHeight: NSLayoutConstraint!
     @IBOutlet weak var trainingNameLabel: UILabel!
     @IBOutlet weak var leaderboardButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
@@ -29,6 +30,18 @@ class TrainingViewController: UIViewController {
     // MARK: - Refresh
     
     func refresh() {
+        refreshStopTrainingButton()
+        refreshTrainingNameLabel()
+        UIView.animate(withDuration: 0.5) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    fileprivate func refreshStopTrainingButton() {
+        stopTrainingButtonZeroHeight.isActive = isTrainingActive
+    }
+    
+    fileprivate func refreshTrainingNameLabel() {
         trainingNameLabel.text = trainingCheckIn.event.name
     }
     
@@ -59,6 +72,12 @@ class TrainingViewController: UIViewController {
     }
     
     // MARK: - Properties
+    
+    fileprivate var isTrainingActive: Bool {
+        get {
+             return trainingCheckIn.event.endDate - Date().timeIntervalSince1970 < 0
+        }
+    }
     
     fileprivate lazy var trainingController: TrainingController = {
         return TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: self.trainingCheckIn.serverURL)
