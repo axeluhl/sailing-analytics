@@ -68,6 +68,14 @@
         .linkContainer > a {
             margin-top: 1em;
         }
+        .disclaimer {
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #008fcc;
+            line-height: .5em;
+            position: absolute;
+            bottom: .5em;
+        }
     </ui:style>
     <div class="{style.main}">
         <div class="{style.content}">
@@ -78,7 +86,10 @@
             </div>
             <div class="{style.textContainer}">
                 <div ui:field="teaserUi" class="{style.teaser}"></div>
-                <div ui:field="descriptionUi" class="{style.description}"></div>
+                <div class="{style.description}">
+                    <span ui:field="descriptionUi"></span>
+	                <span ui:field="disclaimerUi" class="{style.disclaimer}">*</span>
+                </div>
             </div>
         </div>
         <div class="{style.linkContainer}">

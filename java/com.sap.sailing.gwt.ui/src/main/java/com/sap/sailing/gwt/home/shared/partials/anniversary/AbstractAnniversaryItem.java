@@ -1,28 +1,39 @@
 package com.sap.sailing.gwt.home.shared.partials.anniversary;
 
 import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView.AnniversaryAnnouncement;
+import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
+import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.DefaultPresenter;
+import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.Direction;
 
 public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnouncement {
 
     @UiField
     public Style style;
     @UiField
-    public DivElement iconUi, countUi, unitUi, teaserUi, descriptionUi;
+    public Element iconUi, countUi, unitUi, teaserUi, descriptionUi, disclaimerUi;
     @UiField
     public AnchorElement linkUi;
 
     protected void initLayout(boolean isAnnouncement) {
         if (isAnnouncement) {
             this.addStyleName(style.announcement());
+            this.disclaimerUi.removeFromParent();
         } else {
             this.iconUi.removeFromParent();
             this.linkUi.removeFromParent();
         }
+        // FIXME: Adjust Disclaimer content according to legal notices!
+        final Bubble.DefaultPresenter bubblePresenter = new DefaultPresenter(
+                new HTML("Lorem ipsum Lorem ipsum<br>Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum<br>Lorem ipsum "
+                        + "Lorem ipsum<br>Lorem ipsum Lorem ipsum Lorem ipsum<br>Lorem ipsum Lorem ipsum Lorem ipsum"),
+                descriptionUi, descriptionUi, Direction.BOTTOM);
+        bubblePresenter.registerTarget(disclaimerUi);
     }
 
     @Override

@@ -54,6 +54,16 @@
             font-weight: bold;
             color: #008fcc;
         }
+        .description {
+            position: relative;
+        }
+        .disclaimer {
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #008fcc;
+            line-height: 1em;
+            position: absolute;
+        }
         .link {
             width: 100%;
             text-align: center;
@@ -67,7 +77,10 @@
             <div ui:field="unitUi" class="{style.unit}"></div>
         </div>
         <div ui:field="teaserUi" class="{style.teaser}"></div>
-        <div ui:field="descriptionUi" class="{style.description}"></div>
+        <div class="{style.description}">
+            <span ui:field="descriptionUi"></span>
+            <span class="{style.disclaimer}" ui:field="disclaimerUi">*</span>
+        </div>
         <a ui:field="linkUi" target="_blank" class="{res.mainCss.button} {res.mainCss.buttonstrong} 
                 {res.mainCss.buttonarrowrightwhite} {style.link}">
             <ui:text from="{i18n.anniversaryRaceLinkText}" />
