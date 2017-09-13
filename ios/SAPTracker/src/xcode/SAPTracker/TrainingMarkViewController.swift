@@ -10,7 +10,11 @@ import UIKit
 
 class TrainingMarkViewController: MarkSessionViewController {
     
-    @IBOutlet weak var trainingNameLabel: UILabel!
+    struct Segue {
+        static let EmbedTraining = "EmbedTraining"
+    }
+    
+    weak var trainingViewController: TrainingViewController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,29 +47,19 @@ class TrainingMarkViewController: MarkSessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
-    // MARK: - Actions
+    // MARK: - Segues
     
-    override func startTrackingButtonTapped(_ sender: AnyObject) {
-        SVProgressHUD.show()
-        self.trainingController.stopActiveRace(success: {
-            self.trainingController.startNewRace(forCheckIn: self.markCheckIn, success: {
-                SVProgressHUD.dismiss()
-                super.startTrackingButtonTapped(sender)
-            }) { [weak self] (error) in
-                SVProgressHUD.dismiss()
-                self?.showAlert(forError: error)
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        if (segue.identifier == Segue.EmbedTraining) {
+            if let trainingViewController = segue.destination as? TrainingViewController {
+                trainingViewController.delegate = self
+                trainingViewController.trainingCheckIn = markCheckIn
+                trainingViewController.trainingCoreDataManager = markCoreDataManager
+                self.trainingViewController = trainingViewController
             }
-        }) { [weak self] (error) in
-            SVProgressHUD.dismiss()
-            self?.showAlert(forError: error)
         }
     }
-    
-    // MARK: - Properties
-    
-    fileprivate lazy var trainingController: TrainingController = {
-        return TrainingController(coreDataManager: self.markCoreDataManager, baseURLString: self.markCheckIn.serverURL)
-    }()
     
 }
 
@@ -84,7 +78,18 @@ extension TrainingMarkViewController: SessionViewControllerDelegate {
     }
     
     func refresh() {
-        trainingNameLabel.text = markCheckIn.event.name
+        markViewController?.refresh()
+        trainingViewController?.refresh()
+    }
+    
+}
+
+// MARK: - TrainingViewControllerDelegate
+
+extension TrainingMarkViewController: TrainingViewControllerDelegate {
+    
+    func trainingViewController(_ controller: TrainingViewController, startTrackingButtonTapped sender: Any) {
+        super.startTrackingButtonTapped(sender)
     }
     
 }

@@ -51,7 +51,7 @@ class TrackingViewController : UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func stopTrackingButtonTapped(_ sender: AnyObject) {
+    @IBAction func stopTrackingButtonTapped(_ sender: Any) {
         let alertController = UIAlertController(title: Translation.TrackingView.StopTrackingAlert.Title.String,
                                                 message: Translation.TrackingView.StopTrackingAlert.Message.String,
                                                 preferredStyle: .alert

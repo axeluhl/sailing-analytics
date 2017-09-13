@@ -142,10 +142,12 @@ class StartViewController: UIViewController {
     // MARK: - Segues
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
         if (segue.identifier == Segue.Training) {
-            guard let trainingCheckInTVC = segue.destination as? TrainingCheckInTableViewController else { return }
-            trainingCheckInTVC.userName = userName
-            trainingCheckInTVC.signUpController = signUpController
+            if let trainingCheckInTVC = segue.destination as? TrainingCheckInTableViewController {
+                trainingCheckInTVC.userName = userName
+                trainingCheckInTVC.signUpController = signUpController
+            }
         }
     }
     

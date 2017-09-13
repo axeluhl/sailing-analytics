@@ -71,7 +71,7 @@ class SettingsViewController: UITableViewController {
         tableView.endUpdates()
     }
     
-    @IBAction func doneButtonTapped(_ sender: AnyObject) {
+    @IBAction func doneButtonTapped(_ sender: Any) {
         presentingViewController!.dismiss(animated: true, completion: nil)
     }
     

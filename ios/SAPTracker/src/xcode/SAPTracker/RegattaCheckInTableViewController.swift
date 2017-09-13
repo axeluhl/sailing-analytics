@@ -105,7 +105,7 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     
     // MARK: - Actions
     
-    @IBAction func optionButtonTapped(_ sender: AnyObject) {
+    @IBAction func optionButtonTapped(_ sender: Any) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
@@ -123,7 +123,7 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
         present(alertController, animated: true, completion: nil)
     }
     
-    @IBAction func scanButtonTapped(_ sender: AnyObject) {
+    @IBAction func scanButtonTapped(_ sender: Any) {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera) {
             performSegue(withIdentifier: Segue.Scan, sender: sender)
         } else {
@@ -131,7 +131,7 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
         }
     }
     
-    @IBAction func noCodeButtonTapped(_ sender: AnyObject) {
+    @IBAction func noCodeButtonTapped(_ sender: Any) {
         showNoCodeAlert()
     }
     

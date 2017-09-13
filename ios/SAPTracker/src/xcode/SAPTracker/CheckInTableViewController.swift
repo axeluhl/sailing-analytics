@@ -142,12 +142,15 @@ class CheckInTableViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
         if (segue.identifier == CheckInSegue.Competitor) {
-            guard let competitorCheckIn = segueCheckIn as? CompetitorCheckIn else { return }
-            delegate?.checkInTableViewController(self, prepareForSegue: segue, andCompetitorCheckIn: competitorCheckIn)
+            if let competitorCheckIn = segueCheckIn as? CompetitorCheckIn {
+                delegate?.checkInTableViewController(self, prepareForSegue: segue, andCompetitorCheckIn: competitorCheckIn)
+            }
         } else if (segue.identifier == CheckInSegue.Mark) {
-            guard let markCheckIn = segueCheckIn as? MarkCheckIn else { return }
-            delegate?.checkInTableViewController(self, prepareForSegue: segue, andMarkCheckIn: markCheckIn)
+            if let markCheckIn = segueCheckIn as? MarkCheckIn {
+                delegate?.checkInTableViewController(self, prepareForSegue: segue, andMarkCheckIn: markCheckIn)
+            }
         }
     }
     

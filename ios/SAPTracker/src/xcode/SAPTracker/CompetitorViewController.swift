@@ -111,15 +111,15 @@ class CompetitorViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func teamImageAddButtonTapped(_ sender: AnyObject) {
+    @IBAction func teamImageAddButtonTapped(_ sender: Any) {
         showSelectImageAlert()
     }
     
-    @IBAction func teamImageEditButtonTapped(_ sender: AnyObject) {
+    @IBAction func teamImageEditButtonTapped(_ sender: Any) {
         showSelectImageAlert()
     }
     
-    @IBAction func teamImageRetryButtonTapped(_ sender: AnyObject) {
+    @IBAction func teamImageRetryButtonTapped(_ sender: Any) {
         if let data = competitorCheckIn.teamImageData {
             uploadTeamImageData(imageData: data)
         }

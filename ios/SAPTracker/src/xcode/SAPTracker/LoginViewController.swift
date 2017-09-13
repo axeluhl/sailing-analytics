@@ -69,6 +69,7 @@ class LoginViewController: FormularViewController {
     // MARK: - Segues
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
         if let signUpVC = segue.destination as? SignUpViewController {
             signUpVC.signUpController = signUpController
         }

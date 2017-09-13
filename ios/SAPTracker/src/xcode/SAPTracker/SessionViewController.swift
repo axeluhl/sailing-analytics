@@ -66,6 +66,7 @@ class SessionViewController: UIViewController {
     // MARK: - Segues
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
         if (segue.identifier == SessionSegue.Tracking) {
             let trackingNC = segue.destination as! UINavigationController
             let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
@@ -80,7 +81,7 @@ class SessionViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func optionButtonTapped(_ sender: AnyObject) {
+    @IBAction func optionButtonTapped(_ sender: Any) {
         present(delegate.makeOptionSheet(), animated: true, completion: nil)
     }
     
@@ -112,7 +113,7 @@ class SessionViewController: UIViewController {
         }
     }
     
-    @IBAction func startTrackingButtonTapped(_ sender: AnyObject) {
+    @IBAction func startTrackingButtonTapped(_ sender: Any) {
         // TODO: Add or add not WiFi Alert?
         //if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {
         //    showStartTrackingWiFiAlert()

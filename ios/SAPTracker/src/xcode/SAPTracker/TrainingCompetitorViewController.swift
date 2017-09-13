@@ -10,7 +10,11 @@ import UIKit
 
 class TrainingCompetitorViewController: CompetitorSessionViewController {
     
-    @IBOutlet weak var trainingNameLabel: UILabel!
+    struct Segue {
+        static let EmbedTraining = "EmbedTraining"
+    }
+    
+    weak var trainingViewController: TrainingViewController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,29 +47,19 @@ class TrainingCompetitorViewController: CompetitorSessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
-    // MARK: - Actions
+    // MARK: - Segues
     
-    override func startTrackingButtonTapped(_ sender: AnyObject) {
-        SVProgressHUD.show()
-        self.trainingController.stopActiveRace(success: { 
-            self.trainingController.startNewRace(forCheckIn: self.competitorCheckIn, success: {
-                SVProgressHUD.dismiss()
-                super.startTrackingButtonTapped(sender)
-            }) { [weak self] (error) in
-                SVProgressHUD.dismiss()
-                self?.showAlert(forError: error)
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        if (segue.identifier == Segue.EmbedTraining) {
+            if let trainingViewController = segue.destination as? TrainingViewController {
+                trainingViewController.delegate = self
+                trainingViewController.trainingCheckIn = competitorCheckIn
+                trainingViewController.trainingCoreDataManager = competitorCoreDataManager
+                self.trainingViewController = trainingViewController
             }
-        }) { [weak self] (error) in
-            SVProgressHUD.dismiss()
-            self?.showAlert(forError: error)
         }
     }
-    
-    // MARK: - Properties
-    
-    fileprivate lazy var trainingController: TrainingController = {
-        return TrainingController(coreDataManager: self.competitorCoreDataManager, baseURLString: self.competitorCheckIn.serverURL)
-    }()
     
 }
 
@@ -85,7 +79,17 @@ extension TrainingCompetitorViewController: SessionViewControllerDelegate {
     
     func refresh() {
         competitorViewController?.refresh()
-        trainingNameLabel.text = competitorCheckIn.event.name
+        trainingViewController?.refresh()
+    }
+    
+}
+
+// MARK: - TrainingViewControllerDelegate
+
+extension TrainingCompetitorViewController: TrainingViewControllerDelegate {
+    
+    func trainingViewController(_ controller: TrainingViewController, startTrackingButtonTapped sender: Any) {
+        super.startTrackingButtonTapped(sender)
     }
     
 }
