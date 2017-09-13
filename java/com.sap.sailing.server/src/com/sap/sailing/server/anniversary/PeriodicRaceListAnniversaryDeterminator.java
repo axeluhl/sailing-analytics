@@ -184,7 +184,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
         nextAnniversaryNumber = nextAnniversary;
     }
     
-    synchronized void setRaceCount(int raceCount) {
+    synchronized void setRaceCount(Integer raceCount) {
         currentRaceCount = raceCount;
     }
 
