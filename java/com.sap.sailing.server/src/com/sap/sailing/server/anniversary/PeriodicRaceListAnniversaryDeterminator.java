@@ -131,10 +131,12 @@ public class PeriodicRaceListAnniversaryDeterminator {
                 checker.update(allRaces.size());
                 // find past anniversaries
                 for (Integer anniversary : checker.getAnniversaries()) {
-                    final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData = resolveAnniversaryData(anniversary,
-                            allRaces.get(anniversary - 1), checker.getType());
-                    if (anniversaryData != null) {
-                        anniversariesToAdd.put(anniversary, anniversaryData);
+                    if (!knownAnniversaries.containsKey(anniversary)) {
+                        final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData = resolveAnniversaryData(
+                                anniversary, allRaces.get(anniversary - 1), checker.getType());
+                        if (anniversaryData != null) {
+                            anniversariesToAdd.put(anniversary, anniversaryData);
+                        }
                     }
                 }
                 // find next anniversaries
