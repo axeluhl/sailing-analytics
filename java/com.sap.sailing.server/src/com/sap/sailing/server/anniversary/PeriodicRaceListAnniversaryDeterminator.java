@@ -180,11 +180,11 @@ public class PeriodicRaceListAnniversaryDeterminator {
         knownAnniversaries.put(anniversaryToCheck, anniversaryData);
     }
     
-    synchronized void setNextAnniversary(Pair<Integer, AnniversaryType> nextAnniversary) {
+    public synchronized void setNextAnniversary(Pair<Integer, AnniversaryType> nextAnniversary) {
         nextAnniversaryNumber = nextAnniversary;
     }
     
-    synchronized void setRaceCount(Integer raceCount) {
+    public synchronized void setRaceCount(Integer raceCount) {
         currentRaceCount = raceCount;
     }
 

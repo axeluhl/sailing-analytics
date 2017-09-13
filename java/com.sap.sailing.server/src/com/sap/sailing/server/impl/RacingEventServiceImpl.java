@@ -2875,6 +2875,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         oos.writeObject(knownAnniversaries);
         logoutput.append("Serialized " + knownAnniversaries.size() + " anniversary races\n");
 
+        logger.info("Serializing next anniversary...");
+        final Pair<Integer, AnniversaryType> nextAnniversary = raceListAnniversaryDeterminator
+                .getNextAnniversaryNumber();
+        oos.writeObject(nextAnniversary);
+        logoutput.append("Serialized next anniversary " + nextAnniversary + "\n");
+
+        logger.info("Serializing race count for anniversaries...");
+        final Integer currentRaceCount = raceListAnniversaryDeterminator.getCurrentRaceCount();
+        oos.writeObject(currentRaceCount);
+        logoutput.append("Serialized race count for anniversaries " + currentRaceCount + "\n");
+
         logger.info("Serializing remote sailing server references...");
         final ArrayList<RemoteSailingServerReference> remoteServerReferences = new ArrayList<>(remoteSailingServerSet
                 .getCachedEventsForRemoteSailingServers().keySet());
@@ -2981,6 +2992,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 .readObject();
         raceListAnniversaryDeterminator.setKnownAnniversaries(knownAnniversaries);
         logoutput.append("Received " + knownAnniversaries.size() + " anniversary races\n");
+
+        logger.info("Reading next anniversary...");
+        final Pair<Integer, AnniversaryType> nextAnniversary = (Pair<Integer, AnniversaryType>) ois.readObject();
+        raceListAnniversaryDeterminator.setNextAnniversary(nextAnniversary);
+        logoutput.append("Received next anniversary " + nextAnniversary + "\n");
+
+        logger.info("Reading race count for anniversaries...");
+        final Integer currentRaceCount = (Integer) ois.readObject();
+        raceListAnniversaryDeterminator.setRaceCount(currentRaceCount);
+        logoutput.append("Received race count for anniversaries " + currentRaceCount + "\n");
 
         logger.info("Reading remote sailing server references...");
         for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois
