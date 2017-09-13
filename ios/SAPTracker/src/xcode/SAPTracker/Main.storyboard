@@ -567,60 +567,72 @@
                         <viewControllerLayoutGuide type="top" id="dS6-Pi-1JW"/>
                         <viewControllerLayoutGuide type="bottom" id="21h-Jd-SOp"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="N8Q-Eb-vTK" customClass="GradientView" customModule="SAPTracker" customModuleProvider="target">
+                    <view key="view" contentMode="scaleToFill" id="N8Q-Eb-vTK">
                         <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="e6j-2H-QrX">
-                                <rect key="frame" x="20" y="501" width="335" height="82"/>
-                                <color key="backgroundColor" red="0.054901960780000002" green="0.46666666670000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="siT-ZL-pju" customClass="CompetitorView" customModule="SAPTracker" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="475"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3jK-ek-md2" userLabel="Training View">
+                                <rect key="frame" x="0.0" y="475" width="375" height="128"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="12" adjustsLetterSpacingToFitWidth="YES" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="68H-E2-rnx">
+                                        <rect key="frame" x="129" y="8" width="117" height="22"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="22" id="WgF-06-lB0"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="e6j-2H-QrX">
+                                        <rect key="frame" x="20" y="38" width="335" height="82"/>
+                                        <color key="backgroundColor" red="0.054901960780000002" green="0.46666666670000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="82" id="70Q-me-A11">
+                                                <variation key="heightClass=compact" constant="62"/>
+                                            </constraint>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
+                                        <state key="normal" title="Start Tracking Button">
+                                            <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </state>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="startTrackingButtonTapped:" destination="smT-3p-ZYf" eventType="touchUpInside" id="KSM-gG-Y7S"/>
+                                            <action selector="startTrackingButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="SFR-Rt-bll"/>
+                                            <action selector="startTrackingButtonTapped:" destination="dMx-RA-QpG" eventType="touchUpInside" id="bRI-BL-p1Q"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="82" id="70Q-me-A11">
-                                        <variation key="heightClass=compact" constant="62"/>
-                                    </constraint>
+                                    <constraint firstAttribute="bottom" secondItem="e6j-2H-QrX" secondAttribute="bottom" constant="8" id="3lA-ah-B1K"/>
+                                    <constraint firstItem="e6j-2H-QrX" firstAttribute="leading" secondItem="3jK-ek-md2" secondAttribute="leading" constant="20" id="3tt-of-GG5"/>
+                                    <constraint firstAttribute="trailing" secondItem="e6j-2H-QrX" secondAttribute="trailing" constant="20" id="40l-3I-K9K"/>
+                                    <constraint firstItem="e6j-2H-QrX" firstAttribute="top" secondItem="68H-E2-rnx" secondAttribute="bottom" constant="8" id="6DO-rw-ZV7"/>
+                                    <constraint firstItem="68H-E2-rnx" firstAttribute="centerX" secondItem="3jK-ek-md2" secondAttribute="centerX" id="LRh-ad-DlM"/>
+                                    <constraint firstItem="68H-E2-rnx" firstAttribute="top" secondItem="3jK-ek-md2" secondAttribute="top" constant="8" id="vA1-gk-yNN"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
-                                <state key="normal" title="Start Tracking Button">
-                                    <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                </state>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="1"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="startTrackingButtonTapped:" destination="smT-3p-ZYf" eventType="touchUpInside" id="KSM-gG-Y7S"/>
-                                    <action selector="startTrackingButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="SFR-Rt-bll"/>
-                                    <action selector="startTrackingButtonTapped:" destination="dMx-RA-QpG" eventType="touchUpInside" id="bRI-BL-p1Q"/>
-                                </connections>
-                            </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="12" adjustsLetterSpacingToFitWidth="YES" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="68H-E2-rnx">
-                                <rect key="frame" x="129" y="290" width="117" height="22"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="22" id="WgF-06-lB0"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="68H-E2-rnx" firstAttribute="centerX" secondItem="N8Q-Eb-vTK" secondAttribute="centerX" id="KcB-xe-4h1"/>
-                            <constraint firstItem="21h-Jd-SOp" firstAttribute="top" secondItem="e6j-2H-QrX" secondAttribute="bottom" constant="20" id="M06-ZN-rJh"/>
-                            <constraint firstAttribute="trailing" secondItem="e6j-2H-QrX" secondAttribute="trailing" constant="20" id="YVj-G3-ayZ"/>
-                            <constraint firstItem="68H-E2-rnx" firstAttribute="centerY" secondItem="N8Q-Eb-vTK" secondAttribute="centerY" id="sXL-Me-s1c"/>
-                            <constraint firstItem="e6j-2H-QrX" firstAttribute="leading" secondItem="N8Q-Eb-vTK" secondAttribute="leading" constant="20" id="v4F-XR-tVW"/>
+                            <constraint firstItem="3jK-ek-md2" firstAttribute="top" secondItem="siT-ZL-pju" secondAttribute="bottom" id="BAZ-3B-4GU"/>
+                            <constraint firstItem="3jK-ek-md2" firstAttribute="leading" secondItem="N8Q-Eb-vTK" secondAttribute="leading" id="Eb1-gf-rir"/>
+                            <constraint firstItem="21h-Jd-SOp" firstAttribute="top" secondItem="3jK-ek-md2" secondAttribute="bottom" id="JKH-uA-v4m"/>
+                            <constraint firstItem="siT-ZL-pju" firstAttribute="top" secondItem="dS6-Pi-1JW" secondAttribute="bottom" id="NUl-yk-7fe"/>
+                            <constraint firstItem="siT-ZL-pju" firstAttribute="leading" secondItem="N8Q-Eb-vTK" secondAttribute="leading" id="cf7-wm-155"/>
+                            <constraint firstAttribute="trailing" secondItem="siT-ZL-pju" secondAttribute="trailing" id="f0b-Mh-8fZ"/>
+                            <constraint firstAttribute="trailing" secondItem="3jK-ek-md2" secondAttribute="trailing" id="x3N-9Z-4LV"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="color" keyPath="firstColor">
-                                <color key="value" red="0.87058823529411766" green="0.94509803921568625" blue="0.94509803921568625" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                            </userDefinedRuntimeAttribute>
-                            <userDefinedRuntimeAttribute type="color" keyPath="secondColor">
-                                <color key="value" red="0.86274509803921573" green="0.8901960784313725" blue="0.92156862745098034" alpha="1" colorSpace="calibratedRGB"/>
-                            </userDefinedRuntimeAttribute>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" id="d7b-oZ-rAj">
                         <barButtonItem key="rightBarButtonItem" image="settings" id="eom-UN-CnO">
@@ -640,7 +652,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="b6N-3i-Dul" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1978" y="-1810"/>
+            <point key="canvasLocation" x="1976.8" y="-1810.344827586207"/>
         </scene>
         <!--Training Check In Table View Controller-->
         <scene sceneID="EFQ-Uc-xDt">
@@ -851,7 +863,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mark Name Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumFontSize="12" adjustsLetterSpacingToFitWidth="YES" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="BQe-Id-ec3">
-                                <rect key="frame" x="101.5" y="290.5" width="173" height="22"/>
+                                <rect key="frame" x="101" y="290.5" width="173" height="22"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="22" id="g3A-7J-yFy"/>
                                 </constraints>
@@ -1058,7 +1070,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6rV-hv-c3D" userLabel="Countdown View">
-                                        <rect key="frame" x="6" y="38" width="363" height="50"/>
+                                        <rect key="frame" x="6.5" y="38" width="363" height="50"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pjH-rV-MGI" userLabel="Days View">
                                                 <rect key="frame" x="0.0" y="0.0" width="121" height="50"/>
@@ -1474,13 +1486,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="r6d-OU-cRI">
-                                                    <rect key="frame" x="20" y="15" width="134.5" height="23.5"/>
+                                                    <rect key="frame" x="20" y="14.5" width="134.5" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="5Xu-6g-tqP">
-                                                    <rect key="frame" x="259" y="15" width="96" height="23.5"/>
+                                                    <rect key="frame" x="259" y="14.5" width="96" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1506,13 +1518,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Xww-rc-pOA">
-                                                    <rect key="frame" x="20" y="15" width="130.5" height="23.5"/>
+                                                    <rect key="frame" x="20" y="14.5" width="130.5" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="tJY-RR-vpe">
-                                                    <rect key="frame" x="262" y="15" width="93" height="23.5"/>
+                                                    <rect key="frame" x="262" y="14.5" width="93" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1538,13 +1550,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Fixes Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Ujw-jg-ilY">
-                                                    <rect key="frame" x="20" y="15" width="161" height="23.5"/>
+                                                    <rect key="frame" x="20" y="14.5" width="161" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Fixes Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="dz3-w7-CCh">
-                                                    <rect key="frame" x="232" y="15" width="123" height="23.5"/>
+                                                    <rect key="frame" x="232" y="14.5" width="123" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1570,13 +1582,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Accuracy Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Z1d-5I-pbj">
-                                                    <rect key="frame" x="20" y="15" width="191.5" height="23.5"/>
+                                                    <rect key="frame" x="20" y="14.5" width="191.5" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GPS Accuracy Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DiM-MR-SGV">
-                                                    <rect key="frame" x="181.5" y="15" width="153.5" height="23.5"/>
+                                                    <rect key="frame" x="181.5" y="14.5" width="153.5" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -1771,7 +1783,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sGK-xV-9a0">
-                                <rect key="frame" x="3" y="244" width="369" height="98.5"/>
+                                <rect key="frame" x="3" y="243.5" width="369" height="98.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>

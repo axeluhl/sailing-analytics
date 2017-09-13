@@ -370,6 +370,8 @@
 		C8CF22AD1F668BAB00A01E0A /* TrainingMarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */; };
 		C8CF22B41F67C4D800A01E0A /* RegattaRaceColumnAddData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */; };
 		C8CF22B81F68133000A01E0A /* TrainingRaceData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */; };
+		C8CF22BA1F690FB300A01E0A /* CompetitorView.xib in Resources */ = {isa = PBXBuildFile; fileRef = C8CF22B91F690FB300A01E0A /* CompetitorView.xib */; };
+		C8CF22BC1F69105800A01E0A /* CompetitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22BB1F69105800A01E0A /* CompetitorView.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
 		C8E0BD0A1F39A08B002FCCA5 /* FormularViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */; };
 		C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */; };
@@ -783,6 +785,8 @@
 		C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingMarkViewController.swift; sourceTree = "<group>"; };
 		C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaRaceColumnAddData.swift; sourceTree = "<group>"; };
 		C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingRaceData.swift; sourceTree = "<group>"; };
+		C8CF22B91F690FB300A01E0A /* CompetitorView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CompetitorView.xib; sourceTree = "<group>"; };
+		C8CF22BB1F69105800A01E0A /* CompetitorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorView.swift; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 3.xcdatamodel"; sourceTree = "<group>"; };
 		C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormularViewController.swift; sourceTree = "<group>"; };
@@ -1394,6 +1398,8 @@
 				7F193A901A39E54600D71773 /* GPSAccuracyView.swift */,
 				C89C5FC41D06A289002AAAD2 /* GradientView.swift */,
 				C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */,
+				C8CF22B91F690FB300A01E0A /* CompetitorView.xib */,
+				C8CF22BB1F69105800A01E0A /* CompetitorView.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1850,6 +1856,7 @@
 				7F14A20E1A13B9A6001C1ECB /* ZM.png in Resources */,
 				7F14A20B1A13B9A6001C1ECB /* YE.png in Resources */,
 				7F14A1181A13B9A6001C1ECB /* _somaliland.png in Resources */,
+				C8CF22BA1F690FB300A01E0A /* CompetitorView.xib in Resources */,
 				7F14A1931A13B9A6001C1ECB /* KP.png in Resources */,
 				7F14A1971A13B9A6001C1ECB /* KZ.png in Resources */,
 				7F14A1201A13B9A6001C1ECB /* AG.png in Resources */,
@@ -2119,6 +2126,7 @@
 				C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */,
 				7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */,
 				C8739E181D2BF2DC00A89F3C /* BaseData.swift in Sources */,
+				C8CF22BC1F69105800A01E0A /* CompetitorView.swift in Sources */,
 				C8CF22B41F67C4D800A01E0A /* RegattaRaceColumnAddData.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
 				C867BD0F1F4B0A4B007E78E0 /* TrainingCoreDataManager.swift in Sources */,
