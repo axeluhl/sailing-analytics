@@ -31,12 +31,11 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
         this.settingsDialogComponent = dialogComponent;
         sp =  new SimplePanel();
         this.linkWithSettingsGenerator = linkWithSettingsGenerator;
-        if(linkWithSettingsGenerator != null) {
+        if (linkWithSettingsGenerator != null) {
             shareAnchor = new ShareLinkAnchor(stringMessages.sharedSettingsLink(), getLeftButtonPannel());
             shareAnchor.setEnabled(true);
             Scheduler.get().scheduleDeferred(() -> onChange(getResult()));
         }
-        
         sp.setWidget(dialogComponent.getAdditionalWidget(this));
     }
     
