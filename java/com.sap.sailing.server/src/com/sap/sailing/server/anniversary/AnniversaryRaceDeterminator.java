@@ -20,8 +20,8 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RemoteSailingServerSet;
 import com.sap.sse.common.Util.Pair;
 
-public class PeriodicRaceListAnniversaryDeterminator {
-    private static final Logger logger = Logger.getLogger(PeriodicRaceListAnniversaryDeterminator.class.getName());
+public class AnniversaryRaceDeterminator {
+    private static final Logger logger = Logger.getLogger(AnniversaryRaceDeterminator.class.getName());
 
     private final ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries;
     private final CopyOnWriteArrayList<AnniversaryChecker> checkers;
@@ -76,7 +76,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
         AnniversaryType getType();
     }
 
-    public PeriodicRaceListAnniversaryDeterminator(RacingEventService racingEventService,
+    public AnniversaryRaceDeterminator(RacingEventService racingEventService,
             RemoteSailingServerSet remoteSailingServerSet, AnniversaryChecker... checkerToUse) {
         this.racingEventService = racingEventService;
         this.remoteSailingServerSet = remoteSailingServerSet;

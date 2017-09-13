@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.server.anniversary.PeriodicRaceListAnniversaryDeterminator.AnniversaryChecker;
+import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator.AnniversaryChecker;
 
 /**
  * This checker adds all races that are the 10kth,25kth,50kth or 75kth or are a factor 10 of one of those.

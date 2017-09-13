@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.server.anniversary.PeriodicRaceListAnniversaryDeterminator.AnniversaryChecker;
+import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator.AnniversaryChecker;
 import com.sap.sailing.server.anniversary.checker.QuarterChecker;
 
 import junit.framework.Assert;

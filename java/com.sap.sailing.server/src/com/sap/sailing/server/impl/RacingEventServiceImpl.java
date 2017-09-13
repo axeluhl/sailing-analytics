@@ -183,7 +183,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
-import com.sap.sailing.server.anniversary.PeriodicRaceListAnniversaryDeterminator;
+import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
 import com.sap.sailing.server.anniversary.checker.QuarterChecker;
 import com.sap.sailing.server.anniversary.checker.SameDigitChecker;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
@@ -467,7 +467,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
 
-    private final PeriodicRaceListAnniversaryDeterminator raceListAnniversaryDeterminator;
+    private final AnniversaryRaceDeterminator anniversaryRaceDeterminator;
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -527,8 +527,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * @param trackedRaceStatisticsCache
      *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no detailed
      *            statistics about TrackedRaces will be calculated.
-     * @param raceListAnniversaryDeterminator
-     *            a determinator service to periodically check for anniversaries
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore,
             final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListener trackedRegattaListener,
@@ -747,7 +745,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore();
         }
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
-        raceListAnniversaryDeterminator = new PeriodicRaceListAnniversaryDeterminator(this, remoteSailingServerSet,
+        anniversaryRaceDeterminator = new AnniversaryRaceDeterminator(this, remoteSailingServerSet,
                 new QuarterChecker(), new SameDigitChecker());
     }
 
@@ -820,7 +818,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.windStore.clear();
         getRaceLogStore().clear();
         getRegattaLogStore().clear();
-        raceListAnniversaryDeterminator.clear();
+        anniversaryRaceDeterminator.clear();
     }
 
     @Override
@@ -2870,19 +2868,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         logger.info("Serializing anniversary races...");
-        final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = raceListAnniversaryDeterminator
+        final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = anniversaryRaceDeterminator
                 .getKnownAnniversaries();
         oos.writeObject(knownAnniversaries);
         logoutput.append("Serialized " + knownAnniversaries.size() + " anniversary races\n");
 
         logger.info("Serializing next anniversary...");
-        final Pair<Integer, AnniversaryType> nextAnniversary = raceListAnniversaryDeterminator
+        final Pair<Integer, AnniversaryType> nextAnniversary = anniversaryRaceDeterminator
                 .getNextAnniversaryNumber();
         oos.writeObject(nextAnniversary);
         logoutput.append("Serialized next anniversary " + nextAnniversary + "\n");
 
         logger.info("Serializing race count for anniversaries...");
-        final Integer currentRaceCount = raceListAnniversaryDeterminator.getCurrentRaceCount();
+        final Integer currentRaceCount = anniversaryRaceDeterminator.getCurrentRaceCount();
         oos.writeObject(currentRaceCount);
         logoutput.append("Serialized race count for anniversaries " + currentRaceCount + "\n");
 
@@ -2990,17 +2988,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logger.info("Reading anniversary races...");
         final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = (Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>>) ois
                 .readObject();
-        raceListAnniversaryDeterminator.setKnownAnniversaries(knownAnniversaries);
+        anniversaryRaceDeterminator.setKnownAnniversaries(knownAnniversaries);
         logoutput.append("Received " + knownAnniversaries.size() + " anniversary races\n");
 
         logger.info("Reading next anniversary...");
         final Pair<Integer, AnniversaryType> nextAnniversary = (Pair<Integer, AnniversaryType>) ois.readObject();
-        raceListAnniversaryDeterminator.setNextAnniversary(nextAnniversary);
+        anniversaryRaceDeterminator.setNextAnniversary(nextAnniversary);
         logoutput.append("Received next anniversary " + nextAnniversary + "\n");
 
         logger.info("Reading race count for anniversaries...");
         final Integer currentRaceCount = (Integer) ois.readObject();
-        raceListAnniversaryDeterminator.setRaceCount(currentRaceCount);
+        anniversaryRaceDeterminator.setRaceCount(currentRaceCount);
         logoutput.append("Received race count for anniversaries " + currentRaceCount + "\n");
 
         logger.info("Reading remote sailing server references...");
@@ -3086,7 +3084,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             notificationService.stop();
             notificationService = new EmptySailingNotificationService();
         }
-        raceListAnniversaryDeterminator.clearAndStop();
+        anniversaryRaceDeterminator.clearAndStop();
         this.remoteSailingServerSet.setRetrieveRemoteRaceResult(false);
     }
 
@@ -3672,7 +3670,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
         this.replicatingFromMaster = null;
-        raceListAnniversaryDeterminator.start();
+        anniversaryRaceDeterminator.start();
         this.remoteSailingServerSet.setRetrieveRemoteRaceResult(true);
     }
 
@@ -4030,12 +4028,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public Pair<Integer, AnniversaryType> getNextAnniversary() {
-        return raceListAnniversaryDeterminator.getNextAnniversaryNumber();
+        return anniversaryRaceDeterminator.getNextAnniversaryNumber();
     }
 
     @Override
     public Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary() {
-        Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> allAnniversaries = raceListAnniversaryDeterminator
+        Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> allAnniversaries = anniversaryRaceDeterminator
                 .getKnownAnniversaries();
         Triple<Integer, DetailedRaceInfo, AnniversaryType> lastAnniversary = null;
         if (!allAnniversaries.isEmpty()) {
@@ -4050,8 +4048,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Integer getNextAnniversaryCountdown() {
-        final Integer current = raceListAnniversaryDeterminator.getCurrentRaceCount();
-        final Pair<Integer, AnniversaryType> next = raceListAnniversaryDeterminator.getNextAnniversaryNumber();
+        final Integer current = anniversaryRaceDeterminator.getCurrentRaceCount();
+        final Pair<Integer, AnniversaryType> next = anniversaryRaceDeterminator.getNextAnniversaryNumber();
         Integer countDown = null;
         if (current != null && next != null) {
             countDown = next.getA().intValue() - current.intValue();
@@ -4061,11 +4059,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries() {
-        return raceListAnniversaryDeterminator.getKnownAnniversaries();
+        return anniversaryRaceDeterminator.getKnownAnniversaries();
     }
     
     @Override
-    public PeriodicRaceListAnniversaryDeterminator getAnniversaryRaceDeterminator() {
-        return raceListAnniversaryDeterminator;
+    public AnniversaryRaceDeterminator getAnniversaryRaceDeterminator() {
+        return anniversaryRaceDeterminator;
     }
 }
