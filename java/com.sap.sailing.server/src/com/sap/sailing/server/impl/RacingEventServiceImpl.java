@@ -3087,6 +3087,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             notificationService = new EmptySailingNotificationService();
         }
         raceListAnniversaryDeterminator.clearAndStop();
+        this.remoteSailingServerSet.setRetrieveRemoteRaceResult(false);
     }
 
     // Used for TESTING only
@@ -3672,6 +3673,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
         this.replicatingFromMaster = null;
         raceListAnniversaryDeterminator.start();
+        this.remoteSailingServerSet.setRetrieveRemoteRaceResult(true);
     }
 
     @Override

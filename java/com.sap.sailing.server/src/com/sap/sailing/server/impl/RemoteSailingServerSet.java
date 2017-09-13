@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,6 +75,7 @@ public class RemoteSailingServerSet {
     
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedTrackedRacesForRemoteSailingServers;
     private final Set<Runnable> remoteRaceResultReceivedCallbacks = ConcurrentHashMap.newKeySet();
+    private final AtomicBoolean retrieveRemoteRaceResult = new AtomicBoolean(true);
 
     /**
      * @param scheduler
@@ -129,7 +131,19 @@ public class RemoteSailingServerSet {
         new Thread(() -> updateRemoteServerEventCacheSynchronously(ref), "Event Cache Updater for remote server " + ref).start();
         new Thread(() -> updateRemoteServerStatisticsCacheSynchronously(ref),
                 "Statistics by year Cache Updater for remote server " + ref).start();
-        new Thread(() -> updateRemoteServerTrackedRacesCacheSynchronously(ref), "Anniversary Cache Updater for remote server " + ref).start();
+        if (retrieveRemoteRaceResult.get()) {
+            new Thread(() -> updateRemoteServerTrackedRacesCacheSynchronously(ref),
+                    "Anniversary Cache Updater for remote server " + ref).start();
+        }
+    }
+
+    public void setRetrieveRemoteRaceResult(boolean retrieveRemoteRaceResult) {
+        this.retrieveRemoteRaceResult.set(retrieveRemoteRaceResult);
+        synchronized (cachedEventsForRemoteSailingServers) {
+            if (!this.retrieveRemoteRaceResult.get()) {
+                cachedTrackedRacesForRemoteSailingServers.clear();
+            }
+        }
     }
 
     private void updateRemoteServerTrackedRacesCacheSynchronously(RemoteSailingServerReference ref) {
@@ -165,7 +179,11 @@ public class RemoteSailingServerSet {
                     e);
             result = new Util.Pair<Iterable<SimpleRaceInfo>, Exception>(/* events */ null, e);
         }
-        updateCache(ref, result, cachedTrackedRacesForRemoteSailingServers::put);
+        synchronized (cachedTrackedRacesForRemoteSailingServers) {
+            if (retrieveRemoteRaceResult.get()) {
+                updateCache(ref, result, cachedTrackedRacesForRemoteSailingServers::put);
+            }
+        }
         new HashSet<>(remoteRaceResultReceivedCallbacks).forEach(Runnable::run);
     }
 
