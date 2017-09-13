@@ -372,6 +372,8 @@
 		C8CF22B81F68133000A01E0A /* TrainingRaceData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */; };
 		C8CF22BE1F69187800A01E0A /* CompetitorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22BD1F69187800A01E0A /* CompetitorViewController.swift */; };
 		C8CF22C01F6926E500A01E0A /* CompetitorSessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22BF1F6926E500A01E0A /* CompetitorSessionViewController.swift */; };
+		C8CF22C21F692B5300A01E0A /* MarkSessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22C11F692B5300A01E0A /* MarkSessionViewController.swift */; };
+		C8CF22C41F692B7700A01E0A /* MarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22C31F692B7700A01E0A /* MarkViewController.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
 		C8E0BD0A1F39A08B002FCCA5 /* FormularViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */; };
 		C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */; };
@@ -787,6 +789,8 @@
 		C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingRaceData.swift; sourceTree = "<group>"; };
 		C8CF22BD1F69187800A01E0A /* CompetitorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorViewController.swift; sourceTree = "<group>"; };
 		C8CF22BF1F6926E500A01E0A /* CompetitorSessionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorSessionViewController.swift; sourceTree = "<group>"; };
+		C8CF22C11F692B5300A01E0A /* MarkSessionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkSessionViewController.swift; sourceTree = "<group>"; };
+		C8CF22C31F692B7700A01E0A /* MarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkViewController.swift; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 3.xcdatamodel"; sourceTree = "<group>"; };
 		C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormularViewController.swift; sourceTree = "<group>"; };
@@ -1437,13 +1441,15 @@
 		C89C60101D0FF036002AAAD2 /* Session */ = {
 			isa = PBXGroup;
 			children = (
+				C8CF22BF1F6926E500A01E0A /* CompetitorSessionViewController.swift */,
+				C8CF22BD1F69187800A01E0A /* CompetitorViewController.swift */,
 				7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */,
+				C8CF22C11F692B5300A01E0A /* MarkSessionViewController.swift */,
+				C8CF22C31F692B7700A01E0A /* MarkViewController.swift */,
 				C843D48B1EBCB36900250F01 /* SessionViewController.swift */,
 				C8CF22B11F669DA700A01E0A /* Regatta */,
 				C89C5FC61D06CE62002AAAD2 /* Tracking */,
 				C8CF22B21F669DB100A01E0A /* Training */,
-				C8CF22BD1F69187800A01E0A /* CompetitorViewController.swift */,
-				C8CF22BF1F6926E500A01E0A /* CompetitorSessionViewController.swift */,
 			);
 			name = Session;
 			sourceTree = "<group>";
@@ -2114,8 +2120,10 @@
 				C8F71EDD1D8691F700826DE4 /* AFNetworkReachabilityManager.m in Sources */,
 				C867BD0D1F4B0A0E007E78E0 /* RegattaCoreDataManager.swift in Sources */,
 				C843D4801EBC54A300250F01 /* CompetitorCheckIn.swift in Sources */,
+				C8CF22C41F692B7700A01E0A /* MarkViewController.swift in Sources */,
 				C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */,
 				C843D48A1EBCADF500250F01 /* MarkSessionController.swift in Sources */,
+				C8CF22C21F692B5300A01E0A /* MarkSessionViewController.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
 				C843D4831EBC54A300250F01 /* CheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEC1D8691F700826DE4 /* UIButton+AFNetworking.m in Sources */,

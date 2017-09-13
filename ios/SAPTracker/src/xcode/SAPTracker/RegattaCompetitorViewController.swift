@@ -8,15 +8,8 @@
 
 import Foundation
 
-class RegattaCompetitorViewController : SessionViewController, UINavigationControllerDelegate {
+class RegattaCompetitorViewController : CompetitorSessionViewController {
     
-    @IBOutlet weak var teamImageView: UIImageView!
-    @IBOutlet weak var teamImageAddButton: UIButton!
-    @IBOutlet weak var teamImageEditButton: UIButton!
-    @IBOutlet weak var teamImageRetryButton: UIButton!
-    @IBOutlet weak var competitorNameLabel: UILabel!
-    @IBOutlet weak var competitorFlagImageView: UIImageView!
-    @IBOutlet weak var competitorSailLabel: UILabel!
     @IBOutlet weak var regattaStartLabel: UILabel!
     @IBOutlet weak var countdownView: UIView!
     @IBOutlet weak var countdownViewHeight: NSLayoutConstraint!
@@ -29,9 +22,6 @@ class RegattaCompetitorViewController : SessionViewController, UINavigationContr
     @IBOutlet weak var leaderboardButton: UIButton!
     @IBOutlet weak var eventButton: UIButton!
     @IBOutlet weak var announcementLabel: UILabel!
-    
-    weak var competitorCheckIn: CompetitorCheckIn!
-    weak var regattaCoreDataManager: CoreDataManager!
     
     weak var countdownTimer: Timer?
     
@@ -92,47 +82,11 @@ class RegattaCompetitorViewController : SessionViewController, UINavigationContr
         eventButton.setTitle(Translation.CompetitorView.EventButton.Title.String, for: .normal)
         leaderboardButton.setTitle(Translation.LeaderboardView.Title.String, for: .normal)
         startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, for: .normal)
-        teamImageAddButton.setTitle(Translation.CompetitorView.TeamImageAddButton.Title.String, for: .normal)
-        teamImageRetryButton.setTitle(Translation.CompetitorView.TeamImageUploadRetryButton.Title.String, for: .normal)
     }
     
     fileprivate func setupNavigationBar() {
         navigationItem.titleView = TitleView(title: competitorCheckIn.event.name, subtitle: competitorCheckIn.leaderboard.name)
         navigationController?.navigationBar.setNeedsLayout()
-    }
-    
-    // MARK: - TeamImage
-    
-    fileprivate func setTeamImageWithURLRequest(urlString: String?, completion: @escaping (_ withSuccess: Bool) -> Void) {
-        setTeamImageWithURLRequest(urlString: urlString, success: { () in
-            completion(true)
-        }) {
-            completion(false)
-        }
-    }
-    
-    fileprivate func setTeamImageWithURLRequest(urlString: String?, success: @escaping () -> Void, failure: @escaping () -> Void) {
-        guard let string = urlString else { failure(); return }
-        guard let url = URL(string: string) else { failure(); return }
-        teamImageView.setImageWith(
-            URLRequest(url: url),
-            placeholderImage: nil,
-            success: { (request, response, image) in self.setTeamImageWithURLSuccess(image: image, success: success) },
-            failure: { (request, response, error) in self.setTeamImageWithURLFailure(error: error, failure: failure) }
-        )
-    }
-    
-    fileprivate func setTeamImageWithURLSuccess(image: UIImage, success: () -> Void) {
-        teamImageView.image = image
-        competitorCheckIn.teamImageRetry = false
-        competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
-        regattaCoreDataManager.saveContext()
-        success()
-    }
-    
-    fileprivate func setTeamImageWithURLFailure(error: Error, failure: () -> Void) {
-        logError(name: "\(#function)", error: error)
-        failure()
     }
     
     // MARK: - Timer
@@ -159,128 +113,10 @@ class RegattaCompetitorViewController : SessionViewController, UINavigationContr
     
     // MARK: - Actions
     
-    @IBAction func teamImageAddButtonTapped(_ sender: AnyObject) {
-        showSelectImageAlert()
-    }
-    
-    @IBAction func teamImageEditButtonTapped(_ sender: AnyObject) {
-        showSelectImageAlert()
-    }
-    
-    @IBAction func teamImageRetryButtonTapped(_ sender: AnyObject) {
-        if let data = competitorCheckIn.teamImageData {
-            uploadTeamImageData(imageData: data)
-        }
-    }
-    
     @IBAction func eventButtonTapped(_ sender: UIButton) {
         if let eventURL = competitorCheckIn.eventURL() {
             UIApplication.shared.openURL(eventURL)
         }
-    }
-    
-    // MARK: - Alerts
-    
-    fileprivate func showSelectImageAlert() {
-        if UIImagePickerController.isSourceTypeAvailable(.camera) && UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-            let alertController = UIAlertController(title: Translation.CompetitorView.SelectImageAlert.Title.String,
-                                                    message: Translation.CompetitorView.SelectImageAlert.Message.String,
-                                                    preferredStyle: .alert
-            )
-            let cameraAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.CameraAction.Title.String, style: .default) { [weak self] action in
-                self?.showImagePicker(sourceType: .camera)
-            }
-            let photoLibraryAction = UIAlertAction(title: Translation.CompetitorView.SelectImageAlert.PhotoLibraryAction.Title.String, style: .default) { [weak self] action in
-                self?.showImagePicker(sourceType: .photoLibrary)
-            }
-            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
-            alertController.addAction(cameraAction)
-            alertController.addAction(photoLibraryAction)
-            alertController.addAction(cancelAction)
-            present(alertController, animated: true, completion: nil)
-        } else if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            showImagePicker(sourceType: .camera)
-        } else if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-            showImagePicker(sourceType: .photoLibrary)
-        }
-    }
-    
-    // MARK: - Properties
-    
-    fileprivate lazy var competitorSessionController: CompetitorSessionController = {
-        return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.regattaCoreDataManager)
-    }()
-    
-}
-
-// MARK: - UIImagePickerControllerDelegate
-
-extension RegattaCompetitorViewController: UIImagePickerControllerDelegate {
-    
-    fileprivate func showImagePicker(sourceType: UIImagePickerControllerSourceType) {
-        let imagePickerController = UIImagePickerController()
-        imagePickerController.delegate = self
-        imagePickerController.sourceType = sourceType;
-        imagePickerController.mediaTypes = [kUTTypeImage as String];
-        imagePickerController.allowsEditing = false
-        present(imagePickerController, animated: true, completion: nil)
-    }
-    
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            dismiss(animated: true) { self.pickedImage(image: image) }
-        } else {
-            dismiss(animated: true, completion: nil)
-        }
-    }
-    
-    fileprivate func pickedImage(image: UIImage) {
-        teamImageView.image = image
-        competitorCheckIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
-        regattaCoreDataManager.saveContext()
-        if let data = competitorCheckIn.teamImageData {
-            uploadTeamImageData(imageData: data)
-        }
-    }
-    
-    // MARK: - Upload
-    
-    fileprivate func uploadTeamImageData(imageData: Data!) {
-        SVProgressHUD.show()
-        competitorSessionController.postTeamImageData(imageData: imageData, competitorID: competitorCheckIn.competitorID, success: { (teamImageURL) in
-            SVProgressHUD.popActivity()
-            self.uploadTeamImageDataSuccess(teamImageURL: teamImageURL)
-        }) { (error) in
-            SVProgressHUD.popActivity()
-            self.uploadTeamImageDataFailure(error: error)
-        }
-    }
-    
-    fileprivate func uploadTeamImageDataSuccess(teamImageURL: String) {
-        competitorCheckIn.teamImageRetry = false
-        competitorCheckIn.teamImageURL = teamImageURL
-        regattaCoreDataManager.saveContext()
-        refreshTeamImage()
-    }
-    
-    fileprivate func uploadTeamImageDataFailure(error: Error) {
-        competitorCheckIn.teamImageRetry = true
-        regattaCoreDataManager.saveContext()
-        showUploadTeamImageFailureAlert(error: error)
-        refreshTeamImage()
-    }
-    
-    // MARK: - Alerts
-    
-    fileprivate func showUploadTeamImageFailureAlert(error: Error) {
-        let alertController = UIAlertController(
-            title: Translation.CompetitorView.UploadTeamImageFailureAlert.Title.String,
-            message: error.localizedDescription,
-            preferredStyle: .alert
-        )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default, handler: nil)
-        alertController.addAction(okAction)
-        present(alertController, animated: true, completion: nil)
     }
     
 }
@@ -291,68 +127,16 @@ extension RegattaCompetitorViewController: SessionViewControllerDelegate {
     
     var checkIn: CheckIn { get { return competitorCheckIn } }
     
-    var coreDataManager: CoreDataManager { get { return regattaCoreDataManager } }
+    var coreDataManager: CoreDataManager { get { return competitorCoreDataManager } }
     
     var sessionController: SessionController { get { return competitorSessionController } }
     
-    // MARK: - OptionSheet
-    
     func makeOptionSheet() -> UIAlertController {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        if let popoverController = alertController.popoverPresentationController {
-            popoverController.barButtonItem = self.optionButton
-        }
-        alertController.addAction(self.makeActionSettings())
-        alertController.addAction(self.makeActionCheckOut())
-        alertController.addAction(self.makeActionReplaceImage())
-        alertController.addAction(self.makeActionUpdate())
-        alertController.addAction(self.makeActionInfo())
-        alertController.addAction(self.makeActionCancel())
-        return alertController
+        return makeCompetitorOptionSheet()
     }
-    
-    fileprivate func makeActionReplaceImage() -> UIAlertAction {
-        return UIAlertAction(title: Translation.CompetitorView.OptionSheet.ReplaceImageAction.Title.String, style: .default) { [weak self] action in
-            self?.showSelectImageAlert()
-        }
-    }
-    
-    // MARK: - Refresh
     
     func refresh() {
-        refreshCompetitor()
-        refreshTeamImage()
-    }
-    
-    fileprivate func refreshCompetitor() {
-        competitorNameLabel.text = competitorCheckIn.name
-        competitorFlagImageView.image = UIImage(named: competitorCheckIn.countryCode)
-        competitorSailLabel.text = competitorCheckIn.sailID
-    }
-    
-    fileprivate func refreshTeamImage() {
-        if let imageData = competitorCheckIn.teamImageData {
-            teamImageView.image = UIImage(data: imageData as Data)
-            if competitorCheckIn.teamImageRetry {
-                refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: true)
-            } else {
-                refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
-                setTeamImageWithURLRequest(urlString: competitorCheckIn.teamImageURL, completion: { (withSuccess) in
-                    self.refreshTeamImageButtons(showAddButton: false, showEditButton: true, showRetryButton: false)
-                })
-            }
-        } else {
-            self.refreshTeamImageButtons(showAddButton: true, showEditButton: false, showRetryButton: false)
-            setTeamImageWithURLRequest(urlString: competitorCheckIn.teamImageURL, completion: { (withSuccess) in
-                self.refreshTeamImageButtons(showAddButton: !withSuccess, showEditButton: withSuccess, showRetryButton: false)
-            })
-        }
-    }
-    
-    fileprivate func refreshTeamImageButtons(showAddButton: Bool, showEditButton: Bool, showRetryButton: Bool) {
-        teamImageAddButton.isHidden = !showAddButton
-        teamImageEditButton.isHidden = !showEditButton
-        teamImageRetryButton.isHidden = !showRetryButton
+        competitorViewController?.refresh()
     }
     
 }

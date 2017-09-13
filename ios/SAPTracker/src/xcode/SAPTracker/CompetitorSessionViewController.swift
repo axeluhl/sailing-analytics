@@ -43,6 +43,7 @@ class CompetitorSessionViewController: SessionViewController {
     // MARK: - Segues
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
         if (segue.identifier == CompetitorSessionSegue.EmbedCompetitor) {
             if let competitorViewController = segue.destination as? CompetitorViewController {
                 competitorViewController.competitorCheckIn = competitorCheckIn
