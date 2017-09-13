@@ -121,7 +121,7 @@ extension TrainingCheckInTableViewController: CheckInTableViewControllerDelegate
     func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andCompetitorCheckIn competitorCheckIn: CompetitorCheckIn) {
         guard let trainingCompetitorVC = segue.destination as? TrainingCompetitorViewController else { return }
         trainingCompetitorVC.competitorCheckIn = competitorCheckIn
-        trainingCompetitorVC.trainingCoreDataManager = trainingCoreDataManager
+        trainingCompetitorVC.competitorCoreDataManager = trainingCoreDataManager
     }
     
     func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andMarkCheckIn markCheckIn: MarkCheckIn) {

@@ -8,12 +8,8 @@
 
 import UIKit
 
-class TrainingCompetitorViewController: SessionViewController {
+class TrainingCompetitorViewController: CompetitorSessionViewController {
     
-    weak var competitorCheckIn: CompetitorCheckIn!
-    weak var trainingCoreDataManager: CoreDataManager!
-    
-    @IBOutlet weak var stopTrainingButton: UIButton!
     @IBOutlet weak var trainingNameLabel: UILabel!
     
     override func viewDidLoad() {
@@ -67,12 +63,8 @@ class TrainingCompetitorViewController: SessionViewController {
     
     // MARK: - Properties
     
-    fileprivate lazy var competitorSessionController: CompetitorSessionController = {
-        return CompetitorSessionController(checkIn: self.competitorCheckIn, coreDataManager: self.trainingCoreDataManager)
-    }()
-    
     fileprivate lazy var trainingController: TrainingController = {
-        return TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: self.competitorCheckIn.serverURL)
+        return TrainingController(coreDataManager: self.competitorCoreDataManager, baseURLString: self.competitorCheckIn.serverURL)
     }()
     
 }
@@ -83,15 +75,16 @@ extension TrainingCompetitorViewController: SessionViewControllerDelegate {
     
     var checkIn: CheckIn { get { return competitorCheckIn } }
     
-    var coreDataManager: CoreDataManager { get { return trainingCoreDataManager } }
+    var coreDataManager: CoreDataManager { get { return competitorCoreDataManager } }
     
     var sessionController: SessionController { get { return competitorSessionController } }
     
     func makeOptionSheet() -> UIAlertController {
-        return makeDefaultOptionSheet()
+        return makeCompetitorOptionSheet()
     }
     
     func refresh() {
+        competitorViewController?.refresh()
         trainingNameLabel.text = competitorCheckIn.event.name
     }
     
