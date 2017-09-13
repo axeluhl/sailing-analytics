@@ -11,8 +11,8 @@ import UIKit
 class CompetitorViewController: UIViewController {
     
     weak var competitorCheckIn: CompetitorCheckIn!
-    weak var competitorSessionController: CompetitorSessionController!
     weak var competitorCoreDataManager: CoreDataManager!
+    weak var competitorSessionController: CompetitorSessionController!
     
     @IBOutlet weak var teamImageView: UIImageView!
     @IBOutlet weak var teamImageAddButton: UIButton!

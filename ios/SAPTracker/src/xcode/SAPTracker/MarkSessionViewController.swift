@@ -9,5 +9,46 @@
 import UIKit
 
 class MarkSessionViewController: SessionViewController {
-
+    
+    struct MarkSessionSegue {
+        static let EmbedMark = "EmbedMark"
+    }
+    
+    weak var markCheckIn: MarkCheckIn!
+    weak var markCoreDataManager: CoreDataManager!
+    weak var markViewController: MarkViewController?
+    
+    func makeMarkOptionSheet() -> UIAlertController {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        if let popoverController = alertController.popoverPresentationController {
+            popoverController.barButtonItem = self.optionButton
+        }
+        alertController.addAction(self.makeActionSettings())
+        alertController.addAction(self.makeActionCheckOut())
+        alertController.addAction(self.makeActionUpdate())
+        alertController.addAction(self.makeActionInfo())
+        alertController.addAction(self.makeActionCancel())
+        return alertController
+    }
+    
+    // MARK: - Segues
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        if (segue.identifier == MarkSessionSegue.EmbedMark) {
+            if let markViewController = segue.destination as? MarkViewController {
+                markViewController.markCheckIn = markCheckIn
+                markViewController.markSessionController = markSessionController
+                markViewController.markCoreDataManager = markCoreDataManager
+                self.markViewController = markViewController
+            }
+        }
+    }
+    
+    // MARK: - Properties
+    
+    lazy var markSessionController: MarkSessionController = {
+        return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.markCoreDataManager)
+    }()
+    
 }

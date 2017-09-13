@@ -127,7 +127,7 @@ extension TrainingCheckInTableViewController: CheckInTableViewControllerDelegate
     func checkInTableViewController(_ controller: CheckInTableViewController, prepareForSegue segue: UIStoryboardSegue, andMarkCheckIn markCheckIn: MarkCheckIn) {
         guard let trainingMarkVC = segue.destination as? TrainingMarkViewController else { return }
         trainingMarkVC.markCheckIn = markCheckIn
-        trainingMarkVC.trainingCoreDataManager = trainingCoreDataManager
+        trainingMarkVC.markCoreDataManager = trainingCoreDataManager
     }
     
 }

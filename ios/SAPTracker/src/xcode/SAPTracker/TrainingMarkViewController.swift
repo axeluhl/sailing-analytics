@@ -8,12 +8,8 @@
 
 import UIKit
 
-class TrainingMarkViewController: SessionViewController {
+class TrainingMarkViewController: MarkSessionViewController {
     
-    weak var markCheckIn: MarkCheckIn!
-    weak var trainingCoreDataManager: CoreDataManager!
-    
-    @IBOutlet weak var stopTrainingButton: UIButton!
     @IBOutlet weak var trainingNameLabel: UILabel!
     
     override func viewDidLoad() {
@@ -67,12 +63,8 @@ class TrainingMarkViewController: SessionViewController {
     
     // MARK: - Properties
     
-    fileprivate lazy var markSessionController: MarkSessionController = {
-        return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.trainingCoreDataManager)
-    }()
-    
     fileprivate lazy var trainingController: TrainingController = {
-        return TrainingController(coreDataManager: self.trainingCoreDataManager, baseURLString: self.markCheckIn.serverURL)
+        return TrainingController(coreDataManager: self.markCoreDataManager, baseURLString: self.markCheckIn.serverURL)
     }()
     
 }
@@ -83,12 +75,12 @@ extension TrainingMarkViewController: SessionViewControllerDelegate {
     
     var checkIn: CheckIn { get { return markCheckIn } }
     
-    var coreDataManager: CoreDataManager { get { return trainingCoreDataManager } }
+    var coreDataManager: CoreDataManager { get { return markCoreDataManager } }
     
     var sessionController: SessionController { get { return markSessionController } }
     
     func makeOptionSheet() -> UIAlertController {
-        return makeDefaultOptionSheet()
+        return makeMarkOptionSheet()
     }
     
     func refresh() {

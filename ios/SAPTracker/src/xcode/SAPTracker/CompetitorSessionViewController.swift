@@ -15,8 +15,8 @@ class CompetitorSessionViewController: SessionViewController {
     }
     
     weak var competitorCheckIn: CompetitorCheckIn!
-    weak var competitorViewController: CompetitorViewController?
     weak var competitorCoreDataManager: CoreDataManager!
+    weak var competitorViewController: CompetitorViewController?
     
     // MARK: - OptionSheet
     

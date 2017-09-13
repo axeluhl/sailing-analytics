@@ -84,19 +84,6 @@ class SessionViewController: UIViewController {
         present(delegate.makeOptionSheet(), animated: true, completion: nil)
     }
     
-    func makeDefaultOptionSheet() -> UIAlertController {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        if let popoverController = alertController.popoverPresentationController {
-            popoverController.barButtonItem = self.optionButton
-        }
-        alertController.addAction(self.makeActionSettings())
-        alertController.addAction(self.makeActionCheckOut())
-        alertController.addAction(self.makeActionUpdate())
-        alertController.addAction(self.makeActionInfo())
-        alertController.addAction(self.makeActionCancel())
-        return alertController
-    }
-    
     func makeActionCancel() -> UIAlertAction {
         return UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
     }

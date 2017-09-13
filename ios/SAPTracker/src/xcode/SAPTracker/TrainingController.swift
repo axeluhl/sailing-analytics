@@ -255,12 +255,8 @@ class TrainingController: NSObject {
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        self.trainingRequestManager.postLeaderboardStopTracking(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-            self.trainingRequestManager.postLeaderboardRaceSetStopTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-                success()
-            }) { (error, message) in
-                failure(error)
-            }
+        trainingRequestManager.postLeaderboardRaceSetStopTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+            success()
         }) { (error, message) in
             failure(error)
         }

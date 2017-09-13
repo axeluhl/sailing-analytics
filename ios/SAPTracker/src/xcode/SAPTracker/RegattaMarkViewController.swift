@@ -8,12 +8,7 @@
 
 import UIKit
 
-class RegattaMarkViewController: SessionViewController {
-    
-    @IBOutlet weak var markNameLabel: UILabel!
-    
-    weak var markCheckIn: MarkCheckIn!
-    weak var regattaCoreDataManager: CoreDataManager!
+class RegattaMarkViewController: MarkSessionViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,12 +43,6 @@ class RegattaMarkViewController: SessionViewController {
         navigationController?.navigationBar.setNeedsLayout()
     }
     
-    // MARK: - Properties
-    
-    fileprivate lazy var markSessionController: MarkSessionController = {
-        return MarkSessionController(checkIn: self.markCheckIn, coreDataManager: self.regattaCoreDataManager)
-    }()
-    
 }
 
 // MARK: SessionViewControllerDelegate
@@ -62,16 +51,16 @@ extension RegattaMarkViewController: SessionViewControllerDelegate {
     
     var checkIn: CheckIn { get { return markCheckIn } }
     
-    var coreDataManager: CoreDataManager { get { return regattaCoreDataManager } }
+    var coreDataManager: CoreDataManager { get { return markCoreDataManager } }
     
     var sessionController: SessionController { get { return markSessionController } }
     
     func makeOptionSheet() -> UIAlertController {
-        return makeDefaultOptionSheet()
+        return makeMarkOptionSheet()
     }
     
     func refresh() {
-        markNameLabel.text = markCheckIn.name
+        markViewController?.refresh()
     }
     
 }
