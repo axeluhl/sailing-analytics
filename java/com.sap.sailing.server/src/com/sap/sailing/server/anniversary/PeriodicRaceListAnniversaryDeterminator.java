@@ -29,12 +29,12 @@ public class PeriodicRaceListAnniversaryDeterminator {
     /**
      * Contains the results of the last calculation, a number giving the next anniversary
      */
-    private Pair<Integer, AnniversaryType> nextAnniversaryNumber;
+    private volatile Pair<Integer, AnniversaryType> nextAnniversaryNumber;
 
     /**
      * Contains the results of the last calculation, a number giving the amount of races existing
      */
-    private Integer currentRaceCount;
+    private volatile Integer currentRaceCount;
 
     private final RacingEventService raceEventService;
     private final RemoteSailingServerSet remoteSailingServerSet;
