@@ -25,21 +25,13 @@ public class AnniversaryRaceDeterminator {
 
     private final ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries;
     private final CopyOnWriteArrayList<AnniversaryChecker> checkers;
-
-    /**
-     * Contains the results of the last calculation, a number giving the next anniversary
-     */
-    private volatile Pair<Integer, AnniversaryType> nextAnniversaryNumber;
-
-    /**
-     * Contains the results of the last calculation, a number giving the amount of races existing
-     */
-    private volatile Integer currentRaceCount;
-
     private final RacingEventService racingEventService;
     private final RemoteSailingServerSet remoteSailingServerSet;
     private final Runnable raceChangedListener;
     private final AtomicBoolean isStarted = new AtomicBoolean(false);
+
+    private volatile Pair<Integer, AnniversaryType> nextAnniversary;
+    private volatile Integer currentRaceCount;
 
     public interface AnniversaryChecker {
 
@@ -148,12 +140,14 @@ public class AnniversaryRaceDeterminator {
             }
             
             synchronized (this) {
-                if (nearestNext != null && (nextAnniversaryNumber == null || nearestNext.compareTo(nextAnniversaryNumber.getA()) > 0)) {
-                    racingEventService.apply(new UpdateNextAnniversaryOperation(new Pair<Integer, AnniversaryType>(nearestNext, nearestType)));
+                if (nearestNext != null && (nextAnniversary == null || nearestNext > nextAnniversary.getA())) {
+                    racingEventService.apply(new UpdateNextAnniversaryOperation(
+                            new Pair<Integer, AnniversaryType>(nearestNext, nearestType)));
                 }
                 
                 boolean requiresPersist = false;
-                for (Map.Entry<Integer, Pair<DetailedRaceInfo, AnniversaryType>> anniversaryEntry : anniversariesToAdd.entrySet()) {
+                for (Map.Entry<Integer, Pair<DetailedRaceInfo, AnniversaryType>> anniversaryEntry : anniversariesToAdd
+                        .entrySet()) {
                     final Integer anniversary = anniversaryEntry.getKey();
                     if (!knownAnniversaries.containsKey(anniversary)) {
                         racingEventService.apply(new AddAnniversaryOperation(anniversary, anniversaryEntry.getValue()));
@@ -183,15 +177,15 @@ public class AnniversaryRaceDeterminator {
     }
     
     public synchronized void setNextAnniversary(Pair<Integer, AnniversaryType> nextAnniversary) {
-        nextAnniversaryNumber = nextAnniversary;
+        this.nextAnniversary = nextAnniversary;
     }
     
     public synchronized void setRaceCount(Integer raceCount) {
         currentRaceCount = raceCount;
     }
 
-    public Pair<Integer, AnniversaryType> getNextAnniversaryNumber() {
-        return nextAnniversaryNumber;
+    public Pair<Integer, AnniversaryType> getNextAnniversary() {
+        return nextAnniversary;
     }
 
     public Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries() {
@@ -222,7 +216,7 @@ public class AnniversaryRaceDeterminator {
 
     public synchronized void clear() {
         knownAnniversaries.clear();
-        nextAnniversaryNumber = null;
+        nextAnniversary = null;
         currentRaceCount = null;
     }
 }

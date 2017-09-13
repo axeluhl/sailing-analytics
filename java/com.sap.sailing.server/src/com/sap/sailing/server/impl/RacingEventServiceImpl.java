@@ -2875,7 +2875,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         logger.info("Serializing next anniversary...");
         final Pair<Integer, AnniversaryType> nextAnniversary = anniversaryRaceDeterminator
-                .getNextAnniversaryNumber();
+                .getNextAnniversary();
         oos.writeObject(nextAnniversary);
         logoutput.append("Serialized next anniversary " + nextAnniversary + "\n");
 
@@ -4028,7 +4028,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public Pair<Integer, AnniversaryType> getNextAnniversary() {
-        return anniversaryRaceDeterminator.getNextAnniversaryNumber();
+        return anniversaryRaceDeterminator.getNextAnniversary();
     }
 
     @Override
@@ -4049,7 +4049,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Integer getNextAnniversaryCountdown() {
         final Integer current = anniversaryRaceDeterminator.getCurrentRaceCount();
-        final Pair<Integer, AnniversaryType> next = anniversaryRaceDeterminator.getNextAnniversaryNumber();
+        final Pair<Integer, AnniversaryType> next = anniversaryRaceDeterminator.getNextAnniversary();
         Integer countDown = null;
         if (current != null && next != null) {
             countDown = next.getA().intValue() - current.intValue();

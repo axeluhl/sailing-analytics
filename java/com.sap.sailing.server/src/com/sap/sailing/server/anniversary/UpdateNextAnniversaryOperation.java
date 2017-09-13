@@ -7,15 +7,15 @@ import com.sap.sse.replication.OperationWithResult;
 
 public class UpdateNextAnniversaryOperation implements OperationWithResult<RacingEventService, Void> {
     private static final long serialVersionUID = 8989228640752085561L;
-    private final Pair<Integer, AnniversaryType> nextAnniversaryNumber;
+    private final Pair<Integer, AnniversaryType> nextAnniversary;
     
-    public UpdateNextAnniversaryOperation(Pair<Integer, AnniversaryType> nextAnniversaryNumber) {
-        this.nextAnniversaryNumber = nextAnniversaryNumber;
+    public UpdateNextAnniversaryOperation(Pair<Integer, AnniversaryType> nextAnniversary) {
+        this.nextAnniversary = nextAnniversary;
     }
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        toState.getAnniversaryRaceDeterminator().setNextAnniversary(nextAnniversaryNumber);
+        toState.getAnniversaryRaceDeterminator().setNextAnniversary(nextAnniversary);
         return null;
     }
 
