@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
@@ -340,19 +341,25 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     @Override
     public CompetitorDTO convertToCompetitorDTO(Competitor competitor, Boat boat) {
         CompetitorWithoutBoatDTO c = convertToCompetitorWithoutBoatDTO(competitor);
-        BoatClassDTO boatClassDTO = null;
         BoatDTO boatDTO = null;
         if (boat != null) {
-            boatClassDTO = new BoatClassDTO(boat.getBoatClass().getName(), boat.getBoatClass().getDisplayName(), 
-                    boat.getBoatClass().getHullLength(), boat.getBoatClass().getHullBeam());
-            boatDTO = new BoatDTO(boat.getId().toString(), boat.getName(), boatClassDTO, boat.getSailID(), boat.getColor());  
+            boatDTO = convertToBoatDTO(boat); 
         }
-        CompetitorDTO competitorDTO = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(),
-                c.getTwoLetterIsoCountryCode(), c.getThreeLetterIocCountryCode(), c.getCountryName(), c.getIdAsString(),
-                c.getImageURL(), c.getFlagImageURL(), c.getTimeOnTimeFactor(),
-                c.getTimeOnDistanceAllowancePerNauticalMile(), c.getSearchTag(), boatDTO);
+        CompetitorDTO competitorDTO = new CompetitorDTOImpl(c, boatDTO);
 
         return competitorDTO;
+    }
+
+    @Override
+    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats) {
+        Map<CompetitorDTO, BoatDTO> result = new HashMap<>();
+        for (Entry<Competitor, Boat> entry: competitorsAndBoats.entrySet()) {
+            CompetitorWithoutBoatDTO c = convertToCompetitorWithoutBoatDTO(entry.getKey());
+            BoatDTO boatDTO = convertToBoatDTO(entry.getValue());
+            CompetitorDTO competitorDTO = new CompetitorDTOImpl(c, null);
+            result.put(competitorDTO, boatDTO);
+        }
+        return result;
     }
 
     @Override

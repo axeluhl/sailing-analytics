@@ -162,6 +162,11 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
+    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats) {
+        return competitorAndBoatStore.convertToCompetitorAndBoatDTOs(competitorsAndBoats);
+    }
+
+    @Override
     public BoatDTO convertToBoatDTO(Boat boat) {
         return competitorAndBoatStore.convertToBoatDTO(boat);
     }

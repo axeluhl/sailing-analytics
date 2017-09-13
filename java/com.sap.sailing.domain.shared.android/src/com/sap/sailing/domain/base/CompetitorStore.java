@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -88,6 +89,8 @@ public interface CompetitorStore extends CompetitorFactory, BoatFactory {
     CompetitorWithoutBoatDTO convertToCompetitorWithoutBoatDTO(Competitor c);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c, Boat b);
+
+    Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats);
 
     /**
      * Listeners added here are notified whenever {@link #updateCompetitor(String, String, Color, String, Nationality)} is called

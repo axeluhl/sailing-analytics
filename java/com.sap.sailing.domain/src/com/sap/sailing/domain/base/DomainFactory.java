@@ -65,6 +65,8 @@ public interface DomainFactory extends SharedDomainFactory {
 
     CompetitorDTO convertToCompetitorDTO(Competitor c, Boat b);
 
+    Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, Boat> competitorsAndBoats);
+
     BoatDTO convertToBoatDTO(Boat boat);
 
     FleetDTO convertToFleetDTO(Fleet fleet);

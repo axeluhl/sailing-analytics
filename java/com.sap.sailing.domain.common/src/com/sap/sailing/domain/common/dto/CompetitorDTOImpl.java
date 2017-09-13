@@ -20,6 +20,14 @@ public class CompetitorDTOImpl extends CompetitorWithoutBoatDTOImpl implements C
         this.boat = boat;
     }
 
+    public CompetitorDTOImpl(CompetitorWithoutBoatDTO c, BoatDTO boat) {
+        super(c.getName(), c.getShortName(), c.getColor(), c.getEmail(),
+                c.getTwoLetterIsoCountryCode(), c.getThreeLetterIocCountryCode(), c.getCountryName(), c.getIdAsString(),
+                c.getImageURL(), c.getFlagImageURL(), c.getTimeOnTimeFactor(),
+                c.getTimeOnDistanceAllowancePerNauticalMile(), c.getSearchTag());
+        this.boat = boat;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
