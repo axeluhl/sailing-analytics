@@ -1652,7 +1652,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 storeTimePoint(raceInfo.getStartOfRace(), newValue, (FieldNames.START_OF_RACE.name()));
                 newValue.append(FieldNames.EVENT_ID.name(), raceInfo.getEventID().toString());
                 newValue.append(FieldNames.EVENT_NAME.name(), raceInfo.getEventName());
-                newValue.append(FieldNames.EVENT_TYPE.name(), raceInfo.getEventType().name());
+                newValue.append(FieldNames.EVENT_TYPE.name(),
+                        raceInfo.getEventType() == null ? null : raceInfo.getEventType().name());
 
                 final URL remoteUrl = raceInfo.getRemoteUrl();
                 newValue.append(FieldNames.REMOTE_URL.name(), remoteUrl == null ? null : remoteUrl.toExternalForm());
