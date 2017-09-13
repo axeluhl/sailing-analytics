@@ -114,42 +114,52 @@ public class PeriodicRaceListAnniversaryDeterminator {
         }
     }
 
-    private synchronized void checkForNewAnniversaries(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
+    private void checkForNewAnniversaries(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
         if (isStarted.get()) {
-            ArrayList<SimpleRaceInfo> allRaces = new ArrayList<>(races.values());
+            final ArrayList<SimpleRaceInfo> allRaces = new ArrayList<>(races.values());
             Collections.sort(allRaces, new Comparator<SimpleRaceInfo>() {
                 @Override
                 public int compare(SimpleRaceInfo o1, SimpleRaceInfo o2) {
                     return o1.getStartOfRace().compareTo(o2.getStartOfRace());
                 }
             });
-            boolean requiresPersist = false;
-            Integer nearestNext = Integer.MAX_VALUE;
+            
+            final Map<Integer, AnniversaryType> requiredAnniversaries = new HashMap<>();
+            Integer nearestNext = null;
             AnniversaryType nearestType = null;
             for (AnniversaryChecker checker : checkers) {
                 checker.update(allRaces.size());
                 // find past anniversaries
                 for (Integer anniversary : checker.getAnniversaries()) {
-                    if (!knownAnniversaries.containsKey(anniversary)) {
-                        // adjust for zero started counting of the allRaceslist
-                        SimpleRaceInfo anniversaryRace = allRaces.get(anniversary - 1);
-                        insert(anniversary, anniversaryRace, checker.getType());
-                        requiresPersist = true;
-                    }
+                    requiredAnniversaries.putIfAbsent(anniversary, checker.getType());
                 }
                 // find next anniversaries
                 Integer next = checker.getNextAnniversary();
-                if (next != null && next < nearestNext) {
+                if (next != null && (nearestNext == null || next < nearestNext)) {
                     nearestNext = next;
                     nearestType = checker.getType();
                 }
             }
-            if (nearestNext.intValue() != Integer.MAX_VALUE) {
-                nextAnniversaryNumber = new Pair<Integer, AnniversaryType>(nearestNext, nearestType);
-            }
-            currentRaceCount = allRaces.size();
-            if (requiresPersist) {
-                raceEventService.getMongoObjectFactory().storeAnniversaryData(knownAnniversaries);
+            
+            synchronized (this) {
+                if (nearestNext.intValue() != Integer.MAX_VALUE) {
+                    nextAnniversaryNumber = new Pair<Integer, AnniversaryType>(nearestNext, nearestType);
+                }
+                
+                boolean requiresPersist = false;
+                for (Map.Entry<Integer, AnniversaryType> anniversaryEntry : requiredAnniversaries.entrySet()) {
+                    final Integer anniversary = anniversaryEntry.getKey();
+                    if (!knownAnniversaries.containsKey(anniversary)) {
+                        // adjust for zero started counting of the allRaceslist
+                        final SimpleRaceInfo anniversaryRace = allRaces.get(anniversary - 1);
+                        insert(anniversary, anniversaryRace, anniversaryEntry.getValue());
+                        requiresPersist = true;
+                    }
+                }
+                currentRaceCount = allRaces.size();
+                if (requiresPersist) {
+                    raceEventService.getMongoObjectFactory().storeAnniversaryData(knownAnniversaries);
+                }
             }
         }
     }
@@ -158,9 +168,7 @@ public class PeriodicRaceListAnniversaryDeterminator {
         DetailedRaceInfo fullData = raceEventService.getFullDetailsForRaceCascading(simpleRaceInfo.getIdentifier());
         logger.info("Determined new Anniversary! " + anniversaryToCheck + " - " + anniversaryType + " - " + fullData);
         final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData = new Pair<>(fullData, anniversaryType);
-        if (!knownAnniversaries.containsKey(anniversaryToCheck)) {
-            raceEventService.apply(new AddAnniversaryOperation(anniversaryToCheck, anniversaryData));
-        }
+        raceEventService.apply(new AddAnniversaryOperation(anniversaryToCheck, anniversaryData));
     }
 
     synchronized void addAnniversary(int anniversaryToCheck, final Pair<DetailedRaceInfo, AnniversaryType> anniversaryData) {
