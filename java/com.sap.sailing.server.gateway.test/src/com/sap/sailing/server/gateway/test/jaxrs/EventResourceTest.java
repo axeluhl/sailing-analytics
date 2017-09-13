@@ -54,16 +54,16 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     @Test
     public void testCreateEvent() throws Exception {
         Response eventResponse = createEvent();
-        assertTrue(isValidEventResponse(eventResponse));
-        JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
+        assertTrue(isValidCreateEventResponse(eventResponse));
+        JSONObject objEvent = getEvent(getIdFromCreateEventResponse(eventResponse));
         assertFalse(hasDefaultLeaderboardGroup(objEvent));
     }
     
     @Test
     public void testCreateEventInBerlin() throws Exception {
         Response eventResponse = createEventAtLocation(new DegreePosition(52.514176, 13.411628));
-        assertTrue(isValidEventResponse(eventResponse));
-        JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
+        assertTrue(isValidCreateEventResponse(eventResponse));
+        JSONObject objEvent = getEvent(getIdFromCreateEventResponse(eventResponse));
         assertFalse(hasDefaultLeaderboardGroup(objEvent));
         assertEquals("Nikolaiviertel", ((JSONObject) objEvent.get("venue")).get("name"));
     }
@@ -71,16 +71,16 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     @Test
     public void testCreateEventWithLeaderboardGroup() throws Exception {
         Response eventResponse = createEventWithLeaderboardGroup();
-        assertTrue(isValidEventResponse(eventResponse));
-        JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
+        assertTrue(isValidCreateEventResponse(eventResponse));
+        JSONObject objEvent = getEvent(getIdFromCreateEventResponse(eventResponse));
         assertTrue(hasDefaultLeaderboardGroup(objEvent));
     }
 
     @Test
     public void testCreateEventWithLeaderboardGroupAndRegatta() throws Exception {
         Response eventResponse = createEventWithLeaderboardGroupAndRegatta();
-        assert(isValidEventResponse(eventResponse));
-        JSONObject objEvent = getEvent(getIdFromResponse(eventResponse));
+        assert(isValidCreateEventResponse(eventResponse));
+        JSONObject objEvent = getEvent(getIdFromCreateEventResponse(eventResponse));
         assertTrue(hasDefaultLeaderboardGroup(objEvent));
         assertTrue(hasAtLeastOneCourseArea(objEvent));
         JSONObject objRegatta = getRegatta(randomName);
@@ -101,8 +101,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     public void testCreateEventWithLeaderboardGroupAddRegatta() throws Exception {
         String eventName = randomName;
         Response eventResponse = createEventWithLeaderboardGroupAndRegatta();
-        assertTrue(isValidEventResponse(eventResponse));
-        String strEventId = getIdFromResponse(eventResponse);
+        assertTrue(isValidCreateEventResponse(eventResponse));
+        String strEventId = getIdFromCreateEventResponse(eventResponse);
         JSONObject regatta = getRegatta(eventName);
         String strRegattaCourseAreaId = (String) regatta.get("courseAreaId");
         JSONArray arrCourseAreas = getCourseAreasOfEvent(strEventId);
@@ -187,11 +187,11 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
 
     private JSONObject getRegatta(String eventName) {
         Response regattasResponse = regattasResource.getRegatta(eventName);
-        return toJSONObject(getIdFromResponse(regattasResponse));
+        return toJSONObject((String) regattasResponse.getEntity());
     }
 
-    private boolean isValidEventResponse(Response response) {
-        String id = getIdFromResponse(response);
+    private boolean isValidCreateEventResponse(Response response) {
+        String id = getIdFromCreateEventResponse(response);
         return validateUUID(id);
     }
     
@@ -203,26 +203,26 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
 
     private JSONObject getEvent(String strEventId) {
         String jsonEvent = getEventAsString(strEventId);
-        JSONObject objEvent= toJSONObject(jsonEvent);
+        JSONObject objEvent = toJSONObject(jsonEvent);
         return objEvent;
     }
 
     private boolean leaderBoardWithNameExists(String name) {
         Response leaderboardResponse = getLeaderboard(name);
-        JSONObject objLeaderboard = getEntityAsObject(leaderboardResponse);
+        JSONObject objLeaderboard = getLeaderboardAsJsonObject(leaderboardResponse);
         String strLeaderboardName = (String) objLeaderboard.get("name");
         return strLeaderboardName.equals(name);
     }
 
-    private JSONObject getEntityAsObject(Response leaderboardGroupsResponse) {
-        String strLeaderboardGroup = getIdFromResponse(leaderboardGroupsResponse);
+    private JSONObject getLeaderboardAsJsonObject(Response leaderboardResponse) {
+        String strLeaderboardGroup = (String) leaderboardResponse.getEntity();
         JSONObject objLeaderboardGroup = toJSONObject(strLeaderboardGroup);
         return objLeaderboardGroup;
     }
 
     private JSONObject getLeaderboardGroup(String strDefaultLeaderboardGroupName) {
         Response leaderboardGroupsResponse = leaderboardGroupsResource.getLeaderboardGroup(strDefaultLeaderboardGroupName);
-        return toJSONObject(getIdFromResponse(leaderboardGroupsResponse));
+        return toJSONObject(leaderboardGroupsResponse.getEntity().toString());
     }
 
     private JSONArray getLeaderboardGroups(JSONObject objEvent) {
@@ -249,8 +249,8 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
     
 
-    private String getIdFromResponse(Response eventResponse) {
-        return (String) eventResponse.getEntity();
+    private String getIdFromCreateEventResponse(Response createEventResponse) {
+        return (String) toJSONObject((String) createEventResponse.getEntity()).get("eventid");
     }
 
     private <T extends AbstractSailingServerResource> T createResource(T resource){
@@ -258,7 +258,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
     
     private String getEventAsString(String eventId) {
-        return getIdFromResponse(eventsResource.getEvent(eventId));
+        return (String) eventsResource.getEvent(eventId).getEntity();
     }
 
 }

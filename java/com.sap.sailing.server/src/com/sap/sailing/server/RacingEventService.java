@@ -14,6 +14,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.apache.shiro.subject.Subject;
+
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -564,6 +566,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     RaceTracker getRaceTrackerById(Object id);
     
+    /**
+     * Tries to obtain a priority-0 author from a currently logged-in {@link Subject}. If no user
+     * is currently logged on or subject's {@link Subject#getPrincipal() principal} is not set,
+     * a default server author object with priority 0 is returned as default.
+     */
     AbstractLogEventAuthor getServerAuthor();
     
     CompetitorStore getCompetitorStore();

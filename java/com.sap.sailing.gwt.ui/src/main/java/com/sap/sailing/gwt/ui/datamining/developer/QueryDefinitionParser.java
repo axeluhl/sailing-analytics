@@ -110,14 +110,23 @@ public class QueryDefinitionParser {
 
         // Extraction Function
         String statisticVariable = "statistic";
-        builder.appendText(functionToCode(statisticVariable, queryDefinition.getStatisticToCalculate(), typeStrategy)).appendLineBreak();
+        if (statisticVariable != null && queryDefinition.getStatisticToCalculate() != null) {
+            builder.appendText(functionToCode(statisticVariable, queryDefinition.getStatisticToCalculate(), typeStrategy));
+        } else {
+            builder.appendText("null");
+        }
+        builder.appendLineBreak();
 
         // Aggregator Definition
         String aggregatorVariable = "aggregator";
         AggregationProcessorDefinitionDTO aggregator = queryDefinition.getAggregatorDefinition();
-        builder.appendText(aggregatorClassName + " " + aggregatorVariable + " = new " + aggregatorClassName + "(" + literal(aggregator.getMessageKey()) + ", " +
-                           typeStrategy.toCode(aggregator.getExtractedTypeName()) + ", " + typeStrategy.toCode(aggregator.getAggregatedTypeName()) + ", \"\");").appendLineBreak()
-               .appendLineBreak();
+        if (aggregator != null) {
+            builder.appendText(aggregatorClassName + " " + aggregatorVariable + " = new " + aggregatorClassName + "(" + literal(aggregator.getMessageKey()) + ", " +
+                    typeStrategy.toCode(aggregator.getExtractedTypeName()) + ", " + typeStrategy.toCode(aggregator.getAggregatedTypeName()) + ", \"\");");
+        } else {
+            builder.appendText("null");
+        }
+        builder.appendLineBreak().appendLineBreak();
         
         // Retriever Levels and Retriever Chain Definition
         String retrieverLevelsVariable = "retrieverLevels";
@@ -243,6 +252,9 @@ public class QueryDefinitionParser {
         }
         if (value instanceof Integer) {
             return value.toString();
+        }
+        if (value instanceof Enum) {
+            return value.getClass().getName()+".valueOf(\""+((Enum<?>) value).name()+"\")";
         }
         throw new IllegalArgumentException("Can't create literal for values of type " + value.getClass().getName());
     }

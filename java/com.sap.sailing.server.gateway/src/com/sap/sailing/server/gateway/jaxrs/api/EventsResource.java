@@ -48,7 +48,6 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
@@ -86,6 +85,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
@@ -96,7 +96,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 
 @Path("/v1/events")
 public class EventsResource extends AbstractSailingServerResource {
-    private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+    private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
     
     private final boolean enforceSecurityChecks;
     
@@ -113,8 +113,8 @@ public class EventsResource extends AbstractSailingServerResource {
     
     @POST
     @Path("/createEvent")
-    @Consumes("text/plain")
-    @Produces("text/plain")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces("application/json;charset=UTF-8")
     public Response createEvent(
             @Context UriInfo uriInfo,
             @FormParam("eventName") String eventNameParam,
@@ -138,48 +138,32 @@ public class EventsResource extends AbstractSailingServerResource {
         if (enforceSecurityChecks) {
             SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
         }
-        Event event = validateAndCreateEvent(uriInfo, eventNameParam, eventDescriptionParam, startDateParam,
-                startDateAsMillis, endDateParam, endDateAsMillis, venueNameParam,
-                /* venue latitude */ venueLat, /* venue longitude */ venueLng, isPublicParam, officialWebsiteURLParam,
-                baseURLParam, leaderboardGroupIdsListParam, createLeaderboardGroupParam, createRegattaParam,
-                boatClassNameParam, numberOfRacesParam);
-        return ok(event.getId().toString(), MediaType.TEXT_PLAIN);
+        final Response response;
+        if (venueNameParam == null && (venueLat == null || venueLng == null)) {
+            response = Response.status(Status.PRECONDITION_FAILED).entity("No venue specified; provide either venuename or venuelat/venuelng").build();
+        } else {
+            Triple<Event, LeaderboardGroup, RegattaLeaderboard> eventAndLeaderboardGroupAndLeaderboard = validateAndCreateEvent(uriInfo, eventNameParam, eventDescriptionParam, startDateParam,
+                    startDateAsMillis, endDateParam, endDateAsMillis, venueNameParam,
+                    /* venue latitude */ venueLat, /* venue longitude */ venueLng, isPublicParam, officialWebsiteURLParam,
+                    baseURLParam, leaderboardGroupIdsListParam, createLeaderboardGroupParam, createRegattaParam,
+                    boatClassNameParam, numberOfRacesParam);
+            final JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("eventid", eventAndLeaderboardGroupAndLeaderboard.getA().getId().toString());
+            jsonResponse.put("eventname", eventAndLeaderboardGroupAndLeaderboard.getA().getName());
+            jsonResponse.put("eventstartdate", eventAndLeaderboardGroupAndLeaderboard.getA().getStartDate()==null?null:eventAndLeaderboardGroupAndLeaderboard.getA().getStartDate().asMillis());
+            jsonResponse.put("eventenddate", eventAndLeaderboardGroupAndLeaderboard.getA().getEndDate()==null?null:eventAndLeaderboardGroupAndLeaderboard.getA().getEndDate().asMillis());
+            if (eventAndLeaderboardGroupAndLeaderboard.getB() != null) {
+                jsonResponse.put("leaderboardgroupid", eventAndLeaderboardGroupAndLeaderboard.getB().getId().toString());
+            }
+            if (eventAndLeaderboardGroupAndLeaderboard.getC() != null) {
+                jsonResponse.put("regatta", eventAndLeaderboardGroupAndLeaderboard.getC().getRegatta().getName());
+                jsonResponse.put("leaderboard", eventAndLeaderboardGroupAndLeaderboard.getC().getName());
+            }
+            response = ok(jsonResponse.toJSONString(), MediaType.APPLICATION_JSON);
+        }
+        return response;
     }
     
-    @POST
-    @Path("/addCourseArea")
-    @Consumes("text/plain")
-    @Produces("text/plain")
-    public Response addCourseArea(@FormParam("eventId") String eventIdParam,
-            @FormParam("courseAreaName") String courseAreaNameParam) {
-        if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Mode.CREATE));
-        }
-        if (eventIdParam == null) {
-            throw new IllegalArgumentException(ExceptionManager.parameterRequiredMsg("eventId"));
-        }
-        if (courseAreaNameParam == null) {
-            throw new IllegalArgumentException(ExceptionManager.parameterRequiredMsg("courseAreaName"));
-        }
-        UUID eventId = toUUID(eventIdParam);
-        CourseArea courseArea = addCourseArea(eventId, courseAreaNameParam);
-        return ok(courseArea.getId().toString(), MediaType.TEXT_PLAIN);
-    }
-
-    public Response addLeaderboard(String regattaNameParam, List<Integer> discardThresholdsParam) {
-        if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(
-                    Permission.LEADERBOARD.getStringPermissionForObjects(Mode.CREATE, regattaNameParam));
-        }
-        if (regattaNameParam == null) {
-            throw new IllegalArgumentException(ExceptionManager.parameterRequiredMsg("regattaName"));
-        }
-        int[] discardThresholds = discardThresholdsParam == null ? new int[0]
-                : discardThresholdsParam.stream().mapToInt(i -> i).toArray();
-        RegattaLeaderboard leaderboard = addLeaderboard(regattaNameParam, discardThresholds);
-        return ok(leaderboard.getName(), MediaType.TEXT_PLAIN);
-    }
-
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents(@QueryParam("showNonPublic") String showNonPublic) {
@@ -297,25 +281,31 @@ public class EventsResource extends AbstractSailingServerResource {
                 rankingMetric, regattaId, regattaCreationParametersDTO, leaderboardDiscardThresholds, numberOfRaces);
         final RegattaLeaderboard leaderboard = addLeaderboard(regattaName, leaderboardDiscardThresholds);
         SeriesCreationParametersDTO defaultSeries = regattaCreationParametersDTO.getSeriesCreationParameters().get("Default");
-        addRaceColumns(regattaName, "Default", numberOfRaces, boatClassName);
+        addRaceColumns(regattaName, "Default", numberOfRaces);
         updateSeries(regattaName, defaultSeries);
         return leaderboard; 
     }
 
-    private Event validateAndCreateEvent(UriInfo uriInfo, String eventNameParam, String eventDescriptionParam,
-            String startDateParam, Long startDateAsMillis, String endDateParam, Long endDateAsMillis, String venueNameParam,
-            String venueLat, String venueLng, String isPublicParam,
-            String officialWebsiteURLParam, String baseURLParam, List<String> leaderboardGroupIdsListParam, String createLeaderboardGroupParam, String createRegattaParam, String boatClassNameParam, String numberOfRacesParam)
-            throws ParseException, NotFoundException, NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
+    /**
+     * @return the event created as first component; if a leaderboard group was to be created, the leaderboard group
+     *         created as the second component or {@code null} otherwise; the regatta leaderboard as the third component
+     *         in case a regatta was to be created, or {@code null} otherwise
+     */
+    private Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard> validateAndCreateEvent(UriInfo uriInfo, String eventNameParam, String eventDescriptionParam,
+            String startDateParam, Long startDateAsMillis, String endDateParam, Long endDateAsMillis,
+            String venueNameParam, String venueLat, String venueLng, String isPublicParam,
+            String officialWebsiteURLParam, String baseURLParam, List<String> leaderboardGroupIdsListParam,
+            String createLeaderboardGroupParam, String createRegattaParam, String boatClassName,
+            String numberOfRacesParam) throws ParseException, NotFoundException, NumberFormatException, IOException,
+            org.json.simple.parser.ParseException, InvalidDateException {
         boolean isPublic = isPublicParam == null ? false : Boolean.parseBoolean(isPublicParam);
         boolean createRegatta = createRegattaParam == null ? true : Boolean.parseBoolean(createRegattaParam);
         boolean createLeaderboardGroup = createLeaderboardGroupParam == null ? true : Boolean.parseBoolean(createLeaderboardGroupParam);
         String eventName = eventNameParam == null ? getDefaultEventName() : eventNameParam;
         String venueName = venueNameParam == null ? getDefaultVenueName(venueLat, venueLng) : venueNameParam;
-        if (createRegatta && boatClassNameParam == null) {
+        if (createRegatta && boatClassName == null) {
             throw new IllegalArgumentException(ExceptionManager.parameterRequiredMsg("boatClassName"));
         }
-        String boatClassName = boatClassNameParam == null ? null : getBoatClassDisplayName(boatClassNameParam);
         String eventDescription = eventDescriptionParam == null ? eventName : eventDescriptionParam;
         final TimePoint startDate = parseTimePoint(startDateParam, startDateAsMillis, now());
         final TimePoint endDate = parseTimePoint(endDateParam, endDateAsMillis, new MillisecondsTimePoint(addOneWeek(startDate.asDate())));
@@ -338,8 +328,9 @@ public class EventsResource extends AbstractSailingServerResource {
         } else {
             leaderboardGroup = null;
         }
+        final RegattaLeaderboard leaderboard;
         if (createRegatta) {
-            final RegattaLeaderboard leaderboard = validateAndCreateRegatta(event.getName(), boatClassName,
+            leaderboard = validateAndCreateRegatta(event.getName(), boatClassName,
                     /* scoringSchemeParam */ null, courseArea.getId(), /* buoyZoneRadiusInHullLengthsParam */ null,
                     /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null,
                     /* rankingMetricParam */ null, /* leaderboardDiscardThresholdsParam */ null,
@@ -350,8 +341,10 @@ public class EventsResource extends AbstractSailingServerResource {
                         leaderboardGroup.getOverallLeaderboard() == null ? null : ((ThresholdBasedResultDiscardingRule) leaderboardGroup.getOverallLeaderboard().getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
                         leaderboardGroup.getOverallLeaderboard() == null ? null : leaderboardGroup.getOverallLeaderboard().getScoringScheme().getType()));
             }
+        } else {
+            leaderboard = null;
         }
-        return event;
+        return new Util.Triple<>(event, leaderboardGroup, leaderboard);
     }
 
     private LeaderboardGroup validateAndAddLeaderboardGroup(UUID eventId, String leaderboardGroupName,
@@ -363,7 +356,7 @@ public class EventsResource extends AbstractSailingServerResource {
             SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD_GROUP.getStringPermissionForObjects(Mode.CREATE, leaderboardGroupName));
         }
         ScoringSchemeType overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeTypeParam == null
-                ? getScoringSchemeType("LOW_POINT") : getScoringSchemeType(overallLeaderboardScoringSchemeTypeParam);
+                ? null : getScoringSchemeType(overallLeaderboardScoringSchemeTypeParam);
         int[] overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholdsParam == null ? new int[0] : overallLeaderboardDiscardThresholdsParam.stream().mapToInt(i -> i).toArray();
         List<String> leaderboardNames = leaderboardNamesParam == null ? new ArrayList<String>() : leaderboardNamesParam;
         LeaderboardGroup leaderboardGroup = getService().addLeaderboardGroup(UUID.randomUUID(), leaderboardGroupName,
@@ -408,7 +401,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 defaultSeries.getFleets()));
     }
     
-    private void addRaceColumns(String regattaName, String seriesName, int numberOfRaces, String boatClassName) {
+    private void addRaceColumns(String regattaName, String seriesName, int numberOfRaces) {
         final Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
         if (regatta == null) {
             throw new IllegalArgumentException(ExceptionManager.objectNotFoundMsg("regatta", regattaName));
@@ -495,7 +488,7 @@ public class EventsResource extends AbstractSailingServerResource {
             List<String> leaderboards = stream(defaultLeaderboardGroup.getLeaderboards().spliterator()).map(lg -> lg.getName())
                     .collect(Collectors.toList());
             
-            ResultDiscardingRule rule = defaultLeaderboardGroup.getOverallLeaderboard().getResultDiscardingRule();
+            ResultDiscardingRule rule = defaultLeaderboardGroup.getOverallLeaderboard()==null?null:defaultLeaderboardGroup.getOverallLeaderboard().getResultDiscardingRule();
             int[] overallLeaderboardDiscardThresholds = null; 
             if(rule instanceof ThresholdBasedResultDiscardingRule){
                 ThresholdBasedResultDiscardingRule resultDiscardingRule = (ThresholdBasedResultDiscardingRule) rule;
@@ -503,7 +496,8 @@ public class EventsResource extends AbstractSailingServerResource {
             }
             
             getService().updateLeaderboardGroup(defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getName(), defaultLeaderboardGroup.getDescription(),
-                    defaultLeaderboardGroup.getDisplayName(), leaderboards, overallLeaderboardDiscardThresholds, defaultLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
+                    defaultLeaderboardGroup.getDisplayName(), leaderboards, overallLeaderboardDiscardThresholds, 
+                    defaultLeaderboardGroup.getOverallLeaderboard()==null?null:defaultLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
         }
     }
     
@@ -601,16 +595,6 @@ public class EventsResource extends AbstractSailingServerResource {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(ExceptionManager.incorrectParameterValue(scoringSchemeTypeParam,
                     getEnumValuesAsString(ScoringSchemeType.class)));
-        }
-    }
-
-
-    private String getBoatClassDisplayName(String boatClassNameParam) {
-        try {
-            return BoatClassMasterdata.valueOf(boatClassNameParam).getDisplayName();
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(ExceptionManager.incorrectParameterValue(boatClassNameParam,
-                    getEnumValuesAsString(BoatClassMasterdata.class)));
         }
     }
 
