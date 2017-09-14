@@ -29,6 +29,23 @@ class TrainingViewController: UIViewController {
     @IBOutlet weak var leaderboardButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setup()
+    }
+    
+    // MARK: - Setup
+    
+    fileprivate func setup() {
+        setupLocalization()
+    }
+    
+    fileprivate func setupLocalization() {
+        leaderboardButton.setTitle(Translation.TrainingView.LeaderboardButton.Title.String, for: .normal)
+        startTrackingButton.setTitle(Translation.TrainingView.StartTrackingButton.Title.String, for: .normal)
+        stopTrainingButton.setTitle(Translation.TrainingView.StopTrainingButton.Title.String, for: .normal)
+    }
+    
     // MARK: - Refresh
     
     func refresh() {
@@ -50,7 +67,7 @@ class TrainingViewController: UIViewController {
     // MARK: - Actions
     
     @IBAction func stopTrainingButtonTapped(_ sender: Any) {
-        
+        showReactivateAlert()
     }
     
     @IBAction func leaderboardButtonTapped(_ sender: Any) {
@@ -71,6 +88,27 @@ class TrainingViewController: UIViewController {
             SVProgressHUD.dismiss()
             self?.showAlert(forError: error)
         }
+    }
+    
+    // MARK: - Alerts
+    
+    fileprivate func showReactivateAlert() {
+        let alertController = UIAlertController(
+            title: Translation.TrainingView.ReactivateAlert.Title.String,
+            message: Translation.TrainingView.ReactivateAlert.Message.String,
+            preferredStyle: .alert
+        )
+        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .default) { [weak self] action in
+            self?.performReactivation()
+        }
+        let noAction = UIAlertAction(title: Translation.Common.No.String, style: .cancel, handler: nil)
+        alertController.addAction(yesAction)
+        alertController.addAction(noAction)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    fileprivate func performReactivation() {
+        
     }
     
     // MARK: - Properties

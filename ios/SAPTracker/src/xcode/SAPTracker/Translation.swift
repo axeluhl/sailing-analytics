@@ -474,4 +474,37 @@ class Translation: NSObject {
         }
     }
     
+    // MARK: - TrainingView
+    
+    struct TrainingView { private static let Key = "\(TrainingView.self)"
+        struct LeaderboardButton { private static let Key = "\(TrainingView.Key).\(LeaderboardButton.self)"
+            struct Title { private static let Key = "\(LeaderboardButton.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct ReactivateAlert { private static let Key = "\(TrainingView.Key).\(ReactivateAlert.self)"
+            struct Title { private static let Key = "\(ReactivateAlert.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+            struct Message { private static let Key = "\(ReactivateAlert.Key).\(Message.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct StartTrackingButton { private static let Key = "\(TrainingView.Key).\(StartTrackingButton.self)"
+            struct Title { private static let Key = "\(StartTrackingButton.Key).\(Title.self)"
+                static let String = CompetitorView.StartTrackingButton.Title.String
+            }
+        }
+        struct StopTrainingAlert { private static let Key = "\(TrainingView.Key).\(StopTrainingAlert.self)"
+            struct Message { private static let Key = "\(StopTrainingAlert.Key).\(Message.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct StopTrainingButton { private static let Key = "\(TrainingView.Key).\(StopTrainingButton.self)"
+            struct Title { private static let Key = "\(StopTrainingButton.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+    }
+    
 }
