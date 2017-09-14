@@ -48,7 +48,7 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     }
     
     fileprivate func setupLocalization() {
-        navigationItem.title = "REGATTAS TITLE"
+        navigationItem.title = Translation.RegattaCheckInListView.Title.String
         headerTitleLabel.text = Translation.RegattaCheckInListView.HeaderTitleLabel.Text.String
         scanCodeButton.setTitle(Translation.ScanView.Title.String, for: .normal)
         noCodeButton.setTitle(Translation.RegattaCheckInListView.NoCodeAlert.Title.String, for: .normal)

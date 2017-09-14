@@ -180,6 +180,9 @@ class Translation: NSObject {
     // MARK: - RegattaCheckInListView
     
     struct RegattaCheckInListView { static let Key = "\(RegattaCheckInListView.self)"
+        struct Title { static let Key = "\(RegattaCheckInListView.Key).\(Title.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
         struct HeaderTitleLabel { static let Key = "\(RegattaCheckInListView.Key).\(HeaderTitleLabel.self)"
             struct Text { static let Key = "\(HeaderTitleLabel.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
