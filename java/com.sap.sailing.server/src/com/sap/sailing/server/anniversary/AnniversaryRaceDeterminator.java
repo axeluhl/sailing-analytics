@@ -28,10 +28,10 @@ public class AnniversaryRaceDeterminator {
     private final RacingEventService racingEventService;
     private final RemoteSailingServerSet remoteSailingServerSet;
     private final Runnable raceChangedListener;
-    private final AtomicBoolean isStarted = new AtomicBoolean(false);
+    private final AtomicBoolean isStarted;
 
     private volatile Pair<Integer, AnniversaryType> nextAnniversary;
-    private volatile Integer currentRaceCount;
+    private volatile int currentRaceCount;
 
     public interface AnniversaryChecker {
 
@@ -73,6 +73,7 @@ public class AnniversaryRaceDeterminator {
         this.racingEventService = racingEventService;
         this.remoteSailingServerSet = remoteSailingServerSet;
         this.knownAnniversaries = new ConcurrentHashMap<>();
+        this.isStarted = new AtomicBoolean(false);
 
         try {
             knownAnniversaries.putAll(racingEventService.getDomainObjectFactory().getAnniversaryData());
@@ -100,7 +101,7 @@ public class AnniversaryRaceDeterminator {
                 }
             });
             allRaces.putAll(racingEventService.getLocalRaceList());
-            if (currentRaceCount == null || allRaces.size() != currentRaceCount) {
+            if (allRaces.size() != currentRaceCount) {
                 checkForNewAnniversaries(allRaces);
             }
         }
@@ -180,7 +181,7 @@ public class AnniversaryRaceDeterminator {
         this.nextAnniversary = nextAnniversary;
     }
     
-    public synchronized void setRaceCount(Integer raceCount) {
+    public synchronized void setRaceCount(int raceCount) {
         currentRaceCount = raceCount;
     }
 
@@ -199,7 +200,7 @@ public class AnniversaryRaceDeterminator {
         }
     }
 
-    public Integer getCurrentRaceCount() {
+    public int getCurrentRaceCount() {
         return currentRaceCount;
     }
     
@@ -217,6 +218,6 @@ public class AnniversaryRaceDeterminator {
     public synchronized void clear() {
         knownAnniversaries.clear();
         nextAnniversary = null;
-        currentRaceCount = null;
+        currentRaceCount = 0;
     }
 }

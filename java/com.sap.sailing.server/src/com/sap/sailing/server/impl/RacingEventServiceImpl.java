@@ -2880,8 +2880,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logoutput.append("Serialized next anniversary " + nextAnniversary + "\n");
 
         logger.info("Serializing race count for anniversaries...");
-        final Integer currentRaceCount = anniversaryRaceDeterminator.getCurrentRaceCount();
-        oos.writeObject(currentRaceCount);
+        final int currentRaceCount = anniversaryRaceDeterminator.getCurrentRaceCount();
+        oos.writeInt(currentRaceCount);
         logoutput.append("Serialized race count for anniversaries " + currentRaceCount + "\n");
 
         logger.info("Serializing remote sailing server references...");
@@ -2997,7 +2997,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logoutput.append("Received next anniversary " + nextAnniversary + "\n");
 
         logger.info("Reading race count for anniversaries...");
-        final Integer currentRaceCount = (Integer) ois.readObject();
+        final int currentRaceCount = ois.readInt();
         anniversaryRaceDeterminator.setRaceCount(currentRaceCount);
         logoutput.append("Received race count for anniversaries " + currentRaceCount + "\n");
 
@@ -4048,11 +4048,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Integer getNextAnniversaryCountdown() {
-        final Integer current = anniversaryRaceDeterminator.getCurrentRaceCount();
+        final int current = anniversaryRaceDeterminator.getCurrentRaceCount();
         final Pair<Integer, AnniversaryType> next = anniversaryRaceDeterminator.getNextAnniversary();
         Integer countDown = null;
-        if (current != null && next != null) {
-            countDown = next.getA().intValue() - current.intValue();
+        if (next != null) {
+            countDown = next.getA().intValue() - current;
         }
         return countDown;
     }
