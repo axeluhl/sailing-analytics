@@ -986,23 +986,33 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) throws MalformedURLException, IOException, InterruptedException {
         SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-        final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         final Response result;
-        if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
-            JSONObject jsonResult = new JSONObject();
-            final TrackedRace trackedRace = leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn().getTrackedRace(leaderboardAndRaceColumnAndFleetAndResponse.getFleet());
-            if (trackedRace == null) {
-                result = Response.status(Status.PRECONDITION_FAILED).entity("no tracked race").build();
-            } else {
-                final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
-                final RaceDefinition race = trackedRace.getRace();
-                getService().stopTracking(regatta, race);
-                jsonResult.put("regatta", regatta.getName());
-                jsonResult.put("race", race.getName());
-                result = Response.ok(jsonResult.toJSONString()).build();
-            }
+        if (leaderboard == null) {
+            result = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
         } else {
-            result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
+            JSONArray jsonResultArray = new JSONArray();
+            for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                if (raceColumnName == null || raceColumn.getName().equals(raceColumnName)) {
+                    for (final Fleet fleet : raceColumn.getFleets()) {
+                        if (fleetName == null || fleet.getName().equals(fleetName)) {
+                            JSONObject jsonResult = new JSONObject();
+                            final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                            if (trackedRace != null) {
+                                final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
+                                final RaceDefinition race = trackedRace.getRace();
+                                getService().stopTracking(regatta, race);
+                                jsonResult.put("regatta", regatta.getName());
+                                jsonResult.put("race", race.getName());
+                                jsonResultArray.add(jsonResult);
+                            }
+                        }
+                    }
+                }
+            }
+            result = Response.ok(jsonResultArray.toJSONString()).build();
         }
         return result;
     }
