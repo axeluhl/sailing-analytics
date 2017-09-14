@@ -30,12 +30,19 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
     
     fileprivate func setup() {
         setupAddButton()
+        setupLocalization()
     }
     
     fileprivate func setupAddButton() {
         makeViewRoundWithShadow(addButton)
     }
-
+    
+    fileprivate func setupLocalization() {
+        navigationItem.title = Translation.TrainingCheckInListView.Title.String
+        headerTitleLabel.text = Translation.TrainingCheckInListView.HeaderTitleLabel.Text.String
+        footerTextView.text = Translation.TrainingCheckInListView.FooterTextView.Text.String
+    }
+    
     // MARK: - Actions
     
     @IBAction func optionButtonTapped(_ sender: Any) {
