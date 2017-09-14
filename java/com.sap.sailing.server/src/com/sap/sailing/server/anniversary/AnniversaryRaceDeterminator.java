@@ -20,6 +20,16 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RemoteSailingServerSet;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * This implements the calculation and management of anniversary races. The base of the anniversary calculation is a
+ * list of races consisting of known remote races taken from {@link RemoteSailingServerSet} and the set of locally
+ * available races taken from {@link RacingEventService}. The anniversaries to be found are defined by a set of
+ * {@link AnniversaryChecker} instances given to the constructor. On every update of the remote race list in
+ * {@link RemoteSailingServerSet}, a list of all known races is created ordered by the startTimePoint. With this,
+ * anniversaries are defined by their startTimePoint at the moment when the list exceeds a number that matches an
+ * anniversary to be found. Even if an older race is added afterwards, the initially determined nth race will stay the
+ * same.
+ */
 public class AnniversaryRaceDeterminator {
     private static final Logger logger = Logger.getLogger(AnniversaryRaceDeterminator.class.getName());
 
@@ -107,6 +117,10 @@ public class AnniversaryRaceDeterminator {
         }
     }
 
+    /**
+     * Determines and stores anniversary that weren't found before. For every newly found anniversary, the details need
+     * to be retrieved from the server where the race is hosted.
+     */
     private void checkForNewAnniversaries(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
         if (isStarted.get()) {
             final ArrayList<SimpleRaceInfo> allRaces = new ArrayList<>(races.values());
@@ -163,6 +177,9 @@ public class AnniversaryRaceDeterminator {
         }
     }
     
+    /**
+     * Retrieves the detail data for a newly identified anniversary race.
+     */
     private Pair<DetailedRaceInfo, AnniversaryType> resolveAnniversaryData(final Integer anniversary, final SimpleRaceInfo simpleRaceInfo, final AnniversaryType anniversaryType) {
         final DetailedRaceInfo fullData = racingEventService.getFullDetailsForRaceCascading(simpleRaceInfo.getIdentifier());
         logger.info("Determined new Anniversary! " + anniversary +" - " + simpleRaceInfo + " - " + anniversaryType + " - " + fullData);

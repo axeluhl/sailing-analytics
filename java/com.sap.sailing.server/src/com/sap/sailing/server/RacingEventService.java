@@ -776,5 +776,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
     
+    /**
+     * Returns the {@link AnniversaryRaceDeterminator} used by this service. This is needed for replication for
+     * anniversary races only.
+     */
     AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
 }
