@@ -92,6 +92,19 @@ extension UIViewController {
         view.layer.shadowRadius = 4.0
     }
     
+    func presentAboutViewController() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let aboutNC = storyboard.instantiateViewController(withIdentifier: "AboutNavigationController") as? UINavigationController else { return }
+        present(aboutNC, animated: true)
+    }
+    
+    func presentSettingsViewController() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let aboutNC = storyboard.instantiateViewController(withIdentifier: "SettingsNavigationController") as? UINavigationController else { return }
+        present(aboutNC, animated: true)
+
+    }
+    
     func showAlert(forError error: Error) {
         let alertController = UIAlertController(
             title: Translation.Common.Error.String,

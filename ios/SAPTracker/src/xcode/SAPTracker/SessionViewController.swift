@@ -25,8 +25,6 @@ protocol SessionViewControllerDelegate: class {
 class SessionViewController: UIViewController {
     
     struct SessionSegue {
-        static let About = "About"
-        static let Settings = "Settings"
         static let Tracking = "Tracking"
     }
     
@@ -80,13 +78,13 @@ class SessionViewController: UIViewController {
     
     func makeActionInfo() -> UIAlertAction {
         return UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: SessionSegue.About, sender: action)
+            self?.presentAboutViewController()
         }
     }
     
     func makeActionSettings() -> UIAlertAction {
         return UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: SessionSegue.Settings, sender: self)
+            self?.presentSettingsViewController()
         }
     }
     

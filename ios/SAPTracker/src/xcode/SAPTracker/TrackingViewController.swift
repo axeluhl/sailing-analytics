@@ -52,14 +52,15 @@ class TrackingViewController : UIViewController {
     // MARK: - Actions
     
     @IBAction func stopTrackingButtonTapped(_ sender: Any) {
-        let alertController = UIAlertController(title: Translation.TrackingView.StopTrackingAlert.Title.String,
-                                                message: Translation.TrackingView.StopTrackingAlert.Message.String,
-                                                preferredStyle: .alert
+        let alertController = UIAlertController(
+            title: Translation.TrackingView.StopTrackingAlert.Title.String,
+            message: Translation.TrackingView.StopTrackingAlert.Message.String,
+            preferredStyle: .alert
         )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] (action) in
             self?.stopTracking()
         }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel)
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
@@ -72,6 +73,10 @@ class TrackingViewController : UIViewController {
             SVProgressHUD.popActivity()
             self.dismiss(animated: true, completion: nil)
         })
+    }
+    
+    @IBAction func optionButtonTapped(_ sender: Any) {
+        presentSettingsViewController()
     }
     
 }

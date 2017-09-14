@@ -11,9 +11,7 @@ import UIKit
 class RegattaCheckInTableViewController: CheckInTableViewController {
     
     fileprivate struct Segue {
-        static let About = "About"
         static let Scan = "Scan"
-        static let Settings = "Settings"
     }
     
     @IBOutlet weak var scanCodeButton: UIButton!
@@ -111,10 +109,10 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.Settings, sender: alertController)
+            self?.presentSettingsViewController()
         }
         let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.About, sender: alertController)
+            self?.presentAboutViewController()
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(settingsAction)

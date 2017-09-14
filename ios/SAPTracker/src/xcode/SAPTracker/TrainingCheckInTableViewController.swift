@@ -12,9 +12,7 @@ import CoreData
 class TrainingCheckInTableViewController: CheckInTableViewController {
     
     fileprivate struct Segue {
-        static let About = "About"
         static let CreateTraining = "CreateTraining"
-        static let Settings = "Settings"
     }
     
     var signUpController: SignUpController!
@@ -49,10 +47,10 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
             self?.logout()
         }
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.Settings, sender: alertController)
+            self?.presentSettingsViewController()
         }
         let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .default) { [weak self] action in
-            self?.performSegue(withIdentifier: Segue.About, sender: alertController)
+            self?.presentAboutViewController()
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel, handler: nil)
         alertController.addAction(logoutAction)
