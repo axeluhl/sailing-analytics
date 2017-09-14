@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.github.gwtbootstrap.client.ui.ProgressBar;
-import com.github.gwtbootstrap.client.ui.base.ProgressBarBase.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -29,6 +27,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
+import com.sap.sailing.gwt.ui.adminconsole.HTML5ProgressBar;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
@@ -125,12 +124,12 @@ public class MasterDataImportPanel extends VerticalPanel {
         String[] groupNames = createLeaderBoardGroupNamesFromListBox();
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
-        final ProgressBar overallProgressBar = new ProgressBar(Style.ANIMATED);
+        final HTML5ProgressBar overallProgressBar = new HTML5ProgressBar();
         overallProgressBar.ensureDebugId("overallProgressBar");
         this.add(overallProgressBar);
         final Label subProgressName = new Label();
         this.add(subProgressName);
-        final ProgressBar subProgressBar = new ProgressBar(Style.ANIMATED);
+        final HTML5ProgressBar subProgressBar = new HTML5ProgressBar();
         this.add(subProgressBar);
         if (groupNames.length >= 1) {
             disableAllButtons();
@@ -415,8 +414,8 @@ public class MasterDataImportPanel extends VerticalPanel {
         changeButtonStateAccordingToApplicationState();
     }
 
-    private void deleteProgressIndication(final Label overallName, final ProgressBar overallProgressBar,
-            final Label subProgressName, final ProgressBar subProgressBar) {
+    private void deleteProgressIndication(final Label overallName, final HTML5ProgressBar overallProgressBar,
+            final Label subProgressName, final HTML5ProgressBar subProgressBar) {
         this.remove(overallProgressBar);
         this.remove(subProgressBar);
         this.remove(subProgressName);
