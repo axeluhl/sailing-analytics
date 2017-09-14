@@ -92,4 +92,8 @@ extension TrainingCompetitorViewController: TrainingViewControllerDelegate {
         super.startTrackingButtonTapped(sender)
     }
     
+    func trainingViewController(_ controller: TrainingViewController, leaderboardButtonTapped sender: Any) {
+        super.leaderboardButtonTapped(sender)
+    }
+    
 }

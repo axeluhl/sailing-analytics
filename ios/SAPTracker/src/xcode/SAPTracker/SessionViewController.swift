@@ -26,7 +26,6 @@ class SessionViewController: UIViewController {
     
     struct SessionSegue {
         static let About = "About"
-        static let Leaderboard = "Leaderboard"
         static let Settings = "Settings"
         static let Tracking = "Tracking"
     }
@@ -61,22 +60,6 @@ class SessionViewController: UIViewController {
     
     func checkOut() {
         showCheckOutAlert()
-    }
-    
-    // MARK: - Segues
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        super.prepare(for: segue, sender: sender)
-        if (segue.identifier == SessionSegue.Tracking) {
-            let trackingNC = segue.destination as! UINavigationController
-            let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
-            trackingVC.checkIn = delegate.checkIn
-            trackingVC.sessionController = delegate.sessionController
-        } else if (segue.identifier == SessionSegue.Leaderboard) {
-            let leaderboardNC = segue.destination as! UINavigationController
-            let leaderboardVC = leaderboardNC.viewControllers[0] as! LeaderboardViewController
-            leaderboardVC.checkIn = delegate.checkIn
-        }
     }
     
     // MARK: - Actions
@@ -120,6 +103,36 @@ class SessionViewController: UIViewController {
         //} else {
         startTracking()
         //}
+    }
+    
+    @IBAction func eventButtonTapped(_ sender: UIButton) {
+        if let eventURL = delegate.checkIn.eventURL() {
+            UIApplication.shared.openURL(eventURL)
+        }
+    }
+    
+    @IBAction func leaderboardButtonTapped(_ sender: Any) {
+        presentLeaderboardViewController()
+    }
+    
+    // MARK: - Segues
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        if (segue.identifier == SessionSegue.Tracking) {
+            let trackingNC = segue.destination as! UINavigationController
+            let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
+            trackingVC.checkIn = delegate.checkIn
+            trackingVC.sessionController = delegate.sessionController
+        }
+    }
+    
+    fileprivate func presentLeaderboardViewController() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let leaderboardNC = storyboard.instantiateViewController(withIdentifier: "LeaderboardNavigationController") as? UINavigationController else { return }
+        guard let leaderboardVC = leaderboardNC.childViewControllers.first as? LeaderboardViewController else { return }
+        leaderboardVC.checkIn = delegate.checkIn
+        present(leaderboardNC, animated: true)
     }
     
     // MARK: - Alerts

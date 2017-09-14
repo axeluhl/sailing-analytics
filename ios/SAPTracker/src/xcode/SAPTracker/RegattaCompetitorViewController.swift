@@ -111,14 +111,6 @@ class RegattaCompetitorViewController : CompetitorSessionViewController {
         }
     }
     
-    // MARK: - Actions
-    
-    @IBAction func eventButtonTapped(_ sender: UIButton) {
-        if let eventURL = competitorCheckIn.eventURL() {
-            UIApplication.shared.openURL(eventURL)
-        }
-    }
-    
 }
 
 // MARK: SessionViewControllerDelegate

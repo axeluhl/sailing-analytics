@@ -12,6 +12,8 @@ protocol TrainingViewControllerDelegate: class {
     
     func trainingViewController(_ controller: TrainingViewController, startTrackingButtonTapped sender: Any)
     
+    func trainingViewController(_ controller: TrainingViewController, leaderboardButtonTapped sender: Any)
+    
 }
 
 class TrainingViewController: UIViewController {
@@ -52,7 +54,7 @@ class TrainingViewController: UIViewController {
     }
     
     @IBAction func leaderboardButtonTapped(_ sender: Any) {
-        
+        delegate?.trainingViewController(self, leaderboardButtonTapped: sender)
     }
     
     @IBAction func startTrackingButtonTapped(_ sender: Any) {
