@@ -74,7 +74,7 @@
             color: #008fcc;
             line-height: .5em;
             position: absolute;
-            bottom: .5em;
+            padding-top: 0.25em;
         }
     </ui:style>
     <div class="{style.main}">
