@@ -24,11 +24,16 @@ class LeaderboardViewController: UIViewController {
     
     fileprivate func setup() {
         setupLocalization()
+        setupNavigationBar()
         setupWebView()
     }
     
     fileprivate func setupLocalization() {
         navigationItem.title = Translation.LeaderboardView.Title.String
+    }
+    
+    fileprivate func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
     }
     
     fileprivate func setupWebView() {
