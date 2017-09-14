@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.autoplay.client.app.AnimationPanel;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
@@ -33,7 +33,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
     private PreLeaderboardWithImageView view;
     private SingleRaceLeaderboardPanel leaderboardPanel;
     private Timer selectionTimer;
-    private CompetitorSelectionModel competitorSelectionProvider;
+    private RaceCompetitorSelectionModel competitorSelectionProvider;
     ArrayList<CompetitorDTO> compList = new ArrayList<>();
     private com.sap.sse.gwt.client.player.Timer timer;
 
@@ -97,7 +97,7 @@ public class PreLiveRaceLeaderBoardWithImagePresenterImpl
                 false, false, true, false, false, false);
 
         GWT.log("event " + getSlideCtx().getEvent());
-        competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ false);
+        competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ false);
 
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play

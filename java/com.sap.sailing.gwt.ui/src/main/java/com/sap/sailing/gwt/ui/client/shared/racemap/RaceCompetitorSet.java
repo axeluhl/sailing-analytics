@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.RaceCompetitorIdsAsStringWithMD5Hash;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
@@ -33,7 +34,7 @@ import com.sap.sse.common.filter.FilterSet;
 public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
     private static final long serialVersionUID = 3357742414149799988L;
 
-    private CompetitorSelectionProvider competitorSelection;
+    private RaceCompetitorSelectionProvider competitorSelection;
     
     /**
      * A subset of the competitor selection's {@link CompetitorSelectionProvider#getAllCompetitors()} describing the
@@ -61,7 +62,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      * {@link #setIdsAsStringsOfCompetitorsInRace(Iterable)} has been received may this set become adjusted to the
      * actual subset participating in the race.
      */
-    public RaceCompetitorSet(CompetitorSelectionProvider competitorSelection) {
+    public RaceCompetitorSet(RaceCompetitorSelectionProvider competitorSelection) {
         super();
         this.competitorsForRaceDefinedListeners = new HashSet<>();
         this.competitorSelection = competitorSelection;

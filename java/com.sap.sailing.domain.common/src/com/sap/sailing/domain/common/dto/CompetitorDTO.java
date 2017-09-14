@@ -10,6 +10,7 @@ package com.sap.sailing.domain.common.dto;
  * 
  */
 public interface CompetitorDTO extends CompetitorWithoutBoatDTO {
+    // TODO bug2822: Should we remove this?
     String getSailID();
     
     BoatDTO getBoat();

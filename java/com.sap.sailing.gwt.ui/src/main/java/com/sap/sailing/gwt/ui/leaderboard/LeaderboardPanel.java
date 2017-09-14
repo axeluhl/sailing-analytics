@@ -2450,7 +2450,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
                 columnToCollapseAndExpandAgain.changeExpansionState(/* expand */ false);
             }
-            competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */this);
+            updateCompetitors(leaderboard);
             if (!initialCompetitorFilterHasBeenApplied) {
                 applyTop30FilterIfCompetitorSizeGreaterEqual40(leaderboard);
                 initialCompetitorFilterHasBeenApplied = true;
@@ -2574,6 +2574,13 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
+    /**
+     * Updates the competitors in the competitorSelectionProvider with the competitors received from the {@link LeaderboardDTO}
+     */
+    protected void updateCompetitors(LeaderboardDTO leaderboard) {
+        competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */this);
+    }
+    
     /**
      * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
      * whose leg count changed need to be collapsed before the leaderboard is replaced, and expanded afterwards again.

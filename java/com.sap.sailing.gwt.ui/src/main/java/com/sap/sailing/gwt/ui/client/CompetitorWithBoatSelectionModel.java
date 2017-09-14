@@ -17,8 +17,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
-public class CompetitorSelectionModel implements CompetitorSelectionProvider {
-    protected final Set<CompetitorDTO> allCompetitors;
+public class CompetitorWithBoatSelectionModel implements CompetitorSelectionProvider {
+    private final Set<CompetitorDTO> allCompetitors;
     
     /**
      * Keys are {@link CompetitorDTO#getIdAsString()} of their values
@@ -31,17 +31,17 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet; 
 
-    protected final CompetitorColorProvider competitorColorProvider; 
+    private final CompetitorColorProvider competitorColorProvider; 
 
-    public CompetitorSelectionModel(boolean hasMultiSelection) {
+    public CompetitorWithBoatSelectionModel(boolean hasMultiSelection) {
         this(hasMultiSelection, new CompetitorColorProviderImpl(), null);
     }
 
-    public CompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider) {
+    public CompetitorWithBoatSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider) {
         this(hasMultiSelection, competitorColorProvider, null);
     }
 
-    private CompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider, FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
+    private CompetitorWithBoatSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider, FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
         super();
         this.hasMultiSelection = hasMultiSelection;
         this.competitorColorProvider = competitorColorProvider;
