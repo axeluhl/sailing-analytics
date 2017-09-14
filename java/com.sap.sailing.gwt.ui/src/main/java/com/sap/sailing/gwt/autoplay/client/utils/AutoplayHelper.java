@@ -190,6 +190,7 @@ public class AutoplayHelper {
 
                         creationTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                                 clientTimeWhenResponseWasReceived);
+                        creationTimer.setLivePlayDelayInMillis(raceTimesInfo.get(regattaAndRaceIdentifier).delayToLiveInMs);
                         creationTimer.play();
 
                         if (regattaAndRaceIdentifier != null && !alreadyFired) {
