@@ -37,7 +37,7 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
                     @Override
                     public void onSuccess(RVWrapper result) {
                         PreRaceRacemapPlace place = new PreRaceRacemapPlace();
-                        place.setRaceMap(result.raceboardPerspective, result.csel);
+                        place.setRaceMap(result.raceboardPerspective, result.csel,result.raceboardTimer);
                         // add later with settings here
                         place.setURL(cf.getAutoPlayCtx().getEvent().getOfficialWebsiteURL());
                         setPlaceToGo(place);

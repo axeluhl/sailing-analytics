@@ -155,12 +155,13 @@ public class AutoplayHelper {
     }
 
     public static class RVWrapper {
-
-        public RVWrapper(RaceMap raceboardPerspective2, CompetitorSelectionModel competitorSelectionProvider) {
+        public RVWrapper(RaceMap raceboardPerspective2, CompetitorSelectionModel competitorSelectionProvider, Timer raceboardTimer) {
             this.raceboardPerspective = raceboardPerspective2;
             this.csel = competitorSelectionProvider;
+            this.raceboardTimer = raceboardTimer;
         }
 
+        public Timer raceboardTimer;
         public RaceMap raceboardPerspective;
         public CompetitorSelectionModel csel;
     }
@@ -169,14 +170,10 @@ public class AutoplayHelper {
             UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
             RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
         GWT.log("Creating map for " + regattaAndRaceIdentifier);
-        raceboardTimer.setLivePlayDelayInMillis(5000);
-        raceboardTimer.setRefreshInterval(1000);
-
-        if (raceTimesInfoProvider == null) {
-            raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, AutoplayHelper.asyncActionsExecutor,
-                    errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 10000l);
-        }
-        raceTimesInfoProvider.reset();
+        Timer creationTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
+        
+        creationTimer.setLivePlayDelayInMillis(1000);
+        creationTimer.setRefreshInterval(1000);
 
         StrippedLeaderboardDTO selectedLeaderboard = AutoplayHelper.getSelectedLeaderboard(event, leaderBoardName);
 
@@ -191,9 +188,9 @@ public class AutoplayHelper {
                             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
                             long clientTimeWhenResponseWasReceived) {
 
-                        raceboardTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
+                        creationTimer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest,
                                 clientTimeWhenResponseWasReceived);
-                        raceboardTimer.play();
+                        creationTimer.play();
 
                         if (regattaAndRaceIdentifier != null && !alreadyFired) {
                             alreadyFired = true;
@@ -203,7 +200,7 @@ public class AutoplayHelper {
                                         public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
                                             createRaceMapIfNotExist(regattaAndRaceIdentifier, selectedLeaderboard,
                                                     result, competitors, sailingService,
-                                                    AutoplayHelper.asyncActionsExecutor, errorReporter, raceboardTimer,
+                                                    AutoplayHelper.asyncActionsExecutor, errorReporter, creationTimer,
                                                     callback, clientTimeWhenResponseWasReceived,
                                                     serverTimeDuringRequest, clientTimeWhenRequestWasSent,
                                                     raceTimesInfo, new DefaultQuickRanksDTOProvider());
@@ -292,7 +289,7 @@ public class AutoplayHelper {
         raceboardTimer.setPlayMode(PlayModes.Live);
         // wait for one update
         raceboardPerspective.onResize();
-        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider));
+        callback.onSuccess(new RVWrapper(raceboardPerspective, competitorSelectionProvider,raceboardTimer));
     }
 
 }

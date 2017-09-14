@@ -5,6 +5,7 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.home.communication.event.sixtyinch.GetSixtyInchStatisticDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sse.gwt.client.player.Timer;
 
 public class LiveRaceWithRacemapAndLeaderBoardPlace extends Place {
     public static class Tokenizer implements PlaceTokenizer<LiveRaceWithRacemapAndLeaderBoardPlace> {
@@ -23,14 +24,20 @@ public class LiveRaceWithRacemapAndLeaderBoardPlace extends Place {
     private Throwable error;
     private CompetitorSelectionModel raceMapSelectionProvider;
     private GetSixtyInchStatisticDTO statistic;
+    private Timer raceboardTimer;
 
-    public void setRaceMap(RaceMap result, CompetitorSelectionModel csel) {
+    public void setRaceMap(RaceMap result, CompetitorSelectionModel csel, Timer raceboardTimer) {
         this.raceMap = result;
         this.raceMapSelectionProvider = csel;
+        this.raceboardTimer = raceboardTimer;
     }
     
     public GetSixtyInchStatisticDTO getStatistic() {
         return statistic;
+    }
+    
+    public Timer getRaceboardTimer() {
+        return raceboardTimer;
     }
 
     public RaceMap getRaceMap() {
