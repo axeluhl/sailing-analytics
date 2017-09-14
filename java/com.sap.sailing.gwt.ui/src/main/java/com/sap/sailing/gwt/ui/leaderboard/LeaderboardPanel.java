@@ -39,7 +39,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -1103,7 +1102,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
-        public Header<SafeHtml> getHeader() {
+        public SortableExpandableColumnHeader getHeader() {
             SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(
                     /* title */race.getRaceColumnName(),
                     /* iconURL */race.isMedalRace() ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this,
