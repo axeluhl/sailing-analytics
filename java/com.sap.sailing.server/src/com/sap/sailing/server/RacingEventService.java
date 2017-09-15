@@ -753,11 +753,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Pair<Integer, AnniversaryType> getNextAnniversary();
 
     /**
-     * Determines the amount of races required to reach the next anniversary.
-     * 
-     * @return the amount of races until next anniversary, or <code>null</code> if next anniversary can't be determined
+     * @return the amount of races that are tracked have a startTime and are either remotely or locally resolvable, or <code>null</code> if next anniversary can't be determined
      */
-    Integer getNextAnniversaryCountdown();
+    int getCurrentRaceCount();
 
     /**
      * Provides a {@link Map} of all known anniversaries, keyed by the number of the anniversary race.

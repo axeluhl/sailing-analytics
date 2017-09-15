@@ -12,7 +12,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 public class AnniversaryDTO implements DTO {
 
     private int target;
-    private Integer countdown;
+    private int currentRaceCount;
     private EventType eventType;
     private AnniversaryType type;
     private UUID eventID;
@@ -29,16 +29,16 @@ public class AnniversaryDTO implements DTO {
     protected AnniversaryDTO() {
     }
 
-    AnniversaryDTO(int target, Integer countdown, AnniversaryType type) {
+    AnniversaryDTO(int target, int currentRaceCount, AnniversaryType type) {
         this.target = target;
-        this.countdown = countdown;
+        this.currentRaceCount = currentRaceCount;
         this.type = type;
     }
 
-    AnniversaryDTO(int target, AnniversaryType type, UUID eventID, String leaderboardName, String remoteUrl,
+    AnniversaryDTO(int target,int currentRaceCount, AnniversaryType type, UUID eventID, String leaderboardName, String remoteUrl,
             String raceName, String regattaName, String eventName, String leaderboardDisplayName,
             EventType eventType) {
-        this(target, null, type);
+        this(target, currentRaceCount, type);
         this.eventID = eventID;
         this.leaderboardName = leaderboardName;
         this.remoteUrl = remoteUrl;
@@ -65,8 +65,12 @@ public class AnniversaryDTO implements DTO {
         return leaderboardDisplayName;
     }
 
-    public Integer getCountdown() {
-        return countdown;
+    public int getCurrentRaceCount() {
+        return currentRaceCount;
+    }
+    
+    public int getCountdown() {
+        return target-currentRaceCount;
     }
 
     public AnniversaryType getType() {
@@ -94,13 +98,13 @@ public class AnniversaryDTO implements DTO {
     }
 
     public boolean isAnnouncement() {
-        return countdown == null && eventID != null && leaderboardName != null && regattaName != null
+        return eventID != null && leaderboardName != null && regattaName != null
                 && raceName != null;
     }
 
     @Override
     public String toString() {
-        return "AnniversaryInformation [target=" + target + ", countdown=" + countdown + ", type=" + type + ", eventID="
+        return "AnniversaryInformation [target=" + target + ", countdown=" + currentRaceCount + ", type=" + type + ", eventID="
                 + eventID + ", leaderboardName=" + leaderboardName + ", remoteUrl=" + remoteUrl + ", regattaName="
                 + regattaName + ", raceName=" + raceName + "]";
     }

@@ -29,19 +29,20 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
         final AnniversariesDTO anniversaries = new AnniversariesDTO();
         final RacingEventService service = context.getRacingEventService();
         final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnnivs = service.getKnownAnniversaries();
-        final Integer nextCountdown = service.getNextAnniversaryCountdown();
+        final int currentRaceCount = service.getCurrentRaceCount();
 
-        if (nextCountdown != null && nextCountdown < SHOW_IF_LESS_RACES_TILL_NEXT_ANNIVERSARY) {
-            final Pair<Integer, AnniversaryType> next = service.getNextAnniversary();
+        final Pair<Integer, AnniversaryType> next = service.getNextAnniversary();
+        
+        if (next != null && (currentRaceCount -next.getA()) < SHOW_IF_LESS_RACES_TILL_NEXT_ANNIVERSARY) {
             if (!knownAnnivs.containsKey(next.getA())) {
-                anniversaries.addValue(new AnniversaryDTO(next.getA(), nextCountdown, next.getB()));
+                anniversaries.addValue(new AnniversaryDTO(next.getA(), currentRaceCount, next.getB()));
             }
         }
 
         knownAnnivs.forEach((target, anniversaryInfo) -> {
             final DetailedRaceInfo raceinfo = anniversaryInfo.getA();
             if (daysUntilNow(raceinfo.getStartOfRace().asDate()) < DAYS_TO_SHOW_PAST_ANNIVERSARY) {
-                anniversaries.addValue(new AnniversaryDTO(target, anniversaryInfo.getB(), raceinfo.getEventID(),
+                anniversaries.addValue(new AnniversaryDTO(target, currentRaceCount, anniversaryInfo.getB(), raceinfo.getEventID(),
                         raceinfo.getLeaderboardName(), raceinfo.getRemoteUrl().toExternalForm(),
                         raceinfo.getIdentifier().getRaceName(), raceinfo.getIdentifier().getRegattaName(),
                         raceinfo.getEventName(), raceinfo.getLeaderboardDisplayName(), raceinfo.getEventType()));

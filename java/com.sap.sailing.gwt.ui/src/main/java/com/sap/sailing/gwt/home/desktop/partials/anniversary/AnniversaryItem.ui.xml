@@ -36,7 +36,9 @@
         }
         .count {
             font-weight: bold;
-            font-size: 5em;
+            font-size: 3em;
+            margin-bottom: 8px;
+            margin-top: 20px;
         }
         .unit {
             line-height: .5em;

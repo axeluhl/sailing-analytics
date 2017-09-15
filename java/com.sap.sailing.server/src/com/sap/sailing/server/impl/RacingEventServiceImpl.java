@@ -4047,14 +4047,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Integer getNextAnniversaryCountdown() {
-        final int current = anniversaryRaceDeterminator.getCurrentRaceCount();
-        final Pair<Integer, AnniversaryType> next = anniversaryRaceDeterminator.getNextAnniversary();
-        Integer countDown = null;
-        if (next != null) {
-            countDown = next.getA().intValue() - current;
-        }
-        return countDown;
+    public int getCurrentRaceCount() {
+        return anniversaryRaceDeterminator.getCurrentRaceCount();
     }
 
     @Override
