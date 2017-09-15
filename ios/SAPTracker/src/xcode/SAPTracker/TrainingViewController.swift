@@ -114,6 +114,12 @@ class TrainingViewController: UIViewController {
     // MARK: - Actions
     
     @IBAction func stopTrainingButtonTapped(_ sender: Any) {
+        trainingController.stopAllRaces(forCheckIn: trainingCheckIn, success: { 
+            logInfo(name: "\(#function)", info: "success")
+        }) { (error) in
+            logError(name: "\(#function)", error: error)
+        }
+        
         isActive = false
         refresh(true)
     }

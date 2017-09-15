@@ -292,14 +292,40 @@ class TrainingRequestManager: NSObject {
     func postLeaderboardStopTracking(
         leaderboardName: String,
         raceColumnName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        postLeaderboardStopTracking(leaderboardName: leaderboardName, query: "race_column=\(raceColumnName)", success: success, failure: failure)
+    }
+    
+    func postLeaderboardStopTracking(
+        leaderboardName: String,
         fleetName: String,
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error, _ message: String?) -> Void)
     {
+        postLeaderboardStopTracking(leaderboardName: leaderboardName, query: "fleet=\(fleetName)", success: success, failure: failure)
+    }
+    
+    func postLeaderboardStopTracking(
+        leaderboardName: String,
+        raceColumnName: String,
+        fleetName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        postLeaderboardStopTracking(leaderboardName: leaderboardName, query: "race_column=\(raceColumnName)&fleet=\(fleetName)", success: success, failure: failure)
+    }
+    
+    fileprivate func postLeaderboardStopTracking(
+        leaderboardName: String,
+        query: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
         let encodedLeaderboardName = leaderboardName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        let encodedRaceColumnName = raceColumnName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let encodedFleetName = fleetName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/stoptracking?race_column=\(encodedRaceColumnName)&fleet=\(encodedFleetName)"
+        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)/stoptracking?\(encodedQuery)"
         manager.post(urlString, parameters: nil, success: { (requestOperation, responseObject) in
             self.postLeaderboardStopTrackingSuccess(responseObject: responseObject, success: success)
         }) { (requestOperation, error) in

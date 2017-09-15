@@ -65,14 +65,17 @@ class TrainingController: NSObject {
         }
     }
     
+    // MARK: - StopAllRaces
+    
     func stopAllRaces(
+        forCheckIn checkIn: CheckIn,
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        // TODO
+        leaderboardRacesStopTracking(forCheckIn: checkIn, success: success, failure: failure)
     }
     
-    // StartNewRace
+    // MARK: - StartNewRace
     
     func startNewRace(
         forCheckIn checkIn: CheckIn,
@@ -232,6 +235,20 @@ class TrainingController: NSObject {
             }) { (error, message) in
                 failure(error)
             }
+        }) { (error, message) in
+            failure(error)
+        }
+    }
+    
+    // MARK: - LeaderboardRacesStopTracking
+    
+    fileprivate func leaderboardRacesStopTracking(
+        forCheckIn checkIn: CheckIn,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        trainingRequestManager.postLeaderboardStopTracking(leaderboardName: checkIn.leaderboard.name, fleetName: "Default", success: {
+            success()
         }) { (error, message) in
             failure(error)
         }
