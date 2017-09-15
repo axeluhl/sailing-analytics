@@ -22,6 +22,7 @@ class CreateTrainingViewController: UIViewController {
     weak var trainingCoreDataManager: TrainingCoreDataManager!
     
     @IBOutlet weak var boatClassPickerView: UIPickerView!
+    @IBOutlet weak var createTrainingButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,8 +32,13 @@ class CreateTrainingViewController: UIViewController {
     // MARK: - Setup
     
     fileprivate func setup() {
+        setupButtons()
         setupLocalization()
         setupNavigationBar()
+    }
+    
+    fileprivate func setupButtons() {
+        makeGreen(button: createTrainingButton)
     }
     
     fileprivate func setupLocalization() {

@@ -76,7 +76,12 @@ class SignUpViewController: FormularViewController {
     // MARK: - Setup
     
     fileprivate func setup() {
+        setupButtons()
         setupLocalization()
+    }
+    
+    fileprivate func setupButtons() {
+        // TODO
     }
     
     fileprivate func setupLocalization() {

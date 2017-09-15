@@ -18,14 +18,23 @@ struct URLs {
 }
 
 struct Colors {
-    static let Blue = UIColor(hex:0x009de0)
-    static let BlueHighlighted = UIColor(hex:0x007aad)
-    static let Gray = UIColor(hex:0xf3f3f3)
-    static let GrayHighlighted = UIColor(hex:0xf3f3f3)
-    static let Green = UIColor(hex:0x0e7733)
-    static let GreenHighlighted = UIColor(hex:0x08451e)
-    static let Red = UIColor(hex:0xcd201b)
-    static let RedHighlighted = UIColor(hex:0x991814)
+    static let BlueButton = UIColor(hex:0x009de0)
+    static let BlueButtonHighlighted = UIColor(hex:0x007aad)
+    static let BlueButtonTitleColor = UIColor.white
+    static let GrayButton = UIColor(hex:0xf3f3f3)
+    static let GrayButtonBorder = UIColor(hex:0x999999)
+    static let GrayButtonHighlighted = UIColor(hex:0xbfbfbf)
+    static let GrayButtonTitleColor = UIColor.black
+    static let GreenButton = UIColor(hex:0x0e7733)
+    static let GreenButtonHighlighted = UIColor(hex:0x08451e)
+    static let GreenButtonTitleColor = UIColor.white
+    static let RedButton = UIColor(hex:0xcd201b)
+    static let RedButtonHighlighted = UIColor(hex:0x991814)
+    static let RedButtonTitleColor = UIColor.white
+    static let TranslucentButton = UIColor(hex:0xffffff, alpha: 0.5)
+    static let TranslucentButtonBorder = UIColor(hex:0xffffff)
+    static let TranslucentButtonHighlighted = UIColor(hex:0xffffff, alpha: 0.5)
+    static let TranslucentButtonTitleColor = UIColor.white
     static let NavigationBarTitleColor = UIColor.black
     static let NavigationBarTintColor = UIColor(hex: 0x009de0)
 }
@@ -42,14 +51,16 @@ struct Fonts {
 }
 
 struct Images {
-    static let Blue = UIImage(color: Colors.Blue)
-    static let BlueHighlighted = UIImage(color: Colors.BlueHighlighted)
-    static let Gray = UIImage(color: Colors.Gray)
-    static let GrayHighlighted = UIImage(color: Colors.GrayHighlighted)
-    static let Green = UIImage(color: Colors.Green)
-    static let GreenHighlighted = UIImage(color: Colors.GreenHighlighted)
-    static let Red = UIImage(color: Colors.Red)
-    static let RedHighlighted = UIImage(color: Colors.RedHighlighted)
+    static let BlueButton = UIImage(color: Colors.BlueButton)
+    static let BlueButtonHighlighted = UIImage(color: Colors.BlueButtonHighlighted)
+    static let GrayButton = UIImage(color: Colors.GrayButton)
+    static let GrayButtonHighlighted = UIImage(color: Colors.GrayButtonHighlighted)
+    static let GreenButton = UIImage(color: Colors.GreenButton)
+    static let GreenButtonHighlighted = UIImage(color: Colors.GreenButtonHighlighted)
+    static let RedButton = UIImage(color: Colors.RedButton)
+    static let RedButtonHighlighted = UIImage(color: Colors.RedButtonHighlighted)
+    static let TranslucentButton = UIImage(color: Colors.TranslucentButton)
+    static let TranslucentButtonHighlighted = UIImage(color: Colors.TranslucentButtonHighlighted)
 }
 
 let BoatClassNames = [

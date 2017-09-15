@@ -19,7 +19,7 @@ class RegattaMarkViewController: MarkSessionViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        refresh()
+        refresh(true)
     }
     
     // MARK: - Setup
@@ -31,7 +31,7 @@ class RegattaMarkViewController: MarkSessionViewController {
     }
     
     fileprivate func setupButtons() {
-        startTrackingButton.setBackgroundImage(Images.GreenHighlighted, for: .highlighted)
+        makeGreen(button: startTrackingButton)
     }
     
     fileprivate func setupLocalization() {
@@ -59,8 +59,8 @@ extension RegattaMarkViewController: SessionViewControllerDelegate {
         return makeMarkOptionSheet()
     }
     
-    func refresh() {
-        markViewController?.refresh()
+    func refresh(_ animated: Bool) {
+        markViewController?.refresh(animated)
     }
     
 }

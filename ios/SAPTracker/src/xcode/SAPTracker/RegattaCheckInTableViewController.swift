@@ -43,8 +43,8 @@ class RegattaCheckInTableViewController: CheckInTableViewController {
     }
     
     fileprivate func setupButtons() {
-        scanCodeButton.setBackgroundImage(Images.BlueHighlighted, for: .highlighted)
-        noCodeButton.setBackgroundImage(Images.GrayHighlighted, for: .highlighted)
+        makeBlue(button: scanCodeButton)
+        makeGray(button: noCodeButton)
     }
     
     fileprivate func setupLocalization() {

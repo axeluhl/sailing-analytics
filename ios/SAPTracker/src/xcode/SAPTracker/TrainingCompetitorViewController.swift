@@ -23,19 +23,14 @@ class TrainingCompetitorViewController: CompetitorSessionViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        refresh()
+        refresh(true)
     }
     
     // MARK: - Setup
     
     fileprivate func setup() {
-        setupButtons()
         setupLocalization()
         setupNavigationBar()
-    }
-    
-    fileprivate func setupButtons() {
-        startTrackingButton.setBackgroundImage(Images.GreenHighlighted, for: .highlighted)
     }
     
     fileprivate func setupLocalization() {
@@ -77,9 +72,9 @@ extension TrainingCompetitorViewController: SessionViewControllerDelegate {
         return makeCompetitorOptionSheet()
     }
     
-    func refresh() {
-        competitorViewController?.refresh()
-        trainingViewController?.refresh()
+    func refresh(_ animated: Bool) {
+        competitorViewController?.refresh(animated)
+        trainingViewController?.refresh(animated)
     }
     
 }

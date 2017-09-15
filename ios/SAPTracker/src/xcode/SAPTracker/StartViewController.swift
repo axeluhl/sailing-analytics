@@ -33,9 +33,15 @@ class StartViewController: UIViewController {
     // MARK: - Setup
 
     fileprivate func setup() {
+        setupButtons()
         setupNavigationBar()
     }
-
+    
+    fileprivate func setupButtons() {
+        makeBlue(button: regattaButton)
+        makeBlue(button: trainingButton)
+    }
+    
     fileprivate func setupNavigationBar() {
         navigationItem.title = Application.Title
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))

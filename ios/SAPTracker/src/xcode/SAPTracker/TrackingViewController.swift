@@ -36,7 +36,7 @@ class TrackingViewController : UIViewController {
     }
     
     fileprivate func setupButtons() {
-        stopTrackingButton.setBackgroundImage(Images.RedHighlighted, for: .highlighted)
+        makeRed(button: stopTrackingButton)
     }
     
     fileprivate func setupLocalization() {

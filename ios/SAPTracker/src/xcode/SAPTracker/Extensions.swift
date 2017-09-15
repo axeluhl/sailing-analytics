@@ -26,19 +26,36 @@ func logError(name: String, error: String) {
     #endif
 }
 
+// MARK: - UIButton
+
+extension UIButton {
+    
+    func updateLayer(cornerRadius: CGFloat) {
+        layer.cornerRadius = cornerRadius
+        layer.masksToBounds = true
+    }
+    
+    func updateLayer(cornerRadius: CGFloat, borderColor: UIColor) {
+        updateLayer(cornerRadius: cornerRadius)
+        layer.borderWidth = 1
+        layer.borderColor = borderColor.cgColor
+    }
+    
+}
+
 // MARK: - UIColor
 
 extension UIColor { // Set color to RGB hex value. See http://stackoverflow.com/a/24263296
     
-    convenience init(red: Int, green: Int, blue: Int) {
-        assert(red >= 0 && red <= 255, "Invalid red component")
-        assert(green >= 0 && green <= 255, "Invalid green component")
-        assert(blue >= 0 && blue <= 255, "Invalid blue component")
-        self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: 1.0)
-    }
-
     convenience init(hex:Int) {
-        self.init(red:(hex >> 16) & 0xff, green:(hex >> 8) & 0xff, blue:hex & 0xff)
+        self.init(hex: hex, alpha: 1)
+    }
+    
+    convenience init(hex:Int, alpha: CGFloat) {
+        let red = CGFloat((hex >> 16) & 0xff) / 255
+        let green = CGFloat((hex >> 8) & 0xff) / 255
+        let blue = CGFloat(hex & 0xff) / 255
+        self.init(red: red, green: green, blue: blue, alpha: alpha)
     }
     
 }
@@ -90,6 +107,41 @@ extension UIViewController {
         view.layer.shadowOffset = CGSize(width: 3, height: 3)
         view.layer.shadowOpacity = 0.2
         view.layer.shadowRadius = 4.0
+    }
+    
+    func makeBlue(button: UIButton) {
+        button.setTitleColor(Colors.BlueButtonTitleColor, for: .normal)
+        button.setBackgroundImage(Images.BlueButton, for: .normal)
+        button.setBackgroundImage(Images.BlueButtonHighlighted, for: .highlighted)
+        button.updateLayer(cornerRadius: 1)
+    }
+    
+    func makeGray(button: UIButton) {
+        button.setTitleColor(Colors.GrayButtonTitleColor, for: .normal)
+        button.setBackgroundImage(Images.GrayButton, for: .normal)
+        button.setBackgroundImage(Images.GrayButtonHighlighted, for: .highlighted)
+        button.updateLayer(cornerRadius: 1, borderColor: Colors.GrayButtonBorder)
+    }
+    
+    func makeGreen(button: UIButton) {
+        button.setTitleColor(Colors.GreenButtonTitleColor, for: .normal)
+        button.setBackgroundImage(Images.GreenButton, for: .normal)
+        button.setBackgroundImage(Images.GreenButtonHighlighted, for: .highlighted)
+        button.updateLayer(cornerRadius: 1)
+    }
+    
+    func makeRed(button: UIButton) {
+        button.setTitleColor(Colors.RedButtonTitleColor, for: .normal)
+        button.setBackgroundImage(Images.RedButton, for: .normal)
+        button.setBackgroundImage(Images.RedButtonHighlighted, for: .highlighted)
+        button.updateLayer(cornerRadius: 1)
+    }
+    
+    func makeTranslucent(button: UIButton) {
+        button.setTitleColor(Colors.TranslucentButtonTitleColor, for: .normal)
+        button.setBackgroundImage(Images.TranslucentButton, for: .normal)
+        button.setBackgroundImage(Images.TranslucentButtonHighlighted, for: .highlighted)
+        button.updateLayer(cornerRadius: 1, borderColor: Colors.TranslucentButtonBorder)
     }
     
     func presentAboutViewController() {

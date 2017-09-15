@@ -18,7 +18,19 @@ class MarkViewController: UIViewController {
     
     // MARK: - Refresh
     
-    func refresh() {
+    func refresh(_ animated: Bool) {
+        refreshMarkNameLabel(animated)
+    }
+    
+    fileprivate func refreshMarkNameLabel(_ animated: Bool) {
+        if (animated) {
+            UIView.animate(withDuration: 0.5) { self.refreshMarkNameLabel() }
+        } else {
+            refreshMarkNameLabel()
+        }
+    }
+    
+    fileprivate func refreshMarkNameLabel() {
         markNameLabel.text = markCheckIn.name
     }
     

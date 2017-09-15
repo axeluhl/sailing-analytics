@@ -34,7 +34,12 @@ class ForgotPasswordViewController: FormularViewController {
     }
 
     fileprivate func setup() {
+        setupButtons()
         setupLocalization()
+    }
+    
+    fileprivate func setupButtons() {
+        // TODO
     }
     
     fileprivate func setupLocalization() {

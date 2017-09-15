@@ -35,8 +35,13 @@ class LoginViewController: FormularViewController {
     }
 
     fileprivate func setup() {
+        setupButtons()
         setupLocalization()
         setupNavigationBar()
+    }
+    
+    fileprivate func setupButtons() {
+        // TODO
     }
     
     fileprivate func setupLocalization() {

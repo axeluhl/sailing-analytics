@@ -23,28 +23,7 @@ class TrainingMarkViewController: MarkSessionViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        refresh()
-    }
-    
-    // MARK: - Setup
-    
-    fileprivate func setup() {
-        setupButtons()
-        setupLocalization()
-        setupNavigationBar()
-    }
-    
-    fileprivate func setupButtons() {
-        startTrackingButton.setBackgroundImage(Images.GreenHighlighted, for: .highlighted)
-    }
-    
-    fileprivate func setupLocalization() {
-        startTrackingButton.setTitle(Translation.CompetitorView.StartTrackingButton.Title.String, for: .normal)
-    }
-    
-    fileprivate func setupNavigationBar() {
-        navigationItem.titleView = TitleView(title: markCheckIn.event.name, subtitle: markCheckIn.leaderboard.name)
-        navigationController?.navigationBar.setNeedsLayout()
+        refresh(true)
     }
     
     // MARK: - Segues
@@ -77,9 +56,9 @@ extension TrainingMarkViewController: SessionViewControllerDelegate {
         return makeMarkOptionSheet()
     }
     
-    func refresh() {
-        markViewController?.refresh()
-        trainingViewController?.refresh()
+    func refresh(_ animated: Bool) {
+        markViewController?.refresh(animated)
+        trainingViewController?.refresh(animated)
     }
     
 }

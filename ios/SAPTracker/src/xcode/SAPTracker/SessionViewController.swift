@@ -18,7 +18,7 @@ protocol SessionViewControllerDelegate: class {
     
     func makeOptionSheet() -> UIAlertController
     
-    func refresh()
+    func refresh(_ animated: Bool)
     
 }
 
@@ -50,7 +50,7 @@ class SessionViewController: UIViewController {
     
     func update() {
         delegate.sessionController.update { [weak self] in
-            self?.delegate.refresh()
+            self?.delegate.refresh(true)
         }
     }
     

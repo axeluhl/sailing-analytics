@@ -23,11 +23,14 @@ class TrainingViewController: UIViewController {
     weak var trainingCheckIn: CheckIn!
     weak var trainingCoreDataManager: CoreDataManager!
     
+    @IBOutlet var stopTrainingButtonZeroHeight: NSLayoutConstraint! // Strong reference needed to avoid deallocation when constraint is not active
+    
     @IBOutlet weak var stopTrainingButton: UIButton!
-    @IBOutlet weak var stopTrainingButtonZeroHeight: NSLayoutConstraint!
     @IBOutlet weak var trainingNameLabel: UILabel!
     @IBOutlet weak var leaderboardButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
+    
+    var isActive = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +40,14 @@ class TrainingViewController: UIViewController {
     // MARK: - Setup
     
     fileprivate func setup() {
+        setupButtons()
         setupLocalization()
+    }
+    
+    fileprivate func setupButtons() {
+        makeRed(button: stopTrainingButton)
+        makeBlue(button: leaderboardButton)
+        makeGreen(button: startTrackingButton)
     }
     
     fileprivate func setupLocalization() {
@@ -48,26 +58,64 @@ class TrainingViewController: UIViewController {
     
     // MARK: - Refresh
     
-    func refresh() {
-        refreshStopTrainingButton()
-        refreshTrainingNameLabel()
-        UIView.animate(withDuration: 0.5) {
-            self.view.layoutIfNeeded()
+    func refresh(_ animated: Bool) {
+        refreshStopTrainingButton(animated)
+        refreshTrainingNameLabel(animated)
+        refreshStartTrainingButton(animated)
+    }
+    
+    fileprivate func refreshStopTrainingButton(_ animated: Bool) {
+        if (animated) {
+            UIView.animate(withDuration: 0.5) { self.refreshStopTrainingButton() }
+        } else {
+            refreshStopTrainingButton()
         }
     }
     
     fileprivate func refreshStopTrainingButton() {
-        stopTrainingButtonZeroHeight.isActive = isTrainingActive
+        if (isTrainingActive) {
+            stopTrainingButtonZeroHeight.isActive = false
+            stopTrainingButton.alpha = 1
+        } else {
+            stopTrainingButtonZeroHeight.isActive = true
+            stopTrainingButton.alpha = 0
+        }
+        view.layoutIfNeeded()
+    }
+    
+    fileprivate func refreshTrainingNameLabel(_ animated: Bool) {
+        if (animated) {
+            UIView.animate(withDuration: 0.5) { self.refreshTrainingNameLabel() }
+        } else {
+            refreshTrainingNameLabel()
+        }
     }
     
     fileprivate func refreshTrainingNameLabel() {
         trainingNameLabel.text = trainingCheckIn.event.name
     }
     
+    fileprivate func refreshStartTrainingButton(_ animated: Bool) {
+        if (animated) {
+            UIView.animate(withDuration: 0.5) { self.refreshStartTrainingButton() }
+        } else {
+            refreshStartTrainingButton()
+        }
+    }
+    
+    fileprivate func refreshStartTrainingButton() {
+        if (isTrainingActive) {
+            makeGreen(button: startTrackingButton)
+        } else {
+            makeGray(button: startTrackingButton)
+        }
+    }
+    
     // MARK: - Actions
     
     @IBAction func stopTrainingButtonTapped(_ sender: Any) {
-        showReactivateAlert()
+        isActive = false
+        refresh(true)
     }
     
     @IBAction func leaderboardButtonTapped(_ sender: Any) {
@@ -75,6 +123,11 @@ class TrainingViewController: UIViewController {
     }
     
     @IBAction func startTrackingButtonTapped(_ sender: Any) {
+        guard isTrainingActive else {
+            showReactivateAlert()
+            return
+        }
+        
         SVProgressHUD.show()
         self.trainingController.stopActiveRace(success: {
             self.trainingController.startNewRace(forCheckIn: self.trainingCheckIn, success: {
@@ -108,14 +161,21 @@ class TrainingViewController: UIViewController {
     }
     
     fileprivate func performReactivation() {
-        
+        isActive = true
+        refresh(true)
     }
     
     // MARK: - Properties
     
+    fileprivate var isTrainingInactive: Bool {
+        get {
+            return !isTrainingActive
+        }
+    }
+    
     fileprivate var isTrainingActive: Bool {
         get {
-             return trainingCheckIn.event.endDate - Date().timeIntervalSince1970 < 0
+            return isActive // trainingCheckIn.event.endDate - Date().timeIntervalSince1970 < 0
         }
     }
     

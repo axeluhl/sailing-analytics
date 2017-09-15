@@ -35,7 +35,7 @@ class RegattaCompetitorViewController : CompetitorSessionViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         validateTimer()
-        refresh()
+        refresh(true)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -69,9 +69,9 @@ class RegattaCompetitorViewController : CompetitorSessionViewController {
     }
     
     fileprivate func setupButtons() {
-        eventButton.setBackgroundImage(Images.BlueHighlighted, for: .highlighted)
-        leaderboardButton.setBackgroundImage(Images.BlueHighlighted, for: .highlighted)
-        startTrackingButton.setBackgroundImage(Images.GreenHighlighted, for: .highlighted)
+        makeBlue(button: eventButton)
+        makeBlue(button: leaderboardButton)
+        makeGreen(button: startTrackingButton)
     }
     
     fileprivate func setupLocalization() {
@@ -127,8 +127,8 @@ extension RegattaCompetitorViewController: SessionViewControllerDelegate {
         return makeCompetitorOptionSheet()
     }
     
-    func refresh() {
-        competitorViewController?.refresh()
+    func refresh(_ animated: Bool) {
+        competitorViewController?.refresh(animated)
     }
     
 }

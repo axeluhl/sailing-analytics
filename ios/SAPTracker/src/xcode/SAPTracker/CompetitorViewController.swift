@@ -30,7 +30,13 @@ class CompetitorViewController: UIViewController {
     // MARK: - Setup
     
     fileprivate func setup() {
+        setupButtons()
         setupLocalization()
+    }
+    
+    fileprivate func setupButtons() {
+        makeTranslucent(button: teamImageAddButton)
+        makeTranslucent(button: teamImageRetryButton)
     }
     
     fileprivate func setupLocalization() {
@@ -40,15 +46,31 @@ class CompetitorViewController: UIViewController {
     
     // MARK: - Refresh
     
-    func refresh() {
-        refreshCompetitor()
-        refreshTeamImage()
+    func refresh(_ animated: Bool) {
+        refreshCompetitor(animated)
+        refreshTeamImage(animated)
+    }
+
+    fileprivate func refreshCompetitor(_ animated: Bool) {
+        if (animated) {
+            UIView.animate(withDuration: 0.5) { self.refreshCompetitor() }
+        } else {
+            refreshCompetitor()
+        }
     }
     
     fileprivate func refreshCompetitor() {
         competitorNameLabel.text = competitorCheckIn.name
         competitorFlagImageView.image = UIImage(named: competitorCheckIn.countryCode)
         competitorSailIDLabel.text = competitorCheckIn.sailID
+    }
+    
+    fileprivate func refreshTeamImage(_ animated: Bool) {
+        if (animated) {
+            UIView.animate(withDuration: 0.5) { self.refreshTeamImage() }
+        } else {
+            refreshTeamImage()
+        }
     }
     
     fileprivate func refreshTeamImage() {
