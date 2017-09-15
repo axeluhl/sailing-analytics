@@ -29,7 +29,7 @@ class RegattaCompetitorViewController : CompetitorSessionViewController {
         super.viewDidLoad()
         delegate = self
         setup()
-        update()
+        updateOptimistic()
     }
     
     override func viewWillAppear(_ animated: Bool) {

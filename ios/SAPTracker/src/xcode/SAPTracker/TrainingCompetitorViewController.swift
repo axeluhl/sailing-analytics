@@ -92,11 +92,11 @@ extension TrainingCompetitorViewController: TrainingViewControllerDelegate {
     }
     
     func trainingViewControllerDidStopTraining(_ controller: TrainingViewController) {
-        update()
+        updatePessimistic()
     }
     
     func trainingViewControllerDidReactivateTraining(_ controller: TrainingViewController) {
-        update()
+        updatePessimistic()
     }
     
 }

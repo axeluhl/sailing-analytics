@@ -48,9 +48,37 @@ class SessionViewController: UIViewController {
     
     // MARK: - Update
     
-    func update() {
-        delegate.sessionController.update { [weak self] in
-            self?.delegate.refresh(true)
+    func updateOptimistic() {
+        update(success: { 
+            // ...
+        }) { (error) in
+            // ...
+        }
+    }
+    
+    func updatePessimistic() {
+        SVProgressHUD.show()
+        update(success: { 
+            SVProgressHUD.dismiss()
+        }) { [weak self] (error) in
+            SVProgressHUD.dismiss()
+            self?.showAlert(forError: error)
+        }
+    }
+    
+    fileprivate func update(
+        success: @escaping (() -> Void),
+        failure: @escaping ((_ error: Error) -> Void))
+    {
+        do {
+            try delegate.sessionController.update(success: { [weak self] in
+                success()
+                self?.delegate.refresh(true)
+            }) { (error) in
+                failure(error)
+            }
+        } catch {
+            failure(error)
         }
     }
     
@@ -90,7 +118,7 @@ class SessionViewController: UIViewController {
     
     func makeActionUpdate() -> UIAlertAction {
         return UIAlertAction(title: Translation.CompetitorView.OptionSheet.UpdateAction.Title.String, style: .default) { [weak self] action in
-            self?.update()
+            self?.updatePessimistic()
         }
     }
     

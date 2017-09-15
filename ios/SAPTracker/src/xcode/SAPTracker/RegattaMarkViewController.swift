@@ -14,7 +14,7 @@ class RegattaMarkViewController: MarkSessionViewController {
         super.viewDidLoad()
         delegate = self
         setup()
-        update()
+        updateOptimistic()
     }
     
     override func viewWillAppear(_ animated: Bool) {

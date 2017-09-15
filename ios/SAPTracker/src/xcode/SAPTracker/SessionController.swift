@@ -8,8 +8,12 @@
 
 import UIKit
 
+enum SessionControllerError: Error {
+    case checkInDataIsIncomplete
+}
+
 class SessionController: NSObject {
-        
+    
     weak var checkIn: CheckIn!
     weak var coreDataManager: CoreDataManager!
     
@@ -94,29 +98,27 @@ class SessionController: NSObject {
     
     // MARK: - Update
     
-    func update(completion: @escaping () -> Void) {
+    func update(
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void) throws
+    {
         guard let checkInData = CheckInData(checkIn: checkIn) else {
-            updateFailure(completion: completion)
-            return
+            throw SessionControllerError.checkInDataIsIncomplete
         }
         let checkInDataCollector = CheckInDataCollector(checkInData: checkInData)
         checkInDataCollector.collect(checkInData: checkInData, success: { [weak self] (checkInData) in
-            self?.updateSuccess(checkInData: checkInData, completion: completion)
-        }) { [weak self] (error) in
-            self?.updateFailure(completion: completion)
+            self?.updateSuccess(checkInData: checkInData, success: success)
+        }) { (error) in
+            failure(error)
         }
     }
     
-    fileprivate func updateSuccess(checkInData: CheckInData, completion: () -> Void) {
+    fileprivate func updateSuccess(checkInData: CheckInData, success: () -> Void) {
         checkIn.event.updateWithEventData(eventData: checkInData.eventData)
         checkIn.leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
         checkIn.updateWithCheckInData(checkInData: checkInData)
         coreDataManager.saveContext()
-        completion()
-    }
-    
-    fileprivate func updateFailure(completion: () -> Void) {
-        completion()
+        success()
     }
     
     // MARK: - Tracking
