@@ -35,7 +35,7 @@ class RegattaCompetitorViewController : CompetitorSessionViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         validateTimer()
-        refresh(true)
+        refresh(false)
     }
     
     override func viewWillDisappear(_ animated: Bool) {

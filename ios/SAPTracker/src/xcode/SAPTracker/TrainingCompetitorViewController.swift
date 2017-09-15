@@ -23,7 +23,7 @@ class TrainingCompetitorViewController: CompetitorSessionViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        refresh(true)
+        refresh(false)
     }
     
     // MARK: - Setup
@@ -89,6 +89,14 @@ extension TrainingCompetitorViewController: TrainingViewControllerDelegate {
     
     func trainingViewController(_ controller: TrainingViewController, leaderboardButtonTapped sender: Any) {
         super.leaderboardButtonTapped(sender)
+    }
+    
+    func trainingViewControllerDidStopTraining(_ controller: TrainingViewController) {
+        update()
+    }
+    
+    func trainingViewControllerDidReactivateTraining(_ controller: TrainingViewController) {
+        update()
     }
     
 }

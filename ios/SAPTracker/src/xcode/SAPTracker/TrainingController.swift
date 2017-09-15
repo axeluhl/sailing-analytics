@@ -33,7 +33,7 @@ class TrainingController: NSObject {
         failure: @escaping (_ error: Error) -> Void)
     {
         let collector = CreateTrainingData.init(serverURL: trainingRequestManager.baseURLString, boatClassName: boatClassName)
-        createEvent(collector: collector, success: { (createTrainingData) in
+        createTraining_CreateEvent(collector: collector, success: { (createTrainingData) in
             if let checkInData = CheckInData.init(createTrainingData: collector) {
                 success(checkInData)
             } else {
@@ -44,113 +44,36 @@ class TrainingController: NSObject {
         }
     }
     
-    // MARK: StopActiveRace
-    
-    func stopActiveRace(
-        success: @escaping () -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        guard let activeTrainingRaceData = Preferences.activeTrainingRaceData else {
-            success()
-            return
-        }
-        
-        self.leaderboardRaceSetStopTrackingTime(forTrainingRaceData: activeTrainingRaceData, success: {
-            self.autoCourseRace(forTrainingRaceData: activeTrainingRaceData) { (withSuccess) in
-                Preferences.activeTrainingRaceData = nil
-                success()
-            }
-        }) { (error) in
-            failure(error)
-        }
-    }
-    
-    // MARK: - StopAllRaces
-    
-    func stopAllRaces(
-        forCheckIn checkIn: CheckIn,
-        success: @escaping () -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        leaderboardRacesStopTracking(forCheckIn: checkIn, success: success, failure: failure)
-    }
-    
-    // MARK: - StartNewRace
-    
-    func startNewRace(
-        forCheckIn checkIn: CheckIn,
-        success: @escaping () -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        leaderboardRaceStartTracking(forCheckIn: checkIn, success: { (trainingRaceData) in
-            Preferences.activeTrainingRaceData = trainingRaceData
-            success()
-        }) { (error) in
-            failure(error)
-        }
-    }
-    
-    // AutoCourseRace
-    
-    func autoCourseRace(
-        forTrainingRaceData trainingRaceData: TrainingRaceData,
-        completion: @escaping () -> Void)
-    {
-        autoCourseRace(
-            leaderboardName: trainingRaceData.leaderboardName,
-            raceColumnName: trainingRaceData.raceColumnName,
-            fleetName: trainingRaceData.fleetName,
-            completion: completion
-        )
-    }
-    
-    func autoCourseRace(
-        leaderboardName: String,
-        raceColumnName: String,
-        fleetName: String,
-        completion: @escaping () -> Void)
-    {
-        leaderboardRaceAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-            completion()
-        }) { (error) in
-            completion()
-        }
-    }
-    
-    // MARK: - CreateEvent
-    
-    fileprivate func createEvent(
+    fileprivate func createTraining_CreateEvent(
         collector: CreateTrainingData,
         success: @escaping (_ collector: CreateTrainingData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
         trainingRequestManager.postCreateEvent(boatClassName: collector.boatClassName, success: { (createEventData) in
             collector.createEventData = createEventData
-            self.createEventSuccess(collector: collector, success: success, failure: failure)
+            self.createTraining_CreateEventSuccess(collector: collector, success: success, failure: failure)
         }) { (error, message) in
             failure(error)
         }
     }
     
-    fileprivate func createEventSuccess(
+    fileprivate func createTraining_CreateEventSuccess(
         collector: CreateTrainingData,
         success: @escaping (_ collector: CreateTrainingData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
         do {
-            try regattaCompetitorAdd(collector: collector, success: success, failure: failure)
+            try createTraining_AddCompetitor(collector: collector, success: success, failure: failure)
         } catch {
             do {
-                try regattaCompetitorCreateAndAdd(collector: collector, success: success, failure: failure)
+                try createTraining_CreateAndAddCompetitor(collector: collector, success: success, failure: failure)
             } catch {
                 failure(error)
             }
         }
     }
     
-    // MARK: - RegattaCompetitorAdd
-    
-    fileprivate func regattaCompetitorAdd(
+    fileprivate func createTraining_AddCompetitor(
         collector: CreateTrainingData,
         success: @escaping (_ collector: CreateTrainingData) -> Void,
         failure: @escaping (_ error: Error) -> Void) throws
@@ -165,28 +88,26 @@ class TrainingController: NSObject {
                 collector.competitorID = competitorID
                 success(collector)
             }) { (error, message) in
-                self.regattaCompetitorAddFailure(collector: collector, success: success, failure: failure)
+                self.createTraining_AddCompetitorFailure(collector: collector, success: success, failure: failure)
             }
         } else {
-            self.regattaCompetitorAddFailure(collector: collector, success: success, failure: failure)
+            self.createTraining_AddCompetitorFailure(collector: collector, success: success, failure: failure)
         }
     }
     
-    fileprivate func regattaCompetitorAddFailure(
+    fileprivate func createTraining_AddCompetitorFailure(
         collector: CreateTrainingData,
         success: @escaping (_ collector: CreateTrainingData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
         do {
-            try self.regattaCompetitorCreateAndAdd(collector: collector, success: success, failure: failure)
+            try self.createTraining_CreateAndAddCompetitor(collector: collector, success: success, failure: failure)
         } catch {
             failure(error)
         }
     }
     
-    // MARK: - RegattaCompetitorCreateAndAdd
-    
-    fileprivate func regattaCompetitorCreateAndAdd(
+    fileprivate func createTraining_CreateAndAddCompetitor(
         collector: CreateTrainingData,
         success: @escaping (_ collector: CreateTrainingData) -> Void,
         failure: @escaping (_ error: Error) -> Void) throws
@@ -207,9 +128,85 @@ class TrainingController: NSObject {
         }
     }
     
-    // MARK: - LeaderboardRaceStartTracking
+    // MARK: - FinishTraining
     
-    fileprivate func leaderboardRaceStartTracking(
+    func finishTraining(
+        forCheckIn checkIn: CheckIn,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        self.trainingRequestManager.putFinishEventUpdate(eventID: checkIn.event.eventID, success: {
+            self.trainingRequestManager.postLeaderboardStopTracking(leaderboardName: checkIn.leaderboard.name, fleetName: "Default", success: {
+                success()
+            }) { (error, message) in
+                failure(error)
+            }
+        }) { (error, message) in
+            failure(error)
+        }
+    }
+    
+    // MARK: - ReactivateTraining
+    
+    func reactivateTraining(
+        forCheckIn checkIn: CheckIn,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        trainingRequestManager.putReactivateEventUpdate(eventID: checkIn.event.eventID, success: {
+            success()
+        }) { (error, message) in
+            failure(error)
+        }
+    }
+    
+    // MARK: - StopActiveRace
+    
+    func stopActiveRace(
+        forTrainingRaceData trainingRaceData: TrainingRaceData,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        self.stopActiveRace_SetStopTrackingTime(forTrainingRaceData: trainingRaceData, success: {
+            success()
+        }) { (error) in
+            failure(error)
+        }
+    }
+    
+    fileprivate func stopActiveRace_SetStopTrackingTime(
+        forTrainingRaceData data: TrainingRaceData,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        stopActiveRace_SetStopTrackingTime(
+            leaderboardName: data.leaderboardName,
+            regattaName: data.regattaName,
+            raceColumnName: data.raceColumnName,
+            fleetName: data.fleetName,
+            success: success,
+            failure: failure
+        )
+    }
+    
+    fileprivate func stopActiveRace_SetStopTrackingTime(
+        leaderboardName: String,
+        regattaName: String,
+        raceColumnName: String,
+        fleetName: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        trainingRequestManager.postLeaderboardRaceSetStopTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
+            success()
+        }) { (error, message) in
+            failure(error)
+        }
+    }
+    
+    // MARK: - StartNewRace
+    
+    func startNewRace(
         forCheckIn checkIn: CheckIn,
         success: @escaping (_ trainingRaceData: TrainingRaceData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
@@ -240,65 +237,30 @@ class TrainingController: NSObject {
         }
     }
     
-    // MARK: - LeaderboardRacesStopTracking
+    // MARK: - AutoCourseRace
     
-    fileprivate func leaderboardRacesStopTracking(
-        forCheckIn checkIn: CheckIn,
-        success: @escaping () -> Void,
-        failure: @escaping (_ error: Error) -> Void)
+    func autoCourseRace(
+        forTrainingRaceData trainingRaceData: TrainingRaceData,
+        completion: @escaping () -> Void)
     {
-        trainingRequestManager.postLeaderboardStopTracking(leaderboardName: checkIn.leaderboard.name, fleetName: "Default", success: {
-            success()
-        }) { (error, message) in
-            failure(error)
-        }
-    }
-    
-    // MARK: - LeaderboardRaceSetStopTrackingTime
-    
-    fileprivate func leaderboardRaceSetStopTrackingTime(
-        forTrainingRaceData data: TrainingRaceData,
-        success: @escaping () -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        leaderboardRaceSetStopTrackingTime(
-            leaderboardName: data.leaderboardName,
-            regattaName: data.regattaName,
-            raceColumnName: data.raceColumnName,
-            fleetName: data.fleetName,
-            success: success,
-            failure: failure
+        autoCourseRace(
+            leaderboardName: trainingRaceData.leaderboardName,
+            raceColumnName: trainingRaceData.raceColumnName,
+            fleetName: trainingRaceData.fleetName,
+            completion: completion
         )
     }
     
-    fileprivate func leaderboardRaceSetStopTrackingTime(
-        leaderboardName: String,
-        regattaName: String,
-        raceColumnName: String,
-        fleetName: String,
-        success: @escaping () -> Void,
-        failure: @escaping (_ error: Error) -> Void)
-    {
-        trainingRequestManager.postLeaderboardRaceSetStopTrackingTime(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-            success()
-        }) { (error, message) in
-            failure(error)
-        }
-    }
-    
-    // MARK: - LeaderboardRaceAutoCourse
-    
-    fileprivate func leaderboardRaceAutoCourse(
+    func autoCourseRace(
         leaderboardName: String,
         raceColumnName: String,
         fleetName: String,
-        success: @escaping () -> Void,
-        failure: @escaping (_ error: Error) -> Void)
+        completion: @escaping () -> Void)
     {
         trainingRequestManager.postLeaderboardAutoCourse(leaderboardName: leaderboardName, raceColumnName: raceColumnName, fleetName: fleetName, success: {
-            success()
+            completion()
         }) { (error, message) in
-            failure(error)
+            completion()
         }
     }
     

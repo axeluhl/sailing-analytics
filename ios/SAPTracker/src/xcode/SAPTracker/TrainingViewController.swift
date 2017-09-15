@@ -14,6 +14,10 @@ protocol TrainingViewControllerDelegate: class {
     
     func trainingViewController(_ controller: TrainingViewController, leaderboardButtonTapped sender: Any)
     
+    func trainingViewControllerDidStopTraining(_ controller: TrainingViewController)
+    
+    func trainingViewControllerDidReactivateTraining(_ controller: TrainingViewController)
+    
 }
 
 class TrainingViewController: UIViewController {
@@ -30,11 +34,14 @@ class TrainingViewController: UIViewController {
     @IBOutlet weak var leaderboardButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
     
-    var isActive = false
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        stopActiveRace()
     }
     
     // MARK: - Setup
@@ -111,17 +118,79 @@ class TrainingViewController: UIViewController {
         }
     }
     
+    // MARK: - StartTracking
+    
+    fileprivate func startTracking(
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        SVProgressHUD.show()
+        self.stopActiveRace {
+            self.startNewRace(success: {
+                SVProgressHUD.dismiss()
+                success()
+            }) { (error) in
+                SVProgressHUD.dismiss()
+                failure(error)
+            }
+        }
+    }
+    
+    fileprivate func stopActiveRace(completion: (() -> Void)? = nil) {
+        if let trainingRaceData = Preferences.activeTrainingRaceData {
+            trainingController.stopActiveRace(forTrainingRaceData: trainingRaceData, success: {
+                Preferences.activeTrainingRaceData = nil
+                completion?()
+            }) { (error) in
+                completion?()
+            }
+        } else {
+            completion?()
+        }
+    }
+    
+    fileprivate func startNewRace(
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        trainingController.startNewRace(forCheckIn: self.trainingCheckIn, success: { (trainingRaceData) in
+            Preferences.activeTrainingRaceData = trainingRaceData
+            success()
+        }) { (error) in
+            failure(error)
+        }
+    }
+    
+    fileprivate func finishTraining() {
+        SVProgressHUD.show()
+        trainingController.finishTraining(forCheckIn: trainingCheckIn, success: { [weak self] in
+            SVProgressHUD.dismiss()
+            if let strongSelf = self {
+                strongSelf.delegate?.trainingViewControllerDidStopTraining(strongSelf)
+            }
+        }) { [weak self] (error) in
+            SVProgressHUD.dismiss()
+            self?.showAlert(forError: error)
+        }
+    }
+    
+    fileprivate func reactivateTraining() {
+        SVProgressHUD.show()
+        trainingController.reactivateTraining(forCheckIn: trainingCheckIn, success: { [weak self] in
+            SVProgressHUD.dismiss()
+            if let strongSelf = self {
+                strongSelf.delegate?.trainingViewControllerDidReactivateTraining(strongSelf)
+            }
+        }) { [weak self] (error) in
+            SVProgressHUD.dismiss()
+            self?.showAlert(forError: error)
+        }
+    }
+    
     // MARK: - Actions
     
     @IBAction func stopTrainingButtonTapped(_ sender: Any) {
-        trainingController.stopAllRaces(forCheckIn: trainingCheckIn, success: { 
-            logInfo(name: "\(#function)", info: "success")
-        }) { (error) in
-            logError(name: "\(#function)", error: error)
-        }
-        
-        isActive = false
-        refresh(true)
+        finishTraining()
     }
     
     @IBAction func leaderboardButtonTapped(_ sender: Any) {
@@ -129,23 +198,14 @@ class TrainingViewController: UIViewController {
     }
     
     @IBAction func startTrackingButtonTapped(_ sender: Any) {
-        guard isTrainingActive else {
-            showReactivateAlert()
-            return
-        }
-        
-        SVProgressHUD.show()
-        self.trainingController.stopActiveRace(success: {
-            self.trainingController.startNewRace(forCheckIn: self.trainingCheckIn, success: {
-                SVProgressHUD.dismiss()
+        if isTrainingActive {
+            startTracking(success: {
                 self.delegate?.trainingViewController(self, startTrackingButtonTapped: sender)
-            }) { [weak self] (error) in
-                SVProgressHUD.dismiss()
-                self?.showAlert(forError: error)
+            }) { (error) in
+                self.showAlert(forError: error)
             }
-        }) { [weak self] (error) in
-            SVProgressHUD.dismiss()
-            self?.showAlert(forError: error)
+        } else {
+            showReactivateAlert()
         }
     }
     
@@ -158,17 +218,12 @@ class TrainingViewController: UIViewController {
             preferredStyle: .alert
         )
         let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .default) { [weak self] action in
-            self?.performReactivation()
+            self?.reactivateTraining()
         }
         let noAction = UIAlertAction(title: Translation.Common.No.String, style: .cancel, handler: nil)
         alertController.addAction(yesAction)
         alertController.addAction(noAction)
         present(alertController, animated: true, completion: nil)
-    }
-    
-    fileprivate func performReactivation() {
-        isActive = true
-        refresh(true)
     }
     
     // MARK: - Properties
@@ -181,7 +236,8 @@ class TrainingViewController: UIViewController {
     
     fileprivate var isTrainingActive: Bool {
         get {
-            return isActive // trainingCheckIn.event.endDate - Date().timeIntervalSince1970 < 0
+            print("\(trainingCheckIn.event.endDate) - \(Date().timeIntervalSince1970)")
+            return trainingCheckIn.event.endDate - Date().timeIntervalSince1970 > 0
         }
     }
     

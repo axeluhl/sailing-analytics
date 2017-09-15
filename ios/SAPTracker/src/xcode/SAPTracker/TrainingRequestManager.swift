@@ -14,6 +14,8 @@ enum TrainingRequestManagerError: Error {
 
 class TrainingRequestManager: NSObject {
     
+    static let OneWeekInMillis: Int64 = 7 * 24 * 60 * 60 * 1000
+    
     fileprivate let basePathString = "/sailingserver/api/v1"
     
     let baseURLString: String
@@ -80,6 +82,43 @@ class TrainingRequestManager: NSObject {
     fileprivate func postCreateEventFailure(error: Error, failure: (_ error: Error, _ message: String?) -> Void) {
         logError(name: "\(#function)", error: error)
         failure(error, stringForError(error))
+    }
+    
+    // MARK: - EventUpdate
+    
+    func putFinishEventUpdate(
+        eventID: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let endDateAsMillis = millisSince1970()
+        putEventUpdate(eventID: eventID, endDateAsMillis: endDateAsMillis, success: success, failure: failure)
+    }
+    
+    func putReactivateEventUpdate(
+        eventID: String,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let endDateAsMillis = NSNumber(value: millisSince1970().int64Value + TrainingRequestManager.OneWeekInMillis)
+        putEventUpdate(eventID: eventID, endDateAsMillis: endDateAsMillis, success: success, failure: failure)
+    }
+    
+    fileprivate func putEventUpdate(
+        eventID: String,
+        endDateAsMillis: NSNumber,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ message: String?) -> Void)
+    {
+        let encodedEventID = eventID.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let urlString = "\(basePathString)/events/\(encodedEventID)/update"
+        var body = [String: AnyObject]()
+        body["enddateasmillis"] = endDateAsMillis as AnyObject
+        manager.put(urlString, parameters: body, success: { (requestOperation, responseObject) in
+            success()
+        }) { (requestOperation, error) in
+            failure(error, self.stringForError(error))
+        }
     }
     
     // MARK: - RegattaCompetitorAdd
