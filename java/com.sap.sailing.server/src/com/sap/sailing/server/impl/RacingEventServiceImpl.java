@@ -745,7 +745,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             removeLeaderboard(leaderboardName);
         }
         for (Regatta regatta : new ArrayList<>(this.regattasByName.values())) {
-            stopTracking(regatta);
+            stopTracking(regatta, /* willBeRemoved */ true);
             removeRegatta(regatta);
         }
         for (Event event : new ArrayList<>(this.eventsById.values())) {
@@ -1834,7 +1834,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING
-                    && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+                    && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.REMOVED) {
                 if (polarDataService != null) {
                     polarDataService.raceFinishedLoading(race);
                 }
@@ -2084,7 +2084,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
+    public void stopTracking(Regatta regatta, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
         final Set<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
         if (trackersForRegatta != null) {
             for (RaceTracker raceTracker : trackersForRegatta) {
@@ -2092,7 +2092,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 if (race != null) {
                     stopTrackingWind(regatta, race);
                 }
-                raceTracker.stop(/* preemptive */false);
+                raceTracker.stop(/* preemptive */false, willBeRemoved);
                 final Object trackerId = raceTracker.getID();
                 final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
                 try {
@@ -2113,7 +2113,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
-        stopTracking(regatta);
+        stopTracking(regatta, /* willBeRemoved */ true);
         if (regatta != null) {
             if (regatta.getName() != null) {
                 logger.info("Removing regatta " + regatta.getName() + " (" + regatta.hashCode() + ") from " + this);
@@ -2163,7 +2163,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         if (trackersForRegatta != null) {
                             trackersForRegatta.remove(tracker);
                         }
-                        tracker.stop(/* preemptive */true);
+                        tracker.stop(/* preemptive */true, /* willBeRemoved */ true);
                         final Object trackerId = tracker.getID();
                         final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
                         try {
@@ -2172,7 +2172,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                             unlockRaceTrackersById(trackerId, lock);
                         }
                         if (trackersForRegatta == null || trackersForRegatta.isEmpty()) {
-                            stopTracking(regatta);
+                            stopTracking(regatta, /* willBeRemoved */ true);
                         }
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "scheduleAbortTrackerAfterInitialTimeout", e);
@@ -2222,7 +2222,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
         if (trackerSet == null || trackerSet.isEmpty()) {
-            stopTracking(regatta);
+            stopTracking(regatta, /* willBeRemoved */ false);
         }
     }
 
@@ -2397,7 +2397,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 RaceTracker raceTracker = trackerIter.next();
                 if (raceTracker.getRace() == race) {
                     // firstly stop the tracker
-                    raceTracker.stop(/* preemptive */true);
+                    raceTracker.stop(/* preemptive */true, /* willBeRemoved */ true);
                     // remove it from the raceTrackers by Regatta
                     trackerIter.remove();
                     final Object trackerId = raceTracker.getID();
@@ -2409,7 +2409,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     }
                     // if the last tracked race was removed, remove the entire regatta
                     if (raceTrackersByRegatta.get(regatta).isEmpty()) {
-                        stopTracking(regatta);
+                        stopTracking(regatta, /* willBeRemoved */ true);
                     }
                 }
             }

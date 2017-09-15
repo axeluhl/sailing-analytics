@@ -102,7 +102,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     }
     
     private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier) {
-        removeRaceLogSensorDataTracker(raceIdentifier, false);
+        removeRaceLogSensorDataTracker(raceIdentifier, /* preemptive */ false);
     }
 
     private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier, boolean preemptive) {

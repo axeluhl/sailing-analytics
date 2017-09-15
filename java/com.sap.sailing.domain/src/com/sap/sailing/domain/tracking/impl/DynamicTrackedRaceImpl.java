@@ -250,7 +250,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
    
     private void updateLoaderStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
-        if (status.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+        if (status.getStatus() == TrackedRaceStatusEnum.FINISHED || status.getStatus() == TrackedRaceStatusEnum.REMOVED) {
             loaderStatus.remove(loader);
         } else {
             loaderStatus.put(loader, status);

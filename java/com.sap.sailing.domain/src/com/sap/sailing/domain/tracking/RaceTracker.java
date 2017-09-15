@@ -52,6 +52,15 @@ public interface RaceTracker {
      */
     void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException;
 
+
+    /**
+     * Like {@link #stop(boolean)}, only that with this method the caller can assert by setting {@code willBeRemoved} to
+     * {@code true} that the race will be removed and no longer be accessible to clients after stopping this tracker.
+     * This helps save computational efforts because calculations that would otherwise be triggered when loading a race
+     * completes no longer need to be triggered.
+     */
+    void stop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
+
     com.sap.sailing.domain.base.Regatta getRegatta();
 
     /**

@@ -29,17 +29,26 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
      */
     @Override
     public final void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
+        this.onStop(preemptive, /* willBeRemoved */ false);
+    }
+
+    /**
+     * Ensure stop method does notify all listeners after tracker stopped.
+     */
+    @Override
+    public final void stop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
         try {
             listeners.onTrackerWillStop(preemptive);
         } finally {
-            onStop(preemptive);
+            onStop(preemptive, /* willBeRemoved */ willBeRemoved);
         }
     }
 
     /**
      * Template stop method for subclasses.
+     * @param willBeRemoved TODO
      */
-    protected void onStop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
+    protected void onStop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
     }
 
     @Override
