@@ -8,6 +8,8 @@
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
         <h1 class="{res.mediaCss.small12} {res.mediaCss.columns}">TODO: Benefits of logging in on SAPSailing.com</h1>
+        <p class="{res.mediaCss.small12} {res.mediaCss.columns}">TODO: As a registered user of SAP Sailing Analytics you have access to functionality that isn't open for anonymous users.
+           Simply register yourself to get access to the features shown below</p>
         <g:FlowPanel ui:field="contentHolderUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
     </g:HTMLPanel>
 </ui:UiBinder>
