@@ -195,6 +195,7 @@ import com.sap.sailing.server.operationaltransformation.AddMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
+import com.sap.sailing.server.operationaltransformation.CreateCompetitor;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImportProgress;
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
@@ -621,11 +622,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.competitorStore.addCompetitorUpdateListener(new CompetitorUpdateListener() {
             @Override
             public void competitorUpdated(Competitor competitor) {
-                replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor
-                        .getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
-                        competitor.getTeam().getImage(), competitor.getFlagImage(),
-                        competitor.getTimeOnTimeFactor(), competitor.getTimeOnDistanceAllowancePerNauticalMile(),
-                        competitor.getSearchTag()));
+                replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(),
+                        competitor.getColor(), competitor.getEmail(), competitor.getBoat().getSailID(),
+                        competitor.getTeam().getNationality(), competitor.getTeam().getImage(),
+                        competitor.getFlagImage(), competitor.getTimeOnTimeFactor(),
+                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
+            }
+            @Override
+            public void competitorCreated(Competitor competitor) {
+                replicate(new CreateCompetitor(competitor.getId(), competitor.getName(),
+                        competitor.getBoat().getBoatClass().getName(), competitor.getColor(), competitor.getEmail(),
+                        competitor.getFlagImage(), competitor.getBoat().getSailID(),
+                        competitor.getTeam().getNationality(), competitor.getTimeOnTimeFactor(),
+                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
             }
         });
         this.dataImportLock = new DataImportLockWithProgress();

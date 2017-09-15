@@ -8,17 +8,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.stream.StreamSupport;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
@@ -47,7 +44,6 @@ import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDe
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -152,8 +148,12 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")),
-                new BoatImpl(competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */true), /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-        assertTrue(Util.contains(replica.getBaseDomainFactory().getCompetitorStore().getCompetitors(), competitor));
+                new BoatImpl(competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */true), /* sailID */ null),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Thread.sleep(1000);
+        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorStore().getCompetitors().spliterator(), /* parallel */ false).anyMatch(
+                c->
+                    c.getId().equals(competitor.getId())));
     }
 
 }

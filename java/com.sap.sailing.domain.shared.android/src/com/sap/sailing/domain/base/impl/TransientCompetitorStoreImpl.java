@@ -74,7 +74,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         Competitor result = new CompetitorImpl(id, name, displayColor, email, flagImage, team, boat,
                 timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag);
-        addNewCompetitor(id, result);
+        addNewCompetitor(result);
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created competitor "+name+" with ID "+id, new Exception("Here is where it happened"));
         }
@@ -86,13 +86,18 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
      * {@link #getExistingCompetitorById(Serializable)}. Subclasses may override in case they need to take additional
      * measures such as durably storing the competitor. Overriding implementations must call this implementation.
      */
-    protected void addNewCompetitor(Serializable id, Competitor competitor) {
+    protected void addNewCompetitor(Competitor competitor) {
         LockUtil.lockForWrite(lock);
         try {
-            competitorCache.put(id, competitor);
-            competitorsByIdAsString.put(id.toString(), competitor);
+            competitorCache.put(competitor.getId(), competitor);
+            competitorsByIdAsString.put(competitor.getId().toString(), competitor);
         } finally {
             LockUtil.unlockAfterWrite(lock);
+        }
+        synchronized (listeners) {
+            for (final CompetitorUpdateListener listener : listeners) {
+                listener.competitorCreated(competitor);
+            }
         }
     }
     
@@ -277,15 +282,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public void addCompetitors(Iterable<Competitor> competitors) {
-        LockUtil.lockForWrite(lock);
-        try {
-            for (Competitor competitor: competitors) {
-                competitorCache.put(competitor.getId(), competitor);
-                competitorsByIdAsString.put(competitor.getId().toString(), competitor);
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(lock);
+    public void addNewCompetitors(Iterable<Competitor> competitors) {
+        for (Competitor competitor: competitors) {
+            addNewCompetitor(competitor);
         }
     }
 }
