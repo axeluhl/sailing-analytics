@@ -55,7 +55,7 @@ class TrainingController: NSObject {
             return
         }
         
-        self.leaderboardRaceStopTracking(forTrainingRaceData: activeTrainingRaceData, success: {
+        self.leaderboardRaceSetStopTrackingTime(forTrainingRaceData: activeTrainingRaceData, success: {
             self.autoCourseRace(forTrainingRaceData: activeTrainingRaceData) { (withSuccess) in
                 Preferences.activeTrainingRaceData = nil
                 success()
@@ -63,6 +63,13 @@ class TrainingController: NSObject {
         }) { (error) in
             failure(error)
         }
+    }
+    
+    func stopAllRaces(
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error) -> Void)
+    {
+        // TODO
     }
     
     // StartNewRace
@@ -230,14 +237,14 @@ class TrainingController: NSObject {
         }
     }
     
-    // MARK: - LeaderboardRaceStopTracking
+    // MARK: - LeaderboardRaceSetStopTrackingTime
     
-    fileprivate func leaderboardRaceStopTracking(
+    fileprivate func leaderboardRaceSetStopTrackingTime(
         forTrainingRaceData data: TrainingRaceData,
         success: @escaping () -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        leaderboardRaceStopTracking(
+        leaderboardRaceSetStopTrackingTime(
             leaderboardName: data.leaderboardName,
             regattaName: data.regattaName,
             raceColumnName: data.raceColumnName,
@@ -247,7 +254,7 @@ class TrainingController: NSObject {
         )
     }
     
-    fileprivate func leaderboardRaceStopTracking(
+    fileprivate func leaderboardRaceSetStopTrackingTime(
         leaderboardName: String,
         regattaName: String,
         raceColumnName: String,
