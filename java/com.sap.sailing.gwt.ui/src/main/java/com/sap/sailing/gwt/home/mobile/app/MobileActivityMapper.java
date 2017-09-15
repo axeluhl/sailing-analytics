@@ -4,10 +4,10 @@ import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.home.desktop.app.MoreLoginInformation;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
+import com.sap.sailing.gwt.home.mobile.places.morelogininformation.MoreLoginInformationActivity;
 import com.sap.sailing.gwt.home.mobile.places.series.SeriesActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
@@ -87,7 +87,7 @@ public class MobileActivityMapper implements ActivityMapper {
         } else if (place instanceof ImprintPlace) {
             return new ImprintActivityProxy((ImprintPlace) place);
         } else if (place instanceof MoreLoginInformationPlace) {
-            return new MoreLoginInformation(place);
+            return new MoreLoginInformationActivity(place);
         } else {
             return null;
         }

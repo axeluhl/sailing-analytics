@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.app;
+package com.sap.sailing.gwt.home.desktop.places.morelogininformation;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.event.shared.EventBus;
@@ -6,9 +6,9 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 
-public class MoreLoginInformation implements Activity {
+public class MoreLoginInformationActivity implements Activity {
 
-    public MoreLoginInformation(Place place) {
+    public MoreLoginInformationActivity(Place place) {
     }
 
     @Override
