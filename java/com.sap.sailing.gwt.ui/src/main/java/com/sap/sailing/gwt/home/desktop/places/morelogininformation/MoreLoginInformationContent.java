@@ -1,0 +1,37 @@
+package com.sap.sailing.gwt.home.desktop.places.morelogininformation;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Widget;
+
+public class MoreLoginInformationContent extends Widget {
+
+    private static MoreLoginInformationContentUiBinder uiBinder = GWT.create(MoreLoginInformationContentUiBinder.class);
+
+    interface MoreLoginInformationContentUiBinder extends UiBinder<Element, MoreLoginInformationContent> {
+    }
+
+    @UiField
+    DivElement titleUi;
+    @UiField
+    DivElement textUi;
+    @UiField
+    ImageElement imageUi;
+
+    public MoreLoginInformationContent(String title, String content, SafeUri image, boolean imageOnLeft) {
+        setElement(uiBinder.createAndBindUi(this));
+        titleUi.setInnerText(title);
+        textUi.setInnerText(content);
+        if (image != null) {
+            imageUi.setSrc(image.asString());
+        }
+        imageUi.getStyle().setFloat(
+                imageOnLeft ? com.google.gwt.dom.client.Style.Float.LEFT : com.google.gwt.dom.client.Style.Float.RIGHT);
+    }
+
+}

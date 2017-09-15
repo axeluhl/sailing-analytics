@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
+    <ui:style>
+        .clear {
+            clear: both;
+        }
+
+        .image {
+            width: 40%;
+            height: auto;
+            padding: 1em 0;
+        }
+
+        .wrapper {
+            padding: 1em 0;
+        }
+
+        .title {
+            font-size: 1.5em;
+            font-weight: bold;
+            padding-bottom: 0.5em;
+        }
+    </ui:style>
+    <div class="{style.wrapper}">
+        <div ui:field="titleUi" class="{style.title}" />
+        <img ui:field="imageUi" class="{style.image}" />
+        <div ui:field="textUi" />
+        <div class="{style.clear}" />
+    </div>
+</ui:UiBinder>

@@ -4,7 +4,6 @@ import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.Label;
 
 public class MoreLoginInformationActivity implements Activity {
 
@@ -28,8 +27,7 @@ public class MoreLoginInformationActivity implements Activity {
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        Label content = new Label("Best login here!");
-        panel.setWidget(content);
+        panel.setWidget(new MoreLoginInformation());
     }
 
 }
