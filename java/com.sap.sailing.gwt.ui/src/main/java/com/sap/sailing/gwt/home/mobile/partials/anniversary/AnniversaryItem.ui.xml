@@ -31,7 +31,8 @@
         }
         .count {
             font-weight: bold;
-            font-size: 3em;
+            font-size: 2em;
+            line-height: 1.75em;
         }
         .unit {
             line-height: .75em;

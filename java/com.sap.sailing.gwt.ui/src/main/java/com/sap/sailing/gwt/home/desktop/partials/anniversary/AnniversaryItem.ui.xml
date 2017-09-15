@@ -37,8 +37,7 @@
         .count {
             font-weight: bold;
             font-size: 3em;
-            margin-bottom: 8px;
-            margin-top: 20px;
+            line-height: 2em;
         }
         .unit {
             line-height: .5em;
