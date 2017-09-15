@@ -10,10 +10,8 @@ import java.util.Map;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -191,7 +189,7 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
             } else {
                 final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
                 if (table == null) {
-                    GWT.log("WARNING: leaderborad table is null");
+                    GWT.log("WARNING: leaderboard table is null");
                 } else {
                     getLeaderboardPanel().addBusyTask();
                     setTogglingInProcess(true);
@@ -298,6 +296,6 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
     }
     
     @Override
-    public abstract Header<SafeHtml> getHeader();
+    public abstract SortableExpandableColumnHeader getHeader();
 
 }
