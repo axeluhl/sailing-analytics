@@ -631,9 +631,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override
             public void competitorCreated(Competitor competitor) {
                 replicate(new CreateCompetitor(competitor.getId(), competitor.getName(),
-                        competitor.getBoat().getBoatClass().getName(), competitor.getColor(), competitor.getEmail(),
-                        competitor.getFlagImage(), competitor.getBoat().getSailID(),
-                        competitor.getTeam().getNationality(), competitor.getTimeOnTimeFactor(),
+                        competitor.getBoat()==null?null:competitor.getBoat().getBoatClass()==null?null:competitor.getBoat().getBoatClass().getName(),
+                        competitor.getColor(), competitor.getEmail(),
+                        competitor.getFlagImage(), competitor.getBoat()==null?null:competitor.getBoat().getSailID(),
+                        competitor.getTeam()==null?null:competitor.getTeam().getNationality(),
+                        competitor.getTimeOnTimeFactor(),
                         competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
             }
         });
