@@ -95,8 +95,12 @@ public interface RaceTracker {
          * Tracker has stopped event, see {@link RaceTracker#stop(boolean)} method
          * 
          * @param preemptive
+         *            whether to stop ongoing loading jobs
+         * @param willBeRemoved
+         *            if {@code true}, the race is about to be removed; hence, no need in resuming any caches or other
+         *            (re-)calculation jobs
          */
-        void onTrackerWillStop(boolean preemptive);
+        void onTrackerWillStop(boolean preemptive, boolean willBeRemoved);
     }
     
     @FunctionalInterface

@@ -40,9 +40,9 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
     @Override
     public final void stop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
         try {
-            listeners.onTrackerWillStop(preemptive);
+            listeners.onTrackerWillStop(preemptive, willBeRemoved);
         } finally {
-            onStop(preemptive, /* willBeRemoved */ willBeRemoved);
+            onStop(preemptive, willBeRemoved);
         }
     }
 

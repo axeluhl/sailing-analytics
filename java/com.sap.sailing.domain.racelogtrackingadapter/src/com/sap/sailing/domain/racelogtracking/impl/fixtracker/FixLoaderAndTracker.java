@@ -500,15 +500,21 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * TracTrac for archived races, loading is automatically stopped. Finishing already started loading jobs ensures,
      * that e.g. bravo fixes are completely loaded even if loading from TracTrac is faster.<br>
      * If stopping preemptively, the call will block until all already started loading jobs are aborted or finished.
+     * 
+     * @param willBeRemoved
+     *            if {@code true} then not only will tracking for the race be stopped, but the race is expected to be
+     *            removed shortly by the caller; therefore it does not make sense to resume cache calculations for
+     *            the race. The race status will then be set to {@link TrackedRaceStatusEnum#REMOVED} instead of
+     *            {@link TrackedRaceStatusEnum#FINISHED}.
      */
-    public void stop(boolean preemptive) {
+    public void stop(boolean preemptive, boolean willBeRemoved) {
         preemptiveStopRequested.set(preemptive);
         stopRequested.set(true);
         trackedRace.removeListener(raceChangeListener);
         deviceMappings.stop();
         synchronized (loadingJobs) {
             if (loadingJobs.isEmpty()) {
-                setStatusAndProgress(TrackedRaceStatusEnum.FINISHED, 1.0);
+                setStatusAndProgress(willBeRemoved ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED, 1.0);
             }
         }
         sensorFixStore.removeListener(listener);
