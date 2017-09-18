@@ -75,7 +75,7 @@ extension TrainingMarkViewController: TrainingViewControllerDelegate {
         super.leaderboardButtonTapped(sender)
     }
     
-    func trainingViewControllerDidStopTraining(_ controller: TrainingViewController) {
+    func trainingViewControllerDidFinishTraining(_ controller: TrainingViewController) {
         updatePessimistic()
     }
     

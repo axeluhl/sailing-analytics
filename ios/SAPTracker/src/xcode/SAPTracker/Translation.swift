@@ -500,8 +500,8 @@ class Translation: NSObject {
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }
-        struct StopTrainingButton { private static let Key = "\(TrainingView.Key).\(StopTrainingButton.self)"
-            struct Title { private static let Key = "\(StopTrainingButton.Key).\(Title.self)"
+        struct FinishTrainingButton { private static let Key = "\(TrainingView.Key).\(FinishTrainingButton.self)"
+            struct Title { private static let Key = "\(FinishTrainingButton.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }

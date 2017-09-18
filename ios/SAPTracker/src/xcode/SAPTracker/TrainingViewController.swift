@@ -14,7 +14,7 @@ protocol TrainingViewControllerDelegate: class {
     
     func trainingViewController(_ controller: TrainingViewController, leaderboardButtonTapped sender: Any)
     
-    func trainingViewControllerDidStopTraining(_ controller: TrainingViewController)
+    func trainingViewControllerDidFinishTraining(_ controller: TrainingViewController)
     
     func trainingViewControllerDidReactivateTraining(_ controller: TrainingViewController)
     
@@ -27,9 +27,9 @@ class TrainingViewController: UIViewController {
     weak var trainingCheckIn: CheckIn!
     weak var trainingCoreDataManager: CoreDataManager!
     
-    @IBOutlet var stopTrainingButtonZeroHeight: NSLayoutConstraint! // Strong reference needed to avoid deallocation when constraint is not active
+    @IBOutlet var finishTrainingButtonZeroHeight: NSLayoutConstraint! // Strong reference needed to avoid deallocation when constraint is not active
     
-    @IBOutlet weak var stopTrainingButton: UIButton!
+    @IBOutlet weak var finishTrainingButton: UIButton!
     @IBOutlet weak var trainingNameLabel: UILabel!
     @IBOutlet weak var leaderboardButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
@@ -52,7 +52,7 @@ class TrainingViewController: UIViewController {
     }
     
     fileprivate func setupButtons() {
-        makeRed(button: stopTrainingButton)
+        makeRed(button: finishTrainingButton)
         makeBlue(button: leaderboardButton)
         makeGreen(button: startTrackingButton)
     }
@@ -60,32 +60,32 @@ class TrainingViewController: UIViewController {
     fileprivate func setupLocalization() {
         leaderboardButton.setTitle(Translation.TrainingView.LeaderboardButton.Title.String, for: .normal)
         startTrackingButton.setTitle(Translation.TrainingView.StartTrackingButton.Title.String, for: .normal)
-        stopTrainingButton.setTitle(Translation.TrainingView.StopTrainingButton.Title.String, for: .normal)
+        finishTrainingButton.setTitle(Translation.TrainingView.FinishTrainingButton.Title.String, for: .normal)
     }
     
     // MARK: - Refresh
     
     func refresh(_ animated: Bool) {
-        refreshStopTrainingButton(animated)
+        refreshFinishTrainingButton(animated)
         refreshTrainingNameLabel(animated)
         refreshStartTrainingButton(animated)
     }
     
-    fileprivate func refreshStopTrainingButton(_ animated: Bool) {
+    fileprivate func refreshFinishTrainingButton(_ animated: Bool) {
         if (animated) {
-            UIView.animate(withDuration: 0.5) { self.refreshStopTrainingButton() }
+            UIView.animate(withDuration: 0.5) { self.refreshFinishTrainingButton() }
         } else {
-            refreshStopTrainingButton()
+            refreshFinishTrainingButton()
         }
     }
     
-    fileprivate func refreshStopTrainingButton() {
+    fileprivate func refreshFinishTrainingButton() {
         if (isTrainingActive) {
-            stopTrainingButtonZeroHeight.isActive = false
-            stopTrainingButton.alpha = 1
+            finishTrainingButtonZeroHeight.isActive = false
+            finishTrainingButton.alpha = 1
         } else {
-            stopTrainingButtonZeroHeight.isActive = true
-            stopTrainingButton.alpha = 0
+            finishTrainingButtonZeroHeight.isActive = true
+            finishTrainingButton.alpha = 0
         }
         view.layoutIfNeeded()
     }
@@ -166,7 +166,7 @@ class TrainingViewController: UIViewController {
         trainingController.finishTraining(forCheckIn: trainingCheckIn, success: { [weak self] in
             SVProgressHUD.dismiss()
             if let strongSelf = self {
-                strongSelf.delegate?.trainingViewControllerDidStopTraining(strongSelf)
+                strongSelf.delegate?.trainingViewControllerDidFinishTraining(strongSelf)
             }
         }) { [weak self] (error) in
             SVProgressHUD.dismiss()
@@ -189,7 +189,7 @@ class TrainingViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func stopTrainingButtonTapped(_ sender: Any) {
+    @IBAction func finishTrainingButtonTapped(_ sender: Any) {
         finishTraining()
     }
     
