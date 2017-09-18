@@ -50,7 +50,7 @@ class TrainingCheckInTableViewController: CheckInTableViewController {
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let logoutAction = UIAlertAction(title: "LOGOUT ACTION", style: .default) { [weak self] action in
+        let logoutAction = UIAlertAction(title: Translation.Common.Logout.String, style: .default) { [weak self] action in
             self?.logout()
         }
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .default) { [weak self] action in

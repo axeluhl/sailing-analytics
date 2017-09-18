@@ -35,6 +35,9 @@ class Translation: NSObject {
         struct No { private static let Key = "\(Common.Key).\(No.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
+        struct Logout { private static let Key = "\(Common.Key).\(Logout.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
     }
     
     // MARK: - RegattaCheckInController
