@@ -25,7 +25,6 @@ import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedRaceInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
@@ -60,9 +59,6 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
      * are grouped by the remote URL from where they originated. Local entries have a {@code null} value for the
      * {@link DetailedRaceInfoJsonSerializer# FIELD_REMOTEURL remote URL} field. The order of the list returned is
      * undefined.<br>
-     * 
-     * TODO bug 4227: implement a parameter to optionally add remote {@link TrackedRace TrackedRaces} to the list and
-     * extend this JavaDoc accordingly.
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
