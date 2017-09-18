@@ -33,7 +33,7 @@ public class GetAnniversariesAction implements SailingAction<ResultWithTTL<Anniv
 
         final Pair<Integer, AnniversaryType> next = service.getNextAnniversary();
         
-        if (next != null && (currentRaceCount -next.getA()) < SHOW_IF_LESS_RACES_TILL_NEXT_ANNIVERSARY) {
+        if (next != null && (currentRaceCount - next.getA()) < SHOW_IF_LESS_RACES_TILL_NEXT_ANNIVERSARY) {
             if (!knownAnnivs.containsKey(next.getA())) {
                 anniversaries.addValue(new AnniversaryDTO(next.getA(), currentRaceCount, next.getB()));
             }

@@ -70,7 +70,7 @@ public class AnniversaryDTO implements DTO {
     }
     
     public int getCountdown() {
-        return target-currentRaceCount;
+        return target - currentRaceCount;
     }
 
     public AnniversaryType getType() {
