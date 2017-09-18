@@ -18,7 +18,9 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RemoteSailingServerSet;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * This implements the calculation and management of anniversary races. The base of the anniversary calculation is a
@@ -124,6 +126,8 @@ public class AnniversaryRaceDeterminator {
     private void checkForNewAnniversaries(Map<RegattaAndRaceIdentifier, SimpleRaceInfo> races) {
         if (isStarted.get()) {
             final ArrayList<SimpleRaceInfo> allRaces = new ArrayList<>(races.values());
+            final TimePoint now = MillisecondsTimePoint.now();
+            allRaces.removeIf(race -> now.before(race.getStartOfRace()));
             Collections.sort(allRaces, new Comparator<SimpleRaceInfo>() {
                 @Override
                 public int compare(SimpleRaceInfo o1, SimpleRaceInfo o2) {
