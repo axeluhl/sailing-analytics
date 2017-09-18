@@ -64,7 +64,7 @@ class CreateTrainingViewController: UIViewController {
     
     fileprivate func createTraining(forBoatClassName boatClassName: String) {
         SVProgressHUD.show()
-        trainingController.createTraining(forBoatClassName: boatClassName, success: { checkInData in
+        trainingController.createTraining(forBoatClassName: boatClassName, sailID: "", nationality: "GER", success: { checkInData in
             SVProgressHUD.dismiss()
             self.checkIn(withCheckInData: checkInData)
         }) { (error) in

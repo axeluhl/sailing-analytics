@@ -12,15 +12,17 @@ class CreateTrainingData: NSObject {
     
     let serverURL: String
     let boatClassName: String
-    let sailID: String = "123"
-    let nationality: String = "GER"
+    let sailID: String
+    let nationality: String
     
     var createEventData: CreateEventData?
     var competitorID: String?
     
-    init(serverURL: String, boatClassName: String) {
+    init(serverURL: String, boatClassName: String, sailID: String, nationality: String) {
         self.serverURL = serverURL
         self.boatClassName = boatClassName
+        self.sailID = sailID
+        self.nationality = nationality
         super.init()
     }
     

@@ -29,10 +29,12 @@ class TrainingController: NSObject {
     
     func createTraining(
         forBoatClassName boatClassName: String,
+        sailID: String,
+        nationality: String,
         success: @escaping (_ checkInData: CheckInData) -> Void,
         failure: @escaping (_ error: Error) -> Void)
     {
-        let collector = CreateTrainingData.init(serverURL: trainingRequestManager.baseURLString, boatClassName: boatClassName)
+        let collector = CreateTrainingData.init(serverURL: trainingRequestManager.baseURLString, boatClassName: boatClassName, sailID: sailID, nationality: nationality)
         createTraining_CreateEvent(collector: collector, success: { (createTrainingData) in
             if let checkInData = CheckInData.init(createTrainingData: collector) {
                 success(checkInData)
