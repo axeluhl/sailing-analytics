@@ -3965,7 +3965,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     for (RaceColumn race : leaderboard.getRaceColumns()) {
                         for (Fleet fleet : race.getFleets()) {
                             TrackedRace trackedRace = race.getTrackedRace(fleet);
-                            if (trackedRace != null) {
+                            if (trackedRace != null && trackedRace.hasGPSData()) {
                                 RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
                                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                                 if (startOfRace != null) {
