@@ -41,7 +41,8 @@ class LoginViewController: FormularViewController {
     }
     
     fileprivate func setupButtons() {
-        // TODO
+        makeGray(button: signUpButton)
+        makeBlue(button: loginButton)
     }
     
     fileprivate func setupLocalization() {

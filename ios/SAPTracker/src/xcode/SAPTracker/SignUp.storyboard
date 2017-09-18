@@ -32,7 +32,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BJy-Aq-u8Y" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="243"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="254"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="User Name Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rwV-FV-peQ">
                                                 <rect key="frame" x="16" y="8" width="343" height="22"/>
@@ -64,23 +64,24 @@
                                                     <outlet property="delegate" destination="qY9-7D-Xs4" id="A2H-jw-bqU"/>
                                                 </connections>
                                             </textField>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IMI-8y-Fpj">
-                                                <rect key="frame" x="16" y="198" width="167.5" height="37"/>
-                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="18"/>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IMI-8y-Fpj">
+                                                <rect key="frame" x="16" y="198" width="167.5" height="48"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="48" id="q5A-Vx-Ta5"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
                                                 <state key="normal" title="Sign Up Button">
-                                                    <color key="titleColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
                                                 <connections>
                                                     <segue destination="Dwf-Hn-YUN" kind="show" id="L1H-Q4-yHF"/>
                                                 </connections>
                                             </button>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="goq-AQ-7ud">
-                                                <rect key="frame" x="191.5" y="198" width="167.5" height="37"/>
-                                                <color key="backgroundColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
-                                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="18"/>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="goq-AQ-7ud">
+                                                <rect key="frame" x="191.5" y="198" width="167.5" height="48"/>
+                                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
                                                 <state key="normal" title="Login Button">
-                                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
                                                 <connections>
                                                     <action selector="loginButtonTapped:" destination="qY9-7D-Xs4" eventType="touchUpInside" id="DAb-zo-0mf"/>
@@ -107,6 +108,7 @@
                                             <constraint firstItem="goq-AQ-7ud" firstAttribute="centerY" secondItem="IMI-8y-Fpj" secondAttribute="centerY" id="Eml-4B-a97"/>
                                             <constraint firstItem="cAM-A4-6wu" firstAttribute="leading" secondItem="rwV-FV-peQ" secondAttribute="leading" id="I6F-mw-y7a"/>
                                             <constraint firstItem="1ga-QM-WUl" firstAttribute="top" secondItem="2EU-Pr-nmo" secondAttribute="bottom" constant="8" id="NGL-lp-04p"/>
+                                            <constraint firstItem="goq-AQ-7ud" firstAttribute="height" secondItem="IMI-8y-Fpj" secondAttribute="height" id="Os5-Xa-O69"/>
                                             <constraint firstItem="goq-AQ-7ud" firstAttribute="leading" secondItem="IMI-8y-Fpj" secondAttribute="trailing" constant="8" id="Q6G-Iz-94J"/>
                                             <constraint firstItem="2EU-Pr-nmo" firstAttribute="trailing" secondItem="rwV-FV-peQ" secondAttribute="trailing" id="VY9-ex-EQ0"/>
                                             <constraint firstItem="8Yr-4B-QNb" firstAttribute="leading" secondItem="rwV-FV-peQ" secondAttribute="leading" id="ZDd-ZN-wTk"/>
@@ -193,7 +195,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lOZ-p2-hq2" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="533"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="544"/>
                                         <subviews>
                                             <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="uyU-Dr-ejn">
                                                 <rect key="frame" x="16" y="166" width="343" height="30"/>
@@ -204,12 +206,14 @@
                                                     <outlet property="delegate" destination="Dwf-Hn-YUN" id="4nf-v9-ceh"/>
                                                 </connections>
                                             </textField>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="54k-5G-O5L">
-                                                <rect key="frame" x="16" y="488" width="343" height="37"/>
-                                                <color key="backgroundColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
-                                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="18"/>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="54k-5G-O5L">
+                                                <rect key="frame" x="16" y="488" width="343" height="48"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="48" id="dZg-56-eFc"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
                                                 <state key="normal" title="Sign Up Button">
-                                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
                                                 <connections>
                                                     <action selector="signUpButtonTapped:" destination="Dwf-Hn-YUN" eventType="touchUpInside" id="SFe-9o-gh4"/>
@@ -431,7 +435,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hFw-4k-tbQ" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="231"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="242"/>
                                         <subviews>
                                             <textField opaque="NO" clipsSubviews="YES" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="dkV-73-nyH">
                                                 <rect key="frame" x="16" y="136" width="343" height="30"/>
@@ -469,12 +473,14 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cy3-me-Gce">
-                                                <rect key="frame" x="16" y="186" width="343" height="37"/>
-                                                <color key="backgroundColor" red="0.0" green="0.61568627450000002" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
-                                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="18"/>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cy3-me-Gce">
+                                                <rect key="frame" x="16" y="186" width="343" height="48"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="48" id="xki-Br-nq2"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="21"/>
                                                 <state key="normal" title="Reset Password Button">
-                                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 </state>
                                                 <connections>
                                                     <action selector="resetPasswordButtonTapped:" destination="lJd-XI-EoH" eventType="touchUpInside" id="mhs-Sv-oou"/>
@@ -556,7 +562,7 @@
         <scene sceneID="lbf-Ic-ArT">
             <objects>
                 <navigationController storyboardIdentifier="rootViewController" id="CdT-Wl-cUy" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="xQu-r9-hhZ">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" translucent="NO" id="xQu-r9-hhZ">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>

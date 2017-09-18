@@ -81,7 +81,7 @@ class SignUpViewController: FormularViewController {
     }
     
     fileprivate func setupButtons() {
-        // TODO
+        makeBlue(button: signUpButton)
     }
     
     fileprivate func setupLocalization() {

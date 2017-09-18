@@ -39,7 +39,7 @@ class ForgotPasswordViewController: FormularViewController {
     }
     
     fileprivate func setupButtons() {
-        // TODO
+        makeBlue(button: resetPasswordButton)
     }
     
     fileprivate func setupLocalization() {
