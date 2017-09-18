@@ -213,7 +213,9 @@ extension CheckInTableViewController: NSFetchedResultsControllerDelegate {
     {
         switch type {
         case .insert:
-            tableView.insertRows(at: [newIndexPath!], with: UITableViewRowAnimation.automatic)
+            if indexPath == nil { // Workaround for an iOS 8.4 bug https://forums.developer.apple.com/thread/12184
+                tableView.insertRows(at: [newIndexPath!], with: UITableViewRowAnimation.automatic)
+            }
         case .update:
             if let cell = tableView.cellForRow(at: indexPath!) {
                 if let checkIn = fetchedResultsController?.object(at: indexPath!) {
