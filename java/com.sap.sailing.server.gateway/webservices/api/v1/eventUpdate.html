@@ -9,55 +9,47 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/events/createEvent</h2>
+<h2>URL: /api/v1/events/{event-id}/update</h2>
 
 <b>Description:</b>
-<p>Creates a new event. Optional parameters control how "deep" the structure is to be created, regarding
-a default regatta, leaderboard and leaderboard group. Furthermore, optional parameters control some of
-the most important attributes of the objects created. Reasonable defaults are supposed to make the
-consumption of this service simple.</p>
+<p>Updates an existing event. Individual attributes of the Event object can be updated by providing a
+corresponding form parameter in the stream.</p>
 <br/>
 <table>
 	<tr>
 		<td>Webservice Type:</td>
-		<td>POST</td>
+		<td>PUT</td>
 	</tr>
 	<tr>
 		<td>Output format:</td>
-		<td>{event-id}</td>
+		<td>empty</td>
 	</tr>
 	<tr>
 		<td>Mandatory parameters:</td>
-		<td>venuename or venuelat/venuelng must be provided, as follows
-			<div>venuename the name of the venue; if not provided, venuelat and venuelng can be used, and the name of
-			     the town nearest to the coordinates will be used as a venue name then</div>
-			<div>venuelat decimal degrees; can be provided instead of a venuename, together with venuelng encoding the location of the event</div>
-			<div>venuelng decimal degrees; can be provided instead of a venuename, together with venuelat encoding the location of the event</div>
-		</td>
+		<td>none; when no parameters are provided the call is a no-op</td>
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
 		<td>
-			<div>eventname name of the event; defaults to a name constructed from the user name
-			     and a timestamp</div>
-			<div>eventdescription the event description text; defaults to the event name</div>
+			<div>eventname name of the event</div>
+			<div>eventdescription the event description text</div>
 			<div>startdate the event start date in ISO format (e.g., 2017-08-17T10:00:00+0200)</div>
 			<div>startdateasmillis (alternative to startdate) the event start date in milliseconds since the epoch (Unix time)</div>
 			<div>enddate the event end date in ISO format (e.g., 2017-08-19T20:00:00+0200)</div>
 			<div>enddateasmillis (alternative to enddate) the event end date in milliseconds since the epoch (Unix time)</div>
+			<td>venuename or venuelat/venuelng can be provided, as follows
+				<div>venuename the name of the venue; if not provided, venuelat and venuelng can be used, and the name of
+				     the town nearest to the coordinates will be used as a venue name then</div>
+				<div>venuelat decimal degrees; can be provided instead of a venuename, together with venuelng encoding the location of the event</div>
+				<div>venuelng decimal degrees; can be provided instead of a venuename, together with venuelat encoding the location of the event</div>
+			</td>
 			<div>ispublic a boolean value, true/false, telling whether the event shall be public</div>
 			<div>officialwebsiteurl URL of the official web site</div>
 			<div>baseurl event base URL; will be used in e-mails sent out, e.g., for registration; defaults to the base URL of this request</div>
-			<div>leaderboardgroupids IDs of the leaderboard groups to add to the new event</div>
-			<div>createleaderboardgroup boolean; if true, a new leaderboard group will be created, named and described like the
-			     event; the new leaderboard group will be added to the event</div>
-			<div>createregatta boolean; if true, a new regatta will be created, named like the event; in this case, providing
-			     a value for boatclassname becomes mandatory; the regatta will have a "Default" series with a single "Default"
-			     fleet; a regatta leaderboard is created, and if a leaderboard group
-			     was also created, the regatta leaderboard will automatically be added to the new leaderboard group</div>
-			<div>boatclassname must be provided if createretatta=true; can be the display name or an alias name of a boat class to
-			     use for the new regatta</div>
-			<div>numberofraces tells how many races shall be created in the default series; by default the series remains empty</div>
+			<div>leaderboardgroupids IDs of the leaderboard groups to add to the new event; to clear the list, provide a single
+			     empty occurrence as in <pre>leaderboardgroupids=</pre>. If the parameter is not mentioned once then the leaderboard
+			     groups are left unchanged. To provide multiple leaderboard groups, repeat the parameter multiple times, as in
+			     <pre>leaderboardgroupids=57ecd43f-1e77-4e98-a245-2ec51e95f58b&leaderboardgroupids=158e326e-f831-45b2-a1c0-05926d548513</pre></div>
 		</td>
 	</tr>
 	<tr>

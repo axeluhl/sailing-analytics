@@ -4886,7 +4886,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Competitor competitor = convertCompetitorDescriptorToCompetitor(competitorDescriptor, searchTag);
             competitorsForSaving.add(competitor);
         }
-        getBaseDomainFactory().getCompetitorStore().addCompetitors(competitorsForSaving);
+        getBaseDomainFactory().getCompetitorStore().addNewCompetitors(competitorsForSaving);
         return convertToCompetitorDTOs(competitorsForSaving);
     }
 
