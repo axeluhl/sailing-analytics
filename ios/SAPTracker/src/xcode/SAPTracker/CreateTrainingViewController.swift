@@ -22,6 +22,7 @@ class CreateTrainingViewController: UIViewController {
     weak var trainingCoreDataManager: TrainingCoreDataManager!
     
     @IBOutlet weak var boatClassPickerView: UIPickerView!
+    @IBOutlet weak var boatClassNameLabel: UILabel!
     @IBOutlet weak var createTrainingButton: UIButton!
     
     override func viewDidLoad() {
@@ -42,7 +43,9 @@ class CreateTrainingViewController: UIViewController {
     }
     
     fileprivate func setupLocalization() {
-        navigationItem.title = "TRAININGS TITLE"
+        navigationItem.title = Translation.CreateTrainingView.Title.String
+        boatClassNameLabel.text = Translation.CreateTrainingView.BoatClassNameLabel.Text.String
+        createTrainingButton.setTitle(Translation.CreateTrainingView.CreateTrainingButton.Title.String, for: .normal)
     }
     
     fileprivate func setupNavigationBar() {

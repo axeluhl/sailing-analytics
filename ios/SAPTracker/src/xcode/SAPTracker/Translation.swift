@@ -249,6 +249,24 @@ class Translation: NSObject {
         }
     }
     
+    // MARK: - CreateTrainingView
+    
+    struct CreateTrainingView { private static let Key = "\(CreateTrainingView.self)"
+        struct Title { private static let Key = "\(CreateTrainingView.Key).\(Title.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
+        struct BoatClassNameLabel { private static let Key = "\(CreateTrainingView.Key).\(BoatClassNameLabel.self)"
+            struct Text { private static let Key = "\(BoatClassNameLabel.Key).\(Text.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct CreateTrainingButton { private static let Key = "\(CreateTrainingView.Key).\(CreateTrainingButton.self)"
+            struct Title { private static let Key = "\(CreateTrainingButton.Key).\(Title.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+    }
+    
     // MARK: - LeaderboardView
     
     struct LeaderboardView { private static let Key = "\(LeaderboardView.self)"
