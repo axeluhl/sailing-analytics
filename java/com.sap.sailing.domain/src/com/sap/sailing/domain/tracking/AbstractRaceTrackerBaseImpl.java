@@ -29,11 +29,13 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
      */
     @Override
     public final void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
-        this.onStop(preemptive, /* willBeRemoved */ false);
+        this.stop(preemptive, /* willBeRemoved */ false);
     }
 
     /**
-     * Ensure stop method does notify all listeners after tracker stopped.
+     * Ensure stop method does notify all listeners after tracker stopped. If the race will be removed afterwards
+     * by the caller, the caller should pass {@code true} for the {@code willBeRemoved} parameter. This will, in
+     * particular, avoid that unnecessary re-calculations will be triggered.
      */
     @Override
     public final void stop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
@@ -46,7 +48,11 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
 
     /**
      * Template stop method for subclasses.
-     * @param willBeRemoved TODO
+     * 
+     * @param willBeRemoved
+     *            If the race will be removed afterwards by the caller, the caller should pass {@code true} for the
+     *            {@code willBeRemoved} parameter. This will, in particular, avoid that unnecessary re-calculations will
+     *            be triggered.
      */
     protected void onStop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException {
     }

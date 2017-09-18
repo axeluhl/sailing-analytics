@@ -89,7 +89,7 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
                         oldInstance = dataTrackers.put(raceIdentifier, trackerManager);
                     }
                     if (oldInstance != null) {
-                        oldInstance.stop(true);
+                        oldInstance.stop(/* preemptive */ true);
                     }
                 }
             }

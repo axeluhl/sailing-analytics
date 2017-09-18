@@ -209,7 +209,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(false);
-        raceLogFixTrackerManager.stop(false);
+        raceLogFixTrackerManager.stop(/* preemptive */ false);
         addFixes3(race, comp1, dev1);
     }
     

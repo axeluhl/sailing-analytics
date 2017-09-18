@@ -93,7 +93,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  * </ul>
  * </li>
  * </ul>
- * There is a corner cases that is assumed to be acceptable for the specific semantic of a {@link Mark}'s fixes:<br>
+ * There is a corner case that is assumed to be acceptable for the specific semantic of a {@link Mark}'s fixes:<br>
  * If a Marks is tracked and not pinged, any new fix transferred from the tracking device is treated as being better
  * than the one before. So all fixes are being recorded starting at the time point when the operator starts tracking for
  * a race and startOfTracking is in the future.<br>
@@ -122,6 +122,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      */
     private final Set<AbstractLoadingJob> loadingJobs = ConcurrentHashMap.newKeySet();
     private final SensorFixMapperFactory sensorFixMapperFactory;
+    
+    /**
+     * This flag is used to tell the loaders/trackers whether preemptive stopping has been requested. If switched
+     * to {@code true}, running loaders will stop loading fixes and return immediately.
+     */
     private AtomicBoolean preemptiveStopRequested = new AtomicBoolean(false);
     private AtomicBoolean stopRequested = new AtomicBoolean(false);
     private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
@@ -263,7 +268,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         this.sensorFixStore = sensorFixStore;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.trackedRace = trackedRace;
-        
         startTracking();
     }
 
@@ -362,7 +366,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      */
     private void loadFixes(TimeRange timeRangeToLoad, RegattaLogDeviceMappingEvent<? extends WithID> mappingEvent,
             final Consumer<Double> progressConsumer, final BooleanSupplier stopCallback) {
-        if (timeRangeToLoad != null && !preemptiveStopRequested.get()) {
+        if (timeRangeToLoad != null && !stopCallback.getAsBoolean()) {
             mappingEvent.accept(new MappingEventVisitor() {
                 @Override
                 public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
@@ -544,7 +548,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     /**
-     * Updates the {@link FixLoaderAndTracker}'s overall state on the {@link TrackedRace} based on the progresses of
+     * Updates the {@link FixLoaderAndTracker}'s overall status on the {@link TrackedRace} based on the progresses of
      * {@link #loadingJobs}.
      */
     private void updateStatusAndProgress() {
@@ -559,15 +563,14 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     progressSum += loadingJob.getProgress();
                 }
                 if (allFinished) {
-                    loadingJobs.clear();
+                    loadingJobs.clear(); // TODO bug4262: pass through "removeRequested" and transition to REMOVED in that case here
                     status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
                     progress = 1.0;
                 } else {
                     progress = progressSum / loadingJobs.size();
                     status = TrackedRaceStatusEnum.LOADING;
                 }
-                
-            } else {
+            } else { // TODO bug4262: pass through "removeRequested" and transition to REMOVED in that case here
                 status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
                 progress = 1.0;
             }
@@ -629,9 +632,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
         @Override
         public final void run() {
-
             updateStatusAndProgressWithErrorHandling();
-            
             try {
                 load(this::updateProgress, preemptiveStopRequested::get);
             } finally {
