@@ -128,6 +128,14 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * to {@code true}, running loaders will stop loading fixes and return immediately.
      */
     private AtomicBoolean preemptiveStopRequested = new AtomicBoolean(false);
+    
+    /**
+     * When {@link #stop(boolean, boolean)} is called with {@code willBeStopped==true}, the fact will be recorded
+     * in this attribute. This is then evaluated when updating general progress so as to set the race status to
+     * {@link TrackedRaceStatusEnum#REMOVED} instead of {@link TrackedRaceStatusEnum#FINISHED}.
+     */
+    private AtomicBoolean willBeRemovedAfterStopping = new AtomicBoolean(false);
+    
     private AtomicBoolean stopRequested = new AtomicBoolean(false);
     private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         @Override
@@ -509,6 +517,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      */
     public void stop(boolean preemptive, boolean willBeRemoved) {
         preemptiveStopRequested.set(preemptive);
+        willBeRemovedAfterStopping.set(willBeRemoved);
         stopRequested.set(true);
         trackedRace.removeListener(raceChangeListener);
         deviceMappings.stop();
@@ -569,15 +578,15 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     progressSum += loadingJob.getProgress();
                 }
                 if (allFinished) {
-                    loadingJobs.clear(); // TODO bug4262: pass through "removeRequested" and transition to REMOVED in that case here
-                    status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
+                    loadingJobs.clear();
+                    status = stopRequested.get() ? willBeRemovedAfterStopping.get() ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
                     progress = 1.0;
                 } else {
                     progress = progressSum / loadingJobs.size();
                     status = TrackedRaceStatusEnum.LOADING;
                 }
-            } else { // TODO bug4262: pass through "removeRequested" and transition to REMOVED in that case here
-                status = stopRequested.get() ?  TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
+            } else {
+                status = stopRequested.get() ? willBeRemovedAfterStopping.get() ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED : TrackedRaceStatusEnum.TRACKING;
                 progress = 1.0;
             }
             setStatusAndProgress(status, progress);
