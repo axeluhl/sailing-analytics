@@ -15,7 +15,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
  * Convenient implementation of {@link TrackedRegattaListener} that delegates to {@link TrackedRegattaListener}
  * instances found in the OSGi service registry.
  */
-public class OSGiBasedTrackedRegattaListener implements TrackedRegattaListener {
+public class OSGiBasedTrackedRegattaListener extends TrackedRegattaListenerManagerImpl {
 
     private ServiceTracker<TrackedRegattaListener, TrackedRegattaListener> serviceTracker;
 
@@ -47,11 +47,13 @@ public class OSGiBasedTrackedRegattaListener implements TrackedRegattaListener {
 
     @Override
     public void regattaAdded(TrackedRegatta trackedRegatta) {
+        super.regattaAdded(trackedRegatta);
         forEachListener((listener) -> listener.regattaAdded(trackedRegatta));
     }
 
     @Override
     public void regattaRemoved(TrackedRegatta trackedRegatta) {
+        super.regattaRemoved(trackedRegatta);
         forEachListener((listener) -> listener.regattaRemoved(trackedRegatta));
     }
 }
