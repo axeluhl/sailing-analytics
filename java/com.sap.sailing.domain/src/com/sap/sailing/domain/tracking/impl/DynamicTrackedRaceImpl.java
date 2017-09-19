@@ -394,7 +394,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 updated(fix.getTimePoint());
                 triggerManeuverCacheRecalculationForAllCompetitors();
                 notifyListeners(fix, mark, firstFixInTrack);
-                gpsFixReceivedHandler.run();
             }
 
             @Override
