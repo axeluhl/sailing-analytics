@@ -58,7 +58,7 @@
         .description {
             position: relative;
         }
-        .disclaimer {
+        .legalNotice {
             font-size: 1.5em;
             cursor: pointer;
             color: #008fcc;
@@ -80,7 +80,7 @@
         <div ui:field="teaserUi" class="{style.teaser}"></div>
         <div class="{style.description}">
             <span ui:field="descriptionUi"></span>
-            <span class="{style.disclaimer}" ui:field="disclaimerUi">*</span>
+            <span class="{style.legalNotice}" ui:field="legalNoticeUi">*</span>
         </div>
         <a ui:field="linkUi" target="_blank" class="{res.mainCss.button} {res.mainCss.buttonstrong} 
                 {res.mainCss.buttonarrowrightwhite} {style.link}">

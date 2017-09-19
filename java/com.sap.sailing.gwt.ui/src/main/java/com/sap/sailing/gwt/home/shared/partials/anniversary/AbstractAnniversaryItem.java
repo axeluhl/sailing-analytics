@@ -4,7 +4,6 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView.AnniversaryAnnouncement;
 import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
@@ -16,24 +15,21 @@ public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnoun
     @UiField
     public Style style;
     @UiField
-    public Element iconUi, countUi, unitUi, teaserUi, descriptionUi, disclaimerUi;
+    public Element iconUi, countUi, unitUi, teaserUi, descriptionUi, legalNoticeUi;
     @UiField
     public AnchorElement linkUi;
 
     protected void initLayout(boolean isAnnouncement) {
         if (isAnnouncement) {
             this.addStyleName(style.announcement());
-            this.disclaimerUi.removeFromParent();
+            this.legalNoticeUi.removeFromParent();
         } else {
             this.iconUi.removeFromParent();
             this.linkUi.removeFromParent();
         }
-        // FIXME: Adjust Disclaimer content according to legal notices!
         final Bubble.DefaultPresenter bubblePresenter = new DefaultPresenter(
-                new HTML("Lorem ipsum Lorem ipsum<br>Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum<br>Lorem ipsum "
-                        + "Lorem ipsum<br>Lorem ipsum Lorem ipsum Lorem ipsum<br>Lorem ipsum Lorem ipsum Lorem ipsum"),
-                descriptionUi, descriptionUi, Direction.BOTTOM);
-        bubblePresenter.registerTarget(disclaimerUi);
+                new AnniversaryLegalNoticeBubbleContent(13337), descriptionUi, getElement(), Direction.BOTTOM);
+        bubblePresenter.registerTarget(legalNoticeUi);
     }
 
     @Override
