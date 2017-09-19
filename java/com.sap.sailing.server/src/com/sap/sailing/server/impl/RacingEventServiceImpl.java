@@ -162,7 +162,6 @@ import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.EmptyTrackedRegattaListener;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -173,7 +172,6 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
@@ -184,6 +182,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
+import com.sap.sailing.server.anniversary.RaceChangeObserverForAnniversaryDetection;
 import com.sap.sailing.server.anniversary.checker.QuarterChecker;
 import com.sap.sailing.server.anniversary.checker.SameDigitChecker;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
@@ -456,7 +455,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private SailingServerConfiguration sailingServerConfiguration;
 
-    private final TrackedRegattaListener trackedRegattaListener;
+    private final TrackedRegattaListenerManager trackedRegattaListener;
     
     private int numberOfTrackedRacesToRestore;
     
@@ -530,7 +529,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            statistics about TrackedRaces will be calculated.
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore,
-            final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListener trackedRegattaListener,
+            final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces) {
         this((final RaceLogResolver raceLogResolver) -> {
@@ -653,7 +652,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider,
             MediaDB mediaDb, final WindStore windStore, final SensorFixStore sensorFixStore,
-            TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListener trackedRegattaListener,
+            TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces) {
         logger.info("Created " + this);
