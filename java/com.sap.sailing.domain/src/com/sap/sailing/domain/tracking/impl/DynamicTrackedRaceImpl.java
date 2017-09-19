@@ -106,9 +106,19 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     private transient RaceStateChangedListener raceStateBasedStartTimeChangedListener;
     
+    /**
+     * Flag that indicates if a {@link GPSFix} is already tracked in any {@link GPSFixTrack} for a competitor of this
+     * race.
+     */
     private volatile boolean gpsFixReceived;
     
-    private volatile Runnable gpsFixReceivedHandler;
+    /**
+     * Handler to be triggered when a GPSFix is received. The initial implementation sets the {@link #gpsFixReceived}
+     * flag and notifies attached listeners through {@link RaceChangeListener#firstGPSFixReceived()}. The handler is
+     * then changed to be an empty implementation. This helps to not need to check the volatile field
+     * {@link #gpsFixReceived} on every fix that is received.
+     */
+    private Runnable gpsFixReceivedHandler;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
@@ -147,6 +157,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         // createWindTrack which adds this object as a listener
     }
 
+    /**
+     * @see RaceChangeListener#firstGPSFixReceived()
+     */
     private void setupGpsFixReceivedHandler() {
         final Object lockObject = new Object();
         gpsFixReceivedHandler = () -> {
