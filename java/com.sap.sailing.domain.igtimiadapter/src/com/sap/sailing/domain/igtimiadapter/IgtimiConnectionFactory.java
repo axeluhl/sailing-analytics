@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.igtimiadapter;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -32,11 +34,8 @@ public interface IgtimiConnectionFactory {
      * Obtains a URL that a user agent (e.g., a web browser) can be sent to in order to allow that user to authenticate
      * and then authorize this factory's {@link Client} for accessing the user's Igtimi data. The URL is chosen such that
      * it redirects to the {@link AuthorizationCallback} with the <code>code</code> response type.
-     * @param redirectProtocol TODO
-     * @param redirectHost TODO
-     * @param redirectPort TODO
      */
-    String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPort);
+    String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPort) throws MalformedURLException, UnsupportedEncodingException;
     
     /**
      * Using the "account" service, retrieves the {@link Account} information for this access token and stores the token

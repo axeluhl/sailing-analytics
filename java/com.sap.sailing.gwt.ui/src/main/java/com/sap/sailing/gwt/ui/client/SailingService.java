@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -457,7 +459,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 
-    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort);
+    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) throws MalformedURLException, UnsupportedEncodingException;
 
     boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
 
