@@ -2130,6 +2130,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             return result;
         }
+
+        @Override
+        public void firstGPSFixReceived() {
+         // no action required
+        }
     }
 
     /**

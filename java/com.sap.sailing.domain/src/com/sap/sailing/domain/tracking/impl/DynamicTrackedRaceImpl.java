@@ -105,6 +105,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * to be restored during at the time of de-serialization.
      */
     private transient RaceStateChangedListener raceStateBasedStartTimeChangedListener;
+    
+    private volatile boolean gpsFixReceived;
+    
+    private volatile Runnable gpsFixReceivedHandler;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
@@ -132,12 +136,36 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
             setWindSourcesToExclude(windSourcesToExclude);
         }
+        
+        setupGpsFixReceivedHandler();
+        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
         }
         // default wind tracks are observed because they are created by the superclass constructor using
         // createWindTrack which adds this object as a listener
+    }
+
+    private void setupGpsFixReceivedHandler() {
+        final Object lockObject = new Object();
+        gpsFixReceivedHandler = () -> {
+            gpsFixReceivedHandler = () -> {};
+            final boolean firstFix;
+            synchronized (lockObject) {
+                // It's possible that the handler is triggered multiple times before it is exchanged to an empty implementation.
+                // This ensures that the listener is only fired once.
+                if (!gpsFixReceived) {
+                    firstFix = true;
+                    gpsFixReceived = true;
+                } else {
+                    firstFix = false;
+                }
+            }
+            if (firstFix) {
+                notifyListenersAboutFirstGPSFixReceived();
+            }
+        };
     }
 
     /**
@@ -366,6 +394,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 updated(fix.getTimePoint());
                 triggerManeuverCacheRecalculationForAllCompetitors();
                 notifyListeners(fix, mark, firstFixInTrack);
+                gpsFixReceivedHandler.run();
             }
 
             @Override
@@ -552,6 +581,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private void notifyListeners(GPSFixMoving fix, Competitor competitor) {
         notifyListeners(listener -> listener.competitorPositionChanged(fix, competitor));
+    }
+
+    private void notifyListenersAboutFirstGPSFixReceived() {
+        notifyListeners(RaceChangeListener::firstGPSFixReceived);
     }
 
     private void notifyListeners(TrackedRaceStatus status, TrackedRaceStatus oldStatus) {
@@ -996,6 +1029,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         updated(fix.getTimePoint());
         triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor);
+        gpsFixReceivedHandler.run();
     }
 
     @Override
