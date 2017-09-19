@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.dialog;
 
+import com.google.gwt.event.dom.client.HasAllKeyHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -9,8 +10,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 
 public abstract class DialogUtils {
-    public static void linkEnterToButton(final Button button, FocusWidget... widgets) {
-        for (FocusWidget widget : widgets) {
+    public static void linkEnterToButton(final Button button, HasAllKeyHandlers... widgets) {
+        for (HasAllKeyHandlers widget : widgets) {
             widget.addKeyPressHandler(new KeyPressHandler() {
                 @Override
                 public void onKeyPress(KeyPressEvent event) {
@@ -22,8 +23,8 @@ public abstract class DialogUtils {
         }
     }
 
-    public static void linkEscapeToButton(final Button button, FocusWidget... widgets) {
-        for (FocusWidget widget : widgets) {
+    public static void linkEscapeToButton(final Button button, HasAllKeyHandlers... widgets) {
+        for (HasAllKeyHandlers widget : widgets) {
             widget.addKeyPressHandler(new KeyPressHandler() {
                 @Override
                 public void onKeyPress(KeyPressEvent event) {

@@ -36,8 +36,8 @@ public abstract class DataEntryDialogWithBootstrap<T> extends DataEntryDialog<T>
                 validateAndUpdate();
             }
         });
-        DialogUtils.linkEnterToButton(getOkButton(), result.getBox());
-        DialogUtils.linkEscapeToButton(getCancelButton(), result.getBox());
+        DialogUtils.linkEnterToButton(getOkButton(), result);
+        DialogUtils.linkEscapeToButton(getCancelButton(), result);
         return result;
     }
 
