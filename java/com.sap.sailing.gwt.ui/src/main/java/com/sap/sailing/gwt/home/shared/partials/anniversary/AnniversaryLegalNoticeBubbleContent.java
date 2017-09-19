@@ -7,7 +7,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class AnniversaryLegalNoticeBubbleContent extends Widget {
+class AnniversaryLegalNoticeBubbleContent extends Widget {
 
     private static AnniversaryLegalNoticeUiBinder uiBinder = GWT.create(AnniversaryLegalNoticeUiBinder.class);
 
@@ -19,7 +19,7 @@ public class AnniversaryLegalNoticeBubbleContent extends Widget {
     @UiField
     Element legalNoticeHeadline, legalNoticeSectionContest, legalNoticeSectionPrizes;
 
-    public AnniversaryLegalNoticeBubbleContent(int anniversary) {
+    AnniversaryLegalNoticeBubbleContent(int anniversary) {
         setElement(uiBinder.createAndBindUi(this));
         legalNoticeHeadline.setInnerText(i18n.anniversaryLegalNoticeHeadline(anniversary));
         legalNoticeSectionContest.setInnerText(i18n.anniversaryLegalNoticeSectionContestParagraph(anniversary));

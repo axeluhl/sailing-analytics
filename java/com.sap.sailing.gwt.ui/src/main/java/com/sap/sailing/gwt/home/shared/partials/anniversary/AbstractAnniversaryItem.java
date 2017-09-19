@@ -4,6 +4,7 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView.AnniversaryAnnouncement;
 import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
@@ -33,11 +34,6 @@ public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnoun
     }
 
     @Override
-    public void setIconUrl(String iconUrl) {
-        this.iconUi.getStyle().setBackgroundImage("url('" + iconUrl + "')");
-    }
-
-    @Override
     public void setCount(String count) {
         this.countUi.setInnerText(count);
     }
@@ -55,6 +51,17 @@ public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnoun
     @Override
     public void setDescription(String desciption) {
         this.descriptionUi.setInnerText(desciption);
+    }
+
+    @Override
+    public void setLegalNotice(IsWidget content) {
+        final DefaultPresenter presenter = new DefaultPresenter(content, descriptionUi, getElement(), Direction.BOTTOM);
+        presenter.registerTarget(legalNoticeUi);
+    }
+
+    @Override
+    public void setIconUrl(String iconUrl) {
+        this.iconUi.getStyle().setBackgroundImage("url('" + iconUrl + "')");
     }
 
     @Override

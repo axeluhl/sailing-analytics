@@ -69,6 +69,8 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
                 item.setTeaser(I18N.anniversaryRepdigitCountdownTeaser(countdown, target));
                 item.setDescription(I18N.anniversaryRepdigitCountdownDescription(target));
             }
+            // TODO: Separate the legal notice content for "Quarter" and "Rep digit" anniversaries
+            item.setLegalNotice(new AnniversaryLegalNoticeBubbleContent(target));
         }
     }
 

@@ -6,7 +6,7 @@
             padding: 0 1em !important;
             max-width: 80em;
         }
-        .h2, .container > div, p > span:first-child {
+        h2, .container > div, p > span:first-child {
             text-transform: uppercase;
         }
         .container > div, p > span:first-child {

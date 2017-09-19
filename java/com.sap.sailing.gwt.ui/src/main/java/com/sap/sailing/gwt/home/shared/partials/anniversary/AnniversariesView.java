@@ -57,6 +57,12 @@ public interface AnniversariesView extends IsWidget, RefreshableWidget<Anniversa
          */
         void setDescription(String desciption);
 
+        /**
+         * @param content
+         *            the content to show in the legal notices popup
+         */
+        void setLegalNotice(IsWidget content);
+
     }
 
     /**
