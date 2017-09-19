@@ -7,10 +7,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 
+/**
+ * Default implementation of {@link TrackedRegattaListenerManager} having a local set of {@link TrackedRegattaListener}.
+ */
 public class TrackedRegattaListenerManagerImpl implements TrackedRegattaListenerManager {
-    
+
     private final Set<TrackedRegattaListener> listeners;
-    
+
     public TrackedRegattaListenerManagerImpl() {
         listeners = ConcurrentHashMap.newKeySet();
     }
