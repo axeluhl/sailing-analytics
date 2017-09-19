@@ -168,8 +168,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal combination of URLs/URIs, the {@link TracTracRaceTracker}
      * already tracking the race was re-used. The trackers will be stopped by this call regardless of how many calls
      * were made that ensured they were tracking.
+     * @param willBeRemoved TODO
      */
-    void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
+    void stopTracking(Regatta regatta, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
 
     /**
      * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race}

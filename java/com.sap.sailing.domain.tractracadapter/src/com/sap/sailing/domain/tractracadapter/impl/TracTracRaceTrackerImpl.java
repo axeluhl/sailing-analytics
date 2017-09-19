@@ -533,7 +533,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
     
     @Override
-    protected void onStop(boolean stopReceiversPreemtively) throws InterruptedException {
+    protected void onStop(boolean stopReceiversPreemtively, boolean willBeRemoved) throws InterruptedException {
         if (!stopped) {
             stopped = true;
             eventSubscriber.unsubscribeRaces(racesListener);
@@ -553,13 +553,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 new AbstractLoadingQueueDoneCallBack(receivers) {
                     @Override
                     protected void executeWhenAllReceiversAreDoneLoading() {
-                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                        lastStatus = new TrackedRaceStatusImpl(willBeRemoved ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                         updateStatusOfTrackedRaces();
                     }
                 };
             } else {
                 // queues contents were cleared preemptively; this means we're done with loading immediately
-                lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
+                lastStatus = new TrackedRaceStatusImpl(willBeRemoved ? TrackedRaceStatusEnum.REMOVED : TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                 updateStatusOfTrackedRaces();
             }
             if (stopReceiversPreemtively && simulator != null) {
