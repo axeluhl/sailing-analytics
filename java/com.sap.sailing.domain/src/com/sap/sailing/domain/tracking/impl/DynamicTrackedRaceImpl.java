@@ -180,6 +180,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             }
         };
     }
+    
+    @Override
+    public boolean hasGPSData() {
+        return gpsFixReceived;
+    }
 
     /**
      * After de-serialization sets a valid {@link #listeners} collection which is transient and therefore
