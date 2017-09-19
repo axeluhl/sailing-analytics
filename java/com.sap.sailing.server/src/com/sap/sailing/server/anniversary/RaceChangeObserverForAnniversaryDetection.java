@@ -59,7 +59,8 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
 
     private void handleRaceChangeAndRemoveListener(TrackedRace trackedRace) {
         final TrackedRaceStatusEnum trackedRaceStatus = trackedRace.getStatus().getStatus();
-        if (handleRaceChange(trackedRace) || trackedRaceStatus == TrackedRaceStatusEnum.FINISHED) {
+        if (handleRaceChange(trackedRace) || trackedRaceStatus == TrackedRaceStatusEnum.FINISHED
+                || trackedRaceStatus == TrackedRaceStatusEnum.REMOVED) {
             removeListener(trackedRace);
         }
     }
