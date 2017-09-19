@@ -15,18 +15,19 @@
     .scrollPanel {
         height: 20px;
         padding-top:25px;
+        overflow-x: scroll;
+        overflow-y: hidden;
     }
     .content {
         height: 1px;
     }
     </ui:style>
-    <g:SimplePanel styleName="{style.outerBox}">
-        <g:SimplePanel>
-            <g:ScrollPanel ui:field="overlayScrollPanelUi"
-                styleName="{style.scrollPanel}">
-                <g:SimplePanel ui:field="overlayDummyContentUi"
-                    styleName="{style.content}" />
-            </g:ScrollPanel>
-        </g:SimplePanel>
-    </g:SimplePanel>
+    
+    <div class="{style.outerBox}">
+            <div ui:field="overlayScrollPanelUi"
+                class="{style.scrollPanel}">
+                <div ui:field="overlayDummyContentUi"
+                    class="{style.content}" />
+            </div>
+    </div>
 </ui:UiBinder> 

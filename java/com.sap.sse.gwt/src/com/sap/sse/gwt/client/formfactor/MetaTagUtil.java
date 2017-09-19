@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.formfactor;
+package com.sap.sse.gwt.client.formfactor;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.HeadElement;

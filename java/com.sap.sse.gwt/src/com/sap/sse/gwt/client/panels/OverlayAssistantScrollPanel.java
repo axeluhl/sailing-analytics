@@ -8,6 +8,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ScrollEvent;
@@ -18,15 +19,19 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 
 /**
  * This scrollpanel overlays a second scrollbar fixed to the bottom of the viewport as soon as the original scrollbar is
- * not visible anymore.<p>
+ * not visible anymore.
+ * <p>
  * 
  * This class observes a set of events to properly synchronize scrollbar states:
  * 
@@ -39,16 +44,16 @@ import com.google.gwt.user.client.ui.Widget;
 public class OverlayAssistantScrollPanel extends ScrollPanel {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface MyUiBinder extends UiBinder<Widget, OverlayAssistantScrollPanel> {
+    interface MyUiBinder extends UiBinder<DivElement, OverlayAssistantScrollPanel> {
     }
 
+    private DivElement overlayWidget;
     @UiField
-    protected ScrollPanel overlayScrollPanelUi;
+    protected DivElement overlayScrollPanelUi;
     @UiField
-    protected SimplePanel overlayDummyContentUi;
+    protected DivElement overlayDummyContentUi;
     private final OverlayAnimation animation = new OverlayAnimation();
     private final List<HandlerRegistration> registrations = new ArrayList<>();
-    private Widget overlayWidget;
     private final Element contentToSyncWith;
     private final boolean hasMutationObservationCapability;
 
@@ -60,7 +65,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
     public OverlayAssistantScrollPanel(Widget contentToScroll) {
         super(contentToScroll);
         // add 15 pixel spacing between bottom scrollpanel and scrolled content
-        this.getElement().getStyle().setPaddingBottom(15, Unit.PX);
+        this.getElement().getStyle().setPaddingBottom(25, Unit.PX);
         contentToSyncWith = contentToScroll.getElement();
         this.hasMutationObservationCapability = weCanObserve();
     }
@@ -69,20 +74,18 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
      * Bind all observers required to manage both scrollbars in sync.
      */
     @Override
-    protected void onAttach() {
-        super.onAttach();
-        GWT.log("onAttach");
+    protected void onLoad() {
+        overlayWidget = uiBinder.createAndBindUi(this);
+        RootPanel.get().getElement().appendChild(overlayWidget);
         if (!hasMutationObservationCapability) {
             return;
         }
-        overlayWidget = uiBinder.createAndBindUi(this);
-        RootPanel.get().add(overlayWidget);
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
                 matchScrollpanelAndContentWidths();
                 updateOverlayDisplay();
-                syncScrollers(OverlayAssistantScrollPanel.this, overlayScrollPanelUi);
+                applyScrollpanelToOverlay();
             }
         });
         registrations.add(Window.addResizeHandler(new ResizeHandler() {
@@ -90,7 +93,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
             public void onResize(ResizeEvent event) {
                 matchScrollpanelAndContentWidths();
                 updateOverlayDisplay();
-                syncScrollers(OverlayAssistantScrollPanel.this, overlayScrollPanelUi);
+                applyScrollpanelToOverlay();
             }
         }));
         registrations.add(Window.addWindowScrollHandler(new Window.ScrollHandler() {
@@ -103,22 +106,15 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         registrations.add(this.addScrollHandler(new ScrollHandler() {
             @Override
             public void onScroll(ScrollEvent event) {
-                syncScrollers(OverlayAssistantScrollPanel.this, overlayScrollPanelUi);
-            }
-        }));
-        registrations.add(overlayScrollPanelUi.addScrollHandler(new ScrollHandler() {
-            @Override
-            public void onScroll(ScrollEvent event) {
-                syncScrollers(overlayScrollPanelUi, OverlayAssistantScrollPanel.this);
+                applyScrollpanelToOverlay();
             }
         }));
         final JavaScriptObject observer = setupObserver(contentToSyncWith, new Command() {
             @Override
             public void execute() {
-                GWT.log("contentToSyncWith");
                 matchScrollpanelAndContentWidths();
                 updateOverlayDisplay();
-                syncScrollers(OverlayAssistantScrollPanel.this, overlayScrollPanelUi);
+                applyScrollpanelToOverlay();
             }
         });
         registrations.add(new HandlerRegistration() {
@@ -129,15 +125,33 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
                 }
             }
         });
+        if (!DeviceDetector.isMobile()) {
+            // only bind reverse scrolling through overlay scrollpanel in desktop
+            DOM.sinkEvents(overlayScrollPanelUi, Event.ONSCROLL);
+            DOM.setEventListener(overlayScrollPanelUi, new EventListener() {
+                @Override
+                public void onBrowserEvent(Event event) {
+                    if (event.getTypeInt() == Event.ONSCROLL) {
+                        applyOverlayToScrollpanel();
+                    }
+                }
+            });
+        }
     }
 
-    /**
-     * Detach all observers.
-     */
+    private void applyScrollpanelToOverlay() {
+        syncScrollers(this.getElement(), overlayScrollPanelUi);
+        matchScrollpanelAndContentWidths();
+    }
+
+    private void applyOverlayToScrollpanel() {
+        syncScrollers(overlayScrollPanelUi, this.getElement());
+        matchScrollpanelAndContentWidths();
+    }
+
     @Override
-    protected void onDetach() {
-        GWT.log("onDetach");
-        super.onDetach();
+    protected void onUnload() {
+        super.onUnload();
         if (!hasMutationObservationCapability) {
             return;
         }
@@ -145,7 +159,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         for (HandlerRegistration handlerRegistration : registrations) {
             handlerRegistration.removeHandler();
         }
-        if (overlayWidget.isAttached()) {
+        if (overlayWidget != null) {
             overlayWidget.removeFromParent();
         }
     }
@@ -154,8 +168,8 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
      * Helper method that synchronizes the scroll position of the target scrollpanel, using the data gathered from the
      * source scrollpanel
      */
-    private void syncScrollers(ScrollPanel source, ScrollPanel target) {
-        target.setHorizontalScrollPosition(source.getHorizontalScrollPosition());
+    private void syncScrollers(Element source, Element target) {
+        target.setScrollLeft(source.getScrollLeft());
     }
 
     /**
@@ -163,10 +177,9 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
      * content.
      */
     private void matchScrollpanelAndContentWidths() {
-        overlayDummyContentUi.getElement().getStyle().setWidth(contentToSyncWith.getClientWidth(), Unit.PX);
-        overlayScrollPanelUi.getElement().getStyle().setWidth(OverlayAssistantScrollPanel.this.getOffsetWidth() + 16,
-                Unit.PX);
-        overlayScrollPanelUi.getElement().getStyle().setMarginLeft(this.getAbsoluteLeft(), Unit.PX);
+        overlayDummyContentUi.getStyle().setWidth(contentToSyncWith.getClientWidth(), Unit.PX);
+        overlayScrollPanelUi.getStyle().setWidth(OverlayAssistantScrollPanel.this.getOffsetWidth(), Unit.PX);
+        overlayScrollPanelUi.getStyle().setMarginLeft(this.getAbsoluteLeft(), Unit.PX);
     }
 
     /**
@@ -269,17 +282,17 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
 
         @Override
         protected void onStart() {
-            overlayWidget.getElement().getStyle().setOpacity(overlayRequestedTargetState ? 0 : 1);
+            overlayWidget.getStyle().setOpacity(overlayRequestedTargetState ? 0 : 1);
         }
 
         @Override
         protected void onUpdate(double progress) {
-            overlayWidget.getElement().getStyle().setOpacity(overlayRequestedTargetState ? progress : 1 - progress);
+            overlayWidget.getStyle().setOpacity(overlayRequestedTargetState ? progress : 1 - progress);
         }
 
         protected void onComplete() {
             overlayToolbarIsCurrentlyVisible = overlayRequestedTargetState;
-            overlayWidget.getElement().getStyle().setOpacity(overlayRequestedTargetState ? 1 : 0);
+            overlayWidget.getStyle().setOpacity(overlayRequestedTargetState ? 1 : 0);
         };
 
         protected void onCancel() {
