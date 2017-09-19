@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -110,15 +111,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * Flag that indicates if a {@link GPSFix} is already tracked in any {@link GPSFixTrack} for a competitor of this
      * race.
      */
-    private volatile boolean gpsFixReceived;
-    
-    /**
-     * Handler to be triggered when a GPSFix is received. The initial implementation sets the {@link #gpsFixReceived}
-     * flag and notifies attached listeners through {@link RaceChangeListener#firstGPSFixReceived()}. The handler is
-     * then changed to be an empty implementation. This helps to not need to check the volatile field
-     * {@link #gpsFixReceived} on every fix that is received.
-     */
-    private Runnable gpsFixReceivedHandler;
+    private final AtomicBoolean gpsFixReceived;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
@@ -137,6 +130,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.courseDesignChangedListeners = new HashSet<>();
         this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
+        
+        gpsFixReceived = new AtomicBoolean(false);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -147,8 +142,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             setWindSourcesToExclude(windSourcesToExclude);
         }
         
-        setupGpsFixReceivedHandler();
-        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
@@ -156,34 +149,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         // default wind tracks are observed because they are created by the superclass constructor using
         // createWindTrack which adds this object as a listener
     }
-
-    /**
-     * @see RaceChangeListener#firstGPSFixReceived()
-     */
-    private void setupGpsFixReceivedHandler() {
-        final Object lockObject = new Object();
-        gpsFixReceivedHandler = () -> {
-            gpsFixReceivedHandler = () -> {};
-            final boolean firstFix;
-            synchronized (lockObject) {
-                // It's possible that the handler is triggered multiple times before it is exchanged to an empty implementation.
-                // This ensures that the listener is only fired once.
-                if (!gpsFixReceived) {
-                    firstFix = true;
-                    gpsFixReceived = true;
-                } else {
-                    firstFix = false;
-                }
-            }
-            if (firstFix) {
-                notifyListenersAboutFirstGPSFixReceived();
-            }
-        };
-    }
     
     @Override
     public boolean hasGPSData() {
-        return gpsFixReceived;
+        return gpsFixReceived.get();
     }
 
     /**
@@ -1054,7 +1023,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         updated(fix.getTimePoint());
         triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor);
-        gpsFixReceivedHandler.run();
+        
+        // getAndSet call is atomic which means, that it can be ensured that the listeners are notified only once
+        final boolean oldGPSFixReceived = gpsFixReceived.getAndSet(true);
+        if (!oldGPSFixReceived) {
+            notifyListenersAboutFirstGPSFixReceived();
+        }
     }
 
     @Override
