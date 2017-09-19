@@ -28,7 +28,6 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
@@ -87,7 +86,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 sailingService, getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this, SecurityStylesheetResources.INSTANCE.css(), getStringMessages());
         panel.addStyleName("adminConsolePanel");
         
-        BetterDateTimeBox.initialize();
         regattasDisplayers = new HashSet<>();
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();

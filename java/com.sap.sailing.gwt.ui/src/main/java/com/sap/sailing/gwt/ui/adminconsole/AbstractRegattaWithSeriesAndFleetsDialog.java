@@ -22,9 +22,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.common.Util;
@@ -44,8 +44,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected StringMessages stringMessages;
     private final RegattaDTO regatta;
 
-    protected final BetterDateTimeBox startDateBox;
-    protected final BetterDateTimeBox endDateBox;
+    protected final HTML5DateTimeBox startDateBox;
+    protected final HTML5DateTimeBox endDateBox;
     protected final ListBox scoringSchemeListBox;
     protected final ListBox courseAreaListBox;
     protected final ListBox sailingEventsListBox;
@@ -72,11 +72,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
             final NodeList<OptionElement> options = selectElement.getOptions();
             options.getItem(options.getLength()-1).setTitle(RankingMetricTypeFormatter.getDescription(rankingMetricType, stringMessages));
         }
-        startDateBox = createDateTimeBox(regatta.startDate);
-        startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        startDateBox = createDateTimeBox(regatta.startDate,HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
         startDateBox.ensureDebugId("StartDateTimeBox");
-        endDateBox = createDateTimeBox(regatta.endDate);
-        endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox = createDateTimeBox(regatta.endDate,HTML5DateTimeBox.Format.YEAR_TO_MINUTE);
         endDateBox.ensureDebugId("EndDateTimeBox");
         scoringSchemeListBox = createListBox(false);
         scoringSchemeListBox.ensureDebugId("ScoringSchemeListBox");

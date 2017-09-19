@@ -7,14 +7,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
+import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SetStartTimeReceivedDialog extends DataEntryDialogWithBootstrap<Date> {
 
     private final StringMessages stringMessages;
     
-    private BetterDateTimeBox timeBox;
+    private HTML5DateTimeBox timeBox;
 
     public SetStartTimeReceivedDialog(StringMessages stringMessages, DataEntryDialog.DialogCallback<Date> callback) {
         super(stringMessages.setStartTimeReceived(), stringMessages.setStartTimeReceivedDescription(), stringMessages.ok(), stringMessages.cancel(), new ReceivedStartTimeDialog(stringMessages), callback);
@@ -27,7 +27,7 @@ public class SetStartTimeReceivedDialog extends DataEntryDialogWithBootstrap<Dat
         
         Label timeBoxLabel = new Label(stringMessages.startTime() + ":");
         content.setWidget(0, 0, timeBoxLabel);
-        timeBox = createDateTimeBox(new Date());
+        timeBox = createDateTimeBox(new Date(),HTML5DateTimeBox.Format.YEAR_TO_SECOND);
         content.setWidget(0, 1, timeBox);
         
         return content;

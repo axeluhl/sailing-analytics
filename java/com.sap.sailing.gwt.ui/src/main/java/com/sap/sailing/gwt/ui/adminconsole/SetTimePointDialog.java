@@ -7,11 +7,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
+import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SetTimePointDialog extends DataEntryDialogWithBootstrap<Date> {
-    private final BetterDateTimeBox time;
+    private final HTML5DateTimeBox time;
     private final StringMessages stringMessages;
     
     public SetTimePointDialog(final StringMessages stringMessages, String title, DialogCallback<Date> callback) {
@@ -25,7 +25,7 @@ public class SetTimePointDialog extends DataEntryDialogWithBootstrap<Date> {
         
         this.stringMessages = stringMessages;
         
-        time = createDateTimeBox(new Date());
+        time = createDateTimeBox(new Date(), HTML5DateTimeBox.Format.YEAR_TO_SECOND);
     }
     
     @Override

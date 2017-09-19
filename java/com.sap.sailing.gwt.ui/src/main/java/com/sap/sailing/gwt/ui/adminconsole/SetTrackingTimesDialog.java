@@ -25,7 +25,7 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
+import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -49,7 +49,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
     private Label currentEndLabel;
     private TimePointSpecificationFoundInLog currentEnd;
 
-    private BetterDateTimeBox startTimeBox;
+    private HTML5DateTimeBox startTimeBox;
     /**
      * Decides whether the start time value shall be set; if checked, even an empty value (translated
      * to {@code null} will be stored as an event with the author's priority in the log; if unchecked,
@@ -58,7 +58,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
      * make the revoke succeed.
      */
     private CheckBox startTimeSetCheckbox;
-    private BetterDateTimeBox endTimeBox;
+    private HTML5DateTimeBox endTimeBox;
     /**
      * Decides whether the end time value shall be set; if checked, even an empty value (translated
      * to {@code null} will be stored as an event with the author's priority in the log; if unchecked,
@@ -110,7 +110,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
                 });
     }
     
-    private void updateDateTimeLabelAndTimeBoxFromDate(final TimePointSpecificationFoundInLog timePoint, final Label label, final BetterDateTimeBox dateTimeBox, CheckBox setCheckBox) {
+    private void updateDateTimeLabelAndTimeBoxFromDate(final TimePointSpecificationFoundInLog timePoint, final Label label, final HTML5DateTimeBox dateTimeBox, CheckBox setCheckBox) {
         if (timePoint == null) {
             label.setText(stringMessages.notAvailable());
             dateTimeBox.setValue(null);
@@ -142,18 +142,16 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
             }
         });
 
-        startTimeBox = createDateTimeBox(null);
+        startTimeBox = createDateTimeBox(null, HTML5DateTimeBox.Format.YEAR_TO_SECOND);
         startTimeBox.addValueChangeHandler(e->startTimeSetCheckbox.setValue(true)); // when the start time is manipulated, assume the user wants to really set it
-        startTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         content.setWidget(0, 0, createLabel(stringMessages.startOfTracking()));
         content.setWidget(0, 1, startTimeBox);
         startTimeSetCheckbox = createCheckbox(stringMessages.set());
         content.setWidget(0, 2, startTimeSetCheckbox);
         content.setWidget(0, 3, startNow);
-        
-        endTimeBox = createDateTimeBox(null);
+
+        endTimeBox = createDateTimeBox(null, HTML5DateTimeBox.Format.YEAR_TO_SECOND);
         endTimeBox.addValueChangeHandler(e->endTimeSetCheckbox.setValue(true)); // when the end time is manipulated, assume the user wants to really set it
-        endTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         content.setWidget(1, 0, createLabel(stringMessages.endOfTracking()));
         content.setWidget(1, 1, endTimeBox);
         endTimeSetCheckbox = createCheckbox(stringMessages.set());

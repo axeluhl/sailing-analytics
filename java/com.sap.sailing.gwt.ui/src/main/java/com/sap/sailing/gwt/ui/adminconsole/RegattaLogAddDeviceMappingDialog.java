@@ -24,10 +24,10 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.GenericListBox;
@@ -38,8 +38,8 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
     private final String leaderboardName;
     private final GenericListBox<EventDTO> events; 
 
-    protected final BetterDateTimeBox from;
-    protected final BetterDateTimeBox to;
+    protected final HTML5DateTimeBox from;
+    protected final HTML5DateTimeBox to;
     protected final ListBox deviceType;
     protected final TextBox deviceId;
     protected final DeviceMappingQRCodeWidget qrWidget;
@@ -83,9 +83,9 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
 
-        from = createDateTimeBox(new Date());
+        from = createDateTimeBox(new Date(), HTML5DateTimeBox.Format.YEAR_TO_DAY);
         from.setValue(null);
-        to = createDateTimeBox(new Date());
+        to = createDateTimeBox(new Date(), HTML5DateTimeBox.Format.YEAR_TO_DAY);
         to.setValue(null);
 
         deviceType = createListBox(false);

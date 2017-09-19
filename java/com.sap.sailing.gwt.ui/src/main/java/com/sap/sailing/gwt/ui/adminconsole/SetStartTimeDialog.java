@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
+import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -42,7 +42,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
     private int currentPassId = -1;
     private Label currentStartTimeLabel;
     private Label currentPassIdBox;
-    private BetterDateTimeBox timeBox;
+    private HTML5DateTimeBox timeBox;
     private TextBox authorNameBox;
     private com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
     private ListBox racingProcedureSelection;
@@ -100,8 +100,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
     
     private Widget createInputPanel() {
         Grid content = new Grid(5, 2);
-        timeBox = createDateTimeBox(new Date());
-        timeBox.setFormat("dd/mm/yyyy hh:ii:ss");
+        timeBox = createDateTimeBox(new Date(), HTML5DateTimeBox.Format.YEAR_TO_SECOND);
         timeBox.ensureDebugId("StartTimeTimeBox");
         content.setWidget(0, 0, createLabel(stringMessages.startTime()));
         content.setWidget(0, 1, timeBox);
