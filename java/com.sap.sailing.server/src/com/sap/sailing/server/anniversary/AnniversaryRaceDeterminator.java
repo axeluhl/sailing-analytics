@@ -100,7 +100,7 @@ public class AnniversaryRaceDeterminator {
         start();
     }
 
-    private void update() {
+    void update() {
         if (isStarted.get()) {
             // All races need to be passed through this map to eliminate duplicates based on the RegattaAndRaceIdentifier
             final Map<RegattaAndRaceIdentifier, SimpleRaceInfo> allRaces = new HashMap<>();

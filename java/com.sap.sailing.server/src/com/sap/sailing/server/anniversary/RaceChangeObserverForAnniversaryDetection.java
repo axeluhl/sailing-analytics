@@ -20,8 +20,10 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
      * Listeners added a {@link TrackedRaces} that need to be cleaned when {@link TrackedRace}s are removed.
      */
     private final Map<TrackedRace, Listener> listeners;
+    private final AnniversaryRaceDeterminator anniversaryRaceDeterminator;
 
-    public RaceChangeObserverForAnniversaryDetection() {
+    public RaceChangeObserverForAnniversaryDetection(AnniversaryRaceDeterminator anniversaryRaceDeterminator) {
+        this.anniversaryRaceDeterminator = anniversaryRaceDeterminator;
         listeners = new ConcurrentHashMap<>();
     }
 
@@ -66,7 +68,7 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
     }
 
     private void fireUpdate() {
-        // FIXME implement
+        anniversaryRaceDeterminator.update();
     }
 
     private class Listener extends AbstractRaceChangeListener {
