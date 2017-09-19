@@ -85,6 +85,9 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
             handleRaceChangeAndRemoveListener(trackedRace);
         }
         
-        // TODO first fix
+        @Override
+        public void firstGPSFixReceived() {
+            handleRaceChangeAndRemoveListener(trackedRace);
+        }
     }
 }
