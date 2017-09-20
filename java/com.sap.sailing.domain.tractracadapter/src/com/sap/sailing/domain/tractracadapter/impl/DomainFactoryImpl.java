@@ -278,7 +278,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
             DynamicTeam team = createTeam(name, nationality, competitorId);
-            DynamicBoat boat = new BoatImpl(UUID.randomUUID(), shortName, boatClass, shortName);
+            DynamicBoat boat = new BoatImpl(UUID.randomUUID(), "", boatClass, shortName);
             domainCompetitor = competitorStore.getOrCreateCompetitorWithBoat(competitorId, name, shortName, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, (DynamicBoat) boat);
@@ -784,19 +784,14 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
+    public BoatClass getDominantBoatClass(IRace race) {
         List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
-        final List<Competitor> competitors = new ArrayList<Competitor>();
         getCompetingCompetitors(race).forEach(rc->{
             // also add those whose race class doesn't match the dominant one (such as camera boats)
             // because they may still send data that we would like to record in some tracks
-            competitors.add(getOrCreateCompetitor(rc.getCompetitor()));
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         });
-        BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-        Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass>(
-                competitors, dominantBoatClass);
-        return competitorsAndDominantBoatClass;
+        return getDominantBoatClass(competitorClasses);
     }
     
     private BoatClass getDominantBoatClass(Collection<ICompetitorClass> competitorClasses) {

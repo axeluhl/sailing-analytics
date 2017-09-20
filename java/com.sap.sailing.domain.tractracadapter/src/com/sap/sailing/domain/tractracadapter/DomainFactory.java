@@ -267,7 +267,7 @@ public interface DomainFactory {
 
     Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, IRace race, BoatClass defaultBoatClass);
 
-    Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race);
+    BoatClass getDominantBoatClass(IRace race);
     
     /**
      * @param offsetToStartTimeOfSimulatedRace
