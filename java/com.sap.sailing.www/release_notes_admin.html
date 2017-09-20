@@ -22,6 +22,30 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
     
+                    <h2 class="articleSubheadline">September 2017</h2>
+                    <ul class="bulletList">
+                        <li>Authentication for Igtimi accounts is now possible with an OAuth process.
+                            Instead of having to enter the username/password combination into the
+                            administration console, a popup window will show an IFrame with Igtimi's
+                            authentication form. Redirection goes to www.sapsailing.com, together with
+                            a "state" URL parameter providing the base URL of the original server instance
+                            requesting authentication. www.sapsailing.com will then redirect to that server,
+                            removing the "state" parameter from the request and leaving only the "code"
+                            parameter in the URL which the server ultimately receiving the redirected request
+                            will use to obtain an access token and the Igtimi account details. For now, and
+                            as a fallback, the old, non-OAuth process is still supported for a while, though
+                            deprecated as of now.
+                        </li> 
+                        <li>In the process of supporting Igtimi OAuth authentication, new optional system properties for
+                            the Igtimi connector have been introduced:
+                            <ul>
+                              <li><tt>igtimi.client.redirect.protocol</tt>: the redirection protocol, usually one of http or https</li>
+                              <li><tt>igtimi.client.redirect.host</tt>: redirection host; defaults to www.sapsailing.com</li>
+                              <li><tt>igtimi.client.redirect.port</tt>: redirection port; defaults to empty, using the default port for the protocol</li>
+                            </ul>
+                        </li>
+                    </ul>
+
                     <h2 class="articleSubheadline">August 2017</h2>
                     <ul class="bulletList">
                         <li>An NMEA wind import feature is now available under "Tracked Races -- Wind." It can be
