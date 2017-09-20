@@ -326,7 +326,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     public String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPortAsString) throws MalformedURLException, UnsupportedEncodingException {
         final URL redirectTarget;
         int redirectPort;
-        if (redirectPortAsString == null || (redirectPort=Integer.valueOf(redirectPortAsString)) == 0) {
+        if (redirectPortAsString == null || redirectPortAsString.trim().isEmpty() || (redirectPort=Integer.valueOf(redirectPortAsString)) == 0) {
             redirectTarget = new URL(redirectProtocol, redirectHost, /* file */ "");
         } else {
             redirectTarget = new URL(redirectProtocol, redirectHost, redirectPort, /* file */ "");
