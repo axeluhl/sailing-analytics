@@ -26,7 +26,7 @@ public class BoatPanel extends SimplePanel {
 
     public BoatPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
-        this.boatTable = new BoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false);
+        this.boatTable = new BoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true);
         this.refreshableBoatSelectionModel = (RefreshableMultiSelectionModel<BoatDTO>) boatTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
