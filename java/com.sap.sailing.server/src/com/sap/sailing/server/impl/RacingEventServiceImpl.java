@@ -757,7 +757,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
         anniversaryRaceDeterminator = new AnniversaryRaceDeterminator(this, remoteSailingServerSet,
                 new QuarterChecker(), new SameDigitChecker());
-        trackedRegattaListener.addListener(new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator));
+        this.trackedRegattaListener.addListener(new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator));
     }
 
     private void restoreTrackedRaces() {
