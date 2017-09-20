@@ -2326,6 +2326,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Collection<Competitor> loadAllCompetitors() {
+        Collection<Competitor> competitors = loadAllCompetitorsWithoutBoat();
+        Collection<CompetitorWithBoat> competitorsWithBoat = loadAllCompetitorsWithBoat();
+        competitors.addAll(competitorsWithBoat);
+        return competitors; 
+    }
+    
+    private Collection<Competitor> loadAllCompetitorsWithoutBoat() {
         ArrayList<Competitor> result = new ArrayList<>();
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
         try {
@@ -2341,8 +2348,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    @Override
-    public Collection<CompetitorWithBoat> loadAllCompetitorsWithBoat() {
+    private Collection<CompetitorWithBoat> loadAllCompetitorsWithBoat() {
         ArrayList<CompetitorWithBoat> result = new ArrayList<>();
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {

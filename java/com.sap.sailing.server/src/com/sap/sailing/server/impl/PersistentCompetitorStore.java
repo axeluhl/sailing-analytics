@@ -52,17 +52,11 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory, serviceFinderFactory);
         this.storeTo = storeTo;
         if (clearCompetitorsAndBaots) {
-            storeTo.removeAllCompetitorsWithBoat();
             storeTo.removeAllCompetitors();
             storeTo.removeAllBoats();
         } else {
-            // TODO bug2822: How to migrate the competitors with contained boats to competitors with separate boat
             Collection<Competitor> allCompetitors = loadFrom.loadAllCompetitors();
             for (Competitor competitor : allCompetitors) {
-                addCompetitorToTransientStore(competitor.getId(), competitor);
-            }
-            Collection<CompetitorWithBoat> allCompetitorsWithBoat = loadFrom.loadAllCompetitorsWithBoat();
-            for (CompetitorWithBoat competitor : allCompetitorsWithBoat) {
                 addCompetitorToTransientStore(competitor.getId(), competitor);
             }
             Collection<Boat> allBoats = loadFrom.loadAllBoats();
@@ -149,7 +143,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
             String searchTag, DynamicBoat boat) {
         CompetitorWithBoat result = super.updateCompetitorWithBoat(idAsString, newName, newShortName, newRgbDisplayColor, newEmail, newNationality,
                 newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
-        storeTo.storeCompetitorWithBoat(result);
+        storeTo.storeCompetitor(result);
         return result;
     }
     

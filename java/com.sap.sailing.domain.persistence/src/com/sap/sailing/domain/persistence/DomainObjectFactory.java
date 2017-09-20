@@ -13,7 +13,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -133,11 +132,6 @@ public interface DomainObjectFactory {
      * Loads all competitors and resolves them via the domain factory.
      */
     Collection<Competitor> loadAllCompetitors();
-
-    /**
-     * Loads all competitors with boats and resolves them via the domain factory.
-     */
-    Collection<CompetitorWithBoat> loadAllCompetitorsWithBoat();
 
     /**
      * Loads all boats and resolves them via the domain factory.

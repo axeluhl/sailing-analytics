@@ -10,7 +10,6 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -124,20 +123,6 @@ public interface MongoObjectFactory {
     void removeRegattaForRaceID(String raceIDAsString, Regatta regatta);
 
     /**
-     * Stores a competitor, including the boat. This should not be done for competitors for which
-     * the master data is supplied by other systems, such as TracTrac, but rather for smartphone tracking,
-     * where this data is otherwise not recoverable.
-     * @param competitor the competitor to store/update in the database
-     */
-    void storeCompetitorWithBoat(CompetitorWithBoat competitor);
-
-    /**
-     * Like {@link #storeCompetitorWithBoat(CompetitorWithBoat)}, but for a collection of competitors that are all
-     * expected to be new, having a unique {@link Competitor#getId() ID}.
-     */
-    void storeCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors);
-
-    /**
      * Stores a competitor. This should not be done for competitors for which
      * the master data is supplied by other systems, such as TracTrac, but rather for smartphone tracking,
      * where this data is otherwise not recoverable.
@@ -153,11 +138,7 @@ public interface MongoObjectFactory {
 
     void removeAllCompetitors();
 
-    void removeAllCompetitorsWithBoat();
-    
     void removeCompetitor(Competitor competitor);
-
-    void removeCompetitorWithBoat(CompetitorWithBoat competitor);
     
     /**
      * Stores a boat. This should not be done for boats for which

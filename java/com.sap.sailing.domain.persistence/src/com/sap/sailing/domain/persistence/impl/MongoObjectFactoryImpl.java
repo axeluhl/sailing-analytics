@@ -1345,7 +1345,23 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeCompetitorWithBoat(CompetitorWithBoat competitor) {
+    public void storeCompetitor(Competitor competitor) {
+        if (competitor instanceof CompetitorWithBoat) {
+            storeCompetitorWithBoat((CompetitorWithBoat) competitor);
+        } else {
+            storeCompetitorWithoutBoat(competitor);
+        }
+    }
+
+    private void storeCompetitorWithoutBoat(Competitor competitor) {
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
+        JSONObject json = competitorSerializer.serialize(competitor);
+        DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
+        DBObject entry = (DBObject) JSON.parse(json.toString());
+        collection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    private void storeCompetitorWithBoat(CompetitorWithBoat competitor) {
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         JSONObject json = competitorWithBoatSerializer.serialize(competitor);
         DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
@@ -1354,8 +1370,37 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
+    public void storeCompetitors(Iterable<Competitor> competitors) {
         if (competitors != null && !Util.isEmpty(competitors)) {
+            List<Competitor> competitorsWithoutBoat = new ArrayList<>();
+            List<CompetitorWithBoat> competitorsWithBoat = new ArrayList<>();
+            for (Competitor competitor : competitors) {
+                if (competitor instanceof CompetitorWithBoat) {
+                    competitorsWithBoat.add((CompetitorWithBoat) competitor);
+                } else {
+                    competitorsWithoutBoat.add(competitor);
+                }
+            }
+            storeCompetitorsWithBoat(competitorsWithBoat);
+            storeCompetitorsWithoutBoat(competitorsWithoutBoat);
+        }
+    }
+    
+    private void storeCompetitorsWithoutBoat(Iterable<Competitor> competitors) {
+        if (!Util.isEmpty(competitors)) {
+            DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
+            List<DBObject> competitorsDB = new ArrayList<>();
+            for (Competitor competitor : competitors) {
+                JSONObject json = competitorSerializer.serialize(competitor);
+                DBObject entry = (DBObject) JSON.parse(json.toString());
+                competitorsDB.add(entry);
+            }
+            collection.insert(competitorsDB);
+        }
+    }
+
+    private void storeCompetitorsWithBoat(Iterable<CompetitorWithBoat> competitors) {
+        if (!Util.isEmpty(competitors)) {
             DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
             List<DBObject> competitorsDB = new ArrayList<>();
             for (CompetitorWithBoat competitor : competitors) {
@@ -1368,52 +1413,31 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeCompetitor(Competitor competitor) {
-        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
-        JSONObject json = competitorSerializer.serialize(competitor);
-        DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
-        DBObject entry = (DBObject) JSON.parse(json.toString());
-        collection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
-    }
-
-    @Override
-    public void storeCompetitors(Iterable<Competitor> competitors) {
-        if (competitors != null && !Util.isEmpty(competitors)) {
-            DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
-            List<DBObject> competitorsDB = new ArrayList<>();
-            for (Competitor competitor : competitors) {
-                JSONObject json = competitorSerializer.serialize(competitor);
-                DBObject entry = (DBObject) JSON.parse(json.toString());
-                competitorsDB.add(entry);
-            }
-            collection.insert(competitorsDB);
-        }
-    }
-
-    @Override
     public void removeAllCompetitors() {
         logger.info("Removing all persistent competitors");
-        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
-        collection.drop();
-    }
-
-    @Override
-    public void removeAllCompetitorsWithBoat() {
-        logger.info("Removing all persistent competitors");
-        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        collection.drop();
+        DBCollection collection1 = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
+        collection1.drop();
+        DBCollection collection2 = database.getCollection(CollectionNames.COMPETITORS.name());
+        collection2.drop();
     }
 
     @Override
     public void removeCompetitor(Competitor competitor) {
+        if (competitor instanceof CompetitorWithBoat) {
+            removeCompetitorWithBoat((CompetitorWithBoat) competitor);
+        } else {
+            removeCompetitorWithoutBoat(competitor);
+        }
+    }
+    
+    private void removeCompetitorWithoutBoat(Competitor competitor) {
         logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS_WITHOUT_BOAT.name());
         DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
         collection.remove(query, WriteConcern.SAFE);
     }
 
-    @Override
-    public void removeCompetitorWithBoat(CompetitorWithBoat competitor) {
+    private void removeCompetitorWithBoat(CompetitorWithBoat competitor) {
         logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
