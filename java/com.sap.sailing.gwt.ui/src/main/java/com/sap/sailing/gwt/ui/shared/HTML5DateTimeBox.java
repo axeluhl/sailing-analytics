@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.HasAllKeyHandlers;
@@ -10,12 +11,10 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
-import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
 
 public class HTML5DateTimeBox extends FocusPanel implements HasAllKeyHandlers, HasValueChangeHandlers<Date> {
     public static enum ViewMode {
@@ -26,6 +25,17 @@ public class HTML5DateTimeBox extends FocusPanel implements HasAllKeyHandlers, H
         YEAR_TO_MINUTE, YEAR_TO_DAY, YEAR_TO_SECOND
     };
 
+    interface DateTimeBoxStrategy {
+
+        Widget getWidget();
+
+        void setValue(Date newValue);
+
+        Date getValue();
+
+    }
+
+    private final DateTimeBoxStrategy delegate;
     private DateTimeFormat dateFormat;
     private DateBox datePart;
     private InputElement timePart;
@@ -33,33 +43,19 @@ public class HTML5DateTimeBox extends FocusPanel implements HasAllKeyHandlers, H
     private DateTimeFormat combiFormat;
 
     public HTML5DateTimeBox(Format format) {
-        //parser for low level, RFC compatible format
-        dateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
+        boolean supportsDateTime = supportsType("datetime-locale");
+        GWT.log("datetime-local " + supportsDateTime);
 
-        FlowPanel div = new FlowPanel();
-        datePart = new DateBox();
-        datePart.setFormat(new DefaultFormat(dateFormat));
-        div.add(datePart);
-
-        if (format != Format.YEAR_TO_DAY) {
-            timeFormat = DateTimeFormat.getFormat(format == Format.YEAR_TO_MINUTE ? "HH:mm" : "HH:mm:ss");
-            timePart = DOM.createElement("input").cast();
-            timePart.setAttribute("type", "time");
-            if (format == Format.YEAR_TO_SECOND) {
-                timePart.setAttribute("step", "1");
-            } else {
-                timePart.setAttribute("step", "60");
-            }
-            // used to parse time and date in one pass, to workaround parsing time only formats containing the current
-            // day
-            combiFormat = DateTimeFormat
-                    .getFormat("yyyy-MM-dd " + (format == Format.YEAR_TO_MINUTE ? "HH:mm" : "HH:mm:ss"));
-            div.getElement().appendChild(timePart);
-        }
-
+        // TODO deactivated, because currently the detection is not reliable in different browsers and a format cannot
+        // be set yet
+        // if (supportsDateTime) {
+        // delegate = new DateTimeLocalStrategy(format);
+        // setWidget(delegate.getWidget());
+        // } else {
+        delegate = new DateTimeBoxFallbackStrategie(format);
+        setWidget(delegate.getWidget());
+        // }
         sinkEvents(Event.ONCHANGE | Event.ONBLUR | Event.ONKEYUP);
-
-        setWidget(div);
     }
 
     @Override
@@ -67,15 +63,8 @@ public class HTML5DateTimeBox extends FocusPanel implements HasAllKeyHandlers, H
         ValueChangeEvent.fire(HTML5DateTimeBox.this, getValue());
     }
 
-    public void setValue(Date initialValue) {
-        // remove the time part from the datepart, to reduce issus with browser compability
-        Date dateFormated = dateFormat.parse(dateFormat.format(initialValue));
-        datePart.setValue(dateFormated);
-        if (timeFormat != null) {
-            String timeFormated = timeFormat.format(initialValue);
-            com.google.gwt.core.shared.GWT.log(timeFormated);
-            timePart.setAttribute("value", timeFormated);
-        }
+    public void setValue(Date newValue) {
+        delegate.setValue(newValue);
     }
 
     public Element getPicker() {
@@ -83,22 +72,7 @@ public class HTML5DateTimeBox extends FocusPanel implements HasAllKeyHandlers, H
     }
 
     public Date getValue() {
-        Date result = null;
-        try {
-
-            String rawDateValue = dateFormat.format(datePart.getValue());
-            String rawTimeValue = timePart.getValue();
-            if (timeFormat != null) {
-                // it is not possible to parse the timeFormat, as it will add the current day, so we will parse a
-                // combined format with the correct day and time
-                result = combiFormat.parse(rawDateValue + " " + rawTimeValue);
-            } else {
-                result = dateFormat.parse(rawDateValue);
-            }
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-        return result;
+        return delegate.getValue();
     }
 
     @Override
@@ -106,4 +80,22 @@ public class HTML5DateTimeBox extends FocusPanel implements HasAllKeyHandlers, H
         return addHandler(handler, ValueChangeEvent.getType());
     }
 
+    public native boolean supportsType(String type) /*-{
+		var input = document.createElement("input");
+		input.setAttribute("type", type);
+		var desiredType = input.getAttribute('type');
+		console.log("desiredtype " + desiredType + " actual " + input.type);
+		var supported = false;
+		if (input.type === desiredType) {
+			supported = true;
+		}
+		input.value = 'Hello world';
+		console.log("invalue" + input.value);
+		var helloWorldAccepted = (input.value === 'Hello world');
+		if (helloWorldAccepted) {
+			supported = false;
+		}
+		input.value = '';
+		return supported;
+    }-*/;
 }
