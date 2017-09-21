@@ -11,8 +11,8 @@
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
         <h1 class="{res.mediaCss.small12} {res.mediaCss.columns}"><ui:text from="{i18n.moreLoginInformationHeadline}" /></h1>
         <p class="{res.mediaCss.small12} {res.mediaCss.columns}"><ui:text from="{i18n.moreLoginInformationIntroduction}" /></p>
-        <login:MoreLoginInformationContent title="{i18n.moreLoginInformationSectionUserSettingsHeading}" image="{local_res.settings.getSafeUri}" imageOnLeft="true" content="{i18n.moreLoginInformationSectionUserSettingsDescription}" />
-        <login:MoreLoginInformationContent title="{i18n.strategySimulator}" image="{local_res.simulator.getSafeUri}" imageOnLeft="false" content="{i18n.moreLoginInformationSectionStrategySimulatorDescription}" />
-        <login:MoreLoginInformationContent title="{i18n.moreLoginInformationSectionUserNotificationsHeading}" image="{local_res.notifications.getSafeUri}" imageOnLeft="true" content="{i18n.moreLoginInformationSectionUserNotificationsDescription}" />
+        <login:MoreLoginInformationContent title="{i18n.moreLoginInformationSectionUserSettingsHeading}" image="{local_res.settings}" imageOnLeft="true" content="{i18n.moreLoginInformationSectionUserSettingsDescription}" />
+        <login:MoreLoginInformationContent title="{i18n.strategySimulator}" image="{local_res.simulator}" imageOnLeft="false" content="{i18n.moreLoginInformationSectionStrategySimulatorDescription}" />
+        <login:MoreLoginInformationContent title="{i18n.moreLoginInformationSectionUserNotificationsHeading}" image="{local_res.notifications}" imageOnLeft="true" content="{i18n.moreLoginInformationSectionUserNotificationsDescription}" />
     </g:HTMLPanel>
 </ui:UiBinder>

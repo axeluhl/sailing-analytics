@@ -5,7 +5,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -34,12 +34,12 @@ public class MoreLoginInformationContent extends Widget {
     Styles style;
 
     @UiConstructor
-    public MoreLoginInformationContent(String title, String content, SafeUri image, boolean imageOnLeft) {
+    public MoreLoginInformationContent(String title, String content, ImageResource image, boolean imageOnLeft) {
         setElement(uiBinder.createAndBindUi(this));
         titleUi.setInnerText(title);
         textUi.setInnerText(content);
         if (image != null) {
-            imageUi.setSrc(image.asString());
+            imageUi.setSrc(image.getSafeUri().asString());
         }
         imageUi.addClassName(imageOnLeft ? style.left() : style.right());
     }
