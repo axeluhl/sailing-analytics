@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.morelogininformation;
+package com.sap.sailing.gwt.home.shared.places.morelogininformation;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
