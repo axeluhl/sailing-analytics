@@ -457,7 +457,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 
-    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort);
+    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) throws Exception;
 
     boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
 

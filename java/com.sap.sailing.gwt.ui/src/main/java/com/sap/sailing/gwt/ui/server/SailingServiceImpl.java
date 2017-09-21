@@ -4886,7 +4886,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Competitor competitor = convertCompetitorDescriptorToCompetitor(competitorDescriptor, searchTag);
             competitorsForSaving.add(competitor);
         }
-        getBaseDomainFactory().getCompetitorStore().addCompetitors(competitorsForSaving);
+        getBaseDomainFactory().getCompetitorStore().addNewCompetitors(competitorsForSaving);
         return convertToCompetitorDTOs(competitorsForSaving);
     }
 
@@ -5208,7 +5208,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) {
+    public String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) throws MalformedURLException, UnsupportedEncodingException {
         return getIgtimiConnectionFactory().getAuthorizationUrl(redirectProtocol, redirectHostname, redirectPort);
     }
 

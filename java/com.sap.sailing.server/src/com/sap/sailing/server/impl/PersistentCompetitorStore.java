@@ -2,7 +2,6 @@ package com.sap.sailing.server.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.net.URI;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -50,7 +49,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
             storeTo.removeAllCompetitors();
         } else {
             for (Competitor competitor : loadFrom.loadAllCompetitors()) {
-                addCompetitorToTransientStore(competitor.getId(), competitor);
+                super.addNewCompetitor(competitor);
             }
         }
     }
@@ -76,14 +75,10 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
     }
     
-    private void addCompetitorToTransientStore(Serializable id, Competitor competitor) {
-        super.addNewCompetitor(id, competitor);
-    }
-
     @Override
-    protected void addNewCompetitor(Serializable id, Competitor competitor) {
+    protected void addNewCompetitor(Competitor competitor) {
         storeTo.storeCompetitor(competitor);
-        super.addNewCompetitor(id, competitor);
+        super.addNewCompetitor(competitor);
     }
 
     @Override
@@ -109,8 +104,8 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     }
 
     @Override
-    public void addCompetitors(Iterable<Competitor> competitors) {
+    public void addNewCompetitors(Iterable<Competitor> competitors) {
         storeTo.storeCompetitors(competitors);
-        super.addCompetitors(competitors);
+        super.addNewCompetitors(competitors);
     }
 }

@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.stream.StreamSupport;
 
 import org.junit.Test;
 
@@ -135,5 +136,24 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedTrackedRace);
         assertNotNull(replicatedTrackedRace.getTrack(replicatedCompetitor).getFirstRawFix());
         assertEquals(competitorName, replicatedCompetitor.getName());
-   }
+    }
+    
+    @Test
+    public void testCompetitorCreationReplication() throws InterruptedException, URISyntaxException {
+        final String competitorName = "Der mit dem Kiel zieht";
+        URI flagImageURI = new URI("http://www.sapsailing.com");
+        Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
+                123, competitorName, Color.RED, "someone@nowhere.de", flagImageURI,
+                new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
+                /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
+                        new NationalityImpl("NED"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")),
+                new BoatImpl(competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */true), /* sailID */ null),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Thread.sleep(1000);
+        assertTrue(StreamSupport.stream(replica.getBaseDomainFactory().getCompetitorStore().getCompetitors().spliterator(), /* parallel */ false).anyMatch(
+                c->
+                    c.getId().equals(competitor.getId())));
+    }
+
 }
