@@ -9,7 +9,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class OverallLeaderboardSettingsDialogComponent extends MultiRaceLeaderboardSettingsDialogComponent {
 
     public OverallLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages) {
-        super(initialSettings, allRaceColumnNames, stringMessages);
+        super(initialSettings, allRaceColumnNames, stringMessages, false);
     }
 
     @Override

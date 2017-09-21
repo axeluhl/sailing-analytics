@@ -18,12 +18,12 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
             Collection<DetailType> legDetailsToShow, Collection<DetailType> raceDetailsToShow,
             Collection<DetailType> overallDetailsToShow, Long delayBetweenAutoAdvancesInMilliseconds,
             boolean showAddedScores,
-            boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor, boolean showCompetitorSailIdColumn,
-            boolean showCompetitorFullNameColumn, boolean isCompetitorNationalityColumnVisible,boolean showRaceRankColumn) {
+            boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor, boolean showCompetitorShortNameColumn,
+            boolean showCompetitorFullNameColumn, boolean showCompetitorBoatInfoColumn, boolean isCompetitorNationalityColumnVisible,boolean showRaceRankColumn) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
                 delayBetweenAutoAdvancesInMilliseconds, showAddedScores,
-                showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorSailIdColumn,
-                showCompetitorFullNameColumn, isCompetitorNationalityColumnVisible);
+                showOverallColumnWithNumberOfRacesCompletedPerCompetitor, showCompetitorShortNameColumn,
+                showCompetitorFullNameColumn, showCompetitorBoatInfoColumn, isCompetitorNationalityColumnVisible);
         this.showRaceRankColumn.setValue(showRaceRankColumn);
     }
     

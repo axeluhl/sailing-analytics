@@ -267,7 +267,7 @@ public interface DomainFactory {
 
     Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, IRace race, BoatClass defaultBoatClass);
 
-    BoatClass getDominantBoatClass(IRace race);
+    BoatClass resolveDominantBoatClassOfRace(IRace race);
     
     /**
      * @param offsetToStartTimeOfSimulatedRace

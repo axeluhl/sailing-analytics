@@ -278,7 +278,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
             DynamicTeam team = createTeam(name, nationality, competitorId);
-            DynamicBoat boat = new BoatImpl(UUID.randomUUID(), "", boatClass, shortName);
+            DynamicBoat boat = new BoatImpl(competitorId /* boatId is the same like competitorId */,
+                    null /* no boat name available */, boatClass, shortName /* shortName contains the sailId */);
             domainCompetitor = competitorStore.getOrCreateCompetitorWithBoat(competitorId, name, shortName, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag, (DynamicBoat) boat);
@@ -784,7 +785,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public BoatClass getDominantBoatClass(IRace race) {
+    public BoatClass resolveDominantBoatClassOfRace(IRace race) {
         List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
         getCompetingCompetitors(race).forEach(rc->{
             // also add those whose race class doesn't match the dominant one (such as camera boats)

@@ -20,8 +20,7 @@ public class SingleRaceLeaderboardSettingsDialogComponent
     
     public SingleRaceLeaderboardSettingsDialogComponent(SingleRaceLeaderboardSettings initialSettings,
             StringMessages stringMessages) {
-        super(initialSettings, stringMessages);
-        
+        super(initialSettings, stringMessages, true /*canBoatInfoBeShown*/);        
     }
 
     @Override
@@ -57,8 +56,8 @@ public class SingleRaceLeaderboardSettingsDialogComponent
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
                 /* showOverallColumnWithNumberOfRacesSailedPerCompetitor */ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox
                         .getValue().booleanValue(),
-                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
-                isCompetitorNationalityColumnVisible.getValue(), showRaceRankColumn.getValue());
+                showCompetitorShortNameColumnCheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
+                showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue(), showRaceRankColumn.getValue());
         SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
         return newSettings;
     }

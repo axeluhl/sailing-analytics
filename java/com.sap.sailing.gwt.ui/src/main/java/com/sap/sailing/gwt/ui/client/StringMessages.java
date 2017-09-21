@@ -1307,8 +1307,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String fileUploadResult(String status, String message);
     @Override
     String removeUploadedFile();
+    String showCompetitorBoatColumn();
     String showCompetitorSailIdColumn();
     String showCompetitorSailIdColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
+    String showCompetitorShortNameColumn();
+    String showCompetitorShortNameColumnTooltip(String alwaysShowCompetitorNationalityColumnTitle);
     String showCompetitorFullNameColumn();
     String alwaysShowCompetitorNationalityColumn();
     String alwaysShowCompetitorNationalityColumnTooltip();

@@ -44,7 +44,7 @@ public class IdleOverallLeaderBoardNode extends FiresPlaceNode {
 
         final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(null, null, raceDetails, overallDetails,
                 null, null, null, RaceColumnSelectionStrategies.EXPLICIT,true, false,
-                true,
+                true, false,
                 false, true);
 
         timer = new com.sap.sse.gwt.client.player.Timer(

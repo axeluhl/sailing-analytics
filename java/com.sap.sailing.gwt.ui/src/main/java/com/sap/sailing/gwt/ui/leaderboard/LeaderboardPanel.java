@@ -294,8 +294,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     private boolean showAddedScores;
 
-    private boolean showCompetitorSailId;
+    private boolean showCompetitorShortName;
     private boolean showCompetitorFullName;
+    private boolean showCompetitorBoatInfo;
 
     /**
      * When <code>true</code> then an additional column just before the overall points is displayed that sums up the
@@ -681,8 +682,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
-        setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
+        setShowCompetitorShortName(newSettings.isShowCompetitorShortNameColumn());
         setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
+        setShowCompetitorBoatInfo(newSettings.isShowCompetitorBoatInfoColumn());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(
                 newSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         final List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
@@ -749,8 +751,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         setShowCompetitorNationality(newSettings.isShowCompetitorNationality());
         setShowAddedScores(newSettings.isShowAddedScores());
-        setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
+        setShowCompetitorShortName(newSettings.isShowCompetitorShortNameColumn());
         setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
+        setShowCompetitorBoatInfo(newSettings.isShowCompetitorBoatInfoColumn());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(
                 newSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
 
@@ -876,7 +879,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             BoatDTO boat = boatFetcher.getBoat(object);
             boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
             super.render(context, object, sb);
-            if (boat.getSailId() != null) {
+            if (boat != null && boat.getSailId() != null) {
                 sb.appendEscaped(boat.getSailId());
             }
             if (boatColorShown) {
@@ -996,12 +999,70 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
+    /**
+     * A sortable leaderboard column showing boat information
+     * @author Frank Mittag
+     */
+    private class BoatInfoColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
+        private final BoatFetcher<T> boatFetcher;
+        private final CompetitorFetcher<T> competitorFetcher;
+
+        public BoatInfoColumn(CompetitorFetcher<T> competitorFetcher, BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
+            super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
+            this.competitorFetcher = competitorFetcher;
+            this.boatFetcher = boatFetcher;
+            // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
+            // an overflow to the next column (see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3537)
+            setCellStyleNames(style.getTableresources().cellTableStyle().cellTableSailIdColumn());
+        }
+
+        @Override
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.boat()),
+                    stringMessages.boat());
+        }
+
+        @Override
+        public void render(Context context, T object, SafeHtmlBuilder sb) {
+            BoatDTO boat = boatFetcher.getBoat(object);
+            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
+            boolean boatColorShown = renderBoatColorIfNecessary(competitor, sb);
+            if (boat.getName() != null) {
+                sb.appendEscaped(boat.getName());
+            } else if (boat.getSailId() != null) {
+                sb.appendEscaped(boat.getSailId());
+            }
+            if (boatColorShown) {
+                sb.appendHtmlConstant("</div>");
+            }
+        }
+        
+        @Override
+        public InvertibleComparator<T> getComparator() {
+            return new InvertibleComparatorAdapter<T>() {
+                @Override
+                public int compare(T o1, T o2) {
+                    return boatFetcher.getBoat(o1).getName() == null
+                            ? boatFetcher.getBoat(o2).getName() == null ? 0 : -1
+                            : boatFetcher.getBoat(o2).getName() == null ? 1
+                                    : Collator.getInstance().compare(boatFetcher.getBoat(o1).getName(),
+                                            boatFetcher.getBoat(o2).getName());
+                }
+            };
+        }
+
+        @Override
+        public String getValue(T object) {
+            BoatDTO boat = boatFetcher.getBoat(object);
+            return boat != null ? boat.getName() : null;
+        }        
+    }
+    
+    
     protected void processStyleForRaceColumnWithReasonForMaxPoints(boolean isDiscarded, SafeStylesBuilder ssb) {
         ssb.opacity(0.5d);
     }
-
-    
-
+   
     /**
      * Displays net/total points and possible max-points reasons based on a {@link LeaderboardRowDTO} and a race name
      * and makes the column sortable by the total points.
@@ -2257,12 +2318,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         this.showAddedScores = showAddedScores;
     }
 
-    protected boolean isShowCompetitorSailId() {
-        return showCompetitorSailId;
+    protected boolean isShowCompetitorShortName() {
+        return showCompetitorShortName;
     }
 
-    private void setShowCompetitorSailId(boolean showCompetitorSailId) {
-        this.showCompetitorSailId = showCompetitorSailId;
+    private void setShowCompetitorShortName(boolean showCompetitorShortName) {
+        this.showCompetitorShortName = showCompetitorShortName;
     }
 
     protected boolean isShowCompetitorFullName() {
@@ -2271,6 +2332,16 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
     private void setShowCompetitorFullName(boolean showCompetitorFullName) {
         this.showCompetitorFullName = showCompetitorFullName;
+    }
+
+    protected boolean isShowCompetitorBoatInfo() {
+        return showCompetitorBoatInfo;
+    }
+
+    protected abstract boolean canShowCompetitorBoatInfo();
+    
+    private void setShowCompetitorBoatInfo(boolean showCompetitorBoatInfo) {
+        this.showCompetitorBoatInfo = showCompetitorBoatInfo;
     }
 
     /**
@@ -3031,11 +3102,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * @return the 0-based index for the next column
      */
     private int ensureCompetitorInfoWithFlagColumnAndCompetitorColumn(int columnIndexWhereToInsertTheNextColumn) {
-        if (isShowCompetitorSailId()) {
-            boolean canShowSailIdColumn = getLeaderboard().canBoatsOfCompetitorsChangePerRace == false;
+        if (isShowCompetitorShortName()) {
             CompetitorInfoWithFlagColumn<LeaderboardRowDTO> competitorInfoWithFlagColumn;
             CompetitorFetcher<LeaderboardRowDTO> competitorFetcher = (LeaderboardRowDTO row) -> row.competitor;
-            if (canShowSailIdColumn) {
+            if (canShowCompetitorBoatInfo()) {
                 BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> row.boat;
                 competitorInfoWithFlagColumn = new SailIdWithFlagColumn<LeaderboardRowDTO>(competitorFetcher, boatFetcher, style);
             } else {
@@ -3066,6 +3136,23 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 removeColumn(columnIndexWhereToInsertTheNextColumn);
             }
         }
+        if (canShowCompetitorBoatInfo() && isShowCompetitorBoatInfo()) {
+            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
+                    || !(getLeaderboardTable()
+                            .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.BoatInfoColumn)) {
+                CompetitorFetcher<LeaderboardRowDTO> competitorFetcher = (LeaderboardRowDTO row) -> row.competitor;
+                BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> row.boat;
+                BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(competitorFetcher, boatFetcher, style);                
+                insertColumn(columnIndexWhereToInsertTheNextColumn, boatInfoColumn);
+            }
+            columnIndexWhereToInsertTheNextColumn++;
+        } else {
+            if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn && getLeaderboardTable()
+                    .getColumn(columnIndexWhereToInsertTheNextColumn) instanceof LeaderboardPanel.BoatInfoColumn) {
+                removeColumn(columnIndexWhereToInsertTheNextColumn);
+            }
+        }
+
         return columnIndexWhereToInsertTheNextColumn;
     }
 
@@ -3078,7 +3165,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     }
                 }));
     }
-
+    
     private void ensureTotalsColumn() {
         // add a totals column on the right
         if (getLeaderboardTable().getColumnCount() == 0 || !(getLeaderboardTable()

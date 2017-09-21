@@ -30,8 +30,8 @@ public class MultiRaceLeaderboardSettingsDialogComponent
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
 
     public MultiRaceLeaderboardSettingsDialogComponent(MultiRaceLeaderboardSettings initialSettings,
-            List<String> allRaceColumnNames, StringMessages stringMessages) {
-        super(initialSettings, stringMessages);
+            List<String> allRaceColumnNames, StringMessages stringMessages, boolean canBoatInfoBeShown) {
+        super(initialSettings, stringMessages, canBoatInfoBeShown);
         this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         this.raceAllRaceColumnNames = allRaceColumnNames;
         raceColumnCheckboxes = new LinkedHashMap<>();
@@ -83,8 +83,8 @@ public class MultiRaceLeaderboardSettingsDialogComponent
                 /* showAddedScores */ showAddedScoresCheckBox.getValue().booleanValue(),
                 /* showOverallColumnWithNumberOfRacesSailedPerCompetitor */ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox
                         .getValue().booleanValue(),
-                showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
-                isCompetitorNationalityColumnVisible.getValue());
+                showCompetitorShortNameColumnCheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue(),
+                showCompetitorBoatInfoColumnCheckBox.getValue(), isCompetitorNationalityColumnVisible.getValue());
         SettingsDefaultValuesUtils.keepDefaults(initialSettings, newSettings);
         return newSettings;
     }

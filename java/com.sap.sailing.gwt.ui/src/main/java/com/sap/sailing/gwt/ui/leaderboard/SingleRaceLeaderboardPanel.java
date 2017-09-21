@@ -112,6 +112,11 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     }
 
     @Override
+    protected boolean canShowCompetitorBoatInfo() {
+        return true;
+    }
+
+    @Override
     protected void setDefaultRaceColumnSelection(SingleRaceLeaderboardSettings settings) {
         raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
     }
@@ -120,6 +125,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
      * Updates the competitors and their boats in the competitorSelectionProvider with the competitors received from the {@link LeaderboardDTO}
      */
     protected void updateCompetitors(LeaderboardDTO leaderboard) {
+        final RaceCompetitorSelectionProvider raceCompetitorSelection = (RaceCompetitorSelectionProvider) competitorSelectionProvider;
         RaceColumnDTO singleRaceColumn = null;
         for (RaceColumnDTO raceColumn: leaderboard.getRaceList()) {
             if (leaderboard.raceIsTracked(raceColumn.getRaceColumnName())) {
@@ -130,7 +136,10 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         if (singleRaceColumn != null) {
             for (CompetitorDTO competitor: leaderboard.competitors) {
                 BoatDTO boatOfCompetitor = leaderboard.getBoatOfCompetitor(singleRaceColumn.getRaceColumnName(), competitor);
-                getRaceCompetitorSelection().setBoat(competitor, boatOfCompetitor);
+                raceCompetitorSelection.setBoat(competitor, boatOfCompetitor);
+                
+                LeaderboardRowDTO leaderboardRowDTO = leaderboard.rows.get(competitor);
+                leaderboardRowDTO.boat = boatOfCompetitor; 
             }
         }
         super.updateCompetitors(leaderboard);
@@ -141,8 +150,8 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
         SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(selectedManeuverDetails,
                 selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, timer.getRefreshInterval(),
                 isShowAddedScores(),
-                isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorSailId(),
-                isShowCompetitorFullName(), isShowCompetitorNationality,showRaceRankColumn);
+                isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorShortName(),
+                isShowCompetitorFullName(), isShowCompetitorBoatInfo(), isShowCompetitorNationality,showRaceRankColumn);
         SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
         return leaderboardSettings;
     }

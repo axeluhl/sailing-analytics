@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -88,8 +89,8 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
                 selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, namesOfRaceColumnsToShow,
                 raceColumnSelection.getNumberOfLastRaceColumnsToShow(), timer.getRefreshInterval(),
                 raceColumnSelection.getType(), isShowAddedScores(),
-                isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorSailId(),
-                isShowCompetitorFullName(), isShowCompetitorNationality);
+                isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), isShowCompetitorShortName(),
+                isShowCompetitorFullName(), isShowCompetitorFullName(), isShowCompetitorNationality);
         SettingsDefaultValuesUtils.keepDefaults(currentSettings, leaderboardSettings);
         return leaderboardSettings;
     }
@@ -104,6 +105,12 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
             setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
             break;
         }
+    }
+
+    @Override
+    protected boolean canShowCompetitorBoatInfo() {
+        boolean isMetaLeaderboard = leaderboard.type == LeaderboardType.FlexibleMetaLeaderboard || leaderboard.type == LeaderboardType.RegattaMetaLeaderboard;
+        return this.leaderboard.canBoatsOfCompetitorsChangePerRace == false && !isMetaLeaderboard;
     }
 
     @Override
@@ -166,7 +173,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(
             MultiRaceLeaderboardSettings useTheseSettings) {
         return new MultiRaceLeaderboardSettingsDialogComponent((MultiRaceLeaderboardSettings) useTheseSettings,
-                leaderboard.getNamesOfRaceColumns(), stringMessages);
+                leaderboard.getNamesOfRaceColumns(), stringMessages, leaderboard.canBoatsOfCompetitorsChangePerRace);
     }
 
     @Override
