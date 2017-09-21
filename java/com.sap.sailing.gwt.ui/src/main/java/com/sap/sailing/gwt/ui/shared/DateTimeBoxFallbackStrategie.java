@@ -4,10 +4,12 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
@@ -37,6 +39,9 @@ public class DateTimeBoxFallbackStrategie extends Composite implements DateTimeB
 
         datebox.setFormat(new DefaultFormat(dateFormat));
 
+        datebox.ensureDebugId("datebox");
+        UIObject.ensureDebugId(timebox, "timebox");
+        
         if (format != Format.YEAR_TO_DAY) {
             timeFormat = DateTimeFormat.getFormat(format == Format.YEAR_TO_MINUTE ? "HH:mm" : "HH:mm:ss");
             if (format == Format.YEAR_TO_SECOND) {
@@ -49,6 +54,7 @@ public class DateTimeBoxFallbackStrategie extends Composite implements DateTimeB
             combiFormat = DateTimeFormat
                     .getFormat("yyyy-MM-dd " + (format == Format.YEAR_TO_MINUTE ? "HH:mm" : "HH:mm:ss"));
         } else {
+            timebox.getStyle().setDisplay(Display.NONE);
             timeFormat = null;
             combiFormat = null;
         }

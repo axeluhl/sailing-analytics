@@ -7,70 +7,56 @@ import java.util.Date;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.sap.sailing.selenium.core.BySeleniumId;
+import com.sap.sailing.selenium.core.FindBy;
+import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.PageObject;
 
 /**
  * {@link PageObject} implementation for better date time boxes.
  */
-public class BetterDateTimeBoxPO extends TextBoxPO {
-    
-    private static final DateFormat TIME_FORMAT_HOURS_MINUTES = new SimpleDateFormat("dd/MM/yyyy hh:mm");
-    private static final DateFormat TIME_FORMAT_HOURS_MINUTES_SECONDS = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-    
-    private final DateFormat timeFormat;
+public class BetterDateTimeBoxPO extends PageArea {
 
-    /**
-     * Factory method to create a {@link BetterDateTimeBoxPO} using {@link DateFormat} <code>dd/MM/yyyy hh:mm</code> by
-     * default.
-     * 
-     * @param driver the web driver to use
-     * @param element the element representing the date time box on the page
-     * @return a new {@link BetterDateTimeBoxPO} instance
-     */
-    public static BetterDateTimeBoxPO create(WebDriver driver, WebElement element) {
-        return new BetterDateTimeBoxPO(driver, element, TIME_FORMAT_HOURS_MINUTES);
-    }
-    /**
-     * Factory method to create a {@link BetterDateTimeBoxPO}.
-     * 
-     * @param driver the web driver to use
-     * @param element the element representing the date time box on the page
-     * @param includeSeconds <code>true</code> to use the {@link DateFormat} <code>dd/MM/yyyy hh:mm:ss</code>,
-     *                  <code>false</code> to use the default {@link DateFormat} <code>dd/MM/yyyy hh:mm</code>
-     * @return a new {@link BetterDateTimeBoxPO} instance
-     */
-    public static BetterDateTimeBoxPO create(WebDriver driver, WebElement element, boolean includeSeconds) {
-        DateFormat timeFormat = includeSeconds ? TIME_FORMAT_HOURS_MINUTES_SECONDS : TIME_FORMAT_HOURS_MINUTES;
-        return new BetterDateTimeBoxPO(driver, element, timeFormat);
-    }
-    
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+
+    @FindBy(how = BySeleniumId.class, using = "datebox")
+    private WebElement datebox;
+
+    @FindBy(how = BySeleniumId.class, using = "timebox")
+    private WebElement timebox;
+
     /**
      * @see TextBoxPO#TextBoxPO(WebDriver, WebElement)
      */
     protected BetterDateTimeBoxPO(WebDriver driver, WebElement element, DateFormat timeFormat) {
         super(driver, element);
-        this.timeFormat = timeFormat;
     }
-    
+
     /**
      * Sets the underlying {@link WebElement}s text by formatting the given {@link Date} using the internal date format
      * (<code>dd/MM/yyyy hh:mm</code> or <code>dd/MM/yyyy hh:mm:ss</code>).
      * 
-     * @param date the {@link Date} object to set
+     * @param date
+     *            the {@link Date} object to set
      * 
      * @see DateFormat#format(Date)
      * @see #setText(String)
      */
     public void setDate(Date date) {
-        this.setText(timeFormat.format(date));
+        String datein = dateFormat.format(date);
+        datebox.clear();
+        datebox.sendKeys(datein);
+        String timein = timeFormat.format(date);
+        timebox.clear();
+        timebox.sendKeys(timein);
     }
-    
-    @Override
-    public void appendText(String text) {
-        super.appendText(text);
-        // Send tabulator key after changing text to ensure the date time boxes datepicker popup is closed.
-        // Otherwise, the popup potentially overlaps other controls, which can cause unexpected errors.
-        super.appendText("\t");
+
+    public static BetterDateTimeBoxPO create(WebDriver driver, WebElement startTimeTimeBox, boolean b) {
+        return new BetterDateTimeBoxPO(driver, startTimeTimeBox, null);
     }
-    
+
+    public static BetterDateTimeBoxPO create(WebDriver driver, WebElement startDateTimeBox) {
+        return create(driver, startDateTimeBox, true);
+    }
 }

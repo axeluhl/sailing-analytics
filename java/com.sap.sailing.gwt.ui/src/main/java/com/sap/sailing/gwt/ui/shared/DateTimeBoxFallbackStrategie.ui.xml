@@ -27,7 +27,7 @@
 	}
 	</ui:style>
 	<g:HTMLPanel>
-		<g2:DateBox addStyleNames="{style.datebox}" ui:field="datebox" />
-		<input type="time" class="{style.timebox}" ui:field="timebox" />
+		<g2:DateBox addStyleNames="{style.datebox}" ui:field="datebox"/>
+		<input type="time" class="{style.timebox}" ui:field="timebox"/>
 	</g:HTMLPanel>
 </ui:UiBinder> 
