@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLogImpl;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
@@ -32,7 +32,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLogSetTrackingTimesDTO> {
+public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceLogSetTrackingTimesDTO> {
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 

@@ -24,12 +24,6 @@
       <classifier>sources</classifier>
     </dependency>
     <dependency>
-      <groupId>com.github.gwtbootstrap</groupId>
-      <artifactId>gwt-bootstrap</artifactId>
-      <version>2.3.2.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <!-- This dependency is required because the GWT Maven Plugin searches 
         other GWT modules only in Maven dependencies -->
       <groupId>com.github.branflake2267</groupId>

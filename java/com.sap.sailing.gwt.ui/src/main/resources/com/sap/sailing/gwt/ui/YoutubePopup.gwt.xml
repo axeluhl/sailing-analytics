@@ -12,10 +12,6 @@
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<!-- Highcharts API -->
 	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
-	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
-	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
 		<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
 	<inherits name='com.google.gwt.maps.Maps' />

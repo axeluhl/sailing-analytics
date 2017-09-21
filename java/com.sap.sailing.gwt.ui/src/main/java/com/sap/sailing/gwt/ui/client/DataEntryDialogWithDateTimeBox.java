@@ -9,22 +9,22 @@ import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox.Format;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
 
-public abstract class DataEntryDialogWithBootstrap<T> extends DataEntryDialog<T> {
+public abstract class DataEntryDialogWithDateTimeBox<T> extends DataEntryDialog<T> {
 
-    public DataEntryDialogWithBootstrap(String title, String message, String okButtonName, String cancelButtonName,
+    public DataEntryDialogWithDateTimeBox(String title, String message, String okButtonName, String cancelButtonName,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<T> validator, boolean animationEnabled,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<T> callback) {
         super(title, message, okButtonName, cancelButtonName, validator, animationEnabled, callback);
     }
 
-    protected DataEntryDialogWithBootstrap(String title, String message, String okButtonName, String cancelButtonName,
+    protected DataEntryDialogWithDateTimeBox(String title, String message, String okButtonName, String cancelButtonName,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<T> validator,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<T> callback) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
     }
     
     /**
-     * Call something like <code>setFormat("dd/mm/yyyy hh:ii")</code> on the result to set the date / time entry format.
+     * Call the requested format will be honored by the underlying implementation if the native components can support it
      * @param yearToMinute 
      */
     public HTML5DateTimeBox createDateTimeBox(Date initialValue, Format format) {

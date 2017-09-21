@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
@@ -39,7 +39,7 @@ import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
  *
  * @param <T>
  */
-public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialogWithBootstrap<T> {
+public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialogWithDateTimeBox<T> {
 
     protected StringMessages stringMessages;
     private final RegattaDTO regatta;

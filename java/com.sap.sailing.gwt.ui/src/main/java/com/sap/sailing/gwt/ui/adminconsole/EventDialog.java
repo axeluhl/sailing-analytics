@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -37,7 +37,7 @@ import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposi
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
-public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO> {
+public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDTO> {
     protected StringMessages stringMessages;
     protected TextBox nameEntryField;
     protected TextArea descriptionEntryField;

@@ -5,12 +5,12 @@ import java.util.Date;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.HTML5DateTimeBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetStartTimeReceivedDialog extends DataEntryDialogWithBootstrap<Date> {
+public class SetStartTimeReceivedDialog extends DataEntryDialogWithDateTimeBox<Date> {
 
     private final StringMessages stringMessages;
     

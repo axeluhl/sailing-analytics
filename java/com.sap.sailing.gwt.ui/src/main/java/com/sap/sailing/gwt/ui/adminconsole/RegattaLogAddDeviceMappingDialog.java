@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -34,7 +34,7 @@ import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstrap<DeviceMappingDTO> {
+public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTimeBox<DeviceMappingDTO> {
     private final String leaderboardName;
     private final GenericListBox<EventDTO> events; 
 
