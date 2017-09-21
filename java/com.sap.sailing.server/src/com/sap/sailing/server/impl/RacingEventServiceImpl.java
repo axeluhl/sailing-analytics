@@ -3989,6 +3989,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier) {
         DetailedRaceInfo bestMatch = null;
+        boolean matchesName = false;
+        boolean matchesCourseArea = false;
         // start from the top; while there are more efficient ways to look up the TrackedRace by its
         // race identifier, this wouldn't tell a valid event and leaderboard combination through which
         // to navigate to it
@@ -4004,12 +4006,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                                 // check if the race matches the RegattaAndRaceIdentifier
                                 if (trackedRaceIdentifier.equals(raceIdentifier)
                                         && trackedRace.getStartOfRace() != null) {
+                                    final CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
+                                    boolean leaderboardLinkedToEventThroughCourseArea = (defaultCourseArea != null
+                                            && Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea));
+                                    boolean nameOfRegattaAndLeaderboardMatch = leaderboard.getName().equals(trackedRaceIdentifier.getRegattaName());
                                     // check if the match is a best match -> we keep the previous match otherwise
                                     if (bestMatch == null
-                                            || (leaderboard.getName().equals(trackedRaceIdentifier.getRegattaName()))) {
+                                            || (leaderboardLinkedToEventThroughCourseArea && !matchesCourseArea)
+                                            || (leaderboardLinkedToEventThroughCourseArea == matchesCourseArea
+                                                    && nameOfRegattaAndLeaderboardMatch && !matchesName)) {
                                         bestMatch = new DetailedRaceInfo(trackedRaceIdentifier, leaderboard.getName(),
                                                 leaderboard.getDisplayName(), trackedRace.getStartOfRace(),
                                                 event.getId(), event.getName(), eventType, null);
+                                        matchesName = nameOfRegattaAndLeaderboardMatch;
+                                        matchesCourseArea = leaderboardLinkedToEventThroughCourseArea;
                                     }
                                 }
                             }
