@@ -4,8 +4,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -49,15 +47,14 @@ public class BetterDateTimeBoxPO extends PageArea {
         String datein = dateFormat.format(date);
         datebox.clear();
         datebox.sendKeys(datein);
-        //ensure popups are closed!
-        WebElement webElement = driver.findElement(By.xpath(""));
-        webElement.sendKeys(Keys.TAB);
+        // ensure popups are closed!
+        datebox.sendKeys("\t");
         String timein = timeFormat.format(date);
         timebox.clear();
         timebox.sendKeys(timein);
-        //ensure popups are closed!
-        webElement.sendKeys(Keys.TAB);
-        
+        // ensure popups are closed!
+        timebox.sendKeys("\t");
+
     }
 
     public static BetterDateTimeBoxPO create(WebDriver driver, WebElement startTimeTimeBox, boolean b) {
