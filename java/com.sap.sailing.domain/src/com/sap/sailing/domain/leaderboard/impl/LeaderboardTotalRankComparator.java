@@ -12,8 +12,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -214,13 +214,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         // compare by last race:
                         result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter);
                         if (result == 0) {
-                            try {
-                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
-                                if (result == 0) {
-                                    result = compareByArbitraryButStableCriteria(o1, o2);
-                                }
-                            } catch (NoWindException e) {
-                                throw new NoWindError(e);
+                            result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
+                            if (result == 0) {
+                                result = compareByArbitraryButStableCriteria(o1, o2);
                             }
                         }
                     }

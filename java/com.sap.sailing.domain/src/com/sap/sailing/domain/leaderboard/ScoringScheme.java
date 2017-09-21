@@ -115,5 +115,5 @@ public interface ScoringScheme extends Serializable {
      * ordering of the list containing the total points matches the order in the group.
      * @throws NoWindException 
      */
-    int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) throws NoWindException;
+    int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint);
 }
