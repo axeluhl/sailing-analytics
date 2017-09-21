@@ -37,11 +37,17 @@
         .count {
             font-weight: bold;
             font-size: 3em;
-            line-height: 2em;
+            line-height: 1em;
         }
         .unit {
-            line-height: .5em;
+            line-height: 1.5em;
             font-size: 1.5em;
+        }
+        .countdown .count {
+            padding-top: .75em
+        }
+        .countdown .unit {
+            line-height: 2em;
         }
         .announcement .count {
             font-size: 2.5em;

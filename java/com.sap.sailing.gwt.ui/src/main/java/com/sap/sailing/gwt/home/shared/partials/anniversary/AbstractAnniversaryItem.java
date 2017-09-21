@@ -25,6 +25,7 @@ public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnoun
             this.addStyleName(style.announcement());
             this.legalNoticeUi.removeFromParent();
         } else {
+            this.addStyleName(style.countdown());
             this.iconUi.removeFromParent();
             this.linkUi.removeFromParent();
         }
@@ -70,6 +71,8 @@ public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnoun
     }
 
     public interface Style extends CssResource {
+
+        String countdown();
 
         String announcement();
     }
