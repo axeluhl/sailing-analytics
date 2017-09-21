@@ -77,20 +77,27 @@ public class DateTimeBoxFallbackStrategie extends Composite implements DateTimeB
             } else {
                 result = dateFormat.parse(rawDateValue);
             }
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;
     }
 
     public void setValue(Date newValue) {
-        // remove the time part from the datepart, to reduce issus with browser compability
-        Date dateFormated = dateFormat.parse(dateFormat.format(newValue));
-        datebox.setValue(dateFormated);
-        if (timeFormat != null) {
-            String timeFormated = timeFormat.format(newValue);
-            com.google.gwt.core.shared.GWT.log(timeFormated);
-            timebox.setValue(timeFormated);
+        if(newValue != null){
+            // remove the time part from the datepart, to reduce issus with browser compability
+            Date dateFormated = dateFormat.parse(dateFormat.format(newValue));
+            datebox.setValue(dateFormated);
+            if (timeFormat != null) {
+                String timeFormated = timeFormat.format(newValue);
+                com.google.gwt.core.shared.GWT.log(timeFormated);
+                timebox.setValue(timeFormated);
+            }
+        }else{
+            datebox.setValue(null);
+            if(timeFormat != null){
+                timebox.setValue(null);
+            }
         }
     }
 
