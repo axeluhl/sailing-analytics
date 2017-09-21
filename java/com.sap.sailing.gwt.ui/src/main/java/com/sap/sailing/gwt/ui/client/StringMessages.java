@@ -1887,4 +1887,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String estimatedDuration();
     String countDown(long value,String unit);
     String countDownEnd();
+    String moreLoginInformationHeadline();
+    String moreLoginInformationIntroduction();
+    String moreLoginInformationSectionUserSettingsHeading();
+    String moreLoginInformationSectionUserSettingsDescription();
+    String moreLoginInformationSectionStrategySimulatorDescription();
+    String moreLoginInformationSectionUserNotificationsHeading();
+    String moreLoginInformationSectionUserNotificationsDescription();
 }
