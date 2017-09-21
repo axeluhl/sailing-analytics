@@ -8,15 +8,25 @@
 	<ui:with field="local_res"
 		type="com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationResources" />
 	<ui:style>
+	.register {
+		border-radius: .3846154em;
+		width: 100%;
+		text-align: center;
+	}
 	
+	.buttonContainer {
+		margin: 1em 10px 0;
+	}
 	</ui:style>
-	<g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
-		<h1 class="{res.mediaCss.small12} {res.mediaCss.columns}">
-			<ui:text from="{i18n.moreLoginInformationHeadline}" />
-		</h1>
-		<p class="{res.mediaCss.small12} {res.mediaCss.columns}">
-			<ui:text from="{i18n.moreLoginInformationIntroduction}" />
-		</p>
+	<g:HTMLPanel>
+		<div class="{res.mediaCss.grid}">
+			<h1 class="{res.mediaCss.small12} {res.mediaCss.columns}">
+				<ui:text from="{i18n.moreLoginInformationHeadline}" />
+			</h1>
+			<p class="{res.mediaCss.small12} {res.mediaCss.columns}">
+				<ui:text from="{i18n.moreLoginInformationIntroduction}" />
+			</p>
+		</div>
 		<login:MoreLoginInformationContentMobile
 			title="{i18n.moreLoginInformationSectionUserSettingsHeading}" image="{local_res.settings}"
 			imageOnLeft="true"
@@ -29,5 +39,10 @@
 			title="{i18n.moreLoginInformationSectionUserNotificationsHeading}"
 			image="{local_res.notifications}" imageOnLeft="true"
 			content="{i18n.moreLoginInformationSectionUserNotificationsDescription}" />
+		<div class="{style.buttonContainer}">
+			<a
+				class="{style.register} {res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite} "
+				selenium-id="signUpAnchor">Registrieren</a>
+		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
