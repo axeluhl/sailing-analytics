@@ -161,13 +161,12 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     /**
-     * @param o1ScoresIncludingDiscarded scores that include the points for those races that have been discarded (net points)
-     * @param o2ScoresIncludingDiscarded scores that include the points for those races that have been discarded (net points)
+     * @param o1ScoresIncludingDiscarded scores that include the points for those races that have been discarded (total points)
+     * @param o2ScoresIncludingDiscarded scores that include the points for those races that have been discarded (total points)
      */
     @Override
     public int compareByLastRace(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1ScoresIncludingDiscarded,
-            List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded,
-            boolean nullScoresAreBetter) {
+            List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded, boolean nullScoresAreBetter) {
         int result = 0;
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
         ListIterator<Pair<RaceColumn, Double>> o1Iter = o1ScoresIncludingDiscarded.listIterator(o1ScoresIncludingDiscarded.size());
