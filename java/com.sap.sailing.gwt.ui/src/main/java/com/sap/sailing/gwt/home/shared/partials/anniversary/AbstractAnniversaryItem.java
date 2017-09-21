@@ -7,7 +7,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView.AnniversaryAnnouncement;
-import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
 import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.DefaultPresenter;
 import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.Direction;
 
@@ -29,9 +28,6 @@ public class AbstractAnniversaryItem extends Widget implements AnniversaryAnnoun
             this.iconUi.removeFromParent();
             this.linkUi.removeFromParent();
         }
-        final Bubble.DefaultPresenter bubblePresenter = new DefaultPresenter(
-                new AnniversaryLegalNoticeBubbleContent(13337), descriptionUi, getElement(), Direction.BOTTOM);
-        bubblePresenter.registerTarget(legalNoticeUi);
     }
 
     @Override
