@@ -56,7 +56,7 @@ public class TopologicalComparator<T> implements Comparator<T> {
     @Override
     public int compare(T o1, T o2) {
         final int result;
-        if (graph.areOnSameCycle(o1, o2)) {
+        if (o1.equals(o2) || graph.areOnSameCycle(o1, o2)) {
             result = 0;
         } else {
             if (graph.hasPath(o1, o2)) {

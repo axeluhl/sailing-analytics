@@ -49,7 +49,8 @@ public class TopologicalComparatorTest {
     private void assertChain(TopologicalComparator<String> comparator, String...strings) {
         for (int i=0; i<strings.length; i++) {
             for (int j=0; j<strings.length; j++) {
-                assertEquals(Integer.compare(i, j), comparator.compare(strings[i], strings[j]));
+                assertEquals(strings[i]+" at position "+i+" and "+strings[j]+" at position "+j+" compared incorrectly",
+                        Integer.compare(i, j), comparator.compare(strings[i], strings[j]));
             }
         }
     }
