@@ -1416,13 +1416,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (persistent) {
             updateStoredRegatta(regatta);
         }
-        for (Event event : getAllEvents()) {
-            for (CourseArea eventCourseArea : event.getVenue().getCourseAreas()) {
-                if (defaultCourseAreaId != null && eventCourseArea.getId().equals(defaultCourseAreaId)) {
-                    event.addRegatta(regatta);
-                }
-            }
-        }
+
         return wasCreated;
     }
 
@@ -2322,7 +2316,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 regatta.addSeries(seriesObj);
             }
         }
-        regatta.adjustEventToRegattaAssociation(this);
+
         if (regatta.isPersistent()) {
             mongoObjectFactory.storeRegatta(regatta);
         }

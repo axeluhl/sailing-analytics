@@ -740,19 +740,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
     }
 
-    public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
-        CourseArea defaultCourseArea = getDefaultCourseArea();
-        for (Event event : eventFetcher.getAllEvents()) {
-            event.removeRegatta(this);
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (defaultCourseArea != null && courseArea.getId().equals(defaultCourseArea.getId())) {
-                    event.addRegatta(this);
-                }
-            }
-        }
-
-    }
-
     @Override
     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
         return raceExecutionOrderCache;
@@ -870,4 +857,5 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForRegatta);
         deregisterer.deregister(deregisterer.analyze());
     }
+
 }
