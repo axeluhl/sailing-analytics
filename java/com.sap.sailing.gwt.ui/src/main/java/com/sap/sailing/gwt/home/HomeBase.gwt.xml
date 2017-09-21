@@ -47,7 +47,6 @@
     <inherits name="com.sap.sailing.gwt.ui.SourceRaceboard"/>
   	<inherits name='com.sap.sse.gwt.CommonControlCSS'/>
 	<inherits name='com.sap.sailing.gwt.settings.Settings'/>
-  <inherits name="com.google.gwt.dom.DOMPatch" />
 	
 	<replace-with class="com.sap.sailing.gwt.home.shared.utils.dateformatter.CustomEventDatesFormatter">
         <when-type-is class="com.sap.sailing.gwt.home.shared.utils.dateformatter.DefaultEventDatesFormatter"/>
