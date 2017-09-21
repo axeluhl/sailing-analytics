@@ -1,8 +1,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:login="urn:import:com.sap.sailing.gwt.home.desktop.places.morelogininformation">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.places.morelogininformation.MoreLoginInformationResources" />
     <ui:style>
 
     </ui:style>
@@ -10,6 +12,8 @@
         <h1 class="{res.mediaCss.small12} {res.mediaCss.columns}">TODO: Benefits of logging in on SAPSailing.com</h1>
         <p class="{res.mediaCss.small12} {res.mediaCss.columns}">TODO: As a registered user of SAP Sailing Analytics you have access to functionality that isn't open for anonymous users.
            Simply register yourself to get access to the features shown below</p>
-        <g:FlowPanel ui:field="contentHolderUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
+        <login:MoreLoginInformationContent title="TODO: User settings" image="{local_res.settings.getSafeUri}" imageOnLeft="true" content="TODO: Many parts of the user interface are enabled to provide user-changeable settings. While the basic functionality is available to everyone, settings of authenticated users are stored in the user profile and are available on any device just by logging in." />
+        <login:MoreLoginInformationContent title="{i18n.strategySimulator}" image="{local_res.simulator.getSafeUri}" imageOnLeft="false" content="TODO: The simulator enables sailors to simulate strategies for legs based on confugurable wind conditions. The simulator is based on all the historical data available in SAP Sailing Analytics to provide simulations on the accurate behaviour of specific boat classes." />
+        <login:MoreLoginInformationContent title="TODO: User Notifications" image="{local_res.notifications.getSafeUri}" imageOnLeft="true" content="TODO: User notifications are an easy way to keep you up to date about your favourite competitor/team or boat class." />
     </g:HTMLPanel>
 </ui:UiBinder>
