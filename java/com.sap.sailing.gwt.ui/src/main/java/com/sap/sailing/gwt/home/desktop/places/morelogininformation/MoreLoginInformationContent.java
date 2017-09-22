@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.morelogininformation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
@@ -25,7 +26,7 @@ public class MoreLoginInformationContent extends Widget {
     }
 
     @UiField
-    DivElement titleUi;
+    HeadingElement titleUi;
     @UiField
     DivElement textUi;
     @UiField

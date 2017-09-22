@@ -32,7 +32,7 @@
     </ui:style>
     <div class="{style.wrapper}">
         <img ui:field="imageUi" class="{style.image}" />
-        <div ui:field="titleUi" class="{style.title}" />
+        <h2 ui:field="titleUi" class="{style.title}" />
         <div ui:field="textUi" />
         <div class="{style.clear}" />
     </div>
