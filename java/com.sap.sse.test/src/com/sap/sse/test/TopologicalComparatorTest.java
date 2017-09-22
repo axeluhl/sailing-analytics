@@ -59,6 +59,19 @@ public class TopologicalComparatorTest {
         assertChain(comparator, "A", "D", "E");
     }
     
+    @Test
+    public void testSimpleSortWithTwoCycles() {
+        addLessThan("A", "B"); addLessThan("B", "C"); addLessThan("C", "D"); addLessThan("D", "B"); addLessThan("D", "E");
+                                                      addLessThan("C", "F"); addLessThan("F", "B");
+        createGraph();
+        TopologicalComparator<String> comparator = new TopologicalComparator<>(graph);
+        assertMutualEquality(comparator, "B", "C", "D", "F");
+        assertChain(comparator, "A", "B", "E");
+        assertChain(comparator, "A", "C", "E");
+        assertChain(comparator, "A", "D", "E");
+        assertChain(comparator, "A", "F", "E");
+    }
+    
     private void assertMutualEquality(TopologicalComparator<String> comparator, String... strings) {
         for (int i=0; i<strings.length; i++) {
             for (int j=0; j<strings.length; j++) {

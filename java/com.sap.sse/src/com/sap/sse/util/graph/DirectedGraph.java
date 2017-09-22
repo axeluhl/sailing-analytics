@@ -12,10 +12,21 @@ public interface DirectedGraph<T> {
     Set<Path<T>> getCycles();
     
     /**
-     * Returns {@code true} if and only if {@link #getCycles()} returns one or more paths such that
-     * one path contains both, {@code a} and {@code b}.
+     * When cycles overlap, they are combined into {@link CycleCluster}s, each being
+     * {@link CycleCluster#getRepresentative() represented} by a dedicated node from that cluster.
+     * The cycle analysis on this graph can tell the individual {@link #getCycles() cycles}, whereas
+     * this method tells the combination of cycles into clusters based on their overlap.
      */
-    boolean areOnSameCycle(T a, T b);
+    CycleClusters<T> getCycleClusters();
+
+    /**
+     * Returns {@code true} if and only if {@link #getCycleClusters()} has a cluster that
+     * contains both, {@code a} and {@code b}. Note that a node is either in one or in no
+     * cycle cluster. It cannot be in two cycle clusters at the same time because then those
+     * two clusters would have an overlap which by their definition would have required them
+     * to get joined into one.
+     */
+    boolean areOnSameCycleCluster(T a, T b);
     
     /**
      * Tries to find any path leading from {@code from} to {@code to}. If no such
@@ -46,5 +57,6 @@ public interface DirectedGraph<T> {
      * The second element of the pair returned describes the replacements carried out: keys are the representatives
      * of one or more joined cycles, values are the cycle nodes collectively represented by the key node.
      */
-    Pair<DirectedGraph<T>, Map<T, Set<T>>> graphWithCombinedCycleNodes();
+    Pair<DirectedGraph<T>, CycleClusters<T>> graphWithCombinedCycleNodes();
+    
 }

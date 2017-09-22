@@ -1,0 +1,31 @@
+package com.sap.sse.util.graph.impl;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.sap.sse.util.graph.CycleCluster;
+import com.sap.sse.util.graph.CycleClusters;
+
+public class CycleClustersImpl<T> implements CycleClusters<T> {
+    private final Set<CycleCluster<T>> clusters;
+
+    public CycleClustersImpl(Set<CycleCluster<T>> clusters) {
+        this.clusters = new HashSet<>(clusters);
+    }
+    
+    @Override
+    public CycleCluster<T> getCluster(T node) {
+        for (final CycleCluster<T> cluster : clusters) {
+            if (cluster.contains(node)) {
+                return cluster;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public Iterable<CycleCluster<T>> getClusters() {
+        return Collections.unmodifiableCollection(clusters);
+    }
+}

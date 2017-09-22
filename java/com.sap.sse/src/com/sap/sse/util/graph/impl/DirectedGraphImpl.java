@@ -4,11 +4,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.graph.CycleCluster;
+import com.sap.sse.util.graph.CycleClusters;
 import com.sap.sse.util.graph.DirectedEdge;
 import com.sap.sse.util.graph.DirectedGraph;
 import com.sap.sse.util.graph.Path;
@@ -25,6 +26,8 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
      * of at least one cycle.
      */
     private final Map<T, Set<Path<T>>> cyclesPerNode;
+    
+    private final CycleClusters<T> cycleClusters;
     
     private final Set<Path<T>> cycles;
     
@@ -62,6 +65,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
             }
         }
         cyclesPerNode = Collections.unmodifiableMap(modifiableCyclesPerNode);
+        cycleClusters = computeCycleClusters();
     }
 
     private Set<Path<T>> findCycles(Set<T> roots) {
@@ -111,20 +115,17 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     public Set<Path<T>> getCycles() {
         return cycles;
     }
+    
+    @Override
+    public CycleClusters<T> getCycleClusters() {
+        return cycleClusters;
+    }
 
     @Override
-    public boolean areOnSameCycle(T a, T b) {
-        final Set<Path<T>> aCycles = cyclesPerNode.get(a);
-        final Set<Path<T>> bCycles = cyclesPerNode.get(b);
-        final boolean result;
-        if (aCycles != null && !aCycles.isEmpty() && bCycles != null && !bCycles.isEmpty()) {
-            final Set<Path<T>> intersection = new HashSet<>(aCycles);
-            intersection.retainAll(bCycles);
-            result = !intersection.isEmpty();
-        } else {
-            result = false;
-        }
-        return result;
+    public boolean areOnSameCycleCluster(T a, T b) {
+        final CycleCluster<T> aCluster = cycleClusters.getCluster(a);
+        final CycleCluster<T> bCluster = cycleClusters.getCluster(b);
+        return aCluster != null && aCluster == bCluster;
     }
 
     @Override
@@ -138,26 +139,10 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
             result = true;
         } else if (visited.contains(from)) {
             result = false;
-        } else if (areOnSameCycle(from, to)) {
-            result = true;
-        } else {
-            result = hasPathWithoutCycle(from, to, visited);
-        }
-        return result;
-    }
-
-    private boolean hasPathWithoutCycle(T from, T to, Set<T> visited) {
-        assert from.equals(to) || !areOnSameCycle(from, to);
-        final boolean result;
-        if (from.equals(to)) {
-            result = true;
-        } else if (visited.contains(from)) {
-            result = false;
         } else {
             Set<T> nextVisited = new HashSet<>(visited);
             nextVisited.add(from);
-            result = from.equals(to) ||
-                    immediateSuccessors.get(from).stream().anyMatch(successor->hasPath(successor, to, nextVisited));
+            result = immediateSuccessors.get(from).stream().anyMatch(successor->hasPath(successor, to, nextVisited));
         }
         return result;
     }
@@ -166,13 +151,13 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     public Map<T, Integer> getLengthsOfLongestPathsFromRoot() {
         // construct a new graph with joined cycles replaced by combined "cycle nodes" and edges combined accordingly
         // then count in a breadth-first search starting from the roots
-        Pair<DirectedGraph<T>, Map<T, Set<T>>> dag = graphWithCombinedCycleNodes();
+        Pair<DirectedGraph<T>, CycleClusters<T>> dag = graphWithCombinedCycleNodes();
         Map<T, Integer> preResult = dag.getA().getLengthsOfLongestPathsFromRootForDag();
         // now map back the results of the cycle representatives to all nodes that were part of the cycle:
         Map<T, Integer> result = new HashMap<>(preResult);
-        for (final Entry<T, Set<T>> representativeAndNodesRepresented : dag.getB().entrySet()) {
-            final Integer rootDistance = result.get(representativeAndNodesRepresented.getKey());
-            for (final T representedCycleNode : representativeAndNodesRepresented.getValue()) {
+        for (final CycleCluster<T> cycleCluster : dag.getB().getClusters()) {
+            final Integer rootDistance = result.get(cycleCluster.getRepresentative());
+            for (final T representedCycleNode : cycleCluster.getClusterNodes()) {
                 result.put(representedCycleNode, rootDistance);
             }
         }
@@ -180,7 +165,24 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     }
 
     @Override
-    public Pair<DirectedGraph<T>, Map<T, Set<T>>> graphWithCombinedCycleNodes() {
+    public Pair<DirectedGraph<T>, CycleClusters<T>> graphWithCombinedCycleNodes() {
+        assert cycleClusters != null;
+        final Set<T> newNodes = new HashSet<>(nodes);
+        newNodes.removeAll(cyclesPerNode.keySet()); // first remove all cycle nodes
+        for (final CycleCluster<T> cluster : cycleClusters.getClusters()) {
+            newNodes.add(cluster.getRepresentative()); // add the representative nodes
+        }
+        final Set<DirectedEdge<T>> newEdges = new HashSet<>();
+        for (final DirectedEdge<T> edge : edges) {
+            if (!isPartOfCycle(edge)) {
+                newEdges.add(replaceCycleNodesByRepresentatives(edge, cycleClusters));
+            }
+        }
+        return new Pair<>(new DirectedGraphImpl<T>(newNodes, newEdges), cycleClusters);
+    }
+
+    private CycleClusters<T> computeCycleClusters() {
+        assert cycles != null;
         // keep disjoint sets of nodes such that each set consists of the union of one or more cycles
         final Set<Set<T>> combinedCycleNodes = new HashSet<>();
         for (final Path<T> cycle : cycles) {
@@ -207,40 +209,29 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
             }
             combinedCycleNodes.removeAll(nodeSetsToRemoveAfterJoining);
         }
-        final Map<T, Set<T>> representativeToCycleNodesItRepresents = new HashMap<>();
+        final Set<CycleCluster<T>> representativeToCycleNodesItRepresents = new HashSet<>();
         for (final Set<T> cluster : combinedCycleNodes) {
-            representativeToCycleNodesItRepresents.put(cluster.iterator().next(), cluster);
+            representativeToCycleNodesItRepresents.add(new CycleClusterImpl<>(cluster.iterator().next(), cluster));
         }
-        final Set<T> newNodes = new HashSet<>(nodes);
-        newNodes.removeAll(cyclesPerNode.keySet()); // first remove all cycle nodes
-        newNodes.addAll(representativeToCycleNodesItRepresents.keySet()); // add the representative nodes
-        final Set<DirectedEdge<T>> newEdges = new HashSet<>();
-        for (final DirectedEdge<T> edge : edges) {
-            if (!isPartOfCycle(edge)) {
-                newEdges.add(replaceCycleNodesByRepresentatives(edge, representativeToCycleNodesItRepresents));
-            }
-        }
-        return new Pair<>(new DirectedGraphImpl<T>(newNodes, newEdges), representativeToCycleNodesItRepresents);
+        return new CycleClustersImpl<>(representativeToCycleNodesItRepresents);
     }
 
-    private DirectedEdge<T> replaceCycleNodesByRepresentatives(DirectedEdge<T> edge, Map<T, Set<T>> representativeToCycleNodesItRepresents) {
+    private DirectedEdge<T> replaceCycleNodesByRepresentatives(DirectedEdge<T> edge, CycleClusters<T> cycleClusters) {
         boolean replaced = false;
         T from = null;
         T to = null;
-        for (final Entry<T, Set<T>> e : representativeToCycleNodesItRepresents.entrySet()) {
-            if (from == null && e.getValue().contains(edge.getFrom()) && e.getKey() != edge.getFrom()) {
-                from = e.getKey();
-                replaced = true;
-            }
-            if (to == null && e.getValue().contains(edge.getTo()) && e.getKey() != edge.getTo()) {
-                to = e.getKey();
-                replaced = true;
-            }
-        }
-        if (from == null) {
+        final CycleCluster<T> fromCluster;
+        final CycleCluster<T> toCluster;
+        if (from == null && (fromCluster=cycleClusters.getCluster(edge.getFrom())) != null && !fromCluster.getRepresentative().equals(edge.getFrom())) {
+            from = fromCluster.getRepresentative();
+            replaced = true;
+        } else {
             from = edge.getFrom();
         }
-        if (to == null) {
+        if (from == null && (toCluster=cycleClusters.getCluster(edge.getTo())) != null && !toCluster.getRepresentative().equals(edge.getTo())) {
+            to = toCluster.getRepresentative();
+            replaced = true;
+        } else {
             to = edge.getTo();
         }
         return replaced ? new DirectedEdgeImpl<>(from, to) : edge;
