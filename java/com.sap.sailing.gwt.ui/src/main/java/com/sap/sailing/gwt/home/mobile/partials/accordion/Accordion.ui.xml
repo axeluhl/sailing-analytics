@@ -7,8 +7,8 @@
 	
 	</ui:style>
     <g:FlowPanel addStyleNames="{res.mediaCss.grid}">
-        <g:SimplePanel ui:field="headerUi" />
+        <g:SimplePanel ui:field="headerUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
         <g:FlowPanel ui:field="itemsUi" addStyleNames="{local_res.css.solutions} {local_res.css.accordion}" />
-        <g:SimplePanel ui:field="footerUi" />
+        <g:SimplePanel ui:field="footerUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
     </g:FlowPanel>
 </ui:UiBinder> 
