@@ -85,7 +85,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     private Iterable<Path<T>> findCycles(Path<T> path, T successor) {
         final Iterable<Path<T>> result;
         if (path.contains(successor)) {
-            result = Collections.singleton(path.subPath(successor));
+            result = Collections.singleton(path.subPath(successor).extend(successor));
         } else {
             result = findCycles(path.extend(successor));
         }
@@ -129,19 +129,37 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
 
     @Override
     public boolean hasPath(T from, T to) {
+        return hasPath(from, to, /* visited */ new HashSet<>());
+    }
+    
+    private boolean hasPath(T from, T to, Set<T> visited) {
         final boolean result;
-        if (areOnSameCycle(from, to)) {
+        if (from.equals(to)) {
+            result = true;
+        } else if (visited.contains(from)) {
+            result = false;
+        } else if (areOnSameCycle(from, to)) {
             result = true;
         } else {
-            result = hasPathWithoutCycle(from, to);
+            result = hasPathWithoutCycle(from, to, visited);
         }
         return result;
     }
 
-    private boolean hasPathWithoutCycle(T from, T to) {
-        assert !areOnSameCycle(from, to);
-        return from.equals(to) ||
-                immediateSuccessors.get(from).stream().anyMatch(successor->hasPathWithoutCycle(successor, to));
+    private boolean hasPathWithoutCycle(T from, T to, Set<T> visited) {
+        assert from.equals(to) || !areOnSameCycle(from, to);
+        final boolean result;
+        if (from.equals(to)) {
+            result = true;
+        } else if (visited.contains(from)) {
+            result = false;
+        } else {
+            Set<T> nextVisited = new HashSet<>(visited);
+            nextVisited.add(from);
+            result = from.equals(to) ||
+                    immediateSuccessors.get(from).stream().anyMatch(successor->hasPath(successor, to, nextVisited));
+        }
+        return result;
     }
 
     @Override
@@ -182,6 +200,11 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
                     }
                 }
             }
+            if (firstIntersectionWith == null) {
+                final HashSet<T> newCombinedCycleNodes = new HashSet<>();
+                Util.addAll(cycle, newCombinedCycleNodes);
+                combinedCycleNodes.add(newCombinedCycleNodes);
+            }
             combinedCycleNodes.removeAll(nodeSetsToRemoveAfterJoining);
         }
         final Map<T, Set<T>> representativeToCycleNodesItRepresents = new HashMap<>();
@@ -205,11 +228,11 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         T from = null;
         T to = null;
         for (final Entry<T, Set<T>> e : representativeToCycleNodesItRepresents.entrySet()) {
-            if (from == null && e.getValue().contains(from)) {
+            if (from == null && e.getValue().contains(edge.getFrom()) && e.getKey() != edge.getFrom()) {
                 from = e.getKey();
                 replaced = true;
             }
-            if (to == null && e.getValue().contains(to)) {
+            if (to == null && e.getValue().contains(edge.getTo()) && e.getKey() != edge.getTo()) {
                 to = e.getKey();
                 replaced = true;
             }

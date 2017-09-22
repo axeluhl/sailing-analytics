@@ -21,4 +21,9 @@ public class DirectedEdgeImpl<T> implements DirectedEdge<T> {
     public T getTo() {
         return to;
     }
+
+    @Override
+    public String toString() {
+        return "(" + from + " -> " + to + ")";
+    }
 }

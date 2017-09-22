@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.sap.sse.common.Util;
@@ -105,5 +106,10 @@ public class PathImpl<T> implements Path<T> {
     @Override
     public boolean intersects(Path<T> other) {
         return StreamSupport.stream(other.spliterator(), /* parallel */ false).anyMatch(n->contains(n));
+    }
+
+    @Override
+    public String toString() {
+        return "("+nodesInOrder.stream().map(n->n.toString()).collect(Collectors.joining(" -> "))+")";
     }
 }

@@ -36,17 +36,39 @@ public class TopologicalComparatorTest {
     public void testSimpleSort() {
         addLessThan("A", "B"); addLessThan("B", "C"); addLessThan("C", "D");
         addLessThan("E", "F"); addLessThan("F", "G"); addLessThan("G", "H");
+        singleRoot("I");
+        singleRoot("J");
         createGraph();
         TopologicalComparator<String> comparator = new TopologicalComparator<>(graph);
-        assertEquals(0, comparator.compare("A", "E"));
-        assertEquals(0, comparator.compare("B", "F"));
-        assertEquals(0, comparator.compare("C", "G"));
-        assertEquals(0, comparator.compare("D", "H"));
+        assertMutualEquality(comparator, "A", "E", "I", "J");
+        assertMutualEquality(comparator, "B", "F");
+        assertMutualEquality(comparator, "C", "G");
+        assertMutualEquality(comparator, "D", "H");
         assertChain(comparator, "A", "B", "C", "D");
         assertChain(comparator, "E", "F", "G", "H");
     }
     
-    private void assertChain(TopologicalComparator<String> comparator, String...strings) {
+    @Test
+    public void testSimpleSortWithCycle() {
+        addLessThan("A", "B"); addLessThan("B", "C"); addLessThan("C", "D"); addLessThan("D", "B"); addLessThan("D", "E");
+        createGraph();
+        TopologicalComparator<String> comparator = new TopologicalComparator<>(graph);
+        assertMutualEquality(comparator, "B", "C", "D");
+        assertChain(comparator, "A", "B", "E");
+        assertChain(comparator, "A", "C", "E");
+        assertChain(comparator, "A", "D", "E");
+    }
+    
+    private void assertMutualEquality(TopologicalComparator<String> comparator, String... strings) {
+        for (int i=0; i<strings.length; i++) {
+            for (int j=0; j<strings.length; j++) {
+                assertEquals(strings[i]+" at position "+i+" and "+strings[j]+" at position "+j+" compared incorrectly",
+                        0, comparator.compare(strings[i], strings[j]));
+            }
+        }
+    }
+    
+    private void assertChain(TopologicalComparator<String> comparator, String... strings) {
         for (int i=0; i<strings.length; i++) {
             for (int j=0; j<strings.length; j++) {
                 assertEquals(strings[i]+" at position "+i+" and "+strings[j]+" at position "+j+" compared incorrectly",
