@@ -187,7 +187,7 @@ public interface MongoObjectFactory {
     void removeAllConnectivityParametersForRacesToRestore();
 
     /**
-     * Currently unused, meant to store determined Anniversaries related to bug4227 
+     * Stores determined Anniversary races.
      */
     void storeAnniversaryData(ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries);
 }

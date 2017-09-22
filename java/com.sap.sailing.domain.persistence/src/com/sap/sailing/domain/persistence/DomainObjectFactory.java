@@ -199,8 +199,7 @@ public interface DomainObjectFactory {
             String leaderboardName, String wrappedRegattaLeaderboardName, LeaderboardRegistry leaderboardRegistry);
 
     /**
-     * Currently unused, meant to store determined Anniversaries related to bug4227 
-     * @throws MalformedURLException 
+     * Loads all stored anniversary races.
      */
     Map<? extends Integer, ? extends Pair<DetailedRaceInfo, AnniversaryType>> getAnniversaryData() throws MalformedURLException;
 }

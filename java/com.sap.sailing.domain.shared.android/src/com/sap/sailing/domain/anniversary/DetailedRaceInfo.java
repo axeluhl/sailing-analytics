@@ -10,6 +10,7 @@ import com.sap.sse.common.TimePoint;
 /**
  * Reference to an "anniversary" race, such that it can be used to obtain a link to the race on its hosting server. For
  * this, the object hosts additional information about the leaderboard and the event.
+ * Object creation will fail with an exception if no leaderboardName and eventId is given. All other data is optional.
  */
 public class DetailedRaceInfo extends SimpleRaceInfo {
     private static final long serialVersionUID = 1L;
