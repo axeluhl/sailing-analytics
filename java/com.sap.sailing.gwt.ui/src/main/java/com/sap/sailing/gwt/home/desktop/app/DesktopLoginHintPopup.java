@@ -5,6 +5,9 @@ import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 import com.sap.sse.security.ui.authentication.login.LoginHintPopup;
 
+/**
+ * Specific version of {@link LoginHintPopup} that meets the positioning of the page header in Home.html.
+ */
 public class DesktopLoginHintPopup extends LoginHintPopup {
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css();
 

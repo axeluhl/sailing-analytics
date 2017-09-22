@@ -9,6 +9,16 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Widget that shows a message to inform the user that it has benefits to log in. There are two links the user can
+ * press:
+ * <ul>
+ * <li>"Dismiss" to hide the message. This will typically make the message disappear for some time.</li>
+ * <li>"Show details" to show a page providing some information about the benefits of creating an account.</li>
+ * </ul>
+ * the concrete actions to be triggered when clicking the links need to be defined by the using context through the
+ * {@link Runnable Runnables} given to the constructor.
+ */
 public class LoginHintContent extends Composite{
 
     private static LoginPopupContentUiBinder uiBinder = GWT.create(LoginPopupContentUiBinder.class);

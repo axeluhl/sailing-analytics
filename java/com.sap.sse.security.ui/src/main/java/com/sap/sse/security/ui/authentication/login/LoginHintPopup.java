@@ -6,6 +6,9 @@ import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 
+/**
+ * Popup that appears when an unauthenticated user visits the page to inform about the benefits of logging in.
+ */
 public class LoginHintPopup extends PopupPanel {
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css();
     protected final LoginHintContent content;
