@@ -15,12 +15,15 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -117,7 +120,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Pair<Competitor, Boat> createCompetitorWithID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass) {
         CompetitorStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
-        Competitor domainCompetitor = competitorAndBoatStore.getExistingCompetitorByIdAsString(competitor.getID());
+        CompetitorWithBoat domainCompetitor = competitorAndBoatStore.getExistingCompetitorWithBoatByIdAsString(competitor.getID());
         if (domainCompetitor == null || competitorAndBoatStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
             List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
             for (CrewMember crewMember: competitor.getCrew()) {
@@ -126,11 +129,11 @@ public class DomainFactoryImpl implements DomainFactory {
                 teamMembers.add(person);
             }
             DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            domainCompetitor = competitorAndBoatStore.getOrCreateCompetitor(competitor.getID(), competitor.getName(), null /* shortName */, null /*displayColor*/, null /*email*/, null, team,
-                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+            DynamicBoat domainBoat = new BoatImpl(competitor.getID(), null, boatClass, competitor.getBoatID(), null);
+            domainCompetitor = competitorAndBoatStore.getOrCreateCompetitorWithBoat(competitor.getID(), competitor.getName(), null /* shortName */, null /*displayColor*/, null /*email*/, null, team,
+                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, domainBoat);
         }
-        Boat domainBoat = competitorAndBoatStore.getOrCreateBoat(domainCompetitor, competitor.getName(), boatClass, competitor.getBoatID(), null);
-        return new Pair<Competitor, Boat>(domainCompetitor, domainBoat);
+        return new Pair<Competitor, Boat>(domainCompetitor, domainCompetitor.getBoat());
     }
 
     @Override
@@ -143,10 +146,10 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
         String competitorID = getCompetitorID(competitor.getBoatID(), competitor.getName(), raceId, boatClass);
-        Competitor domainCompetitor = competitorAndBoatStore.getOrCreateCompetitor(competitorID,
+        DynamicBoat domainBoat = new BoatImpl(competitor.getID(), null, boatClass, competitor.getBoatID(), null);
+        Competitor domainCompetitor = competitorAndBoatStore.getOrCreateCompetitorWithBoat(competitorID,
                 competitor.getName(), null /* short name */, null /*displayColor*/, null /*email*/, null, team,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Boat domainBoat = competitorAndBoatStore.getOrCreateBoat(domainCompetitor, competitor.getName(), boatClass, competitor.getBoatID(), null);        
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, domainBoat);
         return new Pair<Competitor, Boat>(domainCompetitor, domainBoat);
     }
 
