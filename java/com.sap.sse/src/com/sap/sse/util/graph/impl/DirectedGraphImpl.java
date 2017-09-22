@@ -78,20 +78,22 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
 
     private Iterable<Path<T>> findCycles(Path<T> path) {
         assert !path.isEmpty();
-        final Set<Path<T>> result = new HashSet<>();
-        final Set<T> successors = immediateSuccessors.get(path.tail());
-        for (final T successor : successors) {
-            Util.addAll(findCycles(path, successor), result);
-        }
-        return result;
-    }
-
-    private Iterable<Path<T>> findCycles(Path<T> path, T successor) {
-        final Iterable<Path<T>> result;
-        if (path.contains(successor)) {
-            result = Collections.singleton(path.subPath(successor).extend(successor));
-        } else {
-            result = findCycles(path.extend(successor));
+        final Set<Path<T>> result = new HashSet<>(); // the cycles found
+        Set<Path<T>> workingSet = Collections.singleton(path);
+        while (!workingSet.isEmpty()) {
+            final Set<Path<T>> nextWorkingSet = new HashSet<>();
+            for (final Path<T> p : workingSet) {
+                final Set<T> successors = immediateSuccessors.get(p.tail());
+                for (final T successor : successors) {
+                    if (p.contains(successor)) {
+                        // cycle found
+                        result.add(p.subPath(successor).extend(successor));
+                    } else {
+                        nextWorkingSet.add(p.extend(successor));
+                    }
+                }
+            }
+            workingSet = nextWorkingSet;
         }
         return result;
     }

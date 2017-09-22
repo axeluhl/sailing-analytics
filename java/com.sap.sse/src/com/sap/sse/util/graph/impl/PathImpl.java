@@ -37,14 +37,6 @@ public class PathImpl<T> implements Path<T> {
     }
     
     @Override
-    public Path<T> extendAtHead(T head) {
-        final List<T> newNodes = new ArrayList<>(nodesInOrder.size()+1);
-        newNodes.add(head);
-        newNodes.addAll(nodesInOrder);
-        return new PathImpl<T>(newNodes);
-    }
-    
-    @Override
     public Path<T> subPath(T start) {
         final List<T> newNodes = new ArrayList<>();
         boolean found = false;

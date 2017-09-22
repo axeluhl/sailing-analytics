@@ -2,7 +2,9 @@ package com.sap.sse.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 import org.junit.Test;
@@ -70,6 +72,32 @@ public class TopologicalComparatorTest {
         assertChain(comparator, "A", "C", "E");
         assertChain(comparator, "A", "D", "E");
         assertChain(comparator, "A", "F", "E");
+    }
+    
+    @Test
+    public void randomTest() {
+        final Random random = new Random();
+        final int NUMBER_OF_NODES = 10000;
+        final int NUMBER_OF_EDGES = 100000;
+        final String[] nodes = new String[NUMBER_OF_NODES];
+        for (int i=0; i<NUMBER_OF_NODES; i++) {
+            nodes[i] = ""+i;
+        }
+        final Set<DirectedEdge<String>> edges = new HashSet<>(NUMBER_OF_EDGES);
+        for (int i=0; i<NUMBER_OF_EDGES; i++) {
+            final int from = random.nextInt(NUMBER_OF_NODES);
+            int to;
+            do {
+                to = random.nextInt(NUMBER_OF_NODES);
+            } while (to == from);
+            edges.add(new DirectedEdgeImpl<>(nodes[from], nodes[to]));
+        }
+        graph = new DirectedGraphImpl<String>(new HashSet<>(Arrays.asList(nodes)), edges);
+        TopologicalComparator<String> comparator = new TopologicalComparator<>(graph);
+        for (final DirectedEdge<String> edge : edges) {
+            assertEquals(-1, comparator.compare(edge.getFrom(), edge.getTo()));
+            assertEquals(1, comparator.compare(edge.getTo(), edge.getFrom()));
+        }
     }
     
     private void assertMutualEquality(TopologicalComparator<String> comparator, String... strings) {

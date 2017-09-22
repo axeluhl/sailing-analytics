@@ -6,8 +6,12 @@ public interface Path<T> extends Iterable<T> {
     boolean contains(DirectedEdge<T> edge);
     Path<T> subPath(T start);
     Path<T> subPath(T start, T endExclusive);
+    
+    /**
+     * Returns a new path that has all nodes of this path with {@code tail} appended at the end
+     */
     Path<T> extend(T tail);
-    Path<T> extendAtHead(T head);
+    
     T head();
     T tail();
     boolean isEmpty();
