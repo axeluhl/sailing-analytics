@@ -184,6 +184,10 @@ public class RemoteSailingServerSet {
                 updateCache(ref, result, cachedTrackedRacesForRemoteSailingServers::put);
             }
         }
+        notifyRemoteRaceResultReceivedCallbacks();
+    }
+
+    private void notifyRemoteRaceResultReceivedCallbacks() {
         new HashSet<>(remoteRaceResultReceivedCallbacks).forEach(Runnable::run);
     }
 
@@ -319,18 +323,20 @@ public class RemoteSailingServerSet {
     }
 
     public RemoteSailingServerReference remove(String name) {
+        RemoteSailingServerReference ref = null;
         LockUtil.lockForWrite(lock);
         try{
-            RemoteSailingServerReference ref = remoteSailingServers.remove(name);
+            ref = remoteSailingServers.remove(name);
             if (ref != null) {
                 cachedEventsForRemoteSailingServers.remove(ref);
                 cachedStatisticsByYearForRemoteSailingServers.remove(ref);
                 cachedTrackedRacesForRemoteSailingServers.remove(ref);
             }
-            return ref;
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
+        notifyRemoteRaceResultReceivedCallbacks();
+        return ref;
     }
 
     /**
