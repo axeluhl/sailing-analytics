@@ -1,10 +1,13 @@
 package com.sap.sse.util.graph.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -29,7 +32,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     
     private final CycleClusters<T> cycleClusters;
     
-    private final Set<Path<T>> cycles;
+    private final Iterable<Path<T>> cycles;
     
     public DirectedGraphImpl(Set<T> nodes, Set<DirectedEdge<T>> edges) {
         this.nodes = nodes;
@@ -57,7 +60,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         }
         this.immediateSuccessors = Collections.unmodifiableMap(succWithUnmodifiableSets);
         this.roots = Collections.unmodifiableSet(modifiableRoots);
-        this.cycles = findCycles(roots);
+        this.cycles = findCycles();
         final Map<T, Set<Path<T>>> modifiableCyclesPerNode = new HashMap<>();
         for (final Path<T> cycle : cycles) {
             for (final T cycleNode : cycle) {
@@ -68,21 +71,20 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         cycleClusters = computeCycleClusters();
     }
 
-    private Set<Path<T>> findCycles(Set<T> roots) {
-        final Set<Path<T>> cycles = new HashSet<>();
-        for (final T root : roots) {
-            Util.addAll(findCycles(new PathImpl<T>(Collections.singleton(root))), cycles);
-        }
-        return cycles;
-    }
-
-    private Iterable<Path<T>> findCycles(Path<T> path) {
-        assert !path.isEmpty();
+    private Iterable<Path<T>> findCycles() {
+        final Set<T> nodesNotVisited = new HashSet<>(nodes);
         final Set<Path<T>> result = new HashSet<>(); // the cycles found
-        Set<Path<T>> workingSet = Collections.singleton(path);
-        while (!workingSet.isEmpty()) {
+        Iterable<Path<T>> workingSet = roots.stream().map(r->new PathImpl<T>(Collections.singleton(r))).collect(Collectors.toSet());
+        if (Util.isEmpty(workingSet) && !nodesNotVisited.isEmpty()) {
+            // all nodes seem to be on cycles; no root found; pick any node to start with:
+            final T nextNonRootLikelyInCycle = nodesNotVisited.iterator().next();
+            nodesNotVisited.remove(nextNonRootLikelyInCycle);
+            workingSet = Collections.singleton(new PathImpl<>(Collections.singleton(nextNonRootLikelyInCycle)));
+        }
+        while (!Util.isEmpty(workingSet)) {
             final Set<Path<T>> nextWorkingSet = new HashSet<>();
             for (final Path<T> p : workingSet) {
+                nodesNotVisited.remove(p.tail());
                 final Set<T> successors = immediateSuccessors.get(p.tail());
                 for (final T successor : successors) {
                     if (p.contains(successor)) {
@@ -92,6 +94,14 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
                         nextWorkingSet.add(p.extend(successor));
                     }
                 }
+            }
+            if (nextWorkingSet.isEmpty() && !nodesNotVisited.isEmpty()) {
+                // there are nodes remaining which must be on cycles because they
+                // haven't been reached from any of the root nodes. Add path to first
+                // node not yet visited and continue:
+                final T nextNonRootLikelyInCycle = nodesNotVisited.iterator().next();
+                nodesNotVisited.remove(nextNonRootLikelyInCycle);
+                nextWorkingSet.add(new PathImpl<>(Collections.singleton(nextNonRootLikelyInCycle)));
             }
             workingSet = nextWorkingSet;
         }
@@ -114,7 +124,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     }
 
     @Override
-    public Set<Path<T>> getCycles() {
+    public Iterable<Path<T>> getCycles() {
         return cycles;
     }
     
@@ -136,17 +146,24 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     }
     
     private boolean hasPath(T from, T to, Set<T> visited) {
-        final boolean result;
-        if (from.equals(to)) {
-            result = true;
-        } else if (visited.contains(from)) {
-            result = false;
-        } else {
-            Set<T> nextVisited = new HashSet<>(visited);
-            nextVisited.add(from);
-            result = immediateSuccessors.get(from).stream().anyMatch(successor->hasPath(successor, to, nextVisited));
+        Set<Path<T>> workingSet = Collections.singleton(new PathImpl<>(Arrays.asList(from)));
+        while (!workingSet.isEmpty()) {
+            final Set<Path<T>> nextWorkingSet = new HashSet<>();
+            for (final Path<T> p : workingSet) {
+                if (p.tail().equals(to)) {
+                    return true;
+                }
+                final Set<T> successors = immediateSuccessors.get(p.tail());
+                for (final T successor : successors) {
+                    if (!p.contains(successor)) {
+                        // no cycle found; continue following that path
+                        nextWorkingSet.add(p.extend(successor));
+                    }
+                }
+            }
+            workingSet = nextWorkingSet;
         }
-        return result;
+        return false;
     }
 
     @Override
@@ -240,7 +257,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     }
 
     private boolean isPartOfCycle(DirectedEdge<T> edge) {
-        return cycles.stream().anyMatch(cycle->cycle.contains(edge));
+        return StreamSupport.stream(cycles.spliterator(), /* parallel */ false).anyMatch(cycle->cycle.contains(edge));
     }
 
     private boolean intersects(Path<T> cycle, Set<T> nodeSet) {
@@ -249,7 +266,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
 
     @Override
     public Map<T, Integer> getLengthsOfLongestPathsFromRootForDag() {
-        if (!cycles.isEmpty()) {
+        if (!Util.isEmpty(cycles)) {
             throw new IllegalStateException("Can't call this method on a graph with cycles; use graphWithCombinedCycleNodes() first");
         }
         final Map<T, Integer> result = new HashMap<>();

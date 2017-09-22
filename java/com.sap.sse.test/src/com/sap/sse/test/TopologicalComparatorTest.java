@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.util.graph.DirectedEdge;
 import com.sap.sse.util.graph.DirectedGraph;
 import com.sap.sse.util.graph.impl.DirectedEdgeImpl;
@@ -48,6 +49,16 @@ public class TopologicalComparatorTest {
         assertMutualEquality(comparator, "D", "H");
         assertChain(comparator, "A", "B", "C", "D");
         assertChain(comparator, "E", "F", "G", "H");
+    }
+    
+    @Test
+    public void testSimpleSortWithTrivialCycle() {
+        addLessThan("A", "B"); addLessThan("B", "C"); addLessThan("C", "A");
+        createGraph();
+        assertEquals("Cycle not detected properly", 1, Util.size(graph.getCycles()));
+        assertEquals("Cycle cluster not detected properly", 1, Util.size(graph.getCycleClusters().getClusters()));
+        TopologicalComparator<String> comparator = new TopologicalComparator<>(graph);
+        assertMutualEquality(comparator, "A", "B", "C");
     }
     
     @Test

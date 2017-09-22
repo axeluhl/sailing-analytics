@@ -9,7 +9,7 @@ public interface DirectedGraph<T> {
     Set<T> getNodes();
     Set<DirectedEdge<T>> getEdges();
     Set<T> getRoots();
-    Set<Path<T>> getCycles();
+    Iterable<Path<T>> getCycles();
     
     /**
      * When cycles overlap, they are combined into {@link CycleCluster}s, each being
