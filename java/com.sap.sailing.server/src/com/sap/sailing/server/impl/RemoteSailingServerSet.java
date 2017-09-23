@@ -73,8 +73,13 @@ public class RemoteSailingServerSet {
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Map<Integer, Statistics>, Exception>> cachedStatisticsByYearForRemoteSailingServers;
     private final StatisticsJsonDeserializer statisticsJsonDeserializer;
     
+    /**
+     * Tracked races content is not replicated. In a replica, {@link #cachedTrackedRacesForRemoteSailingServers} remains empty.
+     */
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<SimpleRaceInfo>, Exception>> cachedTrackedRacesForRemoteSailingServers;
+    
     private final Set<Runnable> remoteRaceResultReceivedCallbacks = ConcurrentHashMap.newKeySet();
+    
     private final AtomicBoolean retrieveRemoteRaceResult = new AtomicBoolean(true);
 
     /**
