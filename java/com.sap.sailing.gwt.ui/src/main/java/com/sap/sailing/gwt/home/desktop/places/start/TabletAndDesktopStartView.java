@@ -7,9 +7,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.start.StartViewDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.partials.anniversary.DesktopAnniversaries;
 import com.sap.sailing.gwt.home.desktop.partials.mainevents.MainEvents;
 import com.sap.sailing.gwt.home.desktop.partials.mainmedia.MainMedia;
 import com.sap.sailing.gwt.home.desktop.partials.stage.Stage;
+import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView;
 
 public class TabletAndDesktopStartView extends Composite implements StartView {
     
@@ -19,6 +21,7 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     }
 
     @UiField(provided=true) Stage stage;
+    @UiField DesktopAnniversaries anniversaries;
     // @UiField(provided=true) MainSponsors mainSponsors;
     @UiField(provided=true) MainEvents mainEvents;
     @UiField(provided=true) MainMedia mainMedia;
@@ -37,5 +40,10 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
         stage.setFeaturedEvents(data.getStageEvents());
         mainEvents.setRecentEvents(data.getRecentEvents());
         mainMedia.setData(data.getVideos(), data.getPhotos());
+    }
+
+    @Override
+    public AnniversariesView getAnniversariesView() {
+        return this.anniversaries;
     }
 }

@@ -19,7 +19,7 @@
             text-align: center;
         }
         .buttonContainer {
-            margin: 1em 10px 0;
+            margin: 2em 10px 0;
         
 }
     </ui:style>    
@@ -28,6 +28,7 @@
             <mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
         </div>
         <mp:stage.Stage ui:field='stage'/>
+        <mp:anniversary.MobileAnniversaries ui:field="anniversariesUi"/>
         <div class="{style.buttonContainer}">
             <a ui:field="showAllEventsUi" class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite} {style.action}"><ui:text from='{i18n.mainEventShowAll}'/></a>
         </div>
