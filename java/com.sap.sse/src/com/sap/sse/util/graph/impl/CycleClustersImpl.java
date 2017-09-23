@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.sap.sse.util.graph.CycleCluster;
 import com.sap.sse.util.graph.CycleClusters;
+import com.sap.sse.util.graph.DirectedEdge;
 
 public class CycleClustersImpl<T> implements CycleClusters<T> {
     private final Set<CycleCluster<T>> clusters;
@@ -27,6 +28,11 @@ public class CycleClustersImpl<T> implements CycleClusters<T> {
     @Override
     public Iterable<CycleCluster<T>> getClusters() {
         return Collections.unmodifiableCollection(clusters);
+    }
+
+    @Override
+    public boolean isEdgeInCycleCluster(DirectedEdge<T> edge) {
+        return clusters.stream().anyMatch(c->c.contains(edge.getFrom() )&& c.contains(edge.getTo()));
     }
 
     @Override

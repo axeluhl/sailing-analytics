@@ -15,6 +15,13 @@ package com.sap.sse.util.graph;
  */
 public interface CycleClusters<T> {
     CycleCluster<T> getCluster(T node);
+    
+    /**
+     * Tests whether this object contains a {@link CycleCluster} that contains both,
+     * the {@code edge}'s {@link DirectedEdge#getFrom() from} and {@link DirectedEdge#getTo() to}
+     * nodes.
+     */
+    boolean isEdgeInCycleCluster(DirectedEdge<T> edge);
 
     Iterable<CycleCluster<T>> getClusters();
 
