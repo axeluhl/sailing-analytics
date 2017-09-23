@@ -14,5 +14,4 @@ public class DesktopPlacesNavigator extends HomePlacesNavigator {
     public PlaceNavigation<SponsoringPlace> getSponsoringNavigation() {
         return createGlobalPlaceNavigation(new SponsoringPlace());
     }
-
 }
