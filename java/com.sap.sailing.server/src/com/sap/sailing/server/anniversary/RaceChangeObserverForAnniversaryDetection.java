@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.TimePoint;
 
 /**
- * {@link AbstractTrackedRegattaAndRaceObserver} that observes {@link TrackedRace TrackedRaces} to determin when the
+ * {@link AbstractTrackedRegattaAndRaceObserver} that observes {@link TrackedRace TrackedRaces} to determine when the
  * prerequisites for anniversary race candidates are fulfilled. When a race gets in that state, an update for the given
  * AnniversaryRaceDeterminator is triggered. Races that are either is a state that mets the prerequisites for
  * anniversary races or races that are finished are not observed anymore.
@@ -58,6 +58,8 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
     }
 
     /**
+     * {@link #fireUpdate() Fires an update} if the race fulfills the criteria for being counted for anniversary races.
+     * 
      * @return {@code true} if the tracked race fulfills the criteria for being counted for anniversary races;
      *         {@code false} otherwise
      */
