@@ -1,9 +1,11 @@
 package com.sap.sse.util.graph.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -74,36 +76,40 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     private Iterable<Path<T>> findCycles() {
         final Set<T> nodesNotVisited = new HashSet<>(nodes);
         final Set<Path<T>> result = new HashSet<>(); // the cycles found
-        Iterable<Path<T>> workingSet = roots.stream().map(r->new PathImpl<T>(Collections.singleton(r))).collect(Collectors.toSet());
-        if (Util.isEmpty(workingSet) && !nodesNotVisited.isEmpty()) {
+        List<Path<T>> worklist = roots.stream().map(r->new PathImpl<T>(Collections.singleton(r))).collect(Collectors.toList());
+        if (Util.isEmpty(worklist) && !nodesNotVisited.isEmpty()) {
             // all nodes seem to be on cycles; no root found; pick any node to start with:
             final T nextNonRootLikelyInCycle = nodesNotVisited.iterator().next();
             nodesNotVisited.remove(nextNonRootLikelyInCycle);
-            workingSet = Collections.singleton(new PathImpl<>(Collections.singleton(nextNonRootLikelyInCycle)));
+            worklist = new ArrayList<>();
+            worklist.add(new PathImpl<>(Collections.singleton(nextNonRootLikelyInCycle)));
         }
-        while (!Util.isEmpty(workingSet)) {
-            final Set<Path<T>> nextWorkingSet = new HashSet<>();
-            for (final Path<T> p : workingSet) {
+        final Set<T> visited = new HashSet<>();
+        while (!Util.isEmpty(worklist)) {
+            // depth-first search by using last element in worklist and replacing it by paths extended by its successors
+            final Path<T> p = worklist.remove(worklist.size()-1);
+            if (!visited.contains(p.tail())) {
+                visited.add(p.tail());
                 nodesNotVisited.remove(p.tail());
+                // at this point, should the index drop to the current size the next time and no cycle was added since now, p.tail() has been proven to not be part of a cycle because all outgoing paths were followed;
                 final Set<T> successors = immediateSuccessors.get(p.tail());
                 for (final T successor : successors) {
                     if (p.contains(successor)) {
                         // cycle found
                         result.add(p.subPath(successor).extend(successor));
                     } else {
-                        nextWorkingSet.add(p.extend(successor));
+                        worklist.add(p.extend(successor));
                     }
                 }
             }
-            if (nextWorkingSet.isEmpty() && !nodesNotVisited.isEmpty()) {
+            if (worklist.isEmpty() && !nodesNotVisited.isEmpty()) {
                 // there are nodes remaining which must be on cycles because they
                 // haven't been reached from any of the root nodes. Add path to first
                 // node not yet visited and continue:
                 final T nextNonRootLikelyInCycle = nodesNotVisited.iterator().next();
                 nodesNotVisited.remove(nextNonRootLikelyInCycle);
-                nextWorkingSet.add(new PathImpl<>(Collections.singleton(nextNonRootLikelyInCycle)));
+                worklist.add(new PathImpl<>(Collections.singleton(nextNonRootLikelyInCycle)));
             }
-            workingSet = nextWorkingSet;
         }
         return result;
     }
@@ -193,7 +199,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         }
         final Set<DirectedEdge<T>> newEdges = new HashSet<>();
         for (final DirectedEdge<T> edge : edges) {
-            if (!isPartOfCycle(edge)) {
+            if (!cycleClusters.isEdgeInCycleCluster(edge)) {
                 newEdges.add(replaceCycleNodesByRepresentatives(edge, cycleClusters));
             }
         }
@@ -247,17 +253,13 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         } else {
             from = edge.getFrom();
         }
-        if (from == null && (toCluster=cycleClusters.getCluster(edge.getTo())) != null && !toCluster.getRepresentative().equals(edge.getTo())) {
+        if (to == null && (toCluster=cycleClusters.getCluster(edge.getTo())) != null && !toCluster.getRepresentative().equals(edge.getTo())) {
             to = toCluster.getRepresentative();
             replaced = true;
         } else {
             to = edge.getTo();
         }
         return replaced ? new DirectedEdgeImpl<>(from, to) : edge;
-    }
-
-    private boolean isPartOfCycle(DirectedEdge<T> edge) {
-        return StreamSupport.stream(cycles.spliterator(), /* parallel */ false).anyMatch(cycle->cycle.contains(edge));
     }
 
     private boolean intersects(Path<T> cycle, Set<T> nodeSet) {

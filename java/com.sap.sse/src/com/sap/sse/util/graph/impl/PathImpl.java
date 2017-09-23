@@ -14,13 +14,11 @@ import com.sap.sse.util.graph.DirectedEdge;
 import com.sap.sse.util.graph.Path;
 
 public class PathImpl<T> implements Path<T> {
-    private final Set<T> nodesForFastContains;
+    private Set<T> nodesForFastContains;
     private final List<T> nodesInOrder;
     
     public PathImpl(Iterable<T> nodes) {
-        this.nodesForFastContains = new HashSet<>();
         this.nodesInOrder = new ArrayList<>(Util.size(nodes));
-        Util.addAll(nodes, this.nodesForFastContains);
         Util.addAll(nodes, this.nodesInOrder);
     }
 
@@ -64,6 +62,10 @@ public class PathImpl<T> implements Path<T> {
 
     @Override
     public boolean contains(T node) {
+        if (nodesForFastContains == null) {
+            final Set<T> nffc = new HashSet<>(nodesInOrder);
+            nodesForFastContains = nffc;
+        }
         return nodesForFastContains.contains(node);
     }
 
@@ -87,7 +89,7 @@ public class PathImpl<T> implements Path<T> {
 
     @Override
     public boolean isEmpty() {
-        return nodesForFastContains.isEmpty();
+        return nodesInOrder.isEmpty();
     }
 
     @Override
