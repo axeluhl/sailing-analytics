@@ -17,4 +17,6 @@ public interface CycleClusters<T> {
     CycleCluster<T> getCluster(T node);
 
     Iterable<CycleCluster<T>> getClusters();
+
+    boolean areDisjoint();
 }
