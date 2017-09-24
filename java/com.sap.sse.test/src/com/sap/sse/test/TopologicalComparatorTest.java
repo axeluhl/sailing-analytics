@@ -96,6 +96,7 @@ public class TopologicalComparatorTest {
         addLessThan("C", "D");
         addLessThan("D", "E");
         addLessThan("E", "F");
+        addLessThan("E", "A");
         addLessThan("F", "G");
         addLessThan("G", "H");
         addLessThan("H", "D");
