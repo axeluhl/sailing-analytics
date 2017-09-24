@@ -6,10 +6,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.graph.CycleClusters;
 import com.sap.sse.util.graph.DirectedEdge;
 import com.sap.sse.util.graph.DirectedGraph;
 import com.sap.sse.util.graph.impl.DirectedEdgeImpl;
@@ -85,6 +89,30 @@ public class TopologicalComparatorTest {
         assertChain(comparator, "A", "F", "E");
     }
     
+    @Test
+    public void testDedicatedThreeNestedCircleGraph() {
+        addLessThan("A", "B");
+        addLessThan("B", "C");
+        addLessThan("C", "D");
+        addLessThan("D", "E");
+        addLessThan("E", "F");
+        addLessThan("F", "G");
+        addLessThan("G", "H");
+        addLessThan("H", "D");
+        addLessThan("C", "I");
+        addLessThan("I", "G");
+        createGraph();
+        assertOnCycle("A", "B", "C", "D", "E", "F", "G", "H", "I");
+        final Pair<DirectedGraph<String>, CycleClusters<String>> dag = graph.graphWithCombinedCycleNodes();
+        assertEquals(0, Util.size(dag.getA().getCycles()));
+    }
+    
+    private void assertOnCycle(String... nodes) {
+        for (final String node : nodes) {
+            assertTrue("Expected "+node+" on cycle but wasn't", StreamSupport.stream(graph.getCycles().spliterator(), /* parallel */ false).anyMatch(c->c.contains(node)));
+        }
+    }
+
     @Test
     public void randomTest() {
         final Random random = new Random(123l);
