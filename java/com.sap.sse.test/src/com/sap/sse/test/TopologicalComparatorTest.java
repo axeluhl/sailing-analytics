@@ -87,7 +87,7 @@ public class TopologicalComparatorTest {
     
     @Test
     public void randomTest() {
-        final Random random = new Random();
+        final Random random = new Random(123l);
         final int NUMBER_OF_NODES = 100;
         final int NUMBER_OF_EDGES = 200;
         final String[] nodes = new String[NUMBER_OF_NODES];

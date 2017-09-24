@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -71,6 +70,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         }
         cyclesPerNode = Collections.unmodifiableMap(modifiableCyclesPerNode);
         cycleClusters = computeCycleClusters();
+        assert cycleClusters.areDisjoint();
     }
 
     private Iterable<Path<T>> findCycles() {
