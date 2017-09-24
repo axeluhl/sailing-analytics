@@ -4,8 +4,13 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.graph.impl.DirectedGraphImpl;
 
 public interface DirectedGraph<T> {
+    static <T> DirectedGraph<T> create(Set<T> nodes, Set<DirectedEdge<T>> edges) {
+        return new DirectedGraphImpl<T>(nodes, edges);
+    }
+    
     Set<T> getNodes();
     Set<DirectedEdge<T>> getEdges();
     Set<T> getRoots();

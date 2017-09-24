@@ -1,6 +1,7 @@
 package com.sap.sse.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -9,7 +10,6 @@ import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import org.junit.Test;
-import static org.junit.Assert.assertTrue;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -17,7 +17,6 @@ import com.sap.sse.util.graph.CycleClusters;
 import com.sap.sse.util.graph.DirectedEdge;
 import com.sap.sse.util.graph.DirectedGraph;
 import com.sap.sse.util.graph.impl.DirectedEdgeImpl;
-import com.sap.sse.util.graph.impl.DirectedGraphImpl;
 import com.sap.sse.util.topologicalordering.TopologicalComparator;
 
 public class TopologicalComparatorTest {
@@ -36,7 +35,7 @@ public class TopologicalComparatorTest {
     }
     
     private void createGraph() {
-        graph = new DirectedGraphImpl<>(nodes, edges);
+        graph = DirectedGraph.create(nodes, edges);
     }
     
     @Test
@@ -132,7 +131,7 @@ public class TopologicalComparatorTest {
             } while (to == from);
             edges.add(new DirectedEdgeImpl<>(nodes[from], nodes[to]));
         }
-        graph = new DirectedGraphImpl<String>(new HashSet<>(Arrays.asList(nodes)), edges);
+        graph = DirectedGraph.create(new HashSet<>(Arrays.asList(nodes)), edges);
         TopologicalComparator<String> comparator = new TopologicalComparator<>(graph);
         for (final DirectedEdge<String> edge : edges) {
             if (!graph.areOnSameCycleCluster(edge.getFrom(), edge.getTo())) {
