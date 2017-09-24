@@ -118,7 +118,7 @@ public class TopologicalComparatorTest {
     public void randomTest() {
         final Random random = new Random();
         final int NUMBER_OF_NODES = 100;
-        final int NUMBER_OF_EDGES = 100;
+        final int NUMBER_OF_EDGES = 150;
         final String[] nodes = new String[NUMBER_OF_NODES];
         for (int i=0; i<NUMBER_OF_NODES; i++) {
             nodes[i] = ""+i;
