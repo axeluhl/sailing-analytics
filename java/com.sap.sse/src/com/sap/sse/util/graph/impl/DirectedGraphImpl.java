@@ -70,6 +70,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         }
         cyclesPerNode = Collections.unmodifiableMap(modifiableCyclesPerNode);
         cycleClusters = computeCycleClusters();
+        assert cycleClusters.areDisjoint();
     }
 
     private Iterable<Path<T>> findCycles() {

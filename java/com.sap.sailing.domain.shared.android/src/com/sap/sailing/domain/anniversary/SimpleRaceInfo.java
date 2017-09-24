@@ -1,20 +1,22 @@
 package com.sap.sailing.domain.anniversary;
 
+import java.io.Serializable;
 import java.net.URL;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sse.common.TimePoint;
 
 /**
- * Used to capture information about a race for use in an "anniversary" feature that allows us
- * to sort a set of races by their start time. Races are identified by a {@link RegattaAndRaceIdentifier}.
- * Their start time is recorded in the {@link #startOfRace} field which must not be {@code null}, and
- * the {@link URL} of the remote server reference is stored in {@link #remoteUrl}. Using clients shall
- * make sure that the same {@link URL} object is used for larger sets of objects of this type in order
- * not to waste memory on a massive replication of those equal {@link URL} objects identifying the same
- * remote server.
+ * Used to capture information about a race for use in an "anniversary" feature that allows us to sort a set of races by
+ * their start time. Races are identified by a {@link RegattaAndRaceIdentifier}. Their start time is recorded in the
+ * {@link #startOfRace} field which must not be {@code null}, and the {@link URL} of the remote server reference is
+ * stored in {@link #remoteUrl}. Using clients shall make sure that the same {@link URL} object is used for larger sets
+ * of objects of this type in order not to waste memory on a massive replication of those equal {@link URL} objects
+ * identifying the same remote server.
  */
-public class SimpleRaceInfo {
+public class SimpleRaceInfo implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final RegattaAndRaceIdentifier identifier;
     private final TimePoint startOfRace;
     private final URL remoteUrl;
@@ -36,10 +38,10 @@ public class SimpleRaceInfo {
     public RegattaAndRaceIdentifier getIdentifier() {
         return identifier;
     }
-    
+
     /**
-     * The URL used in a remote server reference through which the record was obtained; or {@code null} in
-     * case the race identified by this object resides on the local server responding to a request.
+     * The URL used in a remote server reference through which the record was obtained; or {@code null} in case the race
+     * identified by this object resides on the local server responding to a request.
      */
     public URL getRemoteUrl() {
         return remoteUrl;

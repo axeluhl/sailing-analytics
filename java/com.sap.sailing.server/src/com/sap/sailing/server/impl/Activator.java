@@ -120,7 +120,6 @@ public class Activator implements BundleActivator {
                 trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
         notificationService.setRacingEventService(racingEventService);
 
-
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));

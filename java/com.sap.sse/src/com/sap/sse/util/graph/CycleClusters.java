@@ -24,4 +24,6 @@ public interface CycleClusters<T> {
     boolean isEdgeInCycleCluster(DirectedEdge<T> edge);
 
     Iterable<CycleCluster<T>> getClusters();
+
+    boolean areDisjoint();
 }

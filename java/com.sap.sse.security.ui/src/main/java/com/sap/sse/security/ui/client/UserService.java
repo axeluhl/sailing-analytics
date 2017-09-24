@@ -10,6 +10,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.Storage;
@@ -48,6 +51,17 @@ public class UserService {
      * and windows about changes in the currently logged-in user. 
      */
     private static final String LOCAL_STORAGE_UPDATE_KEY = "current-user-has-changed";
+    
+    
+    /**
+     * Storage key to remember when a user was authenticated or dismissed the login hint the last time.
+     */
+    protected static final String STORAGE_KEY_FOR_USER_LOGIN_HINT = "sse.ui.lastLoginOrSuppression";
+    
+    /**
+     * Delay when the login hint will be shown next time after a user logged in or dismissed the message.
+     */
+    protected static final Duration SUPRESSION_DELAY = Duration.ONE_WEEK;
     
     private final UserManagementServiceAsync userManagementService;
 
@@ -185,6 +199,10 @@ public class UserService {
     }
 
     private void setCurrentUser(UserDTO result, final boolean notifyOtherInstances) {
+        if (result != null) {
+            // we remember that a user was authenticated to suppress the hint for some time
+            setUserLoginHintToStorage();
+        }
         currentUser = result;
         userInitiallyLoaded = true;
         logger.info("User changed to " + (result == null ? "No User" : (result.getName() + " roles: "
@@ -211,7 +229,7 @@ public class UserService {
     }
 
     private void notifyUserStatusEventHandlers() {
-        for (UserStatusEventHandler handler : handlers) {
+        for (UserStatusEventHandler handler : new HashSet<>(handlers)) {
             handler.onUserStatusChange(getCurrentUser());
         }
     }
@@ -287,5 +305,45 @@ public class UserService {
                 // TODO Do anything in case of success?
             }
         });
+    }
+    
+    /**
+     * Unauthenticated users get a hint that it has benefits to create an account and log in.When a user was recently
+     * logged in or dismissed the notification, he won't see the hint again for some time. This method checks if a user
+     * was logged in or dismissed the message recently.
+     */
+    public boolean wasUserRecentlyLoggedInOrDismissedTheHint() {
+        final TimePoint lastLoginOrSupression = parseLastNewUserSupression();
+        return lastLoginOrSupression != null
+                && lastLoginOrSupression.plus(SUPRESSION_DELAY).after(MillisecondsTimePoint.now());
+    }
+
+    private TimePoint parseLastNewUserSupression() {
+        TimePoint lastLoginOrSupression = null;
+        final Storage storage = Storage.getLocalStorageIfSupported();
+        if(storage != null) {
+            final String stringValue = storage.getItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+            try {
+                if (stringValue != null) {
+                    lastLoginOrSupression = new MillisecondsTimePoint(Long.parseLong(stringValue));
+                }
+            } catch (Exception e) {
+                logger.warning("Error parsing localstore value '" + stringValue + "'");
+                storage.removeItem(STORAGE_KEY_FOR_USER_LOGIN_HINT);
+            }
+        }
+        return lastLoginOrSupression;
+    }
+
+    /**
+     * Unauthenticated users get a hint that it has benefits to create an account and log in. When a user was recently
+     * logged in or dismissed the notification, he won't see the hint again for some time. This method triggers the
+     * suppression.
+     */
+    public void setUserLoginHintToStorage() {
+        final Storage storage = Storage.getLocalStorageIfSupported();
+        if(storage != null) {
+            storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(MillisecondsTimePoint.now().asMillis()));
+        }
     }
 }

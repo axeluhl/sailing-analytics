@@ -34,4 +34,20 @@ public class CycleClustersImpl<T> implements CycleClusters<T> {
     public boolean isEdgeInCycleCluster(DirectedEdge<T> edge) {
         return clusters.stream().anyMatch(c->c.contains(edge.getFrom() )&& c.contains(edge.getTo()));
     }
+
+    @Override
+    public boolean areDisjoint() {
+        for (final CycleCluster<T> c1 : clusters) {
+            for (final CycleCluster<T> c2 : clusters) {
+                if (c1 != c2) {
+                    final Set<T> set = c1.getClusterNodes();
+                    set.retainAll(c2.getClusterNodes());
+                    if (!set.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 }

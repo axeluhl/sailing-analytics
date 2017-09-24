@@ -11,4 +11,5 @@ public interface GenericAuthenticationLinkFactory {
 
     String createPasswordResetLink();
 
+    String createMoreInfoAboutLoginLink();
 }
