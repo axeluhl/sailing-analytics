@@ -206,11 +206,11 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         for (final Path<T> cycle : cycles) {
             // see if cycle has a non-empty intersection with any of the already existing node sets:
             Set<T> firstIntersectionWith = null;
-            Set<Set<T>> nodeSetsToRemoveAfterJoining = new HashSet<>();
+            List<Set<T>> nodeSetsToRemoveAfterJoining = new ArrayList<>(); // don't use set; inner sets change, and so do their hash codes
             for (final Set<T> nodeSet : combinedCycleNodes) {
                 if (intersects(cycle, nodeSet)) {
                     if (firstIntersectionWith == null) {
-                        Util.addAll(cycle, nodeSet);
+                        Util.addAll(cycle, nodeSet); // this changes nodeSet's hash code; don't use nodeSet in hashed collection
                         firstIntersectionWith = nodeSet;
                     } else {
                         // this is not the first node set that cycle intersects with; this
@@ -229,7 +229,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         }
         final Set<CycleCluster<T>> representativeToCycleNodesItRepresents = new HashSet<>();
         for (final Set<T> cluster : combinedCycleNodes) {
-            representativeToCycleNodesItRepresents.add(new CycleClusterImpl<>(cluster.iterator().next(), cluster));
+            representativeToCycleNodesItRepresents.add(new CycleClusterImpl<>(cluster.iterator().next(), Collections.unmodifiableSet(cluster)));
         }
         return new CycleClustersImpl<>(representativeToCycleNodesItRepresents);
     }
