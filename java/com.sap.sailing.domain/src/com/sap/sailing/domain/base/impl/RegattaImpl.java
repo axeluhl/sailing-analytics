@@ -31,8 +31,6 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnaly
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -740,19 +738,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
     }
 
-    public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
-        CourseArea defaultCourseArea = getDefaultCourseArea();
-        for (Event event : eventFetcher.getAllEvents()) {
-            event.removeRegatta(this);
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (defaultCourseArea != null && courseArea.getId().equals(defaultCourseArea.getId())) {
-                    event.addRegatta(this);
-                }
-            }
-        }
-
-    }
-
     @Override
     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
         return raceExecutionOrderCache;
@@ -870,4 +855,5 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForRegatta);
         deregisterer.deregister(deregisterer.analyze());
     }
+
 }
