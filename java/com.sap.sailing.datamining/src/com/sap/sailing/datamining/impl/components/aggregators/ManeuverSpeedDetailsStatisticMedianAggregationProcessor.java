@@ -21,7 +21,8 @@ public class ManeuverSpeedDetailsStatisticMedianAggregationProcessor extends
         AbstractParallelGroupedDataStoringAggregationProcessor<ManeuverSpeedDetailsStatistic, ManeuverSpeedDetailsAggregation> {
 
     private static final String MESSAGE_KEY = "MedianTrendForTWAs";
-    private final ManeuverSpeedDetailsStatisticAggregationProcessorHelper helper = new ManeuverSpeedDetailsStatisticAggregationProcessorHelper(MedianManeuverSpeedDetailsAggregationCreator.class);
+    private final ManeuverSpeedDetailsStatisticAggregationProcessorHelper helper = new ManeuverSpeedDetailsStatisticAggregationProcessorHelper(
+            MedianManeuverSpeedDetailsAggregationCreator.class);
 
     public ManeuverSpeedDetailsStatisticMedianAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, ManeuverSpeedDetailsAggregation>, ?>> resultReceivers) {
@@ -75,14 +76,14 @@ public class ManeuverSpeedDetailsStatisticMedianAggregationProcessor extends
             for (int i = 0; i < 360; ++i) {
                 ArrayList<Double> valuesList = valuesPerTWA[i];
                 int size = valuesList.size();
-                if(size > 0) {
+                if (size > 0) {
                     double[] values = new double[size];
                     int j = 0;
                     for (double value : valuesList) {
                         values[j++] = value;
                     }
                     Arrays.sort(values);
-    
+
                     int middle = size / 2;
                     if (size % 2 == 1) {
                         valuePerTWA[i] = values[middle];

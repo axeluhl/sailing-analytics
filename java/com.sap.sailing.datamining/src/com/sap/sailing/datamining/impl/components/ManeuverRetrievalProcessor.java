@@ -14,12 +14,16 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class ManeuverRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasManeuverContext> {
+public class ManeuverRetrievalProcessor
+        extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasManeuverContext> {
 
     private final ManeuverSettings settings;
 
-    public ManeuverRetrievalProcessor(ExecutorService executor, Collection<Processor<HasManeuverContext, ?>> resultReceivers, ManeuverSettings settings, int retrievalLevel) {
-        super(HasTrackedLegOfCompetitorContext.class, HasManeuverContext.class, executor, resultReceivers, retrievalLevel);
+    public ManeuverRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<HasManeuverContext, ?>> resultReceivers, ManeuverSettings settings,
+            int retrievalLevel) {
+        super(HasTrackedLegOfCompetitorContext.class, HasManeuverContext.class, executor, resultReceivers,
+                retrievalLevel);
         this.settings = settings;
     }
 
@@ -32,18 +36,30 @@ public class ManeuverRetrievalProcessor extends AbstractRetrievalProcessor<HasTr
                 Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
                 for (Maneuver maneuver : maneuvers) {
                     ManeuverWithContext maneuverWithContext = new ManeuverWithContext(element, maneuver);
-                    //Compute only figures which are really required for filtering
-                    double maneuverDuration = settings.getMinManeuverDuration() != null || settings.getMaxManeuverDuration() != null ? maneuverWithContext.getManeuverDuration() : 0;
-                    double maneuverEnteringSpeed = settings.getMinManeuverEnteringSpeedInKnots() != null || settings.getMaxManeuverEnteringSpeedInKnots() != null ? maneuverWithContext.getManeuverEnteringSpeed() : 0;
-                    double maneuverExitingSpeed = settings.getMinManeuverExitingSpeedInKnots() != null || settings.getMaxManeuverExitingSpeedInKnots() != null ? maneuverWithContext.getManeuverExitingSpeed() : 0;
-                    
-                    if(!(settings.getMinManeuverDuration() != null && maneuverDuration < settings.getMinManeuverDuration() ||
-                            settings.getMaxManeuverDuration() != null && maneuverDuration > settings.getMaxManeuverDuration() ||
-                            settings.getMinManeuverEnteringSpeedInKnots() != null && maneuverEnteringSpeed < settings.getMinManeuverEnteringSpeedInKnots() ||
-                            settings.getMaxManeuverEnteringSpeedInKnots() != null && maneuverEnteringSpeed > settings.getMaxManeuverEnteringSpeedInKnots() ||
-                            settings.getMinManeuverExitingSpeedInKnots() != null && maneuverExitingSpeed < settings.getMinManeuverExitingSpeedInKnots() ||
-                            settings.getMaxManeuverExitingSpeedInKnots() != null && maneuverExitingSpeed > settings.getMaxManeuverExitingSpeedInKnots())) {
-                        
+                    // Compute only figures which are really required for filtering
+                    double maneuverDuration = settings.getMinManeuverDuration() != null
+                            || settings.getMaxManeuverDuration() != null ? maneuverWithContext.getManeuverDuration()
+                                    : 0;
+                    double maneuverEnteringSpeed = settings.getMinManeuverEnteringSpeedInKnots() != null
+                            || settings.getMaxManeuverEnteringSpeedInKnots() != null
+                                    ? maneuverWithContext.getManeuverEnteringSpeed() : 0;
+                    double maneuverExitingSpeed = settings.getMinManeuverExitingSpeedInKnots() != null
+                            || settings.getMaxManeuverExitingSpeedInKnots() != null
+                                    ? maneuverWithContext.getManeuverExitingSpeed() : 0;
+
+                    if (!(settings.getMinManeuverDuration() != null
+                            && maneuverDuration < settings.getMinManeuverDuration()
+                            || settings.getMaxManeuverDuration() != null
+                                    && maneuverDuration > settings.getMaxManeuverDuration()
+                            || settings.getMinManeuverEnteringSpeedInKnots() != null
+                                    && maneuverEnteringSpeed < settings.getMinManeuverEnteringSpeedInKnots()
+                            || settings.getMaxManeuverEnteringSpeedInKnots() != null
+                                    && maneuverEnteringSpeed > settings.getMaxManeuverEnteringSpeedInKnots()
+                            || settings.getMinManeuverExitingSpeedInKnots() != null
+                                    && maneuverExitingSpeed < settings.getMinManeuverExitingSpeedInKnots()
+                            || settings.getMaxManeuverExitingSpeedInKnots() != null
+                                    && maneuverExitingSpeed > settings.getMaxManeuverExitingSpeedInKnots())) {
+
                         maneuversWithContext.add(maneuverWithContext);
                     }
                 }

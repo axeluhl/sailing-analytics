@@ -30,10 +30,12 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
- * Is able to present {@link PolarBackendData}.</br> Has one polar chart showing the perAngle regression data and two
- * x-y-linecharts that show speed and angle over windspeed regressions.
+ * Is able to present {@link PolarBackendData}.</br>
+ * Has one polar chart showing the perAngle regression data and two x-y-linecharts that show speed and angle over
+ * windspeed regressions.
  * 
- * </br></br>
+ * </br>
+ * </br>
  * Used in conjunction with the datamining framework.
  * 
  * @author D054528 (Frederik Petersen)
@@ -42,18 +44,18 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Settings> {
 
     private final DockLayoutPanel dockLayoutPanel;
-    
+
     private final Chart polarChart;
     private final SimpleLayoutPanel polarChartWrapperPanel;
-    
+
     private final Chart speedChart;
     private final Chart angleChart;
     private final DockLayoutPanel speedAndAngleChart;
-    
+
     public PolarBackendResultsPresenter(Component<?> parent, ComponentContext<?> context,
             StringMessages stringMessages) {
         super(parent, context, stringMessages);
-        
+
         polarChart = ChartFactory.createPolarChart();
         polarChart.getYAxis().setMin(0);
         polarChartWrapperPanel = new SimpleLayoutPanel() {
@@ -64,7 +66,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
             }
         };
         polarChartWrapperPanel.add(polarChart);
-        
+
         speedChart = ChartFactory.createSpeedChart(stringMessages);
         angleChart = ChartFactory.createAngleChart(stringMessages);
         speedAndAngleChart = new DockLayoutPanel(Unit.PCT) {
@@ -78,16 +80,16 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
         };
         speedAndAngleChart.addNorth(speedChart, 50);
         speedAndAngleChart.addSouth(angleChart, 50);
-        
+
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
         dockLayoutPanel.addEast(speedAndAngleChart, 60);
-        
+
         ExportChartAsCsvToClipboardButton exportButton = new ExportChartAsCsvToClipboardButton(stringMessages);
         exportButton.setChartToExport(polarChart);
         addControl(exportButton);
     }
-    
+
     @Override
     protected Widget getPresentationWidget() {
         return dockLayoutPanel;
@@ -113,7 +115,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
                 double[] upwindSpeedOverWindSpeed = aggregation.getUpwindSpeedOverWindSpeed();
                 for (int i = 0; i < 30; i++) {
                     upwindSpeedSeries.addPoint(i, upwindSpeedOverWindSpeed[i], false, false, false);
-                    
+
                 }
                 speedChart.addSeries(upwindSpeedSeries, false, false);
             }
@@ -123,7 +125,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
                 double[] downwindSpeedOverWindSpeed = aggregation.getDownwindSpeedOverWindSpeed();
                 for (int i = 0; i < 30; i++) {
                     downwindSpeedSeries.addPoint(i, downwindSpeedOverWindSpeed[i], false, false, false);
-                    
+
                 }
                 speedChart.addSeries(downwindSpeedSeries, false, false);
             }
@@ -134,7 +136,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
                 double[] upwindAngleOverWindSpeed = aggregation.getUpwindAngleOverWindSpeed();
                 for (int i = 0; i < 30; i++) {
                     upwindAngleSeries.addPoint(i, upwindAngleOverWindSpeed[i], false, false, false);
-                    
+
                 }
                 angleChart.addSeries(upwindAngleSeries, false, false);
             }
@@ -144,7 +146,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
                 double[] downwindAngleOverWindSpeed = aggregation.getDownwindAngleOverWindSpeed();
                 for (int i = 0; i < 30; i++) {
                     downwindAngleSeries.addPoint(i, downwindAngleOverWindSpeed[i], false, false, false);
-                    
+
                 }
                 angleChart.addSeries(downwindAngleSeries, false, false);
             }
@@ -155,18 +157,18 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
                 polarSeries.setName(key.asString() + "-" + i + "kn");
                 double[][] data = aggregation.getPolarDataPerWindspeedAndAngle();
                 for (int j = 0; j < 360; j++) {
-                    int convertedAngle = j  > 180 ? j  - 360 : j ;
+                    int convertedAngle = j > 180 ? j - 360 : j;
                     polarSeries.addPoint(convertedAngle, hasDataForAngle[j] ? data[j][i] : 0, false, false, false);
                 }
-                if (i!=11) {
+                if (i != 11) {
                     seriesToHideAfterRendering.add(polarSeries);
                 }
                 polarChart.addSeries(polarSeries, false, false);
             }
             polarChart.redraw();
-            
+
         }
-        //Initially resize the chart. Otherwise it's too big. FIXME with a better solution
+        // Initially resize the chart. Otherwise it's too big. FIXME with a better solution
         Timer timer = new Timer() {
 
             @Override
@@ -212,7 +214,6 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     public Settings getSettings() {
         return null;
     }
-
 
     @Override
     public String getId() {

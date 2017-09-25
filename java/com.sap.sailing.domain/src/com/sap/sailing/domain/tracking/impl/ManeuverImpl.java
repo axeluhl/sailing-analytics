@@ -23,11 +23,13 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     private final SpeedWithBearing speedWithBearingAfter;
     private final double directionChangeInDegrees;
     private final Distance maneuverLoss;
-    private final TimePoint timePointBefore; 
-    private final TimePoint timePointAfter; 
+    private final TimePoint timePointBefore;
+    private final TimePoint timePointAfter;
 
-    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint, SpeedWithBearing speedWithBearingBefore,
-            SpeedWithBearing speedWithBearingAfter, double directionChangeInDegrees, Distance maneuverLoss, TimePoint timePointBefore, TimePoint timePointAfter) {
+    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint,
+            SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
+            double directionChangeInDegrees, Distance maneuverLoss, TimePoint timePointBefore,
+            TimePoint timePointAfter) {
         super();
         this.type = type;
         this.newTack = newTack;
@@ -40,7 +42,7 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
         this.timePointBefore = timePointBefore;
         this.timePointAfter = timePointAfter;
     }
-    
+
     @Override
     public ManeuverType getType() {
         return type;
@@ -85,18 +87,19 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     public TimePoint getTimePointBefore() {
         return timePointBefore;
     }
-    
+
     @Override
     public TimePoint getTimePointAfter() {
         return timePointAfter;
     }
-    
+
     @Override
     public String toString() {
         return super.toString() + " " + type + " on new tack " + newTack + " on position " + position
                 + " at time point " + timePoint + ". " + "Speed before maneuver " + speedWithBearingBefore
                 + " speed after maneuver " + speedWithBearingAfter + ". The maneuver changed the course by "
-                + directionChangeInDegrees + "deg." + (getManeuverLoss() == null ? "" : " Lost approximately "+getManeuverLoss());
+                + directionChangeInDegrees + "deg."
+                + (getManeuverLoss() == null ? "" : " Lost approximately " + getManeuverLoss());
     }
 
 }

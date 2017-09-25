@@ -15,7 +15,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDialogComponent<ManeuverSpeedDetailsSettings> {
+public class ManeuverSpeedDetailsSettingsDialogComponent
+        implements SettingsDialogComponent<ManeuverSpeedDetailsSettings> {
 
     private ManeuverSpeedDetailsSettings settings;
     private StringMessages stringMessages;
@@ -42,12 +43,15 @@ public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDial
     private void setupGrid(Grid grid, DataEntryDialog<?> dialog) {
         Label directionNormalizationLabel = dialog.createLabel(stringMessages.maneuverDirectionNormalization());
         grid.setWidget(0, 0, directionNormalizationLabel);
-        maneuverDirectionNoNormalizationRadioButton = dialog.createRadioButton("maneuverDirectionNormalization", stringMessages.disabled());
-        maneuverDirectionStarboardNormalizationRadioButton = dialog.createRadioButton("maneuverDirectionNormalization", stringMessages.starboardSide());
-        maneuverDirectionPortNormalizationRadioButton = dialog.createRadioButton("maneuverDirectionNormalization", stringMessages.portSide());
-        if(settings.getNormalizedManeuverDirection() == NauticalSide.STARBOARD) {
+        maneuverDirectionNoNormalizationRadioButton = dialog.createRadioButton("maneuverDirectionNormalization",
+                stringMessages.disabled());
+        maneuverDirectionStarboardNormalizationRadioButton = dialog.createRadioButton("maneuverDirectionNormalization",
+                stringMessages.starboardSide());
+        maneuverDirectionPortNormalizationRadioButton = dialog.createRadioButton("maneuverDirectionNormalization",
+                stringMessages.portSide());
+        if (settings.getNormalizedManeuverDirection() == NauticalSide.STARBOARD) {
             maneuverDirectionStarboardNormalizationRadioButton.setValue(true);
-        } else if(settings.getNormalizedManeuverDirection() == NauticalSide.PORT) {
+        } else if (settings.getNormalizedManeuverDirection() == NauticalSide.PORT) {
             maneuverDirectionPortNormalizationRadioButton.setValue(true);
         } else {
             maneuverDirectionNoNormalizationRadioButton.setValue(true);
@@ -57,8 +61,9 @@ public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDial
         vp.add(maneuverDirectionStarboardNormalizationRadioButton);
         vp.add(maneuverDirectionPortNormalizationRadioButton);
         grid.setWidget(0, 1, vp);
-        
-        Label maneuverDirectionEqualWeightingEnabledLabel = dialog.createLabel(stringMessages.maneuverDirectionEqualWeightingEnabled());
+
+        Label maneuverDirectionEqualWeightingEnabledLabel = dialog
+                .createLabel(stringMessages.maneuverDirectionEqualWeightingEnabled());
         grid.setWidget(1, 0, maneuverDirectionEqualWeightingEnabledLabel);
         maneuverDirectionEqualWeightingEnabledCheckBox = dialog.createCheckbox("");
         maneuverDirectionEqualWeightingEnabledCheckBox.setValue(settings.isManeuverDirectionEqualWeightingEnabled());
@@ -68,14 +73,15 @@ public class ManeuverSpeedDetailsSettingsDialogComponent implements SettingsDial
     @Override
     public ManeuverSpeedDetailsSettings getResult() {
         NauticalSide nauticalSide;
-        if(maneuverDirectionPortNormalizationRadioButton.getValue()) {
+        if (maneuverDirectionPortNormalizationRadioButton.getValue()) {
             nauticalSide = NauticalSide.PORT;
-        } else if(maneuverDirectionStarboardNormalizationRadioButton.getValue()) {
+        } else if (maneuverDirectionStarboardNormalizationRadioButton.getValue()) {
             nauticalSide = NauticalSide.STARBOARD;
         } else {
             nauticalSide = null;
         }
-        return new ManeuverSpeedDetailsSettingsImpl(nauticalSide, maneuverDirectionEqualWeightingEnabledCheckBox.getValue());
+        return new ManeuverSpeedDetailsSettingsImpl(nauticalSide,
+                maneuverDirectionEqualWeightingEnabledCheckBox.getValue());
     }
 
     @Override

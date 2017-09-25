@@ -19,7 +19,8 @@ public class ManeuverSpeedDetailsStatisticAvgAggregationProcessor extends
         AbstractParallelGroupedDataAggregationProcessor<ManeuverSpeedDetailsStatistic, ManeuverSpeedDetailsAggregation> {
 
     private static final String MESSAGE_KEY = "AvgTrendForTWAs";
-    private final ManeuverSpeedDetailsStatisticAggregationProcessorHelper helper = new ManeuverSpeedDetailsStatisticAggregationProcessorHelper(AvgManeuverSpeedDetailsAggregationCreator.class);
+    private final ManeuverSpeedDetailsStatisticAggregationProcessorHelper helper = new ManeuverSpeedDetailsStatisticAggregationProcessorHelper(
+            AvgManeuverSpeedDetailsAggregationCreator.class);
 
     public ManeuverSpeedDetailsStatisticAvgAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, ManeuverSpeedDetailsAggregation>, ?>> resultReceivers) {

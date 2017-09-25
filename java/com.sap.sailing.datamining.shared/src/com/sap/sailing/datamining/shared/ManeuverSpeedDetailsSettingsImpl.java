@@ -3,22 +3,22 @@ package com.sap.sailing.datamining.shared;
 import com.sap.sailing.domain.common.NauticalSide;
 
 public class ManeuverSpeedDetailsSettingsImpl extends ManeuverSpeedDetailsSettings {
-    
-    
+
     private static final long serialVersionUID = 61329258712144L;
-    
+
     private NauticalSide normalizeManeuverDirection;
 
     private boolean maneuverDirectionEqualWeighingEnabled;
-    
+
     public static ManeuverSpeedDetailsSettings createDefault() {
         return new ManeuverSpeedDetailsSettingsImpl(null, false);
     }
-    
+
     public ManeuverSpeedDetailsSettingsImpl() {
     }
 
-    public ManeuverSpeedDetailsSettingsImpl(NauticalSide normalizeManeuverDirection, boolean maneuverDirectionEqualWeighingEnabled) {
+    public ManeuverSpeedDetailsSettingsImpl(NauticalSide normalizeManeuverDirection,
+            boolean maneuverDirectionEqualWeighingEnabled) {
         this.normalizeManeuverDirection = normalizeManeuverDirection;
         this.maneuverDirectionEqualWeighingEnabled = maneuverDirectionEqualWeighingEnabled;
     }
@@ -37,6 +37,5 @@ public class ManeuverSpeedDetailsSettingsImpl extends ManeuverSpeedDetailsSettin
     public boolean isManeuverDirectionEqualWeightingEnabled() {
         return maneuverDirectionEqualWeighingEnabled;
     }
-    
 
 }

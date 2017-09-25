@@ -14,7 +14,7 @@ import com.sap.sse.datamining.shared.SerializationDummy;
 @SuppressWarnings("unused")
 public final class SailingDataMiningSerializationDummy implements SerializationDummy {
     private static final long serialVersionUID = 2L;
-    
+
     private LegType legType;
     private Distance distance;
     private Bearing bearing;
@@ -30,7 +30,8 @@ public final class SailingDataMiningSerializationDummy implements SerializationD
     private ManeuverSpeedDetailsSettingsImpl maneuverSpeedDetailsSettingsImpl;
     private ManeuverSettings maneuverSettings;
     private ManeuverSettingsImpl maneuverSettingsImpl;
-    
-    private SailingDataMiningSerializationDummy() { }
-    
+
+    private SailingDataMiningSerializationDummy() {
+    }
+
 }

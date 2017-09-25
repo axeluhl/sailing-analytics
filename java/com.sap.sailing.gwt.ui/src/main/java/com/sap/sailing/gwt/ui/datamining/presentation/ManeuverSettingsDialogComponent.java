@@ -44,27 +44,27 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
         grid.setWidget(0, 0, minManeuverDurationLabel);
         minManeuverDurationBox = dialog.createDoubleBox(settings.getMinManeuverDuration(), 10);
         grid.setWidget(0, 1, minManeuverDurationBox);
-        
+
         Label maxManeuverDurationLabel = dialog.createLabel(stringMessages.maxManeuverDuration());
         grid.setWidget(1, 0, maxManeuverDurationLabel);
         maxManeuverDurationBox = dialog.createDoubleBox(settings.getMaxManeuverDuration(), 10);
         grid.setWidget(1, 1, maxManeuverDurationBox);
-        
+
         Label minManeuverEnteringSpeedLabel = dialog.createLabel(stringMessages.minManeuverEnteringSpeedInKnots());
         grid.setWidget(2, 0, minManeuverEnteringSpeedLabel);
         minManeuverEnteringSpeedBox = dialog.createDoubleBox(settings.getMinManeuverEnteringSpeedInKnots(), 10);
         grid.setWidget(2, 1, minManeuverEnteringSpeedBox);
-        
+
         Label maxManeuverEnteringSpeedLabel = dialog.createLabel(stringMessages.maxManeuverEnteringSpeedInKnots());
         grid.setWidget(3, 0, maxManeuverEnteringSpeedLabel);
         maxManeuverEnteringSpeedBox = dialog.createDoubleBox(settings.getMaxManeuverEnteringSpeedInKnots(), 10);
         grid.setWidget(3, 1, maxManeuverEnteringSpeedBox);
-        
+
         Label minManeuverExitingSpeedLabel = dialog.createLabel(stringMessages.minManeuverExitingSpeedInKnots());
         grid.setWidget(4, 0, minManeuverExitingSpeedLabel);
         minManeuverExitingSpeedBox = dialog.createDoubleBox(settings.getMinManeuverExitingSpeedInKnots(), 10);
         grid.setWidget(4, 1, minManeuverExitingSpeedBox);
-        
+
         Label maxManeuverExitingSpeedLabel = dialog.createLabel(stringMessages.maxManeuverExitingSpeedInKnots());
         grid.setWidget(5, 0, maxManeuverExitingSpeedLabel);
         maxManeuverExitingSpeedBox = dialog.createDoubleBox(settings.getMaxManeuverExitingSpeedInKnots(), 10);
@@ -73,7 +73,9 @@ public class ManeuverSettingsDialogComponent implements SettingsDialogComponent<
 
     @Override
     public ManeuverSettings getResult() {
-        return new ManeuverSettingsImpl(minManeuverDurationBox.getValue(), maxManeuverDurationBox.getValue(), minManeuverEnteringSpeedBox.getValue(), maxManeuverEnteringSpeedBox.getValue(), minManeuverExitingSpeedBox.getValue(), maxManeuverExitingSpeedBox.getValue());
+        return new ManeuverSettingsImpl(minManeuverDurationBox.getValue(), maxManeuverDurationBox.getValue(),
+                minManeuverEnteringSpeedBox.getValue(), maxManeuverEnteringSpeedBox.getValue(),
+                minManeuverExitingSpeedBox.getValue(), maxManeuverExitingSpeedBox.getValue());
     }
 
     @Override

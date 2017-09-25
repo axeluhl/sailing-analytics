@@ -15,19 +15,19 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class ChartFactory extends Chart {
-    
+
     public static Chart createPolarChart() {
-        LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1).setMarker(new Marker().setEnabled(false));
-        Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
-                .setLinePlotOptions(linePlotOptions)
-                .setPolar(true).setHeight100().setWidth100();
+        LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1)
+                .setMarker(new Marker().setEnabled(false));
+        Chart polarSheetChart = new Chart().setType(Series.Type.LINE).setLinePlotOptions(linePlotOptions).setPolar(true)
+                .setHeight100().setWidth100();
         polarSheetChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
         polarSheetChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
         polarSheetChart.setOption("/pane/startAngle", 180);
         polarSheetChart.setExporting(new Exporting().setEnabled(false));
         return polarSheetChart;
     }
-    
+
     public static Chart createDataCountHistogramChart(String xAxisLabel, StringMessages stringMessages) {
         Chart histogramChart = new Chart().setType(Type.COLUMN).setHeight100().setWidth100();
         histogramChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
@@ -38,17 +38,17 @@ public class ChartFactory extends Chart {
         histogramChart.setExporting(new Exporting().setEnabled(false));
         return histogramChart;
     }
-    
+
     public static Chart createSpeedChart(StringMessages stringMessages) {
         Chart speedChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
         speedChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
         speedChart.setExporting(new Exporting().setEnabled(false));
         speedChart.getYAxis().setExtremes(0, speedChart.getYAxis().getExtremes().getMax())
-                .setAxisTitleText(stringMessages.boatSpeed() + " (" +  stringMessages.knotsUnit() + ")");
+                .setAxisTitleText(stringMessages.boatSpeed() + " (" + stringMessages.knotsUnit() + ")");
         speedChart.getXAxis().setAxisTitleText(stringMessages.windSpeed());
         return speedChart;
     }
-    
+
     public static Chart createAngleChart(StringMessages stringMessages) {
         Chart angleChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
         angleChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
@@ -57,15 +57,16 @@ public class ChartFactory extends Chart {
         angleChart.getXAxis().setAxisTitleText(stringMessages.windSpeed());
         return angleChart;
     }
-    
+
     public static Chart createLineChartForPolarData(StringMessages stringMessages) {
-        LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1).setMarker(new Marker().setEnabled(false));
-        Chart lineChart = new Chart().setType(Series.Type.LINE)
-                .setLinePlotOptions(linePlotOptions).setHeight100().setWidth100();
+        LinePlotOptions linePlotOptions = new LinePlotOptions().setLineWidth(1)
+                .setMarker(new Marker().setEnabled(false));
+        Chart lineChart = new Chart().setType(Series.Type.LINE).setLinePlotOptions(linePlotOptions).setHeight100()
+                .setWidth100();
         lineChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
         lineChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
-        lineChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(30).setEnabled(true))
-                .setAxisTitle(new AxisTitle().setText(stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")"));
+        lineChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(30).setEnabled(true)).setAxisTitle(
+                new AxisTitle().setText(stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")"));
         lineChart.setLegend(new Legend().setEnabled(false));
         lineChart.setExporting(new Exporting().setEnabled(false));
         return lineChart;

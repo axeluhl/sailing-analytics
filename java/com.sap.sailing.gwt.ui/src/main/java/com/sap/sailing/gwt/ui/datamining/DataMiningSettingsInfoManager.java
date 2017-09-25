@@ -17,22 +17,22 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class DataMiningSettingsInfoManager {
-    
+
     private final Map<Class<?>, DataMiningSettingsInfo> infosMappedBySettingsType;
-    
+
     public DataMiningSettingsInfoManager() {
         infosMappedBySettingsType = new HashMap<>();
-        
+
         // GWT doesn't support Class.isAssignableFrom and Class.getInterfaces.
         // Adding every implementation of the desired type is necessary.
         PolarDataMiningSettingsInfo polarDataMiningSettingsInfo = new PolarDataMiningSettingsInfo();
         infosMappedBySettingsType.put(PolarDataMiningSettings.class, polarDataMiningSettingsInfo);
         infosMappedBySettingsType.put(PolarDataMiningSettingsImpl.class, polarDataMiningSettingsInfo);
-        
+
         ManeuverSpeedDetailsSettingsInfo maneuverSpeedDetailsSettingsInfo = new ManeuverSpeedDetailsSettingsInfo();
         infosMappedBySettingsType.put(ManeuverSpeedDetailsSettings.class, maneuverSpeedDetailsSettingsInfo);
         infosMappedBySettingsType.put(ManeuverSpeedDetailsSettingsImpl.class, maneuverSpeedDetailsSettingsInfo);
-        
+
         ManeuverSettingsInfo maneuverSettingsInfo = new ManeuverSettingsInfo();
         infosMappedBySettingsType.put(ManeuverSettings.class, maneuverSettingsInfo);
         infosMappedBySettingsType.put(ManeuverSettingsImpl.class, maneuverSettingsInfo);
@@ -41,13 +41,15 @@ public class DataMiningSettingsInfoManager {
     public DataMiningSettingsInfo getSettingsInfo(Class<?> settingsType) {
         return infosMappedBySettingsType.get(settingsType);
     }
-    
+
     private class PolarDataMiningSettingsInfo implements DataMiningSettingsInfo {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(SettingsType settings) {
-            return (SettingsDialogComponent<SettingsType>) new PolarDataMiningSettingsDialogComponent((PolarDataMiningSettings) settings);
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(
+                SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new PolarDataMiningSettingsDialogComponent(
+                    (PolarDataMiningSettings) settings);
         }
 
         @Override
@@ -59,15 +61,17 @@ public class DataMiningSettingsInfoManager {
         public String getId() {
             return "PolarDataMiningSettingsInfo";
         }
-        
+
     }
-    
+
     private class ManeuverSettingsInfo implements DataMiningSettingsInfo {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(SettingsType settings) {
-            return (SettingsDialogComponent<SettingsType>) new ManeuverSettingsDialogComponent((ManeuverSettings) settings);
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(
+                SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new ManeuverSettingsDialogComponent(
+                    (ManeuverSettings) settings);
         }
 
         @Override
@@ -79,15 +83,17 @@ public class DataMiningSettingsInfoManager {
         public String getId() {
             return "ManeuverSettingsInfo";
         }
-        
+
     }
-    
+
     private class ManeuverSpeedDetailsSettingsInfo implements DataMiningSettingsInfo {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(SettingsType settings) {
-            return (SettingsDialogComponent<SettingsType>) new ManeuverSpeedDetailsSettingsDialogComponent((ManeuverSpeedDetailsSettings) settings);
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(
+                SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new ManeuverSpeedDetailsSettingsDialogComponent(
+                    (ManeuverSpeedDetailsSettings) settings);
         }
 
         @Override
@@ -99,7 +105,7 @@ public class DataMiningSettingsInfoManager {
         public String getId() {
             return "ManeuverSpeedDetailsSettingsInfo";
         }
-        
+
     }
 
 }

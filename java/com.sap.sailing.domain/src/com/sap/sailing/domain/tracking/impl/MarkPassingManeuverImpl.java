@@ -14,10 +14,11 @@ public class MarkPassingManeuverImpl extends ManeuverImpl implements MarkPassing
     private static final long serialVersionUID = 8935348908557191614L;
     private final Waypoint waypointPassed;
     private final NauticalSide side;
-    
+
     public MarkPassingManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, Distance maneuverLoss, TimePoint timePointBefore, TimePoint timePointAfter, Waypoint waypointPassed, NauticalSide side) {
+            double directionChangeInDegrees, Distance maneuverLoss, TimePoint timePointBefore, TimePoint timePointAfter,
+            Waypoint waypointPassed, NauticalSide side) {
         super(type, newTack, position, timePoint, speedWithBearingBefore, speedWithBearingAfter,
                 directionChangeInDegrees, maneuverLoss, timePointBefore, timePointAfter);
         this.waypointPassed = waypointPassed;
@@ -33,11 +34,11 @@ public class MarkPassingManeuverImpl extends ManeuverImpl implements MarkPassing
     public NauticalSide getSide() {
         return side;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder(super.toString());
-        result.append(", passed waypoint "+getWaypointPassed()+" to "+getSide().name());
+        result.append(", passed waypoint " + getWaypointPassed() + " to " + getSide().name());
         return result.toString();
     }
 

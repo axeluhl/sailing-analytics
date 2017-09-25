@@ -5,11 +5,11 @@ public class ManeuverSpeedDetailsAggregationImpl implements ManeuverSpeedDetails
     private double[] valuePerTWA;
     private int[] countPerTWA;
     private int count;
-    
+
     public ManeuverSpeedDetailsAggregationImpl() {
-      //GWT
+        // GWT
     }
-    
+
     public ManeuverSpeedDetailsAggregationImpl(double[] valuePerTWA, int[] countPerTWA, int count) {
         this.valuePerTWA = valuePerTWA;
         this.countPerTWA = countPerTWA;
@@ -32,4 +32,3 @@ public class ManeuverSpeedDetailsAggregationImpl implements ManeuverSpeedDetails
     }
 
 }
-

@@ -6,30 +6,30 @@ import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasManeuverSpeedDetailsContext {
-    
-    //FIXME due to UI bug there is at least one dimension per fact required
-    @Dimension(messageKey="ManeuverDirection")
+
+    // FIXME due to UI bug there is at least one dimension per fact required
+    @Dimension(messageKey = "ManeuverDirection")
     NauticalSide getToSide();
-    
-    @Connector(scanForStatistics=false)
+
+    @Connector(scanForStatistics = false)
     HasManeuverContext getManeuverContext();
-    
-    @Statistic(messageKey="SpeedSlope", ordinal=6, resultDecimals=4)
+
+    @Statistic(messageKey = "SpeedSlope", ordinal = 6, resultDecimals = 4)
     ManeuverSpeedDetailsStatistic getSpeedSlopeStatistic();
-    
-    @Statistic(messageKey="RatioToEnteringSpeed", ordinal=1, resultDecimals=4)
+
+    @Statistic(messageKey = "RatioToEnteringSpeed", ordinal = 1, resultDecimals = 4)
     ManeuverSpeedDetailsStatistic getRatioToEnteringSpeedStatistic();
 
-    @Statistic(messageKey="RatioToPreviousTWA", ordinal=5, resultDecimals=4)
+    @Statistic(messageKey = "RatioToPreviousTWA", ordinal = 5, resultDecimals = 4)
     ManeuverSpeedDetailsStatistic getRatioToPreviousTWAStatistic();
-    
-    @Statistic(messageKey="LowestRatioToEnteringSpeed", ordinal=2, resultDecimals=4)
+
+    @Statistic(messageKey = "LowestRatioToEnteringSpeed", ordinal = 2, resultDecimals = 4)
     Double getLowestRatioToEnteringSpeedStatistic();
-    
-    @Statistic(messageKey="HighestRatioToEnteringSpeed", ordinal=3, resultDecimals=4)
+
+    @Statistic(messageKey = "HighestRatioToEnteringSpeed", ordinal = 3, resultDecimals = 4)
     Double getHighestRatioToEnteringSpeedStatistic();
-    
-    @Statistic(messageKey="HighestRatioToEnteringSpeedMinusLowest", ordinal=4, resultDecimals=4)
+
+    @Statistic(messageKey = "HighestRatioToEnteringSpeedMinusLowest", ordinal = 4, resultDecimals = 4)
     Double getHighestRatioToEnteringSpeedMinusLowestStatistic();
-    
+
 }

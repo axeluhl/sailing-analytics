@@ -1,22 +1,23 @@
 package com.sap.sailing.datamining.shared;
 
 public class ManeuverSettingsImpl extends ManeuverSettings {
-    
+
     private static final long serialVersionUID = 69258712144L;
-    
+
     private Double minManeuverDuration;
     private Double maxManeuverDuration;
     private Double minManeuverEnteringSpeedInKnots;
     private Double maxManeuverEnteringSpeedInKnots;
     private Double minManeuverExitingSpeedInKnots;
     private Double maxManeuverExitingSpeedInKnots;
-    
+
     public static ManeuverSettingsImpl createDefault() {
         return new ManeuverSettingsImpl(1.0, null, 2.0, null, 1.0, null);
     }
-    
-    public ManeuverSettingsImpl() {}
-    
+
+    public ManeuverSettingsImpl() {
+    }
+
     public ManeuverSettingsImpl(Double minManeuverDuration, Double maxManeuverDuration,
             Double minManeuverEnteringSpeedInKnots, Double maxManeuverEnteringSpeedInKnots,
             Double minManeuverExitingSpeedInKnots, Double maxManeuverExitingSpeedInKnots) {
@@ -110,5 +111,5 @@ public class ManeuverSettingsImpl extends ManeuverSettings {
             return false;
         return true;
     }
-    
+
 }

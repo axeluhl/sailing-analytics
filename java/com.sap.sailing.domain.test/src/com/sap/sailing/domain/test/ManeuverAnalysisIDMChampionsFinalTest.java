@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.test;
 
-
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
@@ -50,23 +49,28 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException,
+            SubscriberInitializationException, CreateModelException {
         super.setUp();
-        URI storedUri = new URI("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.mtb").getCanonicalPath().replace('\\', '/'));
-        super.setUp(new URL("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.txt").getCanonicalPath()),
+        URI storedUri = new URI("file:///" + new File("resources/event_20110929_Internatio-Champions_Cup_Final.mtb")
+                .getCanonicalPath().replace('\\', '/'));
+        super.setUp(
+                new URL("file:///"
+                        + new File("resources/event_20110929_Internatio-Champions_Cup_Final.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
         getTrackedRace().recordWind(
-                new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
+                new WindImpl(/* position */null, MillisecondsTimePoint.now(),
+                        new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(65))),
+                new WindSourceImpl(WindSourceType.WEB));
     }
-    
+
     /**
-     * If a leg's type needs to be determined, some wind data is required to decide on upwind,
-     * downwind or reaching leg. Wind information is queried by {@link TrackedLegImpl} based on
-     * the marks' positions. Therefore, approximate mark positions are set here for all marks
-     * of {@link #getTrackedRace()}'s courses for the time span starting at the epoch up to now.
+     * If a leg's type needs to be determined, some wind data is required to decide on upwind, downwind or reaching leg.
+     * Wind information is queried by {@link TrackedLegImpl} based on the marks' positions. Therefore, approximate mark
+     * positions are set here for all marks of {@link #getTrackedRace()}'s courses for the time span starting at the
+     * epoch up to now.
      */
     public static void fixApproximateMarkPositionsForWindReadOut(DynamicTrackedRace race) {
         TimePoint epoch = new MillisecondsTimePoint(0l);
@@ -84,7 +88,7 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
             }
         }
     }
-    
+
     @Override
     protected String getExpectedEventName() {
         return "Internationale Deutche Meisterschaft";
@@ -98,7 +102,7 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         Competitor competitor = getCompetitorByName("Polgar\\+Koy\\+Seelig");
         assertNotNull(competitor);
         Date toDate = new Date(1317650038784l); // that's shortly after their penalty circle
-        Date fromDate = new Date(toDate.getTime()-450000l);
+        Date fromDate = new Date(toDate.getTime() - 450000l);
         final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         TimePoint maneuverTime = new MillisecondsTimePoint(dateFormatter.parse("2011-10-03T15:52:31.000+0200"));
         Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
@@ -110,5 +114,5 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         maneuverTypesFound.add(ManeuverType.PENALTY_CIRCLE);
         assertAllManeuversOfTypesDetected(maneuverTypesFound, maneuversInvalid);
     }
-    
+
 }

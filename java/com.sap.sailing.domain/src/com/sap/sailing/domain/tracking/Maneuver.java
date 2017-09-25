@@ -12,20 +12,20 @@ import com.sap.sse.datamining.annotations.Statistic;
 public interface Maneuver extends GPSFix {
     ManeuverType getType();
 
-    @Dimension(messageKey="Tack", ordinal=13)
+    @Dimension(messageKey = "Tack", ordinal = 13)
     Tack getNewTack();
-    
+
     SpeedWithBearing getSpeedWithBearingBefore();
 
     SpeedWithBearing getSpeedWithBearingAfter();
 
-    @Statistic(messageKey="DirectionChange", resultDecimals=2, ordinal=2)
+    @Statistic(messageKey = "DirectionChange", resultDecimals = 2, ordinal = 2)
     double getDirectionChangeInDegrees();
 
     Distance getManeuverLoss();
-    
+
     TimePoint getTimePointBefore();
-    
+
     TimePoint getTimePointAfter();
-    
+
 }

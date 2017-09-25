@@ -24,28 +24,31 @@ public class ManeuverWithContext implements HasManeuverContext {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
         this.maneuver = maneuver;
     }
-    
+
     public Double getManeuverEnteringSpeed() {
         Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
-        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext()
+                .getTrackedRace();
         return trackedRace.getTrack(competitor).getEstimatedSpeed(maneuver.getTimePointBefore()).getKnots();
     }
-    
+
     public Double getManeuverExitingSpeed() {
         Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
-        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext()
+                .getTrackedRace();
         return trackedRace.getTrack(competitor).getEstimatedSpeed(maneuver.getTimePointAfter()).getKnots();
     }
-    
+
     @Override
     public Double getManeuverDuration() {
         return maneuver.getTimePointBefore().until(maneuver.getTimePointAfter()).asSeconds();
     }
-    
+
     @Override
     public Double getBeatAngleAtManeuverClimax() {
         Competitor competitor = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getCompetitor();
-        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+        TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext()
+                .getTrackedRace();
         Wind wind = trackedRace.getWind(maneuver.getPosition(), maneuver.getTimePoint());
         SpeedWithBearing speedWithBearing = trackedRace.getTrack(competitor).getEstimatedSpeed(maneuver.getTimePoint());
         return Math.abs(wind.getFrom().getDifferenceTo(speedWithBearing.getBearing()).getDegrees());
@@ -75,7 +78,7 @@ public class ManeuverWithContext implements HasManeuverContext {
     public Double getAbsoluteDirectionChangeInDegrees() {
         return Math.abs(getManeuver().getDirectionChangeInDegrees());
     }
-    
+
     @Override
     public Distance getManeuverLoss() {
         return getManeuver().getManeuverLoss();
@@ -90,7 +93,7 @@ public class ManeuverWithContext implements HasManeuverContext {
     public void setWindInternal(Wind wind) {
         this.wind = wind;
     }
-    
+
     @Override
     public Double getEnteringBeatAngle() {
         return getBeatAngleAtTimepoint(maneuver.getTimePointBefore());
@@ -100,11 +103,14 @@ public class ManeuverWithContext implements HasManeuverContext {
     public Double getExitingBeatAngle() {
         return getBeatAngleAtTimepoint(maneuver.getTimePointAfter());
     }
-    
+
     private Double getBeatAngleAtTimepoint(TimePoint timepoint) {
-        Wind wind = trackedLegOfCompetitor.getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getWind(maneuver.getPosition(), timepoint);
-        GPSFixTrack<Competitor,GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
-        if(wind != null) {
+        Wind wind = trackedLegOfCompetitor.getTrackedLegContext().getTrackedRaceContext().getTrackedRace()
+                .getWind(maneuver.getPosition(), timepoint);
+        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedLegOfCompetitorContext()
+                .getTrackedLegContext().getTrackedRaceContext().getTrackedRace()
+                .getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
+        if (wind != null) {
             competitorTrack.lockForRead();
             try {
                 SpeedWithBearing speedWithBearing = competitorTrack.getEstimatedSpeed(timepoint);
@@ -116,12 +122,12 @@ public class ManeuverWithContext implements HasManeuverContext {
         }
         return null;
     }
-    
+
     @Override
     public Double getEnteringManeuverSpeedMinusExitingSpeed() {
         return getManeuverEnteringSpeed() - getManeuverExitingSpeed();
     }
-    
+
     @Override
     public Double getRatioBetweenManeuverEnteringAndExitingSpeed() {
         return getManeuverEnteringSpeed() / getManeuverExitingSpeed();

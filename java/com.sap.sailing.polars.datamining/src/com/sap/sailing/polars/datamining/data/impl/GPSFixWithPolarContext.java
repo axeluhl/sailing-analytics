@@ -27,8 +27,9 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
     private final HasCompetitorPolarContext competitorPolarContext;
     private final WindWithConfidence<Pair<Position, TimePoint>> wind;
 
-    public GPSFixWithPolarContext(GPSFixMoving fix, TrackedRace trackedRace, ClusterGroup<Speed> windSpeedRangeGroup, Competitor competitor,
-            PolarDataMiningSettings settings, WindWithConfidence<Pair<Position, TimePoint>> wind, HasCompetitorPolarContext competitorPolarContext) {
+    public GPSFixWithPolarContext(GPSFixMoving fix, TrackedRace trackedRace, ClusterGroup<Speed> windSpeedRangeGroup,
+            Competitor competitor, PolarDataMiningSettings settings, WindWithConfidence<Pair<Position, TimePoint>> wind,
+            HasCompetitorPolarContext competitorPolarContext) {
         this.fix = fix;
         this.trackedRace = trackedRace;
         this.windSpeedRangeGroup = windSpeedRangeGroup;
@@ -41,7 +42,7 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
     @Override
     public ClusterDTO getWindSpeedRange() {
         String signifier;
-        if(wind == null || wind.getObject() == null) {
+        if (wind == null || wind.getObject() == null) {
             signifier = "null";
         } else {
             Cluster<Speed> cluster = windSpeedRangeGroup.getClusterFor(wind.getObject());
@@ -63,7 +64,8 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
     @Override
     public boolean isFoiling() {
         final boolean result;
-        final BravoFixTrack<Competitor> competitorBravoFixTrack = trackedRace.getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+        final BravoFixTrack<Competitor> competitorBravoFixTrack = trackedRace.getSensorTrack(competitor,
+                BravoFixTrack.TRACK_NAME);
         if (competitorBravoFixTrack != null) {
             result = competitorBravoFixTrack.isFoiling(fix.getTimePoint());
         } else {
