@@ -5,6 +5,10 @@ import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.i18n.client.Messages;
 
 @DefaultLocale("en")
+/**
+ * This are legal messages required for Anniversaries, the reason for a separate interface is, that they should not be
+ * translated by the usual process, to prevent changed meanings of the legal implications
+ */
 public interface AnniversaryLegalMessages extends Messages{
     public static final AnniversaryLegalMessages INSTANCE = GWT.create(AnniversaryLegalMessages.class);
     
