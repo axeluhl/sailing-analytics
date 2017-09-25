@@ -177,7 +177,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     /**
      * Refresh information of current user.
      */
-    public void refreshUserInfo() {
+    private void refreshUserInfo() {
         userService.updateUser(true);
     }
     
