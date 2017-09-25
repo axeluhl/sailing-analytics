@@ -17,6 +17,28 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.7.6 ****************
+********************************************
+ This is a final version.It fixes bugs in the implementation and it adds a some features.
+ It keeps the backward compatibility.
+
+ Release date: 14/08/2017
+ Build number: 14241
+
+ 1) Features
+
+ - Two new RaceCompetitorStatusType values have been added: 8 (Did not finish) and 9 (Missing data). (Requested by
+ Chris Terkelsen, 28/07/2017)
+
+ 2) Bugs
+
+ - Releasing the memory when the ISubscriber.close method is called (Reported by Axel Uhl, 04/08/2017)
+ - The live messages (e.g: race start time updated, live delay updated...) are not arriving sometimes,
+ despite of the server is sending them all the time. The implementation of this part has been
+ downgraded to the version used in TracAPI 3.6.x (Reported by SAP)
+
+
+********************************************
 ************* TracAPI 3.7.5 ****************
 ********************************************
 This is a final version. It fixes bugs in the implementation

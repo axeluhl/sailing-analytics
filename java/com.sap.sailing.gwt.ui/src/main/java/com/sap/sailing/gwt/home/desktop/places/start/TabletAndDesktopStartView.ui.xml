@@ -1,12 +1,12 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
-		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-   	<g:HTMLPanel>
-   	    <dp:stage.Stage ui:field='stage'/>
-   	    <!-- <s:mainsponsors.MainSponsors ui:field='mainSponsors'/> -->
-   	    <dp:mainevents.MainEvents ui:field='mainEvents'/>
-   	    <dp:mainmedia.MainMedia ui:field='mainMedia'/>
-   	    <dp:socialfooter.SocialFooter/>
-	</g:HTMLPanel>
-</ui:UiBinder>    
+             xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
+    <g:HTMLPanel>
+        <dp:stage.Stage ui:field='stage'/>
+        <dp:anniversary.DesktopAnniversaries ui:field="anniversaries"/>
+        <!-- <s:mainsponsors.MainSponsors ui:field='mainSponsors'/> -->
+        <dp:mainevents.MainEvents ui:field='mainEvents'/>
+        <dp:mainmedia.MainMedia ui:field='mainMedia'/>
+        <dp:socialfooter.SocialFooter/>
+    </g:HTMLPanel>
+</ui:UiBinder>

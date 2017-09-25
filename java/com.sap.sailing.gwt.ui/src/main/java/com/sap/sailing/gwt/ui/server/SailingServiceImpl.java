@@ -4767,6 +4767,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
                     importer.importFromStream(inputStream, importOperationId, override);
                 } catch (Exception e) {
+                    // do not assume that RuntimeException is logged properly
+                    logger.log(Level.SEVERE, e.getMessage(), e);
                     getService()
                             .setDataImportFailedWithReplication(
                                     importOperationId,
@@ -4884,7 +4886,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Competitor competitor = convertCompetitorDescriptorToCompetitor(competitorDescriptor, searchTag);
             competitorsForSaving.add(competitor);
         }
-        getBaseDomainFactory().getCompetitorStore().addCompetitors(competitorsForSaving);
+        getBaseDomainFactory().getCompetitorStore().addNewCompetitors(competitorsForSaving);
         return convertToCompetitorDTOs(competitorsForSaving);
     }
 
@@ -5165,8 +5167,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> times;
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> times = new TrackingTimesFinder(raceLog).analyze();
+        if (raceLog != null) {
+            times = new TrackingTimesFinder(raceLog).analyze();
+        } else {
+            times = null;
+        }
         return times;
     }
 
@@ -5201,7 +5208,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) {
+    public String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) throws MalformedURLException, UnsupportedEncodingException {
         return getIgtimiConnectionFactory().getAuthorizationUrl(redirectProtocol, redirectHostname, redirectPort);
     }
 
@@ -5273,6 +5280,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private class TimeoutExtendingInputStream extends FilterInputStream {
 
+    	// default timeout is high to ensure that long running client operations
+    	// such as compressing data will not have the server run into a timeout
+    	private static final int DEFAULT_TIMEOUT_IN_SECONDS = 60*10;
+
         private final HttpURLConnection connection;
 
         protected TimeoutExtendingInputStream(InputStream in, HttpURLConnection connection) {
@@ -5282,19 +5293,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         @Override
         public int read() throws IOException {
-            connection.setReadTimeout(10000);
+            connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
             return super.read();
         }
 
         @Override
         public int read(byte[] b) throws IOException {
-            connection.setReadTimeout(10000);
+            connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
             return super.read(b);
         }
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            connection.setReadTimeout(10000);
+            connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
             return super.read(b, off, len);
         }
 
@@ -5865,18 +5876,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<TrackFileImportDeviceIdentifierDTO> getTrackFileImportDeviceIds(List<String> uuids)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        List<TrackFileImportDeviceIdentifierDTO> result = new ArrayList<>();
-        for (String uuidAsString : uuids) {
-            UUID uuid = UUID.fromString(uuidAsString);
-            TrackFileImportDeviceIdentifier device = TrackFileImportDeviceIdentifierImpl.getOrCreate(uuid);
-            long numFixes = getService().getSensorFixStore().getNumberOfFixes(device);
-            TimeRange timeRange = getService().getSensorFixStore().getTimeRangeCoveredByFixes(device);
-            Date from = timeRange == null ? null : timeRange.from().asDate();
-            Date to = timeRange == null ? null : timeRange.to().asDate();
-            result.add(new TrackFileImportDeviceIdentifierDTO(uuidAsString, device.getFileName(), device.getTrackName(),
-                    numFixes, from, to));
+        try {
+            final List<TrackFileImportDeviceIdentifierDTO> result = new ArrayList<>();
+            for (String uuidAsString : uuids) {
+                UUID uuid = UUID.fromString(uuidAsString);
+                TrackFileImportDeviceIdentifier device = TrackFileImportDeviceIdentifierImpl.getOrCreate(uuid);
+                long numFixes = getService().getSensorFixStore().getNumberOfFixes(device);
+                TimeRange timeRange = getService().getSensorFixStore().getTimeRangeCoveredByFixes(device);
+                Date from = timeRange == null ? null : timeRange.from().asDate();
+                Date to = timeRange == null ? null : timeRange.to().asDate();
+                result.add(new TrackFileImportDeviceIdentifierDTO(uuidAsString, device.getFileName(), device.getTrackName(),
+                        numFixes, from, to));
+            }
+            return result;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception trying to obtain track file import device IDs", e);
+            throw e;
         }
-        return result;
     }
 
     @Override

@@ -53,7 +53,7 @@ public class PositionTest {
         assertCompactFixHasEqualLatLng(now, -45., 45.);
         assertCompactFixHasEqualLatLng(now, 0., 45.);
     }
-
+    
     private void assertCompactFixHasEqualLatLng(final TimePoint now, final double latDeg, final double lngDeg) {
         GPSFix fix = new VeryCompactGPSFixImpl(new DegreePosition(latDeg, lngDeg), now);
         assertEquals(latDeg, fix.getPosition().getLatDeg(), 0.0000001);

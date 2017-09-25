@@ -3,6 +3,8 @@ package com.sap.sse.security.ui.authentication;
 import static com.sap.sse.security.shared.UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL;
 import static com.sap.sse.security.shared.UserManagementException.USER_ALREADY_EXISTS;
 
+import java.util.function.Consumer;
+
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -41,8 +43,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     /**
      * Creates an {@link AuthenticationManagerImpl} instance based on the {@link UserService} and
      * {@link UserManagementServiceAsync} instances provided by the given {@link WithSecurity} instance.
-     * 
-     * @param userService
+     *      * @param userService
      *            the {@link UserService} instance to use
      * @param eventBus
      *            the {@link EventBus} instance
@@ -233,6 +234,24 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     @Override
     public AuthenticationContext getAuthenticationContext() {
         return new AuthenticationContextImpl(userService.getCurrentUser());
+    }
+    
+    @Override
+    public void checkNewUserPopup(final Runnable hideUserHintCallback, Consumer<Runnable> showUserHintCallback) {
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                if (user != null) {
+                    // No further user changes need to be handled
+                    userService.removeUserStatusEventHandler(this);
+                    hideUserHintCallback.run();
+                } else {
+                    if (!userService.wasUserRecentlyLoggedInOrDismissedTheHint()) {
+                        showUserHintCallback.accept(userService::setUserLoginHintToStorage);
+                    }
+                }
+            }
+        }, true);
     }
     
     private abstract class AsyncCallbackImpl<T> implements AsyncCallback<T> {

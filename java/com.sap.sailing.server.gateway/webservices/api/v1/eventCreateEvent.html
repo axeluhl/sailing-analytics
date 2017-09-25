@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/events/createEvent</h2>
+
+<b>Description:</b>
+<p>Creates a new event. Optional parameters control how "deep" the structure is to be created, regarding
+a default regatta, leaderboard and leaderboard group. Furthermore, optional parameters control some of
+the most important attributes of the objects created. Reasonable defaults are supposed to make the
+consumption of this service simple.</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>{event-id}</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>venuename or venuelat/venuelng must be provided, as follows
+			<div>venuename the name of the venue; if not provided, venuelat and venuelng can be used, and the name of
+			     the town nearest to the coordinates will be used as a venue name then</div>
+			<div>venuelat decimal degrees; can be provided instead of a venuename, together with venuelng encoding the location of the event</div>
+			<div>venuelng decimal degrees; can be provided instead of a venuename, together with venuelat encoding the location of the event</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>
+			<div>eventname name of the event; defaults to a name constructed from the user name
+			     and a timestamp</div>
+			<div>eventdescription the event description text; defaults to the event name</div>
+			<div>startdate the event start date in ISO format (e.g., 2017-08-17T10:00:00+0200)</div>
+			<div>startdateasmillis (alternative to startdate) the event start date in milliseconds since the epoch (Unix time)</div>
+			<div>enddate the event end date in ISO format (e.g., 2017-08-19T20:00:00+0200)</div>
+			<div>enddateasmillis (alternative to enddate) the event end date in milliseconds since the epoch (Unix time)</div>
+			<div>ispublic a boolean value, true/false, telling whether the event shall be public</div>
+			<div>officialwebsiteurl URL of the official web site</div>
+			<div>baseurl event base URL; will be used in e-mails sent out, e.g., for registration; defaults to the base URL of this request</div>
+			<div>leaderboardgroupids IDs of the leaderboard groups to add to the new event</div>
+			<div>createleaderboardgroup boolean; if true, a new leaderboard group will be created, named and described like the
+			     event; the new leaderboard group will be added to the event</div>
+			<div>createregatta boolean; if true, a new regatta will be created, named like the event; in this case, providing
+			     a value for boatclassname becomes mandatory; the regatta will have a "Default" series with a single "Default"
+			     fleet; a regatta leaderboard is created, and if a leaderboard group
+			     was also created, the regatta leaderboard will automatically be added to the new leaderboard group</div>
+			<div>boatclassname must be provided if createretatta=true; can be the display name or an alias name of a boat class to
+			     use for the new regatta</div>
+			<div>numberofraces tells how many races shall be created in the default series; by default the series remains empty</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl -X POST -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://dev.sapsailing.com/sailingserver/api/v1/events/createEvent"<br>
+		produces output<pre>
+		{
+			"eventid":cb8d7c69-fd82-45f6-a0a3-2920eb3307cb,
+			"eventname":"Session admin 24-08-2017 16:46:40",
+			"eventstartdate":1503586000961,
+			"eventenddate":1504190800961,
+			"leaderboardgroupid":99859e24-2fe0-4c4e-bcbb-2df272a26c2c,
+			"regatta":"Session admin 24-08-2017 16:46:40",
+			"leaderboard":"Session admin 24-08-2017 16:46:40"
+		}
+		</pre></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

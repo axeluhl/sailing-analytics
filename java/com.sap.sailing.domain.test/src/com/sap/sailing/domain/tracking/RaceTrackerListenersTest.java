@@ -17,12 +17,12 @@ public class RaceTrackerListenersTest {
             listeners.addListener(new RaceTracker.Listener() {
 
                 @Override
-                public void onTrackerWillStop(boolean preemptive) {
+                public void onTrackerWillStop(boolean preemptive, boolean willBeRemoved) {
                     listeners.removeListener(this);
                 }
             });
         }
-        listeners.onTrackerWillStop(false);
+        listeners.onTrackerWillStop(/* preemptive */ false, /* willBeRemoved */ false);
     }
 
 }

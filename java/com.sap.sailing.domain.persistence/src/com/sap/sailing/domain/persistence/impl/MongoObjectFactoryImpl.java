@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,6 +64,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -93,6 +95,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -125,6 +128,7 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -1628,6 +1632,37 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void removeAllConnectivityParametersForRacesToRestore() {
         database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name()).drop();
+    }
+
+    @Override
+    public void storeAnniversaryData(
+            ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries) {
+        try {
+            DBCollection anniversarysStored = database.getCollection(CollectionNames.ANNIVERSARIES.name());
+            for (Entry<Integer, Pair<DetailedRaceInfo, AnniversaryType>> anniversary : knownAnniversaries.entrySet()) {
+                BasicDBObject currentProxy = new BasicDBObject(FieldNames.ANNIVERSARY_NUMBER.name(),
+                        anniversary.getKey().intValue());
+                BasicDBObject newValue = new BasicDBObject(FieldNames.ANNIVERSARY_NUMBER.name(),
+                        anniversary.getKey().intValue());
+                DetailedRaceInfo raceInfo = anniversary.getValue().getA();
+                newValue.append(FieldNames.RACE_NAME.name(), raceInfo.getIdentifier().getRaceName());
+                newValue.append(FieldNames.REGATTA_NAME.name(), raceInfo.getIdentifier().getRegattaName());
+                newValue.append(FieldNames.LEADERBOARD_NAME.name(), raceInfo.getLeaderboardName());
+                newValue.append(FieldNames.LEADERBOARD_DISPLAY_NAME.name(), raceInfo.getLeaderboardDisplayName());
+                storeTimePoint(raceInfo.getStartOfRace(), newValue, (FieldNames.START_OF_RACE.name()));
+                newValue.append(FieldNames.EVENT_ID.name(), raceInfo.getEventID().toString());
+                newValue.append(FieldNames.EVENT_NAME.name(), raceInfo.getEventName());
+                newValue.append(FieldNames.EVENT_TYPE.name(),
+                        raceInfo.getEventType() == null ? null : raceInfo.getEventType().name());
+
+                final URL remoteUrl = raceInfo.getRemoteUrl();
+                newValue.append(FieldNames.REMOTE_URL.name(), remoteUrl == null ? null : remoteUrl.toExternalForm());
+                newValue.append(FieldNames.ANNIVERSARY_TYPE.name(), anniversary.getValue().getB().toString());
+                anniversarysStored.update(currentProxy, newValue, true, false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

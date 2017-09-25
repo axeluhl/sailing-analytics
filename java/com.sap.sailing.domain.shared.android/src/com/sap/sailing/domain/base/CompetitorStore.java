@@ -19,6 +19,7 @@ import com.sap.sse.common.Duration;
 public interface CompetitorStore extends CompetitorFactory {
     public interface CompetitorUpdateListener {
         void competitorUpdated(Competitor competitor);
+        void competitorCreated(Competitor competitor);
     }
     
     /**
@@ -68,7 +69,7 @@ public interface CompetitorStore extends CompetitorFactory {
             String newSailId, Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag);
 
-    void addCompetitors(Iterable<Competitor> competitors);
+    void addNewCompetitors(Iterable<Competitor> competitors);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
     

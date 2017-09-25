@@ -2,9 +2,11 @@ package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.mongodb.DB;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -15,6 +17,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -22,6 +25,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.
@@ -181,4 +185,9 @@ public interface MongoObjectFactory {
      * objects obtained through {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)}.
      */
     void removeAllConnectivityParametersForRacesToRestore();
+
+    /**
+     * Stores determined Anniversary races.
+     */
+    void storeAnniversaryData(ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries);
 }
