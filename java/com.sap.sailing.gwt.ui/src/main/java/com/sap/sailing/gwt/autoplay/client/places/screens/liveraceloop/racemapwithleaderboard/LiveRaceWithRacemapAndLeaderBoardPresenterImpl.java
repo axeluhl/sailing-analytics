@@ -173,6 +173,9 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
         if(getPlace().getRaceboardTimer() != null){
             getPlace().getRaceboardTimer().pause();
         }
+        if(getPlace().getTimeProvider() != null){
+            getPlace().getTimeProvider().terminate();
+        }
         selectionTimer.cancel();
         view.onStop();
     }

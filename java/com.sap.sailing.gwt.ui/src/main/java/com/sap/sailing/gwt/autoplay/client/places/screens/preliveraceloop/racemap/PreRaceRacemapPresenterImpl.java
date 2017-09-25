@@ -108,6 +108,9 @@ public class PreRaceRacemapPresenterImpl extends AutoPlayPresenterConfigured<Pre
         if(getPlace().getRaceboardTimer() != null){
             getPlace().getRaceboardTimer().pause();
         }
+        if(getPlace().getTimeProvider() != null){
+            getPlace().getTimeProvider().terminate();
+        }
         updateStatistics.cancel();
         reloadStatistics.cancel();
     }
