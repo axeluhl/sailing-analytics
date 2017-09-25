@@ -183,7 +183,7 @@ public class OnlineDataManager extends DataManager {
                     .getAuthor(), globalConfiguration, RaceGroupDeserializer.create(domainFactory, RegattaConfigurationJsonDeserializer.create()));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(context, OnlineDataManager.this);
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
-                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER, courseAreaId.toString()));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_COURSE_AREA_FILTER, courseAreaId.toString()));
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_CLIENT_UUID, MessageSendingService.uuid));
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/racegroups", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);

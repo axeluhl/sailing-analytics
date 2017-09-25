@@ -38,6 +38,8 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -2565,7 +2567,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description, String displayName,
+    public LeaderboardGroup addLeaderboardGroup(UUID leaderboardGroupId, String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         ArrayList<Leaderboard> leaderboards = new ArrayList<>();
@@ -2577,7 +2579,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 leaderboards.add(leaderboard);
             }
         }
-        LeaderboardGroup result = new LeaderboardGroupImpl(id, groupName, description, displayName,
+        LeaderboardGroup result = new LeaderboardGroupImpl(leaderboardGroupId, groupName, description, displayName,
                 displayGroupsInReverseOrder, leaderboards);
         if (overallLeaderboardScoringSchemeType != null) {
             // create overall leaderboard and its discards settings
@@ -3418,7 +3420,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public AbstractLogEventAuthor getServerAuthor() {
-        return raceLogEventAuthorForServer;
+        Subject subject  = null;
+        try {
+            subject = SecurityUtils.getSubject();
+        } catch (Exception e) {
+            logger.info("Couldn't access security manager's subject; using default server author: "+e.getMessage());
+        }
+        final AbstractLogEventAuthor result;
+        if (subject != null && subject.getPrincipal() != null) {
+            result = new LogEventAuthorImpl(subject.getPrincipal().toString(), /* priority */ 0);
+        } else {
+            result = raceLogEventAuthorForServer;
+        }
+        return result;
     }
 
     @Override

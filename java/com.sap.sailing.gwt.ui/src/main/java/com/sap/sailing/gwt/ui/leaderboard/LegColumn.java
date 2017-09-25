@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -318,8 +316,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 new FormattedDoubleDetailTypeColumn(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new WindwardDistanceToGoInMeters(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.RANK_GAIN, new RankGainColumn(stringMessages.rankGain(), new RankGain(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.TIME_TRAVELED,
-                new FormattedDoubleDetailTypeColumn(DetailType.TIME_TRAVELED, new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
+        result.put(DetailType.TIME_TRAVELED, new TotalTimeColumn(DetailType.TIME_TRAVELED, new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.CORRECTED_TIME_TRAVELED,
                 new FormattedDoubleDetailTypeColumn(DetailType.CORRECTED_TIME_TRAVELED, new CorrectedTimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS, 
@@ -375,7 +372,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
 
     @Override
-    public Header<SafeHtml> getHeader() {
+    public SortableExpandableColumnHeader getHeader() {
         SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(/* title */ stringMessages.leg()+(legIndex+1),
                 /* iconURL */ null, getLeaderboardPanel(), this, stringMessages);
         return result;
