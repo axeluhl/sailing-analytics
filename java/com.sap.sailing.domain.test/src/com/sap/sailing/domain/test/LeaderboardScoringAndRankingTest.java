@@ -452,6 +452,60 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(Arrays.asList(competitors.get(4), competitors.get(2), competitors.get(0), competitors.get(1), competitors.get(3), competitors.get(5)),
                 rankedCompetitors);
     }
+    
+    @Test
+    public void testMatchRaceTieBreakWithMultipleDirectComparisonLastRace() {
+        List<Competitor> competitors = createCompetitors(6);
+        Regatta regatta = createRegatta(/* qualifying */ 4, new String[] { "M1", "M2", "M3" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, /* medal */ 0, "testMatchRaceTieBreak",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_ONE));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 2));
+        TrackedRace q1M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(2, 4));
+        TrackedRace q1M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(4, 6));
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        q1Column.setTrackedRace(q1Column.getFleetByName("M1"), q1M1);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M2"), q1M2);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M3"), q1M3);
+        
+        TrackedRace q2M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(1), competitors.get(0)));
+        TrackedRace q2M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(2), competitors.get(3)));
+        TrackedRace q2M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(5)));
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        q2Column.setTrackedRace(q2Column.getFleetByName("M1"), q2M1);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M2"), q2M2);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M3"), q2M3);
+        
+        TrackedRace q3M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 2));
+        TrackedRace q3M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(2, 4));
+        TrackedRace q3M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(4, 6));
+        RaceColumn q3Column = qualificationSeries.getRaceColumnByName("Q3");
+        q3Column.setTrackedRace(q2Column.getFleetByName("M1"), q3M1);
+        q3Column.setTrackedRace(q2Column.getFleetByName("M2"), q3M2);
+        q3Column.setTrackedRace(q2Column.getFleetByName("M3"), q3M3);
+
+        TrackedRace q4M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(1), competitors.get(0)));
+        TrackedRace q4M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(2), competitors.get(3)));
+        TrackedRace q4M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(5)));
+        RaceColumn q4Column = qualificationSeries.getRaceColumnByName("Q4");
+        q4Column.setTrackedRace(q2Column.getFleetByName("M1"), q4M1);
+        q4Column.setTrackedRace(q2Column.getFleetByName("M2"), q4M2);
+        q4Column.setTrackedRace(q2Column.getFleetByName("M3"), q4M3);
+        // point sums for competitors 0..5: 2, 2, 4, 0, 4, 0
+        // The ties between (2) and (4) with both 4 points cannot be decided because they never met;
+        // the same holds for (3) and (5) with both 0 points.
+        // The tie between (0) and (1) shall be broken based on their last match because their
+        // direct comparison scores are equal, too (both 2). In the last match (1) won over (0).
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(Arrays.asList(competitors.get(1), competitors.get(0)), rankedCompetitors.subList(2, 4));
+    }
 
     /**
      * Match races want to prefer a competitor over another with equal score sum based on the direct
