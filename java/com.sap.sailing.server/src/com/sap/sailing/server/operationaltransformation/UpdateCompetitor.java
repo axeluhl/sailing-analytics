@@ -4,8 +4,10 @@ import java.net.URI;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
@@ -48,7 +50,8 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     }
 
     /**
-     * {@link #internalApplyTo(RacingEventService)} already replicates the effects
+     * {@link #internalApplyTo(RacingEventService)} already replicates the effects; see {@link RacingEventServiceImpl#RacingEventServiceImpl()}
+     * where a {@link CompetitorUpdateListener} is registered that handles replication of any updates to a competitor.
      */
     @Override
     public boolean isRequiresExplicitTransitiveReplication() {

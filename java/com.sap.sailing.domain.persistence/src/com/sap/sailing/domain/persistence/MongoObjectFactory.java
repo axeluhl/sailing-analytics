@@ -1,9 +1,8 @@
 package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.mongodb.DB;
 import com.mongodb.DBObject;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -25,6 +25,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.
@@ -186,13 +187,7 @@ public interface MongoObjectFactory {
     void removeAllConnectivityParametersForRacesToRestore();
 
     /**
-     * Currently unused, meant to store determined Anniversaries related to bug4227 
+     * Stores determined Anniversary races.
      */
-    void storeAnniversaryData(Map<Integer, DetailedRaceInfo> data);
-
-    /**
-     * Currently unused, meant to store determined Anniversaries related to bug4227 
-     * @throws MalformedURLException 
-     */
-    Map<Integer, DetailedRaceInfo> getAnniversaryData() throws MalformedURLException;
+    void storeAnniversaryData(ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries);
 }

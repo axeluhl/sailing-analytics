@@ -161,5 +161,8 @@ public enum FieldNames {
     SAILORS_INFO_URL, SAILORS_INFO_LOCALE,
     
     // double vector fixes
-    FIX;
+    FIX,
+    
+    //anniversary fields
+    START_OF_RACE, ANNIVERSARY_NUMBER, REMOTE_URL, ANNIVERSARY_TYPE, EVENT_TYPE;
 }

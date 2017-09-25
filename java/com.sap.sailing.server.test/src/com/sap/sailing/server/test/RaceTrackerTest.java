@@ -144,7 +144,7 @@ public class RaceTrackerTest {
             assertNotSame(oldTrackedRace, newTrackedRace);
             assertNotSame(oldRaceDefinition, newTrackedRace.getRace());
         } finally {
-            service.stopTracking(myRaceHandle.getRegatta());
+            service.stopTracking(myRaceHandle.getRegatta(), /* willBeRemoved */ false);
         }
         logger.exiting(getClass().getName(), "testStopTracking");
     }
@@ -172,7 +172,7 @@ public class RaceTrackerTest {
             assertSame(oldTrackedRace, newTrackedRace);
             assertSame(raceHandle.getRaceTracker(), myRaceHandle.getRaceTracker());
         } finally {
-            service.stopTracking(myRaceHandle.getRegatta());
+            service.stopTracking(myRaceHandle.getRegatta(), /* willBeRemoved */ false);
         }
         logger.exiting(getClass().getName(), "testStopTracking");
     }

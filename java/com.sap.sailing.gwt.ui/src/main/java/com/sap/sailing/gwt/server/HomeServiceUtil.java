@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -41,6 +40,7 @@ import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.communication.start.StageEventType;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -69,18 +69,6 @@ public final class HomeServiceUtil {
     public static String findEventThumbnailImageUrlAsString(EventBase event) {
         ImageDescriptor url = findEventThumbnailImage(event);
         return url == null ? null : url.getURL().toString();
-    }
-    
-    public static boolean isFakeSeries(EventBase event) {
-        Iterator<? extends LeaderboardGroupBase> lgIter = event.getLeaderboardGroups().iterator();
-        if(!lgIter.hasNext()) {
-            return false;
-        }
-        LeaderboardGroupBase lg = lgIter.next();
-        if(lgIter.hasNext()) {
-            return false;
-        }
-        return lg.hasOverallLeaderboard();
     }
     
     public static boolean isSingleRegatta(Event event) {
@@ -363,7 +351,7 @@ public final class HomeServiceUtil {
         dto.setEndDate(event.getEndDate() == null ? null : event.getEndDate().asDate());
         dto.setState(HomeServiceUtil.calculateEventState(event));
         dto.setVenue(event.getVenue().getName());
-        if(HomeServiceUtil.isFakeSeries(event)) {
+        if (EventUtil.isFakeSeries(event)) {
             dto.setLocation(getLocation(event, service));
         }
         dto.setThumbnailImageURL(HomeServiceUtil.findEventThumbnailImageUrlAsString(event));
@@ -375,7 +363,7 @@ public final class HomeServiceUtil {
     }
 
     public static String getEventDisplayName(EventBase event, RacingEventService service) {
-        if(isFakeSeries(event)) {
+        if (EventUtil.isFakeSeries(event)) {
             String seriesName = getSeriesName(event);
             if(seriesName != null) {
                 String location = getLocation(event, service);
@@ -510,7 +498,7 @@ public final class HomeServiceUtil {
     }
 
     public static boolean hasRegattaData(EventBase event) {
-        final boolean fakeSeries = HomeServiceUtil.isFakeSeries(event);
+        final boolean fakeSeries = EventUtil.isFakeSeries(event);
         for (LeaderboardGroupBase leaderboardGroupBase : event.getLeaderboardGroups()) {
             if(leaderboardGroupBase instanceof LeaderboardGroup) {
                 // for events that are locally available, we can see if there are any leaderboards
