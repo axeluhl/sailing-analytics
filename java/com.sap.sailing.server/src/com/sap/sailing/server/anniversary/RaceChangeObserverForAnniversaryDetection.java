@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.TimePoint;
 
 /**
- * {@link AbstractTrackedRegattaAndRaceObserver} that observes {@link TrackedRace TrackedRaces} to determin when the
+ * {@link AbstractTrackedRegattaAndRaceObserver} that observes {@link TrackedRace TrackedRaces} to determine when the
  * prerequisites for anniversary race candidates are fulfilled. When a race gets in that state, an update for the given
  * AnniversaryRaceDeterminator is triggered. Races that are either is a state that mets the prerequisites for
  * anniversary races or races that are finished are not observed anymore.
@@ -57,6 +57,12 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
         }
     }
 
+    /**
+     * {@link #fireUpdate() Fires an update} if the race fulfills the criteria for being counted for anniversary races.
+     * 
+     * @return {@code true} if the tracked race fulfills the criteria for being counted for anniversary races;
+     *         {@code false} otherwise
+     */
     private boolean handleRaceChange(TrackedRace trackedRace) {
         if (trackedRace.hasGPSData() && trackedRace.getStartOfRace() != null) {
             fireUpdate();
@@ -65,7 +71,7 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
         return false;
     }
 
-    private void handleRaceChangeAndRemoveListener(TrackedRace trackedRace) {
+    private void handleRaceChangeAndRemoveListenerIfNoLongerNeeded(TrackedRace trackedRace) {
         final TrackedRaceStatusEnum trackedRaceStatus = trackedRace.getStatus().getStatus();
         if (handleRaceChange(trackedRace) || trackedRaceStatus == TrackedRaceStatusEnum.FINISHED
                 || trackedRaceStatus == TrackedRaceStatusEnum.REMOVED) {
@@ -86,17 +92,17 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
 
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
-            handleRaceChangeAndRemoveListener(trackedRace);
+            handleRaceChangeAndRemoveListenerIfNoLongerNeeded(trackedRace);
         }
 
         @Override
         public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
-            handleRaceChangeAndRemoveListener(trackedRace);
+            handleRaceChangeAndRemoveListenerIfNoLongerNeeded(trackedRace);
         }
         
         @Override
         public void firstGPSFixReceived() {
-            handleRaceChangeAndRemoveListener(trackedRace);
+            handleRaceChangeAndRemoveListenerIfNoLongerNeeded(trackedRace);
         }
     }
 }

@@ -103,7 +103,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     @Path("allRaces")
     public Response fullRaceList() {
         JSONArray json = new JSONArray();
-        Map<RegattaAndRaceIdentifier, SimpleRaceInfo> store = getDistinctRaces(true);
+        Map<RegattaAndRaceIdentifier, SimpleRaceInfo> store = getDistinctRaces(/* include remotes */ true);
         ArrayList<SimpleRaceInfo> sorted = new ArrayList<>(store.values());
         Collections.sort(sorted, new Comparator<SimpleRaceInfo>() {
             @Override

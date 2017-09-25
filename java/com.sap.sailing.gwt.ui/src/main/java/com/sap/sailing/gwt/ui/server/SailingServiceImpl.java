@@ -2411,37 +2411,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<StrippedLeaderboardDTO> getLeaderboardsByEvent(EventDTO event) {
-        List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
-        if (event != null) {
-            for (RegattaDTO regatta : event.regattas) {
-                results.addAll(getLeaderboardsByRegatta(regatta));
-            }
-            HashSet<StrippedLeaderboardDTO> set = new HashSet<StrippedLeaderboardDTO>(results);
-            results.clear();
-            results.addAll(set);
-        }
-        return results;
-    }
-
-    private List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
-        List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
-        if (regatta != null && regatta.races != null) {
-            for (RaceDTO race : regatta.races) {
-                List<StrippedLeaderboardDTO> leaderboard = getLeaderboardsByRaceAndRegatta(race.getName(), regatta.getRegattaIdentifier());
-                if (leaderboard != null && !leaderboard.isEmpty()) {
-                    results.addAll(leaderboard);
-                }
-            }
-        }
-        // Removing duplicates
-        HashSet<StrippedLeaderboardDTO> set = new HashSet<StrippedLeaderboardDTO>(results);
-        results.clear();
-        results.addAll(set);
-        return results;
-    }
-
-    @Override
     public List<StrippedLeaderboardDTO> getLeaderboardsByRaceAndRegatta(String raceName, RegattaIdentifier regattaIdentifier) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
@@ -3829,13 +3798,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private EventDTO convertToEventDTO(Event event, boolean withStatisticalData) {
         EventDTO eventDTO = new EventDTO(event.getName());
         copyEventBaseFieldsToDTO(event, eventDTO);
-        eventDTO.regattas = new ArrayList<RegattaDTO>();
-        for (Regatta regatta: event.getRegattas()) {
-            RegattaDTO regattaDTO = new RegattaDTO();
-            regattaDTO.setName(regatta.getName());
-            regattaDTO.races = convertToRaceDTOs(regatta);
-            eventDTO.regattas.add(regattaDTO);
-        }
         eventDTO.venue.setCourseAreas(new ArrayList<CourseAreaDTO>());
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             CourseAreaDTO courseAreaDTO = convertToCourseAreaDTO(courseArea);
