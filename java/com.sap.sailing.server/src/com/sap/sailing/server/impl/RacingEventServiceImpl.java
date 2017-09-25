@@ -70,7 +70,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
@@ -262,7 +261,7 @@ import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
-        LeaderboardRegistry, Replicator, EventFetcher {
+        LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
