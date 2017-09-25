@@ -30,4 +30,5 @@ public class PlaceTokenPrefixes {
     public static final String UserConfirmation = "/user/confirmation/";
     public static final String UserPasswordReset = "/user/passwordreset/";
     public static final String UserAuthentication = "/user/auth/";
+    public static final String AboutAccount = "/about/account/";
 }

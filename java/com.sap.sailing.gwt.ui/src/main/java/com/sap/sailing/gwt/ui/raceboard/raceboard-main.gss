@@ -21,9 +21,9 @@
 	background-image: url('images/home/loggedin-open.svg');
 }
 .usermanagement_view {
-	top: 68px !important;
+	top: 60px !important;
     left: inherit !important;
-    right: 5px !important;
+    right: -0.25em !important;
     z-index: 10;
     line-height: 1.333;
 }

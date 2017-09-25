@@ -15,7 +15,7 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
     private static final long serialVersionUID = 1L;
 
     public HighPointFirstGets1LastBreaksTie() {
-        super(1.0);
+        super(/* score for race winner */ 1.0, /* minimum score from rank */ 0.0);
     }
 
     @Override

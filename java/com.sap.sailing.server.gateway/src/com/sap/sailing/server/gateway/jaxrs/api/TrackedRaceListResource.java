@@ -59,36 +59,32 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
      * are grouped by the remote URL from where they originated. Local entries have a {@code null} value for the
      * {@link DetailedRaceInfoJsonSerializer# FIELD_REMOTEURL remote URL} field. The order of the list returned is
      * undefined.<br>
-     * 
-     * TODO bug 4227: implement a parameter to optionally add remote {@link TrackedRace TrackedRaces} to the list and
-     * extend this JavaDoc accordingly.
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
     @Path("getRaces")
     public Response raceList(@QueryParam("transitive") Boolean transitive) {
-        HashMap<URL, List<SimpleRaceInfo>> raceData = new HashMap<>();
-        raceData.put(null, new ArrayList<>(getService().getLocalRaceList().values()));
-        if (transitive != null && Boolean.TRUE.equals(transitive)) {
-            for (SimpleRaceInfo remoteRace : getService().getRemoteRaceList().values()) {
-                URL remoteUrl = remoteRace.getRemoteUrl();
-                List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
-                if (remoteList == null) {
-                    remoteList = new ArrayList<>();
-                    raceData.put(remoteUrl, remoteList);
-                }
-                remoteList.add(remoteRace);
+        final boolean includeRemotes = transitive != null && Boolean.TRUE.equals(transitive);
+        final Map<RegattaAndRaceIdentifier, SimpleRaceInfo> distinctRaces = getDistinctRaces(includeRemotes);
+
+        final HashMap<String, List<SimpleRaceInfo>> raceData = new HashMap<>();
+        distinctRaces.values().forEach(raceInfo -> {
+            final String remoteUrl = raceInfo.getRemoteUrl() == null ? null : raceInfo.getRemoteUrl().toExternalForm();
+            List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
+            if (remoteList == null) {
+                raceData.put(remoteUrl, remoteList = new ArrayList<>());
             }
-        }
-        JSONArray json = new JSONArray();
-        for (Entry<URL, List<SimpleRaceInfo>> raced : raceData.entrySet()) {
+            remoteList.add(raceInfo);
+        });
+
+        final JSONArray json = new JSONArray();
+        for (Entry<String, List<SimpleRaceInfo>> raced : raceData.entrySet()) {
             JSONArray list = new JSONArray();
             for (SimpleRaceInfo simpleRaceInfo : raced.getValue()) {
                 list.add(simpleRaceListJsonSerializer.serialize(simpleRaceInfo));
             }
-            JSONObject remote = new JSONObject();
-            final URL remoteURL = raced.getKey();
-            remote.put(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL, remoteURL == null ? null : remoteURL.toExternalForm());
+            final JSONObject remote = new JSONObject();
+            remote.put(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL, raced.getKey());
             remote.put(DetailedRaceInfoJsonSerializer.FIELD_RACES, list);
             json.add(remote);
         }
@@ -107,9 +103,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     @Path("allRaces")
     public Response fullRaceList() {
         JSONArray json = new JSONArray();
-        Map<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
-        store.putAll(getService().getRemoteRaceList());
-        store.putAll(getService().getLocalRaceList());
+        Map<RegattaAndRaceIdentifier, SimpleRaceInfo> store = getDistinctRaces(/* include remotes */ true);
         ArrayList<SimpleRaceInfo> sorted = new ArrayList<>(store.values());
         Collections.sort(sorted, new Comparator<SimpleRaceInfo>() {
             @Override
@@ -127,6 +121,15 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             json.add(raceInfo);
         }
         return getJsonResponse(json);
+    }
+
+    private Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getDistinctRaces(boolean includeRemotes) {
+        final Map<RegattaAndRaceIdentifier, SimpleRaceInfo> distinctRaces = new HashMap<>();
+        if (includeRemotes) {
+            distinctRaces.putAll(getService().getRemoteRaceList());
+        }
+        distinctRaces.putAll(getService().getLocalRaceList());
+        return distinctRaces;
     }
 
     private Response getJsonResponse(JSONAware json) {

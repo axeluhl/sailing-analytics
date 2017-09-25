@@ -54,6 +54,7 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -82,11 +83,13 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
@@ -740,4 +743,40 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return a DetailedRaceInfo object or null if the race could not be resolved
      */
     DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier);
+
+    /**
+     * Provides number and {@link AnniversaryType type} information for the next anniversary race.
+     * 
+     * @return a {@link Pair} containing the next anniversary number and {@link AnniversaryType type}, or
+     *         <code>null</code> if next anniversary can't be determined
+     */
+    Pair<Integer, AnniversaryType> getNextAnniversary();
+
+    /**
+     * @return the amount of races that are tracked have a startTime and are either remotely or locally resolvable, or <code>null</code> if next anniversary can't be determined
+     */
+    int getCurrentRaceCount();
+
+    /**
+     * Provides a {@link Map} of all known anniversaries, keyed by the number of the anniversary race.
+     * 
+     * @return the {@link Map} of known anniversaries (key = anniversary number / value = {@link Pair} containing
+     *         {@link DetailedRaceInfo race} and {@link AnniversaryType type} information)
+     */
+    Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries();
+
+    /**
+     * Provides the number, {@link DetailedRaceInfo race} and {@link AnniversaryType type} information for the latest
+     * anniversary race.
+     * 
+     * @return {@link Triple} containing the last anniversary number, {@link DetailedRaceInfo race} and
+     *         {@link AnniversaryType type}, or <code>null</code> if there's no anniversary so far
+     */
+    Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
+    
+    /**
+     * Returns the {@link AnniversaryRaceDeterminator} used by this service. This is needed for replication for
+     * anniversary races only.
+     */
+    AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
 }

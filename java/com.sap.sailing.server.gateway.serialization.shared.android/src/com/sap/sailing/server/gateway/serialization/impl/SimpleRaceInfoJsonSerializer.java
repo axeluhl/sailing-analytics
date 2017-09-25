@@ -26,10 +26,10 @@ public class SimpleRaceInfoJsonSerializer implements JsonSerializer<SimpleRaceIn
         return result;
     }
 
-    public SimpleRaceInfo deserialize(JSONObject object,URL remoteUrl) throws JsonDeserializationException {
-        String raceName = object.get(SimpleRaceInfoJsonSerializer.FIELD_RACE_NAME).toString();
-        String regattaName = object.get(SimpleRaceInfoJsonSerializer.FIELD_REGATTA_NAME).toString();
-        TimePoint startOfRace = new MillisecondsTimePoint(((Number)object.get(SimpleRaceInfoJsonSerializer.FIELD_START_OF_RACE)).longValue());
+    public SimpleRaceInfo deserialize(JSONObject object, URL remoteUrl) throws JsonDeserializationException {
+        String raceName = object.get(FIELD_RACE_NAME).toString();
+        String regattaName = object.get(FIELD_REGATTA_NAME).toString();
+        TimePoint startOfRace = new MillisecondsTimePoint(((Number) object.get(FIELD_START_OF_RACE)).longValue());
         return new SimpleRaceInfo(new RegattaNameAndRaceName(regattaName, raceName), startOfRace, remoteUrl);
     }
 }
