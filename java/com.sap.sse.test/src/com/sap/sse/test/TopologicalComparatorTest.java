@@ -58,7 +58,7 @@ public class TopologicalComparatorTest {
     public void testSimpleSortWithTrivialCycle() {
         addLessThan("A", "B"); addLessThan("B", "C"); addLessThan("C", "A");
         createGraph();
-        assertEquals("Cycle not detected properly", 1, Util.size(graph.getCycles()));
+        assertEquals("Cycle not detected properly", 1, Util.size(graph.getCycleClusters().getClusters()));
         assertEquals("Cycle cluster not detected properly", 1, Util.size(graph.getCycleClusters().getClusters()));
         TopologicalComparator<String> comparator = new TopologicalComparator<>(graph);
         assertMutualEquality(comparator, "A", "B", "C");
@@ -104,20 +104,20 @@ public class TopologicalComparatorTest {
         createGraph();
         assertOnCycle("A", "B", "C", "D", "E", "F", "G", "H", "I");
         final Pair<DirectedGraph<String>, CycleClusters<String>> dag = graph.graphWithCombinedCycleNodes();
-        assertEquals(0, Util.size(dag.getA().getCycles()));
+        assertEquals(0, Util.size(dag.getA().getCycleClusters().getClusters()));
     }
     
     private void assertOnCycle(String... nodes) {
         for (final String node : nodes) {
-            assertTrue("Expected "+node+" on cycle but wasn't", StreamSupport.stream(graph.getCycles().spliterator(), /* parallel */ false).anyMatch(c->c.contains(node)));
+            assertTrue("Expected "+node+" on cycle but wasn't", StreamSupport.stream(graph.getCycleClusters().getClusters().spliterator(), /* parallel */ false).anyMatch(c->c.contains(node)));
         }
     }
 
     @Test
     public void randomTest() {
-        final Random random = new Random();
-        final int NUMBER_OF_NODES = 100;
-        final int NUMBER_OF_EDGES = 150;
+        final Random random = new Random(12434522567l);
+        final int NUMBER_OF_NODES = 1000;
+        final int NUMBER_OF_EDGES = 2000;
         final String[] nodes = new String[NUMBER_OF_NODES];
         for (int i=0; i<NUMBER_OF_NODES; i++) {
             nodes[i] = ""+i;

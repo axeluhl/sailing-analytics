@@ -12,8 +12,27 @@ public interface Path<T> extends Iterable<T> {
      */
     Path<T> extend(T tail);
     
+    /**
+     * Constructs a new path that contains this path's nodes and then {@code subPath}'s nodes appended
+     * to them
+     */
+    Path<T> extend(Path<T> subPath);
+
+    /**
+     * The first node in this path, or {@code null} if this path is empty
+     */
     T head();
-    T tail();
+    
+    /**
+     * A new path that has all elements but the first of this one; empty if this path has zero or
+     * one element.
+     */
+    Path<T> tail();
+    
+    /**
+     * The last node in this path, or {@code null} if this path is empty
+     */
+    T last();
     boolean isEmpty();
     
     /**

@@ -1,12 +1,11 @@
 package com.sap.sse.util.graph.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
@@ -15,7 +14,6 @@ import com.sap.sse.util.graph.CycleCluster;
 import com.sap.sse.util.graph.CycleClusters;
 import com.sap.sse.util.graph.DirectedEdge;
 import com.sap.sse.util.graph.DirectedGraph;
-import com.sap.sse.util.graph.Path;
 
 public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     private final Set<T> nodes;
@@ -23,16 +21,7 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     private final Map<T, Set<T>> immediateSuccessors;
     private final Set<T> roots;
     
-    /**
-     * A node may be part of one or more cycles. Contains a key only if it is part of at least one cycle.
-     * In other words, the value sets are never empty, and the key set describes all nodes that are part
-     * of at least one cycle.
-     */
-    private final Map<T, Set<Path<T>>> cyclesPerNode;
-    
     private final CycleClusters<T> cycleClusters;
-    
-    private final Iterable<Path<T>> cycles;
     
     public DirectedGraphImpl(Set<T> nodes, Set<DirectedEdge<T>> edges) {
         this.nodes = nodes;
@@ -60,51 +49,197 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         }
         this.immediateSuccessors = Collections.unmodifiableMap(succWithUnmodifiableSets);
         this.roots = Collections.unmodifiableSet(modifiableRoots);
-        this.cycles = findCycles();
-        final Map<T, Set<Path<T>>> modifiableCyclesPerNode = new HashMap<>();
-        for (final Path<T> cycle : cycles) {
-            for (final T cycleNode : cycle) {
-                Util.addToValueSet(modifiableCyclesPerNode, cycleNode, cycle);
-            }
-        }
-        cyclesPerNode = Collections.unmodifiableMap(modifiableCyclesPerNode);
-        cycleClusters = computeCycleClusters();
+        cycleClusters = findStronglyConnectedComponents();
         assert cycleClusters.areDisjoint();
     }
+    
+    private interface DFSStep<T> {
+        int applyAndReturnNextDFSNumber(LinkedList<T> oReps, LinkedList<T> oNodes, Map<T, T> representatives,
+                Map<T, Integer> depthFirstSearchPosition, Set<T> remainingRoots, LinkedList<DFSStep<T>> worklist, int nodeCounter, Set<T> oNodesForFastContains);
+    }
+    
+    private class Backtrack implements DFSStep<T> {
+        private final T backtrackFromNode;
 
-    private Iterable<Path<T>> findCycles() {
-        final Set<T> nodesNotVisited = new HashSet<>(nodes);
-        final Set<Path<T>> result = new HashSet<>(); // the cycles found
-        final List<Path<T>> worklist = new ArrayList<>();
-        if (!nodes.isEmpty()) {
-            final T root = nodes.iterator().next();
-            nodesNotVisited.remove(root);
-            worklist.add(new PathImpl<T>(Collections.singleton(root)));
-            while (!Util.isEmpty(worklist)) {
-                // depth-first search by using last element in worklist and replacing it by paths extended by its successors
-                final Path<T> p = worklist.remove(worklist.size()-1);
-                // at this point, should the index drop to the current size the next time and no cycle was added since now, p.tail() has been proven to not be part of a cycle because all outgoing paths were followed;
-                final Set<T> successors = immediateSuccessors.get(p.tail());
-                for (final T successor : successors) {
-                    nodesNotVisited.remove(successor);
-                    if (p.contains(successor)) {
-                        // cycle found
-                        result.add(p.subPath(successor).extend(successor));
-                    } else {
-                        worklist.add(p.extend(successor));
-                    }
+        public Backtrack(T backtrackFromNode) {
+            this.backtrackFromNode = backtrackFromNode;
+        }
+
+        @Override
+        public int applyAndReturnNextDFSNumber(LinkedList<T> oReps, LinkedList<T> oNodes, Map<T, T> representatives,
+                Map<T, Integer> depthFirstSearchPosition, Set<T> remainingRoots, LinkedList<DFSStep<T>> worklist, int nodeCounter, Set<T> oNodesForFastContains) {
+            // the second condition avoids creating single-element components; we don't want
+            // to call each single element a "strongly-connected component"
+            if (backtrackFromNode == oReps.getLast()) {
+                oReps.removeLast();
+                T lastNodeFromoNodes;
+                do {
+                    lastNodeFromoNodes = oNodes.removeLast();
+                    oNodesForFastContains.remove(lastNodeFromoNodes);
+                    representatives.put(lastNodeFromoNodes, backtrackFromNode);
+                } while (lastNodeFromoNodes != backtrackFromNode);
+            }
+            return nodeCounter;
+        }
+        
+        @Override
+        public String toString() {
+            return "backtrack("+backtrackFromNode+")";
+        }
+    }
+    
+    private class TraverseNonTreeEdge implements DFSStep<T> {
+        private final T toNode;
+
+        public TraverseNonTreeEdge(T toNode) {
+            this.toNode = toNode;
+        }
+
+        @Override
+        public int applyAndReturnNextDFSNumber(LinkedList<T> oReps, LinkedList<T> oNodes, Map<T, T> representatives,
+                Map<T, Integer> depthFirstSearchPosition, Set<T> remainingRoots, LinkedList<DFSStep<T>> worklist,
+                int nodeCounter, Set<T> oNodesForFastContains) {
+            if (oNodesForFastContains.contains(toNode)) {
+                while (depthFirstSearchPosition.get(toNode) < depthFirstSearchPosition.get(oReps.getLast())) {
+                    oReps.removeLast();
                 }
-                if (worklist.isEmpty() && !nodesNotVisited.isEmpty()) {
+            }
+            return nodeCounter;
+        }
+        
+        @Override
+        public String toString() {
+            return "traverseNonTreeEdge("+toNode+")";
+        }
+    }
+    
+    private class TraverseTreeEdge implements DFSStep<T> {
+        private final T toNode;
+
+        public TraverseTreeEdge(T toNode) {
+            this.toNode = toNode;
+        }
+
+        @Override
+        public int applyAndReturnNextDFSNumber(LinkedList<T> oReps, LinkedList<T> oNodes, Map<T, T> representatives,
+                Map<T, Integer> depthFirstSearchPosition, Set<T> remainingRoots, LinkedList<DFSStep<T>> worklist, int nodeCounter, Set<T> oNodesForFastContains) {
+            oReps.add(toNode);
+            oNodes.add(toNode);
+            oNodesForFastContains.add(toNode);
+            remainingRoots.remove(toNode);
+            depthFirstSearchPosition.put(toNode, nodeCounter++);
+            worklist.add(new DFS(toNode));
+            return nodeCounter;
+        }
+        
+        @Override
+        public String toString() {
+            return "traverseTreeEdge("+toNode+")";
+        }
+    }
+    
+    private class Root implements DFSStep<T> {
+        private final T rootNode;
+
+        public Root(T rootNode) {
+            super();
+            this.rootNode = rootNode;
+        }
+
+        @Override
+        public int applyAndReturnNextDFSNumber(LinkedList<T> oReps, LinkedList<T> oNodes, Map<T, T> representatives,
+                Map<T, Integer> depthFirstSearchPosition, Set<T> remainingRoots, LinkedList<DFSStep<T>> worklist, int nodeCounter, Set<T> oNodesForFastContains) {
+            remainingRoots.remove(rootNode);
+            depthFirstSearchPosition.put(rootNode, nodeCounter++);
+            oReps.add(rootNode);
+            oNodes.add(rootNode);
+            oNodesForFastContains.add(rootNode);
+            worklist.add(new DFS(rootNode));
+            return nodeCounter;
+        }
+        
+        @Override
+        public String toString() {
+            return "root("+rootNode+")";
+        }
+    }
+    
+    private class DFS implements DFSStep<T> {
+        private final T to;
+        
+        public DFS(T to) {
+            this.to = to;
+        }
+
+        @Override
+        public int applyAndReturnNextDFSNumber(LinkedList<T> oReps, LinkedList<T> oNodes, Map<T, T> representatives,
+                Map<T, Integer> depthFirstSearchPosition, Set<T> remainingRoots, LinkedList<DFSStep<T>> worklist, int nodeCounter, Set<T> oNodesForFastContains) {
+            worklist.add(new Backtrack(to));
+            for (final T successor : immediateSuccessors.get(to)) {
+                if (depthFirstSearchPosition.containsKey(successor)) {
+                    worklist.add(new TraverseNonTreeEdge(successor));
+                } else {
+                    worklist.add(new TraverseTreeEdge(successor));
+                }
+            }
+            return nodeCounter;
+        }
+        
+        @Override
+        public String toString() {
+            return "DFS("+to+")";
+        }
+    }
+    
+    /**
+     * A strongly connected component is a set of nodes such that all nodes in the set can be reached from any other
+     * node in the set by traversing existing graph edges, and where no other node exists outside that set that, when
+     * added, would still make a strongly connected component.
+     * 
+     * @return cycle clusters; each {@link CycleCluster} is one strongly-connected component
+     */
+    private CycleClusters<T> findStronglyConnectedComponents() {
+        final Set<T> remainingRoots = new HashSet<>(nodes);
+        final LinkedList<DFSStep<T>> worklist = new LinkedList<>();
+        final LinkedList<T> oReps = new LinkedList<>();
+        final LinkedList<T> oNodes = new LinkedList<>();
+        final Set<T> oNodesForFastContains = new HashSet<>();
+        int nodeCounter = 0;
+        final Map<T, T> representativesForNodes = new HashMap<>();
+        
+        final Map<T, Integer> depthFirstSearchPosition = new HashMap<>();
+        
+        if (!nodes.isEmpty()) {
+            final T nextRoot = remainingRoots.iterator().next();
+            remainingRoots.remove(nextRoot);
+            worklist.add(new Root(nextRoot));
+            while (!Util.isEmpty(worklist)) {
+                // depth-first search by using last element in worklist and replacing it by paths extended by its successors;
+                // insert "instructions" (DFSStep objects) in reverse order of intended execution order
+                final DFSStep<T> nextStep = worklist.removeLast();
+                nodeCounter = nextStep.applyAndReturnNextDFSNumber(oReps, oNodes, representativesForNodes,
+                        depthFirstSearchPosition, remainingRoots, worklist, nodeCounter, oNodesForFastContains);
+                if (worklist.isEmpty() && !remainingRoots.isEmpty()) {
                     // there are nodes remaining which must be on cycles because they
                     // haven't been reached from any of the root nodes. Add path to first
                     // node not yet visited and continue:
-                    final T nextNonRootLikelyInCycle = nodesNotVisited.iterator().next();
-                    nodesNotVisited.remove(nextNonRootLikelyInCycle);
-                    worklist.add(new PathImpl<>(Collections.singleton(nextNonRootLikelyInCycle)));
+                    final T nextRoot2 = remainingRoots.iterator().next();
+                    remainingRoots.remove(nextRoot2);
+                    worklist.add(new Root(nextRoot2));
                 }
             }
         }
-        return result;
+        final Set<CycleCluster<T>> cycleClusters = new HashSet<>();
+        final Map<T, Set<T>> cycleClusterNodes = new HashMap<>();
+        for (final Entry<T, T> e : representativesForNodes.entrySet()) {
+            Util.addToValueSet(cycleClusterNodes, e.getValue(), e.getKey());
+        }
+        for (final Entry<T, Set<T>> e : cycleClusterNodes.entrySet()) {
+            if (e.getValue().size() > 1) {
+                cycleClusters.add(new CycleClusterImpl<>(e.getKey(), e.getValue()));
+            }
+        }
+        return new CycleClustersImpl<>(cycleClusters);
     }
 
     @Override
@@ -122,11 +257,6 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         return roots;
     }
 
-    @Override
-    public Iterable<Path<T>> getCycles() {
-        return cycles;
-    }
-    
     @Override
     public CycleClusters<T> getCycleClusters() {
         return cycleClusters;
@@ -146,26 +276,22 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
 
     @Override
     public boolean hasPath(T from, T to) {
-        return hasPath(from, to, /* visited */ new HashSet<>());
-    }
-    
-    private boolean hasPath(T from, T to, Set<T> visited) {
-        Set<Path<T>> workingSet = Collections.singleton(new PathImpl<>(Arrays.asList(from)));
-        while (!workingSet.isEmpty()) {
-            final Set<Path<T>> nextWorkingSet = new HashSet<>();
-            for (final Path<T> p : workingSet) {
-                if (p.tail().equals(to)) {
-                    return true;
-                }
-                final Set<T> successors = immediateSuccessors.get(p.tail());
-                for (final T successor : successors) {
-                    if (!p.contains(successor)) {
-                        // no cycle found; continue following that path
-                        nextWorkingSet.add(p.extend(successor));
+        final Set<T> visited = new HashSet<>();
+        final LinkedList<T> toVisit = new LinkedList<>();
+        toVisit.add(from);
+        visited.add(from);
+        while (!toVisit.isEmpty()) {
+            final T next = toVisit.removeFirst();
+            if (next.equals(to)) {
+                return true;
+            } else {
+                for (final T successor : immediateSuccessors.get(next)) {
+                    if (!visited.contains(successor)) {
+                        toVisit.add(successor);
+                        visited.add(successor);
                     }
                 }
             }
-            workingSet = nextWorkingSet;
         }
         return false;
     }
@@ -191,8 +317,8 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
     public Pair<DirectedGraph<T>, CycleClusters<T>> graphWithCombinedCycleNodes() {
         assert cycleClusters != null;
         final Set<T> newNodes = new HashSet<>(nodes);
-        newNodes.removeAll(cyclesPerNode.keySet()); // first remove all cycle nodes
         for (final CycleCluster<T> cluster : cycleClusters.getClusters()) {
+            newNodes.removeAll(cluster.getClusterNodes());
             newNodes.add(cluster.getRepresentative()); // add the representative nodes
         }
         final Set<DirectedEdge<T>> newEdges = new HashSet<>();
@@ -202,41 +328,6 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
             }
         }
         return new Pair<>(new DirectedGraphImpl<T>(newNodes, newEdges), cycleClusters);
-    }
-
-    private CycleClusters<T> computeCycleClusters() {
-        assert cycles != null;
-        // keep disjoint sets of nodes such that each set consists of the union of one or more cycles
-        final Set<Set<T>> combinedCycleNodes = new HashSet<>();
-        for (final Path<T> cycle : cycles) {
-            // see if cycle has a non-empty intersection with any of the already existing node sets:
-            Set<T> firstIntersectionWith = null;
-            List<Set<T>> nodeSetsToRemoveAfterJoining = new ArrayList<>(); // don't use set; inner sets change, and so do their hash codes
-            for (final Set<T> nodeSet : combinedCycleNodes) {
-                if (intersects(cycle, nodeSet)) {
-                    if (firstIntersectionWith == null) {
-                        Util.addAll(cycle, nodeSet); // this changes nodeSet's hash code; don't use nodeSet in hashed collection
-                        firstIntersectionWith = nodeSet;
-                    } else {
-                        // this is not the first node set that cycle intersects with; this
-                        // requires joining the nodeSet with the firstIntersectionWith set:
-                        firstIntersectionWith.addAll(nodeSet);
-                        nodeSetsToRemoveAfterJoining.add(nodeSet);
-                    }
-                }
-            }
-            if (firstIntersectionWith == null) {
-                final HashSet<T> newCombinedCycleNodes = new HashSet<>();
-                Util.addAll(cycle, newCombinedCycleNodes);
-                combinedCycleNodes.add(newCombinedCycleNodes);
-            }
-            combinedCycleNodes.removeAll(nodeSetsToRemoveAfterJoining);
-        }
-        final Set<CycleCluster<T>> representativeToCycleNodesItRepresents = new HashSet<>();
-        for (final Set<T> cluster : combinedCycleNodes) {
-            representativeToCycleNodesItRepresents.add(new CycleClusterImpl<>(cluster.iterator().next(), Collections.unmodifiableSet(cluster)));
-        }
-        return new CycleClustersImpl<>(representativeToCycleNodesItRepresents);
     }
 
     private DirectedEdge<T> replaceCycleNodesByRepresentatives(DirectedEdge<T> edge, CycleClusters<T> cycleClusters) {
@@ -260,13 +351,9 @@ public class DirectedGraphImpl<T> implements DirectedGraph<T> {
         return replaced ? new DirectedEdgeImpl<>(from, to) : edge;
     }
 
-    private boolean intersects(Path<T> cycle, Set<T> nodeSet) {
-        return nodeSet.stream().anyMatch(node->cycle.contains(node));
-    }
-
     @Override
     public Map<T, Integer> getLengthsOfLongestPathsFromRootForDag() {
-        if (!Util.isEmpty(cycles)) {
+        if (!Util.isEmpty(cycleClusters.getClusters())) {
             throw new IllegalStateException("Can't call this method on a graph with cycles; use graphWithCombinedCycleNodes() first");
         }
         final Map<T, Integer> result = new HashMap<>();

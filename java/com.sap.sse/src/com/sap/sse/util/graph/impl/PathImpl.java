@@ -35,6 +35,18 @@ public class PathImpl<T> implements Path<T> {
     }
     
     @Override
+    public Path<T> extend(Path<T> subPath) {
+        final List<T> newNodes = new ArrayList<>(nodesInOrder);
+        Util.addAll(subPath, newNodes);
+        return new PathImpl<T>(newNodes);
+    }
+
+    @Override
+    public Path<T> tail() {
+        return new PathImpl<T>(nodesInOrder.subList(1, nodesInOrder.size()));
+    }
+
+    @Override
     public Path<T> subPath(T start) {
         final List<T> newNodes = new ArrayList<>();
         boolean found = false;
@@ -83,7 +95,7 @@ public class PathImpl<T> implements Path<T> {
     }
 
     @Override
-    public T tail() {
+    public T last() {
         return nodesInOrder.isEmpty() ? null : nodesInOrder.get(nodesInOrder.size()-1);
     }
 
