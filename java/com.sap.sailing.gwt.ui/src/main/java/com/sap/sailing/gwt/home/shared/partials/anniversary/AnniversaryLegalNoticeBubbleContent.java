@@ -5,7 +5,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 
 class AnniversaryLegalNoticeBubbleContent extends Widget {
 
@@ -15,7 +14,7 @@ class AnniversaryLegalNoticeBubbleContent extends Widget {
     }
 
     @UiField
-    StringMessages i18n;
+    AnniversaryLegalMessages i18n;
     @UiField
     Element legalNoticeHeadline, legalNoticeSectionContest, legalNoticeSectionPrizes;
 
