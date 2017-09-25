@@ -52,6 +52,15 @@ public interface RaceTracker {
      */
     void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException;
 
+
+    /**
+     * Like {@link #stop(boolean)}, only that with this method the caller can assert by setting {@code willBeRemoved} to
+     * {@code true} that the race will be removed and no longer be accessible to clients after stopping this tracker.
+     * This helps save computational efforts because calculations that would otherwise be triggered when loading a race
+     * completes no longer need to be triggered.
+     */
+    void stop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
+
     com.sap.sailing.domain.base.Regatta getRegatta();
 
     /**
@@ -86,8 +95,12 @@ public interface RaceTracker {
          * Tracker has stopped event, see {@link RaceTracker#stop(boolean)} method
          * 
          * @param preemptive
+         *            whether to stop ongoing loading jobs
+         * @param willBeRemoved
+         *            if {@code true}, the race is about to be removed; hence, no need in resuming any caches or other
+         *            (re-)calculation jobs
          */
-        void onTrackerWillStop(boolean preemptive);
+        void onTrackerWillStop(boolean preemptive, boolean willBeRemoved);
     }
     
     @FunctionalInterface

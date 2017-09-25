@@ -161,7 +161,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    protected void onStop(boolean preemptive) {
+    protected void onStop(boolean preemptive, boolean willBeRemoved) {
         RaceLog raceLog = params.getRaceLog();
         final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
         if (!trackedRegatta.getRegatta().isControlTrackingFromStartAndFinishTimes() &&

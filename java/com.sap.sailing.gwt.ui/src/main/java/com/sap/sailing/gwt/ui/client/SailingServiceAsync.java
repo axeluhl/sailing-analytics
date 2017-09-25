@@ -638,8 +638,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
 
-    void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-
     /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
      *         so
