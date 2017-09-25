@@ -145,13 +145,15 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         for (HandlerRegistration handlerRegistration : registrations) {
             handlerRegistration.removeHandler();
         }
-        removeObserverFromCurrentChildWidget();
+        if (observer != null) {
+            removeObserverFromCurrentChildWidget();
+        }
         overlayWidget.removeFromParent();
     }
     
     @Override
     public void setWidget(Widget w) {
-        if (isAttached()) {
+        if (observer != null) {
             removeObserverFromCurrentChildWidget();
         }
         super.setWidget(w);
